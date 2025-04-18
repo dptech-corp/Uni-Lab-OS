@@ -53,6 +53,10 @@ mamba activate unilab
 
 # 或更新现有环境
 conda env update --file unilabos-[YOUR_OS].yml -n 环境名
+
+# 现阶段，需要安装 `unilabos_msgs` 包
+# 可以前往 Release 页面下载系统对应的包进行安装
+conda install ros-humble-unilabos-msgs-0.8.0-xxxxx.tar.bz2
 ```
 
 其中 `[YOUR_OS]` 可以是 `win64`, `linux-64`, `osx-64`, 或 `osx-arm64`。

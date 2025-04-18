@@ -3,16 +3,20 @@ import time
 import uuid
 
 import paho.mqtt.client as mqtt
-import ssl, base64, hmac
+import ssl
+import base64
+import hmac
 from hashlib import sha1
 import tempfile
 import os
 
 from unilabos.config.config import MQConfig
 from unilabos.app.controler import devices, job_add
-from unilabos.app.model import JobAddReq, JobAddResp
+from unilabos.app.model import JobAddReq
 from unilabos.utils import logger
 from unilabos.utils.type_check import TypeEncoder
+
+from paho.mqtt.enums import CallbackAPIVersion
 
 
 class MQTTClient:
@@ -21,7 +25,7 @@ class MQTTClient:
     def __init__(self):
         self.mqtt_disable = not MQConfig.lab_id
         self.client_id = f"{MQConfig.group_id}@@@{MQConfig.lab_id}{uuid.uuid4()}"
-        self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=self.client_id, protocol=mqtt.MQTTv5)
+        self.client = mqtt.Client(CallbackAPIVersion.VERSION2, client_id=self.client_id, protocol=mqtt.MQTTv5)
         self._setup_callbacks()
 
     def _setup_callbacks(self):
@@ -41,7 +45,7 @@ class MQTTClient:
             logger.error("[MQTT] on_connect ErrorHostNotInit")
             return
 
-    def _on_message(self, client, userdata, msg):
+    def _on_message(self, client, userdata, msg) -> None:
         logger.info("[MQTT] on_message<<<< " + msg.topic + " " + str(msg.payload))
         try:
             payload_str = msg.payload.decode("utf-8")
@@ -52,7 +56,7 @@ class MQTTClient:
                 logger.debug("job_add", type(payload_json), payload_json)
                 job_req = JobAddReq.model_validate(payload_json)
                 data = job_add(job_req)
-                return JobAddResp(data=data)
+                return
 
         except json.JSONDecodeError as e:
             logger.error(f"[MQTT] JSON 解析错误: {e}")
@@ -87,7 +91,7 @@ class MQTTClient:
             for temp_file in temp_files:
                 try:
                     os.unlink(temp_file)
-                except:
+                except Exception as e:
                     pass
 
     def start(self):
@@ -151,12 +155,12 @@ class MQTTClient:
             return
         jobdata = {"job_id": job_id, "data": feedback_data, "status": status}
         self.client.publish(f"labs/{MQConfig.lab_id}/job/list/", json.dumps(jobdata), qos=2)
-    
+
     def publish_registry(self, device_id: str, device_info: dict):
         if self.mqtt_disable:
             return
         address = f"labs/{MQConfig.lab_id}/registry/"
-        registry_data = json.dumps({device_id: device_info}, ensure_ascii = False, cls = TypeEncoder)
+        registry_data = json.dumps({device_id: device_info}, ensure_ascii=False, cls=TypeEncoder)
         self.client.publish(address, registry_data, qos=2)
         logger.debug(f"Registry data published: address: {address}, {registry_data}")
 
