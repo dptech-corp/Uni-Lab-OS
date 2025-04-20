@@ -46,9 +46,9 @@ class MQConfig:
     port: int = 8883
     
     # 可以直接提供证书文件路径
-    ca_file: str = "/path/to/ca.pem"
-    cert_file: str = "/path/to/cert.pem"
-    key_file: str = "/path/to/key.pem"
+    ca_file: str = "/path/to/ca.pem"  # 相对config.py所在目录的路径
+    cert_file: str = "/path/to/cert.pem"  # 相对config.py所在目录的路径
+    key_file: str = "/path/to/key.pem"  # 相对config.py所在目录的路径
     
     # 或者直接提供证书内容
     ca_content: str = ""
@@ -101,6 +101,8 @@ class ROSConfig:
 ```bash
 unilab --config path/to/your/config.py
 ```
+
+如果您不涉及多环境开发，可以在unilabos的安装路径中手动添加local_config.py的文件
 
 # 启动Uni-Lab
 python -m unilabos.app.main --config path/to/your/config.py

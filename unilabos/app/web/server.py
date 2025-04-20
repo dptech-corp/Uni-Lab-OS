@@ -13,8 +13,8 @@ from starlette.responses import Response
 
 from unilabos.utils.fastapi.log_adapter import setup_fastapi_logging
 from unilabos.utils.log import info, error
-from unilabos.web.api import setup_api_routes
-from unilabos.web.pages import setup_web_pages
+from unilabos.app.web.api import setup_api_routes
+from unilabos.app.web.pages import setup_web_pages
 
 # 创建FastAPI应用
 app = FastAPI(

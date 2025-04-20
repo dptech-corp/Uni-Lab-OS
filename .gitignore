@@ -229,6 +229,6 @@ CATKIN_IGNORE
 
 .DS_Store
 
-local_config.py
+/**/local_config.py
 
 *.graphml

@@ -18,7 +18,7 @@ from unilabos.app.model import (
     JobPreintakeFinishReq,
     JobFinishReq,
 )
-from unilabos.web.utils.host_utils import get_host_node_info
+from unilabos.app.web.utils.host_utils import get_host_node_info
 
 # 创建API路由器
 api = APIRouter()

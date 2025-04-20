@@ -1,1 +1,3 @@
 recursive-include unilabos/registry *.yaml
+recursive-include unilabos/app/web *.html
+recursive-include unilabos/app/web *.css

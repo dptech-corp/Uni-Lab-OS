@@ -9,7 +9,7 @@ from typing import Dict, Any
 
 from unilabos.config.config import BasicConfig
 from unilabos.ros.nodes.presets.host_node import HostNode
-from unilabos.web.utils.action_utils import get_action_info
+from unilabos.app.web.utils.action_utils import get_action_info
 
 
 def get_host_node_info() -> Dict[str, Any]:

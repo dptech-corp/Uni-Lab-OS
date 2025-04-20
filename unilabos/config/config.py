@@ -28,9 +28,9 @@ class MQConfig:
     key_content = ""
 
     # 指定
-    ca_file = ""
-    cert_file = ""
-    key_file = ""
+    ca_file = ""  # 相对config.py所在目录的路径
+    cert_file = ""  # 相对config.py所在目录的路径
+    key_file = ""  # 相对config.py所在目录的路径
 
 
 # OSS上传配置
@@ -97,7 +97,7 @@ def load_config(config_path=None):
         BasicConfig.config_path = os.path.abspath(os.path.dirname(config_path))
         if not os.path.exists(config_path):
             logger.error(f"配置文件 {config_path} 不存在")
-            return
+            exit(1)
 
         try:
             module_name = "lab_" + os.path.basename(config_path).replace(".py", "")
@@ -114,10 +114,5 @@ def load_config(config_path=None):
             traceback.print_exc()
             exit(1)
     else:
-        try:
-            import unilabos.config.local_config as local_config  # type: ignore
-
-            _update_config_from_module(local_config)
-            logger.info("已加载默认配置 unilabos.config.local_config")
-        except ImportError:
-            pass
+        config_path = os.path.join(os.path.dirname(__file__), "local_config.py")
+        load_config(config_path)

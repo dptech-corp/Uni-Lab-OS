@@ -69,14 +69,17 @@ def main():
     args_dict = vars(args)
 
     # 加载配置文件 - 这里保持最先加载配置的逻辑
-    if args_dict.get("config"):
-        config_path = args_dict["config"]
+    config_path = args_dict.get("config")
+    if config_path:
         if not os.path.exists(config_path):
             print_status(f"配置文件 {config_path} 不存在", "error")
         elif not config_path.endswith(".py"):
             print_status(f"配置文件 {config_path} 不是Python文件，必须以.py结尾", "error")
         else:
             load_config(config_path)
+    else:
+        print_status(f"启动 UniLab-OS时，配置文件参数未正确传入 --config '{config_path}' 尝试本地配置...", "warning")
+        load_config(config_path)
 
     # 设置BasicConfig参数
     BasicConfig.is_host_mode = not args_dict.get("without_host", False)
@@ -92,8 +95,8 @@ def main():
     from unilabos.app.mq import mqtt_client
     from unilabos.registry.registry import build_registry
     from unilabos.app.backend import start_backend
-    from unilabos.web import http_client
-    from unilabos.web import start_server
+    from unilabos.app.web import http_client
+    from unilabos.app.web import start_server
 
     # 显示启动横幅
     print_unilab_banner(args_dict)

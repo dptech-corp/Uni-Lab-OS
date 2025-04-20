@@ -4,10 +4,10 @@ Web UI 模块
 提供了UniLab系统的Web界面功能
 """
 
-from unilabos.web.pages import setup_web_pages
-from unilabos.web.server import setup_server, start_server
-from unilabos.web.client import http_client
-from unilabos.web.api import setup_api_routes
+from unilabos.app.web.pages import setup_web_pages
+from unilabos.app.web.server import setup_server, start_server
+from unilabos.app.web.client import http_client
+from unilabos.app.web.api import setup_api_routes
 
 __all__ = [
     "setup_web_pages",  # 设置Web页面

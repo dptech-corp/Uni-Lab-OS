@@ -20,9 +20,9 @@ from unilabos.app.mq import mqtt_client
 from unilabos.ros.msgs.message_converter import msg_converter_manager
 from unilabos.utils.log import error
 from unilabos.utils.type_check import TypeEncoder
-from unilabos.web.utils.device_utils import get_registry_info
-from unilabos.web.utils.host_utils import get_host_node_info
-from unilabos.web.utils.ros_utils import get_ros_node_info, update_ros_node_info
+from unilabos.app.web.utils.device_utils import get_registry_info
+from unilabos.app.web.utils.host_utils import get_host_node_info
+from unilabos.app.web.utils.ros_utils import get_ros_node_info, update_ros_node_info
 
 # 设置Jinja2模板环境
 template_dir = Path(__file__).parent / "templates"
