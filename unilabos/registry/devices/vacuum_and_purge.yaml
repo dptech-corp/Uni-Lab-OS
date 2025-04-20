@@ -1,9 +1,11 @@
 vacuum_pump.mock:
+  description: Mock vacuum pump
   class:
     module: unilabos.devices.pump_and_valve.vacuum_pump_mock:VacuumPumpMock
     type: python
 
 gas_source.mock:
+  description: Mock gas source
   class:
     module: unilabos.devices.pump_and_valve.vacuum_pump_mock:VacuumPumpMock
     type: python

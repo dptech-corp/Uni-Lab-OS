@@ -1,4 +1,5 @@
 Opentrons_96_adapter_Vb:
+  description: Opentrons 96 adapter Vb
   class: 
     module: pylabrobot.resources.opentrons.plate_adapters:Opentrons_96_adapter_Vb
     type: pylabrobot

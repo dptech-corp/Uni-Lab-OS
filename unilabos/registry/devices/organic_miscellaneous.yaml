@@ -1,4 +1,5 @@
 separator.homemade:
+  description: Separator device with homemade grbl controller
   class:
     module: unilabos.devices.separator.homemade_grbl_conductivity:Separator_Controller
     type: python
@@ -39,6 +40,7 @@ separator.homemade:
     additionalProperties: false
 
 rotavap.one:
+  description: Rotavap device
   class:
     module: unilabos.devices.rotavap.rotavap_one:RotavapOne
     type: python

@@ -1,4 +1,5 @@
 serial:
+  description: Serial communication interface, used when sharing same serial port for multiple devices
   class:
     module: unilabos.ros.nodes.presets:ROS2SerialNode
     type: ros2

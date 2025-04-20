@@ -1,5 +1,6 @@
 # 光学表征设备：红外、紫外可见、拉曼等
 raman_home_made:
+  description: Raman spectroscopy device
   class:
     module: unilabos.devices.raman_uv.home_made_raman:RamanObj
     type: python

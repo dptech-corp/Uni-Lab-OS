@@ -1,4 +1,5 @@
 robotic_arm.UR:
+  description: UR robotic arm
   class:
     module: unilabos.devices.agv.ur_arm_task:UrArmTask
     type: python

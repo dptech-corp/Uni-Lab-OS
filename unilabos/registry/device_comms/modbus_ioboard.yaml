@@ -1,4 +1,5 @@
 io_snrd:
+  description: IO Board with 16 IOs
   class:
     module: unilabos.device_comms.SRND_16_IO:SRND_16_IO
     type: python

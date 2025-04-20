@@ -1,4 +1,5 @@
 heaterstirrer.dalong:
+  description: DaLong heater stirrer
   class:
     module: unilabos.devices.heaterstirrer.dalong:HeaterStirrer_DaLong
     type: python
@@ -34,6 +35,7 @@ heaterstirrer.dalong:
           success: success
 
 chiller:
+  description: Chiller
   class:
     module: unilabos.devices.temperature.chiller:Chiller
     type: python
@@ -46,6 +48,7 @@ chiller:
         result:
           success: success
 tempsensor:
+  description: Temperature sensor
   class:
     module: unilabos.devices.temperature.sensor_node:TempSensorNode
     type: python

@@ -54,9 +54,9 @@ class Registry:
             if data:
                 # 为每个资源添加文件路径信息
                 for resource_id, resource_info in data.items():
-                    # 添加文件路径 - 使用规范化的完整文件路径
                     resource_info["file_path"] = str(file.absolute()).replace("\\", "/")
-
+                    if "description" not in resource_info:
+                        resource_info["description"] = ""
                 self.resource_type_registry.update(data)
                 logger.debug(
                     f"[UniLab Registry] Resource-{current_resource_number} File-{i+1}/{len(files)} "
@@ -112,7 +112,8 @@ class Registry:
                 for device_id, device_config in data.items():
                     # 添加文件路径信息 - 使用规范化的完整文件路径
                     device_config["file_path"] = str(file.absolute()).replace("\\", "/")
-
+                    if "description" not in device_config:
+                        device_config["description"] = ""
                     if "class" in device_config:
                         # 处理状态类型
                         if "status_types" in device_config["class"]:

@@ -1,4 +1,5 @@
 syringe_pump_with_valve.runze:
+  description: Runze Syringe pump with valve
   class:
     module: unilabos.devices.pump_and_valve.runze_backbone:RunzeSyringePump
     type: python
@@ -25,11 +26,13 @@ syringe_pump_with_valve.runze:
 
 
 solenoid_valve.mock:
+  description: Mock solenoid valve
   class:
     module: unilabos.devices.pump_and_valve.solenoid_valve_mock:SolenoidValveMock
     type: python
 
 solenoid_valve:
+  description: Solenoid valve
   class:
     module: unilabos.devices.pump_and_valve.solenoid_valve:SolenoidValve
     type: python

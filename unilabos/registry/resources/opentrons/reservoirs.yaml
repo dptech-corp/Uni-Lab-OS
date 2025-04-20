@@ -1,29 +1,35 @@
 agilent_1_reservoir_290ml:
+  description: Agilent 1 reservoir 290ml
   class: 
     module: pylabrobot.resources.opentrons.reserviors:agilent_1_reservoir_290ml
     type: pylabrobot
 
 axygen_1_reservoir_90ml:
+  description: Axygen 1 reservoir 90ml
   class: 
     module: pylabrobot.resources.opentrons.reserviors:axygen_1_reservoir_90ml
     type: pylabrobot
 
 nest_12_reservoir_15ml:
+  description: Nest 12 reservoir 15ml
   class: 
     module: pylabrobot.resources.opentrons.reserviors:nest_12_reservoir_15ml
     type: pylabrobot
 
 nest_1_reservoir_195ml:
+  description: Nest 1 reservoir 195ml
   class: 
     module: pylabrobot.resources.opentrons.reserviors:nest_1_reservoir_195ml
     type: pylabrobot
 
 nest_1_reservoir_290ml:
+  description: Nest 1 reservoir 290ml
   class: 
     module: pylabrobot.resources.opentrons.reserviors:nest_1_reservoir_290ml
     type: pylabrobot
 
 usascientific_12_reservoir_22ml:
+  description: USAScientific 12 reservoir 22ml
   class: 
     module: pylabrobot.resources.opentrons.reserviors:usascientific_12_reservoir_22ml
     type: pylabrobot

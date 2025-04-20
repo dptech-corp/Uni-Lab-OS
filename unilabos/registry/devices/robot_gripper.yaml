@@ -1,4 +1,5 @@
 gripper.mock:
+  description: Mock gripper
   class:
     module: unilabos.devices.gripper.mock:MockGripper
     type: python
@@ -21,6 +22,7 @@ gripper.mock:
 
 
 gripper.misumi_rz:
+  description: Misumi RZ gripper
   class:
     module: unilabos.devices.motor:Grasp.EleGripper
     type: python

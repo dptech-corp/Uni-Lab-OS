@@ -1,4 +1,5 @@
 OTDeck:
+  description: Opentrons deck
   class: 
     module: pylabrobot.resources.opentrons.deck:OTDeck
     type: pylabrobot

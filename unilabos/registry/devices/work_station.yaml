@@ -1,4 +1,5 @@
 workstation:
+  description: Workstation
   class:
     module: unilabos.ros.nodes.presets.protocol_node:ROS2ProtocolNode
     type: ros2

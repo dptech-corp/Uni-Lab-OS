@@ -1,4 +1,5 @@
 linear_motion.grbl:
+  description: Grbl CNC
   class:
     module: unilabos.devices.cnc.grbl_sync:GrblCNC
     type: python
@@ -38,6 +39,7 @@ linear_motion.grbl:
 
 
 motor.iCL42:
+  description: iCL42 motor
   class:
     module: unilabos.devices.motor.iCL42:iCL42Driver
     type: python

@@ -1,4 +1,5 @@
 liquid_handler:
+  description: Liquid handler device controlled by pylabrobot
   class:
     module: pylabrobot.liquid_handling:LiquidHandler
     type: python

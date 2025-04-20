@@ -1,5 +1,6 @@
 # 仙工智能底盘（知行使用）
 agv.SEER:
+  description: SEER AGV
   class:
     module: unilabos.devices.agv.agv_navigator:AgvNavigator
     type: python
