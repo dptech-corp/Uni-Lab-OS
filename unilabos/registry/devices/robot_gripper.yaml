@@ -19,7 +19,9 @@ gripper.mock:
         result:
           position: position
           effort: torque
-
+  model:
+    tpye: device
+    mesh: slide_w140
 
 gripper.misumi_rz:
   description: Misumi RZ gripper
