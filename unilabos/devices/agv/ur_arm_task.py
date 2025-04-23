@@ -77,9 +77,6 @@ class UrArmTask():
                 if n > retry:
                     raise Exception('Can not connect to the arm info server!')
                 
-        self.pose_data = {}
-        self.pose_file = 'C:\\auto\\unilabos\\unilabos\\devices\\agv\\pose.json'
-        self.reload_pose()
         self.dash_c.stop()
 
     def arm_init(self):
