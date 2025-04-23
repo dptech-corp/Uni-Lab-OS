@@ -20,8 +20,8 @@ gripper.mock:
           position: position
           effort: torque
   model:
-    tpye: device
-    mesh: slide_w140
+    type: device
+    mesh: opentrons_liquid_handler
 
 gripper.misumi_rz:
   description: Misumi RZ gripper
