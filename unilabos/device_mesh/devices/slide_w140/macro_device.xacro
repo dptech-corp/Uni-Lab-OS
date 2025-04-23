@@ -35,7 +35,7 @@
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/device/slide_w140/meshes/base_link.STL"/>
+          <mesh filename="file://${mesh_path}/devices/slide_w140/meshes/base_link.STL"/>
         </geometry>
         <material name="">
           <color rgba="1 1 1 1"/>
@@ -44,7 +44,7 @@
       <collision>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/device/slide_w140/meshes/base_link.STL"/>
+          <mesh filename="file://${mesh_path}/devices/slide_w140/meshes/base_link.STL"/>
         </geometry>
       </collision>
     </link>
@@ -57,7 +57,7 @@
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/device/slide_w140/meshes/slider.STL" />
+          <mesh filename="file://${mesh_path}/devices/slide_w140/meshes/slider.STL" />
         </geometry>
         <material name="">
           <color rgba="1 1 1 1"/>
@@ -66,7 +66,7 @@
       <collision>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/device/slide_w140/meshes/slider.STL" />
+          <mesh filename="file://${mesh_path}/devices/slide_w140/meshes/slider.STL" />
         </geometry>
       </collision>
     </link>
@@ -86,7 +86,7 @@
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/device/slide_w140/meshes/length.STL" scale="${(length + min_d + max_d + slider_d)} 1 1"/>
+          <mesh filename="file://${mesh_path}/devices/slide_w140/meshes/length.STL" scale="${(length + min_d + max_d + slider_d)} 1 1"/>
         </geometry>
         <material name="">
           <color rgba="1 1 1 1"/>
@@ -95,7 +95,7 @@
       <collision>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/device/slide_w140/meshes/length.STL" scale="${(length + min_d + max_d + slider_d)} 1 1"/>
+          <mesh filename="file://${mesh_path}/devices/slide_w140/meshes/length.STL" scale="${(length + min_d + max_d + slider_d)} 1 1"/>
         </geometry>
       </collision>
     </link>
@@ -113,7 +113,7 @@
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/device/slide_w140/meshes/slide_end.STL"/>
+          <mesh filename="file://${mesh_path}/devices/slide_w140/meshes/slide_end.STL"/>
         </geometry>
         <material name="">
           <color rgba="1 1 1 1"/>
@@ -122,7 +122,7 @@
       <collision>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/device/slide_w140/meshes/slide_end.STL"/>
+          <mesh filename="file://${mesh_path}/devices/slide_w140/meshes/slide_end.STL"/>
         </geometry>
       </collision>
     </link>

@@ -24,7 +24,7 @@
     <link name='${station_name}${device_name}main_link'>
       <visual>
         <geometry>
-          <mesh filename="file://${mesh_path}/device/opentrons_liquid_handler/meshes/ot2-0.stl"/>
+          <mesh filename="file://${mesh_path}/devices/opentrons_liquid_handler/meshes/ot2-0.stl"/>
         </geometry>
         <material name="">
             <color rgba="0.756862745098039 0.768627450980392 0.752941176470588 1"/>
@@ -33,7 +33,7 @@
       <collision>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/device/opentrons_liquid_handler/meshes/ot2-0.stl"/>
+          <mesh filename="file://${mesh_path}/devices/opentrons_liquid_handler/meshes/ot2-0.stl"/>
         </geometry>
       </collision>
     </link>
@@ -41,7 +41,7 @@
     <link name='${station_name}${device_name}first_link'>
       <visual>
         <geometry>
-          <mesh filename="file://${mesh_path}/device/opentrons_liquid_handler/meshes/ot2-1.stl"/>
+          <mesh filename="file://${mesh_path}/devices/opentrons_liquid_handler/meshes/ot2-1.stl"/>
         </geometry>
         <material name="">
             <color rgba="0.756862745098039 0.768627450980392 0.752941176470588 1"/>
@@ -50,7 +50,7 @@
       <collision>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/device/opentrons_liquid_handler/meshes/ot2-1.stl"/>
+          <mesh filename="file://${mesh_path}/devices/opentrons_liquid_handler/meshes/ot2-1.stl"/>
         </geometry>
       </collision>
     </link>
@@ -58,7 +58,7 @@
     <link name='${station_name}${device_name}second_link'>
       <visual>
         <geometry>
-          <mesh filename="file://${mesh_path}/device/opentrons_liquid_handler/meshes/ot2-2.stl"/>
+          <mesh filename="file://${mesh_path}/devices/opentrons_liquid_handler/meshes/ot2-2.stl"/>
         </geometry>
         <material name="">
             <color rgba="0.756862745098039 0.768627450980392 0.752941176470588 1"/>
@@ -67,7 +67,7 @@
       <collision>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/device/opentrons_liquid_handler/meshes/ot2-2.stl"/>
+          <mesh filename="file://${mesh_path}/devices/opentrons_liquid_handler/meshes/ot2-2.stl"/>
         </geometry>
       </collision>
     </link>
@@ -75,7 +75,7 @@
     <link name='${station_name}${device_name}third_link'>
       <visual>
         <geometry>
-          <mesh filename="file://${mesh_path}/device/opentrons_liquid_handler/meshes/ot2-3a.stl"/>
+          <mesh filename="file://${mesh_path}/devices/opentrons_liquid_handler/meshes/ot2-3a.stl"/>
         </geometry>
         <material name="">
             <color rgba="0.756862745098039 0.768627450980392 0.752941176470588 1"/>
@@ -84,7 +84,7 @@
       <collision>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/device/opentrons_liquid_handler/meshes/ot2-3a.stl"/>
+          <mesh filename="file://${mesh_path}/devices/opentrons_liquid_handler/meshes/ot2-3a.stl"/>
         </geometry>
       </collision>
     </link>
@@ -92,7 +92,7 @@
     <link name='${station_name}${device_name}fourth_link'>
       <visual>
         <geometry>
-          <mesh filename="file://${mesh_path}/device/opentrons_liquid_handler/meshes/ot2-3b.stl"/>
+          <mesh filename="file://${mesh_path}/devices/opentrons_liquid_handler/meshes/ot2-3b.stl"/>
         </geometry>
         <material name="">
             <color rgba="0.756862745098039 0.768627450980392 0.752941176470588 1"/>
@@ -101,7 +101,7 @@
       <collision>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/device/opentrons_liquid_handler/meshes/ot2-3b.stl"/>
+          <mesh filename="file://${mesh_path}/devices/opentrons_liquid_handler/meshes/ot2-3b.stl"/>
         </geometry>
       </collision>
     </link>

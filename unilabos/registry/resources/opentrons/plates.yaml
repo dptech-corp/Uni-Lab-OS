@@ -53,8 +53,8 @@ nest_96_wellplate_100ul_pcr_full_skirt:
     type: pylabrobot
   model: 
     type: resource
-    mesh: /home/z43/git_pj/uni-lab-assets/device_models/tecan_nested_tip_rack/meshes/plate.stl
-    children_mesh: /home/z43/git_pj/uni-lab-assets/device_models/generic_labware_tube_10_75/meshes/0_base.stl
+    mesh: tecan_nested_tip_rack/meshes/plate.stl
+    children_mesh: generic_labware_tube_10_75/meshes/0_base.stl
     
 appliedbiosystemsmicroamp_384_wellplate_40ul:
   description: Applied Biosystems microamp 384 wellplate 40ul

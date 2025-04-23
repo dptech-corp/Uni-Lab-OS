@@ -5,6 +5,7 @@ import sys
 import json
 import yaml
 from copy import deepcopy
+import threading
 
 # 首先添加项目根目录到路径
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -14,7 +15,7 @@ if ilabos_dir not in sys.path:
 
 from unilabos.config.config import load_config, BasicConfig
 from unilabos.utils.banner_print import print_status, print_unilab_banner
-
+from unilabos.device_mesh.resource_visalization import ResourceVisualization
 
 def parse_args():
     """解析命令行参数"""
@@ -114,7 +115,8 @@ def main():
     print_unilab_banner(args_dict)
 
     # 注册表
-    build_registry(args_dict["registry_path"])
+    registry_dict = build_registry(args_dict["registry_path"])
+
 
     if args_dict["graph"] is not None:
         import unilabos.resources.graphio as graph_res
@@ -162,8 +164,16 @@ def main():
         signal.signal(signal.SIGTERM, _exit)
         mqtt_client.start()
 
+    resource_visualization = ResourceVisualization(args_dict["devices_config"], args_dict["resources_config"],registry_dict)
     start_backend(**args_dict)
-    start_server(port=args_dict.get("port", 8002), open_browser=args_dict.get("open_browser", False))
+    print('-'*100)
+    print(resource_visualization.resource_model)
+    print(json.dumps(args_dict["resources_config"], indent=4, ensure_ascii=False))
+    print('-'*100)
+    server_thread = threading.Thread(target=start_server)
+    server_thread.start()
+
+    resource_visualization.start()
 
 
 if __name__ == "__main__":
