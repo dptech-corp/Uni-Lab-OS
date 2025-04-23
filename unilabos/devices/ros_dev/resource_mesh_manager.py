@@ -8,12 +8,15 @@ from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.qos import QoSProfile, QoSDurabilityPolicy, QoSReliabilityPolicy, QoSHistoryPolicy
 from moveit_msgs.msg import CollisionObject, AttachedCollisionObject, AllowedCollisionEntry
 from shape_msgs.msg import Mesh, MeshTriangle, SolidPrimitive
-from geometry_msgs.msg import Pose, PoseStamped, Point, Quaternion
+from geometry_msgs.msg import Pose, PoseStamped, Point, Quaternion, TransformStamped
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.qos import QoSProfile, QoSDurabilityPolicy, QoSReliabilityPolicy, QoSHistoryPolicy
 from rclpy.task import Future
 import copy
 from typing import Tuple, Optional, Union, Any, List
+from tf_transformations import quaternion_from_euler
+from tf2_ros import StaticTransformBroadcaster
+
 
 class ResourceMeshManager(Node):
     def __init__(self, resource_model: dict, resource_config: list, node_name: str):
@@ -31,6 +34,10 @@ class ResourceMeshManager(Node):
         self.resource_config_dict = {item['id']: item for item in self.resource_config}
         self.move_group_ready = False
         self.resource_tf_dict = {}
+        self.tf_broadcaster = StaticTransformBroadcaster(self)
+
+        self.create_timer(1, self.publish_resource_tf)
+
         callback_group = ReentrantCallbackGroup()
         self._get_planning_scene_service = self.create_client(
             srv_type=GetPlanningScene,
@@ -99,6 +106,58 @@ class ResourceMeshManager(Node):
                                                                    "position":resource_config['position'],
                                                                    "rotation":resource_config['config']['rotation']}})
 
+    def publish_resource_tf(self):
+        """
+        发布资源之间的TF关系
+        
+        遍历self.resource_tf_dict中的每个元素，根据key，parent，以及position和rotation，
+        发布key和parent之间的tf关系
+        """
+        self.get_logger().info('开始发布资源TF关系')
+        
+        # 创建静态TF广播器
+        
+        
+        # 存储所有需要发布的静态变换
+        transforms = []
+        
+        # 遍历资源TF字典
+        for resource_id, tf_info in self.resource_tf_dict.items():
+            parent = tf_info['parent']
+            position = tf_info['position']
+            rotation = tf_info['rotation']
+            
+            # 创建静态变换消息
+            
+            transform = TransformStamped()
+            transform.header.stamp = self.get_clock().now().to_msg()
+            transform.header.frame_id = parent
+            transform.child_frame_id = resource_id
+            
+            # 设置位置
+            transform.transform.translation.x = float(position['x'])/1000
+            transform.transform.translation.y = float(position['y'])/1000
+            transform.transform.translation.z = float(position['z'])/1000
+            
+            # 从欧拉角转换为四元数
+            q = quaternion_from_euler(
+                float(rotation['x']), 
+                float(rotation['y']), 
+                float(rotation['z'])
+            )
+            
+            # 设置旋转
+            transform.transform.rotation.x = q[0]
+            transform.transform.rotation.y = q[1]
+            transform.transform.rotation.z = q[2]
+            transform.transform.rotation.w = q[3]
+            
+            transforms.append(transform)
+            
+        # 一次性发布所有静态变换
+        if transforms:
+            self.tf_broadcaster.sendTransform(transforms)
+            self.get_logger().info(f'已发布 {len(transforms)} 个资源TF关系')
 
         
     def add_collision_primitive(
@@ -4610,3 +4669,4 @@ if __name__ == '__main__':
     resource_mesh_manager = ResourceMeshManager(resource_model, resource_config, 'resource_mesh_manager')
     resource_mesh_manager.resource_mesh_setup()
     print(json.dumps(resource_mesh_manager.resource_tf_dict, indent=4, ensure_ascii=False))
+    rclpy.spin(resource_mesh_manager)
