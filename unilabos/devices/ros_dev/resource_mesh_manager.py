@@ -15,8 +15,10 @@ from rclpy.task import Future
 import copy
 from typing import Tuple, Optional, Union, Any, List
 from tf_transformations import quaternion_from_euler
-from tf2_ros import StaticTransformBroadcaster
-
+from tf2_ros import TransformBroadcaster, Buffer, TransformListener 
+from rclpy.action import ActionServer
+from unilabos_msgs.action import SendCmd
+from rclpy.action.server import ServerGoalHandle
 
 class ResourceMeshManager(Node):
     def __init__(self, resource_model: dict, resource_config: list, node_name: str):
@@ -30,13 +32,13 @@ class ResourceMeshManager(Node):
         super().__init__(node_name)
         
         self.resource_model = resource_model
-        self.resource_config = resource_config
-        self.resource_config_dict = {item['id']: item for item in self.resource_config}
+        self.resource_config_dict = {item['id']: item for item in resource_config}
         self.move_group_ready = False
         self.resource_tf_dict = {}
-        self.tf_broadcaster = StaticTransformBroadcaster(self)
-
-        self.create_timer(1, self.publish_resource_tf)
+        self.tf_broadcaster = TransformBroadcaster(self)
+        self.tf_buffer = Buffer()
+        self.tf_listener            = TransformListener(self.tf_buffer, self)
+        self.create_timer(0.02, self.publish_resource_tf)
 
         callback_group = ReentrantCallbackGroup()
         self._get_planning_scene_service = self.create_client(
@@ -74,9 +76,65 @@ class ResourceMeshManager(Node):
             AttachedCollisionObject, "/attached_collision_object", 10
         )
 
+        # 创建一个Action Server用于修改resource_tf_dict
+        self._action_server = ActionServer(
+            self,
+            SendCmd,
+            f'{node_name}/tf_update',
+            self.tf_update,
+            callback_group=callback_group
+        )
 
-        """检查move_group节点是否已初始化完成"""
+    def tf_update(self, goal_handle : ServerGoalHandle):
+        tf_update_msg = goal_handle.request
+        
+        try:
+            cmd_dict = json.loads(tf_update_msg.command.replace("'",'"'))
+            for resource_id, target_parent in cmd_dict.items():
+
+                # 获取从resource_id到target_parent的转换
+                transform = self.tf_buffer.lookup_transform(
+                    target_parent,
+                    resource_id,
+                    rclpy.time.Time()
+                )
+                
+                # 提取转换中的位置和旋转信息
+                position = {
+                    "x": transform.transform.translation.x,
+                    "y": transform.transform.translation.y,
+                    "z": transform.transform.translation.z
+                }
+                
+                rotation = {
+                    "x": transform.transform.rotation.x,
+                    "y": transform.transform.rotation.y,
+                    "z": transform.transform.rotation.z,
+                    "w": transform.transform.rotation.w
+                }
+                
+                self.resource_tf_dict[resource_id] = {
+                    "parent": target_parent,
+                    "position": position,
+                    "rotation": rotation
+                }
+
+                print(self.resource_tf_dict)
+                self.attach_collision_object(id=resource_id,link_name=target_parent)
+
+            self.publish_resource_tf()
+            
+
+                
+        except Exception as e:
+            self.get_logger().error(f"更新资源TF字典失败: {e}")
+            goal_handle.abort()
+            return SendCmd.Result(success=False)
+        goal_handle.succeed()
+        return SendCmd.Result(success=True)
+
     def check_move_group_ready(self):
+        """检查move_group节点是否已初始化完成"""
         while not self.move_group_ready:
             # 获取当前可用的节点列表
             if self._get_planning_scene_service.service_is_ready() and self._apply_planning_scene_service.service_is_ready():
@@ -91,20 +149,54 @@ class ResourceMeshManager(Node):
         
         #遍历resource_config中的资源配置，判断panent是否在resource_model中，
 
-        for resource_config in self.resource_config:
-            if resource_config['parent'] in self.resource_model:
-                # self.resource_tf_dict[resource_config['id']] = resource_config['parent']
-                self.resource_tf_dict.update({resource_config['id']:{"parent":resource_config['parent'],
-                                                                   "position":resource_config['position'],
-                                                                   "rotation":resource_config['config']['rotation']}})
-            elif resource_config['parent'] is None and resource_config['id'] in self.resource_model:
-                self.resource_tf_dict.update({resource_config['id']:{'parent':'world',
-                                                                   "position":resource_config['position'],
-                                                                   "rotation":resource_config['config']['rotation']}})
-            elif resource_config['parent'] not in self.resource_model and resource_config['parent'] is not None:
-                self.resource_tf_dict.update({resource_config['id']:{'parent':f"{self.resource_config_dict[resource_config['parent']]['parent']}{resource_config['parent']}_device_link".replace("None",""),
-                                                                   "position":resource_config['position'],
-                                                                   "rotation":resource_config['config']['rotation']}})
+        for resource_id, resource_config in self.resource_config_dict.items():
+
+            parent = resource_config['parent']
+            parent_link = 'world'
+            if parent in self.resource_model:
+                parent_link = parent
+            elif parent is None and resource_id in self.resource_model:
+                pass
+            elif parent not in self.resource_model and parent is not None:
+                parent_link = f"{self.resource_config_dict[parent]['parent']}{parent}_device_link".replace("None","")
+            else:
+                continue
+            # 提取位置信息并转换单位
+            position = {
+                "x": float(resource_config['position']['x'])/1000,
+                "y": float(resource_config['position']['y'])/1000,
+                "z": float(resource_config['position']['z'])/1000
+            }
+            
+            rotation_dict = {
+                "x": 0,
+                "y": 0,
+                "z": 0
+            }
+
+            if 'rotation' in resource_config['config']:
+                rotation_dict = resource_config['config']['rotation']   
+                
+            # 从欧拉角转换为四元数
+            q = quaternion_from_euler(
+                float(rotation_dict['x']), 
+                float(rotation_dict['y']), 
+                float(rotation_dict['z'])
+            )
+
+            rotation = {
+                "x": q[0],
+                "y": q[1],
+                "z": q[2],
+                "w": q[3]
+            }
+
+            # 更新资源TF字典
+            self.resource_tf_dict[resource_id] = {
+                "parent": parent_link,
+                "position": position,
+                "rotation": rotation
+            }
 
     def publish_resource_tf(self):
         """
@@ -113,12 +205,7 @@ class ResourceMeshManager(Node):
         遍历self.resource_tf_dict中的每个元素，根据key，parent，以及position和rotation，
         发布key和parent之间的tf关系
         """
-        self.get_logger().info('开始发布资源TF关系')
-        
-        # 创建静态TF广播器
-        
-        
-        # 存储所有需要发布的静态变换
+
         transforms = []
         
         # 遍历资源TF字典
@@ -135,31 +222,92 @@ class ResourceMeshManager(Node):
             transform.child_frame_id = resource_id
             
             # 设置位置
-            transform.transform.translation.x = float(position['x'])/1000
-            transform.transform.translation.y = float(position['y'])/1000
-            transform.transform.translation.z = float(position['z'])/1000
-            
-            # 从欧拉角转换为四元数
-            q = quaternion_from_euler(
-                float(rotation['x']), 
-                float(rotation['y']), 
-                float(rotation['z'])
-            )
+            transform.transform.translation.x = float(position['x'])
+            transform.transform.translation.y = float(position['y'])
+            transform.transform.translation.z = float(position['z'])
             
             # 设置旋转
-            transform.transform.rotation.x = q[0]
-            transform.transform.rotation.y = q[1]
-            transform.transform.rotation.z = q[2]
-            transform.transform.rotation.w = q[3]
+            transform.transform.rotation.x = rotation['x']
+            transform.transform.rotation.y = rotation['y']
+            transform.transform.rotation.z = rotation['z']
+            transform.transform.rotation.w = rotation['w']
             
             transforms.append(transform)
             
         # 一次性发布所有静态变换
         if transforms:
             self.tf_broadcaster.sendTransform(transforms)
-            self.get_logger().info(f'已发布 {len(transforms)} 个资源TF关系')
+            # self.get_logger().info(f'已发布 {len(transforms)} 个资源TF关系')
 
+    def add_resource_collision_meshes(self):
+        """
+        遍历资源配置字典，为每个在resource_model中有对应模型的资源添加碰撞网格
         
+        该方法检查每个资源ID是否在self.resource_model中有对应的3D模型文件路径，
+        如果有，则调用add_collision_mesh方法将其添加到碰撞环境中。
+        """
+        self.get_logger().info('开始添加资源碰撞网格')
+        
+        for resource_id, tf_info in self.resource_tf_dict.items():
+            
+            if resource_id in self.resource_model:
+                # 获取位置信息
+
+                position = [
+                    float(self.resource_model[resource_id]['mesh_tf'][0]),
+                    float(self.resource_model[resource_id]['mesh_tf'][1]),
+                    float(self.resource_model[resource_id]['mesh_tf'][2])
+                ]
+                
+                # 获取旋转信息并转换为四元数
+
+                q = quaternion_from_euler(
+                    float(self.resource_model[resource_id]['mesh_tf'][3]), 
+                    float(self.resource_model[resource_id]['mesh_tf'][4]), 
+                    float(self.resource_model[resource_id]['mesh_tf'][5])
+                )
+                
+                # 添加碰撞网格
+                self.add_collision_mesh(
+                    filepath=self.resource_model[resource_id]['mesh'],
+                    id=resource_id,
+                    position=position,
+                    quat_xyzw=q,
+                    frame_id=resource_id
+                )
+
+            elif f"{tf_info['parent']}_" in self.resource_model:
+                # 获取资源的父级框架ID
+                id_ = f"{tf_info['parent']}_"
+                
+                # 获取位置信息
+                position = [
+                    float(self.resource_model[id_]['mesh_tf'][0]),
+                    float(self.resource_model[id_]['mesh_tf'][1]),
+                    float(self.resource_model[id_]['mesh_tf'][2])
+                ]
+                
+                # 获取旋转信息并转换为四元数
+
+                q = quaternion_from_euler(
+                    float(self.resource_model[id_]['mesh_tf'][3]), 
+                    float(self.resource_model[id_]['mesh_tf'][4]), 
+                    float(self.resource_model[id_]['mesh_tf'][5])
+                )
+                
+                # 添加碰撞网格
+                self.add_collision_mesh(
+                    filepath=self.resource_model[id_]['mesh'],
+                    id=resource_id,
+                    position=position,
+                    quat_xyzw=q,
+                    frame_id=resource_id
+                )
+            time.sleep(0.01)
+
+        self.get_logger().info('资源碰撞网格添加完成')
+
+
     def add_collision_primitive(
         self,
         id: str,
@@ -672,7 +820,8 @@ class ResourceMeshManager(Node):
 
 if __name__ == '__main__':
     model_s = '''
-{'Plate1': '/home/z43/git_pj/Uni-Lab-OS/unilabos/device_mesh/resources/tecan_nested_tip_rack/meshes/plate.stl', 'Plate1_': '/home/z43/git_pj/Uni-Lab-OS/unilabos/device_mesh/resources/generic_labware_tube_10_75/meshes/0_base.stl'}
+{'Plate1': {'mesh': '/home/z43/git_pj/Uni-Lab-OS/unilabos/device_mesh/resources/tecan_nested_tip_rack/meshes/plate.stl', 'mesh_tf': [0.064, 0.043, 0, -1.5708, 0, 1.5708]}, 
+'Plate1_': {'mesh': '/home/z43/git_pj/Uni-Lab-OS/unilabos/device_mesh/resources/generic_labware_tube_10_75/meshes/0_base.stl', 'mesh_tf': [0.0018, 0.0018, 0, -1.5708,0, 0]}}
 '''
     resource_model = json.loads(model_s.replace("'",'"'))
 
@@ -686,8 +835,8 @@ if __name__ == '__main__':
         "type": "device",
         "class": "gripper.mock",
         "position": {
-            "x": 620.6111111111111,
-            "y": 171,
+            "x": 0,
+            "y": 0,
             "z": 0
         },
         "config": {},
@@ -799,9 +948,9 @@ if __name__ == '__main__':
         "type": "device",
         "class": "",
         "position": {
-            "x": 620.6111111111111,
-            "y": 171,
-            "z": 0
+            "x": 0,
+            "y": 0,
+            "z": 69
         },
         "config": {
             "type": "Plate",
@@ -4668,5 +4817,8 @@ if __name__ == '__main__':
     rclpy.init()
     resource_mesh_manager = ResourceMeshManager(resource_model, resource_config, 'resource_mesh_manager')
     resource_mesh_manager.resource_mesh_setup()
-    print(json.dumps(resource_mesh_manager.resource_tf_dict, indent=4, ensure_ascii=False))
+    resource_mesh_manager.publish_resource_tf()
+    # resource_mesh_manager.clear_all_collision_objects()
+    # print(json.dumps(resource_mesh_manager.resource_tf_dict, indent=4, ensure_ascii=False))
+    resource_mesh_manager.add_resource_collision_meshes()
     rclpy.spin(resource_mesh_manager)

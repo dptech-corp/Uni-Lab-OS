@@ -166,10 +166,9 @@ def main():
 
     resource_visualization = ResourceVisualization(args_dict["devices_config"], args_dict["resources_config"],registry_dict)
     start_backend(**args_dict)
-    print('-'*100)
-    print(resource_visualization.resource_model)
-    print(json.dumps(args_dict["resources_config"], indent=4, ensure_ascii=False))
-    print('-'*100)
+    # print('-'*100)
+    # print(resource_visualization.resource_model)
+    # print('-'*100)
     server_thread = threading.Thread(target=start_server)
     server_thread.start()
 
