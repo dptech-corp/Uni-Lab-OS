@@ -28,7 +28,12 @@ class ResourceVisualization:
         self.mesh_path = Path(__file__).parent.absolute()
         self.enable_rviz = enable_rviz
 
+        self.srdf_str = '''
+        <?xml version="1.0" encoding="UTF-8"?>
+        <robot name="minimal">
 
+        </robot>
+        '''
         self.robot_state_str= '''<?xml version="1.0" ?>
         <robot xmlns:xacro="http://ros.org/wiki/xacro" name="full_dev">
         <link name="world"/>
@@ -56,6 +61,13 @@ class ResourceVisualization:
                         new_dev = etree.SubElement(self.root, f"{{{xacro_uri}}}{model_config['mesh']}")
                         new_dev.set("parent_link", "world")
                         new_dev.set("mesh_path", str(self.mesh_path))
+                        new_dev.set("device_name", node["id"]+"_")
+                        new_dev.set("x",str(float(node["position"]["x"])/1000))
+                        new_dev.set("y",str(float(node["position"]["y"])/1000))
+                        new_dev.set("z",str(float(node["position"]["z"])/1000))
+                        if "rotation" in node["config"]:
+                            new_dev.set("r",str(float(node["config"]["rotation"]["z"])/1000))
+
                         
             elif node['type'] in self.resource_type:
                 # print(registry.resource_type_registry)
@@ -65,9 +77,14 @@ class ResourceVisualization:
                 elif "model" in registry.resource_type_registry[resource_class].keys():
                     model_config = registry.resource_type_registry[resource_class]['model']
                     if model_config['type'] == 'resource':
-                        self.resource_model[node['id']] = f"{str(self.mesh_path)}/resources/{model_config['mesh']}"
+                        self.resource_model[node['id']] = {
+                            'mesh': f"{str(self.mesh_path)}/resources/{model_config['mesh']}",
+                            'mesh_tf': model_config['mesh_tf']}
                         if model_config['children_mesh'] is not None:
-                            self.resource_model[f"{node['id']}_"] = f"{str(self.mesh_path)}/resources/{model_config['children_mesh']}"
+                            self.resource_model[f"{node['id']}_"] = {
+                                'mesh': f"{str(self.mesh_path)}/resources/{model_config['children_mesh']}",
+                                'mesh_tf': model_config['children_mesh_tf']
+                            }
             
         re = etree.tostring(self.root, encoding="unicode")
         doc = xacro.parse(re)
@@ -102,23 +119,35 @@ class ResourceVisualization:
             }]
         )
 
+        joint_state_publisher_node = nd(
+            package='joint_state_publisher_gui',  # 或 joint_state_publisher
+            executable='joint_state_publisher_gui',
+            name='joint_state_publisher',
+            output='screen'
+        )
         # 创建move_group节点
         move_group = nd(
             package='moveit_ros_move_group',
             executable='move_group',
             output='screen',
             parameters=[{
-                'robot_description': robot_description,
-                'allow_trajectory_execution': True,
+                'robot_description': self.robot_state_str,
+                'robot_description_semantic': self.srdf_str,
                 'capabilities': '',
                 'disable_capabilities': '',
                 'monitor_dynamics': False,
-                'publish_monitored_planning_scene': True
+                'publish_monitored_planning_scene': True,
+                'publish_robot_description_semantic': True,
+                'publish_planning_scene': True,
+                'publish_geometry_updates': True,
+                'publish_state_updates': True,
+                'publish_transforms_updates': True,
             }]
         )
 
         # 将节点添加到launch描述中
         self.launch_description.add_action(robot_state_publisher)
+        self.launch_description.add_action(joint_state_publisher_node)
         self.launch_description.add_action(move_group)
 
         # 如果启用RViz,添加RViz节点
@@ -127,6 +156,7 @@ class ResourceVisualization:
                 package='rviz2',
                 executable='rviz2',
                 name='rviz2',
+                arguments=['-d', f"{str(self.mesh_path)}/view_robot.rviz"],
                 output='screen'
             )
             self.launch_description.add_action(rviz_node)

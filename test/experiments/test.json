@@ -9,8 +9,8 @@
             "type": "device",
             "class": "gripper.mock",
             "position": {
-                "x": 620.6111111111111,
-                "y": 171,
+                "x": 1000,
+                "y": 1000,
                 "z": 0
             },
             "config": {
@@ -27,9 +27,9 @@
             "type": "plate",
             "class": "nest_96_wellplate_100ul_pcr_full_skirt",
             "position": {
-                "x": 620.6111111111111,
-                "y": 171,
-                "z": 0
+                "x": 0,
+                "y": 0,
+                "z": 69
             },
             "config": {
             },

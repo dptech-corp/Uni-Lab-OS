@@ -1,0 +1,923 @@
+Panels:
+  - Class: rviz_common/Displays
+    Help Height: 138
+    Name: Displays
+    Property Tree Widget:
+      Expanded:
+        - /Global Options1
+        - /TF1
+        - /TF1/Tree1
+        - /RobotModel1
+        - /PlanningScene1
+        - /PlanningScene1/Scene Geometry1
+        - /RobotState1
+        - /RobotState1/Links1
+      Splitter Ratio: 0.5
+    Tree Height: 275
+  - Class: rviz_common/Selection
+    Name: Selection
+  - Class: rviz_common/Tool Properties
+    Expanded:
+      - /2D Goal Pose1
+      - /Publish Point1
+    Name: Tool Properties
+    Splitter Ratio: 0.5886790156364441
+  - Class: rviz_common/Views
+    Expanded:
+      - /Current View1
+    Name: Views
+    Splitter Ratio: 0.5
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Alpha: 0.5
+      Cell Size: 1
+      Class: rviz_default_plugins/Grid
+      Color: 160; 160; 164
+      Enabled: true
+      Line Style:
+        Line Width: 0.029999999329447746
+        Value: Lines
+      Name: Grid
+      Normal Cell Count: 0
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Plane: XY
+      Plane Cell Count: 10
+      Reference Frame: <Fixed Frame>
+      Value: true
+    - Class: rviz_default_plugins/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: false
+        Gripper1_device_link:
+          Value: false
+        Gripper1_first_link:
+          Value: true
+        Gripper1_fourth_link:
+          Value: false
+        Gripper1_main_link:
+          Value: false
+        Gripper1_second_link:
+          Value: false
+        Gripper1_socketTypeGenericSbsFootprint:
+          Value: false
+        Gripper1_socketTypeHEPAModule:
+          Value: false
+        Gripper1_third_link:
+          Value: false
+        Plate1:
+          Value: false
+        Plate1_A1:
+          Value: false
+        Plate1_A10:
+          Value: false
+        Plate1_A11:
+          Value: false
+        Plate1_A12:
+          Value: false
+        Plate1_A2:
+          Value: false
+        Plate1_A3:
+          Value: false
+        Plate1_A4:
+          Value: false
+        Plate1_A5:
+          Value: false
+        Plate1_A6:
+          Value: false
+        Plate1_A7:
+          Value: false
+        Plate1_A8:
+          Value: false
+        Plate1_A9:
+          Value: false
+        Plate1_B1:
+          Value: false
+        Plate1_B10:
+          Value: false
+        Plate1_B11:
+          Value: false
+        Plate1_B12:
+          Value: false
+        Plate1_B2:
+          Value: false
+        Plate1_B3:
+          Value: false
+        Plate1_B4:
+          Value: false
+        Plate1_B5:
+          Value: false
+        Plate1_B6:
+          Value: false
+        Plate1_B7:
+          Value: false
+        Plate1_B8:
+          Value: false
+        Plate1_B9:
+          Value: false
+        Plate1_C1:
+          Value: false
+        Plate1_C10:
+          Value: false
+        Plate1_C11:
+          Value: false
+        Plate1_C12:
+          Value: false
+        Plate1_C2:
+          Value: false
+        Plate1_C3:
+          Value: false
+        Plate1_C4:
+          Value: false
+        Plate1_C5:
+          Value: false
+        Plate1_C6:
+          Value: false
+        Plate1_C7:
+          Value: false
+        Plate1_C8:
+          Value: false
+        Plate1_C9:
+          Value: false
+        Plate1_D1:
+          Value: false
+        Plate1_D10:
+          Value: false
+        Plate1_D11:
+          Value: false
+        Plate1_D12:
+          Value: false
+        Plate1_D2:
+          Value: false
+        Plate1_D3:
+          Value: false
+        Plate1_D4:
+          Value: false
+        Plate1_D5:
+          Value: false
+        Plate1_D6:
+          Value: false
+        Plate1_D7:
+          Value: false
+        Plate1_D8:
+          Value: false
+        Plate1_D9:
+          Value: false
+        Plate1_E1:
+          Value: false
+        Plate1_E10:
+          Value: false
+        Plate1_E11:
+          Value: false
+        Plate1_E12:
+          Value: false
+        Plate1_E2:
+          Value: false
+        Plate1_E3:
+          Value: false
+        Plate1_E4:
+          Value: false
+        Plate1_E5:
+          Value: false
+        Plate1_E6:
+          Value: false
+        Plate1_E7:
+          Value: false
+        Plate1_E8:
+          Value: false
+        Plate1_E9:
+          Value: false
+        Plate1_F1:
+          Value: false
+        Plate1_F10:
+          Value: false
+        Plate1_F11:
+          Value: false
+        Plate1_F12:
+          Value: false
+        Plate1_F2:
+          Value: false
+        Plate1_F3:
+          Value: false
+        Plate1_F4:
+          Value: false
+        Plate1_F5:
+          Value: false
+        Plate1_F6:
+          Value: false
+        Plate1_F7:
+          Value: false
+        Plate1_F8:
+          Value: false
+        Plate1_F9:
+          Value: false
+        Plate1_G1:
+          Value: false
+        Plate1_G10:
+          Value: false
+        Plate1_G11:
+          Value: false
+        Plate1_G12:
+          Value: false
+        Plate1_G2:
+          Value: false
+        Plate1_G3:
+          Value: false
+        Plate1_G4:
+          Value: false
+        Plate1_G5:
+          Value: false
+        Plate1_G6:
+          Value: false
+        Plate1_G7:
+          Value: false
+        Plate1_G8:
+          Value: false
+        Plate1_G9:
+          Value: false
+        Plate1_H1:
+          Value: false
+        Plate1_H10:
+          Value: false
+        Plate1_H11:
+          Value: false
+        Plate1_H12:
+          Value: false
+        Plate1_H2:
+          Value: false
+        Plate1_H3:
+          Value: false
+        Plate1_H4:
+          Value: false
+        Plate1_H5:
+          Value: false
+        Plate1_H6:
+          Value: false
+        Plate1_H7:
+          Value: false
+        Plate1_H8:
+          Value: false
+        Plate1_H9:
+          Value: false
+        world:
+          Value: false
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        world:
+          Gripper1_device_link:
+            Gripper1_main_link:
+              Gripper1_first_link:
+                Gripper1_second_link:
+                  Gripper1_fourth_link:
+                    {}
+                  Gripper1_third_link:
+                    {}
+                Plate1_C6:
+                  {}
+              Gripper1_socketTypeGenericSbsFootprint:
+                {}
+              Gripper1_socketTypeHEPAModule:
+                {}
+            Plate1:
+              Plate1_A1:
+                {}
+              Plate1_A10:
+                {}
+              Plate1_A11:
+                {}
+              Plate1_A12:
+                {}
+              Plate1_A2:
+                {}
+              Plate1_A3:
+                {}
+              Plate1_A4:
+                {}
+              Plate1_A5:
+                {}
+              Plate1_A6:
+                {}
+              Plate1_A7:
+                {}
+              Plate1_A8:
+                {}
+              Plate1_A9:
+                {}
+              Plate1_B1:
+                {}
+              Plate1_B10:
+                {}
+              Plate1_B11:
+                {}
+              Plate1_B12:
+                {}
+              Plate1_B2:
+                {}
+              Plate1_B3:
+                {}
+              Plate1_B4:
+                {}
+              Plate1_B5:
+                {}
+              Plate1_B6:
+                {}
+              Plate1_B7:
+                {}
+              Plate1_B8:
+                {}
+              Plate1_B9:
+                {}
+              Plate1_C1:
+                {}
+              Plate1_C10:
+                {}
+              Plate1_C11:
+                {}
+              Plate1_C12:
+                {}
+              Plate1_C2:
+                {}
+              Plate1_C3:
+                {}
+              Plate1_C4:
+                {}
+              Plate1_C7:
+                {}
+              Plate1_C8:
+                {}
+              Plate1_C9:
+                {}
+              Plate1_D1:
+                {}
+              Plate1_D10:
+                {}
+              Plate1_D11:
+                {}
+              Plate1_D12:
+                {}
+              Plate1_D2:
+                {}
+              Plate1_D3:
+                {}
+              Plate1_D4:
+                {}
+              Plate1_D5:
+                {}
+              Plate1_D6:
+                {}
+              Plate1_D7:
+                {}
+              Plate1_D8:
+                {}
+              Plate1_D9:
+                {}
+              Plate1_E1:
+                {}
+              Plate1_E10:
+                {}
+              Plate1_E11:
+                {}
+              Plate1_E12:
+                {}
+              Plate1_E2:
+                {}
+              Plate1_E3:
+                {}
+              Plate1_E4:
+                {}
+              Plate1_E5:
+                {}
+              Plate1_E6:
+                {}
+              Plate1_E7:
+                {}
+              Plate1_E8:
+                {}
+              Plate1_E9:
+                {}
+              Plate1_F1:
+                {}
+              Plate1_F10:
+                {}
+              Plate1_F11:
+                {}
+              Plate1_F12:
+                {}
+              Plate1_F2:
+                {}
+              Plate1_F3:
+                {}
+              Plate1_F4:
+                {}
+              Plate1_F5:
+                {}
+              Plate1_F6:
+                {}
+              Plate1_F7:
+                {}
+              Plate1_F8:
+                {}
+              Plate1_F9:
+                {}
+              Plate1_G1:
+                {}
+              Plate1_G10:
+                {}
+              Plate1_G11:
+                {}
+              Plate1_G12:
+                {}
+              Plate1_G2:
+                {}
+              Plate1_G3:
+                {}
+              Plate1_G4:
+                {}
+              Plate1_G5:
+                {}
+              Plate1_G6:
+                {}
+              Plate1_G7:
+                {}
+              Plate1_G8:
+                {}
+              Plate1_G9:
+                {}
+              Plate1_H1:
+                {}
+              Plate1_H10:
+                {}
+              Plate1_H11:
+                {}
+              Plate1_H12:
+                {}
+              Plate1_H2:
+                {}
+              Plate1_H3:
+                {}
+              Plate1_H4:
+                {}
+              Plate1_H5:
+                {}
+              Plate1_H6:
+                {}
+              Plate1_H7:
+                {}
+              Plate1_H8:
+                {}
+              Plate1_H9:
+                {}
+            Plate1_C5:
+              {}
+      Update Interval: 0
+      Value: true
+    - Alpha: 1
+      Class: rviz_default_plugins/RobotModel
+      Collision Enabled: false
+      Description File: ""
+      Description Source: Topic
+      Description Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /robot_description
+      Enabled: true
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Gripper1_device_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        Gripper1_first_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        Gripper1_fourth_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        Gripper1_main_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        Gripper1_second_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        Gripper1_socketTypeGenericSbsFootprint:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        Gripper1_socketTypeHEPAModule:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        Gripper1_third_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        Link Tree Style: Links in Alphabetic Order
+        world:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+      Mass Properties:
+        Inertia: false
+        Mass: false
+      Name: RobotModel
+      TF Prefix: ""
+      Update Interval: 0
+      Value: true
+      Visual Enabled: true
+    - Class: moveit_rviz_plugin/PlanningScene
+      Enabled: false
+      Move Group Namespace: ""
+      Name: PlanningScene
+      Planning Scene Topic: /monitored_planning_scene
+      Robot Description: robot_description
+      Scene Geometry:
+        Scene Alpha: 0.8999999761581421
+        Scene Color: 50; 230; 50
+        Scene Display Time: 0.009999999776482582
+        Show Scene Geometry: true
+        Voxel Coloring: Z-Axis
+        Voxel Rendering: Occupied Voxels
+      Scene Robot:
+        Attached Body Color: 150; 50; 150
+        Links:
+          All Links Enabled: true
+          Expand Joint Details: false
+          Expand Link Details: false
+          Expand Tree: false
+          Gripper1_device_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          Gripper1_first_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          Gripper1_fourth_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          Gripper1_main_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          Gripper1_second_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          Gripper1_socketTypeGenericSbsFootprint:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          Gripper1_socketTypeHEPAModule:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          Gripper1_third_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          Link Tree Style: Links in Alphabetic Order
+          world:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+        Robot Alpha: 1
+        Show Robot Collision: false
+        Show Robot Visual: false
+      Value: false
+    - Attached Body Color: 150; 50; 150
+      Class: moveit_rviz_plugin/RobotState
+      Collision Enabled: false
+      Enabled: false
+      Links:
+        All Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Gripper1_device_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        Gripper1_first_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        Gripper1_fourth_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        Gripper1_main_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        Gripper1_second_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        Gripper1_socketTypeGenericSbsFootprint:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        Gripper1_socketTypeHEPAModule:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        Gripper1_third_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        Link Tree Style: Links in Alphabetic Order
+        world:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+      Name: RobotState
+      Robot Alpha: 1
+      Robot Description: robot_description
+      Robot State Topic: display_robot_state
+      Show All Links: true
+      Show Highlights: true
+      Value: false
+      Visual Enabled: true
+    - Acceleration_Scaling_Factor: 0.1
+      Class: moveit_rviz_plugin/MotionPlanning
+      Enabled: true
+      Move Group Namespace: ""
+      MoveIt_Allow_Approximate_IK: false
+      MoveIt_Allow_External_Program: false
+      MoveIt_Allow_Replanning: false
+      MoveIt_Allow_Sensor_Positioning: false
+      MoveIt_Planning_Attempts: 10
+      MoveIt_Planning_Time: 5
+      MoveIt_Use_Cartesian_Path: false
+      MoveIt_Use_Constraint_Aware_IK: false
+      MoveIt_Workspace:
+        Center:
+          X: 0
+          Y: 0
+          Z: 0
+        Size:
+          X: 2
+          Y: 2
+          Z: 2
+      Name: MotionPlanning
+      Planned Path:
+        Color Enabled: false
+        Interrupt Display: false
+        Links:
+          All Links Enabled: true
+          Expand Joint Details: false
+          Expand Link Details: false
+          Expand Tree: false
+          Gripper1_device_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          Gripper1_first_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          Gripper1_fourth_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          Gripper1_main_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          Gripper1_second_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          Gripper1_socketTypeGenericSbsFootprint:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          Gripper1_socketTypeHEPAModule:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          Gripper1_third_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          Link Tree Style: Links in Alphabetic Order
+          world:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+        Loop Animation: false
+        Robot Alpha: 0.5
+        Robot Color: 150; 50; 150
+        Show Robot Collision: false
+        Show Robot Visual: true
+        Show Trail: false
+        State Display Time: 3x
+        Trail Step Size: 1
+        Trajectory Topic: /display_planned_path
+        Use Sim Time: false
+      Planning Metrics:
+        Payload: 1
+        Show Joint Torques: false
+        Show Manipulability: false
+        Show Manipulability Index: false
+        Show Weight Limit: false
+        TextHeight: 0.07999999821186066
+      Planning Request:
+        Colliding Link Color: 255; 0; 0
+        Goal State Alpha: 1
+        Goal State Color: 250; 128; 0
+        Interactive Marker Size: 0
+        Joint Violation Color: 255; 0; 255
+        Planning Group: ""
+        Query Goal State: true
+        Query Start State: false
+        Show Workspace: false
+        Start State Alpha: 1
+        Start State Color: 0; 255; 0
+      Planning Scene Topic: /monitored_planning_scene
+      Robot Description: robot_description
+      Scene Geometry:
+        Scene Alpha: 0.8999999761581421
+        Scene Color: 50; 230; 50
+        Scene Display Time: 0.009999999776482582
+        Show Scene Geometry: true
+        Voxel Coloring: Z-Axis
+        Voxel Rendering: Occupied Voxels
+      Scene Robot:
+        Attached Body Color: 150; 50; 150
+        Links:
+          All Links Enabled: true
+          Expand Joint Details: false
+          Expand Link Details: false
+          Expand Tree: false
+          Gripper1_device_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          Gripper1_first_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          Gripper1_fourth_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          Gripper1_main_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          Gripper1_second_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          Gripper1_socketTypeGenericSbsFootprint:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          Gripper1_socketTypeHEPAModule:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          Gripper1_third_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          Link Tree Style: Links in Alphabetic Order
+          world:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+        Robot Alpha: 1
+        Show Robot Collision: false
+        Show Robot Visual: true
+      Value: true
+      Velocity_Scaling_Factor: 0.1
+  Enabled: true
+  Global Options:
+    Background Color: 48; 48; 48
+    Fixed Frame: world
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz_default_plugins/Interact
+      Hide Inactive Objects: true
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/Select
+    - Class: rviz_default_plugins/FocusCamera
+    - Class: rviz_default_plugins/Measure
+      Line color: 128; 128; 0
+    - Class: rviz_default_plugins/SetInitialPose
+      Covariance x: 0.25
+      Covariance y: 0.25
+      Covariance yaw: 0.06853891909122467
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /initialpose
+    - Class: rviz_default_plugins/SetGoal
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /goal_pose
+    - Class: rviz_default_plugins/PublishPoint
+      Single click: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /clicked_point
+  Transformation:
+    Current:
+      Class: rviz_default_plugins/TF
+  Value: true
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 1.49553644657135
+      Enable Stereo Rendering:
+        Stereo Eye Separation: 0.05999999865889549
+        Stereo Focal Distance: 1
+        Swap Stereo Eyes: false
+        Value: false
+      Focal Point:
+        X: 1.2573390007019043
+        Y: 1.1951926946640015
+        Z: 0.23975235223770142
+      Focal Shape Fixed Size: true
+      Focal Shape Size: 0.05000000074505806
+      Invert Z Axis: false
+      Name: Current View
+      Near Clip Distance: 0.009999999776482582
+      Pitch: 0.5797955989837646
+      Target Frame: <Fixed Frame>
+      Value: Orbit (rviz)
+      Yaw: 6.250748634338379
+    Saved: ~
+Window Geometry:
+  "":
+    collapsed: false
+  " - Trajectory Slider":
+    collapsed: false
+  Displays:
+    collapsed: false
+  Height: 1656
+  Hide Left Dock: false
+  Hide Right Dock: true
+  QMainWindow State: 000000ff00000000fd0000000400000000000003a3000005dcfc020000000afb0000001200530065006c0065006300740069006f006e00000001e10000009b000000b000fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000006e0000020b0000018200fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb000000280020002d0020005400720061006a006500630074006f0072007900200053006c00690064006500720000000000ffffffff0000007a00fffffffbffffffff0100000285000003c5000002b700ffffff000000010000010f00000387fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000003b000003870000013200fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004420000003efc0100000002fb0000000800540069006d00650100000000000004420000000000000000fb0000000800540069006d0065010000000000000450000000000000000000000627000005dc00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Selection:
+    collapsed: false
+  Tool Properties:
+    collapsed: false
+  Views:
+    collapsed: true
+  Width: 2518
+  X: 125
+  Y: 145
