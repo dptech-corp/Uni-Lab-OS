@@ -131,7 +131,7 @@ class ResourceVisualization:
             executable='move_group',
             output='screen',
             parameters=[{
-                'robot_description': self.robot_state_str,
+                'robot_description': robot_description,
                 'robot_description_semantic': self.srdf_str,
                 'capabilities': '',
                 'disable_capabilities': '',
