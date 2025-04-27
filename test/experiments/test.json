@@ -9,8 +9,8 @@
             "type": "device",
             "class": "gripper.mock",
             "position": {
-                "x": 1000,
-                "y": 1000,
+                "x": 0,
+                "y": 0,
                 "z": 0
             },
             "config": {

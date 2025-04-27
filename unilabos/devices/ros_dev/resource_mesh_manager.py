@@ -19,18 +19,27 @@ from tf2_ros import TransformBroadcaster, Buffer, TransformListener
 from rclpy.action import ActionServer
 from unilabos_msgs.action import SendCmd
 from rclpy.action.server import ServerGoalHandle
+from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode,DeviceNodeResourceTracker
 
-class ResourceMeshManager(Node):
-    def __init__(self, resource_model: dict, resource_config: list, node_name: str):
+class ResourceMeshManager(BaseROS2DeviceNode):
+    def __init__(self, resource_model: dict, resource_config: list,resource_tracker, device_id: str = "resource_mesh_manager"):
         """初始化资源网格管理器节点
         
         Args:
             resource_model (dict): 资源模型字典,包含资源的3D模型信息
             resource_config (dict): 资源配置字典,包含资源的配置信息
-            node_name (str): 节点名称
+            device_id (str): 节点名称
         """
-        super().__init__(node_name)
-        
+        super().__init__(
+            driver_instance=self,
+            device_id=device_id,
+            status_types={},
+            action_value_mappings={},
+            hardware_interface={},
+            print_publish=False,
+            resource_tracker=resource_tracker, 
+        ) 
+
         self.resource_model         = resource_model
         self.resource_config_dict   = {item['id']: item for item in resource_config}
         self.move_group_ready       = False
@@ -38,7 +47,7 @@ class ResourceMeshManager(Node):
         self.tf_broadcaster         = TransformBroadcaster(self)
         self.tf_buffer              = Buffer()
         self.tf_listener            = TransformListener(self.tf_buffer, self)
-        
+
 
         self.old_resource_pose      = {}
         self.__planning_scene       = None
@@ -49,7 +58,7 @@ class ResourceMeshManager(Node):
         callback_group = ReentrantCallbackGroup()
         self._get_planning_scene_service = self.create_client(
             srv_type=GetPlanningScene,
-            srv_name="get_planning_scene",
+            srv_name="/get_planning_scene",
             qos_profile=QoSProfile(
                 durability=QoSDurabilityPolicy.VOLATILE,
                 reliability=QoSReliabilityPolicy.RELIABLE,
@@ -62,7 +71,7 @@ class ResourceMeshManager(Node):
         # Create a service for applying the planning scene
         self._apply_planning_scene_service = self.create_client(
             srv_type=ApplyPlanningScene,
-            srv_name="apply_planning_scene",
+            srv_name="/apply_planning_scene",
             qos_profile=QoSProfile(
                 durability=QoSDurabilityPolicy.VOLATILE,
                 reliability=QoSReliabilityPolicy.RELIABLE,
@@ -73,7 +82,7 @@ class ResourceMeshManager(Node):
         )
 
         self.resource_pose_publisher = self.create_publisher(
-            String, f"devices/{node_name}/resource_pose", 10
+            String, f"resource_pose", 10
         )
         self.__collision_object_publisher = self.create_publisher(
             CollisionObject, "/collision_object", 10
@@ -86,7 +95,7 @@ class ResourceMeshManager(Node):
         self._action_server = ActionServer(
             self,
             SendCmd,
-            f'devices/{node_name}/tf_update',
+            f"tf_update",
             self.tf_update,
             callback_group=callback_group
         )
@@ -94,6 +103,7 @@ class ResourceMeshManager(Node):
         self.resource_mesh_setup()
         self.create_timer(0.02, self.publish_resource_tf)
         self.create_timer(1, self.check_resource_pose_changes)
+        
 
 
     def check_move_group_ready(self):
@@ -101,8 +111,9 @@ class ResourceMeshManager(Node):
 
         # 获取当前可用的节点列表
 
-        tf_ready = self.tf_buffer.can_transform("world", next(iter(self.resource_tf_dict.keys())), rclpy.time.Time())
-        # print(tf_ready)
+        tf_ready = self.tf_buffer.can_transform("world", next(iter(self.resource_tf_dict.keys())), rclpy.time.Time(),rclpy.duration.Duration(seconds=2))
+
+        # if tf_ready:
         if self._get_planning_scene_service.service_is_ready() and self._apply_planning_scene_service.service_is_ready() and tf_ready:
             self.move_group_ready = True
             self.add_resource_collision_meshes()
@@ -5022,10 +5033,10 @@ if __name__ == '__main__':
     '''
     resource_config = json.loads(config_s.replace("'",'"'))
     rclpy.init()
-    resource_mesh_manager = ResourceMeshManager(resource_model, resource_config, 'resource_mesh_manager')
+    resource_mesh_manager = ResourceMeshManager(resource_model, resource_config, DeviceNodeResourceTracker())
     # resource_mesh_manager.resource_mesh_setup()
-    resource_mesh_manager.check_move_group_ready()
-    resource_mesh_manager.publish_resource_tf()
+    # resource_mesh_manager.check_move_group_ready()
+    # resource_mesh_manager.publish_resource_tf()
     # resource_mesh_manager.clear_all_collision_objects()
     # print(json.dumps(resource_mesh_manager.resource_tf_dict, indent=4, ensure_ascii=False))
     

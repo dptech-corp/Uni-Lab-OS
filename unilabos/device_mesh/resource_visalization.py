@@ -119,12 +119,12 @@ class ResourceVisualization:
             }]
         )
 
-        joint_state_publisher_node = nd(
-            package='joint_state_publisher_gui',  # 或 joint_state_publisher
-            executable='joint_state_publisher_gui',
-            name='joint_state_publisher',
-            output='screen'
-        )
+        # joint_state_publisher_node = nd(
+        #     package='joint_state_publisher_gui',  # 或 joint_state_publisher
+        #     executable='joint_state_publisher_gui',
+        #     name='joint_state_publisher',
+        #     output='screen'
+        # )
         # 创建move_group节点
         move_group = nd(
             package='moveit_ros_move_group',
@@ -147,7 +147,7 @@ class ResourceVisualization:
 
         # 将节点添加到launch描述中
         self.launch_description.add_action(robot_state_publisher)
-        self.launch_description.add_action(joint_state_publisher_node)
+        # self.launch_description.add_action(joint_state_publisher_node)
         self.launch_description.add_action(move_group)
 
         # 如果启用RViz,添加RViz节点
