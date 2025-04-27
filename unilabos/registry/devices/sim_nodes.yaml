@@ -1,0 +1,11 @@
+joint_republisher:
+  class:
+    module: unilabos.devices.ros_dev.joint_republisher:JointRepublisher
+    type: ros2
+
+resource.mesh_manager:
+  class:
+    module: unilabos.devices.ros_dev.resource_mesh_manager:ResourceMeshManager
+    type: ros2
+
+

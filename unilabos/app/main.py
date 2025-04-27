@@ -71,7 +71,12 @@ def parse_args():
         default=True,
         help="是否在启动时打开信息页",
     )
-
+    parser.add_argument(
+        "--visual",
+        choices=["rviz", "web","None"],
+        default="rviz",
+        help="选择可视化工具: 'rviz' 或 'web' 或 'None'，默认'rviz'",
+    )
     return parser.parse_args()
 
 
@@ -164,16 +169,63 @@ def main():
         signal.signal(signal.SIGTERM, _exit)
         mqtt_client.start()
 
-    resource_visualization = ResourceVisualization(args_dict["devices_config"], args_dict["resources_config"],registry_dict)
-    start_backend(**args_dict)
-    # print('-'*100)
-    # print(resource_visualization.resource_model)
-    # print('-'*100)
-    server_thread = threading.Thread(target=start_server)
-    server_thread.start()
+    if args_dict["visual"] != "None":
+        if args_dict["visual"] == "rviz":
+            resource_visualization = ResourceVisualization(args_dict["devices_config"], args_dict["resources_config"],registry_dict)
+        elif args_dict["visual"] == "web":
+            resource_visualization = ResourceVisualization(args_dict["devices_config"], args_dict["resources_config"],registry_dict,enable_rviz=False )
+        devices_config_add = add_resource_mesh_manager_node(resource_visualization.resource_model, args_dict["resources_config"])
+        args_dict["devices_config"] = {**args_dict["devices_config"], **devices_config_add}
+    
+        server_thread = threading.Thread(target=start_server)
+        server_thread.start()
+        start_backend(**args_dict)
+        resource_visualization.start()
+    else:
+        start_backend(**args_dict)
+        start_server()
 
-    resource_visualization.start()
-
+def add_resource_mesh_manager_node(
+                                    resource_model, 
+                                    resource_config ,
+                                    mesh_manager_device_id = "resource_mesh_manager",
+                                    joint_publisher_device_id = "joint_republisher"):
+    mesh_manager_config ={
+            "id": mesh_manager_device_id,
+            "name": mesh_manager_device_id,
+            "children": [],
+            "parent": None,
+            "type": "device",
+            "class": "resource.mesh_manager",
+            "position": {
+                "x": 620.6111111111111,
+                "y": 171,
+                "z": 0
+            },
+            "config": {
+                "resource_model": resource_model,
+                "resource_config": resource_config
+            },
+            "data": {
+            }
+        }
+    joint_publisher_config = {
+        "id": joint_publisher_device_id,
+        "name": joint_publisher_device_id,
+        "children": [],
+        "parent": None,
+        "type": "device",
+        "class": "joint_republisher",
+        "position": {
+            "x": 620.6111111111111,
+            "y": 171,
+            "z": 0
+        },
+        "config": {},
+        "data": {}
+    }
+    return {joint_publisher_config["id"]: joint_publisher_config,mesh_manager_config["id"]: mesh_manager_config}
+    # return {joint_publisher_config["id"]: joint_publisher_config}
 
 if __name__ == "__main__":
     main()

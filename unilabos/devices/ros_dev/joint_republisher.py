@@ -3,13 +3,22 @@ from rclpy.node import Node
 from sensor_msgs.msg import JointState 
 from std_msgs.msg import String
 from rclpy.callback_groups import ReentrantCallbackGroup
+from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode
 
-class JointRepublisher(Node):
-    def __init__(self,device_id):
-        super().__init__(device_id)  
+class JointRepublisher(BaseROS2DeviceNode):
+    def __init__(self,device_id,resource_tracker):
+        super().__init__(
+            driver_instance=self,
+            device_id=device_id,
+            status_types={},
+            action_value_mappings={},
+            hardware_interface={},
+            print_publish=False,
+            resource_tracker=resource_tracker,  
+        )  
         
         # print('-'*20,device_id)
-        self.joint_repub = self.create_publisher(String,f'/devices/{device_id}/joint_state_repub',10)
+        self.joint_repub = self.create_publisher(String,f'joint_state_repub',10)
         # 创建订阅者
         self.create_subscription(
             JointState,               
