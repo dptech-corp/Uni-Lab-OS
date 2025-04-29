@@ -22,7 +22,7 @@ raman_home_made:
     - status
     additionalProperties: false
     type: object
-hplc.agile:
+hplc.agilent:
   description: HPLC device
   class:
     module: unilabos.devices.hplc.AgilentHPLC:HPLCDriver
