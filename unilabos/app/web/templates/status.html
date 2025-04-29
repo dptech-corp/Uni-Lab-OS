@@ -96,17 +96,19 @@
             <tr>
                 <th>设备ID</th>
                 <th>命名空间</th>
+                <th>机器名称</th>
                 <th>状态</th>
             </tr>
             {% for device_id, device_info in host_node_info.devices.items() %}
             <tr>
                 <td>{{ device_id }}</td>
                 <td>{{ device_info.namespace }}</td>
+                <td>{{ device_info.machine_name }}</td>
                 <td><span class="status-badge online">{{ "在线" if device_info.is_online else "离线" }}</span></td>
             </tr>
             {% else %}
             <tr>
-                <td colspan="3" class="empty-state">没有发现已管理的设备</td>
+                <td colspan="4" class="empty-state">没有发现已管理的设备</td>
             </tr>
             {% endfor %}
         </table>
@@ -218,6 +220,7 @@
             <th>Device ID</th>
             <th>节点名称</th>
             <th>命名空间</th>
+            <th>机器名称</th>
             <th>状态项</th>
             <th>动作数</th>
         </tr>
@@ -227,6 +230,7 @@
             <td>{{ device_id }}</td>
             <td>{{ device_info.node_name }}</td>
             <td>{{ device_info.namespace }}</td>
+            <td>{{ device_info.machine_name|default("本地") }}</td>
             <td>{{ ros_node_info.device_topics.get(device_id, {})|length }}</td>
             <td>{{ ros_node_info.device_actions.get(device_id, {})|length }} <span class="toggle-indicator">▼</span></td>
         </tr>

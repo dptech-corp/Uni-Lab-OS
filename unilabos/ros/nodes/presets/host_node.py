@@ -14,6 +14,7 @@ from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.service import Service
 from unique_identifier_msgs.msg import UUID
 
+from unilabos.registry.registry import lab_registry
 from unilabos.resources.registry import add_schema
 from unilabos.ros.initialize_device import initialize_device_from_dict
 from unilabos.ros.msgs.message_converter import (
@@ -97,6 +98,7 @@ class HostNode(BaseROS2DeviceNode):
         # 创建设备、动作客户端和目标存储
         self.devices_names: Dict[str, str] = {}  # 存储设备名称和命名空间的映射
         self.devices_instances: Dict[str, ROS2DeviceNode] = {}  # 存储设备实例
+        self.device_machine_names: Dict[str, str] = {}  # 存储设备ID到机器名称的映射
         self._action_clients: Dict[str, ActionClient] = {}  # 用来存储多个ActionClient实例
         self._action_value_mappings: Dict[str, Dict] = (
             {}
@@ -112,6 +114,10 @@ class HostNode(BaseROS2DeviceNode):
 
         self.device_status = {}  # 用来存储设备状态
         self.device_status_timestamps = {}  # 用来存储设备状态最后更新时间
+
+        from unilabos.app.mq import mqtt_client
+        for device_config in lab_registry.obtain_registry_device_info():
+            mqtt_client.publish_registry(device_config["id"], device_config)
 
         # 首次发现网络中的设备
         self._discover_devices()
@@ -255,6 +261,7 @@ class HostNode(BaseROS2DeviceNode):
             return
         # noinspection PyProtectedMember
         self.devices_names[device_id] = d._ros_node.namespace
+        self.device_machine_names[device_id] = "本地"
         self.devices_instances[device_id] = d
         # noinspection PyProtectedMember
         for action_name, action_value_mapping in d._ros_node._action_value_mappings.items():
@@ -517,10 +524,17 @@ class HostNode(BaseROS2DeviceNode):
         self.lab_logger().info(f"[Host Node] Node info update request received: {request}")
         try:
             from unilabos.app.mq import mqtt_client
+
             info = json.loads(request.command)
             machine_name = info["machine_name"]
             devices_config = info["devices_config"]
             registry_config = info["registry_config"]
+
+            # 更新设备机器名称映射
+            for device_id in devices_config.keys():
+                self.device_machine_names[device_id] = machine_name
+                self.lab_logger().debug(f"[Host Node] Updated machine name for device {device_id}: {machine_name}")
+
             for device_config in registry_config:
                 mqtt_client.publish_registry(device_config["id"], device_config)
             self.lab_logger().info(f"[Host Node] Node info update: {info}")
