@@ -125,7 +125,6 @@ class ResourceMeshManager(BaseROS2DeviceNode):
     def resource_mesh_setup(self):
         """move_group初始化完成后的设置"""
         self.get_logger().info('开始设置资源网格管理器')
-        
         #遍历resource_config中的资源配置，判断panent是否在resource_model中，
 
         for resource_id, resource_config in self.resource_config_dict.items():
@@ -162,7 +161,12 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                 float(rotation_dict['y']), 
                 float(rotation_dict['z'])
             )
-
+            # print("-"*20)
+            # print(f"resource_id: {resource_id}")
+            # print(f"parent: {parent}")
+            # print(f"resource_config: {self.resource_model}")
+            # print(f"parent_link: {parent_link}")
+            # print("-"*20)
             rotation = {
                 "x": q[0],
                 "y": q[1],
@@ -357,62 +361,6 @@ class ResourceMeshManager(BaseROS2DeviceNode):
             return SendCmd.Result(success=False)
         goal_handle.succeed()
         return SendCmd.Result(success=True)
-
-                
-    def resource_mesh_setup(self):
-        """move_group初始化完成后的设置"""
-        self.get_logger().info('开始设置资源网格管理器')
-        
-        #遍历resource_config中的资源配置，判断panent是否在resource_model中，
-
-        for resource_id, resource_config in self.resource_config_dict.items():
-
-            parent = resource_config['parent']
-            parent_link = 'world'
-            if parent in self.resource_model:
-                parent_link = parent
-            elif parent is None and resource_id in self.resource_model:
-                pass
-            elif parent not in self.resource_model and parent is not None:
-                parent_link = f"{self.resource_config_dict[parent]['parent']}{parent}_device_link".replace("None","")
-            else:
-                continue
-            # 提取位置信息并转换单位
-            position = {
-                "x": float(resource_config['position']['x'])/1000,
-                "y": float(resource_config['position']['y'])/1000,
-                "z": float(resource_config['position']['z'])/1000
-            }
-            
-            rotation_dict = {
-                "x": 0,
-                "y": 0,
-                "z": 0
-            }
-
-            if 'rotation' in resource_config['config']:
-                rotation_dict = resource_config['config']['rotation']   
-                
-            # 从欧拉角转换为四元数
-            q = quaternion_from_euler(
-                float(rotation_dict['x']), 
-                float(rotation_dict['y']), 
-                float(rotation_dict['z'])
-            )
-
-            rotation = {
-                "x": q[0],
-                "y": q[1],
-                "z": q[2],
-                "w": q[3]
-            }
-
-            # 更新资源TF字典
-            self.resource_tf_dict[resource_id] = {
-                "parent": parent_link,
-                "position": position,
-                "rotation": rotation
-            }
 
     def publish_resource_tf(self):
         """

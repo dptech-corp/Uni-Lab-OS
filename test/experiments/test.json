@@ -4,6 +4,7 @@
             "id": "Gripper1",
             "name": "假夹爪",
             "children": [
+                "Plate1"
             ],
             "parent": null,
             "type": "device",
@@ -23,7 +24,7 @@
             "name": "Plate1",
             "children": [
             ],
-            "parent": null,
+            "parent": "Gripper1",
             "type": "plate",
             "class": "nest_96_wellplate_100ul_pcr_full_skirt",
             "position": {

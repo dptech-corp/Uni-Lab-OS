@@ -50,6 +50,10 @@ class ResourceVisualization:
                 
                 # 检查设备类型是否在注册表中
                 if device_class not in registry.device_type_registry.keys():
+                    print("="*20)
+                    print(device_class)
+                    print(registry.device_type_registry.keys())
+                    print("="*20)
                     raise ValueError(f"设备类型 {device_class} 未在注册表中注册")
                 
                 elif "model" in registry.device_type_registry[device_class].keys():
@@ -71,6 +75,7 @@ class ResourceVisualization:
                         
             elif node['type'] in self.resource_type:
                 # print(registry.resource_type_registry)
+
                 resource_class = node['class']
                 if resource_class not in registry.resource_type_registry.keys():
                     raise ValueError(f"资源类型 {resource_class} 未在注册表中注册")
@@ -85,6 +90,7 @@ class ResourceVisualization:
                                 'mesh': f"{str(self.mesh_path)}/resources/{model_config['children_mesh']}",
                                 'mesh_tf': model_config['children_mesh_tf']
                             }
+
             
         re = etree.tostring(self.root, encoding="unicode")
         doc = xacro.parse(re)

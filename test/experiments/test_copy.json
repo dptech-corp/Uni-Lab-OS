@@ -1,0 +1,102 @@
+{
+    "nodes": [
+        {
+            "id": "PLR_STATION",
+            "name": "PLR_LH_TEST",
+            "parent": null,
+            "type": "device",
+            "class": "liquid_handler",
+            "position": {
+                "x": 620.6111111111111,
+                "y": 171,
+                "z": 0
+            },
+            "config": {
+                "data": {
+                    "children": [
+                        {
+                            "_resource_child_name": "deck",
+                            "_resource_type": "pylabrobot.resources.opentrons.deck:OTDeck"
+                        }
+                    ],
+                    "backend": {
+                        "type": "LiquidHandlerChatterboxBackend"
+                    }
+                }
+            },
+            "data": {},
+            "children": [
+                "deck"
+            ]
+        },
+        {
+            "id": "deck",
+            "name": "deck",
+            "sample_id": null,
+            "children": [
+
+                "teaching_carrier"
+            ],
+            "parent": "PLR_STATION",
+            "type": "device",
+            "class": "OTDeck",
+            "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+            },
+            "config": {
+                "type": "OTDeck",
+                "size_x": 1360,
+                "size_y": 653.5,
+                "size_z": 900,
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0,
+                    "type": "Rotation"
+                },
+                "category": "deck",
+                "num_rails": 32,
+                "with_trash": false,
+                "with_trash96": false,
+                "with_teaching_rack": false
+            },
+            "data": {}
+        },
+
+        {
+            "id": "teaching_carrier",
+            "name": "teaching_carrier",
+            "sample_id": null,
+            "children": [
+            ],
+            "parent": "deck",
+            "type": "plate",
+            "class": "nest_96_wellplate_100ul_pcr_full_skirt",
+            "position": {
+                "x": 0,
+                "y": 0,
+                "z": 69
+            },
+            "config": {
+                "type": "Resource",
+                "size_x": 30,
+                "size_y": 445.2,
+                "size_z": 100,
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0,
+                    "type": "Rotation"
+                },
+                "category": null,
+                "model": null
+            },
+            "data": {}
+        }
+    ],
+    "links": [
+        
+    ]
+}
