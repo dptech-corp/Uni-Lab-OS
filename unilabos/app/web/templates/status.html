@@ -333,8 +333,13 @@
         <tr id="device-info-{{ loop.index }}" class="detail-row" style="display: none;">
             <td colspan="5">
                 <div class="content-full">
-                    <pre>{{ device.class|tojson(indent=4) }}</pre>
-                    
+                    {% if device.class %}
+                        <pre>{{ device.class | tojson(indent=4) }}</pre>
+                    {% else %}
+                        <!-- 这里可以放占位内容，比如 -->
+                        <pre>// No data</pre>
+                    {% endif %}
+
                     {% if device.is_online %}
                     <div class="status-badge"><span class="online-status">在线</span></div>
                     {% endif %}
@@ -366,7 +371,12 @@
                                     <button class="copy-btn" onclick="copyToClipboard(this.previousElementSibling.textContent, event)">复制</button>
                                     <button class="debug-btn" onclick="toggleDebugInfo(this, event)">调试</button>
                                     <div class="debug-info" style="display:none;">
-                                        <pre>{{ action_info|tojson(indent=2) }}</pre>
+                                        {% if action_info %}
+                                            <pre>{{ action_info | tojson(indent=4) }}</pre>
+                                        {% else %}
+                                            <!-- 这里可以放占位内容，比如 -->
+                                            <pre>// No data</pre>
+                                        {% endif %}
                                     </div>
                                 </div>
                                 
