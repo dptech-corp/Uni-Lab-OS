@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 import traceback
@@ -85,7 +86,7 @@ def slave(
     """从节点函数"""
     rclpy.init(args=args)
     rclpy.__executor = executor = MultiThreadedExecutor()
-
+    devices_config_copy = copy.deepcopy(devices_config)
     for device_id, device_config in devices_config.items():
         d = initialize_device_from_dict(device_id, device_config)
         if d is None:
@@ -109,20 +110,19 @@ def slave(
         request.command = json.dumps({
             "machine_name": machine_name,
             "type": "slave",
-            "devices_config": devices_config,
+            "devices_config": devices_config_copy,
             "registry_config": lab_registry.obtain_registry_device_info()
         }, ensure_ascii=False, cls=TypeEncoder)
-        response = sclient.call_async(request)
-        logger.info(f"Slave node info update response: {response}")
+        response = sclient.call_async(request).result()
+        logger.info(f"Slave node info updated.")
 
         rclient = n.create_client(ResourceAdd, "/resources/add")
         rclient.wait_for_service()  # FIXME 可能一直等待，加一个参数
 
         request = ResourceAdd.Request()
         request.resources = [convert_to_ros_msg(Resource, resource) for resource in resources_config]
-        response = rclient.call_async(request)
-        logger.info(f"Slave resource add response: {response}")
-
+        response = rclient.call_async(request).result()
+        logger.info(f"Slave resource added.")
 
 
     run_event_loop_in_thread()

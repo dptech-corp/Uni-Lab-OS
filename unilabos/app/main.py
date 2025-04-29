@@ -61,7 +61,7 @@ def parse_args():
     parser.add_argument(
         "--port",
         type=int,
-        default=None,
+        default=8002,
         help="信息页web服务的启动端口",
     )
     parser.add_argument(

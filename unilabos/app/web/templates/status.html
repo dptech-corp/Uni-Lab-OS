@@ -329,7 +329,7 @@
         <tr id="device-info-{{ loop.index }}" class="detail-row" style="display: none;">
             <td colspan="5">
                 <div class="content-full">
-                    <pre>{{ device.class_json }}</pre>
+                    <pre>{{ device.class|tojson(indent=4) }}</pre>
                     
                     {% if device.is_online %}
                     <div class="status-badge"><span class="online-status">在线</span></div>

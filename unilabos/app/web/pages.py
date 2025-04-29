@@ -92,7 +92,7 @@ def setup_web_pages(router: APIRouter) -> None:
 
             # 获取已加载的设备
             if lab_registry:
-                devices = lab_registry.obtain_registry_device_info()
+                devices = json.loads(json.dumps(lab_registry.obtain_registry_device_info(), ensure_ascii=False, cls=TypeEncoder))
                 # 资源类型
                 for resource_id, resource_info in lab_registry.resource_type_registry.items():
                     resources.append(

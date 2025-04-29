@@ -516,7 +516,13 @@ class HostNode(BaseROS2DeviceNode):
         """
         self.lab_logger().info(f"[Host Node] Node info update request received: {request}")
         try:
+            from unilabos.app.mq import mqtt_client
             info = json.loads(request.command)
+            machine_name = info["machine_name"]
+            devices_config = info["devices_config"]
+            registry_config = info["registry_config"]
+            for device_config in registry_config:
+                mqtt_client.publish_registry(device_config["id"], device_config)
             self.lab_logger().info(f"[Host Node] Node info update: {info}")
             response.response = "OK"
         except Exception as e:
