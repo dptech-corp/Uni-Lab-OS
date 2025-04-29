@@ -1,6 +1,7 @@
 import copy
 import threading
 import time
+import traceback
 import uuid
 from typing import Optional, Dict, Any, List, ClassVar, Set
 
@@ -132,10 +133,14 @@ class HostNode(BaseROS2DeviceNode):
                 controller_config["update_rate"] = update_rate
                 self.initialize_controller(controller_id, controller_config)
 
-        for bridge in self.bridges:
-            if hasattr(bridge, "resource_add"):
-                self.lab_logger().info("[Host Node-Resource] Adding resources to bridge.")
-                bridge.resource_add(add_schema(resources_config))
+        try:
+            for bridge in self.bridges:
+                if hasattr(bridge, "resource_add"):
+                    self.lab_logger().info("[Host Node-Resource] Adding resources to bridge.")
+                    bridge.resource_add(add_schema(resources_config))
+        except Exception as ex:
+            self.lab_logger().error("[Host Node-Resource] 添加物料出错！")
+            self.lab_logger().error(traceback.format_exc())
 
         # 创建定时器，定期发现设备
         self._discovery_timer = self.create_timer(

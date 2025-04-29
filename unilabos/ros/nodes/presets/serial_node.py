@@ -21,6 +21,7 @@ class ROS2SerialNode(BaseROS2DeviceNode):
             self.hardware_interface = Serial(baudrate=baudrate, port=port)
         except (OSError, SerialException) as e:
             # 因为还没调用父类初始化，无法使用日志，直接抛出异常
+            # print(f"Failed to connect to serial port {port} at {baudrate} baudrate.")
             raise RuntimeError(f"Failed to connect to serial port {port} at {baudrate} baudrate.") from e
 
         # 初始化BaseROS2DeviceNode，使用自身作为driver_instance
@@ -46,7 +47,7 @@ class ROS2SerialNode(BaseROS2DeviceNode):
         self.lab_logger().info(f"【ROS2SerialNode.__init__】创建串口写入服务: serialwrite")
 
     def send_command(self, command: str):
-        self.lab_logger().info(f"【ROS2SerialNode.send_command】发送命令: {command}")
+        # self.lab_logger().debug(f"【ROS2SerialNode.send_command】发送命令: {command}")
         with self._query_lock:
             if self._closing:
                 self.lab_logger().error(f"【ROS2SerialNode.send_command】设备正在关闭，无法发送命令")
@@ -58,23 +59,23 @@ class ROS2SerialNode(BaseROS2DeviceNode):
             response = self.hardware_interface.write(full_command_data)
             # time.sleep(0.05)
             output = self._receive(self.hardware_interface.read_until(b"\n"))
-            self.lab_logger().info(f"【ROS2SerialNode.send_command】接收响应: {output}")
+            # self.lab_logger().debug(f"【ROS2SerialNode.send_command】接收响应: {output}")
         return output
 
     def read_data(self):
-        self.lab_logger().debug(f"【ROS2SerialNode.read_data】读取数据")
+        # self.lab_logger().debug(f"【ROS2SerialNode.read_data】读取数据")
         with self._query_lock:
             if self._closing:
                 self.lab_logger().error(f"【ROS2SerialNode.read_data】设备正在关闭，无法读取数据")
                 raise RuntimeError
             data = self.hardware_interface.read_until(b"\n")
             result = self._receive(data)
-            self.lab_logger().debug(f"【ROS2SerialNode.read_data】读取到数据: {result}")
+            # self.lab_logger().debug(f"【ROS2SerialNode.read_data】读取到数据: {result}")
             return result
 
     def _receive(self, data: bytes):
         ascii_string = "".join(chr(byte) for byte in data)
-        self.lab_logger().debug(f"【ROS2SerialNode._receive】接收数据: {ascii_string}")
+        # self.lab_logger().debug(f"【ROS2SerialNode._receive】接收数据: {ascii_string}")
         return ascii_string
 
     def handle_serial_request(self, request, response):

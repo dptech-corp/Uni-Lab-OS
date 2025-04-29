@@ -6,7 +6,7 @@ def generate_clean_protocol(
     G: nx.DiGraph, 
     vessel: str,  # Vessel to clean.
     solvent: str, # Solvent to clean vessel with.
-    volume: float = 25000.0, # Optional. Volume of solvent to clean vessel with.
+    volume: float = 25.0, # Optional. Volume of solvent to clean vessel with.
     temp: float = 25, # Optional. Temperature to heat vessel to while cleaning.
     repeats: int = 1, # Optional. Number of cleaning cycles to perform.
 ) -> list[dict]:
@@ -27,7 +27,7 @@ def generate_clean_protocol(
     from_vessel = f"flask_{solvent}"
     waste_vessel = f"waste_workup"
     
-    transfer_flowrate = flowrate = 2500.0
+    transfer_flowrate = flowrate = 2.5
     
     # 生成泵操作的动作序列
     for i in range(repeats):

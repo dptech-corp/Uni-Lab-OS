@@ -75,20 +75,29 @@ def _update_config_from_module(module):
         # 需要先判断是否为相对路径
         if MQConfig.ca_file.startswith("."):
             MQConfig.ca_file = os.path.join(BasicConfig.config_path, MQConfig.ca_file)
-        with open(MQConfig.ca_file, "r", encoding="utf-8") as f:
-            MQConfig.ca_content = f.read()
+        if len(MQConfig.ca_file) != 0:
+            with open(MQConfig.ca_file, "r", encoding="utf-8") as f:
+                MQConfig.ca_content = f.read()
+        else:
+            logger.warning("Skipping CA file loading, ca_file is empty")
     if len(MQConfig.cert_content) == 0:
         # 需要先判断是否为相对路径
         if MQConfig.cert_file.startswith("."):
             MQConfig.cert_file = os.path.join(BasicConfig.config_path, MQConfig.cert_file)
-        with open(MQConfig.cert_file, "r", encoding="utf-8") as f:
-            MQConfig.cert_content = f.read()
+        if len(MQConfig.ca_file) != 0:
+            with open(MQConfig.cert_file, "r", encoding="utf-8") as f:
+                MQConfig.cert_content = f.read()
+        else:
+            logger.warning("Skipping cert file loading, cert_file is empty")
     if len(MQConfig.key_content) == 0:
         # 需要先判断是否为相对路径
         if MQConfig.key_file.startswith("."):
             MQConfig.key_file = os.path.join(BasicConfig.config_path, MQConfig.key_file)
-        with open(MQConfig.key_file, "r", encoding="utf-8") as f:
-            MQConfig.key_content = f.read()
+        if len(MQConfig.ca_file) != 0:
+            with open(MQConfig.key_file, "r", encoding="utf-8") as f:
+                MQConfig.key_content = f.read()
+        else:
+            logger.warning("Skipping key file loading, key_file is empty")
 
 
 def load_config(config_path=None):

@@ -3,6 +3,10 @@ syringe_pump_with_valve.runze:
   class:
     module: unilabos.devices.pump_and_valve.runze_backbone:RunzeSyringePump
     type: python
+    hardware_interface:
+      name: hardware_interface
+      read: send_command
+      write: send_command
   schema:
     type: object
     properties:

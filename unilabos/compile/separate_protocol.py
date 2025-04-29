@@ -11,7 +11,7 @@ def generate_separate_protocol(
     to_vessel: str, # Vessel to send product phase to.
     waste_phase_to_vessel: str, # Optional. Vessel to send waste phase to.
     solvent: str, # Optional. Solvent to add to separation vessel after contents of from_vessel has been transferred to create two phases.
-    solvent_volume: float = 50000, # Optional. Volume of solvent to add.
+    solvent_volume: float = 50, # Optional. Volume of solvent to add (mL).
     through: str = "", # Optional. Solid chemical to send product phase through on way to to_vessel, e.g. 'celite'.
     repeats: int = 1, # Optional. Number of separations to perform.
     stir_time: float = 30, # Optional. Time stir for after adding solvent, before separation of phases.
@@ -32,7 +32,7 @@ def generate_separate_protocol(
     
     # 生成泵操作的动作序列
     pump_action_sequence = []
-    reactor_volume = 500000.0
+    reactor_volume = 500.0
     waste_vessel = waste_phase_to_vessel
     
     # TODO：通过物料管理系统找到溶剂的容器
@@ -46,7 +46,7 @@ def generate_separate_protocol(
     separator_controller = f"{separation_vessel}_controller"
     separation_vessel_bottom = f"flask_{separation_vessel}"
     
-    transfer_flowrate = flowrate = 2500.0
+    transfer_flowrate = flowrate = 2.5
     
     if from_vessel != separation_vessel:
         pump_action_sequence.append(
@@ -140,8 +140,8 @@ def generate_separate_protocol(
                     "action_kwargs": {
                         "from_vessel": separation_vessel_bottom,
                         "to_vessel": to_vessel,
-                        "volume": 250000.0,
-                        "time": 250000.0 / flowrate,
+                        "volume": 250.0,
+                        "time": 250.0 / flowrate,
                         # "transfer_flowrate": transfer_flowrate,
                     }
                 }
@@ -164,8 +164,8 @@ def generate_separate_protocol(
                     "action_kwargs": {
                         "from_vessel": separation_vessel_bottom,
                         "to_vessel": waste_vessel,
-                        "volume": 250000.0,
-                        "time": 250000.0 / flowrate,
+                        "volume": 250.0,
+                        "time": 250.0 / flowrate,
                         # "transfer_flowrate": transfer_flowrate,
                     }
                 }
@@ -179,8 +179,8 @@ def generate_separate_protocol(
                     "action_kwargs": {
                         "from_vessel": separation_vessel_bottom,
                         "to_vessel": waste_vessel,
-                        "volume": 250000.0,
-                        "time": 250000.0 / flowrate,
+                        "volume": 250.0,
+                        "time": 250.0 / flowrate,
                         # "transfer_flowrate": transfer_flowrate,
                     }
                 }
@@ -203,8 +203,8 @@ def generate_separate_protocol(
                     "action_kwargs": {
                         "from_vessel": separation_vessel_bottom,
                         "to_vessel": to_vessel,
-                        "volume": 250000.0,
-                        "time": 250000.0 / flowrate,
+                        "volume": 250.0,
+                        "time": 250.0 / flowrate,
                         # "transfer_flowrate": transfer_flowrate,
                     }
                 }
@@ -221,8 +221,8 @@ def generate_separate_protocol(
                     "action_kwargs": {
                         "from_vessel": to_vessel,
                         "to_vessel": separation_vessel,
-                        "volume": 250000.0,
-                        "time": 250000.0 / flowrate,
+                        "volume": 250.0,
+                        "time": 250.0 / flowrate,
                         # "transfer_flowrate": transfer_flowrate,
                     }
                 }

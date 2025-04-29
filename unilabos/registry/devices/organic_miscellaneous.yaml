@@ -1,7 +1,7 @@
 separator.homemade:
   description: Separator device with homemade grbl controller
   class:
-    module: unilabos.devices.separator.homemade_grbl_conductivity:Separator_Controller
+    module: unilabos.devices.separator.homemade_grbl_conductivity:SeparatorController
     type: python
     status_types:
       sensordata: Float64

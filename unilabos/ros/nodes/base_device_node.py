@@ -342,9 +342,15 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                 else:
                     return getattr(self.driver_instance, attr_name)
             except AttributeError as ex:
-                self.lab_logger().error(
-                    f"publish error, {str(type(self.driver_instance))[8:-2]} has no attribute '{attr_name}'"
-                )
+                if ex.args[0].startswith(f"AttributeError: '{self.driver_instance.__class__.__name__}' object"):
+                    self.lab_logger().error(
+                        f"publish error, {str(type(self.driver_instance))[8:-2]} has no attribute '{attr_name}'"
+                    )
+                else:
+                    self.lab_logger().error(
+                        f"publish error, when {str(type(self.driver_instance))[8:-2]} getting attribute '{attr_name}'"
+                    )
+                    self.lab_logger().error(traceback.format_exc())
 
         self._property_publishers[attr_name] = PropertyPublisher(
             self, attr_name, get_device_attr, msg_type, initial_period, self._print_publish
@@ -429,6 +435,15 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             else:
                 self.lab_logger().info(f"同步执行动作 {ACTION}")
                 future = self._executor.submit(ACTION, **action_kwargs)
+
+                def _handle_future_exception(fut):
+                    try:
+                        fut.result()
+                    except Exception as e:
+                        error(f"同步任务 {ACTION.__name__} 报错了")
+                        error(traceback.format_exc())
+
+                future.add_done_callback(_handle_future_exception)
 
             action_type = action_value_mapping["type"]
             feedback_msg_types = action_type.Feedback.get_fields_and_field_types()
