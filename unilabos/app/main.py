@@ -58,6 +58,18 @@ def parse_args():
         default=None,
         help="配置文件路径，支持.py格式的Python配置文件",
     )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=None,
+        help="信息页web服务的启动端口",
+    )
+    parser.add_argument(
+        "--open_browser",
+        type=bool,
+        default=True,
+        help="是否在启动时打开信息页",
+    )
 
     return parser.parse_args()
 
@@ -151,7 +163,7 @@ def main():
         mqtt_client.start()
 
     start_backend(**args_dict)
-    start_server()
+    start_server(port=args_dict.get("port", 8002), open_browser=args_dict.get("open_browser", False))
 
 
 if __name__ == "__main__":

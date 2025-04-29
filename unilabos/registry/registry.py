@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 from pathlib import Path
@@ -8,6 +9,7 @@ import yaml
 from unilabos.utils import logger
 from unilabos.ros.msgs.message_converter import msg_converter_manager
 from unilabos.utils.decorator import singleton
+from unilabos.utils.type_check import TypeEncoder
 
 DEFAULT_PATHS = [Path(__file__).absolute().parent]
 
@@ -142,6 +144,20 @@ class Registry:
                 logger.debug(
                     f"[UniLab Registry] Device File-{i+1}/{len(files)} Not Valid YAML File: {file.absolute()}"
                 )
+
+    def obtain_registry_device_info(self):
+        devices = []
+        for device_id, device_info in self.device_type_registry.items():
+            msg = {
+                "id": device_id,
+                "name": device_info.get("name", "未命名"),
+                "file_path": device_info.get("file_path", ""),
+                "class_json": json.dumps(
+                    device_info.get("class", {}), indent=4, ensure_ascii=False, cls=TypeEncoder
+                ),
+            }
+            devices.append(msg)
+        return devices
 
 
 # 全局单例实例
