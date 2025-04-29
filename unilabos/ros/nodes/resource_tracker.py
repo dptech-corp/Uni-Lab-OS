@@ -48,6 +48,7 @@ class DeviceNodeResourceTracker:
 
     def loop_find_resource(self, resource, resource_cls_type, identifier_key, compare_value):
         res_list = []
+        print(resource, resource_cls_type, identifier_key, compare_value)
         children = getattr(resource, "children", [])
         for child in children:
             res_list.extend(self.loop_find_resource(child, resource_cls_type, identifier_key, compare_value))

@@ -45,7 +45,7 @@ class ResourceVisualization:
 
         # 遍历设备节点
         for node in device.values():
-            if node['type'] == 'device':
+            if node['type'] == 'device' and node['class'] != '':
                 device_class = node['class']
                 
                 # 检查设备类型是否在注册表中

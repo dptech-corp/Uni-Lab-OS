@@ -12,6 +12,10 @@ Panels:
         - /PlanningScene1/Scene Geometry1
         - /RobotState1
         - /RobotState1/Links1
+        - /MotionPlanning1
+        - /MotionPlanning1/Scene Geometry1
+        - /MotionPlanning1/Scene Robot1
+        - /MotionPlanning1/Planning Request1
       Splitter Ratio: 0.5
     Tree Height: 345
   - Class: rviz_common/Selection
@@ -161,44 +165,44 @@ Visualization Manager:
           Expand Joint Details: false
           Expand Link Details: false
           Expand Tree: false
-          Gripper1_device_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          Gripper1_first_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          Gripper1_fourth_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          Gripper1_main_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          Gripper1_second_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          Gripper1_socketTypeGenericSbsFootprint:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          Gripper1_socketTypeHEPAModule:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          Gripper1_third_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
           Link Tree Style: Links in Alphabetic Order
+          deck_device_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          deck_first_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          deck_fourth_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          deck_main_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          deck_second_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          deck_socketTypeGenericSbsFootprint:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          deck_socketTypeHEPAModule:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          deck_third_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
           world:
             Alpha: 1
             Show Axes: false
@@ -227,7 +231,7 @@ Visualization Manager:
         Interactive Marker Size: 0
         Joint Violation Color: 255; 0; 255
         Planning Group: ""
-        Query Goal State: true
+        Query Goal State: false
         Query Start State: false
         Show Workspace: false
         Start State Alpha: 1
@@ -248,44 +252,44 @@ Visualization Manager:
           Expand Joint Details: false
           Expand Link Details: false
           Expand Tree: false
-          Gripper1_device_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          Gripper1_first_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          Gripper1_fourth_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          Gripper1_main_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          Gripper1_second_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          Gripper1_socketTypeGenericSbsFootprint:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          Gripper1_socketTypeHEPAModule:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-          Gripper1_third_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
           Link Tree Style: Links in Alphabetic Order
+          deck_device_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          deck_first_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          deck_fourth_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          deck_main_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          deck_second_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
+          deck_socketTypeGenericSbsFootprint:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          deck_socketTypeHEPAModule:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          deck_third_link:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
           world:
             Alpha: 1
             Show Axes: false
@@ -356,10 +360,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.40479576587677
+      Pitch: 0.4347957372665405
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 6.070750713348389
+      Yaw: 6.020748138427734
     Saved: ~
 Window Geometry:
   Displays:
