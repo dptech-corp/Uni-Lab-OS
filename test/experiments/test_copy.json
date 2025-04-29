@@ -20,7 +20,7 @@
                         }
                     ],
                     "backend": {
-                        "type": "LiquidHandlerChatterboxBackend"
+                        "type": "LiquidHandlerRvizBackend"
                     }
                 }
             },
@@ -34,7 +34,6 @@
             "name": "deck",
             "sample_id": null,
             "children": [
-
                 "teaching_carrier"
             ],
             "parent": "PLR_STATION",
@@ -47,20 +46,13 @@
             },
             "config": {
                 "type": "OTDeck",
-                "size_x": 1360,
-                "size_y": 653.5,
-                "size_z": 900,
+                "with_trash": false,
                 "rotation": {
                     "x": 0,
                     "y": 0,
                     "z": 0,
                     "type": "Rotation"
-                },
-                "category": "deck",
-                "num_rails": 32,
-                "with_trash": false,
-                "with_trash96": false,
-                "with_teaching_rack": false
+                }
             },
             "data": {}
         },
@@ -70,20 +62,21 @@
             "name": "teaching_carrier",
             "sample_id": null,
             "children": [
+                "teaching_carrier_A1"
             ],
             "parent": "deck",
             "type": "plate",
-            "class": "nest_96_wellplate_100ul_pcr_full_skirt",
+            "class": "opentrons_96_filtertiprack_1000ul",
             "position": {
-                "x": 0,
-                "y": 0,
+                "x": 132.5,
+                "y": 271.5,
                 "z": 69
             },
             "config": {
                 "type": "Resource",
-                "size_x": 30,
-                "size_y": 445.2,
-                "size_z": 100,
+                "size_x": 127,
+                "size_y": 85,
+                "size_z": 0,
                 "rotation": {
                     "x": 0,
                     "y": 0,
@@ -94,6 +87,46 @@
                 "model": null
             },
             "data": {}
+        },
+        {
+            "id": "teaching_carrier_A1",
+            "name": "teaching_carrier_A1",
+            "sample_id": null,
+            "children": [],
+            "parent": "teaching_carrier",
+            "type": "device",
+            "class": "",
+            "position": {
+                "x": 10.87,
+                "y": 70.77,
+                "z": 3.03
+            },
+            "config": {
+                "type": "TipSpot",
+                "size_x": 6.86,
+                "size_y": 6.86,
+                "size_z": 10.67,
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0,
+                    "type": "Rotation"
+                },
+                "category": "tip_spot",
+                "model": null,
+                "prototype_tip": {
+                    "type": "Tip",
+                    "total_tip_length": 39.2,
+                    "has_filter": true,
+                    "maximal_volume": 20.0,
+                    "fitting_depth": 3.29
+                }
+            },
+            "data": {
+                "liquids": [],
+                "pending_liquids": [],
+                "liquid_history": []
+            }
         }
     ],
     "links": [

@@ -135,8 +135,8 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                 parent_link = parent
             elif parent is None and resource_id in self.resource_model:
                 pass
-            elif parent not in self.resource_model and parent is not None:
-                parent_link = f"{self.resource_config_dict[parent]['parent']}{parent}_device_link".replace("None","")
+            elif parent not in self.resource_model and parent is not None and resource_config['class'] != '':
+                parent_link = f"{self.resource_config_dict[parent]['parent']}_{parent}_device_link".replace("None","")
             else:
                 continue
             # 提取位置信息并转换单位
@@ -164,7 +164,7 @@ class ResourceMeshManager(BaseROS2DeviceNode):
             # print("-"*20)
             # print(f"resource_id: {resource_id}")
             # print(f"parent: {parent}")
-            # print(f"resource_config: {self.resource_model}")
+            # print(f"resource_config: {resource_config}")
             # print(f"parent_link: {parent_link}")
             # print("-"*20)
             rotation = {
