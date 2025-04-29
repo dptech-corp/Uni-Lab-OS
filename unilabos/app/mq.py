@@ -146,7 +146,7 @@ class MQTTClient:
         if self.mqtt_disable:
             return
         status = {"data": device_status.get(device_id, {}), "device_id": device_id}
-        address = f"labs/{MQConfig.lab_id}/devices"
+        address = f"labs/{MQConfig.lab_id}/devices/"
         self.client.publish(address, json.dumps(status), qos=2)
         logger.critical(f"Device status published: address: {address}, {status}")
 
