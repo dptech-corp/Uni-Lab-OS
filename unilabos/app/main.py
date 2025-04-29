@@ -134,6 +134,7 @@ def main():
         args_dict["resources_config"] = initialize_resources(list(deepcopy(devices_and_resources).values()))
         args_dict["devices_config"] = dict_to_nested_dict(deepcopy(devices_and_resources), devices_only=False)
         # args_dict["resources_config"] = dict_to_tree(devices_and_resources, devices_only=False)
+
         args_dict["graph"] = graph_res.physical_setup_graph
     else:
         if args_dict["devices"] is None or args_dict["resources"] is None:
@@ -171,9 +172,10 @@ def main():
 
     if args_dict["visual"] != "None":
         if args_dict["visual"] == "rviz":
-            resource_visualization = ResourceVisualization(args_dict["devices_config"], args_dict["resources_config"],registry_dict)
+            enable_rviz=True
         elif args_dict["visual"] == "web":
-            resource_visualization = ResourceVisualization(args_dict["devices_config"], args_dict["resources_config"],registry_dict,enable_rviz=False )
+            enable_rviz=False
+        resource_visualization = ResourceVisualization(devices_and_resources, args_dict["resources_config"],registry_dict,enable_rviz=enable_rviz)
         devices_config_add = add_resource_mesh_manager_node(resource_visualization.resource_model, args_dict["resources_config"])
         args_dict["devices_config"] = {**args_dict["devices_config"], **devices_config_add}
     
