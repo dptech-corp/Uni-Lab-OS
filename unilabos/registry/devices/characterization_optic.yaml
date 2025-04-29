@@ -29,9 +29,9 @@ hplc.agilent:
     type: python
     status_types:
       device_status: String
-      could_run: Boolean
-      driver_init_ok: Boolean
-      is_running: Boolean
+      could_run: Bool
+      driver_init_ok: Bool
+      is_running: Bool
       finish_status: String
       status_text: String
     action_value_mappings:
