@@ -2,11 +2,9 @@ import copy
 import json
 import os
 import threading
-import traceback
 from typing import Optional, Dict, Any, List
 
 import rclpy
-from rclpy.callback_groups import ReentrantCallbackGroup
 from unilabos_msgs.msg import Resource  # type: ignore
 from unilabos_msgs.srv import ResourceAdd, SerialCommand  # type: ignore
 from rclpy.executors import MultiThreadedExecutor
@@ -67,6 +65,9 @@ def main(
     thread = threading.Thread(target=executor.spin, daemon=True, name="host_executor_thread")
     thread.start()
 
+    while True:
+        input()
+
 
 def slave(
     devices_config: Dict[str, Any] = {},
@@ -120,6 +121,8 @@ def slave(
         response = rclient.call_async(request).result()
         logger.info(f"Slave resource added.")
 
+    while True:
+        input()
 
 if __name__ == "__main__":
     main()

@@ -225,6 +225,7 @@ class PyLabRobotCreator(DeviceClassCreator[T]):
             from unilabos.ros.nodes.base_device_node import ROS2DeviceNode
             ROS2DeviceNode.run_async_func(getattr(self.device_instance, "setup")).add_done_callback(lambda x: logger.debug(f"PyLabRobot设备实例 {self.device_instance} 设置完成"))
 
+
 class ProtocolNodeCreator(DeviceClassCreator[T]):
     """
     ProtocolNode设备类创建器
