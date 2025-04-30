@@ -60,6 +60,18 @@ def parse_args():
         help="配置文件路径，支持.py格式的Python配置文件",
     )
     parser.add_argument(
+        "--port",
+        type=int,
+        default=8002,
+        help="信息页web服务的启动端口",
+    )
+    parser.add_argument(
+        "--open_browser",
+        type=bool,
+        default=True,
+        help="是否在启动时打开信息页",
+    )
+    parser.add_argument(
         "--visual",
         choices=["rviz", "web","None"],
         default="rviz",

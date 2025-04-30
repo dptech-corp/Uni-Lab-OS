@@ -1,4 +1,5 @@
 import importlib
+import inspect
 import json
 from typing import Union
 import numpy as np
@@ -384,7 +385,11 @@ def resource_ulab_to_plr(resource: dict, plr_model=False) -> "ResourcePLR":
     d = resource_ulab_to_plr_inner(resource)
     """无法通过Resource进行反序列化，例如TipSpot必须内部序列化好，直接用TipSpot序列化会多参数，导致出错"""
     from pylabrobot.utils.object_parsing import find_subclass
-    resource_plr = find_subclass(d["type"], ResourcePLR).deserialize(d, allow_marshal=True)
+    sub_cls = find_subclass(d["type"], ResourcePLR)
+    spect = inspect.signature(sub_cls)
+    if "category" not in spect.parameters:
+        d.pop("category")
+    resource_plr = sub_cls.deserialize(d, allow_marshal=True)
     resource_plr.load_all_state(all_states)
     return resource_plr
 

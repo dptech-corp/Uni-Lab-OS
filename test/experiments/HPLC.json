@@ -5,7 +5,7 @@
             "name": "HPLC",
             "parent": null,
             "type": "device",
-            "class": "hplc",
+            "class": "hplc.agilent",
             "position": {
                 "x": 620.6111111111111,
                 "y": 171,

@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 from pathlib import Path
@@ -6,8 +7,9 @@ from typing import Any
 import yaml
 
 from unilabos.utils import logger
-from unilabos.ros.msgs.message_converter import msg_converter_manager
+from unilabos.ros.msgs.message_converter import msg_converter_manager, ros_action_to_json_schema
 from unilabos.utils.decorator import singleton
+from unilabos.utils.type_check import TypeEncoder
 
 DEFAULT_PATHS = [Path(__file__).absolute().parent]
 
@@ -129,6 +131,7 @@ class Registry:
                                     action_config["type"] = self._replace_type_with_class(
                                         action_config["type"], device_id, f"动作 {action_name}"
                                     )
+                                    action_config["schema"] = ros_action_to_json_schema(action_config["type"])
 
                 self.device_type_registry.update(data)
 
@@ -142,6 +145,16 @@ class Registry:
                 logger.debug(
                     f"[UniLab Registry] Device File-{i+1}/{len(files)} Not Valid YAML File: {file.absolute()}"
                 )
+
+    def obtain_registry_device_info(self):
+        devices = []
+        for device_id, device_info in self.device_type_registry.items():
+            msg = {
+                "id": device_id,
+                **device_info
+            }
+            devices.append(msg)
+        return devices
 
 
 # 全局单例实例

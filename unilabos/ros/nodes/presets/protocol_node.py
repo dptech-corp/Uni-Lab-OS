@@ -20,7 +20,7 @@ from unilabos.ros.msgs.message_converter import (
     convert_from_ros_msg,
     convert_from_ros_msg_with_mapping,
 )
-from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode, DeviceNodeResourceTracker
+from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode, DeviceNodeResourceTracker, ROS2DeviceNode
 
 
 class ROS2ProtocolNode(BaseROS2DeviceNode):
@@ -55,34 +55,39 @@ class ROS2ProtocolNode(BaseROS2DeviceNode):
         )
 
         # 初始化子设备
-        communication_node_id = None
+        self.communication_node_id_to_instance = {}
+
         for device_id, device_config in self.children.items():
             if device_config.get("type", "device") != "device":
                 self.lab_logger().debug(f"[Protocol Node] Skipping type {device_config['type']} {device_id} already existed, skipping.")
                 continue
-            d = self.initialize_device(device_id, device_config)
+            try:
+                d = self.initialize_device(device_id, device_config)
+            except Exception as ex:
+                self.lab_logger().error(f"[Protocol Node] Failed to initialize device {device_id}: {ex}")
+                d = None
             if d is None:
                 continue
 
             if "serial_" in device_id or "io_" in device_id:
-                communication_node_id = device_id
+                self.communication_node_id_to_instance[device_id] = d
                 continue
 
             # 设置硬件接口代理
-            if d and hasattr(d, "_hardware_interface"):
+            if d:
                 if (
-                    hasattr(d, d._hardware_interface["name"])
-                    and hasattr(d, d._hardware_interface["write"])
-                    and (d._hardware_interface["read"] is None or hasattr(d, d._hardware_interface["read"]))
+                    hasattr(d.driver_instance, d.ros_node_instance._hardware_interface["name"])
+                    and hasattr(d.driver_instance, d.ros_node_instance._hardware_interface["write"])
+                    and (d.ros_node_instance._hardware_interface["read"] is None or hasattr(d.driver_instance, d.ros_node_instance._hardware_interface["read"]))
                 ):
 
-                    name = getattr(d, d._hardware_interface["name"])
-                    read = d._hardware_interface.get("read", None)
-                    write = d._hardware_interface.get("write", None)
+                    name = getattr(d.driver_instance, d.ros_node_instance._hardware_interface["name"])
+                    read = d.ros_node_instance._hardware_interface.get("read", None)
+                    write = d.ros_node_instance._hardware_interface.get("write", None)
 
                     # 如果硬件接口是字符串，通过通信设备提供
-                    if isinstance(name, str) and communication_node_id in self.sub_devices:
-                        self._setup_hardware_proxy(d, self.sub_devices[communication_node_id], read, write)
+                    if isinstance(name, str) and name in self.sub_devices:
+                        self._setup_hardware_proxy(d, self.sub_devices[name], read, write)
 
     def _setup_protocol_names(self, protocol_type):
         # 处理协议类型
@@ -234,11 +239,11 @@ class ROS2ProtocolNode(BaseROS2DeviceNode):
 
     """还没有改过的部分"""
 
-    def _setup_hardware_proxy(self, device, communication_device, read_method, write_method):
+    def _setup_hardware_proxy(self, device: ROS2DeviceNode, communication_device: ROS2DeviceNode, read_method, write_method):
         """为设备设置硬件接口代理"""
-        extra_info = [getattr(device, info) for info in communication_device._hardware_interface.get("extra_info", [])]
-        write_func = getattr(communication_device, communication_device._hardware_interface["write"])
-        read_func = getattr(communication_device, communication_device._hardware_interface["read"])
+        extra_info = [getattr(device.driver_instance, info) for info in communication_device.ros_node_instance._hardware_interface.get("extra_info", [])]
+        write_func = getattr(communication_device.ros_node_instance, communication_device.ros_node_instance._hardware_interface["write"])
+        read_func = getattr(communication_device.ros_node_instance, communication_device.ros_node_instance._hardware_interface["read"])
 
         def _read():
             return read_func(*extra_info)
@@ -247,9 +252,9 @@ class ROS2ProtocolNode(BaseROS2DeviceNode):
             return write_func(*extra_info, command)
 
         if read_method:
-            setattr(device, read_method, _read)
+            setattr(device.driver_instance, read_method, _read)
         if write_method:
-            setattr(device, write_method, _write)
+            setattr(device.driver_instance, write_method, _write)
 
 
     async def _update_resources(self, goal, protocol_kwargs):

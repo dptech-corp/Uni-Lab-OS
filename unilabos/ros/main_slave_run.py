@@ -1,14 +1,17 @@
+import copy
+import json
 import os
 import traceback
 from typing import Optional, Dict, Any, List
 
 import rclpy
 from unilabos_msgs.msg import Resource  # type: ignore
-from unilabos_msgs.srv import ResourceAdd  # type: ignore
+from unilabos_msgs.srv import ResourceAdd, SerialCommand  # type: ignore
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from rclpy.timer import Timer
 
+from unilabos.registry.registry import lab_registry
 from unilabos.ros.initialize_device import initialize_device_from_dict
 from unilabos.ros.msgs.message_converter import (
     convert_to_ros_msg,
@@ -17,6 +20,7 @@ from unilabos.ros.nodes.presets.host_node import HostNode
 from unilabos.ros.x.rclpyx import run_event_loop_in_thread
 from unilabos.utils import logger
 from unilabos.config.config import BasicConfig
+from unilabos.utils.type_check import TypeEncoder
 
 
 def exit() -> None:
@@ -82,7 +86,7 @@ def slave(
     """从节点函数"""
     rclpy.init(args=args)
     rclpy.__executor = executor = MultiThreadedExecutor()
-
+    devices_config_copy = copy.deepcopy(devices_config)
     for device_id, device_config in devices_config.items():
         d = initialize_device_from_dict(device_id, device_config)
         if d is None:
@@ -98,17 +102,28 @@ def slave(
     n = Node(f"slaveMachine_{machine_name}", parameter_overrides=[])
     executor.add_node(n)
 
-    if BasicConfig.slave_no_host:
-        # 确保ResourceAdd存在
-        if "ResourceAdd" in globals():
-            rclient = n.create_client(ResourceAdd, "/resources/add")
-            rclient.wait_for_service()  # FIXME 可能一直等待，加一个参数
+    if not BasicConfig.slave_no_host:
+        sclient = n.create_client(SerialCommand, "/node_info_update")
+        sclient.wait_for_service()
 
-            request = ResourceAdd.Request()
-            request.resources = [convert_to_ros_msg(Resource, resource) for resource in resources_config]
-            response = rclient.call_async(request)
-        else:
-            print("Warning: ResourceAdd service not available")
+        request = SerialCommand.Request()
+        request.command = json.dumps({
+            "machine_name": machine_name,
+            "type": "slave",
+            "devices_config": devices_config_copy,
+            "registry_config": lab_registry.obtain_registry_device_info()
+        }, ensure_ascii=False, cls=TypeEncoder)
+        response = sclient.call_async(request).result()
+        logger.info(f"Slave node info updated.")
+
+        rclient = n.create_client(ResourceAdd, "/resources/add")
+        rclient.wait_for_service()  # FIXME 可能一直等待，加一个参数
+
+        request = ResourceAdd.Request()
+        request.resources = [convert_to_ros_msg(Resource, resource) for resource in resources_config]
+        response = rclient.call_async(request).result()
+        logger.info(f"Slave resource added.")
+
 
     run_event_loop_in_thread()
 

@@ -1,17 +1,20 @@
 import copy
+import json
 import threading
 import time
+import traceback
 import uuid
 from typing import Optional, Dict, Any, List, ClassVar, Set
 
 from action_msgs.msg import GoalStatus
 from unilabos_msgs.msg import Resource  # type: ignore
-from unilabos_msgs.srv import ResourceAdd, ResourceGet, ResourceDelete, ResourceUpdate, ResourceList  # type: ignore
+from unilabos_msgs.srv import ResourceAdd, ResourceGet, ResourceDelete, ResourceUpdate, ResourceList, SerialCommand  # type: ignore
 from rclpy.action import ActionClient, get_action_server_names_and_types_by_node
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.service import Service
 from unique_identifier_msgs.msg import UUID
 
+from unilabos.registry.registry import lab_registry
 from unilabos.resources.registry import add_schema
 from unilabos.ros.initialize_device import initialize_device_from_dict
 from unilabos.ros.msgs.message_converter import (
@@ -19,7 +22,8 @@ from unilabos.ros.msgs.message_converter import (
     get_ros_type_by_msgname,
     convert_from_ros_msg,
     convert_to_ros_msg,
-    msg_converter_manager, ros_action_to_json_schema,
+    msg_converter_manager,
+    ros_action_to_json_schema,
 )
 from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode, ROS2DeviceNode, DeviceNodeResourceTracker
 from unilabos.ros.nodes.presets.controller_node import ControllerNode
@@ -94,6 +98,7 @@ class HostNode(BaseROS2DeviceNode):
         # 创建设备、动作客户端和目标存储
         self.devices_names: Dict[str, str] = {}  # 存储设备名称和命名空间的映射
         self.devices_instances: Dict[str, ROS2DeviceNode] = {}  # 存储设备实例
+        self.device_machine_names: Dict[str, str] = {}  # 存储设备ID到机器名称的映射
         self._action_clients: Dict[str, ActionClient] = {}  # 用来存储多个ActionClient实例
         self._action_value_mappings: Dict[str, Dict] = (
             {}
@@ -105,10 +110,14 @@ class HostNode(BaseROS2DeviceNode):
         self._subscribed_topics = set()  # 用于跟踪已订阅的话题
 
         # 创建物料增删改查服务（非客户端）
-        self._init_resource_service()
+        self._init_host_service()
 
         self.device_status = {}  # 用来存储设备状态
         self.device_status_timestamps = {}  # 用来存储设备状态最后更新时间
+
+        from unilabos.app.mq import mqtt_client
+        for device_config in lab_registry.obtain_registry_device_info():
+            mqtt_client.publish_registry(device_config["id"], device_config)
 
         # 首次发现网络中的设备
         self._discover_devices()
@@ -116,7 +125,9 @@ class HostNode(BaseROS2DeviceNode):
         # 初始化所有本机设备节点，多一次过滤，防止重复初始化
         for device_id, device_config in devices_config.items():
             if device_config.get("type", "device") != "device":
-                self.lab_logger().debug(f"[Host Node] Skipping type {device_config['type']} {device_id} already existed, skipping.")
+                self.lab_logger().debug(
+                    f"[Host Node] Skipping type {device_config['type']} {device_id} already existed, skipping."
+                )
                 continue
             if device_id not in self.devices_names:
                 self.initialize_device(device_id, device_config)
@@ -132,10 +143,14 @@ class HostNode(BaseROS2DeviceNode):
                 controller_config["update_rate"] = update_rate
                 self.initialize_controller(controller_id, controller_config)
 
-        for bridge in self.bridges:
-            if hasattr(bridge, "resource_add"):
-                self.lab_logger().info("[Host Node-Resource] Adding resources to bridge.")
-                bridge.resource_add(add_schema(resources_config))
+        try:
+            for bridge in self.bridges:
+                if hasattr(bridge, "resource_add"):
+                    self.lab_logger().info("[Host Node-Resource] Adding resources to bridge.")
+                    bridge.resource_add(add_schema(resources_config))
+        except Exception as ex:
+            self.lab_logger().error("[Host Node-Resource] 添加物料出错！")
+            self.lab_logger().error(traceback.format_exc())
 
         # 创建定时器，定期发现设备
         self._discovery_timer = self.create_timer(
@@ -221,6 +236,7 @@ class HostNode(BaseROS2DeviceNode):
                     )
                     self.lab_logger().debug(f"[Host Node] Created ActionClient: {action_id}")
                     from unilabos.app.mq import mqtt_client
+
                     info_with_schema = ros_action_to_json_schema(action_type)
                     mqtt_client.publish_actions(action_id, info_with_schema)
                 except Exception as e:
@@ -245,6 +261,7 @@ class HostNode(BaseROS2DeviceNode):
             return
         # noinspection PyProtectedMember
         self.devices_names[device_id] = d._ros_node.namespace
+        self.device_machine_names[device_id] = "本地"
         self.devices_instances[device_id] = d
         # noinspection PyProtectedMember
         for action_name, action_value_mapping in d._ros_node._action_value_mappings.items():
@@ -254,6 +271,7 @@ class HostNode(BaseROS2DeviceNode):
                 self._action_clients[action_id] = ActionClient(self, action_type, action_id)
                 self.lab_logger().debug(f"[Host Node] Created ActionClient: {action_id}")
                 from unilabos.app.mq import mqtt_client
+
                 info_with_schema = ros_action_to_json_schema(action_type)
                 mqtt_client.publish_actions(action_id, info_with_schema)
             else:
@@ -468,7 +486,7 @@ class HostNode(BaseROS2DeviceNode):
 
     """Resource"""
 
-    def _init_resource_service(self):
+    def _init_host_service(self):
         self._resource_services: Dict[str, Service] = {
             "resource_add": self.create_service(
                 ResourceAdd, "/resources/add", self._resource_add_callback, callback_group=ReentrantCallbackGroup()
@@ -491,7 +509,40 @@ class HostNode(BaseROS2DeviceNode):
             "resource_list": self.create_service(
                 ResourceList, "/resources/list", self._resource_list_callback, callback_group=ReentrantCallbackGroup()
             ),
+            "node_info_update": self.create_service(
+                SerialCommand,
+                "/node_info_update",
+                self._node_info_update_callback,
+                callback_group=ReentrantCallbackGroup(),
+            ),
         }
+
+    def _node_info_update_callback(self, request, response):
+        """
+        更新节点信息回调
+        """
+        self.lab_logger().info(f"[Host Node] Node info update request received: {request}")
+        try:
+            from unilabos.app.mq import mqtt_client
+
+            info = json.loads(request.command)
+            machine_name = info["machine_name"]
+            devices_config = info["devices_config"]
+            registry_config = info["registry_config"]
+
+            # 更新设备机器名称映射
+            for device_id in devices_config.keys():
+                self.device_machine_names[device_id] = machine_name
+                self.lab_logger().debug(f"[Host Node] Updated machine name for device {device_id}: {machine_name}")
+
+            for device_config in registry_config:
+                mqtt_client.publish_registry(device_config["id"], device_config)
+            self.lab_logger().info(f"[Host Node] Node info update: {info}")
+            response.response = "OK"
+        except Exception as e:
+            self.lab_logger().error(f"[Host Node] Error updating node info: {str(e)}")
+            response.response = "ERROR"
+        return response
 
     def _resource_add_callback(self, request, response):
         """

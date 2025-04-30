@@ -7,7 +7,7 @@ def generate_pump_protocol(
     from_vessel: str, 
     to_vessel: str, 
     volume: float, 
-    flowrate: float = 500.0,
+    flowrate: float = 0.5,
     transfer_flowrate: float = 0, 
 ) -> list[dict]:
     """
@@ -141,11 +141,11 @@ def generate_pump_protocol_with_rinsing(
     time: float = 0,
     viscous: bool = False,
     rinsing_solvent: str = "air",
-    rinsing_volume: float = 5000.0,
+    rinsing_volume: float = 5.0,
     rinsing_repeats: int = 2,
     solid: bool = False,
-    flowrate: float = 2500.0,
-    transfer_flowrate: float = 500.0, 
+    flowrate: float = 2.5,
+    transfer_flowrate: float = 0.5, 
 ) -> list[dict]:
     """
     Generates a pump protocol for transferring a specified volume between vessels, including rinsing steps with a chosen solvent. This function constructs a sequence of pump actions based on the provided parameters and the shortest path in a directed graph.
@@ -159,11 +159,11 @@ def generate_pump_protocol_with_rinsing(
         time (float, optional): Time over which to perform the transfer (default is 0).
         viscous (bool, optional): Indicates if the fluid is viscous (default is False).
         rinsing_solvent (str, optional): The solvent to use for rinsing (default is "air").
-        rinsing_volume (float, optional): The volume of rinsing solvent to use (default is 5000.0).
+        rinsing_volume (float, optional): The volume of rinsing solvent to use (default is 5.0).
         rinsing_repeats (int, optional): The number of times to repeat rinsing (default is 2).
         solid (bool, optional): Indicates if the transfer involves a solid (default is False).
-        flowrate (float, optional): The flow rate for the transfer (default is 2500.0). 最终注入容器B时的流速
-        transfer_flowrate (float, optional): The flow rate for the transfer action (default is 500.0). 泵骨架中转移流速（若不指定，默认与注入流速相同）
+        flowrate (float, optional): The flow rate for the transfer (default is 2.5). 最终注入容器B时的流速
+        transfer_flowrate (float, optional): The flow rate for the transfer action (default is 0.5). 泵骨架中转移流速（若不指定，默认与注入流速相同）
     
     Returns:
         list[dict]: A sequence of pump actions to be executed for the transfer and rinsing process. 泵操作的动作序列.
@@ -172,7 +172,7 @@ def generate_pump_protocol_with_rinsing(
         AssertionError: If the number of rinsing solvents does not match the number of rinsing repeats.
     
     Examples:
-        pump_protocol = generate_pump_protocol_with_rinsing(G, "vessel_A", "vessel_B", 100.0, rinsing_solvent="water")
+        pump_protocol = generate_pump_protocol_with_rinsing(G, "vessel_A", "vessel_B", 0.1, rinsing_solvent="water")
     """
     air_vessel = "flask_air"
     waste_vessel = f"waste_workup"

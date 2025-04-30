@@ -24,8 +24,8 @@ def generate_evaporate_protocol(
     
     # 生成泵操作的动作序列
     pump_action_sequence = []
-    reactor_volume = 500000.0
-    transfer_flowrate = flowrate = 2500.0
+    reactor_volume = 500.0
+    transfer_flowrate = flowrate = 2.5
     
     # 开启冷凝器
     pump_action_sequence.append({

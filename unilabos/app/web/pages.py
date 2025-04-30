@@ -92,19 +92,7 @@ def setup_web_pages(router: APIRouter) -> None:
 
             # 获取已加载的设备
             if lab_registry:
-                # 设备类型
-                for device_id, device_info in lab_registry.device_type_registry.items():
-                    msg = {
-                            "id": device_id,
-                            "name": device_info.get("name", "未命名"),
-                            "file_path": device_info.get("file_path", ""),
-                            "class_json": json.dumps(
-                                device_info.get("class", {}), indent=4, ensure_ascii=False, cls=TypeEncoder
-                            ),
-                        }
-                    mqtt_client.publish_registry(device_id, device_info)
-                    devices.append(msg)
-
+                devices = json.loads(json.dumps(lab_registry.obtain_registry_device_info(), ensure_ascii=False, cls=TypeEncoder))
                 # 资源类型
                 for resource_id, resource_info in lab_registry.resource_type_registry.items():
                     resources.append(
