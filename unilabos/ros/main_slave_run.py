@@ -1,10 +1,12 @@
 import copy
 import json
 import os
+import threading
 import traceback
 from typing import Optional, Dict, Any, List
 
 import rclpy
+from rclpy.callback_groups import ReentrantCallbackGroup
 from unilabos_msgs.msg import Resource  # type: ignore
 from unilabos_msgs.srv import ResourceAdd, SerialCommand  # type: ignore
 from rclpy.executors import MultiThreadedExecutor
@@ -17,7 +19,6 @@ from unilabos.ros.msgs.message_converter import (
     convert_to_ros_msg,
 )
 from unilabos.ros.nodes.presets.host_node import HostNode
-from unilabos.ros.x.rclpyx import run_event_loop_in_thread
 from unilabos.utils import logger
 from unilabos.config.config import BasicConfig
 from unilabos.utils.type_check import TypeEncoder
@@ -63,16 +64,8 @@ def main(
         discovery_interval,
     )
 
-    executor.add_node(host_node)
-    # run_event_loop_in_thread()
-
-    try:
-        executor.spin()
-    except Exception as e:
-        logger.error(traceback.format_exc())
-        print(f"Exception caught: {e}")
-    finally:
-        exit()
+    thread = threading.Thread(target=executor.spin, daemon=True, name="host_executor_thread")
+    thread.start()
 
 
 def slave(
@@ -102,6 +95,9 @@ def slave(
     n = Node(f"slaveMachine_{machine_name}", parameter_overrides=[])
     executor.add_node(n)
 
+    thread = threading.Thread(target=executor.spin, daemon=True, name="slave_executor_thread")
+    thread.start()
+
     if not BasicConfig.slave_no_host:
         sclient = n.create_client(SerialCommand, "/node_info_update")
         sclient.wait_for_service()
@@ -123,16 +119,6 @@ def slave(
         request.resources = [convert_to_ros_msg(Resource, resource) for resource in resources_config]
         response = rclient.call_async(request).result()
         logger.info(f"Slave resource added.")
-
-
-    run_event_loop_in_thread()
-
-    try:
-        executor.spin()
-    except Exception as e:
-        print(f"Exception caught: {e}")
-    finally:
-        exit()
 
 
 if __name__ == "__main__":
