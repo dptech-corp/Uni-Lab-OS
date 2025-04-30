@@ -68,8 +68,8 @@
             "type": "plate",
             "class": "opentrons_96_filtertiprack_1000ul",
             "position": {
-                "x": 132.5,
-                "y": 271.5,
+                "x": 0,
+                "y": 0,
                 "z": 69
             },
             "config": {
@@ -99,7 +99,7 @@
             "position": {
                 "x": 10.87,
                 "y": 70.77,
-                "z": 3.03
+                "z": 10
             },
             "config": {
                 "type": "TipSpot",

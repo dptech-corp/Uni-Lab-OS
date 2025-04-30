@@ -8,4 +8,8 @@ resource.mesh_manager:
     module: unilabos.devices.ros_dev.resource_mesh_manager:ResourceMeshManager
     type: ros2
 
+lh_joint_publisher:
+  class:
+    module: unilabos.devices.ros_dev.liquid_handler_joint_publisher:LiquidHandlerJointPublisher
+    type: ros2
 
