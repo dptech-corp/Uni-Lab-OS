@@ -19,8 +19,8 @@
         },
         {
             "id": "BottlesRack3",
-            "name": "Revvity上样盘3",
-            "parent": "Revvity",
+            "name": "上样盘3",
+            "parent": "HPLC",
             "type": "plate",
             "class": null,
             "position": {
