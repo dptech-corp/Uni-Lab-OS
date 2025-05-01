@@ -49,9 +49,11 @@ def main(
     discovery_interval: float = 5.0,
 ) -> None:
     """主函数"""
-    rclpy.init(args=args)
-    rclpy.__executor = executor = MultiThreadedExecutor()
-
+    if not rclpy.ok():
+        rclpy.init(args=args)
+    executor = rclpy.__executor
+    if not executor:
+        executor = rclpy.__executor = MultiThreadedExecutor()
     # 创建主机节点
     host_node = HostNode(
         "host_node",
@@ -79,8 +81,11 @@ def slave(
     args: List[str] = ["--log-level", "debug"],
 ) -> None:
     """从节点函数"""
-    rclpy.init(args=args)
-    rclpy.__executor = executor = MultiThreadedExecutor()
+    if not rclpy.ok():
+        rclpy.init(args=args)
+    executor = rclpy.__executor
+    if not executor:
+        executor = rclpy.__executor = MultiThreadedExecutor()
     devices_config_copy = copy.deepcopy(devices_config)
     for device_id, device_config in devices_config.items():
         d = initialize_device_from_dict(device_id, device_config)

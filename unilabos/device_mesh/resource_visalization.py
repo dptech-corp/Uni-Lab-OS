@@ -52,10 +52,6 @@ class ResourceVisualization:
                 device_class = node['class']
                 # 检查设备类型是否在注册表中
                 if device_class not in registry.device_type_registry.keys():
-                    print("="*20)
-                    print(device_class)
-                    print(registry.device_type_registry.keys())
-                    print("="*20)
                     raise ValueError(f"设备类型 {device_class} 未在注册表中注册")
             elif node['type'] in self.resource_type:
                 # print(registry.resource_type_registry)

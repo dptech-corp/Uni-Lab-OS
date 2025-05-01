@@ -22,7 +22,7 @@ from rclpy.action.server import ServerGoalHandle
 from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode,DeviceNodeResourceTracker
 
 class ResourceMeshManager(BaseROS2DeviceNode):
-    def __init__(self, resource_model: dict, resource_config: list,resource_tracker, device_id: str = "resource_mesh_manager"):
+    def __init__(self, resource_model: dict, resource_config: list,resource_tracker, device_id: str = "resource_mesh_manager", rate=50):
         """初始化资源网格管理器节点
         
         Args:
@@ -47,7 +47,8 @@ class ResourceMeshManager(BaseROS2DeviceNode):
         self.tf_broadcaster         = TransformBroadcaster(self)
         self.tf_buffer              = Buffer()
         self.tf_listener            = TransformListener(self.tf_buffer, self)
-
+        self.rate                   = rate
+        self.zero_count             = 0
 
         self.old_resource_pose      = {}
         self.__planning_scene       = None
@@ -101,8 +102,8 @@ class ResourceMeshManager(BaseROS2DeviceNode):
         )
 
         self.resource_mesh_setup()
-        self.create_timer(0.02, self.publish_resource_tf)
-        self.create_timer(1, self.check_resource_pose_changes)
+        self.create_timer(1/self.rate, self.publish_resource_tf)
+        self.create_timer(1/self.rate, self.check_resource_pose_changes)
         
 
 
@@ -116,6 +117,7 @@ class ResourceMeshManager(BaseROS2DeviceNode):
         # if tf_ready:
         if self._get_planning_scene_service.service_is_ready() and self._apply_planning_scene_service.service_is_ready() and tf_ready:
             self.move_group_ready = True
+            self.publish_resource_tf()
             self.add_resource_collision_meshes()
             
         # time.sleep(1)
@@ -246,7 +248,7 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                 transform = self.tf_buffer.lookup_transform(
                     "world",
                     resource_id,
-                    rclpy.time.Time(),
+                    rclpy.time.Time(seconds=0),
                     rclpy.duration.Duration(seconds=5)
                 )
                 
@@ -280,13 +282,24 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                         
             except Exception as e:
                 self.get_logger().warning(f"获取资源 {resource_id} 的世界坐标变换失败: {e}")
-                
-        changed_poses_msg = String()
-        changed_poses_msg.data = json.dumps(changed_poses)
-        self.resource_pose_publisher.publish(changed_poses_msg)
+        
+        if changed_poses != {}:
+            self.zero_count = 0
+            changed_poses_msg = String()
+            changed_poses_msg.data = json.dumps(changed_poses)
+            self.resource_pose_publisher.publish(changed_poses_msg)
+        else:
+            if self.zero_count > self.rate:
+                self.zero_count = 0
+                changed_poses_msg = String()
+                changed_poses_msg.data = json.dumps(changed_poses)
+                self.resource_pose_publisher.publish(changed_poses_msg)
+            self.zero_count += 1
+            
+        
         
     
-    def _is_pose_equal(self, pose1, pose2, tolerance=1e-5):
+    def _is_pose_equal(self, pose1, pose2, tolerance=1e-7):
         """
         比较两个位姿是否相等（考虑浮点数精度）
         
@@ -328,7 +341,7 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                 transform = self.tf_buffer.lookup_transform(
                     target_parent,
                     resource_id,
-                    rclpy.time.Time()
+                    rclpy.time.Time(seconds=0)
                 )
                 
                 # 提取转换中的位置和旋转信息
@@ -350,7 +363,7 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                     "position": position,
                     "rotation": rotation
                 }
-
+                
                 self.attach_collision_object(id=resource_id,link_name=target_parent)
 
             self.publish_resource_tf()
@@ -362,48 +375,6 @@ class ResourceMeshManager(BaseROS2DeviceNode):
         goal_handle.succeed()
         return SendCmd.Result(success=True)
 
-    def publish_resource_tf(self):
-        """
-        发布资源之间的TF关系
-        
-        遍历self.resource_tf_dict中的每个元素，根据key，parent，以及position和rotation，
-        发布key和parent之间的tf关系
-        """
-
-        transforms = []
-        
-        # 遍历资源TF字典
-        resource_tf_dict = copy.deepcopy(self.resource_tf_dict)
-        for resource_id, tf_info in resource_tf_dict.items():
-            parent = tf_info['parent']
-            position = tf_info['position']
-            rotation = tf_info['rotation']
-            
-            # 创建静态变换消息
-            
-            transform = TransformStamped()
-            transform.header.stamp = self.get_clock().now().to_msg()
-            transform.header.frame_id = parent
-            transform.child_frame_id = resource_id
-            
-            # 设置位置
-            transform.transform.translation.x = float(position['x'])
-            transform.transform.translation.y = float(position['y'])
-            transform.transform.translation.z = float(position['z'])
-            
-            # 设置旋转
-            transform.transform.rotation.x = rotation['x']
-            transform.transform.rotation.y = rotation['y']
-            transform.transform.rotation.z = rotation['z']
-            transform.transform.rotation.w = rotation['w']
-            
-            transforms.append(transform)
-            
-        # 一次性发布所有静态变换
-        if transforms:
-            self.tf_broadcaster.sendTransform(transforms)
-
-            # self.get_logger().info(f'已发布 {len(transforms)} 个资源TF关系')
 
     def add_resource_collision_meshes(self):
         """

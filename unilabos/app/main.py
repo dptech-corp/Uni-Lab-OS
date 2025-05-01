@@ -10,6 +10,9 @@ import yaml
 from copy import deepcopy
 import threading
 
+import rclpy
+from unilabos.ros.nodes.resource_tracker import DeviceNodeResourceTracker
+
 # 首先添加项目根目录到路径
 current_dir = os.path.dirname(os.path.abspath(__file__))
 ilabos_dir = os.path.dirname(os.path.dirname(current_dir))
@@ -19,6 +22,10 @@ if ilabos_dir not in sys.path:
 from unilabos.config.config import load_config, BasicConfig, _update_config_from_env
 from unilabos.utils.banner_print import print_status, print_unilab_banner
 from unilabos.device_mesh.resource_visalization import ResourceVisualization
+from unilabos.ros.nodes.presets.joint_republisher import JointRepublisher
+from unilabos.ros.nodes.presets.resource_mesh_manager import ResourceMeshManager
+from rclpy.executors import MultiThreadedExecutor
+
 
 def parse_args():
     """解析命令行参数"""
@@ -184,8 +191,29 @@ def main():
         elif args_dict["visual"] == "web":
             enable_rviz=False
         resource_visualization = ResourceVisualization(devices_and_resources, args_dict["resources_config"] ,enable_rviz=enable_rviz)
-        devices_config_add = add_resource_mesh_manager_node(resource_visualization.resource_model, args_dict["resources_config"])
-        args_dict["devices_config"] = {**args_dict["devices_config"], **devices_config_add}
+
+        # 如果没有初始化，则初始化ros，并创建一个多线程执行器
+        # 在main_slave_run.py中也会初始化ros，并创建一个多线程执行器
+        # 所以这里需要判断是否已经初始化，如果已经初始化，则不重复初始化    
+        if not rclpy.ok():
+            rclpy.init(args = ["--log-level", "debug"],)
+        executor = rclpy.__executor
+        if not executor:
+            executor = rclpy.__executor = MultiThreadedExecutor()
+
+        resource_mesh_manager = ResourceMeshManager(
+            resource_visualization.resource_model,
+            args_dict["resources_config"],
+            resource_tracker= DeviceNodeResourceTracker(),
+            device_id = 'resource_mesh_manager',
+        )
+        joint_republisher = JointRepublisher(
+            'joint_republisher',
+            DeviceNodeResourceTracker()
+        )
+
+        rclpy.__executor.add_node(resource_mesh_manager)
+        rclpy.__executor.add_node(joint_republisher)
         start_backend(**args_dict)
         server_thread = threading.Thread(target=start_server)
         server_thread.start()
@@ -197,47 +225,6 @@ def main():
         start_backend(**args_dict)
         start_server()
 
-def add_resource_mesh_manager_node(
-                                    resource_model, 
-                                    resource_config ,
-                                    mesh_manager_device_id = "resource_mesh_manager",
-                                    joint_publisher_device_id = "joint_republisher"):
-    mesh_manager_config ={
-            "id": mesh_manager_device_id,
-            "name": mesh_manager_device_id,
-            "children": [],
-            "parent": None,
-            "type": "device",
-            "class": "resource.mesh_manager",
-            "position": {
-                "x": 620.6111111111111,
-                "y": 171,
-                "z": 0
-            },
-            "config": {
-                "resource_model": resource_model,
-                "resource_config": resource_config
-            },
-            "data": {
-            }
-        }
-    joint_publisher_config = {
-        "id": joint_publisher_device_id,
-        "name": joint_publisher_device_id,
-        "children": [],
-        "parent": None,
-        "type": "device",
-        "class": "joint_republisher",
-        "position": {
-            "x": 620.6111111111111,
-            "y": 171,
-            "z": 0
-        },
-        "config": {},
-        "data": {}
-    }
-    return {joint_publisher_config["id"]: joint_publisher_config,mesh_manager_config["id"]: mesh_manager_config}
-    # return {joint_publisher_config["id"]: joint_publisher_config}
 
 if __name__ == "__main__":
     main()

@@ -1,13 +1,3 @@
-joint_republisher:
-  class:
-    module: unilabos.devices.ros_dev.joint_republisher:JointRepublisher
-    type: ros2
-
-resource.mesh_manager:
-  class:
-    module: unilabos.devices.ros_dev.resource_mesh_manager:ResourceMeshManager
-    type: ros2
-
 lh_joint_publisher:
   class:
     module: unilabos.devices.ros_dev.liquid_handler_joint_publisher:LiquidHandlerJointPublisher
