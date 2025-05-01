@@ -6,9 +6,11 @@ from launch_ros.actions import Node as nd
 import xacro
 from lxml import etree
 
+from unilabos.registry.registry import lab_registry
+
 
 class ResourceVisualization:
-    def __init__(self, device: dict, resource: dict, registry: dict, enable_rviz: bool = True):
+    def __init__(self, device: dict, resource: dict, enable_rviz: bool = True):
         """初始化资源可视化类
         
         该类用于将设备和资源的3D模型可视化展示。通过解析设备和资源的配置信息,
@@ -24,9 +26,10 @@ class ResourceVisualization:
         self.launch_description = LaunchDescription()
         self.resource_dict = resource
         self.resource_model = {}
-        self.resource_type = ['plate', 'container']
+        self.resource_type = ['deck', 'plate', 'container']
         self.mesh_path = Path(__file__).parent.absolute()
         self.enable_rviz = enable_rviz
+        registry = lab_registry
 
         self.srdf_str = '''
         <?xml version="1.0" encoding="UTF-8"?>

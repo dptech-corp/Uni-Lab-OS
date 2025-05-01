@@ -35,7 +35,8 @@ class MQTTClient:
         self.client.on_disconnect = self._on_disconnect
 
     def _on_log(self, client, userdata, level, buf):
-        logger.info(f"[MQTT] log: {buf}")
+        # logger.info(f"[MQTT] log: {buf}")
+        pass
 
     def _on_connect(self, client, userdata, flags, rc, properties=None):
         logger.info("[MQTT] Connected with result code " + str(rc))

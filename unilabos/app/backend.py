@@ -29,7 +29,9 @@ def start_backend(
     
     backend_thread = threading.Thread(
         target=main if not without_host else slave,
-        args=(devices_config, resources_config, graph, controllers_config, bridges)
+        args=(devices_config, resources_config, graph, controllers_config, bridges),
+        name="backend_thread",
+        daemon=True,
     )
     backend_thread.start()
     logger.info(f"Backend {backend} started.")

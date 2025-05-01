@@ -2,6 +2,7 @@ import copy
 import json
 import os
 import threading
+import time
 from typing import Optional, Dict, Any, List
 
 import rclpy
@@ -66,7 +67,7 @@ def main(
     thread.start()
 
     while True:
-        input()
+        time.sleep(1)
 
 
 def slave(
@@ -120,7 +121,7 @@ def slave(
         logger.info(f"Slave resource added.")
 
     while True:
-        input()
+        time.sleep(1)
 
 if __name__ == "__main__":
     main()

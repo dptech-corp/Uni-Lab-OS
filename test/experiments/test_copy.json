@@ -37,7 +37,7 @@
                 "teaching_carrier"
             ],
             "parent": "PLR_STATION",
-            "type": "device",
+            "type": "deck",
             "class": "OTDeck",
             "position": {
                 "x": 0,

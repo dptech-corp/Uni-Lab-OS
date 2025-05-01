@@ -1,5 +1,0 @@
-OTDeck:
-  description: Opentrons deck 3d model
-  model:
-    type: device
-    mesh: opentrons_liquid_handler

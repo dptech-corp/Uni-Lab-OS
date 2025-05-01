@@ -1,8 +1,11 @@
 import argparse
+import asyncio
 import os
 import signal
 import sys
 import json
+import time
+
 import yaml
 from copy import deepcopy
 import threading
@@ -125,7 +128,7 @@ def main():
     print_unilab_banner(args_dict)
 
     # 注册表
-    registry_dict = build_registry(args_dict["registry_path"])
+    build_registry(args_dict["registry_path"])
 
 
     if args_dict["graph"] is not None:
@@ -180,14 +183,17 @@ def main():
             enable_rviz=True
         elif args_dict["visual"] == "web":
             enable_rviz=False
-        resource_visualization = ResourceVisualization(devices_and_resources, args_dict["resources_config"],registry_dict,enable_rviz=enable_rviz)
+        resource_visualization = ResourceVisualization(devices_and_resources, args_dict["resources_config"] ,enable_rviz=enable_rviz)
         devices_config_add = add_resource_mesh_manager_node(resource_visualization.resource_model, args_dict["resources_config"])
         args_dict["devices_config"] = {**args_dict["devices_config"], **devices_config_add}
-    
-        server_thread = threading.Thread(target=start_server)
-        server_thread.start()
         start_backend(**args_dict)
+
+        from unilabos.ros.nodes.base_device_node import ROS2DeviceNode
+        while ROS2DeviceNode.get_loop() is None:
+            time.sleep(0.1)
+        asyncio.set_event_loop(ROS2DeviceNode.get_loop())
         resource_visualization.start()
+        start_server()
     else:
         start_backend(**args_dict)
         start_server()
