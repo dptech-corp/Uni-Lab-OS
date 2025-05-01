@@ -168,11 +168,8 @@ class MQTTClient:
         if self.mqtt_disable:
             return
         address = f"labs/{MQConfig.lab_id}/actions/"
-        action_type_name = action_info["title"]
-        action_info["title"] = action_id
-        action_data = json.dumps({action_type_name: action_info}, ensure_ascii=False)
-        self.client.publish(address, action_data, qos=2)
-        logger.debug(f"Action data published: address: {address}, {action_data}")
+        self.client.publish(address, json.dumps(action_info), qos=2)
+        logger.debug(f"Action data published: address: {address}, {action_id}, {action_info}")
 
 
 mqtt_client = MQTTClient()

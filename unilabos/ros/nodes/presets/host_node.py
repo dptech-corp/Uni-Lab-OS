@@ -27,6 +27,7 @@ from unilabos.ros.msgs.message_converter import (
 )
 from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode, ROS2DeviceNode, DeviceNodeResourceTracker
 from unilabos.ros.nodes.presets.controller_node import ControllerNode
+from unilabos.utils.type_check import TypeEncoder
 
 
 class HostNode(BaseROS2DeviceNode):
@@ -98,7 +99,7 @@ class HostNode(BaseROS2DeviceNode):
         # 创建设备、动作客户端和目标存储
         self.devices_names: Dict[str, str] = {}  # 存储设备名称和命名空间的映射
         self.devices_instances: Dict[str, ROS2DeviceNode] = {}  # 存储设备实例
-        self.device_machine_names: Dict[str, str] = {}  # 存储设备ID到机器名称的映射
+        self.device_machine_names: Dict[str, str] = {device_id: "本地", }  # 存储设备ID到机器名称的映射
         self._action_clients: Dict[str, ActionClient] = {}  # 用来存储多个ActionClient实例
         self._action_value_mappings: Dict[str, Dict] = (
             {}
@@ -160,6 +161,13 @@ class HostNode(BaseROS2DeviceNode):
         self.lab_logger().info("[Host Node] Host node initialized.")
         HostNode._ready_event.set()
 
+    def _send_re_register(self, sclient):
+        sclient.wait_for_service()
+        request = SerialCommand.Request()
+        request.command = ""
+        future = sclient.call_async(request)
+        response = future.result()
+
     def _discover_devices(self) -> None:
         """
         发现网络中的设备
@@ -176,23 +184,37 @@ class HostNode(BaseROS2DeviceNode):
         current_devices = set()
 
         for device_id, namespace in nodes_and_names:
-            if not namespace.startswith("/devices"):
+            if not namespace.startswith("/devices/"):
                 continue
-
+            edge_device_id = namespace[9:]
             # 将设备添加到当前设备集合
-            device_key = f"{namespace}/{device_id}"
+            device_key = f"{namespace}/{edge_device_id}"  # namespace已经包含device_id了，这里复写一遍
             current_devices.add(device_key)
 
             # 如果是新设备，记录并创建ActionClient
-            if device_id not in self.devices_names:
+            if edge_device_id not in self.devices_names:
                 self.lab_logger().info(f"[Host Node] Discovered new device: {device_key}")
-                self.devices_names[device_id] = namespace
+                self.devices_names[edge_device_id] = namespace
                 self._create_action_clients_for_device(device_id, namespace)
                 self._online_devices.add(device_key)
+                sclient = self.create_client(SerialCommand, f"/srv{namespace}/query_host_name")
+                threading.Thread(
+                    target=self._send_re_register,
+                    args=(sclient,),
+                    daemon=True,
+                    name=f"ROSDevice{self.device_id}_query_host_name_{namespace}"
+                ).start()
             elif device_key not in self._online_devices:
                 # 设备重新上线
                 self.lab_logger().info(f"[Host Node] Device reconnected: {device_key}")
                 self._online_devices.add(device_key)
+                sclient = self.create_client(SerialCommand, f"/srv{namespace}/query_host_name")
+                threading.Thread(
+                    target=self._send_re_register,
+                    args=(sclient,),
+                    daemon=True,
+                    name=f"ROSDevice{self.device_id}_query_host_name_{namespace}"
+                ).start()
 
         # 检测离线设备
         offline_devices = self._online_devices - current_devices
@@ -234,17 +256,22 @@ class HostNode(BaseROS2DeviceNode):
                     self._action_clients[action_id] = ActionClient(
                         self, action_type, action_id, callback_group=self.callback_group
                     )
-                    self.lab_logger().debug(f"[Host Node] Created ActionClient: {action_id}")
+                    self.lab_logger().debug(f"[Host Node] Created ActionClient (Discovery): {action_id}")
+                    action_name = action_id[len(namespace) + 1:]
+                    edge_device_id = namespace[9:]
                     from unilabos.app.mq import mqtt_client
-
                     info_with_schema = ros_action_to_json_schema(action_type)
-                    mqtt_client.publish_actions(action_id, info_with_schema)
+                    mqtt_client.publish_actions(action_name, {
+                        "device_id": edge_device_id,
+                        "action_name": action_name,
+                        "schema": info_with_schema,
+                    })
                 except Exception as e:
                     self.lab_logger().error(f"[Host Node] Failed to create ActionClient for {action_id}: {str(e)}")
 
     def initialize_device(self, device_id: str, device_config: Dict[str, Any]) -> None:
         """
-        根据配置初始化设备
+        根据配置初始化设备，
 
         此函数根据提供的设备配置动态导入适当的设备类并创建其实例。
         同时为设备的动作值映射设置动作客户端。
@@ -260,7 +287,7 @@ class HostNode(BaseROS2DeviceNode):
         if d is None:
             return
         # noinspection PyProtectedMember
-        self.devices_names[device_id] = d._ros_node.namespace
+        self.devices_names[device_id] = d._ros_node.namespace  # 这里不涉及二级device_id
         self.device_machine_names[device_id] = "本地"
         self.devices_instances[device_id] = d
         # noinspection PyProtectedMember
@@ -269,14 +296,17 @@ class HostNode(BaseROS2DeviceNode):
             if action_id not in self._action_clients:
                 action_type = action_value_mapping["type"]
                 self._action_clients[action_id] = ActionClient(self, action_type, action_id)
-                self.lab_logger().debug(f"[Host Node] Created ActionClient: {action_id}")
+                self.lab_logger().debug(f"[Host Node] Created ActionClient (Local): {action_id}")  # 子设备再创建用的是Discover发现的
                 from unilabos.app.mq import mqtt_client
-
                 info_with_schema = ros_action_to_json_schema(action_type)
-                mqtt_client.publish_actions(action_id, info_with_schema)
+                mqtt_client.publish_actions(action_name, {
+                    "device_id": device_id,
+                    "action_name": action_name,
+                    "schema": info_with_schema,
+                })
             else:
                 self.lab_logger().warning(f"[Host Node] ActionClient {action_id} already exists.")
-        device_key = f"{self.devices_names[device_id]}/{device_id}"
+        device_key = f"{self.devices_names[device_id]}/{device_id}"  # 这里不涉及二级device_id
         # 添加到在线设备列表
         self._online_devices.add(device_key)
 
@@ -298,8 +328,8 @@ class HostNode(BaseROS2DeviceNode):
 
                 # 解析设备名和属性名
                 parts = topic.split("/")
-                if len(parts) >= 4:
-                    device_id = parts[-2]
+                if len(parts) >= 4:  # 可能有ProtocolNode，创建更长的设备
+                    device_id = "/".join(parts[2:-1])
                     property_name = parts[-1]
 
                     # 初始化设备状态字典
@@ -526,21 +556,19 @@ class HostNode(BaseROS2DeviceNode):
             from unilabos.app.mq import mqtt_client
 
             info = json.loads(request.command)
-            machine_name = info["machine_name"]
-            devices_config = info["devices_config"]
-            registry_config = info["registry_config"]
-
-            # 更新设备机器名称映射
-            for device_id in devices_config.keys():
-                self.device_machine_names[device_id] = machine_name
-                self.lab_logger().debug(f"[Host Node] Updated machine name for device {device_id}: {machine_name}")
-
-            for device_config in registry_config:
-                mqtt_client.publish_registry(device_config["id"], device_config)
-            self.lab_logger().info(f"[Host Node] Node info update: {info}")
+            if "SYNC_SLAVE_NODE_INFO" in info:
+                info = info["SYNC_SLAVE_NODE_INFO"]
+                machine_name = info["machine_name"]
+                edge_device_id = info["edge_device_id"]
+                self.device_machine_names[edge_device_id] = machine_name
+            else:
+                registry_config = info["registry_config"]
+                for device_config in registry_config:
+                    mqtt_client.publish_registry(device_config["id"], device_config)
+            self.lab_logger().debug(f"[Host Node] Node info update: {info}")
             response.response = "OK"
         except Exception as e:
-            self.lab_logger().error(f"[Host Node] Error updating node info: {str(e)}")
+            self.lab_logger().error(f"[Host Node] Error updating node info: {e.args}")
             response.response = "ERROR"
         return response
 

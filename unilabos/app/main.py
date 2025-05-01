@@ -13,7 +13,7 @@ ilabos_dir = os.path.dirname(os.path.dirname(current_dir))
 if ilabos_dir not in sys.path:
     sys.path.append(ilabos_dir)
 
-from unilabos.config.config import load_config, BasicConfig
+from unilabos.config.config import load_config, BasicConfig, _update_config_from_env
 from unilabos.utils.banner_print import print_status, print_unilab_banner
 from unilabos.device_mesh.resource_visalization import ResourceVisualization
 
@@ -86,8 +86,10 @@ def main():
     args = parse_args()
     args_dict = vars(args)
 
-    # 加载配置文件 - 这里保持最先加载配置的逻辑
+    # 加载配置文件，优先加载config，然后从env读取
     config_path = args_dict.get("config")
+    if config_path is None:
+        config_path = os.environ.get("UNILABOS.BASICCONFIG.CONFIG_PATH", None)
     if config_path:
         if not os.path.exists(config_path):
             print_status(f"配置文件 {config_path} 不存在", "error")
@@ -102,6 +104,9 @@ def main():
     # 设置BasicConfig参数
     BasicConfig.is_host_mode = not args_dict.get("without_host", False)
     BasicConfig.slave_no_host = args_dict.get("slave_no_host", False)
+    machine_name = os.popen("hostname").read().strip()
+    machine_name = "".join([c if c.isalnum() or c == "_" else "_" for c in machine_name])
+    BasicConfig.machine_name = machine_name
 
     from unilabos.resources.graphio import (
         read_node_link_json,

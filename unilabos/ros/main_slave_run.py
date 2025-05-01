@@ -1,7 +1,7 @@
 import copy
 import json
 import os
-import traceback
+import threading
 from typing import Optional, Dict, Any, List
 
 import rclpy
@@ -17,7 +17,6 @@ from unilabos.ros.msgs.message_converter import (
     convert_to_ros_msg,
 )
 from unilabos.ros.nodes.presets.host_node import HostNode
-from unilabos.ros.x.rclpyx import run_event_loop_in_thread
 from unilabos.utils import logger
 from unilabos.config.config import BasicConfig
 from unilabos.utils.type_check import TypeEncoder
@@ -63,16 +62,11 @@ def main(
         discovery_interval,
     )
 
-    executor.add_node(host_node)
-    # run_event_loop_in_thread()
+    thread = threading.Thread(target=executor.spin, daemon=True, name="host_executor_thread")
+    thread.start()
 
-    try:
-        executor.spin()
-    except Exception as e:
-        logger.error(traceback.format_exc())
-        print(f"Exception caught: {e}")
-    finally:
-        exit()
+    while True:
+        input()
 
 
 def slave(
@@ -97,10 +91,11 @@ def slave(
         # else:
         #     print(f"Warning: Device {device_id} could not be initialized or is not a valid Node")
 
-    machine_name = os.popen("hostname").read().strip()
-    machine_name = "".join([c if c.isalnum() or c == "_" else "_" for c in machine_name])
-    n = Node(f"slaveMachine_{machine_name}", parameter_overrides=[])
+    n = Node(f"slaveMachine_{BasicConfig.machine_name}", parameter_overrides=[])
     executor.add_node(n)
+
+    thread = threading.Thread(target=executor.spin, daemon=True, name="slave_executor_thread")
+    thread.start()
 
     if not BasicConfig.slave_no_host:
         sclient = n.create_client(SerialCommand, "/node_info_update")
@@ -108,7 +103,7 @@ def slave(
 
         request = SerialCommand.Request()
         request.command = json.dumps({
-            "machine_name": machine_name,
+            "machine_name": BasicConfig.machine_name,
             "type": "slave",
             "devices_config": devices_config_copy,
             "registry_config": lab_registry.obtain_registry_device_info()
@@ -124,16 +119,8 @@ def slave(
         response = rclient.call_async(request).result()
         logger.info(f"Slave resource added.")
 
-
-    run_event_loop_in_thread()
-
-    try:
-        executor.spin()
-    except Exception as e:
-        print(f"Exception caught: {e}")
-    finally:
-        exit()
-
+    while True:
+        input()
 
 if __name__ == "__main__":
     main()

@@ -1,3 +1,4 @@
+import json
 import threading
 import time
 import traceback
@@ -13,15 +14,17 @@ from rclpy.action import ActionServer
 from rclpy.action.server import ServerGoalHandle
 from rclpy.client import Client
 from rclpy.callback_groups import ReentrantCallbackGroup
+from rclpy.service import Service
 
 from unilabos.resources.graphio import convert_resources_to_type, convert_resources_from_type
 from unilabos.ros.msgs.message_converter import (
     convert_to_ros_msg,
     convert_from_ros_msg,
     convert_from_ros_msg_with_mapping,
-    convert_to_ros_msg_with_mapping,
+    convert_to_ros_msg_with_mapping, ros_action_to_json_schema,
 )
-from unilabos_msgs.srv import ResourceAdd, ResourceGet, ResourceDelete, ResourceUpdate, ResourceList  # type: ignore
+from unilabos_msgs.srv import ResourceAdd, ResourceGet, ResourceDelete, ResourceUpdate, ResourceList, \
+    SerialCommand  # type: ignore
 from unilabos_msgs.msg import Resource  # type: ignore
 
 from unilabos.ros.nodes.resource_tracker import DeviceNodeResourceTracker
@@ -29,7 +32,7 @@ from unilabos.ros.x.rclpyx import get_event_loop
 from unilabos.ros.utils.driver_creator import ProtocolNodeCreator, PyLabRobotCreator, DeviceClassCreator
 from unilabos.utils.async_util import run_async_func
 from unilabos.utils.log import info, debug, warning, error, critical, logger
-from unilabos.utils.type_check import get_type_class
+from unilabos.utils.type_check import get_type_class, TypeEncoder
 
 T = TypeVar("T")
 
@@ -44,19 +47,17 @@ class ROSLoggerAdapter:
 
     @property
     def identifier(self):
-        return f"{self.namespace}/{self.node_name}"
+        return f"{self.namespace}"
 
-    def __init__(self, ros_logger, node_name, namespace):
+    def __init__(self, ros_logger, namespace):
         """
         初始化日志适配器
 
         Args:
             ros_logger: ROS2日志记录器
-            node_name: 节点名称
             namespace: 命名空间
         """
         self.ros_logger = ros_logger
-        self.node_name = node_name
         self.namespace = namespace
         self.level_2_logger_func = {
             "info": info,
@@ -258,9 +259,9 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             self.lab_logger().critical("资源跟踪器未初始化，请检查")
 
         # 创建自定义日志记录器
-        self._lab_logger = ROSLoggerAdapter(self.get_logger(), self.node_name, self.namespace)
+        self._lab_logger = ROSLoggerAdapter(self.get_logger(), self.namespace)
 
-        self._action_servers = {}
+        self._action_servers: Dict[str, ActionServer] = {}
         self._property_publishers = {}
         self._status_types = status_types
         self._action_value_mappings = action_value_mappings
@@ -284,7 +285,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                 self.create_ros_action_server(action_name, action_value_mapping)
 
         # 创建线程池执行器
-        self._executor = ThreadPoolExecutor(max_workers=max(len(action_value_mappings), 1))
+        self._executor = ThreadPoolExecutor(max_workers=max(len(action_value_mappings), 1), thread_name_prefix=f"ROSDevice{self.device_id}")
 
         # 创建资源管理客户端
         self._resource_clients: Dict[str, Client] = {
@@ -293,6 +294,18 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             "resource_delete": self.create_client(ResourceDelete, "/resources/delete"),
             "resource_update": self.create_client(ResourceUpdate, "/resources/update"),
             "resource_list": self.create_client(ResourceList, "/resources/list"),
+        }
+
+        def query_host_name_cb(req, res):
+            self.register_device()
+            self.lab_logger().info("Host要求重新注册当前节点")
+            res.response = ""
+            return res
+
+        self._service_server: Dict[str, Service] = {
+            "query_host_name": self.create_service(
+                SerialCommand, f"/srv{self.namespace}/query_host_name", query_host_name_cb, callback_group=self.callback_group
+            ),
         }
 
         # 向全局在线设备注册表添加设备信息
@@ -318,6 +331,31 @@ class BaseROS2DeviceNode(Node, Generic[T]):
         )
         # 加入全局注册表
         registered_devices[self.device_id] = device_info
+        from unilabos.config.config import BasicConfig
+        if not BasicConfig.is_host_mode:
+            sclient = self.create_client(SerialCommand, "/node_info_update")
+            # 启动线程执行发送任务
+            threading.Thread(
+                target=self.send_slave_node_info,
+                args=(sclient,),
+                daemon=True,
+                name=f"ROSDevice{self.device_id}_send_slave_node_info"
+            ).start()
+
+    def send_slave_node_info(self, sclient):
+        sclient.wait_for_service()
+        request = SerialCommand.Request()
+        from unilabos.config.config import BasicConfig
+        request.command = json.dumps({
+            "SYNC_SLAVE_NODE_INFO": {
+                "machine_name": BasicConfig.machine_name,
+                "type": "slave",
+                "edge_device_id": self.device_id
+            }}, ensure_ascii=False, cls=TypeEncoder)
+
+        # 发送异步请求并等待结果
+        future = sclient.call_async(request)
+        response = future.result()
 
     def lab_logger(self):
         """

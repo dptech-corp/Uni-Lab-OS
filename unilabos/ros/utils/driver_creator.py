@@ -224,8 +224,7 @@ class PyLabRobotCreator(DeviceClassCreator[T]):
         if hasattr(self.device_instance, "setup") and asyncio.iscoroutinefunction(getattr(self.device_instance, "setup")):
             from unilabos.ros.nodes.base_device_node import ROS2DeviceNode
             ROS2DeviceNode.run_async_func(getattr(self.device_instance, "setup")).add_done_callback(lambda x: logger.debug(f"PyLabRobot设备实例 {self.device_instance} 设置完成"))
-# 2486229810384
-#2486232539792
+
 
 class ProtocolNodeCreator(DeviceClassCreator[T]):
     """
