@@ -187,13 +187,12 @@ def main():
         devices_config_add = add_resource_mesh_manager_node(resource_visualization.resource_model, args_dict["resources_config"])
         args_dict["devices_config"] = {**args_dict["devices_config"], **devices_config_add}
         start_backend(**args_dict)
-
-        from unilabos.ros.nodes.base_device_node import ROS2DeviceNode
-        while ROS2DeviceNode.get_loop() is None:
-            time.sleep(0.1)
-        asyncio.set_event_loop(ROS2DeviceNode.get_loop())
+        server_thread = threading.Thread(target=start_server)
+        server_thread.start()
+        asyncio.set_event_loop(asyncio.new_event_loop())
         resource_visualization.start()
-        start_server()
+        while True:
+            time.sleep(1)
     else:
         start_backend(**args_dict)
         start_server()
