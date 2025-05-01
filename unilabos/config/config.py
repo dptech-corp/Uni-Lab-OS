@@ -101,26 +101,79 @@ def _update_config_from_module(module):
             logger.warning("Skipping key file loading, key_file is empty")
 
 
+def _update_config_from_env():
+    prefix = "UNILABOS."
+    for env_key, env_value in os.environ.items():
+        if not env_key.startswith(prefix):
+            continue
+        try:
+            key_path = env_key[len(prefix):]  # Remove UNILAB_ prefix
+            class_field = key_path.upper().split(".", 1)
+            if len(class_field) != 2:
+                logger.warning(f"[ENV] 环境变量格式不正确：{env_key}")
+                continue
+
+            class_key, field_key = class_field
+            # 遍历 globals 找匹配类（不区分大小写）
+            matched_cls = None
+            for name, obj in globals().items():
+                if name.upper() == class_key and isinstance(obj, type):
+                    matched_cls = obj
+                    break
+
+            if matched_cls is None:
+                logger.warning(f"[ENV] 未找到类：{class_key}")
+                continue
+
+            # 查找类属性（不区分大小写）
+            matched_field = None
+            for attr in dir(matched_cls):
+                if attr.upper() == field_key:
+                    matched_field = attr
+                    break
+
+            if matched_field is None:
+                logger.warning(f"[ENV] 类 {matched_cls.__name__} 中未找到字段：{field_key}")
+                continue
+
+            current_value = getattr(matched_cls, matched_field)
+            attr_type = type(current_value)
+            if attr_type == bool:
+                value = env_value.lower() in ("true", "1", "yes")
+            elif attr_type == int:
+                value = int(env_value)
+            elif attr_type == float:
+                value = float(env_value)
+            else:
+                value = env_value
+            setattr(matched_cls, matched_field, value)
+            logger.info(f"[ENV] 设置 {matched_cls.__name__}.{matched_field} = {value}")
+        except Exception as e:
+            logger.warning(f"[ENV] 解析环境变量 {env_key} 失败: {e}")
+
+
+
 def load_config(config_path=None):
     # 如果提供了配置文件路径，从该文件导入配置
     if config_path:
+        _update_config_from_env()  # 允许config_path被env设定后读取
         BasicConfig.config_path = os.path.abspath(os.path.dirname(config_path))
         if not os.path.exists(config_path):
-            logger.error(f"配置文件 {config_path} 不存在")
+            logger.error(f"[ENV] 配置文件 {config_path} 不存在")
             exit(1)
 
         try:
             module_name = "lab_" + os.path.basename(config_path).replace(".py", "")
             spec = importlib.util.spec_from_file_location(module_name, config_path)
             if spec is None:
-                logger.error(f"配置文件 {config_path} 错误")
+                logger.error(f"[ENV] 配置文件 {config_path} 错误")
                 return
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)  # type: ignore
             _update_config_from_module(module)
-            logger.info(f"配置文件 {config_path} 加载成功")
+            logger.info(f"[ENV] 配置文件 {config_path} 加载成功")
         except Exception as e:
-            logger.error(f"加载配置文件 {config_path} 失败: {e}")
+            logger.error(f"[ENV] 加载配置文件 {config_path} 失败")
             traceback.print_exc()
             exit(1)
     else:
