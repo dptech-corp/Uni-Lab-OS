@@ -96,6 +96,9 @@ def main():
     # 设置BasicConfig参数
     BasicConfig.is_host_mode = not args_dict.get("without_host", False)
     BasicConfig.slave_no_host = args_dict.get("slave_no_host", False)
+    machine_name = os.popen("hostname").read().strip()
+    machine_name = "".join([c if c.isalnum() or c == "_" else "_" for c in machine_name])
+    BasicConfig.machine_name = machine_name
 
     from unilabos.resources.graphio import (
         read_node_link_json,

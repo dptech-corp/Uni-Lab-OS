@@ -30,13 +30,13 @@ def get_host_node_info() -> Dict[str, Any]:
         return host_info
     host_info["available"] = True
     host_info["devices"] = {
-        device_id: {
+        edge_device_id: {
             "namespace": namespace,
-            "is_online": f"{namespace}/{device_id}" in host_node._online_devices,
-            "key": f"{namespace}/{device_id}" if namespace.startswith("/") else f"/{namespace}/{device_id}",
-            "machine_name": host_node.device_machine_names.get(device_id, "未知"),
+            "is_online": f"{namespace}/{edge_device_id}" in host_node._online_devices,
+            "key": f"{namespace}/{edge_device_id}" if namespace.startswith("/") else f"/{namespace}/{edge_device_id}",
+            "machine_name": host_node.device_machine_names.get(edge_device_id, "未知"),
         }
-        for device_id, namespace in host_node.devices_names.items()
+        for edge_device_id, namespace in host_node.devices_names.items()
     }
     # 获取已订阅的主题
     host_info["subscribed_topics"] = sorted(list(host_node._subscribed_topics))

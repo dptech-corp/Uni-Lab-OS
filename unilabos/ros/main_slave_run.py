@@ -91,9 +91,7 @@ def slave(
         # else:
         #     print(f"Warning: Device {device_id} could not be initialized or is not a valid Node")
 
-    machine_name = os.popen("hostname").read().strip()
-    machine_name = "".join([c if c.isalnum() or c == "_" else "_" for c in machine_name])
-    n = Node(f"slaveMachine_{machine_name}", parameter_overrides=[])
+    n = Node(f"slaveMachine_{BasicConfig.machine_name}", parameter_overrides=[])
     executor.add_node(n)
 
     thread = threading.Thread(target=executor.spin, daemon=True, name="slave_executor_thread")
@@ -105,7 +103,7 @@ def slave(
 
         request = SerialCommand.Request()
         request.command = json.dumps({
-            "machine_name": machine_name,
+            "machine_name": BasicConfig.machine_name,
             "type": "slave",
             "devices_config": devices_config_copy,
             "registry_config": lab_registry.obtain_registry_device_info()
