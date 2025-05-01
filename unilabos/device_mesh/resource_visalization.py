@@ -50,7 +50,6 @@ class ResourceVisualization:
         for node in device.values():
             if node['type'] == 'device' and node['class'] != '':
                 device_class = node['class']
-                
                 # 检查设备类型是否在注册表中
                 if device_class not in registry.device_type_registry.keys():
                     print("="*20)
@@ -58,27 +57,8 @@ class ResourceVisualization:
                     print(registry.device_type_registry.keys())
                     print("="*20)
                     raise ValueError(f"设备类型 {device_class} 未在注册表中注册")
-                
-                elif "model" in registry.device_type_registry[device_class].keys():
-                    model_config = registry.device_type_registry[device_class]['model']
-
-                    if model_config['type'] == 'device':
-                        new_include = etree.SubElement(self.root, f"{{{xacro_uri}}}include")
-                        new_include.set("filename", f"{str(self.mesh_path)}/devices/{model_config['mesh']}/macro_device.xacro")
-                        new_dev = etree.SubElement(self.root, f"{{{xacro_uri}}}{model_config['mesh']}")
-                        new_dev.set("parent_link", "world")
-                        new_dev.set("mesh_path", str(self.mesh_path))
-                        new_dev.set("device_name", node["id"]+"_")
-                        new_dev.set("x",str(float(node["position"]["x"])/1000))
-                        new_dev.set("y",str(float(node["position"]["y"])/1000))
-                        new_dev.set("z",str(float(node["position"]["z"])/1000))
-                        if "rotation" in node["config"]:
-                            new_dev.set("r",str(float(node["config"]["rotation"]["z"])/1000))
-
-                        
             elif node['type'] in self.resource_type:
                 # print(registry.resource_type_registry)
-
                 resource_class = node['class']
                 if resource_class not in registry.resource_type_registry.keys():
                     raise ValueError(f"资源类型 {resource_class} 未在注册表中注册")
@@ -93,8 +73,20 @@ class ResourceVisualization:
                                 'mesh': f"{str(self.mesh_path)}/resources/{model_config['children_mesh']}",
                                 'mesh_tf': model_config['children_mesh_tf']
                             }
-
-            
+                    elif model_config['type'] == 'device':
+                        new_include = etree.SubElement(self.root, f"{{{xacro_uri}}}include")
+                        new_include.set("filename", f"{str(self.mesh_path)}/devices/{model_config['mesh']}/macro_device.xacro")
+                        new_dev = etree.SubElement(self.root, f"{{{xacro_uri}}}{model_config['mesh']}")
+                        new_dev.set("parent_link", "world")
+                        new_dev.set("mesh_path", str(self.mesh_path))
+                        new_dev.set("device_name", node["id"]+"_")
+                        new_dev.set("x",str(float(node["position"]["x"])/1000))
+                        new_dev.set("y",str(float(node["position"]["y"])/1000))
+                        new_dev.set("z",str(float(node["position"]["z"])/1000))
+                        if "rotation" in node["config"]:
+                            new_dev.set("r",str(float(node["config"]["rotation"]["z"])/1000))
+                    else:
+                        print("错误的注册表类型！")
         re = etree.tostring(self.root, encoding="unicode")
         doc = xacro.parse(re)
         xacro.process_doc(doc)
