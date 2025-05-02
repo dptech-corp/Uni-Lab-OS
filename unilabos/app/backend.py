@@ -12,6 +12,8 @@ def start_backend(
     controllers_config: dict = {},
     bridges=[],
     without_host: bool = False,
+    visual: str = "None",
+    resources_mesh_config: dict = {},
     **kwargs
 ):
     if backend == "ros":
@@ -29,7 +31,7 @@ def start_backend(
     
     backend_thread = threading.Thread(
         target=main if not without_host else slave,
-        args=(devices_config, resources_config, graph, controllers_config, bridges),
+        args=(devices_config, resources_config, graph, controllers_config, bridges, visual, resources_mesh_config),
         name="backend_thread",
         daemon=True,
     )

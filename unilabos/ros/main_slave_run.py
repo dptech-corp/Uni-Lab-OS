@@ -6,6 +6,9 @@ import time
 from typing import Optional, Dict, Any, List
 
 import rclpy
+from unilabos.ros.nodes.presets.joint_republisher import JointRepublisher
+from unilabos.ros.nodes.presets.resource_mesh_manager import ResourceMeshManager
+from unilabos.ros.nodes.resource_tracker import DeviceNodeResourceTracker
 from unilabos_msgs.msg import Resource  # type: ignore
 from unilabos_msgs.srv import ResourceAdd, SerialCommand  # type: ignore
 from rclpy.executors import MultiThreadedExecutor
@@ -45,15 +48,15 @@ def main(
     graph: Optional[Dict[str, Any]] = None,
     controllers_config: Dict[str, Any] = {},
     bridges: List[Any] = [],
+    visual: str = "None",
+    resources_mesh_config: dict = {},
     args: List[str] = ["--log-level", "debug"],
     discovery_interval: float = 5.0,
 ) -> None:
     """主函数"""
-    if not rclpy.ok():
-        rclpy.init(args=args)
-    executor = rclpy.__executor
-    if not executor:
-        executor = rclpy.__executor = MultiThreadedExecutor()
+
+    rclpy.init(args=args)
+    executor = rclpy.__executor = MultiThreadedExecutor()
     # 创建主机节点
     host_node = HostNode(
         "host_node",
@@ -65,6 +68,21 @@ def main(
         discovery_interval,
     )
 
+    if visual != "None":
+        resource_mesh_manager = ResourceMeshManager(
+            resources_mesh_config,
+            resources_config,
+            resource_tracker= DeviceNodeResourceTracker(),
+            device_id = 'resource_mesh_manager',
+        )
+        joint_republisher = JointRepublisher(
+            'joint_republisher',
+            DeviceNodeResourceTracker()
+        )
+
+        executor.add_node(resource_mesh_manager)
+        executor.add_node(joint_republisher)
+        
     thread = threading.Thread(target=executor.spin, daemon=True, name="host_executor_thread")
     thread.start()
 

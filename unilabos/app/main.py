@@ -184,7 +184,8 @@ def main():
         signal.signal(signal.SIGINT, _exit)
         signal.signal(signal.SIGTERM, _exit)
         mqtt_client.start()
-
+    args_dict["resources_mesh_config"] = {}
+    
     if args_dict["visual"] != "None":
         if args_dict["visual"] == "rviz":
             enable_rviz=True
@@ -192,28 +193,9 @@ def main():
             enable_rviz=False
         resource_visualization = ResourceVisualization(devices_and_resources, args_dict["resources_config"] ,enable_rviz=enable_rviz)
 
-        # 如果没有初始化，则初始化ros，并创建一个多线程执行器
-        # 在main_slave_run.py中也会初始化ros，并创建一个多线程执行器
-        # 所以这里需要判断是否已经初始化，如果已经初始化，则不重复初始化    
-        if not rclpy.ok():
-            rclpy.init(args = ["--log-level", "debug"],)
-        executor = rclpy.__executor
-        if not executor:
-            executor = rclpy.__executor = MultiThreadedExecutor()
-
-        resource_mesh_manager = ResourceMeshManager(
-            resource_visualization.resource_model,
-            args_dict["resources_config"],
-            resource_tracker= DeviceNodeResourceTracker(),
-            device_id = 'resource_mesh_manager',
-        )
-        joint_republisher = JointRepublisher(
-            'joint_republisher',
-            DeviceNodeResourceTracker()
-        )
-
-        rclpy.__executor.add_node(resource_mesh_manager)
-        rclpy.__executor.add_node(joint_republisher)
+        args_dict["resources_mesh_config"] = resource_visualization.resource_model
+        # 将joint_republisher和resource_mesh_manager添加进 main_slave_run.py中
+        
         start_backend(**args_dict)
         server_thread = threading.Thread(target=start_server)
         server_thread.start()
