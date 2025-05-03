@@ -41,29 +41,7 @@ class DPLiquidHandler(LiquidHandler):
         trash = self.deck.get_trash_area()
         try:
             if is_96_well:
-                if not isinstance(vols, (int, float)):
-                    raise ValueError("For 96‑well operations `vols` must be a scalar.")
-                tip = next(self.current_tip)
-                await self.pick_up_tips96(first_rack)
-                await self.aspirate96(
-                    resource=sources,
-                    volume=vols,
-                    offset=Coordinate.zero(),
-                    flow_rate=flow_rates[0] if flow_rates else None,
-                    blow_out_air_volume=blow_out_air_volume[0] if blow_out_air_volume else None,
-                    use_channels=use_channels,
-                )
-                await self.dispense(
-                    resources=[trash],
-                    vols=[vols] * 8,
-                    use_channels=use_channels,
-                    flow_rates=flow_rates,
-                    offsets=None,
-                    liquid_height=liquid_height,
-                    blow_out_air_volume=blow_out_air_volume,
-                    spread=spread,
-                )
-                await self.discard_tips96()
+                pass # This mode is not verified
             else:
                 if len(vols) != len(sources):
                     raise ValueError("Length of `vols` must match `sources`.")
@@ -76,9 +54,9 @@ class DPLiquidHandler(LiquidHandler):
                         resources=[src],
                         vols=[vol],
                         use_channels=use_channels, # only aspirate96 used, default to None
-                        flow_rates=flow_rates[0] if flow_rates else None,
+                        flow_rates=[flow_rates[0]] if flow_rates else None,
                         offsets=[offsets[0]] if offsets else None,
-                        liquid_height=liquid_height[0] if liquid_height else None,
+                        liquid_height=[liquid_height[0]] if liquid_height else None,
                         blow_out_air_volume=blow_out_air_volume[0] if blow_out_air_volume else None,
                         spread=spread,
                     )
@@ -87,9 +65,9 @@ class DPLiquidHandler(LiquidHandler):
                         resources=waste_liquid,
                          vols=[vol],
                          use_channels=use_channels,
-                         flow_rates=flow_rates[1] if flow_rates else None,
+                         flow_rates=[flow_rates[1]] if flow_rates else None,
                          offsets=[offsets[1]] if offsets else None,
-                         liquid_height=liquid_height[1] if liquid_height else None,
+                         liquid_height=[liquid_height[1]] if liquid_height else None,
                          blow_out_air_volume=blow_out_air_volume[1] if blow_out_air_volume else None,
                          spread=spread,
                      )
@@ -126,29 +104,7 @@ class DPLiquidHandler(LiquidHandler):
 
         try:
             if is_96_well:
-                if not isinstance(vols, (int, float)):
-                    raise ValueError("For 96‑well operations `vols` must be a scalar.")
-                first_rack = next(iter(tip_racks))
-                await self.pick_up_tips96(first_rack)
-                await self.aspirate(
-                    resources=reagent_sources,
-                    vols=[vols],
-                    use_channels=use_channels,
-                    flow_rates=flow_rates,
-                    offsets=offsets,
-                    liquid_height=liquid_height,
-                    blow_out_air_volume=blow_out_air_volume,
-                    spread=spread,
-                )
-                await self.dispense96(
-                    resource=targets,
-                    volume=vols,
-                    offset=Coordinate.zero(),
-                    flow_rate=flow_rates[0] if flow_rates else None,
-                    blow_out_air_volume=blow_out_air_volume[0] if blow_out_air_volume else None,
-                    use_channels=use_channels
-                )
-                await self.discard_tips96()
+                pass # This mode is not verified.
             else:
                 if len(asp_vols) != len(targets):
                     raise ValueError("Length of `vols` must match `targets`.")
@@ -160,10 +116,10 @@ class DPLiquidHandler(LiquidHandler):
                         resources=reagent_sources,
                         vols=[asp_vols[_]],
                         use_channels=use_channels,
-                        flow_rates=flow_rates[0] if flow_rates else None,
-                        offsets=offsets[0] if offsets else None,
-                        liquid_height=liquid_height[0] if liquid_height else None,
-                        blow_out_air_volume=blow_out_air_volume[0] if blow_out_air_volume else None,
+                        flow_rates=[flow_rates[0]] if flow_rates else None,
+                        offsets=[offsets[0]] if offsets else None,
+                        liquid_height=[liquid_height[0]] if liquid_height else None,
+                        blow_out_air_volume=[blow_out_air_volume[0]] if blow_out_air_volume else None,
                         spread=spread
                     )
                     await self.custom_delay(seconds=delays[0] if delays else 0)
@@ -171,10 +127,10 @@ class DPLiquidHandler(LiquidHandler):
                         resources=[targets[_]],
                         vols=[dis_vols[_]],
                         use_channels=use_channels,
-                        flow_rates=flow_rates[1] if flow_rates else None,
-                        offsets=offsets[1] if offsets else None,
-                        blow_out_air_volume=blow_out_air_volume[1] if blow_out_air_volume else None,
-                        liquid_height=liquid_height[1] if liquid_height else None,
+                        flow_rates=[flow_rates[1]] if flow_rates else None,
+                        offsets=[offsets[1]] if offsets else None,
+                        blow_out_air_volume=[blow_out_air_volume[1]] if blow_out_air_volume else None,
+                        liquid_height=[liquid_height[1]] if liquid_height else None,
                         spread=spread,
                     )
                     await self.custom_delay(seconds=delays[1] if delays else 0)
@@ -233,39 +189,7 @@ class DPLiquidHandler(LiquidHandler):
             # 96‑channel head mode
             # ------------------------------------------------------------------
             if is_96_well:
-                # Validate inputs ------------------------------------------------
-
-                if len(sources) != 1 or len(targets) != 1:
-                    raise ValueError("Provide exactly one source plate and one target plate in 96‑well mode.")
-
-                # 1) Pick up 96 tips
-                first_rack = next(iter(tip_racks))
-                await self.pick_up_tips96(first_rack)
-
-                # 2) Aspirate from source plate
-                await self.aspirate96(
-                    resource=sources,
-                    volume=vols,
-                    offset=Coordinate.zero(),
-                    flow_rate=flow_rates[0] if flow_rates else None,
-                    blow_out_air_volume=blow_out_air_volume[0] if blow_out_air_volume else None,
-                    use_channels=use_channels,
-                )
-
-                # 3) Dispense into target plate
-                await self.dispense96(
-                    resource=targets,
-                    volume=vols,
-                    offset=Coordinate.zero(),
-                    flow_rate=flow_rates[0] if flow_rates else None,
-                    blow_out_air_volume=blow_out_air_volume[0] if blow_out_air_volume else None,
-                    use_channels=use_channels,
-                )
-
-                # 4) Drop tips
-                await self.discard_tips96()
-                return  # success
-
+                pass # This mode is not verified
             else:
                 if not (len(vols) == len(sources) == len(targets)):
                     raise ValueError("`sources`, `targets`, and `vols` must have the same length.")
@@ -316,7 +240,7 @@ class DPLiquidHandler(LiquidHandler):
         seconds: seconds to wait
         msg: information to be printed
         """
-        if seconds > 0:
+        if seconds != None and seconds > 0:
             if msg:
                 print(f"Waiting time: {msg}")
                 print(f"Current time: {time.strftime('%H:%M:%S')}")
