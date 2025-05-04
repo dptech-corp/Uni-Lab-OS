@@ -9,6 +9,7 @@ from typing import List, Dict, Any, Optional
 import requests
 from unilabos.utils.log import info
 from unilabos.config.config import MQConfig, HTTPConfig
+from unilabos.utils import logger
 
 
 class HTTPClient:
@@ -100,6 +101,30 @@ class HTTPClient:
             headers={"Authorization": f"lab {self.auth}"},
             timeout=5,
         )
+        return response
+
+    def upload_file(self, file_path: str, scene: str = "models") -> requests.Response:
+        """
+        上传文件到服务器
+
+        使用multipart/form-data格式上传文件，类似curl -F "files=@filepath"
+
+        Args:
+            file_path: 要上传的文件路径
+            scene: 上传场景，可选值为"user"或"models"，默认为"models"
+
+        Returns:
+            Response: API响应对象
+        """
+        with open(file_path, "rb") as file:
+            files = {"files": file}
+            logger.info(f"上传文件: {file_path} 到 {scene}")
+            response = requests.post(
+                f"{self.remote_addr}/api/account/file_upload/{scene}",
+                files=files,
+                headers={"Authorization": f"lab {self.auth}"},
+                timeout=30,  # 上传文件可能需要更长的超时时间
+            )
         return response
 
 

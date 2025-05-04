@@ -97,7 +97,7 @@ class HostNode(BaseROS2DeviceNode):
         self.bridges = bridges
 
         # 创建设备、动作客户端和目标存储
-        self.devices_names: Dict[str, str] = {}  # 存储设备名称和命名空间的映射
+        self.devices_names: Dict[str, str] = {device_id: self.namespace}  # 存储设备名称和命名空间的映射
         self.devices_instances: Dict[str, ROS2DeviceNode] = {}  # 存储设备实例
         self.device_machine_names: Dict[str, str] = {device_id: "本地", }  # 存储设备ID到机器名称的映射
         self._action_clients: Dict[str, ActionClient] = {}  # 用来存储多个ActionClient实例
