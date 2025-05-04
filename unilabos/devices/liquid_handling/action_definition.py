@@ -122,7 +122,8 @@ class DPLiquidHandler(LiquidHandler):
                         blow_out_air_volume=[blow_out_air_volume[0]] if blow_out_air_volume else None,
                         spread=spread
                     )
-                    await self.custom_delay(seconds=delays[0] if delays else 0)
+                    if delays is not None:
+                        await self.custom_delay(seconds=delays[0])
                     await self.dispense(
                         resources=[targets[_]],
                         vols=[dis_vols[_]],
@@ -133,7 +134,8 @@ class DPLiquidHandler(LiquidHandler):
                         liquid_height=[liquid_height[1]] if liquid_height else None,
                         spread=spread,
                     )
-                    await self.custom_delay(seconds=delays[1] if delays else 0)
+                    if delays is not None:
+                        await self.custom_delay(seconds=delays[1])
                     await self.mix(
                         targets=targets[_],
                         mix_time=mix_time,
@@ -141,7 +143,8 @@ class DPLiquidHandler(LiquidHandler):
                         offsets=offsets if offsets else None,
                         height_to_bottom=mix_liquid_height if mix_liquid_height else None,
                         mix_rate=mix_rate if mix_rate else None)
-                    await self.custom_delay(seconds=delays[1] if delays else 0)
+                    if delays is not None:
+                        await self.custom_delay(seconds=delays[1])
                     await self.touch_tip(targets[_])
                 await self.discard_tips()
 
@@ -153,27 +156,33 @@ class DPLiquidHandler(LiquidHandler):
     # ---------------------------------------------------------------
     async def transfer_liquid(
         self,
-        vols: Union[float, List[float]],
+        asp_vols: Union[List[float], float],
+        dis_vols: Union[List[float], float],
         sources: Sequence[Container],
         targets: Sequence[Container],
         tip_racks: Sequence[TipRack],
         *,
         use_channels: Optional[List[int]] = None,
-        flow_rates: Optional[List[Optional[float]]] = None,
+        asp_flow_rates: Optional[List[Optional[float]]] = None,
+        dis_flow_rates: Optional[List[Optional[float]]] = None,
         offsets: Optional[List[Coordinate]] = None,
+        touch_tip: bool = False,
         liquid_height: Optional[List[Optional[float]]] = None,
         blow_out_air_volume: Optional[List[Optional[float]]] = None,
         spread: Literal["wide", "tight", "custom"] = "wide",
         is_96_well: bool = False,
+        mix_stage: Optional[Literal["none", "before", "after", "both"]] = "none",
         mix_times: Optional[List(int)] = None,
         mix_vol: Optional[int] = None,
+        mix_rate: Optional[int] = None,
+        mix_liquid_height: Optional[float] = None,
         delays: Optional[List[int]] = None,
     ):
         """Transfer liquid from each *source* well/plate to the corresponding *target*.
 
         Parameters
         ----------
-        vols
+        asp_vols, dis_vols
             Single volume (µL) or list matching the number of transfers.
         sources, targets
             Same‑length sequences of containers (wells or plates). In 96‑well mode
@@ -191,19 +200,20 @@ class DPLiquidHandler(LiquidHandler):
             if is_96_well:
                 pass # This mode is not verified
             else:
-                if not (len(vols) == len(sources) == len(targets)):
+                if not (len(asp_vols) == len(sources) and len(dis_vols) == len(targets)):
                     raise ValueError("`sources`, `targets`, and `vols` must have the same length.")
 
                 tip_iter = self.iter_tips(tip_racks)
-                for src, tgt, vol in zip(sources, targets, vols):
+                for src, tgt, asp_vol, asp_flow_rate, dis_vol, dis_flow_rate in (
+                        zip(sources, targets, asp_vols, asp_flow_rates, dis_vols, dis_flow_rates)):
                     tip = next(tip_iter)
                     await self.pick_up_tips(tip)
                     # Aspirate from source
                     await self.aspirate(
                         resources=[src],
-                        vols=[vol],
+                        vols=[asp_vol],
                         use_channels=use_channels,
-                        flow_rates=flow_rates,
+                        flow_rates=[asp_flow_rate],
                         offsets=offsets,
                         liquid_height=liquid_height,
                         blow_out_air_volume=blow_out_air_volume,
@@ -213,9 +223,9 @@ class DPLiquidHandler(LiquidHandler):
                     # Dispense into target
                     await self.dispense(
                         resources=[tgt],
-                        vols=[vol],
+                        vols=[dis_vol],
                         use_channels=use_channels,
-                        flow_rates=flow_rates,
+                        flow_rates=[dis_flow_rate],
                         offsets=offsets,
                         liquid_height=liquid_height,
                         blow_out_air_volume=blow_out_air_volume,
@@ -224,8 +234,11 @@ class DPLiquidHandler(LiquidHandler):
                     await self.mix(
                         targets=[tgt],
                         mix_time=mix_times[0] if mix_times else None,
-                        mix_vol=mix_vol[0] if mix_vol else None)
-                    await self.touch_tip(tgt)
+                        mix_vol=mix_vol[0] if mix_vol else None,
+                        mix_rate=mix_rate[0] if mix_rate else None,
+                    )
+                    if touch_tip:
+                        await self.touch_tip(tgt)
                     await self.discard_tips()
 
         except Exception as exc:
