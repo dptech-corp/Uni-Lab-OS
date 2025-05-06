@@ -1,0 +1,5 @@
+Resource[] resources
+string[] device_ids
+---
+bool success
+---
