@@ -55,7 +55,7 @@ set(action_files
   "action/EmptyIn.action"
   "action/FloatSingleInput.action"
   "action/IntSingleInput.action"
-  "action/IntSingleOutput.action"
+  "action/StrSingleInput.action"
   "action/Point3DSeparateInput.action"
 
   "action/ResourceCreateFromOuter.action"
