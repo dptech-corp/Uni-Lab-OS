@@ -383,6 +383,10 @@ class ResourceMeshManager(BaseROS2DeviceNode):
         
         try:
             cmd_dict = json.loads(tf_update_msg.command.replace("'",'"'))
+            self.__planning_scene = self._get_planning_scene_service.call(
+                GetPlanningScene.Request()
+                ).scene
+            
             for resource_id, target_parent in cmd_dict.items():
 
                 # 获取从resource_id到target_parent的转换
@@ -412,8 +416,20 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                     "rotation": rotation
                 }
                 
-                self.attach_collision_object(id=resource_id,link_name=target_parent)
-
+                # self.attach_collision_object(id=resource_id,link_name=target_parent)
+                collision_object = AttachedCollisionObject(
+                    id=resource_id,
+                    link_name=target_parent,
+                    object=CollisionObject(
+                        id=resource_id,
+                        operation=CollisionObject.ADD   
+                    )
+                )
+                
+                self.__planning_scene.robot_state.attached_collision_objects.append(collision_object)
+            req = ApplyPlanningScene.Request()
+            req.scene = self.__planning_scene
+            self._apply_planning_scene_service.call_async(req)
             self.publish_resource_tf()
             
         except Exception as e:
