@@ -286,9 +286,10 @@ class HostNode(BaseROS2DeviceNode):
                     "y": bind_location.y,
                     "z": bind_location.z,
                 },
-                "other_calling_param": json.loads(other_calling_param),
+                "other_calling_param": json.loads(other_calling_param) if other_calling_param else {},
             }, ensure_ascii=False)
             response = sclient.call(request)
+            pass
         pass
 
     def initialize_device(self, device_id: str, device_config: Dict[str, Any]) -> None:

@@ -6679,8 +6679,7 @@
                 "plate_well_11_3",
                 "plate_well_11_4",
                 "plate_well_11_5",
-                "plate_well_11_6",
-                "plate_well_11_7"
+                "plate_well_11_6"
             ],
             "parent": "deck",
             "type": "device",
@@ -10481,45 +10480,6 @@
             "position": {
                 "x": 109.87,
                 "y": 16.77,
-                "z": 3.03
-            },
-            "config": {
-                "type": "Well",
-                "size_x": 6.86,
-                "size_y": 6.86,
-                "size_z": 10.67,
-                "rotation": {
-                    "x": 0,
-                    "y": 0,
-                    "z": 0,
-                    "type": "Rotation"
-                },
-                "category": "well",
-                "model": null,
-                "max_volume": 360,
-                "material_z_thickness": 0.5,
-                "compute_volume_from_height": null,
-                "compute_height_from_volume": null,
-                "bottom_type": "flat",
-                "cross_section_type": "circle"
-            },
-            "data": {
-                "liquids": [],
-                "pending_liquids": [],
-                "liquid_history": []
-            }
-        },
-        {
-            "id": "plate_well_11_7",
-            "name": "plate_well_11_7",
-            "sample_id": null,
-            "children": [],
-            "parent": "plate",
-            "type": "device",
-            "class": "",
-            "position": {
-                "x": 109.87,
-                "y": 7.77,
                 "z": 3.03
             },
             "config": {

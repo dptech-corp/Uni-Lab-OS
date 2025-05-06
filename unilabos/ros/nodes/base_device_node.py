@@ -15,7 +15,7 @@ from rclpy.action.server import ServerGoalHandle
 from rclpy.client import Client
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.service import Service
-from unilabos_msgs.srv._serial_command import SerialCommand_Request
+from unilabos_msgs.srv._serial_command import SerialCommand_Request, SerialCommand_Response
 
 from unilabos.resources.graphio import convert_resources_to_type, convert_resources_from_type, resource_ulab_to_plr
 from unilabos.ros.msgs.message_converter import (
@@ -305,7 +305,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             res.response = ""
             return res
 
-        def append_resource(req: SerialCommand_Request, res):
+        def append_resource(req: SerialCommand_Request, res: SerialCommand_Response):
             # 物料传输到对应的node节点
             rclient = self.create_client(ResourceAdd, "/resources/add")
             rclient.wait_for_service()
@@ -314,7 +314,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             namespace = command_json["namespace"]
             bind_parent_id = command_json["bind_parent_id"]
             edge_device_id = command_json["edge_device_id"]
-            location = command_json["location"]
+            location = command_json["bind_location"]
             other_calling_param = command_json["other_calling_param"]
             resources = command_json["resource"]
             # 本地拿到这个物料，可能需要先做初始化?
@@ -341,8 +341,9 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             except Exception as e:
                 self.lab_logger().error("Host请求添加物料时出错")
                 self.lab_logger().error(traceback.format_exc())
-            pass
+            return res
 
+        # noinspection PyTypeChecker
         self._service_server: Dict[str, Service] = {
             "query_host_name": self.create_service(
                 SerialCommand, f"/srv{self.namespace}/query_host_name", query_host_name_cb, callback_group=self.callback_group
@@ -571,27 +572,28 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             del future
 
             # 向Host更新物料当前状态
-            for k, v in goal.get_fields_and_field_types().items():
-                if v not in ["unilabos_msgs/Resource", "sequence<unilabos_msgs/Resource>"]:
-                    continue
-                self.lab_logger().info(f"更新资源状态: {k}")
-                r = ResourceUpdate.Request()
-                # 仅当action_kwargs[k]不为None时尝试转换
-                akv = action_kwargs[k]
-                apv = action_paramtypes[k]
-                final_type = get_type_class(apv)
-                if final_type is None:
-                    continue
-                try:
-                    r.resources = [
-                        convert_to_ros_msg(Resource, self.resource_tracker.root_resource(rs))
-                        for rs in convert_resources_from_type(akv, final_type)  # type: ignore  # FIXME  # 考虑反查到最大的
-                    ]
-                    response = await self._resource_clients["resource_update"].call_async(r)
-                    self.lab_logger().debug(f"资源更新结果: {response}")
-                except Exception as e:
-                    self.lab_logger().error(f"资源更新失败: {e}")
-                    self.lab_logger().error(traceback.format_exc())
+            if action_name != "add_resource_from_outer":
+                for k, v in goal.get_fields_and_field_types().items():
+                    if v not in ["unilabos_msgs/Resource", "sequence<unilabos_msgs/Resource>"]:
+                        continue
+                    self.lab_logger().info(f"更新资源状态: {k}")
+                    r = ResourceUpdate.Request()
+                    # 仅当action_kwargs[k]不为None时尝试转换
+                    akv = action_kwargs[k]
+                    apv = action_paramtypes[k]
+                    final_type = get_type_class(apv)
+                    if final_type is None:
+                        continue
+                    try:
+                        r.resources = [
+                            convert_to_ros_msg(Resource, self.resource_tracker.root_resource(rs))
+                            for rs in convert_resources_from_type(akv, final_type)  # type: ignore  # FIXME  # 考虑反查到最大的
+                        ]
+                        response = await self._resource_clients["resource_update"].call_async(r)
+                        self.lab_logger().debug(f"资源更新结果: {response}")
+                    except Exception as e:
+                        self.lab_logger().error(f"资源更新失败: {e}")
+                        self.lab_logger().error(traceback.format_exc())
 
             # 发布结果
             goal_handle.succeed()
