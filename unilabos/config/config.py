@@ -13,6 +13,7 @@ class BasicConfig:
     is_host_mode = True  # 从registry.py移动过来
     slave_no_host = False  # 是否跳过rclient.wait_for_service()
     machine_name = "undefined"
+    vis_2d_enable = False
 
 
 # MQTT配置
