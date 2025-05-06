@@ -55,6 +55,12 @@ class MQTTClient:
             logger.debug("Payload:", json.dumps(payload_json, indent=2, ensure_ascii=False))
             if msg.topic == f"labs/{MQConfig.lab_id}/job/start/":
                 logger.debug("job_add", type(payload_json), payload_json)
+                if "data" not in payload_json:
+                    payload_json["data"] = {}
+                if "action" in payload_json:
+                    payload_json["data"]["action"] = payload_json.pop("action")
+                if "action_kwargs" in payload_json:
+                    payload_json["data"]["action_kwargs"] = payload_json.pop("action_kwargs")
                 job_req = JobAddReq.model_validate(payload_json)
                 data = job_add(job_req)
                 return
