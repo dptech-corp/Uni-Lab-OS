@@ -120,7 +120,7 @@ def slave(
     n = Node(f"slaveMachine_{BasicConfig.machine_name}", parameter_overrides=[])
     executor.add_node(n)
 
-    if visual != "None":
+    if visual != "disable":
         resource_mesh_manager = ResourceMeshManager(
             resources_mesh_config,
             resources_config,
