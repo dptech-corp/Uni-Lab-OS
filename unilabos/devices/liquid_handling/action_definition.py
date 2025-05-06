@@ -36,6 +36,7 @@ class DPLiquidHandler(LiquidHandler):
         delays: Optional[List[int]] = None,
         is_96_well: Optional[bool] = False,
         top: Optional[List(float)] = None,
+        none_keys: List[str] = []
     ):
         """A complete *remove* (aspirate → waste) operation."""
         trash = self.deck.get_trash_area()
@@ -98,7 +99,8 @@ class DPLiquidHandler(LiquidHandler):
         mix_time: Optional[int] = None,
         mix_vol: Optional[int] = None,
         mix_rate: Optional[int] = None,
-        mix_liquid_height: Optional[float] = None
+        mix_liquid_height: Optional[float] = None,
+        none_keys: List[str] = []
     ):
         """A complete *add* (aspirate reagent → dispense into targets) operation."""
 
@@ -177,6 +179,7 @@ class DPLiquidHandler(LiquidHandler):
         mix_rate: Optional[int] = None,
         mix_liquid_height: Optional[float] = None,
         delays: Optional[List[int]] = None,
+        none_keys: List[str] = []
     ):
         """Transfer liquid from each *source* well/plate to the corresponding *target*.
 
@@ -295,6 +298,7 @@ class DPLiquidHandler(LiquidHandler):
         height_to_bottom: Optional[float] = None,
         offsets: Optional[Coordinate] = None,
         mix_rate: Optional[float] = None,
+        none_keys: List[str] = []
     ):
         if mix_time is None: # No mixing required
             return

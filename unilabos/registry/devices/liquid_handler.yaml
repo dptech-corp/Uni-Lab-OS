@@ -163,12 +163,13 @@ liquid_handler:
   schema:
     type: object
     properties:
-      status:
+      name:
         type: string
         description: 液体处理仪器当前状态
     required:
-      - status
+    - name
     additionalProperties: false
+
 
 liquid_handler.revvity:
   class:
@@ -179,7 +180,7 @@ liquid_handler.revvity:
     action_value_mappings:
       run:
         type: WorkStationRun
-        goal: 
+        goal:
           wf_name: file_path
           params: params
           resource: resource
@@ -187,4 +188,3 @@ liquid_handler.revvity:
           status: status
         result:
           success: success
-    

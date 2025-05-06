@@ -1,0 +1,6 @@
+float64 seconds
+string msg
+---
+bool success
+---
+# 反馈
