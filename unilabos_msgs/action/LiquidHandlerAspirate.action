@@ -1,12 +1,11 @@
-# Bio
 Resource[] resources
 float64[] vols
 int32[] use_channels
 float64[] flow_rates
-float64 end_delay
 geometry_msgs/Point[] offsets
 float64[] liquid_height
 float64[] blow_out_air_volume
+string spread="wide"
 ---
 bool success
 ---
