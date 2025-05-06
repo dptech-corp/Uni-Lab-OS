@@ -72,12 +72,12 @@ def main(
         resource_mesh_manager = ResourceMeshManager(
             resources_mesh_config,
             resources_config,
-            resource_tracker= DeviceNodeResourceTracker(),
+            resource_tracker= host_node.resource_tracker,
             device_id = 'resource_mesh_manager',
         )
         joint_republisher = JointRepublisher(
             'joint_republisher',
-            DeviceNodeResourceTracker()
+            host_node.resource_tracker
         )
 
         executor.add_node(resource_mesh_manager)
@@ -96,6 +96,8 @@ def slave(
     graph: Optional[Dict[str, Any]] = None,
     controllers_config: Dict[str, Any] = {},
     bridges: List[Any] = [],
+    visual: str = "None",
+    resources_mesh_config: dict = {},
     args: List[str] = ["--log-level", "debug"],
 ) -> None:
     """从节点函数"""
@@ -118,6 +120,21 @@ def slave(
     n = Node(f"slaveMachine_{BasicConfig.machine_name}", parameter_overrides=[])
     executor.add_node(n)
 
+    if visual != "None":
+        resource_mesh_manager = ResourceMeshManager(
+            resources_mesh_config,
+            resources_config,
+            resource_tracker= DeviceNodeResourceTracker(),
+            device_id = 'resource_mesh_manager',
+        )
+        joint_republisher = JointRepublisher(
+            'joint_republisher',
+            DeviceNodeResourceTracker()
+        )
+
+        executor.add_node(resource_mesh_manager)
+        executor.add_node(joint_republisher)
+        
     thread = threading.Thread(target=executor.spin, daemon=True, name="slave_executor_thread")
     thread.start()
 

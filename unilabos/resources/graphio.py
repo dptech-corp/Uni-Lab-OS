@@ -394,14 +394,14 @@ def resource_ulab_to_plr(resource: dict, plr_model=False) -> "ResourcePLR":
     return resource_plr
 
 
-def resource_plr_to_ulab(resource_plr: "ResourcePLR"):
+def resource_plr_to_ulab(resource_plr: "ResourcePLR", parent_name: str = None):
     def resource_plr_to_ulab_inner(d: dict, all_states: dict) -> dict:
         r = {
             "id": d["name"],
             "name": d["name"],
             "sample_id": None,
             "children": [resource_plr_to_ulab_inner(child, all_states) for child in d["children"]],
-            "parent": d["parent_name"] if d["parent_name"] else None,
+            "parent": d["parent_name"] if d["parent_name"] else parent_name if parent_name else None,
             "type": "device",  # FIXME plr自带的type是python class name
             "class": d.get("class", ""),
             "position": (
@@ -417,6 +417,7 @@ def resource_plr_to_ulab(resource_plr: "ResourcePLR"):
     d = resource_plr.serialize()
     all_states = resource_plr.serialize_all_state()
     r = resource_plr_to_ulab_inner(d, all_states)
+
     return r
 
 
@@ -451,7 +452,8 @@ def initialize_resource(resource_config: dict, lab_registry: dict) -> list[dict]
 
         if resource_class_config["type"] == "pylabrobot":
             resource_plr = RESOURCE(name=resource_config["name"])
-            r = resource_plr_to_ulab(resource_plr=resource_plr)
+            r = resource_plr_to_ulab(resource_plr=resource_plr, parent_name=resource_config.get("parent", None))
+            # r = resource_plr_to_ulab(resource_plr=resource_plr)
             if resource_config.get("position") is not None:
                 r["position"] = resource_config["position"]
             r = tree_to_list([r])
@@ -475,8 +477,9 @@ def initialize_resources(resources_config) -> list[dict]:
     """
 
     from unilabos.registry.registry import lab_registry
-
     resources = []
     for resource_config in resources_config:
+
         resources.extend(initialize_resource(resource_config, lab_registry))
+
     return resources

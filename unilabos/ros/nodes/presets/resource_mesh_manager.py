@@ -1,3 +1,4 @@
+from pathlib import Path
 import time
 import rclpy,json
 from rclpy.node import Node
@@ -6,7 +7,7 @@ import numpy as np
 from moveit_msgs.srv import GetPlanningScene, ApplyPlanningScene
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.qos import QoSProfile, QoSDurabilityPolicy, QoSReliabilityPolicy, QoSHistoryPolicy
-from moveit_msgs.msg import CollisionObject, AttachedCollisionObject, AllowedCollisionEntry
+from moveit_msgs.msg import CollisionObject, AttachedCollisionObject, AllowedCollisionEntry, RobotState, PlanningScene
 from shape_msgs.msg import Mesh, MeshTriangle, SolidPrimitive
 from geometry_msgs.msg import Pose, PoseStamped, Point, Quaternion, TransformStamped
 from rclpy.callback_groups import ReentrantCallbackGroup
@@ -20,6 +21,8 @@ from rclpy.action import ActionServer
 from unilabos_msgs.action import SendCmd
 from rclpy.action.server import ServerGoalHandle
 from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode,DeviceNodeResourceTracker
+from unilabos.resources.graphio import initialize_resources
+from unilabos.registry.registry import lab_registry
 
 class ResourceMeshManager(BaseROS2DeviceNode):
     def __init__(self, resource_model: dict, resource_config: list,resource_tracker, device_id: str = "resource_mesh_manager", rate=50):
@@ -51,10 +54,10 @@ class ResourceMeshManager(BaseROS2DeviceNode):
         self.zero_count             = 0
 
         self.old_resource_pose      = {}
-        self.__planning_scene       = None
+        self.__planning_scene       = PlanningScene()
         self.__old_planning_scene   = None
         self.__old_allowed_collision_matrix = None
-        
+        self.mesh_path = Path(__file__).parent.parent.parent.parent.absolute()
         
         callback_group = ReentrantCallbackGroup()
         self._get_planning_scene_service = self.create_client(
@@ -101,10 +104,47 @@ class ResourceMeshManager(BaseROS2DeviceNode):
             callback_group=callback_group
         )
 
-        self.resource_mesh_setup()
+        # 创建一个Action Server用于添加新的资源模型与resource_tf_dict
+        self._add_resource_mesh_action_server = ActionServer(
+            self,
+            SendCmd,
+            f"add_resource_mesh",
+            self.add_resource_mesh_callback,
+            callback_group=callback_group
+        )
+
+        self.resource_tf_dict = self.resource_mesh_setup(self.resource_config_dict)
         self.create_timer(1/self.rate, self.publish_resource_tf)
         self.create_timer(1/self.rate, self.check_resource_pose_changes)
         
+
+    def add_resource_mesh_callback(self,resource_config_str:str):
+        """刷新资源配置"""
+
+        registry = lab_registry
+        resource_config = json.loads(resource_config_str)
+        
+        if resource_config['id'] in self.resource_config_dict:
+            self.get_logger().info(f'资源 {resource_config["id"]} 已存在')
+            return
+        if resource_config['class'] in registry.resource_type_registry.keys():
+            model_config = registry.resource_type_registry[resource_config['class']]['model']
+            if model_config['type'] == 'resource':
+                self.resource_model[resource_config['id']] = {
+                    'mesh': f"{str(self.mesh_path)}/device_mesh/resources/{model_config['mesh']}",
+                    'mesh_tf': model_config['mesh_tf']}
+                if model_config['children_mesh'] is not None:
+                    self.resource_model[f"{resource_config['id']}_"] = {
+                        'mesh': f"{str(self.mesh_path)}/device_mesh/resources/{model_config['children_mesh']}",
+                        'mesh_tf': model_config['children_mesh_tf']
+                    }
+        resources = initialize_resources([resource_config])
+        resource_dict = {item['id']: item for item in resources}
+        self.resource_config_dict = {**self.resource_config_dict,**resource_dict}
+        tf_dict = self.resource_mesh_setup(resource_dict)
+        self.resource_tf_dict = {**self.resource_tf_dict,**tf_dict}
+        self.publish_resource_tf()
+        self.add_resource_collision_meshes(tf_dict)   
 
 
     def check_move_group_ready(self):
@@ -113,33 +153,35 @@ class ResourceMeshManager(BaseROS2DeviceNode):
         # 获取当前可用的节点列表
 
         tf_ready = self.tf_buffer.can_transform("world", next(iter(self.resource_tf_dict.keys())), rclpy.time.Time(),rclpy.duration.Duration(seconds=2))
-
+        
         # if tf_ready:
         if self._get_planning_scene_service.service_is_ready() and self._apply_planning_scene_service.service_is_ready() and tf_ready:
             self.move_group_ready = True
             self.publish_resource_tf()
-            self.add_resource_collision_meshes()
+            self.add_resource_collision_meshes(self.resource_tf_dict)
             
         # time.sleep(1)
 
-        
 
-    def resource_mesh_setup(self):
+    def resource_mesh_setup(self, resource_config_dict:dict):
         """move_group初始化完成后的设置"""
         self.get_logger().info('开始设置资源网格管理器')
         #遍历resource_config中的资源配置，判断panent是否在resource_model中，
-
-        for resource_id, resource_config in self.resource_config_dict.items():
+        resource_tf_dict = {}
+        for resource_id, resource_config in resource_config_dict.items():
 
             parent = resource_config['parent']
             parent_link = 'world'
             if parent in self.resource_model:
                 parent_link = parent
             elif parent is None and resource_id in self.resource_model:
+
                 pass
-            elif parent not in self.resource_model and parent is not None and resource_config['class'] != '':
+            elif parent is not None and resource_id in self.resource_model:
                 parent_link = f"{self.resource_config_dict[parent]['parent']}_{parent}_device_link".replace("None","")
+
             else:
+
                 continue
             # 提取位置信息并转换单位
             position = {
@@ -163,12 +205,7 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                 float(rotation_dict['y']), 
                 float(rotation_dict['z'])
             )
-            # print("-"*20)
-            # print(f"resource_id: {resource_id}")
-            # print(f"parent: {parent}")
-            # print(f"resource_config: {resource_config}")
-            # print(f"parent_link: {parent_link}")
-            # print("-"*20)
+
             rotation = {
                 "x": q[0],
                 "y": q[1],
@@ -177,11 +214,13 @@ class ResourceMeshManager(BaseROS2DeviceNode):
             }
 
             # 更新资源TF字典
-            self.resource_tf_dict[resource_id] = {
+            resource_tf_dict[resource_id] = {
                 "parent": parent_link,
                 "position": position,
                 "rotation": rotation
             }
+
+        return resource_tf_dict
 
 
     def publish_resource_tf(self):
@@ -376,7 +415,7 @@ class ResourceMeshManager(BaseROS2DeviceNode):
         return SendCmd.Result(success=True)
 
 
-    def add_resource_collision_meshes(self):
+    def add_resource_collision_meshes(self,resource_tf_dict:dict):
         """
         遍历资源配置字典，为每个在resource_model中有对应模型的资源添加碰撞网格
         
@@ -384,8 +423,11 @@ class ResourceMeshManager(BaseROS2DeviceNode):
         如果有，则调用add_collision_mesh方法将其添加到碰撞环境中。
         """
         self.get_logger().info('开始添加资源碰撞网格')
-        
-        for resource_id, tf_info in self.resource_tf_dict.items():
+
+        self.__planning_scene = self._get_planning_scene_service.call(
+            GetPlanningScene.Request()
+        ).scene
+        for resource_id, tf_info in resource_tf_dict.items():
             
             if resource_id in self.resource_model:
                 # 获取位置信息
@@ -405,14 +447,14 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                 )
                 
                 # 添加碰撞网格
-                self.add_collision_mesh(
+                collision_object = self.get_collision_mesh(
                     filepath=self.resource_model[resource_id]['mesh'],
                     id=resource_id,
                     position=position,
                     quat_xyzw=q,
                     frame_id=resource_id
                 )
-
+                self.__planning_scene.world.collision_objects.append(collision_object)
             elif f"{tf_info['parent']}_" in self.resource_model:
                 # 获取资源的父级框架ID
                 id_ = f"{tf_info['parent']}_"
@@ -433,15 +475,21 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                 )
                 
                 # 添加碰撞网格
-                self.add_collision_mesh(
+                collision_object = self.get_collision_mesh(
                     filepath=self.resource_model[id_]['mesh'],
                     id=resource_id,
                     position=position,
                     quat_xyzw=q,
                     frame_id=resource_id
                 )
-            time.sleep(0.03)
 
+                self.__planning_scene.world.collision_objects.append(collision_object)
+
+        req = ApplyPlanningScene.Request()
+        req.scene = self.__planning_scene
+        self._apply_planning_scene_service.call_async(req)
+            
+        
         self.get_logger().info('资源碰撞网格添加完成')
 
 
@@ -637,6 +685,116 @@ class ResourceMeshManager(BaseROS2DeviceNode):
             operation=operation,
         )
 
+    def get_collision_mesh(
+        self,
+        filepath: Optional[str],
+        id: str,
+        pose: Optional[Union[PoseStamped, Pose]] = None,
+        position: Optional[Union[Point, Tuple[float, float, float]]] = None,
+        quat_xyzw: Optional[
+            Union[Quaternion, Tuple[float, float, float, float]]
+        ] = None,
+        frame_id: Optional[str] = None,
+        operation: int = CollisionObject.ADD,
+        scale: Union[float, Tuple[float, float, float]] = 1.0,
+        mesh: Optional[Any] = None,
+    ):
+        """
+        Add collision object with a mesh geometry. Either `filepath` must be
+        specified or `mesh` must be provided.
+        Note: This function required 'trimesh' Python module to be installed.
+        """
+
+        # Load the mesh
+        try:
+            import trimesh
+        except ImportError as err:
+            raise ImportError(
+                "Python module 'trimesh' not found! Please install it manually in order "
+                "to add collision objects into the MoveIt 2 planning scene."
+            ) from err
+
+        # Check the parameters
+        if (pose is None) and (position is None or quat_xyzw is None):
+            raise ValueError(
+                "Either `pose` or `position` and `quat_xyzw` must be specified!"
+            )
+        if (filepath is None and mesh is None) or (
+            filepath is not None and mesh is not None
+        ):
+            raise ValueError("Exactly one of `filepath` or `mesh` must be specified!")
+        if mesh is not None and not isinstance(mesh, trimesh.Trimesh):
+            raise ValueError("`mesh` must be an instance of `trimesh.Trimesh`!")
+
+        if isinstance(pose, PoseStamped):
+            pose_stamped = pose
+        elif isinstance(pose, Pose):
+            pose_stamped = PoseStamped(
+                header=Header(
+                    stamp=self.get_clock().now().to_msg(),
+                    frame_id=(
+                        frame_id if frame_id is not None else self.__base_link_name
+                    ),
+                ),
+                pose=pose,
+            )
+        else:
+            if not isinstance(position, Point):
+                position = Point(
+                    x=float(position[0]), y=float(position[1]), z=float(position[2])
+                )
+            if not isinstance(quat_xyzw, Quaternion):
+                quat_xyzw = Quaternion(
+                    x=float(quat_xyzw[0]),
+                    y=float(quat_xyzw[1]),
+                    z=float(quat_xyzw[2]),
+                    w=float(quat_xyzw[3]),
+                )
+            pose_stamped = PoseStamped(
+                header=Header(
+                    stamp=self.get_clock().now().to_msg(),
+                    frame_id=(
+                        frame_id if frame_id is not None else self.__base_link_name
+                    ),
+                ),
+                pose=Pose(position=position, orientation=quat_xyzw),
+            )
+
+        msg = CollisionObject(
+            header=pose_stamped.header,
+            id=id,
+            operation=operation,
+            pose=pose_stamped.pose,
+        )
+
+        if filepath is not None:
+            mesh = trimesh.load(filepath)
+
+        # Scale the mesh
+        if isinstance(scale, float):
+            scale = (scale, scale, scale)
+        if not (scale[0] == scale[1] == scale[2] == 1.0):
+            # If the mesh was passed in as a parameter, make a copy of it to
+            # avoid transforming the original.
+            if filepath is not None:
+                mesh = mesh.copy()
+            # Transform the mesh
+            transform = np.eye(4)
+            np.fill_diagonal(transform, scale)
+            mesh.apply_transform(transform)
+
+        msg.meshes.append(
+            Mesh(
+                triangles=[MeshTriangle(vertex_indices=face) for face in mesh.faces],
+                vertices=[
+                    Point(x=vert[0], y=vert[1], z=vert[2]) for vert in mesh.vertices
+                ],
+            )
+        )
+        
+        # self.__collision_object_publisher.publish(msg)
+        return msg
+
     def add_collision_mesh(
         self,
         filepath: Optional[str],
@@ -743,7 +901,7 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                 ],
             )
         )
-
+        
         self.__collision_object_publisher.publish(msg)
 
     def remove_collision_object(self, id: str):
