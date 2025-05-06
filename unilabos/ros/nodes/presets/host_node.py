@@ -102,7 +102,7 @@ class HostNode(BaseROS2DeviceNode):
         self._action_clients: Dict[str, ActionClient] = {}  # 用来存储多个ActionClient实例
         self._action_value_mappings: Dict[str, Dict] = {}  # 用来存储多个ActionClient的type, goal, feedback, result的变量名映射关系
         self._goals: Dict[str, Any] = {}  # 用来存储多个目标的状态
-        self._online_devices: Set[str] = set()  # 用于跟踪在线设备
+        self._online_devices: Set[str] = {f"{self.namespace}/{device_id}"}  # 用于跟踪在线设备
         self._last_discovery_time = 0.0  # 上次设备发现的时间
         self._discovery_lock = threading.Lock()  # 设备发现的互斥锁
         self._subscribed_topics = set()  # 用于跟踪已订阅的话题
