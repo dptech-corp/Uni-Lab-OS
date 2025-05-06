@@ -116,9 +116,34 @@ class ResourceMeshManager(BaseROS2DeviceNode):
         self.resource_tf_dict = self.resource_mesh_setup(self.resource_config_dict)
         self.create_timer(1/self.rate, self.publish_resource_tf)
         self.create_timer(1/self.rate, self.check_resource_pose_changes)
-        
 
-    def add_resource_mesh_callback(self,resource_config_str:str):
+    def check_move_group_ready(self):
+        """检查move_group节点是否已初始化完成"""
+
+        # 获取当前可用的节点列表
+
+        tf_ready = self.tf_buffer.can_transform("world", next(iter(self.resource_tf_dict.keys())), rclpy.time.Time(),rclpy.duration.Duration(seconds=2))
+        
+        # if tf_ready:
+        if self._get_planning_scene_service.service_is_ready() and self._apply_planning_scene_service.service_is_ready() and tf_ready:
+            self.move_group_ready = True
+            self.publish_resource_tf()
+            self.add_resource_collision_meshes(self.resource_tf_dict)
+            
+        # time.sleep(1)
+       
+    def add_resource_mesh_callback(self, goal_handle : ServerGoalHandle):
+        tf_update_msg = goal_handle.request
+        try:    
+            self.add_resource_mesh(tf_update_msg.command)
+        except Exception as e:
+            self.get_logger().error(f"添加资源失败: {e}")
+            goal_handle.abort()
+            return SendCmd.Result(success=False)
+        goal_handle.succeed()
+        return SendCmd.Result(success=True)
+    
+    def add_resource_mesh(self,resource_config_str:str):
         """刷新资源配置"""
 
         registry = lab_registry
@@ -144,23 +169,7 @@ class ResourceMeshManager(BaseROS2DeviceNode):
         tf_dict = self.resource_mesh_setup(resource_dict)
         self.resource_tf_dict = {**self.resource_tf_dict,**tf_dict}
         self.publish_resource_tf()
-        self.add_resource_collision_meshes(tf_dict)   
-
-
-    def check_move_group_ready(self):
-        """检查move_group节点是否已初始化完成"""
-
-        # 获取当前可用的节点列表
-
-        tf_ready = self.tf_buffer.can_transform("world", next(iter(self.resource_tf_dict.keys())), rclpy.time.Time(),rclpy.duration.Duration(seconds=2))
-        
-        # if tf_ready:
-        if self._get_planning_scene_service.service_is_ready() and self._apply_planning_scene_service.service_is_ready() and tf_ready:
-            self.move_group_ready = True
-            self.publish_resource_tf()
-            self.add_resource_collision_meshes(self.resource_tf_dict)
-            
-        # time.sleep(1)
+        self.add_resource_collision_meshes(tf_dict)
 
 
     def resource_mesh_setup(self, resource_config_dict:dict):
