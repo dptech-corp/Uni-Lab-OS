@@ -70,16 +70,20 @@ def parse_args():
         help="信息页web服务的启动端口",
     )
     parser.add_argument(
-        "--open_browser",
-        type=bool,
-        default=True,
-        help="是否在启动时打开信息页",
+        "--disable_browser",
+        action='store_true',
+        help="是否在启动时关闭信息页",
+    )
+    parser.add_argument(
+        "--2d_vis",
+        action='store_true',
+        help="是否在pylabrobot实例启动时，同时启动可视化",
     )
     parser.add_argument(
         "--visual",
-        choices=["rviz", "web", "deck", "disable"],
+        choices=["rviz", "web", "disable"],
         default="disable",
-        help="选择可视化工具: rviz, web, deck(2D bird view)",
+        help="选择可视化工具: rviz, web",
     )
     return parser.parse_args()
 
@@ -111,6 +115,7 @@ def main():
     machine_name = os.popen("hostname").read().strip()
     machine_name = "".join([c if c.isalnum() or c == "_" else "_" for c in machine_name])
     BasicConfig.machine_name = machine_name
+    BasicConfig.vis_2d_enable = args_dict["2d_vis"]
 
     from unilabos.resources.graphio import (
         read_node_link_json,
@@ -186,7 +191,7 @@ def main():
             resource_visualization = ResourceVisualization(devices_and_resources, args_dict["resources_config"] ,enable_rviz=enable_rviz)
             args_dict["resources_mesh_config"] = resource_visualization.resource_model
             start_backend(**args_dict)
-            server_thread = threading.Thread(target=start_server)
+            server_thread = threading.Thread(target=start_server, args=(not args_dict["disable_browser"],))
             server_thread.start()
             asyncio.set_event_loop(asyncio.new_event_loop())
             resource_visualization.start()
@@ -194,10 +199,10 @@ def main():
                 time.sleep(1)
         else:
             start_backend(**args_dict)
-            start_server()
+            start_server(open_browser=not args_dict["disable_browser"])
     else:
         start_backend(**args_dict)
-        start_server()
+        start_server(open_browser=not args_dict["disable_browser"])
 
 
 if __name__ == "__main__":
