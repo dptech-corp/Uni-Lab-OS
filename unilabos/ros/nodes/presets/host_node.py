@@ -269,6 +269,18 @@ class HostNode(BaseROS2DeviceNode):
 
     def add_resource_from_outer(self, resources: list["Resource"], device_ids: list[str], bind_parent_ids: list[str]):
         for resource, device_id, bind_parent_id in zip(resources, device_ids, bind_parent_ids):
+            # 这里要求device_id传入必须是edge_device_id
+            namespace = "/devices/" + device_id
+            srv_address = f"/srv{namespace}/append_resource"
+            sclient = self.create_client(SerialCommand, srv_address)
+            request = SerialCommand.Request()
+            request.command = json.dumps({
+                "machine_name": BasicConfig.machine_name,
+                "type": "slave",
+                "devices_config": devices_config_copy,
+                "registry_config": lab_registry.obtain_registry_device_info()
+            }, ensure_ascii=False, cls=TypeEncoder)
+            response = sclient.call(request)
             print("111")
         pass
 
