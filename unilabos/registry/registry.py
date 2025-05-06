@@ -1,3 +1,4 @@
+import io
 import json
 import os
 import sys
@@ -143,6 +144,7 @@ class Registry:
             + f"total: {len(files)}"
         )
         current_device_number = len(self.device_type_registry) + 1
+        from unilabos.app.web.utils.action_utils import get_yaml_from_goal_type
         for i, file in enumerate(files):
             data = yaml.safe_load(open(file, encoding="utf-8"))
             if data:
@@ -167,6 +169,7 @@ class Registry:
                                     action_config["type"] = self._replace_type_with_class(
                                         action_config["type"], device_id, f"动作 {action_name}"
                                     )
+                                    action_config["goal_default"] = yaml.safe_load(io.StringIO(get_yaml_from_goal_type(action_config["type"].Goal)))
                                     action_config["schema"] = ros_action_to_json_schema(action_config["type"])
 
                 self.device_type_registry.update(data)
