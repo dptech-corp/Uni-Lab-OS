@@ -5,7 +5,7 @@ import time
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.action import ActionServer
 from sensor_msgs.msg import JointState
-from ilabos_msgs.action import SendCmd
+from unilabos_msgs.action import SendCmd
 from rclpy.action.server import ServerGoalHandle
 from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode
 from tf_transformations import quaternion_from_euler
