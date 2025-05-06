@@ -479,7 +479,8 @@ def initialize_resources(resources_config) -> list[dict]:
     from unilabos.registry.registry import lab_registry
     resources = []
     for resource_config in resources_config:
-
+        if resource_config["parent"] == "tip_rack" or resource_config["parent"] == "plate_well":
+            continue
         resources.extend(initialize_resource(resource_config, lab_registry))
 
     return resources
