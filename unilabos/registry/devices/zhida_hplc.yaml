@@ -7,7 +7,7 @@ zhida_hplc:
       status: String
     action_value_mappings:
       start:
-        type: StringSingleInput
+        type: StrSingleInput
         goal:
           string: string
         feedback: {}

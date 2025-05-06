@@ -101,6 +101,7 @@ def init_wrapper(
     self,
     device_id: str,
     driver_class: type[T],
+    device_config: Dict[str, Any],
     status_types: Dict[str, Any],
     action_value_mappings: Dict[str, Any],
     hardware_interface: Dict[str, Any],
@@ -118,6 +119,7 @@ def init_wrapper(
         children = []
     kwargs["device_id"] = device_id
     kwargs["driver_class"] = driver_class
+    kwargs["device_config"] = device_config
     kwargs["driver_params"] = driver_params
     kwargs["status_types"] = status_types
     kwargs["action_value_mappings"] = action_value_mappings
@@ -627,6 +629,7 @@ class ROS2DeviceNode:
         self,
         device_id: str,
         driver_class: Type[T],
+        device_config: Dict[str, Any],
         driver_params: Dict[str, Any],
         status_types: Dict[str, Any],
         action_value_mappings: Dict[str, Any],
@@ -641,6 +644,8 @@ class ROS2DeviceNode:
         Args:
             device_id: 设备标识符
             driver_class: 设备类
+            device_config: 原始初始化的json
+            driver_params: driver初始化的参数
             status_types: 状态类型映射
             action_value_mappings: 动作值映射
             hardware_interface: 硬件接口配置
@@ -657,6 +662,7 @@ class ROS2DeviceNode:
         # 保存设备类是否支持异步上下文
         self._has_async_context = hasattr(driver_class, "__aenter__") and hasattr(driver_class, "__aexit__")
         self._driver_class = driver_class
+        self.device_config = device_config
         self.driver_is_ros = driver_is_ros
         self.resource_tracker = DeviceNodeResourceTracker()
 
