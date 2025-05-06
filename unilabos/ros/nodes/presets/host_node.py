@@ -50,7 +50,7 @@ class HostNode(BaseROS2DeviceNode):
         self,
         device_id: str,
         devices_config: Dict[str, Any],
-        resources_config: Any,
+        resources_config: list,
         physical_setup_graph: Optional[Dict[str, Any]] = None,
         controllers_config: Optional[Dict[str, Any]] = None,
         bridges: Optional[List[Any]] = None,

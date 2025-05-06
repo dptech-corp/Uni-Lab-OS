@@ -44,7 +44,7 @@ def exit() -> None:
 
 def main(
     devices_config: Dict[str, Any] = {},
-    resources_config={},
+    resources_config: list=[],
     graph: Optional[Dict[str, Any]] = None,
     controllers_config: Dict[str, Any] = {},
     bridges: List[Any] = [],
@@ -68,7 +68,7 @@ def main(
         discovery_interval,
     )
 
-    if visual != "None":
+    if visual != "disable":
         resource_mesh_manager = ResourceMeshManager(
             resources_mesh_config,
             resources_config,

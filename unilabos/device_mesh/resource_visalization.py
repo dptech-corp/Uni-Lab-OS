@@ -10,7 +10,7 @@ from unilabos.registry.registry import lab_registry
 
 
 class ResourceVisualization:
-    def __init__(self, device: dict, resource: dict, enable_rviz: bool = True):
+    def __init__(self, device: dict, resource: list, enable_rviz: bool = True):
         """初始化资源可视化类
         
         该类用于将设备和资源的3D模型可视化展示。通过解析设备和资源的配置信息,
@@ -18,13 +18,13 @@ class ResourceVisualization:
         
         Args:
             device (dict): 设备配置字典,包含设备的类型、位置等信息
-            resource (dict): 资源配置字典,包含资源的类型、位置等信息 
+            resource (list): 资源配置列表,包含资源的类型、位置等信息
             registry (dict): 注册表字典,包含设备和资源类型的注册信息
             enable_rviz (bool, optional): 是否启用RViz可视化. Defaults to True.
         """
         self.launch_service = LaunchService()
         self.launch_description = LaunchDescription()
-        self.resource_dict = resource
+        self.resource_list = resource
         self.resource_model = {}
         self.resource_type = ['deck', 'plate', 'container']
         self.mesh_path = Path(__file__).parent.absolute()

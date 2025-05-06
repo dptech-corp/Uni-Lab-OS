@@ -7,7 +7,7 @@ from unilabos.utils import logger
 def start_backend(
     backend: str,
     devices_config: dict = {},
-    resources_config: dict = {},
+    resources_config: list = [],
     graph=None,
     controllers_config: dict = {},
     bridges=[],
