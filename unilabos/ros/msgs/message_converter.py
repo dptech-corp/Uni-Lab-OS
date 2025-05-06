@@ -133,15 +133,15 @@ _msg_converter: Dict[Type, Any] = {
     String: lambda x: String(data=str(x)),
     Point: lambda x: Point(x=x.x, y=x.y, z=x.z),
     Resource: lambda x: Resource(
-        id=x["id"],
-        name=x["name"],
+        id=x.get("id", ""),
+        name=x.get("name", ""),
         sample_id=x.get("sample_id", "") or "",
         children=list(x.get("children", [])),
         parent=x.get("parent", "") or "",
-        type=x["type"],
-        category=x.get("class", "") or x["type"],
+        type=x.get("type", ""),
+        category=x.get("class", "") or x.get("type", ""),
         pose=(
-            Pose(position=Point(x=float(x["position"]["x"]), y=float(x["position"]["y"]), z=float(x["position"]["z"])))
+            Pose(position=Point(x=float(x.get("position", {}).get("x", 0)), y=float(x.get("position", {}).get("y", 0)), z=float(x.get("position", {}).get("z", 0))))
             if x.get("position", None) is not None
             else Pose()
         ),
@@ -331,16 +331,27 @@ def convert_to_ros_msg(ros_msg_type: Union[Type, Any], obj: Any) -> Any:
     ros_msg = ros_msg_type() if isinstance(ros_msg_type, type) else ros_msg_type
 
     # 提取数据
-    data = _extract_data(obj)
+    extract_data = dict(_extract_data(obj))
 
     # 转换数据到ROS消息
-    for key, value in data.items():
+    for ind, data in enumerate(ros_msg.get_fields_and_field_types().items()):
+        key, type_name = data
+        if key not in extract_data:
+            continue
+        value = extract_data[key]
         if hasattr(ros_msg, key):
             attr = getattr(ros_msg, key)
             if isinstance(attr, (float, int, str, bool)):
                 setattr(ros_msg, key, value)
             elif isinstance(attr, (list, tuple)) and isinstance(value, Iterable):
-                setattr(ros_msg, key, list(value))
+                td = ros_msg.SLOT_TYPES[ind].value_type
+                if isinstance(td, NamespacedType):
+                    target_class = msg_converter_manager.get_class(f"{'.'.join(td.namespaces)}.{td.name}")
+                    setattr(ros_msg, key, [convert_to_ros_msg(target_class, v) for v in value])
+                else:
+                    setattr(ros_msg, key, [])  # FIXME
+            elif "array.array" in str(type(attr)):
+                setattr(ros_msg, key, value)
             else:
                 nested_ros_msg = convert_to_ros_msg(type(attr)(), value)
                 setattr(ros_msg, key, nested_ros_msg)

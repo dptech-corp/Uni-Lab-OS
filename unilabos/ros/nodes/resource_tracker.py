@@ -43,7 +43,7 @@ class DeviceNodeResourceTracker(object):
                 res_list.extend(
                     self.loop_find_resource(r, resource_cls_type, identifier_key, getattr(query_resource, identifier_key))
                 )
-        assert len(res_list) == 1, f"找到多个资源，请检查资源是否唯一: {res_list}"
+        assert len(res_list) == 1, f"{query_resource} 找到多个资源，请检查资源是否唯一: {res_list}"
         self.root_resource2resource[id(query_resource)] = res_list[0]
         # 后续加入其他对比方式
         return res_list[0]
