@@ -77,9 +77,9 @@ def parse_args():
     )
     parser.add_argument(
         "--visual",
-        choices=["rviz", "web", "disable"],
+        choices=["rviz", "web", "deck", "disable"],
         default="disable",
-        help="选择可视化工具: rviz, web",
+        help="选择可视化工具: rviz, web, deck(2D bird view)",
     )
     return parser.parse_args()
 
@@ -179,7 +179,7 @@ def main():
         signal.signal(signal.SIGTERM, _exit)
         mqtt_client.start()
     args_dict["resources_mesh_config"] = {}
-
+    # web visiualize 2D
     if args_dict["visual"] != "disable":
         enable_rviz = args_dict["visual"] == "rviz"
         if devices_and_resources is not None:

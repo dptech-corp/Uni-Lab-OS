@@ -37,6 +37,9 @@ class Registry:
                             "goal": {
                                 "resources": "resources",
                                 "device_ids": "device_ids",
+                                "bind_parent_ids": "bind_parent_ids",
+                                "bind_locations": "bind_locations",
+                                "other_calling_params": "other_calling_params",
                             },
                             "feedback": {},
                             "result": {

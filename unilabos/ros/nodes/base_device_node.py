@@ -15,8 +15,9 @@ from rclpy.action.server import ServerGoalHandle
 from rclpy.client import Client
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.service import Service
+from unilabos_msgs.srv._serial_command import SerialCommand_Request
 
-from unilabos.resources.graphio import convert_resources_to_type, convert_resources_from_type
+from unilabos.resources.graphio import convert_resources_to_type, convert_resources_from_type, resource_ulab_to_plr
 from unilabos.ros.msgs.message_converter import (
     convert_to_ros_msg,
     convert_from_ros_msg,
@@ -304,7 +305,42 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             res.response = ""
             return res
 
-        def append_resource(req, res):
+        def append_resource(req: SerialCommand_Request, res):
+            # 物料传输到对应的node节点
+            rclient = self.create_client(ResourceAdd, "/resources/add")
+            rclient.wait_for_service()
+            request = ResourceAdd.Request()
+            command_json = json.loads(req.command)
+            namespace = command_json["namespace"]
+            bind_parent_id = command_json["bind_parent_id"]
+            edge_device_id = command_json["edge_device_id"]
+            location = command_json["location"]
+            other_calling_param = command_json["other_calling_param"]
+            resources = command_json["resource"]
+            # 本地拿到这个物料，可能需要先做初始化?
+            if isinstance(resources, list):
+                request.resources = [convert_to_ros_msg(Resource, resource) for resource in resources]
+            else:
+                request.resources = [convert_to_ros_msg(Resource, resources)]
+            response = rclient.call(request)
+            # 应该本地先add_resource？
+            res.response = "OK"
+            # 接下来该根据bind_parent_id进行assign了，目前只有plr可以进行assign，不然没有办法输入到物料系统中
+            resource = self.resource_tracker.figure_resource({"name": bind_parent_id})
+            try:
+                from pylabrobot.resources.resource import Resource as ResourcePLR
+                from pylabrobot.resources.deck import Deck
+                from pylabrobot.resources import Coordinate
+                contain_model = not isinstance(resource, Deck)
+                if isinstance(resource, ResourcePLR):
+                    # resources.list()
+                    plr_instance = resource_ulab_to_plr(resources, contain_model)
+                    resource.assign_child_resource(plr_instance, Coordinate(location["x"], location["y"], location["z"]), **other_calling_param)
+            except ImportError:
+                self.lab_logger().error("Host请求添加物料时，本环境并不存在pylabrobot")
+            except Exception as e:
+                self.lab_logger().error("Host请求添加物料时出错")
+                self.lab_logger().error(traceback.format_exc())
             pass
 
         self._service_server: Dict[str, Service] = {
