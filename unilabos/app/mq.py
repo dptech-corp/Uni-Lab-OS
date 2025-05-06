@@ -1,5 +1,6 @@
 import json
 import time
+import traceback
 import uuid
 
 import paho.mqtt.client as mqtt
@@ -68,8 +69,10 @@ class MQTTClient:
         except json.JSONDecodeError as e:
             logger.error(f"[MQTT] JSON 解析错误: {e}")
             logger.error(f"[MQTT] Raw message: {msg.payload}")
+            logger.error(traceback.format_exc())
         except Exception as e:
             logger.error(f"[MQTT] 处理消息时出错: {e}")
+            logger.error(traceback.format_exc())
 
     def _on_disconnect(self, client, userdata, rc, reasonCode=None, properties=None):
         if rc != 0:
