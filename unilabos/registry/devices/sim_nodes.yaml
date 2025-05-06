@@ -1,0 +1,5 @@
+lh_joint_publisher:
+  class:
+    module: unilabos.devices.ros_dev.liquid_handler_joint_publisher:LiquidHandlerJointPublisher
+    type: ros2
+

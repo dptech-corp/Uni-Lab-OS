@@ -3,3 +3,6 @@ OTDeck:
   class: 
     module: pylabrobot.resources.opentrons.deck:OTDeck
     type: pylabrobot
+  model:
+    type: device
+    mesh: opentrons_liquid_handler

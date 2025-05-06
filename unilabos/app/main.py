@@ -1,10 +1,17 @@
 import argparse
+import asyncio
 import os
 import signal
 import sys
 import json
+import time
+
 import yaml
 from copy import deepcopy
+import threading
+
+import rclpy
+from unilabos.ros.nodes.resource_tracker import DeviceNodeResourceTracker
 
 # 首先添加项目根目录到路径
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -14,6 +21,10 @@ if ilabos_dir not in sys.path:
 
 from unilabos.config.config import load_config, BasicConfig, _update_config_from_env
 from unilabos.utils.banner_print import print_status, print_unilab_banner
+from unilabos.device_mesh.resource_visalization import ResourceVisualization
+from unilabos.ros.nodes.presets.joint_republisher import JointRepublisher
+from unilabos.ros.nodes.presets.resource_mesh_manager import ResourceMeshManager
+from rclpy.executors import MultiThreadedExecutor
 
 
 def parse_args():
@@ -70,7 +81,12 @@ def parse_args():
         default=True,
         help="是否在启动时打开信息页",
     )
-
+    parser.add_argument(
+        "--visual",
+        choices=["rviz", "web","None"],
+        default="rviz",
+        help="选择可视化工具: 'rviz' 或 'web' 或 'None'，默认'rviz'",
+    )
     return parser.parse_args()
 
 
@@ -121,6 +137,7 @@ def main():
     # 注册表
     build_registry(args_dict["registry_path"])
 
+
     if args_dict["graph"] is not None:
         import unilabos.resources.graphio as graph_res
         graph_res.physical_setup_graph = (
@@ -132,6 +149,7 @@ def main():
         args_dict["resources_config"] = initialize_resources(list(deepcopy(devices_and_resources).values()))
         args_dict["devices_config"] = dict_to_nested_dict(deepcopy(devices_and_resources), devices_only=False)
         # args_dict["resources_config"] = dict_to_tree(devices_and_resources, devices_only=False)
+
         args_dict["graph"] = graph_res.physical_setup_graph
     else:
         if args_dict["devices"] is None or args_dict["resources"] is None:
@@ -166,9 +184,28 @@ def main():
         signal.signal(signal.SIGINT, _exit)
         signal.signal(signal.SIGTERM, _exit)
         mqtt_client.start()
+    args_dict["resources_mesh_config"] = {}
+    
+    if args_dict["visual"] != "None":
+        if args_dict["visual"] == "rviz":
+            enable_rviz=True
+        elif args_dict["visual"] == "web":
+            enable_rviz=False
+        resource_visualization = ResourceVisualization(devices_and_resources, args_dict["resources_config"] ,enable_rviz=enable_rviz)
 
-    start_backend(**args_dict)
-    start_server(port=args_dict.get("port", 8002), open_browser=args_dict.get("open_browser", False))
+        args_dict["resources_mesh_config"] = resource_visualization.resource_model
+        # 将joint_republisher和resource_mesh_manager添加进 main_slave_run.py中
+        
+        start_backend(**args_dict)
+        server_thread = threading.Thread(target=start_server)
+        server_thread.start()
+        asyncio.set_event_loop(asyncio.new_event_loop())
+        resource_visualization.start()
+        while True:
+            time.sleep(1)
+    else:
+        start_backend(**args_dict)
+        start_server()
 
 
 if __name__ == "__main__":
