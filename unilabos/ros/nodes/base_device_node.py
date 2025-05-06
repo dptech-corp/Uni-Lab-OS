@@ -439,26 +439,26 @@ class BaseROS2DeviceNode(Node, Generic[T]):
 
             action_kwargs = convert_from_ros_msg_with_mapping(goal, action_value_mapping["goal"])
             self.lab_logger().debug(f"接收到原始目标: {action_kwargs}")
-
             # 向Host查询物料当前状态，如果是host本身的增加物料的请求，则直接跳过
-            for k, v in goal.get_fields_and_field_types().items():
-                if v in ["unilabos_msgs/Resource", "sequence<unilabos_msgs/Resource>"]:
-                    self.lab_logger().info(f"查询资源状态: Key: {k} Type: {v}")
-                    try:
-                        r = ResourceGet.Request()
-                        r.id = action_kwargs[k]["id"] if v == "unilabos_msgs/Resource" else action_kwargs[k][0]["id"]
-                        r.with_children = True
-                        response = await self._resource_clients["resource_get"].call_async(r)
-                    except Exception:
-                        logger.error(f"资源查询失败，默认使用本地资源")
-                    # 删除对response.resources的检查，因为它总是存在
-                    resources_list = [convert_from_ros_msg(rs) for rs in response.resources]  # type: ignore  # FIXME
-                    self.lab_logger().debug(f"资源查询结果: {len(resources_list)} 个资源")
-                    type_hint = action_paramtypes[k]
-                    final_type = get_type_class(type_hint)
-                    # 判断 ACTION 是否需要特殊的物料类型如 pylabrobot.resources.Resource，并做转换
-                    final_resource = convert_resources_to_type(resources_list, final_type)
-                    action_kwargs[k] = self.resource_tracker.figure_resource(final_resource)
+            if action_name != "add_resource_from_outer":
+                for k, v in goal.get_fields_and_field_types().items():
+                    if v in ["unilabos_msgs/Resource", "sequence<unilabos_msgs/Resource>"]:
+                        self.lab_logger().info(f"查询资源状态: Key: {k} Type: {v}")
+                        try:
+                            r = ResourceGet.Request()
+                            r.id = action_kwargs[k]["id"] if v == "unilabos_msgs/Resource" else action_kwargs[k][0]["id"]
+                            r.with_children = True
+                            response = await self._resource_clients["resource_get"].call_async(r)
+                        except Exception:
+                            logger.error(f"资源查询失败，默认使用本地资源")
+                        # 删除对response.resources的检查，因为它总是存在
+                        resources_list = [convert_from_ros_msg(rs) for rs in response.resources]  # type: ignore  # FIXME
+                        self.lab_logger().debug(f"资源查询结果: {len(resources_list)} 个资源")
+                        type_hint = action_paramtypes[k]
+                        final_type = get_type_class(type_hint)
+                        # 判断 ACTION 是否需要特殊的物料类型如 pylabrobot.resources.Resource，并做转换
+                        final_resource = convert_resources_to_type(resources_list, final_type)
+                        action_kwargs[k] = self.resource_tracker.figure_resource(final_resource)
 
             self.lab_logger().info(f"准备执行: {action_kwargs}, 函数: {ACTION.__name__}")
             time_start = time.time()

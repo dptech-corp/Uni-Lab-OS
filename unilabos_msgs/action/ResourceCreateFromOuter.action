@@ -1,5 +1,6 @@
 Resource[] resources
 string[] device_ids
+string[] bind_parent_ids
 ---
 bool success
 ---

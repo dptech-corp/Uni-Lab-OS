@@ -7,11 +7,12 @@ import uuid
 from typing import Optional, Dict, Any, List, ClassVar, Set
 
 from action_msgs.msg import GoalStatus
-from unilabos_msgs.msg import Resource  # type: ignore
-from unilabos_msgs.srv import ResourceAdd, ResourceGet, ResourceDelete, ResourceUpdate, ResourceList, SerialCommand  # type: ignore
 from rclpy.action import ActionClient, get_action_server_names_and_types_by_node
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.service import Service
+from unilabos_msgs.msg import Resource  # type: ignore
+from unilabos_msgs.srv import ResourceAdd, ResourceGet, ResourceDelete, ResourceUpdate, ResourceList, \
+    SerialCommand  # type: ignore
 from unique_identifier_msgs.msg import UUID
 
 from unilabos.registry.registry import lab_registry
@@ -23,11 +24,9 @@ from unilabos.ros.msgs.message_converter import (
     convert_from_ros_msg,
     convert_to_ros_msg,
     msg_converter_manager,
-    ros_action_to_json_schema,
 )
 from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode, ROS2DeviceNode, DeviceNodeResourceTracker
 from unilabos.ros.nodes.presets.controller_node import ControllerNode
-from unilabos.utils.type_check import TypeEncoder
 
 
 class HostNode(BaseROS2DeviceNode):
@@ -76,7 +75,7 @@ class HostNode(BaseROS2DeviceNode):
             driver_instance=self,
             device_id=device_id,
             status_types={},
-            action_value_mappings={},
+            action_value_mappings=lab_registry.device_type_registry["host_node"]["class"]["action_value_mappings"],
             hardware_interface={},
             print_publish=False,
             resource_tracker=DeviceNodeResourceTracker(),  # host node并不是通过initialize 包一层传进来的
@@ -268,8 +267,9 @@ class HostNode(BaseROS2DeviceNode):
                 except Exception as e:
                     self.lab_logger().error(f"[Host Node] Failed to create ActionClient for {action_id}: {str(e)}")
 
-    def add_resource_from_outer(self, resources: list["Resource"], device_ids):
-        print("111")
+    def add_resource_from_outer(self, resources: list["Resource"], device_ids: list[str], bind_parent_ids: list[str]):
+        for resource, device_id, bind_parent_id in zip(resources, device_ids, bind_parent_ids):
+            print("111")
         pass
 
     def initialize_device(self, device_id: str, device_config: Dict[str, Any]) -> None:
