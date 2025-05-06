@@ -10,14 +10,16 @@ import asyncio
 
 import rclpy
 from rclpy.node import Node
-from rclpy.action import ActionServer
+from rclpy.action import ActionServer, ActionClient
 from rclpy.action.server import ServerGoalHandle
 from rclpy.client import Client
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.service import Service
+from unilabos_msgs.action import SendCmd
 from unilabos_msgs.srv._serial_command import SerialCommand_Request, SerialCommand_Response
 
-from unilabos.resources.graphio import convert_resources_to_type, convert_resources_from_type, resource_ulab_to_plr
+from unilabos.resources.graphio import convert_resources_to_type, convert_resources_from_type, resource_ulab_to_plr, \
+    initialize_resources
 from unilabos.ros.msgs.message_converter import (
     convert_to_ros_msg,
     convert_from_ros_msg,
@@ -317,25 +319,50 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             location = command_json["bind_location"]
             other_calling_param = command_json["other_calling_param"]
             resources = command_json["resource"]
+            initialize_full = other_calling_param.pop("initialize_full", False)
             # 本地拿到这个物料，可能需要先做初始化?
             if isinstance(resources, list):
+                if initialize_full:
+                    resources = initialize_resources(resources)
                 request.resources = [convert_to_ros_msg(Resource, resource) for resource in resources]
             else:
+                if initialize_full:
+                    resources = initialize_resources([resources])
                 request.resources = [convert_to_ros_msg(Resource, resources)]
             response = rclient.call(request)
-            # 应该本地先add_resource？
+            # 应该先add_resource了
             res.response = "OK"
             # 接下来该根据bind_parent_id进行assign了，目前只有plr可以进行assign，不然没有办法输入到物料系统中
             resource = self.resource_tracker.figure_resource({"name": bind_parent_id})
+            request.resources = [convert_to_ros_msg(Resource, resources)]
+
             try:
                 from pylabrobot.resources.resource import Resource as ResourcePLR
                 from pylabrobot.resources.deck import Deck
                 from pylabrobot.resources import Coordinate
+                from pylabrobot.resources import OTDeck
                 contain_model = not isinstance(resource, Deck)
                 if isinstance(resource, ResourcePLR):
                     # resources.list()
                     plr_instance = resource_ulab_to_plr(resources, contain_model)
+                    if isinstance(resource, OTDeck) and "slot" in other_calling_param:
+                        resource.assign_child_at_slot(plr_instance, **other_calling_param)
                     resource.assign_child_resource(plr_instance, Coordinate(location["x"], location["y"], location["z"]), **other_calling_param)
+                # 发送给ResourceMeshManager
+                action_client = ActionClient(
+                    self, SendCmd, "/devices/resource_mesh_manager/add_resource_mesh", callback_group=self.callback_group
+                )
+                goal = SendCmd.Goal()
+                goal.command = json.dumps({
+                    "resources": resources,
+                    "bind_parent_id": bind_parent_id,
+                })
+                future = action_client.send_goal_async(goal, goal_uuid=uuid.uuid4())
+
+                def done_cb(*args):
+                    self.lab_logger().info(f"向meshmanager发送新增resource完成")
+
+                future.add_done_callback(done_cb)
             except ImportError:
                 self.lab_logger().error("Host请求添加物料时，本环境并不存在pylabrobot")
             except Exception as e:
