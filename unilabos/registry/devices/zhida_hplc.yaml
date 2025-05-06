@@ -1,0 +1,27 @@
+zhida_hplc:
+  description: Zhida HPLC
+  class:
+    module: unilabos.devices.zhida_hplc.zhida:ZhidaClient
+    type: python
+    status_types:
+      status: String
+    action_value_mappings:
+      start:
+        type: StringSingleInput
+        goal:
+          string: string
+        feedback: {}
+        result: {}
+      abort:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result: {}
+      get_methods:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result: {}
+
+  schema:
+    properties: {}

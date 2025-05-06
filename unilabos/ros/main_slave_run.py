@@ -82,7 +82,7 @@ def main(
 
         executor.add_node(resource_mesh_manager)
         executor.add_node(joint_republisher)
-        
+
     thread = threading.Thread(target=executor.spin, daemon=True, name="host_executor_thread")
     thread.start()
 

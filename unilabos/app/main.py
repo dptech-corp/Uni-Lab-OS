@@ -16,7 +16,7 @@ unilabos_dir = os.path.dirname(os.path.dirname(current_dir))
 if unilabos_dir not in sys.path:
     sys.path.append(unilabos_dir)
 
-from unilabos.config.config import load_config, BasicConfig
+from unilabos.config.config import load_config, BasicConfig, _update_config_from_env
 from unilabos.utils.banner_print import print_status, print_unilab_banner
 from unilabos.device_mesh.resource_visalization import ResourceVisualization
 
@@ -179,7 +179,7 @@ def main():
         signal.signal(signal.SIGTERM, _exit)
         mqtt_client.start()
     args_dict["resources_mesh_config"] = {}
-    
+
     if args_dict["visual"] != "disable":
         enable_rviz = args_dict["visual"] == "rviz"
         if devices_and_resources is not None:
