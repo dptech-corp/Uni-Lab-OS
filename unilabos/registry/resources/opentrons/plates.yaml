@@ -39,6 +39,10 @@ nest_96_wellplate_2ml_deep:
   class: 
     module: pylabrobot.resources.opentrons.plates:nest_96_wellplate_2ml_deep
     type: pylabrobot
+  model: 
+    type: resource
+    mesh: tecan_nested_tip_rack/meshes/plate.stl
+    mesh_tf: [0.064, 0.043, 0, -1.5708, 0, 1.5708]
 
 nest_96_wellplate_200ul_flat:
   description: Nest 96 wellplate 200ul flat

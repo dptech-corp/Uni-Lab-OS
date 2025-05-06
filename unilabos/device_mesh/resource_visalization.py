@@ -64,11 +64,12 @@ class ResourceVisualization:
                         self.resource_model[node['id']] = {
                             'mesh': f"{str(self.mesh_path)}/resources/{model_config['mesh']}",
                             'mesh_tf': model_config['mesh_tf']}
-                        if model_config['children_mesh'] is not None:
-                            self.resource_model[f"{node['id']}_"] = {
-                                'mesh': f"{str(self.mesh_path)}/resources/{model_config['children_mesh']}",
-                                'mesh_tf': model_config['children_mesh_tf']
-                            }
+                        if 'children_mesh' in model_config:
+                            if model_config['children_mesh'] is not None:
+                                self.resource_model[f"{node['id']}_"] = {
+                                    'mesh': f"{str(self.mesh_path)}/resources/{model_config['children_mesh']}",
+                                    'mesh_tf': model_config['children_mesh_tf']
+                                }
                     elif model_config['type'] == 'device':
                         new_include = etree.SubElement(self.root, f"{{{xacro_uri}}}include")
                         new_include.set("filename", f"{str(self.mesh_path)}/devices/{model_config['mesh']}/macro_device.xacro")
