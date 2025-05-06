@@ -20,7 +20,43 @@ class Registry:
         self.registry_paths = DEFAULT_PATHS.copy()  # 使用copy避免修改默认值
         if registry_paths:
             self.registry_paths.extend(registry_paths)
-        self.device_type_registry = {}
+        action_type = self._replace_type_with_class(
+            "ResourceCreateFromOuter", "host_node", f"动作 add_resource_from_outer"
+        )
+        schema = ros_action_to_json_schema(action_type)
+        self.device_type_registry = {
+            "host_node": {
+                "description": "UniLabOS主机节点",
+                "class": {
+                    "module": "unilabos.ros.nodes.presets.host_node",
+                    "type": "python",
+                    "status_types": {},
+                    "action_value_mappings": {
+                        "add_resource_from_outer": {
+                            "type": msg_converter_manager.search_class("ResourceCreateFromOuter"),
+                            "goal": {
+                                "resources": "resources",
+                                "device_ids": "device_ids",
+                                "bind_parent_ids": "bind_parent_ids",
+                                "bind_locations": "bind_locations",
+                                "other_calling_params": "other_calling_params",
+                            },
+                            "feedback": {},
+                            "result": {
+                                "success": "success"
+                            },
+                            "schema": schema
+                        }
+                    }
+                },
+                "schema": {
+                    "properties": {},
+                    "additionalProperties": False,
+                    "type": "object"
+                },
+                "file_path": "/"
+            }
+        }
         self.resource_type_registry = {}
         self._setup_called = False  # 跟踪setup是否已调用
         # 其他状态变量

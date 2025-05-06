@@ -61,3 +61,5 @@ dependencies:
   # ros-humble-gazebo-ros // ignored because of the conflict with ign-gazebo
   # ilab equipments
 #  - ros-humble-unilabos-msgs
+  - pip:
+      - paho-mqtt

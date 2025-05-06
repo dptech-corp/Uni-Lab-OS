@@ -7,11 +7,13 @@ import uuid
 from typing import Optional, Dict, Any, List, ClassVar, Set
 
 from action_msgs.msg import GoalStatus
-from unilabos_msgs.msg import Resource  # type: ignore
-from unilabos_msgs.srv import ResourceAdd, ResourceGet, ResourceDelete, ResourceUpdate, ResourceList, SerialCommand  # type: ignore
+from geometry_msgs.msg import Point
 from rclpy.action import ActionClient, get_action_server_names_and_types_by_node
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.service import Service
+from unilabos_msgs.msg import Resource  # type: ignore
+from unilabos_msgs.srv import ResourceAdd, ResourceGet, ResourceDelete, ResourceUpdate, ResourceList, \
+    SerialCommand  # type: ignore
 from unique_identifier_msgs.msg import UUID
 
 from unilabos.registry.registry import lab_registry
@@ -23,11 +25,9 @@ from unilabos.ros.msgs.message_converter import (
     convert_from_ros_msg,
     convert_to_ros_msg,
     msg_converter_manager,
-    ros_action_to_json_schema,
 )
 from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode, ROS2DeviceNode, DeviceNodeResourceTracker
 from unilabos.ros.nodes.presets.controller_node import ControllerNode
-from unilabos.utils.type_check import TypeEncoder
 
 
 class HostNode(BaseROS2DeviceNode):
@@ -50,7 +50,7 @@ class HostNode(BaseROS2DeviceNode):
         self,
         device_id: str,
         devices_config: Dict[str, Any],
-        resources_config: Any,
+        resources_config: list,
         physical_setup_graph: Optional[Dict[str, Any]] = None,
         controllers_config: Optional[Dict[str, Any]] = None,
         bridges: Optional[List[Any]] = None,
@@ -76,7 +76,7 @@ class HostNode(BaseROS2DeviceNode):
             driver_instance=self,
             device_id=device_id,
             status_types={},
-            action_value_mappings={},
+            action_value_mappings=lab_registry.device_type_registry["host_node"]["class"]["action_value_mappings"],
             hardware_interface={},
             print_publish=False,
             resource_tracker=DeviceNodeResourceTracker(),  # host node并不是通过initialize 包一层传进来的
@@ -97,15 +97,13 @@ class HostNode(BaseROS2DeviceNode):
         self.bridges = bridges
 
         # 创建设备、动作客户端和目标存储
-        self.devices_names: Dict[str, str] = {}  # 存储设备名称和命名空间的映射
+        self.devices_names: Dict[str, str] = {device_id: self.namespace}  # 存储设备名称和命名空间的映射
         self.devices_instances: Dict[str, ROS2DeviceNode] = {}  # 存储设备实例
         self.device_machine_names: Dict[str, str] = {device_id: "本地", }  # 存储设备ID到机器名称的映射
         self._action_clients: Dict[str, ActionClient] = {}  # 用来存储多个ActionClient实例
-        self._action_value_mappings: Dict[str, Dict] = (
-            {}
-        )  # 用来存储多个ActionClient的type, goal, feedback, result的变量名映射关系
+        self._action_value_mappings: Dict[str, Dict] = {}  # 用来存储多个ActionClient的type, goal, feedback, result的变量名映射关系
         self._goals: Dict[str, Any] = {}  # 用来存储多个目标的状态
-        self._online_devices: Set[str] = set()  # 用于跟踪在线设备
+        self._online_devices: Set[str] = {f"{self.namespace}/{device_id}"}  # 用于跟踪在线设备
         self._last_discovery_time = 0.0  # 上次设备发现的时间
         self._discovery_lock = threading.Lock()  # 设备发现的互斥锁
         self._subscribed_topics = set()  # 用于跟踪已订阅的话题
@@ -259,15 +257,40 @@ class HostNode(BaseROS2DeviceNode):
                     self.lab_logger().debug(f"[Host Node] Created ActionClient (Discovery): {action_id}")
                     action_name = action_id[len(namespace) + 1:]
                     edge_device_id = namespace[9:]
-                    from unilabos.app.mq import mqtt_client
-                    info_with_schema = ros_action_to_json_schema(action_type)
-                    mqtt_client.publish_actions(action_name, {
-                        "device_id": edge_device_id,
-                        "action_name": action_name,
-                        "schema": info_with_schema,
-                    })
+                    # from unilabos.app.mq import mqtt_client
+                    # info_with_schema = ros_action_to_json_schema(action_type)
+                    # mqtt_client.publish_actions(action_name, {
+                    #     "device_id": edge_device_id,
+                    #     "device_type": "",
+                    #     "action_name": action_name,
+                    #     "schema": info_with_schema,
+                    # })
                 except Exception as e:
                     self.lab_logger().error(f"[Host Node] Failed to create ActionClient for {action_id}: {str(e)}")
+
+    def add_resource_from_outer(self, resources: list["Resource"], device_ids: list[str], bind_parent_ids: list[str], bind_locations: list[Point], other_calling_params: list[str]):
+        for resource, device_id, bind_parent_id, bind_location, other_calling_param in zip(resources, device_ids, bind_parent_ids, bind_locations, other_calling_params):
+            # 这里要求device_id传入必须是edge_device_id
+            namespace = "/devices/" + device_id
+            srv_address = f"/srv{namespace}/append_resource"
+            sclient = self.create_client(SerialCommand, srv_address)
+            sclient.wait_for_service()
+            request = SerialCommand.Request()
+            request.command = json.dumps({
+                "resource": resource,
+                "namespace": namespace,
+                "edge_device_id": device_id,
+                "bind_parent_id": bind_parent_id,
+                "bind_location": {
+                    "x": bind_location.x,
+                    "y": bind_location.y,
+                    "z": bind_location.z,
+                },
+                "other_calling_param": json.loads(other_calling_param) if other_calling_param else {},
+            }, ensure_ascii=False)
+            response = sclient.call(request)
+            pass
+        pass
 
     def initialize_device(self, device_id: str, device_config: Dict[str, Any]) -> None:
         """
@@ -297,13 +320,14 @@ class HostNode(BaseROS2DeviceNode):
                 action_type = action_value_mapping["type"]
                 self._action_clients[action_id] = ActionClient(self, action_type, action_id)
                 self.lab_logger().debug(f"[Host Node] Created ActionClient (Local): {action_id}")  # 子设备再创建用的是Discover发现的
-                from unilabos.app.mq import mqtt_client
-                info_with_schema = ros_action_to_json_schema(action_type)
-                mqtt_client.publish_actions(action_name, {
-                    "device_id": device_id,
-                    "action_name": action_name,
-                    "schema": info_with_schema,
-                })
+                # from unilabos.app.mq import mqtt_client
+                # info_with_schema = ros_action_to_json_schema(action_type)
+                # mqtt_client.publish_actions(action_name, {
+                #     "device_id": device_id,
+                #     "device_type": device_config["class"],
+                #     "action_name": action_name,
+                #     "schema": info_with_schema,
+                # })
             else:
                 self.lab_logger().warning(f"[Host Node] ActionClient {action_id} already exists.")
         device_key = f"{self.devices_names[device_id]}/{device_id}"  # 这里不涉及二级device_id

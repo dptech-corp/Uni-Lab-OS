@@ -163,12 +163,133 @@ liquid_handler:
   schema:
     type: object
     properties:
-      status:
+      name:
         type: string
         description: 液体处理仪器当前状态
     required:
-      - status
+    - name
     additionalProperties: false
+
+dp_liquid_handler:
+  description: 通用液体处理
+  class:
+    module: unilabos.devices.liquid_handling.action_definition:DPLiquidHandler
+    type: python
+    status_types:
+      status: String
+    action_value_mappings:
+      remove_liquid:
+        type: DPLiquidHandlerRemoveLiquid
+        goal:
+          vols: vols
+          sources: sources
+          waste_liquid: waste_liquid
+          use_channels: use_channels
+          flow_rates: flow_rates
+          offsets: offsets
+          liquid_height: liquid_height
+          blow_out_air_volume: blow_out_air_volume
+          spread: spread
+          delays: delays
+          is_96_well: is_96_well
+          top: top
+          none_keys: none_keys
+        feedback: {}
+        result: {}
+      add_liquid:
+        type: DPLiquidHandlerAddLiquid
+        goal:
+          asp_vols: asp_vols
+          dis_vols: dis_vols
+          reagent_sources: reagent_sources
+          targets: targets
+          use_channels: use_channels
+          flow_rates: flow_rates
+          offsets: offsets
+          liquid_height: liquid_height
+          blow_out_air_volume: blow_out_air_volume
+          spread: spread
+          is_96_well: is_96_well
+          mix_time: mix_time
+          mix_vol: mix_vol
+          mix_rate: mix_rate
+          mix_liquid_height: mix_liquid_height
+          none_keys: none_keys
+        feedback: {}
+        result: {}
+      transfer_liquid:
+        type: DPLiquidHandlerTransferLiquid
+        goal:
+          asp_vols: asp_vols
+          dis_vols: dis_vols
+          sources: sources
+          targets: targets
+          tip_racks: tip_racks
+          use_channels: use_channels
+          asp_flow_rates: asp_flow_rates
+          dis_flow_rates: dis_flow_rates
+          offsets: offsets
+          touch_tip: touch_tip
+          liquid_height: liquid_height
+          blow_out_air_volume: blow_out_air_volume
+          spread: spread
+          is_96_well: is_96_well
+          mix_stage: mix_stage
+          mix_times: mix_times
+          mix_vol: mix_vol
+          mix_rate: mix_rate
+          mix_liquid_height: mix_liquid_height
+          delays: delays
+          none_keys: none_keys
+        feedback: {}
+        result: {}
+      custom_delay:
+        type: DPLiquidHandlerCustomDelay
+        goal:
+          seconds: seconds
+          msg: msg
+        feedback: {}
+        result: {}
+      touch_tip:
+        type: DPLiquidHandlerTouchTip
+        goal:
+          targets: targets
+        feedback: {}
+        result: {}
+      mix:
+        type: DPLiquidHandlerMix
+        goal:
+          targets: targets
+          mix_time: mix_time
+          mix_vol: mix_vol
+          height_to_bottom: height_to_bottom
+          offsets: offsets
+          mix_rate: mix_rate
+          none_keys: none_keys
+        feedback: {}
+        result: {}
+      set_tiprack:
+        type: DPLiquidHandlerSetTiprack
+        goal:
+          tip_racks: tip_racks
+        feedback: {}
+        result: {}
+      move_to:
+        type: DPLiquidHandlerMoveTo
+        goal:
+          well: well
+          dis_to_top: dis_to_top
+          channel: channel
+        feedback: {}
+        result: {}
+  schema:
+    type: object
+    properties:
+      name:
+        type: string
+        description: 物料名
+    required:
+    - name
 
 liquid_handler.revvity:
   class:
@@ -179,7 +300,7 @@ liquid_handler.revvity:
     action_value_mappings:
       run:
         type: WorkStationRun
-        goal: 
+        goal:
           wf_name: file_path
           params: params
           resource: resource
@@ -187,4 +308,3 @@ liquid_handler.revvity:
           status: status
         result:
           success: success
-    

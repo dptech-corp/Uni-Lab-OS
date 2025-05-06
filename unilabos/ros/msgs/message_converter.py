@@ -566,6 +566,7 @@ basic_type_map = {
     'float32': {'type': 'number'},
     'float64': {'type': 'number'},
     'string': {'type': 'string'},
+    'boolean': {'type': 'boolean'},
     'char': {'type': 'string', 'maxLength': 1},
     'byte': {'type': 'integer', 'minimum': 0, 'maximum': 255},
 }

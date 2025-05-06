@@ -42,10 +42,11 @@ conda env update --file unilabos-[YOUR_OS].yml -n 环境名
 
 # 现阶段，需要安装 `unilabos_msgs` 包
 # 可以前往 Release 页面下载系统对应的包进行安装
-conda install ros-humble-unilabos-msgs-0.8.0-xxxxx.tar.bz2
+conda install ros-humble-unilabos-msgs-0.9.0-xxxxx.tar.bz2
 
 # 安装PyLabRobot等前置
-git clone https://github.com/PyLabRobot/pylabrobot
+git clone https://github.com/PyLabRobot/pylabrobot plr_repo
+cd plr_repo
 pip install .[opentrons]
 ```
 

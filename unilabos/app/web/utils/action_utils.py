@@ -8,7 +8,7 @@ import traceback
 from typing import Dict, Any, Type, TypedDict, Optional
 
 from rclpy.action import ActionClient, ActionServer
-from rosidl_parser.definition import UnboundedSequence, NamespacedType, BasicType
+from rosidl_parser.definition import UnboundedSequence, NamespacedType, BasicType, UnboundedString
 
 from unilabos.ros.msgs.message_converter import msg_converter_manager
 from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode
@@ -74,7 +74,6 @@ def get_yaml_from_goal_type(goal_type) -> str:
         for ind, slot_info in enumerate(goal_type._fields_and_field_types.items()):
             slot_name, slot_type = slot_info
             type_info = goal_type.SLOT_TYPES[ind]
-            default_value = "unknown"
             if isinstance(type_info, UnboundedSequence):
                 inner_type = type_info.value_type
                 if isinstance(inner_type, NamespacedType):
@@ -83,8 +82,10 @@ def get_yaml_from_goal_type(goal_type) -> str:
                     default_value = [get_ros_msg_instance_as_dict(type_class())]
                 elif isinstance(inner_type, BasicType):
                     default_value = [get_default_value_for_ros_type(inner_type.typename)]
+                elif isinstance(inner_type, UnboundedString):
+                    default_value = [""]
                 else:
-                    default_value = "unknown"
+                    default_value = []
             elif isinstance(type_info, NamespacedType):
                 cls_name = ".".join(type_info.namespaces) + ":" + type_info.name
                 type_class = msg_converter_manager.get_class(cls_name)
@@ -93,6 +94,8 @@ def get_yaml_from_goal_type(goal_type) -> str:
                 default_value = get_ros_msg_instance_as_dict(type_class())
             elif isinstance(type_info, BasicType):
                 default_value = get_default_value_for_ros_type(type_info.typename)
+            elif isinstance(type_info, UnboundedString):
+                default_value = ""
             else:
                 type_class = msg_converter_manager.search_class(slot_type, search_lower=True)
                 if type_class is not None:

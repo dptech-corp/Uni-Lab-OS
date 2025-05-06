@@ -1,0 +1,8 @@
+Resource[] resources
+string[] device_ids
+string[] bind_parent_ids
+geometry_msgs/Point[] bind_locations
+string[] other_calling_params
+---
+bool success
+---

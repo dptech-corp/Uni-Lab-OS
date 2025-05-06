@@ -219,12 +219,14 @@ class PyLabRobotCreator(DeviceClassCreator[T]):
                         logger.error(f"PyLabRobot反序列化失败: {deserialize_error}")
                         logger.error(f"PyLabRobot反序列化堆栈: {stack}")
 
-            return self.device_instance
+        return self.device_instance
 
     def post_create(self):
         if hasattr(self.device_instance, "setup") and asyncio.iscoroutinefunction(getattr(self.device_instance, "setup")):
             from unilabos.ros.nodes.base_device_node import ROS2DeviceNode
-            ROS2DeviceNode.run_async_func(getattr(self.device_instance, "setup")).add_done_callback(lambda x: logger.debug(f"PyLabRobot设备实例 {self.device_instance} 设置完成"))
+            def done_cb(*args):
+                logger.debug(f"PyLabRobot设备实例 {self.device_instance} 设置完成")
+            ROS2DeviceNode.run_async_func(getattr(self.device_instance, "setup")).add_done_callback(done_cb)
 
 
 class ProtocolNodeCreator(DeviceClassCreator[T]):

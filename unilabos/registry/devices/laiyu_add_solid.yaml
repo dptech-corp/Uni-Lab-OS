@@ -1,0 +1,56 @@
+laiyu_add_solid:
+  description: Laiyu Add Solid
+  class:
+    module: unilabos.devices.laiyu_add_solid.laiyu:Laiyu
+    type: python
+    status_types: {}
+    action_value_mappings:
+      move_to_xyz:
+        type: Point3DSeparateInput
+        goal:
+          x: x
+          y: y
+          z: z
+        feedback: {}
+        result: {}
+      pick_powder_tube:
+        type: IntSingleInput
+        goal:
+          int_input: int_input
+        feedback: {}
+        result: {}
+      put_powder_tube:
+        type: IntSingleInput
+        goal:
+          int_input: int_input
+        feedback: {}
+        result: {}
+      reset:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result: {}
+      add_powder_tube:
+        type: SolidDispenseAddPowderTube
+        goal:
+          powder_tube_number: powder_tube_number
+          target_tube_position: target_tube_position
+          compound_mass: compound_mass
+        feedback: {}
+        result: 
+          actual_mass_mg: actual_mass_mg
+      move_to_plate:
+        type: StrSingleInput
+        goal:
+          string: string
+        feedback: {}
+        result: {}
+      discharge:
+        type: FloatSingleInput
+        goal:
+          float_input: float_input
+        feedback: {}
+        result: {}
+        
+  schema:
+    properties: {}

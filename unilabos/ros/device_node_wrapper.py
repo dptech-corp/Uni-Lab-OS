@@ -18,6 +18,7 @@ class ROS2DeviceNodeWrapper(ROS2DeviceNode):
 
 def ros2_device_node(
     cls: Type[T],
+    device_config: Optional[Dict[str, Any]] = None,
     status_types: Optional[Dict[str, Any]] = None,
     action_value_mappings: Optional[Dict[str, Any]] = None,
     hardware_interface: Optional[Dict[str, Any]] = None,
@@ -30,6 +31,7 @@ def ros2_device_node(
         cls: 要封装的设备类
         status_types: 需要发布的状态和传感器信息，每个(PROP: TYPE)，PROP应该匹配cls.PROP或cls.get_PROP()，
             TYPE应该是ROS2消息类型。默认为{}。
+        device_config: 初始化时的config。
         action_value_mappings: 设备动作。默认为{}。
             每个(ACTION: {'type': CMD_TYPE, 'goal': {FIELD: PROP}, 'feedback': {FIELD: PROP}, 'result': {FIELD: PROP}}),
         hardware_interface: 硬件接口配置。默认为{"name": "hardware_interface", "write": "send_command", "read": "read_data", "extra_info": []}。
@@ -42,6 +44,8 @@ def ros2_device_node(
     # 从属性中自动发现可发布状态
     if status_types is None:
         status_types = {}
+    if device_config is None:
+        device_config = {}
     if action_value_mappings is None:
         action_value_mappings = {}
     if hardware_interface is None:
@@ -73,6 +77,7 @@ def ros2_device_node(
             "__init__": lambda self, *args, **kwargs: init_wrapper(
                 self,
                 driver_class=cls,
+                device_config=device_config,
                 status_types=status_types,
                 action_value_mappings=action_value_mappings,
                 hardware_interface=hardware_interface,

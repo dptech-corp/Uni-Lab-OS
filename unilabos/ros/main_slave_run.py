@@ -44,18 +44,18 @@ def exit() -> None:
 
 def main(
     devices_config: Dict[str, Any] = {},
-    resources_config={},
+    resources_config: list=[],
     graph: Optional[Dict[str, Any]] = None,
     controllers_config: Dict[str, Any] = {},
     bridges: List[Any] = [],
-    visual: str = "None",
+    visual: str = "disable",
     resources_mesh_config: dict = {},
-    args: List[str] = ["--log-level", "debug"],
+    rclpy_init_args: List[str] = ["--log-level", "debug"],
     discovery_interval: float = 5.0,
 ) -> None:
     """主函数"""
 
-    rclpy.init(args=args)
+    rclpy.init(args=rclpy_init_args)
     executor = rclpy.__executor = MultiThreadedExecutor()
     # 创建主机节点
     host_node = HostNode(
@@ -68,21 +68,21 @@ def main(
         discovery_interval,
     )
 
-    if visual != "None":
+    if visual != "disable":
         resource_mesh_manager = ResourceMeshManager(
             resources_mesh_config,
             resources_config,
-            resource_tracker= host_node.resource_tracker,
+            resource_tracker= DeviceNodeResourceTracker(),
             device_id = 'resource_mesh_manager',
         )
         joint_republisher = JointRepublisher(
             'joint_republisher',
-            host_node.resource_tracker
+            DeviceNodeResourceTracker()
         )
 
         executor.add_node(resource_mesh_manager)
         executor.add_node(joint_republisher)
-        
+
     thread = threading.Thread(target=executor.spin, daemon=True, name="host_executor_thread")
     thread.start()
 
@@ -96,13 +96,13 @@ def slave(
     graph: Optional[Dict[str, Any]] = None,
     controllers_config: Dict[str, Any] = {},
     bridges: List[Any] = [],
-    visual: str = "None",
+    visual: str = "disable",
     resources_mesh_config: dict = {},
-    args: List[str] = ["--log-level", "debug"],
+    rclpy_init_args: List[str] = ["--log-level", "debug"],
 ) -> None:
     """从节点函数"""
     if not rclpy.ok():
-        rclpy.init(args=args)
+        rclpy.init(args=rclpy_init_args)
     executor = rclpy.__executor
     if not executor:
         executor = rclpy.__executor = MultiThreadedExecutor()
@@ -153,7 +153,7 @@ def slave(
         logger.info(f"Slave node info updated.")
 
         rclient = n.create_client(ResourceAdd, "/resources/add")
-        rclient.wait_for_service()  # FIXME 可能一直等待，加一个参数
+        rclient.wait_for_service()
 
         request = ResourceAdd.Request()
         request.resources = [convert_to_ros_msg(Resource, resource) for resource in resources_config]

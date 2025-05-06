@@ -15,8 +15,9 @@ from rclpy.action.server import ServerGoalHandle
 from rclpy.client import Client
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.service import Service
+from unilabos_msgs.srv._serial_command import SerialCommand_Request, SerialCommand_Response
 
-from unilabos.resources.graphio import convert_resources_to_type, convert_resources_from_type
+from unilabos.resources.graphio import convert_resources_to_type, convert_resources_from_type, resource_ulab_to_plr
 from unilabos.ros.msgs.message_converter import (
     convert_to_ros_msg,
     convert_from_ros_msg,
@@ -101,6 +102,7 @@ def init_wrapper(
     self,
     device_id: str,
     driver_class: type[T],
+    device_config: Dict[str, Any],
     status_types: Dict[str, Any],
     action_value_mappings: Dict[str, Any],
     hardware_interface: Dict[str, Any],
@@ -118,6 +120,7 @@ def init_wrapper(
         children = []
     kwargs["device_id"] = device_id
     kwargs["driver_class"] = driver_class
+    kwargs["device_config"] = device_config
     kwargs["driver_params"] = driver_params
     kwargs["status_types"] = status_types
     kwargs["action_value_mappings"] = action_value_mappings
@@ -302,9 +305,51 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             res.response = ""
             return res
 
+        def append_resource(req: SerialCommand_Request, res: SerialCommand_Response):
+            # 物料传输到对应的node节点
+            rclient = self.create_client(ResourceAdd, "/resources/add")
+            rclient.wait_for_service()
+            request = ResourceAdd.Request()
+            command_json = json.loads(req.command)
+            namespace = command_json["namespace"]
+            bind_parent_id = command_json["bind_parent_id"]
+            edge_device_id = command_json["edge_device_id"]
+            location = command_json["bind_location"]
+            other_calling_param = command_json["other_calling_param"]
+            resources = command_json["resource"]
+            # 本地拿到这个物料，可能需要先做初始化?
+            if isinstance(resources, list):
+                request.resources = [convert_to_ros_msg(Resource, resource) for resource in resources]
+            else:
+                request.resources = [convert_to_ros_msg(Resource, resources)]
+            response = rclient.call(request)
+            # 应该本地先add_resource？
+            res.response = "OK"
+            # 接下来该根据bind_parent_id进行assign了，目前只有plr可以进行assign，不然没有办法输入到物料系统中
+            resource = self.resource_tracker.figure_resource({"name": bind_parent_id})
+            try:
+                from pylabrobot.resources.resource import Resource as ResourcePLR
+                from pylabrobot.resources.deck import Deck
+                from pylabrobot.resources import Coordinate
+                contain_model = not isinstance(resource, Deck)
+                if isinstance(resource, ResourcePLR):
+                    # resources.list()
+                    plr_instance = resource_ulab_to_plr(resources, contain_model)
+                    resource.assign_child_resource(plr_instance, Coordinate(location["x"], location["y"], location["z"]), **other_calling_param)
+            except ImportError:
+                self.lab_logger().error("Host请求添加物料时，本环境并不存在pylabrobot")
+            except Exception as e:
+                self.lab_logger().error("Host请求添加物料时出错")
+                self.lab_logger().error(traceback.format_exc())
+            return res
+
+        # noinspection PyTypeChecker
         self._service_server: Dict[str, Service] = {
             "query_host_name": self.create_service(
                 SerialCommand, f"/srv{self.namespace}/query_host_name", query_host_name_cb, callback_group=self.callback_group
+            ),
+            "append_resource": self.create_service(
+                SerialCommand, f"/srv{self.namespace}/append_resource", append_resource, callback_group=self.callback_group
             ),
         }
 
@@ -437,26 +482,26 @@ class BaseROS2DeviceNode(Node, Generic[T]):
 
             action_kwargs = convert_from_ros_msg_with_mapping(goal, action_value_mapping["goal"])
             self.lab_logger().debug(f"接收到原始目标: {action_kwargs}")
-
-            # 向Host查询物料当前状态
-            for k, v in goal.get_fields_and_field_types().items():
-                if v in ["unilabos_msgs/Resource", "sequence<unilabos_msgs/Resource>"]:
-                    self.lab_logger().info(f"查询资源状态: Key: {k} Type: {v}")
-                    try:
-                        r = ResourceGet.Request()
-                        r.id = action_kwargs[k]["id"] if v == "unilabos_msgs/Resource" else action_kwargs[k][0]["id"]
-                        r.with_children = True
-                        response = await self._resource_clients["resource_get"].call_async(r)
-                    except Exception:
-                        logger.error(f"资源查询失败，默认使用本地资源")
-                    # 删除对response.resources的检查，因为它总是存在
-                    resources_list = [convert_from_ros_msg(rs) for rs in response.resources]  # type: ignore  # FIXME
-                    self.lab_logger().debug(f"资源查询结果: {len(resources_list)} 个资源")
-                    type_hint = action_paramtypes[k]
-                    final_type = get_type_class(type_hint)
-                    # 判断 ACTION 是否需要特殊的物料类型如 pylabrobot.resources.Resource，并做转换
-                    final_resource = convert_resources_to_type(resources_list, final_type)
-                    action_kwargs[k] = self.resource_tracker.figure_resource(final_resource)
+            # 向Host查询物料当前状态，如果是host本身的增加物料的请求，则直接跳过
+            if action_name != "add_resource_from_outer":
+                for k, v in goal.get_fields_and_field_types().items():
+                    if v in ["unilabos_msgs/Resource", "sequence<unilabos_msgs/Resource>"]:
+                        self.lab_logger().info(f"查询资源状态: Key: {k} Type: {v}")
+                        try:
+                            r = ResourceGet.Request()
+                            r.id = action_kwargs[k]["id"] if v == "unilabos_msgs/Resource" else action_kwargs[k][0]["id"]
+                            r.with_children = True
+                            response = await self._resource_clients["resource_get"].call_async(r)
+                        except Exception:
+                            logger.error(f"资源查询失败，默认使用本地资源")
+                        # 删除对response.resources的检查，因为它总是存在
+                        resources_list = [convert_from_ros_msg(rs) for rs in response.resources]  # type: ignore  # FIXME
+                        self.lab_logger().debug(f"资源查询结果: {len(resources_list)} 个资源")
+                        type_hint = action_paramtypes[k]
+                        final_type = get_type_class(type_hint)
+                        # 判断 ACTION 是否需要特殊的物料类型如 pylabrobot.resources.Resource，并做转换
+                        final_resource = convert_resources_to_type(resources_list, final_type)
+                        action_kwargs[k] = self.resource_tracker.figure_resource(final_resource)
 
             self.lab_logger().info(f"准备执行: {action_kwargs}, 函数: {ACTION.__name__}")
             time_start = time.time()
@@ -527,27 +572,28 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             del future
 
             # 向Host更新物料当前状态
-            for k, v in goal.get_fields_and_field_types().items():
-                if v not in ["unilabos_msgs/Resource", "sequence<unilabos_msgs/Resource>"]:
-                    continue
-                self.lab_logger().info(f"更新资源状态: {k}")
-                r = ResourceUpdate.Request()
-                # 仅当action_kwargs[k]不为None时尝试转换
-                akv = action_kwargs[k]
-                apv = action_paramtypes[k]
-                final_type = get_type_class(apv)
-                if final_type is None:
-                    continue
-                try:
-                    r.resources = [
-                        convert_to_ros_msg(Resource, self.resource_tracker.root_resource(rs))
-                        for rs in convert_resources_from_type(akv, final_type)  # type: ignore  # FIXME  # 考虑反查到最大的
-                    ]
-                    response = await self._resource_clients["resource_update"].call_async(r)
-                    self.lab_logger().debug(f"资源更新结果: {response}")
-                except Exception as e:
-                    self.lab_logger().error(f"资源更新失败: {e}")
-                    self.lab_logger().error(traceback.format_exc())
+            if action_name != "add_resource_from_outer":
+                for k, v in goal.get_fields_and_field_types().items():
+                    if v not in ["unilabos_msgs/Resource", "sequence<unilabos_msgs/Resource>"]:
+                        continue
+                    self.lab_logger().info(f"更新资源状态: {k}")
+                    r = ResourceUpdate.Request()
+                    # 仅当action_kwargs[k]不为None时尝试转换
+                    akv = action_kwargs[k]
+                    apv = action_paramtypes[k]
+                    final_type = get_type_class(apv)
+                    if final_type is None:
+                        continue
+                    try:
+                        r.resources = [
+                            convert_to_ros_msg(Resource, self.resource_tracker.root_resource(rs))
+                            for rs in convert_resources_from_type(akv, final_type)  # type: ignore  # FIXME  # 考虑反查到最大的
+                        ]
+                        response = await self._resource_clients["resource_update"].call_async(r)
+                        self.lab_logger().debug(f"资源更新结果: {response}")
+                    except Exception as e:
+                        self.lab_logger().error(f"资源更新失败: {e}")
+                        self.lab_logger().error(traceback.format_exc())
 
             # 发布结果
             goal_handle.succeed()
@@ -627,6 +673,7 @@ class ROS2DeviceNode:
         self,
         device_id: str,
         driver_class: Type[T],
+        device_config: Dict[str, Any],
         driver_params: Dict[str, Any],
         status_types: Dict[str, Any],
         action_value_mappings: Dict[str, Any],
@@ -641,6 +688,8 @@ class ROS2DeviceNode:
         Args:
             device_id: 设备标识符
             driver_class: 设备类
+            device_config: 原始初始化的json
+            driver_params: driver初始化的参数
             status_types: 状态类型映射
             action_value_mappings: 动作值映射
             hardware_interface: 硬件接口配置
@@ -657,11 +706,12 @@ class ROS2DeviceNode:
         # 保存设备类是否支持异步上下文
         self._has_async_context = hasattr(driver_class, "__aenter__") and hasattr(driver_class, "__aexit__")
         self._driver_class = driver_class
+        self.device_config = device_config
         self.driver_is_ros = driver_is_ros
         self.resource_tracker = DeviceNodeResourceTracker()
 
         # use_pylabrobot_creator 使用 cls的包路径检测
-        use_pylabrobot_creator = driver_class.__module__.startswith("pylabrobot")
+        use_pylabrobot_creator = driver_class.__module__.startswith("pylabrobot") or driver_class.__name__ == "DPLiquidHandler"
 
         # TODO: 要在创建之前预先请求服务器是否有当前id的物料，放到resource_tracker中，让pylabrobot进行创建
         # 创建设备类实例

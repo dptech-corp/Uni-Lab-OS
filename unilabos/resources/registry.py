@@ -1,5 +1,5 @@
-import sys
-
+import traceback
+from unilabos.utils.log import logger
 
 resource_schema = {
     "workstation": {"type": "object", "properties": {}},
@@ -132,7 +132,8 @@ def add_schema(resources_config: list[dict]) -> list[dict]:
             try:
                 if type(resource["children"][0]) == dict:
                     resource["children"] = add_schema(resource["children"])
-            except:
-                sys.exit(0)
+            except Exception as ex:
+                logger.error("添加物料schema时出错")
+                traceback.print_exc()
 
     return resources_config
