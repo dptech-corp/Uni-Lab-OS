@@ -10,7 +10,7 @@ from unilabos.registry.registry import lab_registry
 
 
 class ResourceVisualization:
-    def __init__(self, device: dict, resource: list, enable_rviz: bool = True):
+    def __init__(self, device: dict, resource: dict, enable_rviz: bool = True):
         """初始化资源可视化类
         
         该类用于将设备和资源的3D模型可视化展示。通过解析设备和资源的配置信息,
@@ -18,13 +18,13 @@ class ResourceVisualization:
         
         Args:
             device (dict): 设备配置字典,包含设备的类型、位置等信息
-            resource (list): 资源配置列表,包含资源的类型、位置等信息
+            resource (dict): 资源配置字典,包含资源的类型、位置等信息 
             registry (dict): 注册表字典,包含设备和资源类型的注册信息
             enable_rviz (bool, optional): 是否启用RViz可视化. Defaults to True.
         """
         self.launch_service = LaunchService()
         self.launch_description = LaunchDescription()
-        self.resource_list = resource
+        self.resource_dict = resource
         self.resource_model = {}
         self.resource_type = ['deck', 'plate', 'container']
         self.mesh_path = Path(__file__).parent.absolute()
@@ -64,11 +64,12 @@ class ResourceVisualization:
                         self.resource_model[node['id']] = {
                             'mesh': f"{str(self.mesh_path)}/resources/{model_config['mesh']}",
                             'mesh_tf': model_config['mesh_tf']}
-                        if model_config['children_mesh'] is not None:
-                            self.resource_model[f"{node['id']}_"] = {
-                                'mesh': f"{str(self.mesh_path)}/resources/{model_config['children_mesh']}",
-                                'mesh_tf': model_config['children_mesh_tf']
-                            }
+                        if 'children_mesh' in model_config:
+                            if model_config['children_mesh'] is not None:
+                                self.resource_model[f"{node['id']}_"] = {
+                                    'mesh': f"{str(self.mesh_path)}/resources/{model_config['children_mesh']}",
+                                    'mesh_tf': model_config['children_mesh_tf']
+                                }
                     elif model_config['type'] == 'device':
                         new_include = etree.SubElement(self.root, f"{{{xacro_uri}}}include")
                         new_include.set("filename", f"{str(self.mesh_path)}/devices/{model_config['mesh']}/macro_device.xacro")
@@ -76,6 +77,7 @@ class ResourceVisualization:
                         new_dev.set("parent_link", "world")
                         new_dev.set("mesh_path", str(self.mesh_path))
                         new_dev.set("device_name", node["id"]+"_")
+                        new_dev.set("station_name", node["parent"]+'_')
                         new_dev.set("x",str(float(node["position"]["x"])/1000))
                         new_dev.set("y",str(float(node["position"]["y"])/1000))
                         new_dev.set("z",str(float(node["position"]["z"])/1000))

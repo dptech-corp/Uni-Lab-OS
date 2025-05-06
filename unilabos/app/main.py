@@ -191,7 +191,9 @@ def main():
             resource_visualization = ResourceVisualization(devices_and_resources, args_dict["resources_config"] ,enable_rviz=enable_rviz)
             args_dict["resources_mesh_config"] = resource_visualization.resource_model
             start_backend(**args_dict)
-            server_thread = threading.Thread(target=start_server, args=(not args_dict["disable_browser"],))
+            server_thread = threading.Thread(target=start_server, kwargs=dict(
+                open_browser=not args_dict["disable_browser"]
+            ))
             server_thread.start()
             asyncio.set_event_loop(asyncio.new_event_loop())
             resource_visualization.start()

@@ -643,7 +643,8 @@ class HostNode(BaseROS2DeviceNode):
                 self.lab_logger().debug(f"[Host Node-Resource] Retrieved from bridge: {len(r)} resources")
             except Exception as e:
                 self.lab_logger().error(f"[Host Node-Resource] Error retrieving from bridge: {str(e)}")
-                r = []
+                r = [resource for resource in self.resources_config if resource.get("id") == request.id]
+                self.lab_logger().warning(f"[Host Node-Resource] Retrieved from local: {len(r)} resources")
         else:
             # 本地物料服务，根据 id 查询物料
             r = [resource for resource in self.resources_config if resource.get("id") == request.id]

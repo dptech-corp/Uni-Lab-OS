@@ -68,7 +68,7 @@ opentrons_96_filtertiprack_1000ul:
     mesh: tecan_nested_tip_rack/meshes/plate.stl
     mesh_tf: [0.064, 0.043, 0, -1.5708, 0, 1.5708]
     children_mesh: generic_labware_tube_10_75/meshes/0_base.stl
-    children_mesh_tf: [0.0018, 0.0018, 0, -1.5708,0, 0]
+    children_mesh_tf: [0.0085, 0.006, 0, -1.5708,0, 0]
     
 opentrons_96_filtertiprack_20ul:
   description: Opentrons 96 filtertiprack 20ul
