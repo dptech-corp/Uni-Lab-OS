@@ -166,39 +166,39 @@ Visualization Manager:
           Expand Link Details: false
           Expand Tree: false
           Link Tree Style: Links in Alphabetic Order
-          deck_device_link:
+          PLR_STATION_deck_device_link:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          deck_first_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          deck_fourth_link:
+          PLR_STATION_deck_first_link:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          deck_main_link:
+          PLR_STATION_deck_fourth_link:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          deck_second_link:
+          PLR_STATION_deck_main_link:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          deck_socketTypeGenericSbsFootprint:
+          PLR_STATION_deck_second_link:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          deck_socketTypeHEPAModule:
+            Value: true
+          PLR_STATION_deck_socketTypeGenericSbsFootprint:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          deck_third_link:
+          PLR_STATION_deck_socketTypeHEPAModule:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          PLR_STATION_deck_third_link:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -253,39 +253,39 @@ Visualization Manager:
           Expand Link Details: false
           Expand Tree: false
           Link Tree Style: Links in Alphabetic Order
-          deck_device_link:
+          PLR_STATION_deck_device_link:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          deck_first_link:
-            Alpha: 1
-            Show Axes: false
-            Show Trail: false
-            Value: true
-          deck_fourth_link:
+          PLR_STATION_deck_first_link:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          deck_main_link:
+          PLR_STATION_deck_fourth_link:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          deck_second_link:
+          PLR_STATION_deck_main_link:
             Alpha: 1
             Show Axes: false
             Show Trail: false
             Value: true
-          deck_socketTypeGenericSbsFootprint:
+          PLR_STATION_deck_second_link:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          deck_socketTypeHEPAModule:
+            Value: true
+          PLR_STATION_deck_socketTypeGenericSbsFootprint:
             Alpha: 1
             Show Axes: false
             Show Trail: false
-          deck_third_link:
+          PLR_STATION_deck_socketTypeHEPAModule:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+          PLR_STATION_deck_third_link:
             Alpha: 1
             Show Axes: false
             Show Trail: false
@@ -345,25 +345,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 1.49553644657135
+      Distance: 1.0284695625305176
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 1.0440783500671387
-        Y: 0.27775266766548157
-        Z: 0.42559614777565
+        X: 0.3028717339038849
+        Y: 0.19851508736610413
+        Z: 0.25103560090065
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.40479573607444763
+      Pitch: 0.2897956669330597
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 6.090748310089111
+      Yaw: 0.4607405960559845
     Saved: ~
 Window Geometry:
   Displays:
