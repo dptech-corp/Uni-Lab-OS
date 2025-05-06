@@ -29,6 +29,8 @@ def job_add(req: JobAddReq) -> JobData:
     req.data['action'] = action_name
     if action_name == "execute_command_from_outer":
         action_kwargs = {"command": json.dumps(action_kwargs)}
+    elif "command" in action_kwargs:
+        action_kwargs = action_kwargs["command"]
     print(f"job_add:{req.device_id} {action_name} {action_kwargs}")
     HostNode.get_instance().send_goal(req.device_id, action_name=action_name, action_kwargs=action_kwargs, goal_uuid=req.job_id)
     return JobData(jobId=req.job_id)
