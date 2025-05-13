@@ -26,6 +26,7 @@ class MQTTClient:
     def __init__(self):
         self.mqtt_disable = not MQConfig.lab_id
         self.client_id = f"{MQConfig.group_id}@@@{MQConfig.lab_id}{uuid.uuid4()}"
+        logger.info("[MQTT] Client_id: " + self.client_id)
         self.client = mqtt.Client(CallbackAPIVersion.VERSION2, client_id=self.client_id, protocol=mqtt.MQTTv5)
         self._setup_callbacks()
 
