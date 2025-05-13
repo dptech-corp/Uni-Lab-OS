@@ -92,7 +92,7 @@ class ResourceMeshManager(BaseROS2DeviceNode):
             CollisionObject, "/collision_object", 10
         )
         self.__attached_collision_object_publisher = self.create_publisher(
-            AttachedCollisionObject, "/attached_collision_object", 10
+            AttachedCollisionObject, "/attached_collision_object", 0
         )
 
         # 创建一个Action Server用于修改resource_tf_dict
@@ -121,7 +121,6 @@ class ResourceMeshManager(BaseROS2DeviceNode):
         """检查move_group节点是否已初始化完成"""
 
         # 获取当前可用的节点列表
-
         tf_ready = self.tf_buffer.can_transform("world", next(iter(self.resource_tf_dict.keys())), rclpy.time.Time(),rclpy.duration.Duration(seconds=2))
         
         # if tf_ready:
@@ -129,8 +128,7 @@ class ResourceMeshManager(BaseROS2DeviceNode):
             self.move_group_ready = True
             self.publish_resource_tf()
             self.add_resource_collision_meshes(self.resource_tf_dict)
-            
-        # time.sleep(1)
+
        
     def add_resource_mesh_callback(self, goal_handle : ServerGoalHandle):
         tf_update_msg = goal_handle.request
@@ -187,7 +185,7 @@ class ResourceMeshManager(BaseROS2DeviceNode):
 
                 pass
             elif parent is not None and resource_id in self.resource_model:
-                parent_link = f"{self.resource_config_dict[parent]['parent']}_{parent}_device_link".replace("None","")
+                parent_link = f"{self.resource_config_dict[parent]['parent']}_{parent}_device_link".replace("None_","")
 
             else:
 
@@ -344,9 +342,7 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                 self.resource_pose_publisher.publish(changed_poses_msg)
             self.zero_count += 1
             
-        
-        
-    
+
     def _is_pose_equal(self, pose1, pose2, tolerance=1e-7):
         """
         比较两个位姿是否相等（考虑浮点数精度）
@@ -381,12 +377,14 @@ class ResourceMeshManager(BaseROS2DeviceNode):
     def tf_update(self, goal_handle : ServerGoalHandle):
         tf_update_msg = goal_handle.request
         
+        # 获取调用节点的信息
+
         try:
             cmd_dict = json.loads(tf_update_msg.command.replace("'",'"'))
             self.__planning_scene = self._get_planning_scene_service.call(
                 GetPlanningScene.Request()
                 ).scene
-            
+            self.__planning_scene.is_diff = True
             for resource_id, target_parent in cmd_dict.items():
 
                 # 获取从resource_id到target_parent的转换
@@ -416,20 +414,21 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                     "rotation": rotation
                 }
                 
-                # self.attach_collision_object(id=resource_id,link_name=target_parent)
-                collision_object = AttachedCollisionObject(
-                    id=resource_id,
-                    link_name=target_parent,
-                    object=CollisionObject(
-                        id=resource_id,
-                        operation=CollisionObject.ADD   
-                    )
-                )
                 
-                self.__planning_scene.robot_state.attached_collision_objects.append(collision_object)
-            req = ApplyPlanningScene.Request()
-            req.scene = self.__planning_scene
-            self._apply_planning_scene_service.call_async(req)
+                self.attach_collision_object(id=resource_id,link_name=target_parent)
+            #     collision_object = AttachedCollisionObject(
+            #         id=resource_id,
+            #         link_name=target_parent,
+            #         object=CollisionObject(
+            #             id=resource_id,
+            #             operation=CollisionObject.ADD   
+            #         )
+            #     )
+                
+            #     self.__planning_scene.robot_state.attached_collision_objects.append(collision_object)
+            # req = ApplyPlanningScene.Request()
+            # req.scene = self.__planning_scene
+            # self._apply_planning_scene_service.call_async(req)
             self.publish_resource_tf()
             
         except Exception as e:
@@ -438,6 +437,7 @@ class ResourceMeshManager(BaseROS2DeviceNode):
             return SendCmd.Result(success=False)
         goal_handle.succeed()
         return SendCmd.Result(success=True)
+
 
 
     def add_resource_collision_meshes(self,resource_tf_dict:dict):
@@ -958,9 +958,6 @@ class ResourceMeshManager(BaseROS2DeviceNode):
         """
         Attach collision object to the robot.
         """
-
-        if link_name is None:
-            link_name = self.__end_effector_name
 
         msg = AttachedCollisionObject(
             object=CollisionObject(id=id, operation=CollisionObject.ADD)
