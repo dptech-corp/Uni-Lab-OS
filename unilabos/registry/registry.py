@@ -54,6 +54,7 @@ class Registry:
                                 "res_id": "res_id",
                                 "class_name": "class_name",
                                 "parent": "parent",
+                                "device_id": "device_id",
                                 "bind_locations": "bind_locations",
                                 "liquid_input_slot": "liquid_input_slot",
                                 "liquid_type": "liquid_type",
