@@ -53,8 +53,6 @@ class MQTTClient:
         try:
             payload_str = msg.payload.decode("utf-8")
             payload_json = json.loads(payload_str)
-            logger.debug(f"Topic: {msg.topic}")
-            logger.debug("Payload:", json.dumps(payload_json, indent=2, ensure_ascii=False))
             if msg.topic == f"labs/{MQConfig.lab_id}/job/start/":
                 if "data" not in payload_json:
                     payload_json["data"] = {}
