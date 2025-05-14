@@ -55,6 +55,7 @@ set(action_files
   "action/Point3DSeparateInput.action"
 
   "action/ResourceCreateFromOuter.action"
+  "action/ResourceCreateFromOuterEasy.action"
 
   "action/SolidDispenseAddPowderTube.action"
 
