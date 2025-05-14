@@ -574,6 +574,7 @@ basic_type_map = {
     'int64': {'type': 'integer'},
     'uint64': {'type': 'integer', 'minimum': 0},
     'double': {'type': 'number'},
+    'float': {'type': 'number'},
     'float32': {'type': 'number'},
     'float64': {'type': 'number'},
     'string': {'type': 'string'},

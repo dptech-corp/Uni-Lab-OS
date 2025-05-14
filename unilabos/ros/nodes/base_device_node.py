@@ -515,7 +515,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             action_kwargs = convert_from_ros_msg_with_mapping(goal, action_value_mapping["goal"])
             self.lab_logger().debug(f"接收到原始目标: {action_kwargs}")
             # 向Host查询物料当前状态，如果是host本身的增加物料的请求，则直接跳过
-            if action_name != "add_resource_from_outer":
+            if action_name not in ["add_resource_from_outer", "add_resource_from_outer_easy"]:
                 for k, v in goal.get_fields_and_field_types().items():
                     if v in ["unilabos_msgs/Resource", "sequence<unilabos_msgs/Resource>"]:
                         self.lab_logger().info(f"查询资源状态: Key: {k} Type: {v}")
@@ -614,7 +614,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             del future
 
             # 向Host更新物料当前状态
-            if action_name != "add_resource_from_outer":
+            if action_name not in ["add_resource_from_outer", "add_resource_from_outer_easy"]:
                 for k, v in goal.get_fields_and_field_types().items():
                     if v not in ["unilabos_msgs/Resource", "sequence<unilabos_msgs/Resource>"]:
                         continue

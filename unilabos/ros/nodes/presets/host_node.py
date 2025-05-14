@@ -143,7 +143,19 @@ class HostNode(BaseROS2DeviceNode):
                 controller_config["update_rate"] = update_rate
                 self.initialize_controller(controller_id, controller_config)
         resources_config.insert(0, {
-
+            "id": "host_node",
+            "name": "host_node",
+            "parent": None,
+            "type": "device",
+            "class": "host_node",
+            "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+            },
+            "config": {},
+            "data": {},
+            "children": []
         })
         try:
             for bridge in self.bridges:

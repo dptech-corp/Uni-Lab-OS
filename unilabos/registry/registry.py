@@ -51,11 +51,14 @@ class Registry:
                         "add_resource_from_outer_easy": {
                             "type": msg_converter_manager.search_class("ResourceCreateFromOuterEasy"),
                             "goal": {
-                                "resources": "resources",
-                                "device_ids": "device_ids",
-                                "bind_parent_ids": "bind_parent_ids",
+                                "res_id": "res_id",
+                                "class_name": "class_name",
+                                "parent": "parent",
                                 "bind_locations": "bind_locations",
-                                "other_calling_params": "other_calling_params",
+                                "liquid_input_slot": "liquid_input_slot",
+                                "liquid_type": "liquid_type",
+                                "liquid_volume": "liquid_volume",
+                                "slot_on_deck": "slot_on_deck",
                             },
                             "feedback": {},
                             "result": {
