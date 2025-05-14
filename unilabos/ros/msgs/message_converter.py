@@ -351,7 +351,10 @@ def convert_to_ros_msg(ros_msg_type: Union[Type, Any], obj: Any) -> Any:
                 else:
                     setattr(ros_msg, key, [])  # FIXME
             elif "array.array" in str(type(attr)):
-                setattr(ros_msg, key, value)
+                if attr.typecode == "f":
+                    setattr(ros_msg, key, [float(i) for i in value])
+                else:
+                    setattr(ros_msg, key, value)
             else:
                 nested_ros_msg = convert_to_ros_msg(type(attr)(), value)
                 setattr(ros_msg, key, nested_ros_msg)
