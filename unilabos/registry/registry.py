@@ -19,10 +19,10 @@ class Registry:
         self.registry_paths = DEFAULT_PATHS.copy()  # 使用copy避免修改默认值
         if registry_paths:
             self.registry_paths.extend(registry_paths)
-        ResourceCreateFromOuter = self._replace_type_with_class(
+        self.ResourceCreateFromOuter = self._replace_type_with_class(
             "ResourceCreateFromOuter", "host_node", f"动作 add_resource_from_outer"
         )
-        ResourceCreateFromOuterEasy = self._replace_type_with_class(
+        self.ResourceCreateFromOuterEasy = self._replace_type_with_class(
             "ResourceCreateFromOuterEasy", "host_node", f"动作 add_resource_from_outer_easy"
         )
         self.device_type_registry = {
@@ -46,7 +46,7 @@ class Registry:
                             "result": {
                                 "success": "success"
                             },
-                            "schema": ros_action_to_json_schema(ResourceCreateFromOuter)
+                            "schema": ros_action_to_json_schema(self.ResourceCreateFromOuter)
                         },
                         "add_resource_from_outer_easy": {
                             "type": msg_converter_manager.search_class("ResourceCreateFromOuterEasy"),
@@ -64,7 +64,7 @@ class Registry:
                             "result": {
                                 "success": "success"
                             },
-                            "schema": ros_action_to_json_schema(ResourceCreateFromOuterEasy)
+                            "schema": ros_action_to_json_schema(self.ResourceCreateFromOuterEasy)
                         }
                     }
                 },

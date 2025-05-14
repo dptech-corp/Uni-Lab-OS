@@ -101,7 +101,14 @@ class HostNode(BaseROS2DeviceNode):
         self.devices_names: Dict[str, str] = {device_id: self.namespace}  # 存储设备名称和命名空间的映射
         self.devices_instances: Dict[str, ROS2DeviceNode] = {}  # 存储设备实例
         self.device_machine_names: Dict[str, str] = {device_id: "本地", }  # 存储设备ID到机器名称的映射
-        self._action_clients: Dict[str, ActionClient] = {}  # 用来存储多个ActionClient实例
+        self._action_clients: Dict[str, ActionClient] = {  # 为了方便了解实际的数据类型，host的默认写好
+            "/devices/host_node/add_resource_from_outer_easy": ActionClient(
+                self, lab_registry.ResourceCreateFromOuterEasy, "/devices/host_node/add_resource_from_outer_easy", callback_group=self.callback_group
+            ),
+            "/devices/host_node/add_resource_from_outer": ActionClient(
+                self, lab_registry.ResourceCreateFromOuter, "/devices/host_node/add_resource_from_outer", callback_group=self.callback_group
+            )
+        }  # 用来存储多个ActionClient实例
         self._action_value_mappings: Dict[str, Dict] = {}  # 用来存储多个ActionClient的type, goal, feedback, result的变量名映射关系
         self._goals: Dict[str, Any] = {}  # 用来存储多个目标的状态
         self._online_devices: Set[str] = {f"{self.namespace}/{device_id}"}  # 用于跟踪在线设备
