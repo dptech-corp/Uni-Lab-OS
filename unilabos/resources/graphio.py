@@ -421,7 +421,7 @@ def resource_plr_to_ulab(resource_plr: "ResourcePLR", parent_name: str = None):
     return r
 
 
-def initialize_resource(resource_config: dict, lab_registry: dict) -> list[dict]:
+def initialize_resource(resource_config: dict) -> list[dict]:
     """Initializes a resource based on its configuration.
 
     If the config is detailed, then do nothing;
@@ -433,6 +433,7 @@ def initialize_resource(resource_config: dict, lab_registry: dict) -> list[dict]
     Returns:
         None
     """
+    from unilabos.registry.registry import lab_registry
     resource_class_config = resource_config.get("class", None)
     if resource_class_config is None:
         return [resource_config]
@@ -476,9 +477,8 @@ def initialize_resources(resources_config) -> list[dict]:
         None
     """
 
-    from unilabos.registry.registry import lab_registry
     resources = []
     for resource_config in resources_config:
-        resources.extend(initialize_resource(resource_config, lab_registry))
+        resources.extend(initialize_resource(resource_config))
 
     return resources

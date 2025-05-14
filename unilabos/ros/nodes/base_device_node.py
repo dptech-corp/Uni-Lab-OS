@@ -320,6 +320,11 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             other_calling_param = command_json["other_calling_param"]
             resources = command_json["resource"]
             initialize_full = other_calling_param.pop("initialize_full", False)
+            ADD_LIQUID_TYPE = other_calling_param.pop("ADD_LIQUID_TYPE", [])
+            LIQUID_VOLUME = other_calling_param.pop("LIQUID_VOLUME", [])
+            slot = other_calling_param.pop("slot", -1)
+            if slot >= 0:  # slot为负数的时候采用assign方法
+                other_calling_param["slot"] = slot
             # 本地拿到这个物料，可能需要先做初始化?
             if isinstance(resources, list):
                 if initialize_full:

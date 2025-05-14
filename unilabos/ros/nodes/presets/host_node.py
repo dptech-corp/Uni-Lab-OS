@@ -17,6 +17,7 @@ from unilabos_msgs.srv import ResourceAdd, ResourceGet, ResourceDelete, Resource
 from unique_identifier_msgs.msg import UUID
 
 from unilabos.registry.registry import lab_registry
+from unilabos.resources.graphio import initialize_resource
 from unilabos.resources.registry import add_schema
 from unilabos.ros.initialize_device import initialize_device_from_dict
 from unilabos.ros.msgs.message_converter import (
@@ -141,7 +142,9 @@ class HostNode(BaseROS2DeviceNode):
             ].items():
                 controller_config["update_rate"] = update_rate
                 self.initialize_controller(controller_id, controller_config)
+        resources_config.insert(0, {
 
+        })
         try:
             for bridge in self.bridges:
                 if hasattr(bridge, "resource_add"):
@@ -291,6 +294,31 @@ class HostNode(BaseROS2DeviceNode):
             response = sclient.call(request)
             pass
         pass
+
+    def add_resource_from_outer_easy(self, device_id: str, res_id: str, class_name: str, parent: str, bind_locations: Point, liquid_input_slot: list[int], liquid_type: list[str], liquid_volume: list[int], slot_on_deck: int):
+        init_new_res = initialize_resource({
+            "name": res_id,
+            "class": class_name,
+            "parent": parent,
+            "position": {
+                "x": bind_locations.x,
+                "y": bind_locations.y,
+                "z": bind_locations.z,
+            }
+        })
+        resources = init_new_res
+        device_id = [device_id]
+        bind_parent_id = [parent]
+        bind_location = [bind_locations]
+        other_calling_param = [json.dumps({
+            "ADD_LIQUID_TYPE": liquid_type,
+            "LIQUID_VOLUME": liquid_volume,
+            "LIQUID_INPUT_SLOT": liquid_input_slot,
+            "initialize_full": False,
+            "slot": slot_on_deck
+        })]
+
+        return self.add_resource_from_outer(resources, device_id, bind_parent_id, bind_location, other_calling_param)
 
     def initialize_device(self, device_id: str, device_config: Dict[str, Any]) -> None:
         """
