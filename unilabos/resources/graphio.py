@@ -189,6 +189,7 @@ def dict_from_graph(graph: nx.Graph) -> dict:
 def dict_to_tree(nodes: dict, devices_only: bool = False) -> list[dict]:
     # 将节点转换为字典，以便通过 ID 快速查找
     nodes_list = [node for node in nodes.values() if node.get("type") == "device" or not devices_only]
+    id_list = [node["id"] for node in nodes_list]
 
     # 初始化每个节点的 children 为包含节点字典的列表
     for node in nodes_list:
@@ -196,7 +197,7 @@ def dict_to_tree(nodes: dict, devices_only: bool = False) -> list[dict]:
 
     # 找到根节点并返回
     root_nodes = [
-        node for node in nodes_list if len(nodes_list) == 1 or node.get("parent", node.get("parent_name")) in [None, "", "None", np.nan]
+        node for node in nodes_list if len(nodes_list) == 1 or node.get("parent", node.get("parent_name")) in [None, "", "None", np.nan] or node.get("parent", node.get("parent_name")) not in id_list
     ]
 
     # 如果存在多个根节点，返回所有根节点

@@ -20,10 +20,10 @@ class Registry:
         if registry_paths:
             self.registry_paths.extend(registry_paths)
         self.ResourceCreateFromOuter = self._replace_type_with_class(
-            "ResourceCreateFromOuter", "host_node", f"动作 add_resource_from_outer"
+            "ResourceCreateFromOuter", "host_node", f"动作 create_resource_detailed"
         )
         self.ResourceCreateFromOuterEasy = self._replace_type_with_class(
-            "ResourceCreateFromOuterEasy", "host_node", f"动作 add_resource_from_outer_easy"
+            "ResourceCreateFromOuterEasy", "host_node", f"动作 create_resource"
         )
         self.device_type_registry = {
             "host_node": {
@@ -33,7 +33,7 @@ class Registry:
                     "type": "python",
                     "status_types": {},
                     "action_value_mappings": {
-                        "add_resource_from_outer": {
+                        "create_resource_detailed": {
                             "type": msg_converter_manager.search_class("ResourceCreateFromOuter"),
                             "goal": {
                                 "resources": "resources",
@@ -48,7 +48,7 @@ class Registry:
                             },
                             "schema": ros_action_to_json_schema(self.ResourceCreateFromOuter)
                         },
-                        "add_resource_from_outer_easy": {
+                        "create_resource": {
                             "type": msg_converter_manager.search_class("ResourceCreateFromOuterEasy"),
                             "goal": {
                                 "res_id": "res_id",
@@ -56,9 +56,9 @@ class Registry:
                                 "parent": "parent",
                                 "device_id": "device_id",
                                 "bind_locations": "bind_locations",
-                                "liquid_input_slot": "liquid_input_slot",
-                                "liquid_type": "liquid_type",
-                                "liquid_volume": "liquid_volume",
+                                "liquid_input_slot": "liquid_input_slot[]",
+                                "liquid_type": "liquid_type[]",
+                                "liquid_volume": "liquid_volume[]",
                                 "slot_on_deck": "slot_on_deck",
                             },
                             "feedback": {},

@@ -348,7 +348,10 @@ def convert_to_ros_msg(ros_msg_type: Union[Type, Any], obj: Any) -> Any:
                 if isinstance(td, NamespacedType):
                     target_class = msg_converter_manager.get_class(f"{'.'.join(td.namespaces)}.{td.name}")
                     setattr(ros_msg, key, [convert_to_ros_msg(target_class, v) for v in value])
+                elif isinstance(td, UnboundedString):
+                    setattr(ros_msg, key, value)
                 else:
+                    logger.warning(f"Not Supported type: {td}")
                     setattr(ros_msg, key, [])  # FIXME
             elif "array.array" in str(type(attr)):
                 if attr.typecode == "f":

@@ -56,6 +56,8 @@ dependencies:
   - ros-humble-moveit-servo
   # simulation
   - ros-humble-simulation # ignored because of NO python3.11 package in WIN64
+  - ros-humble-tf-transformations
+  - transforms3d
   # ros-humble-gazebo-ros // ignored because of the conflict with ign-gazebo
   # ilab equipments
   # ros-humble-unilabos-msgs
