@@ -43,14 +43,10 @@ set(action_files
   "action/LiquidHandlerStamp.action"
   "action/LiquidHandlerTransfer.action"
 
-  "action/DPLiquidHandlerAddLiquid.action"
-  "action/DPLiquidHandlerCustomDelay.action"
-  "action/DPLiquidHandlerMix.action"
-  "action/DPLiquidHandlerMoveTo.action"
-  "action/DPLiquidHandlerRemoveLiquid.action"
-  "action/DPLiquidHandlerSetTiprack.action"
-  "action/DPLiquidHandlerTouchTip.action"
-  "action/DPLiquidHandlerTransferLiquid.action"
+  "action/LiquidHandlerAdd.action"
+  "action/LiquidHandlerMix.action"
+  "action/LiquidHandlerMoveTo.action"
+  "action/LiquidHandlerRemove.action"
 
   "action/EmptyIn.action"
   "action/FloatSingleInput.action"
