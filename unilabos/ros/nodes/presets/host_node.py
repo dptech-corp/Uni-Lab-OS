@@ -156,7 +156,7 @@ class HostNode(BaseROS2DeviceNode):
             for bridge in self.bridges:
                 if hasattr(bridge, "resource_add"):
                     self.lab_logger().info("[Host Node-Resource] Adding resources to bridge.")
-                    bridge.resource_add(add_schema(resource_with_parent_name))
+                    resource_add_res = bridge.resource_add(add_schema(resource_with_parent_name))
         except Exception as ex:
             self.lab_logger().error("[Host Node-Resource] 添加物料出错！")
             self.lab_logger().error(traceback.format_exc())
