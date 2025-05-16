@@ -164,11 +164,22 @@ class HostNode(BaseROS2DeviceNode):
             "data": {},
             "children": []
         })
+        resource_with_parent_name = []
+        resource_ids_to_instance = {i["id"]: i for i in resources_config}
+        for res in resources_config:
+            if res.get("parent") and res.get("type") == "device" and res.get("class"):
+                parent_id = res.get("parent")
+                parent_res = resource_ids_to_instance[parent_id]
+                if parent_res.get("type") == "device" and parent_res.get("class"):
+                    resource_with_parent_name.append(copy.deepcopy(res))
+                    resource_with_parent_name[-1]["id"] = f"{parent_res['id']}/{res['id']}"
+                    continue
+            resource_with_parent_name.append(copy.deepcopy(res))
         try:
             for bridge in self.bridges:
                 if hasattr(bridge, "resource_add"):
                     self.lab_logger().info("[Host Node-Resource] Adding resources to bridge.")
-                    bridge.resource_add(add_schema(resources_config))
+                    resource_add_res = bridge.resource_add(add_schema(resource_with_parent_name))
         except Exception as ex:
             self.lab_logger().error("[Host Node-Resource] 添加物料出错！")
             self.lab_logger().error(traceback.format_exc())
@@ -213,7 +224,7 @@ class HostNode(BaseROS2DeviceNode):
 
             # 如果是新设备，记录并创建ActionClient
             if edge_device_id not in self.devices_names:
-                self.lab_logger().info(f"[Host Node] Discovered new device: {device_key}")
+                self.lab_logger().info(f"[Host Node] Discovered new device: {edge_device_id}")
                 self.devices_names[edge_device_id] = namespace
                 self._create_action_clients_for_device(device_id, namespace)
                 self._online_devices.add(device_key)
