@@ -169,8 +169,13 @@ class Registry:
                                     action_config["type"] = self._replace_type_with_class(
                                         action_config["type"], device_id, f"动作 {action_name}"
                                     )
-                                    action_config["goal_default"] = yaml.safe_load(io.StringIO(get_yaml_from_goal_type(action_config["type"].Goal)))
-                                    action_config["schema"] = ros_action_to_json_schema(action_config["type"])
+                                    if action_config["type"] is not None:
+                                        action_config["goal_default"] = yaml.safe_load(io.StringIO(get_yaml_from_goal_type(action_config["type"].Goal)))
+                                        action_config["schema"] = ros_action_to_json_schema(action_config["type"])
+                                    else:
+                                        logger.warning(
+                                            f"[UniLab Registry] 设备 {device_id} 的动作 {action_name} 类型为空，跳过替换"
+                                        )
 
                 self.device_type_registry.update(data)
 
