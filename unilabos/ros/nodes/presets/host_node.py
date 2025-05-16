@@ -201,7 +201,7 @@ class HostNode(BaseROS2DeviceNode):
 
             # 如果是新设备，记录并创建ActionClient
             if edge_device_id not in self.devices_names:
-                self.lab_logger().info(f"[Host Node] Discovered new device: {device_key}")
+                self.lab_logger().info(f"[Host Node] Discovered new device: {edge_device_id}")
                 self.devices_names[edge_device_id] = namespace
                 self._create_action_clients_for_device(device_id, namespace)
                 self._online_devices.add(device_key)

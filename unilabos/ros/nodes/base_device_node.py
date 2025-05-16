@@ -404,6 +404,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
         # 加入全局注册表
         registered_devices[self.device_id] = device_info
         from unilabos.config.config import BasicConfig
+        from unilabos.ros.nodes.presets.host_node import HostNode
         if not BasicConfig.is_host_mode:
             sclient = self.create_client(SerialCommand, "/node_info_update")
             # 启动线程执行发送任务
@@ -413,6 +414,10 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                 daemon=True,
                 name=f"ROSDevice{self.device_id}_send_slave_node_info"
             ).start()
+        else:
+            host_node = HostNode.get_instance(0)
+            if host_node is not None:
+                host_node.device_machine_names[self.device_id] = "本地"
 
     def send_slave_node_info(self, sclient):
         sclient.wait_for_service()

@@ -42,7 +42,7 @@ def get_host_node_info() -> Dict[str, Any]:
     host_info["subscribed_topics"] = sorted(list(host_node._subscribed_topics))
     # 获取动作客户端信息
     for action_id, client in host_node._action_clients.items():
-        host_info["action_clients"] = {action_id: get_action_info(client, full_name=action_id)}
+        host_info["action_clients"][action_id] = get_action_info(client, full_name=action_id)
 
     # 获取设备状态
     host_info["device_status"] = host_node.device_status
