@@ -58,6 +58,8 @@ dependencies:
   - ros-humble-moveit-servo
   # simulation
   - ros-humble-simulation
+  - ros-humble-tf-transformations
+  - transforms3d
   # ros-humble-gazebo-ros // ignored because of the conflict with ign-gazebo
   # ilab equipments
 #  - ros-humble-unilabos-msgs

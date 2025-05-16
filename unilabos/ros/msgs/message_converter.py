@@ -348,10 +348,16 @@ def convert_to_ros_msg(ros_msg_type: Union[Type, Any], obj: Any) -> Any:
                 if isinstance(td, NamespacedType):
                     target_class = msg_converter_manager.get_class(f"{'.'.join(td.namespaces)}.{td.name}")
                     setattr(ros_msg, key, [convert_to_ros_msg(target_class, v) for v in value])
+                elif isinstance(td, UnboundedString):
+                    setattr(ros_msg, key, value)
                 else:
+                    logger.warning(f"Not Supported type: {td}")
                     setattr(ros_msg, key, [])  # FIXME
             elif "array.array" in str(type(attr)):
-                setattr(ros_msg, key, value)
+                if attr.typecode == "f":
+                    setattr(ros_msg, key, [float(i) for i in value])
+                else:
+                    setattr(ros_msg, key, value)
             else:
                 nested_ros_msg = convert_to_ros_msg(type(attr)(), value)
                 setattr(ros_msg, key, nested_ros_msg)
@@ -574,6 +580,7 @@ basic_type_map = {
     'int64': {'type': 'integer'},
     'uint64': {'type': 'integer', 'minimum': 0},
     'double': {'type': 'number'},
+    'float': {'type': 'number'},
     'float32': {'type': 'number'},
     'float64': {'type': 'number'},
     'string': {'type': 'string'},

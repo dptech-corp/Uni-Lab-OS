@@ -14,7 +14,7 @@ from pylabrobot.resources import (
     Well
 )
 
-class DPLiquidHandler(LiquidHandler):
+class LiquidHandlerAbstract(LiquidHandler):
     """Extended LiquidHandler with additional operations."""
 
     # ---------------------------------------------------------------
