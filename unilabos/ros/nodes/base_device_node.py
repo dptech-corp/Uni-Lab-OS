@@ -1,3 +1,4 @@
+import functools
 import json
 import threading
 import time
@@ -486,6 +487,17 @@ class BaseROS2DeviceNode(Node, Generic[T]):
 
         self.lab_logger().debug(f"发布动作: {action_name}, 类型: {str_action_type}")
 
+    def get_real_function(self, instance, attr_name):
+        if hasattr(instance.__class__, attr_name):
+            obj = getattr(instance.__class__, attr_name)
+            if isinstance(obj, property):
+                return lambda *args, **kwargs: obj.fset(instance, *args, **kwargs), get_type_hints(obj.fset)
+            obj = getattr(instance, attr_name)
+            return obj, get_type_hints(obj)
+        else:
+            obj = getattr(instance, attr_name)
+            return obj, get_type_hints(obj)
+
     def _create_execute_callback(self, action_name, action_value_mapping):
         """创建动作执行回调函数"""
 
@@ -500,17 +512,16 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                     for i, action in enumerate(self._action_value_mappings["sequence"]):
                         if i == 0:
                             self.lab_logger().info(f"执行序列动作第一步: {action}")
-                            getattr(self.driver_instance, action)(**kwargs)
+                            self.get_real_function(self.driver_instance, action)[0](**kwargs)
                         else:
                             self.lab_logger().info(f"执行序列动作后续步骤: {action}")
-                            getattr(self.driver_instance, action)()
+                            self.get_real_function(self.driver_instance, action)[0]()
 
                 action_paramtypes = get_type_hints(
-                    getattr(self.driver_instance, self._action_value_mappings["sequence"][0])
-                )
+                    self.get_real_function(self.driver_instance, self._action_value_mappings["sequence"][0])
+                )[1]
             else:
-                ACTION = getattr(self.driver_instance, action_name)
-                action_paramtypes = get_type_hints(ACTION)
+                ACTION, action_paramtypes = self.get_real_function(self.driver_instance, action_name)
 
             action_kwargs = convert_from_ros_msg_with_mapping(goal, action_value_mapping["goal"])
             self.lab_logger().debug(f"接收到原始目标: {action_kwargs}")
