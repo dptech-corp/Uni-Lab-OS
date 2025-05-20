@@ -390,10 +390,12 @@ class ResourceMeshManager(BaseROS2DeviceNode):
             planning_scene.is_diff = True
             planning_scene.robot_state.is_diff = True
             for resource_id, target_parent in cmd_dict.items():
-
+                parent_id = target_parent
+                if target_parent == '__trash':
+                    parent_id = 'world'
                 # 获取从resource_id到target_parent的转换
                 transform = self.tf_buffer.lookup_transform(
-                    target_parent,
+                    parent_id,
                     resource_id,
                     rclpy.time.Time(seconds=0)
                 )
@@ -413,7 +415,7 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                 }
                 
                 self.resource_tf_dict[resource_id] = {
-                    "parent": target_parent,
+                    "parent": parent_id,
                     "position": position,
                     "rotation": rotation
                 }
@@ -422,16 +424,19 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                 # self.attach_collision_object(id=resource_id,link_name=target_parent)
                 # time.sleep(0.02)
                 operation_attach = CollisionObject.ADD
-                operation_remove = CollisionObject.REMOVE
+                operation_world = CollisionObject.REMOVE
                 if target_parent == 'world':
                     operation_attach = CollisionObject.REMOVE
-                    operation_remove = CollisionObject.ADD
+                    operation_world = CollisionObject.ADD
+                elif target_parent == '__trash':
+                    operation_attach = CollisionObject.REMOVE
 
-                remove_object = CollisionObject(
+                world_object = CollisionObject(
                     id=resource_id,
-                    operation=operation_remove
+                    operation=operation_world
                 )
-                planning_scene.world.collision_objects.append(remove_object)
+                if target_parent != '__trash':
+                    planning_scene.world.collision_objects.append(world_object)
 
 
                 collision_object = AttachedCollisionObject(
@@ -440,7 +445,7 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                         operation=operation_attach   
                     )
                 )
-                if target_parent != 'world':
+                if target_parent != 'world' and target_parent != '__trash':
                     collision_object.link_name = target_parent
                 planning_scene.robot_state.attached_collision_objects.append(collision_object)
 

@@ -165,9 +165,6 @@ class LiquidHandlerJointPublisher(BaseROS2DeviceNode):
             goal_handle.abort()
             result.success = False
         
-        print('='*20)
-        print(result)
-        print('='*20)
         return result
     def inverse_kinematics(self, x, y, z, 
                            parent_id,
@@ -250,6 +247,9 @@ class LiquidHandlerJointPublisher(BaseROS2DeviceNode):
             link_name =  self.lh_devices[parent_id]['joint_config']['link_names'][z_index]
             link_name =  f'{parent_id}_{link_name}'
             self.resource_move(resource_name_, link_name, [0,1,2,3,4,5,6,7])
+            time.sleep(1)
+        elif option == "drop_trash":
+            self.resource_move(resource_name_, "__trash", [0,1,2,3,4,5,6,7])
             time.sleep(1)
         elif option == "drop":
             self.resource_move(resource_name_, "world", [0,1,2,3,4,5,6,7])
@@ -345,7 +345,7 @@ class JointStatePublisher(Node):
         
         try:
             # 创建新的executor
-            executor = rclpy.executors.SingleThreadedExecutor()
+            executor = rclpy.executors.MultiThreadedExecutor()
             executor.add_node(self)
             
             # 发送目标
