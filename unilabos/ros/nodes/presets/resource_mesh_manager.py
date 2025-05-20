@@ -91,9 +91,6 @@ class ResourceMeshManager(BaseROS2DeviceNode):
         self.__collision_object_publisher = self.create_publisher(
             CollisionObject, "/collision_object", 10
         )
-        self.__planning_scene_publisher = self.create_publisher(
-            PlanningScene, "/planning_scene", 10
-        )
         self.__attached_collision_object_publisher = self.create_publisher(
             AttachedCollisionObject, "/attached_collision_object", 0
         )
@@ -148,7 +145,7 @@ class ResourceMeshManager(BaseROS2DeviceNode):
         """刷新资源配置"""
 
         registry = lab_registry
-        resource_config = json.loads(resource_config_str.replace("'",'"'))
+        resource_config = json.loads(resource_config_str)
         
         if resource_config['id'] in self.resource_config_dict:
             self.get_logger().info(f'资源 {resource_config["id"]} 已存在')
@@ -380,15 +377,14 @@ class ResourceMeshManager(BaseROS2DeviceNode):
     def tf_update(self, goal_handle : ServerGoalHandle):
         tf_update_msg = goal_handle.request
         
+        # 获取调用节点的信息
+
         try:
             cmd_dict = json.loads(tf_update_msg.command.replace("'",'"'))
             self.__planning_scene = self._get_planning_scene_service.call(
                 GetPlanningScene.Request()
                 ).scene
             self.__planning_scene.is_diff = True
-            planning_scene = PlanningScene()
-            planning_scene.is_diff = True
-            planning_scene.robot_state.is_diff = True
             for resource_id, target_parent in cmd_dict.items():
 
                 # 获取从resource_id到target_parent的转换
@@ -419,32 +415,9 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                 }
                 
                 
-                # self.attach_collision_object(id=resource_id,link_name=target_parent)
-                # time.sleep(0.02)
-                operation_attach = CollisionObject.ADD
-                operation_remove = CollisionObject.REMOVE
-                if target_parent == 'world':
-                    operation_attach = CollisionObject.REMOVE
-                    operation_remove = CollisionObject.ADD
-
-                remove_object = CollisionObject(
-                    id=resource_id,
-                    operation=operation_remove
-                )
-                planning_scene.world.collision_objects.append(remove_object)
-
-
-                collision_object = AttachedCollisionObject(
-                    object=CollisionObject(
-                        id=resource_id,
-                        operation=operation_attach   
-                    )
-                )
-                if target_parent != 'world':
-                    collision_object.link_name = target_parent
-                planning_scene.robot_state.attached_collision_objects.append(collision_object)
-
+                self.attach_collision_object(id=resource_id,link_name=target_parent)
             #     collision_object = AttachedCollisionObject(
+            #         id=resource_id,
             #         link_name=target_parent,
             #         object=CollisionObject(
             #             id=resource_id,
@@ -453,12 +426,9 @@ class ResourceMeshManager(BaseROS2DeviceNode):
             #     )
                 
             #     self.__planning_scene.robot_state.attached_collision_objects.append(collision_object)
-            req = ApplyPlanningScene.Request()
-            req.scene = planning_scene
-            self._apply_planning_scene_service.call_async(req)
-            self.__planning_scene_publisher.publish(planning_scene)
-
-            # self.__collision_object_publisher.publish(CollisionObject())
+            # req = ApplyPlanningScene.Request()
+            # req.scene = self.__planning_scene
+            # self._apply_planning_scene_service.call_async(req)
             self.publish_resource_tf()
             
         except Exception as e:
@@ -482,8 +452,6 @@ class ResourceMeshManager(BaseROS2DeviceNode):
         self.__planning_scene = self._get_planning_scene_service.call(
             GetPlanningScene.Request()
         ).scene
-        planning_scene = PlanningScene()
-        planning_scene.is_diff = True
         for resource_id, tf_info in resource_tf_dict.items():
             
             if resource_id in self.resource_model:
@@ -511,7 +479,7 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                     quat_xyzw=q,
                     frame_id=resource_id
                 )
-                planning_scene.world.collision_objects.append(collision_object)
+                self.__planning_scene.world.collision_objects.append(collision_object)
             elif f"{tf_info['parent']}_" in self.resource_model:
                 # 获取资源的父级框架ID
                 id_ = f"{tf_info['parent']}_"
@@ -540,13 +508,12 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                     frame_id=resource_id
                 )
 
-                planning_scene.world.collision_objects.append(collision_object)
+                self.__planning_scene.world.collision_objects.append(collision_object)
 
         req = ApplyPlanningScene.Request()
-        req.scene = planning_scene
+        req.scene = self.__planning_scene
         self._apply_planning_scene_service.call_async(req)
-        self.__planning_scene_publisher.publish(planning_scene)
-        self.publish_resource_tf()
+            
         
         self.get_logger().info('资源碰撞网格添加完成')
 

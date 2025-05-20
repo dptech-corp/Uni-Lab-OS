@@ -1,7 +1,4 @@
-import asyncio
 import copy
-from pathlib import Path
-import threading
 import rclpy
 import json
 import time
@@ -18,7 +15,7 @@ from rclpy.node import Node
 import re
 
 class LiquidHandlerJointPublisher(BaseROS2DeviceNode):
-    def __init__(self,resources_config:list, resource_tracker, rate=50, device_id:str = "lh_joint_publisher"):
+    def __init__(self,resource_config:list, resource_tracker, rate=50, device_id:str = "lh_joint_publisher"):
         super().__init__(
             driver_instance=self,
             device_id=device_id,
@@ -31,8 +28,8 @@ class LiquidHandlerJointPublisher(BaseROS2DeviceNode):
         
         # 初始化参数
         self.j_msg          = JointState()
-        joint_config        = json.load(open(f"{Path(__file__).parent.absolute()}/lh_joint_config.json", encoding="utf-8"))
-        self.resources_config = {x['id']:x for x in resources_config}
+        joint_config   = json.load(open('./lh_joint_config.json', encoding="utf-8"))
+        self.resource_config = resource_config
         self.rate           = rate
         self.tf_buffer      = Buffer()
         self.tf_listener    = TransformListener(self.tf_buffer, self)
@@ -53,7 +50,7 @@ class LiquidHandlerJointPublisher(BaseROS2DeviceNode):
         self.deck_list = []
         self.lh_devices = {}
         # 初始化设备ID与config信息
-        for resource in resources_config:
+        for resource in resource_config:
             if resource['class'] == 'liquid_handler':
                 deck_id = resource['config']['data']['children'][0]['_resource_child_name']
                 deck_class = resource['config']['data']['children'][0]['_resource_type'].split(':')[-1]
@@ -99,15 +96,13 @@ class LiquidHandlerJointPublisher(BaseROS2DeviceNode):
 
     def find_resource_parent(self, resource_id:str):
         # 遍历父辈，找到父辈的父辈，直到找到设备ID
-        parent_id = self.resources_config[resource_id]['parent']
+        parent_id = self.resource_config[resource_id]['parent']
         try:
             if parent_id in self.deck_list:
-                p_ = self.resources_config[parent_id]['parent']
-                str_ = f'{p_}_{parent_id}'
-                return str(str_)
+                return f'{self.resource_config[parent_id]['parent']}_{parent_id}'
             else:
-                return self.find_resource_parent(parent_id)
-        except Exception as e:
+                self.find_resource_parent(parent_id)
+        except:
             return None
 
 
@@ -161,13 +156,10 @@ class LiquidHandlerJointPublisher(BaseROS2DeviceNode):
             goal_handle.succeed()
             
         except Exception as e:
-            print(f'Liquid handler action error: \n{e}')
+            print(e)
             goal_handle.abort()
             result.success = False
-        
-        print('='*20)
-        print(result)
-        print('='*20)
+
         return result
     def inverse_kinematics(self, x, y, z, 
                            parent_id,
@@ -206,40 +198,36 @@ class LiquidHandlerJointPublisher(BaseROS2DeviceNode):
             index = self.lh_devices[parent_id]['joint_msg'].name.index(f"{parent_id}_{joint_name}")
             joint_positions[index] = z * config["factor"] + config["offset"]
             z_index = index
-
+        
         return joint_positions ,z_index
 
 
-    def move_joints(self, resource_names, x, y, z, option, speed = 0.1 ,x_joint=None, y_joint=None, z_joint=None):
+    def move_joints(self, resource_names, speed,x,y,z,option, x_joint=None, y_joint=None, z_joint=None):
         if isinstance(resource_names, list):
             resource_name_ = resource_names[0]
         else:
             resource_name_ = resource_names
-        
         parent_id = self.find_resource_parent(resource_name_)
 
+
         if x_joint is None:
-            xa,xb = next(iter(self.lh_devices[parent_id]['joint_config']['x'].items()))
-            x_joint_config = {xa:xb}
-        elif x_joint in self.lh_devices[parent_id]['joint_config']['x']:
-            x_joint_config = self.lh_devices[parent_id]['joint_config']['x'][x_joint]
+            x_joint_config = next(iter(self.lh_devices[parent_id]['x'].items()))
+        elif x_joint in self.lh_devices[parent_id]['x']:
+            x_joint_config = self.lh_devices[parent_id]['x'][x_joint]
         else:
             raise ValueError(f"x_joint {x_joint} not in joint_config['x']")
         if y_joint is None:
-            ya,yb = next(iter(self.lh_devices[parent_id]['joint_config']['y'].items()))
-            y_joint_config = {ya:yb}
-        elif y_joint in self.lh_devices[parent_id]['joint_config']['y']:
-            y_joint_config = self.lh_devices[parent_id]['joint_config']['y'][y_joint]
+            y_joint_config = next(iter(self.lh_devices[parent_id]['y'].items()))
+        elif y_joint in self.lh_devices[parent_id]['y']:
+            y_joint_config = self.lh_devices[parent_id]['y'][y_joint]
         else:
             raise ValueError(f"y_joint {y_joint} not in joint_config['y']")
         if z_joint is None:
-            za, zb = next(iter(self.lh_devices[parent_id]['joint_config']['z'].items()))
-            z_joint_config = {za :zb}
-        elif z_joint in self.lh_devices[parent_id]['joint_config']['z']:
-            z_joint_config = self.lh_devices[parent_id]['joint_config']['z'][z_joint]
+            z_joint_config = next(iter(self.lh_devices[parent_id]['z'].items()))
+        elif z_joint in self.lh_devices[parent_id]['z']:
+            z_joint_config = self.lh_devices[parent_id]['z'][z_joint]
         else:
             raise ValueError(f"z_joint {z_joint} not in joint_config['z']")
-
         joint_positions_target, z_index = self.inverse_kinematics(x,y,z,parent_id,x_joint_config,y_joint_config,z_joint_config)
         joint_positions_target_zero = copy.deepcopy(joint_positions_target)
         joint_positions_target_zero[z_index] = 0
@@ -247,13 +235,10 @@ class LiquidHandlerJointPublisher(BaseROS2DeviceNode):
         self.move_to(joint_positions_target_zero, speed, parent_id)
         self.move_to(joint_positions_target, speed, parent_id)
         if option == "pick":
-            link_name =  self.lh_devices[parent_id]['joint_config']['link_names'][z_index]
-            link_name =  f'{parent_id}_{link_name}'
+            link_name =  self.lh_devices[parent_id]['joint_msg'].name[z_index]
             self.resource_move(resource_name_, link_name, [0,1,2,3,4,5,6,7])
-            time.sleep(1)
         elif option == "drop":
             self.resource_move(resource_name_, "world", [0,1,2,3,4,5,6,7])
-            time.sleep(1)
         self.move_to(joint_positions_target_zero, speed, parent_id)
 
 
@@ -322,59 +307,14 @@ class JointStatePublisher(Node):
                 
         return None
     
-    def send_resource_action(self, resource_name, x,y,z,option, speed = 0.1,x_joint=None, y_joint=None, z_joint=None):
+    def send_resource_action(self, resource_id_list:list[str], link_name:str):
         goal_msg = SendCmd.Goal()
-        str_dict = {
-            'resource_names':resource_name,
-            'x':x,
-            'y':y,
-            'z':z,
-            'option':option,
-            'speed':speed,
-            'x_joint':x_joint,
-            'y_joint':y_joint,
-            'z_joint':z_joint
-        }
-        
+        str_dict = {}
+        for resource in resource_id_list:
+            str_dict[resource] = link_name
 
         goal_msg.command = json.dumps(str_dict)
-
-        if not self.lh_action_client.wait_for_server(timeout_sec=5.0):
-            self.get_logger().error('Action server not available')
-            return None
-        
-        try:
-            # 创建新的executor
-            executor = rclpy.executors.SingleThreadedExecutor()
-            executor.add_node(self)
-            
-            # 发送目标
-            future = self.lh_action_client.send_goal_async(goal_msg)
-            
-            # 使用executor等待结果
-            while not future.done():
-                executor.spin_once(timeout_sec=0.1)
-            
-            handle = future.result()
-            
-            if not handle.accepted:
-                self.get_logger().error('Goal was rejected')
-                return None
-                
-            # 等待最终结果
-            result_future = handle.get_result_async()
-            while not result_future.done():
-                executor.spin_once(timeout_sec=0.1)
-                
-            result = result_future.result()
-            return result
-            
-        except Exception as e:
-            self.get_logger().error(f'Error during action execution: {str(e)}')
-            return None
-        finally:
-            # 清理executor
-            executor.remove_node(self)
+        self.lh_action_client.send_goal_async(goal_msg)
 
 
 def main():
