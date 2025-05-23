@@ -4,83 +4,86 @@
 
 # Uni-Lab-OS
 
+<!-- Language switcher -->
+**English** | [中文](README_zh.md)
+
 [![GitHub Stars](https://img.shields.io/github/stars/dptech-corp/Uni-Lab-OS.svg)](https://github.com/dptech-corp/Uni-Lab-OS/stargazers)
 [![GitHub Forks](https://img.shields.io/github/forks/dptech-corp/Uni-Lab-OS.svg)](https://github.com/dptech-corp/Uni-Lab-OS/network/members)
 [![GitHub Issues](https://img.shields.io/github/issues/dptech-corp/Uni-Lab-OS.svg)](https://github.com/dptech-corp/Uni-Lab-OS/issues)
 [![GitHub License](https://img.shields.io/github/license/dptech-corp/Uni-Lab-OS.svg)](https://github.com/dptech-corp/Uni-Lab-OS/blob/main/LICENSE)
 
-Uni-Lab 操作系统是一个用于实验室自动化的综合平台，旨在连接和控制各种实验设备，实现实验流程的自动化和标准化。
+Uni-Lab Operating System is a platform for laboratory automation, designed to connect and control various experimental equipment, enabling automation and standardization of experimental workflows.
 
-## 核心特点
+## Key Features
 
-- 多设备集成管理
-- 自动化实验流程
-- 云端连接能力
-- 灵活的配置系统
-- 支持多种实验协议
+- Multi-device integration management
+- Automated experimental workflows
+- Cloud connectivity capabilities
+- Flexible configuration system
+- Support for multiple experimental protocols
 
-## 文档
+## Documentation
 
-详细文档可在以下位置找到:
+Detailed documentation can be found at:
 
-- [在线文档](https://readthedocs.dp.tech/Uni-Lab/v0.8.0/)
+- [Online Documentation](https://readthedocs.dp.tech/Uni-Lab/v0.8.0/)
 
-## 快速开始
+## Quick Start
 
-1. 配置Conda环境
+1. Configure Conda Environment
 
-Uni-Lab-OS 建议使用 `mamba` 管理环境。根据您的操作系统选择适当的环境文件:
+Uni-Lab-OS recommends using `mamba` for environment management. Choose the appropriate environment file for your operating system:
 
 ```bash
-# 创建新环境
+# Create new environment
 mamba env create -f unilabos-[YOUR_OS].yaml
 mamba activate unilab
 
-# 或更新现有环境
-# 其中 `[YOUR_OS]` 可以是 `win64`, `linux-64`, `osx-64`, 或 `osx-arm64`。
-conda env update --file unilabos-[YOUR_OS].yml -n 环境名
+# Or update existing environment
+# Where `[YOUR_OS]` can be `win64`, `linux-64`, `osx-64`, or `osx-arm64`.
+conda env update --file unilabos-[YOUR_OS].yml -n environment_name
 
-# 现阶段，需要安装 `unilabos_msgs` 包
-# 可以前往 Release 页面下载系统对应的包进行安装
+# Currently, you need to install the `unilabos_msgs` package
+# You can download the system-specific package from the Release page
 conda install ros-humble-unilabos-msgs-0.9.0-xxxxx.tar.bz2
 
-# 安装PyLabRobot等前置
+# Install PyLabRobot and other prerequisites
 git clone https://github.com/PyLabRobot/pylabrobot plr_repo
 cd plr_repo
 pip install .[opentrons]
 ```
 
-2. 安装 Uni-Lab-OS:
+2. Install Uni-Lab-OS:
 
 ```bash
-# 克隆仓库
+# Clone the repository
 git clone https://github.com/dptech-corp/Uni-Lab-OS.git
 cd Uni-Lab-OS
 
-# 安装 Uni-Lab-OS
+# Install Uni-Lab-OS
 pip install .
 ```
 
-3. 启动 Uni-Lab 系统:
+3. Start Uni-Lab System:
 
-请见[文档-启动样例](https://readthedocs.dp.tech/Uni-Lab/v0.8.0/boot_examples/index.html)
+Please refer to [Documentation - Boot Examples](https://readthedocs.dp.tech/Uni-Lab/v0.8.0/boot_examples/index.html)
 
-## 消息格式
+## Message Format
 
-Uni-Lab-OS 使用预构建的 `unilabos_msgs` 进行系统通信。您可以在 [GitHub Releases](https://github.com/dptech-corp/Uni-Lab-OS/releases) 页面找到已构建的版本。
+Uni-Lab-OS uses pre-built `unilabos_msgs` for system communication. You can find the built versions on the [GitHub Releases](https://github.com/dptech-corp/Uni-Lab-OS/releases) page.
 
-## 许可证
+## License
 
-此项目采用 GPL-3.0 许可 - 详情请参阅 [LICENSE](LICENSE) 文件。
+This project is licensed under GPL-3.0 - see the [LICENSE](LICENSE) file for details.
 
-## 项目统计
+## Project Statistics
 
-### Stars 趋势
+### Stars Trend
 
 <a href="https://star-history.com/#dptech-corp/Uni-Lab-OS&Date">
   <img src="https://api.star-history.com/svg?repos=dptech-corp/Uni-Lab-OS&type=Date" alt="Star History Chart" width="600">
 </a>
 
-## 联系我们
+## Contact Us
 
 - GitHub Issues: [https://github.com/dptech-corp/Uni-Lab-OS/issues](https://github.com/dptech-corp/Uni-Lab-OS/issues)
