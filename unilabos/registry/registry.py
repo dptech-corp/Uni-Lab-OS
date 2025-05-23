@@ -1,5 +1,4 @@
 import io
-import json
 import os
 import sys
 from pathlib import Path
@@ -7,10 +6,9 @@ from typing import Any
 
 import yaml
 
-from unilabos.utils import logger
 from unilabos.ros.msgs.message_converter import msg_converter_manager, ros_action_to_json_schema
+from unilabos.utils import logger
 from unilabos.utils.decorator import singleton
-from unilabos.utils.type_check import TypeEncoder
 
 DEFAULT_PATHS = [Path(__file__).absolute().parent]
 
@@ -21,10 +19,12 @@ class Registry:
         self.registry_paths = DEFAULT_PATHS.copy()  # 使用copy避免修改默认值
         if registry_paths:
             self.registry_paths.extend(registry_paths)
-        action_type = self._replace_type_with_class(
-            "ResourceCreateFromOuter", "host_node", f"动作 add_resource_from_outer"
+        self.ResourceCreateFromOuter = self._replace_type_with_class(
+            "ResourceCreateFromOuter", "host_node", f"动作 create_resource_detailed"
         )
-        schema = ros_action_to_json_schema(action_type)
+        self.ResourceCreateFromOuterEasy = self._replace_type_with_class(
+            "ResourceCreateFromOuterEasy", "host_node", f"动作 create_resource"
+        )
         self.device_type_registry = {
             "host_node": {
                 "description": "UniLabOS主机节点",
@@ -33,7 +33,7 @@ class Registry:
                     "type": "python",
                     "status_types": {},
                     "action_value_mappings": {
-                        "add_resource_from_outer": {
+                        "create_resource_detailed": {
                             "type": msg_converter_manager.search_class("ResourceCreateFromOuter"),
                             "goal": {
                                 "resources": "resources",
@@ -46,7 +46,26 @@ class Registry:
                             "result": {
                                 "success": "success"
                             },
-                            "schema": schema
+                            "schema": ros_action_to_json_schema(self.ResourceCreateFromOuter)
+                        },
+                        "create_resource": {
+                            "type": msg_converter_manager.search_class("ResourceCreateFromOuterEasy"),
+                            "goal": {
+                                "res_id": "res_id",
+                                "class_name": "class_name",
+                                "parent": "parent",
+                                "device_id": "device_id",
+                                "bind_locations": "bind_locations",
+                                "liquid_input_slot": "liquid_input_slot[]",
+                                "liquid_type": "liquid_type[]",
+                                "liquid_volume": "liquid_volume[]",
+                                "slot_on_deck": "slot_on_deck",
+                            },
+                            "feedback": {},
+                            "result": {
+                                "success": "success"
+                            },
+                            "schema": ros_action_to_json_schema(self.ResourceCreateFromOuterEasy)
                         }
                     }
                 },

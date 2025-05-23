@@ -17,6 +17,7 @@ from unilabos_msgs.srv import ResourceAdd, ResourceGet, ResourceDelete, Resource
 from unique_identifier_msgs.msg import UUID
 
 from unilabos.registry.registry import lab_registry
+from unilabos.resources.graphio import initialize_resource
 from unilabos.resources.registry import add_schema
 from unilabos.ros.initialize_device import initialize_device_from_dict
 from unilabos.ros.msgs.message_converter import (
@@ -100,7 +101,14 @@ class HostNode(BaseROS2DeviceNode):
         self.devices_names: Dict[str, str] = {device_id: self.namespace}  # 存储设备名称和命名空间的映射
         self.devices_instances: Dict[str, ROS2DeviceNode] = {}  # 存储设备实例
         self.device_machine_names: Dict[str, str] = {device_id: "本地", }  # 存储设备ID到机器名称的映射
-        self._action_clients: Dict[str, ActionClient] = {}  # 用来存储多个ActionClient实例
+        self._action_clients: Dict[str, ActionClient] = {  # 为了方便了解实际的数据类型，host的默认写好
+            "/devices/host_node/create_resource": ActionClient(
+                self, lab_registry.ResourceCreateFromOuterEasy, "/devices/host_node/create_resource", callback_group=self.callback_group
+            ),
+            "/devices/host_node/create_resource_detailed": ActionClient(
+                self, lab_registry.ResourceCreateFromOuter, "/devices/host_node/create_resource_detailed", callback_group=self.callback_group
+            )
+        }  # 用来存储多个ActionClient实例
         self._action_value_mappings: Dict[str, Dict] = {}  # 用来存储多个ActionClient的type, goal, feedback, result的变量名映射关系
         self._goals: Dict[str, Any] = {}  # 用来存储多个目标的状态
         self._online_devices: Set[str] = {f"{self.namespace}/{device_id}"}  # 用于跟踪在线设备
@@ -141,6 +149,21 @@ class HostNode(BaseROS2DeviceNode):
             ].items():
                 controller_config["update_rate"] = update_rate
                 self.initialize_controller(controller_id, controller_config)
+        resources_config.insert(0, {
+            "id": "host_node",
+            "name": "host_node",
+            "parent": None,
+            "type": "device",
+            "class": "host_node",
+            "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+            },
+            "config": {},
+            "data": {},
+            "children": []
+        })
         resource_with_parent_name = []
         resource_ids_to_instance = {i["id"]: i for i in resources_config}
         for res in resources_config:
@@ -278,7 +301,7 @@ class HostNode(BaseROS2DeviceNode):
                 except Exception as e:
                     self.lab_logger().error(f"[Host Node] Failed to create ActionClient for {action_id}: {str(e)}")
 
-    def add_resource_from_outer(self, resources: list["Resource"], device_ids: list[str], bind_parent_ids: list[str], bind_locations: list[Point], other_calling_params: list[str]):
+    def create_resource_detailed(self, resources: list["Resource"], device_ids: list[str], bind_parent_ids: list[str], bind_locations: list[Point], other_calling_params: list[str]):
         for resource, device_id, bind_parent_id, bind_location, other_calling_param in zip(resources, device_ids, bind_parent_ids, bind_locations, other_calling_params):
             # 这里要求device_id传入必须是edge_device_id
             namespace = "/devices/" + device_id
@@ -287,7 +310,7 @@ class HostNode(BaseROS2DeviceNode):
             sclient.wait_for_service()
             request = SerialCommand.Request()
             request.command = json.dumps({
-                "resource": resource,
+                "resource": resource,  # 单个/单组 可为 list[list[Resource]]
                 "namespace": namespace,
                 "edge_device_id": device_id,
                 "bind_parent_id": bind_parent_id,
@@ -301,6 +324,31 @@ class HostNode(BaseROS2DeviceNode):
             response = sclient.call(request)
             pass
         pass
+
+    def create_resource(self, device_id: str, res_id: str, class_name: str, parent: str, bind_locations: Point, liquid_input_slot: list[int], liquid_type: list[str], liquid_volume: list[int], slot_on_deck: int):
+        init_new_res = initialize_resource({
+            "name": res_id,
+            "class": class_name,
+            "parent": parent,
+            "position": {
+                "x": bind_locations.x,
+                "y": bind_locations.y,
+                "z": bind_locations.z,
+            }
+        })  # flatten的格式
+        resources = [init_new_res]
+        device_id = [device_id]
+        bind_parent_id = [parent]
+        bind_location = [bind_locations]
+        other_calling_param = [json.dumps({
+            "ADD_LIQUID_TYPE": liquid_type,
+            "LIQUID_VOLUME": liquid_volume,
+            "LIQUID_INPUT_SLOT": liquid_input_slot,
+            "initialize_full": False,
+            "slot": slot_on_deck
+        })]
+
+        return self.create_resource_detailed(resources, device_id, bind_parent_id, bind_location, other_calling_param)
 
     def initialize_device(self, device_id: str, device_config: Dict[str, Any]) -> None:
         """

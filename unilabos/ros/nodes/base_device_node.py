@@ -1,3 +1,4 @@
+import copy
 import functools
 import json
 import threading
@@ -20,7 +21,7 @@ from unilabos_msgs.action import SendCmd
 from unilabos_msgs.srv._serial_command import SerialCommand_Request, SerialCommand_Response
 
 from unilabos.resources.graphio import convert_resources_to_type, convert_resources_from_type, resource_ulab_to_plr, \
-    initialize_resources
+    initialize_resources, list_to_nested_dict, dict_to_tree, resource_plr_to_ulab, tree_to_list
 from unilabos.ros.msgs.message_converter import (
     convert_to_ros_msg,
     convert_from_ros_msg,
@@ -312,7 +313,10 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             # 物料传输到对应的node节点
             rclient = self.create_client(ResourceAdd, "/resources/add")
             rclient.wait_for_service()
+            rclient2 = self.create_client(ResourceAdd, "/resources/add")
+            rclient2.wait_for_service()
             request = ResourceAdd.Request()
+            request2 = ResourceAdd.Request()
             command_json = json.loads(req.command)
             namespace = command_json["namespace"]
             bind_parent_id = command_json["bind_parent_id"]
@@ -321,11 +325,23 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             other_calling_param = command_json["other_calling_param"]
             resources = command_json["resource"]
             initialize_full = other_calling_param.pop("initialize_full", False)
+            # 用来增加液体
+            ADD_LIQUID_TYPE = other_calling_param.pop("ADD_LIQUID_TYPE", [])
+            LIQUID_VOLUME = other_calling_param.pop("LIQUID_VOLUME", [])
+            LIQUID_INPUT_SLOT = other_calling_param.pop("LIQUID_INPUT_SLOT", [])
+            slot = other_calling_param.pop("slot", -1)
+            if slot >= 0:  # slot为负数的时候采用assign方法
+                other_calling_param["slot"] = slot
             # 本地拿到这个物料，可能需要先做初始化?
             if isinstance(resources, list):
-                if initialize_full:
+                if len(resources) == 1 and isinstance(resources[0], list) and not initialize_full:  # 取消，不存在的情况
+                    # 预先initialize过，以整组的形式传入
+                    request.resources = [convert_to_ros_msg(Resource, resource_) for resource_ in resources[0]]
+                elif initialize_full:
                     resources = initialize_resources(resources)
-                request.resources = [convert_to_ros_msg(Resource, resource) for resource in resources]
+                    request.resources = [convert_to_ros_msg(Resource, resource) for resource in resources]
+                else:
+                    request.resources = [convert_to_ros_msg(Resource, resource) for resource in resources]
             else:
                 if initialize_full:
                     resources = initialize_resources([resources])
@@ -335,20 +351,31 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             res.response = "OK"
             # 接下来该根据bind_parent_id进行assign了，目前只有plr可以进行assign，不然没有办法输入到物料系统中
             resource = self.resource_tracker.figure_resource({"name": bind_parent_id})
-            request.resources = [convert_to_ros_msg(Resource, resources)]
+            # request.resources = [convert_to_ros_msg(Resource, resources)]
 
             try:
                 from pylabrobot.resources.resource import Resource as ResourcePLR
                 from pylabrobot.resources.deck import Deck
                 from pylabrobot.resources import Coordinate
                 from pylabrobot.resources import OTDeck
+                from pylabrobot.resources import Plate
                 contain_model = not isinstance(resource, Deck)
                 if isinstance(resource, ResourcePLR):
                     # resources.list()
-                    plr_instance = resource_ulab_to_plr(resources, contain_model)
+                    resources_tree = dict_to_tree(copy.deepcopy({r["id"]: r for r in resources}))
+                    plr_instance = resource_ulab_to_plr(resources_tree[0], contain_model)
+                    if isinstance(plr_instance, Plate):
+                        empty_liquid_info_in = [(None, 0)] * plr_instance.num_items
+                        for liquid_type, liquid_volume, liquid_input_slot in zip(ADD_LIQUID_TYPE, LIQUID_VOLUME, LIQUID_INPUT_SLOT):
+                            empty_liquid_info_in[liquid_input_slot] = (liquid_type, liquid_volume)
+                        plr_instance.set_well_liquids(empty_liquid_info_in)
                     if isinstance(resource, OTDeck) and "slot" in other_calling_param:
                         resource.assign_child_at_slot(plr_instance, **other_calling_param)
-                    resource.assign_child_resource(plr_instance, Coordinate(location["x"], location["y"], location["z"]), **other_calling_param)
+                    else:
+                        _discard_slot = other_calling_param.pop("slot", -1)
+                        resource.assign_child_resource(plr_instance, Coordinate(location["x"], location["y"], location["z"]), **other_calling_param)
+                    request2.resources = [convert_to_ros_msg(Resource, r) for r in tree_to_list([resource_plr_to_ulab(resource)])]
+                    rclient2.call(request2)
                 # 发送给ResourceMeshManager
                 action_client = ActionClient(
                     self, SendCmd, "/devices/resource_mesh_manager/add_resource_mesh", callback_group=self.callback_group
@@ -526,7 +553,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             action_kwargs = convert_from_ros_msg_with_mapping(goal, action_value_mapping["goal"])
             self.lab_logger().debug(f"接收到原始目标: {action_kwargs}")
             # 向Host查询物料当前状态，如果是host本身的增加物料的请求，则直接跳过
-            if action_name != "add_resource_from_outer":
+            if action_name not in ["create_resource_detailed", "create_resource"]:
                 for k, v in goal.get_fields_and_field_types().items():
                     if v in ["unilabos_msgs/Resource", "sequence<unilabos_msgs/Resource>"]:
                         self.lab_logger().info(f"查询资源状态: Key: {k} Type: {v}")
@@ -625,7 +652,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             del future
 
             # 向Host更新物料当前状态
-            if action_name != "add_resource_from_outer":
+            if action_name not in ["create_resource_detailed", "create_resource"]:
                 for k, v in goal.get_fields_and_field_types().items():
                     if v not in ["unilabos_msgs/Resource", "sequence<unilabos_msgs/Resource>"]:
                         continue
@@ -764,7 +791,7 @@ class ROS2DeviceNode:
         self.resource_tracker = DeviceNodeResourceTracker()
 
         # use_pylabrobot_creator 使用 cls的包路径检测
-        use_pylabrobot_creator = driver_class.__module__.startswith("pylabrobot") or driver_class.__name__ == "DPLiquidHandler"
+        use_pylabrobot_creator = driver_class.__module__.startswith("pylabrobot") or driver_class.__name__ == "LiquidHandlerAbstract"
 
         # TODO: 要在创建之前预先请求服务器是否有当前id的物料，放到resource_tracker中，让pylabrobot进行创建
         # 创建设备类实例

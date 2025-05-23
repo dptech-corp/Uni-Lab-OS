@@ -26,6 +26,7 @@ class MQTTClient:
     def __init__(self):
         self.mqtt_disable = not MQConfig.lab_id
         self.client_id = f"{MQConfig.group_id}@@@{MQConfig.lab_id}{uuid.uuid4()}"
+        logger.info("[MQTT] Client_id: " + self.client_id)
         self.client = mqtt.Client(CallbackAPIVersion.VERSION2, client_id=self.client_id, protocol=mqtt.MQTTv5)
         self._setup_callbacks()
 
@@ -52,10 +53,7 @@ class MQTTClient:
         try:
             payload_str = msg.payload.decode("utf-8")
             payload_json = json.loads(payload_str)
-            logger.debug(f"Topic: {msg.topic}")
-            logger.debug("Payload:", json.dumps(payload_json, indent=2, ensure_ascii=False))
             if msg.topic == f"labs/{MQConfig.lab_id}/job/start/":
-                logger.debug("job_add", type(payload_json), payload_json)
                 if "data" not in payload_json:
                     payload_json["data"] = {}
                 if "action" in payload_json:
