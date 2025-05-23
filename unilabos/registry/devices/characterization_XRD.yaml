@@ -1,0 +1,20 @@
+# 电化学表征设备：电化学工作站、电池测试柜
+XRD_station.Aolong:
+  description: Aolong XRD_station test
+  class:
+    module: unilabos.devices.XRD.XRD_test:XRD_Aolong_AL_Y3500
+    type: python
+    status_types:
+      samplein_status: Bool
+      sampleout_status: Bool
+    action_value_mappings:
+      NMR_cmd:
+        type: SendCmd
+        goal:
+          #command: wf_name
+          params: command
+          #resource: resource
+        feedback:
+          status: status
+        result:
+          success: success
