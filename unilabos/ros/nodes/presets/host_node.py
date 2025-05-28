@@ -93,6 +93,7 @@ class HostNode(BaseROS2DeviceNode):
         self.__class__._instance = self
 
         # 初始化配置
+        self.server_latest_timestamp = 0.0  #
         self.devices_config = devices_config
         self.resources_config = resources_config
         self.physical_setup_graph = physical_setup_graph
@@ -120,6 +121,12 @@ class HostNode(BaseROS2DeviceNode):
                 self,
                 lab_registry.ResourceCreateFromOuter,
                 "/devices/host_node/create_resource_detailed",
+                callback_group=self.callback_group,
+            ),
+            "/devices/host_node/test_latency": ActionClient(
+                self,
+                lab_registry.EmptyIn,
+                "/devices/host_node/test_latency",
                 callback_group=self.callback_group,
             ),
         }  # 用来存储多个ActionClient实例
@@ -206,6 +213,10 @@ class HostNode(BaseROS2DeviceNode):
         self._discovery_timer = self.create_timer(
             discovery_interval, self._discovery_devices_callback, callback_group=ReentrantCallbackGroup()
         )
+
+        # 添加ping-pong相关属性
+        self._ping_responses = {}  # 存储ping响应
+        self._ping_lock = threading.Lock()
 
         self.lab_logger().info("[Host Node] Host node initialized.")
         HostNode._ready_event.set()
@@ -379,8 +390,8 @@ class HostNode(BaseROS2DeviceNode):
                 },
             }
         )  # flatten的格式
-        resources = [init_new_res]
-        device_id = [device_id]
+        resources = init_new_res  # initialize_resource已经返回list[dict]
+        device_ids = [device_id]
         bind_parent_id = [parent]
         bind_location = [bind_locations]
         other_calling_param = [
@@ -395,7 +406,7 @@ class HostNode(BaseROS2DeviceNode):
             )
         ]
 
-        return self.create_resource_detailed(resources, device_id, bind_parent_id, bind_location, other_calling_param)
+        return self.create_resource_detailed(resources, device_ids, bind_parent_id, bind_location, other_calling_param)
 
     def initialize_device(self, device_id: str, device_config: Dict[str, Any]) -> None:
         """
@@ -526,7 +537,12 @@ class HostNode(BaseROS2DeviceNode):
                         )
 
     def send_goal(
-        self, device_id: str, action_name: str, action_kwargs: Dict[str, Any], goal_uuid: Optional[str] = None
+        self,
+        device_id: str,
+        action_name: str,
+        action_kwargs: Dict[str, Any],
+        goal_uuid: Optional[str] = None,
+        server_info: Optional[Dict[str, Any]] = None,
     ) -> None:
         """
         向设备发送目标请求
@@ -538,6 +554,8 @@ class HostNode(BaseROS2DeviceNode):
             goal_uuid: 目标UUID，如果为None则自动生成
         """
         action_id = f"/devices/{device_id}/{action_name}"
+        if action_name == "test_latency" and server_info is not None:
+            self.server_latest_timestamp = server_info.get("send_timestamp", 0.0)
         if action_id not in self._action_clients:
             self.lab_logger().error(f"[Host Node] ActionClient {action_id} not found.")
             return
@@ -832,3 +850,148 @@ class HostNode(BaseROS2DeviceNode):
         # 这里可以实现返回资源列表的逻辑
         self.lab_logger().debug(f"[Host Node-Resource] List parameters: {request}")
         return response
+
+    def test_latency(self):
+        """
+        测试网络延迟的action实现
+        通过5次ping-pong机制校对时间误差并计算实际延迟
+        """
+        import time
+        import uuid as uuid_module
+
+        self.lab_logger().info("=" * 60)
+        self.lab_logger().info("开始网络延迟测试...")
+
+        # 记录任务开始执行的时间
+        task_start_time = time.time()
+
+        # 进行5次ping-pong测试
+        ping_results = []
+
+        for i in range(5):
+            self.lab_logger().info(f"第{i+1}/5次ping-pong测试...")
+
+            # 生成唯一的ping ID
+            ping_id = str(uuid_module.uuid4())
+
+            # 记录发送时间
+            send_timestamp = time.time()
+
+            # 发送ping
+            from unilabos.app.mq import mqtt_client
+
+            mqtt_client.send_ping(ping_id, send_timestamp)
+
+            # 等待pong响应
+            timeout = 10.0
+            start_wait_time = time.time()
+
+            while time.time() - start_wait_time < timeout:
+                with self._ping_lock:
+                    if ping_id in self._ping_responses:
+                        pong_data = self._ping_responses.pop(ping_id)
+                        break
+                time.sleep(0.001)
+            else:
+                self.lab_logger().error(f"❌ 第{i+1}次测试超时")
+                continue
+
+            # 计算本次测试结果
+            receive_timestamp = time.time()
+            client_timestamp = pong_data["client_timestamp"]
+            server_timestamp = pong_data["server_timestamp"]
+
+            # 往返时间
+            rtt_ms = (receive_timestamp - send_timestamp) * 1000
+
+            # 客户端与服务端时间差（客户端时间 - 服务端时间）
+            # 假设网络延迟对称，取中间点的服务端时间
+            mid_point_time = send_timestamp + (receive_timestamp - send_timestamp) / 2
+            time_diff_ms = (mid_point_time - server_timestamp) * 1000
+
+            ping_results.append({"rtt_ms": rtt_ms, "time_diff_ms": time_diff_ms})
+
+            self.lab_logger().info(f"✅ 第{i+1}次: 往返时间={rtt_ms:.2f}ms, 时间差={time_diff_ms:.2f}ms")
+
+            time.sleep(0.1)
+
+        if not ping_results:
+            self.lab_logger().error("❌ 所有ping-pong测试都失败了")
+            return {"status": "all_timeout"}
+
+        # 统计分析
+        rtts = [r["rtt_ms"] for r in ping_results]
+        time_diffs = [r["time_diff_ms"] for r in ping_results]
+
+        avg_rtt_ms = sum(rtts) / len(rtts)
+        avg_time_diff_ms = sum(time_diffs) / len(time_diffs)
+        max_time_diff_error_ms = max(abs(min(time_diffs)), abs(max(time_diffs)))
+
+        self.lab_logger().info("-" * 50)
+        self.lab_logger().info("[测试统计]")
+        self.lab_logger().info(f"有效测试次数: {len(ping_results)}/5")
+        self.lab_logger().info(f"平均往返时间: {avg_rtt_ms:.2f}ms")
+        self.lab_logger().info(f"平均时间差: {avg_time_diff_ms:.2f}ms")
+        self.lab_logger().info(f"时间差范围: {min(time_diffs):.2f}ms ~ {max(time_diffs):.2f}ms")
+        self.lab_logger().info(f"最大时间误差: ±{max_time_diff_error_ms:.2f}ms")
+
+        # 计算任务执行延迟
+        if hasattr(self, "server_latest_timestamp") and self.server_latest_timestamp > 0:
+            self.lab_logger().info("-" * 50)
+            self.lab_logger().info("[任务执行延迟分析]")
+            self.lab_logger().info(f"服务端任务下发时间: {self.server_latest_timestamp:.6f}")
+            self.lab_logger().info(f"客户端任务开始时间: {task_start_time:.6f}")
+
+            # 原始时间差（不考虑时间同步误差）
+            raw_delay_ms = (task_start_time - self.server_latest_timestamp) * 1000
+
+            # 考虑时间同步误差后的延迟（用平均时间差校正）
+            corrected_delay_ms = raw_delay_ms - avg_time_diff_ms
+
+            self.lab_logger().info(f"📊 原始时间差: {raw_delay_ms:.2f}ms")
+            self.lab_logger().info(f"🔧 时间同步校正: {avg_time_diff_ms:.2f}ms")
+            self.lab_logger().info(f"⏰ 实际任务延迟: {corrected_delay_ms:.2f}ms")
+            self.lab_logger().info(f"📏 误差范围: ±{max_time_diff_error_ms:.2f}ms")
+
+            # 给出延迟范围
+            min_delay = corrected_delay_ms - max_time_diff_error_ms
+            max_delay = corrected_delay_ms + max_time_diff_error_ms
+            self.lab_logger().info(f"📋 延迟范围: {min_delay:.2f}ms ~ {max_delay:.2f}ms")
+
+        else:
+            self.lab_logger().warning("⚠️ 无法获取服务端任务下发时间，跳过任务延迟分析")
+            corrected_delay_ms = -1
+
+        self.lab_logger().info("=" * 60)
+
+        return {
+            "avg_rtt_ms": avg_rtt_ms,
+            "avg_time_diff_ms": avg_time_diff_ms,
+            "max_time_error_ms": max_time_diff_error_ms,
+            "task_delay_ms": corrected_delay_ms if corrected_delay_ms > 0 else -1,
+            "raw_delay_ms": (
+                raw_delay_ms if hasattr(self, "server_latest_timestamp") and self.server_latest_timestamp > 0 else -1
+            ),
+            "test_count": len(ping_results),
+            "status": "success",
+        }
+
+    def handle_pong_response(self, pong_data: dict):
+        """
+        处理pong响应
+        """
+        ping_id = pong_data.get("ping_id")
+        if ping_id:
+            with self._ping_lock:
+                self._ping_responses[ping_id] = pong_data
+
+            # 详细信息合并为一条日志
+            client_timestamp = pong_data.get("client_timestamp", 0)
+            server_timestamp = pong_data.get("server_timestamp", 0)
+            current_time = time.time()
+
+            self.lab_logger().debug(
+                f"📨 Pong | ID:{ping_id[:8]}.. | C→S→C: {client_timestamp:.3f}→{server_timestamp:.3f}→{current_time:.3f}"
+            )
+        else:
+            self.lab_logger().warning("⚠️ 收到无效的Pong响应（缺少ping_id）")

@@ -25,6 +25,9 @@ class Registry:
         self.ResourceCreateFromOuterEasy = self._replace_type_with_class(
             "ResourceCreateFromOuterEasy", "host_node", f"动作 create_resource"
         )
+        self.EmptyIn = self._replace_type_with_class(
+            "EmptyIn", "host_node", f""
+        )
         self.device_type_registry = {}
         self.resource_type_registry = {}
         self._setup_called = False  # 跟踪setup是否已调用
@@ -38,58 +41,69 @@ class Registry:
             return
 
         from unilabos.app.web.utils.action_utils import get_yaml_from_goal_type
-        self.device_type_registry.update({
-            "host_node": {
-                "description": "UniLabOS主机节点",
-                "class": {
-                    "module": "unilabos.ros.nodes.presets.host_node",
-                    "type": "python",
-                    "status_types": {},
-                    "action_value_mappings": {
-                        "create_resource_detailed": {
-                            "type": self.ResourceCreateFromOuter,
-                            "goal": {
-                                "resources": "resources",
-                                "device_ids": "device_ids",
-                                "bind_parent_ids": "bind_parent_ids",
-                                "bind_locations": "bind_locations",
-                                "other_calling_params": "other_calling_params",
+
+        self.device_type_registry.update(
+            {
+                "host_node": {
+                    "description": "UniLabOS主机节点",
+                    "class": {
+                        "module": "unilabos.ros.nodes.presets.host_node",
+                        "type": "python",
+                        "status_types": {},
+                        "action_value_mappings": {
+                            "create_resource_detailed": {
+                                "type": self.ResourceCreateFromOuter,
+                                "goal": {
+                                    "resources": "resources",
+                                    "device_ids": "device_ids",
+                                    "bind_parent_ids": "bind_parent_ids",
+                                    "bind_locations": "bind_locations",
+                                    "other_calling_params": "other_calling_params",
+                                },
+                                "feedback": {},
+                                "result": {"success": "success"},
+                                "schema": ros_action_to_json_schema(self.ResourceCreateFromOuter),
+                                "goal_default": yaml.safe_load(
+                                    io.StringIO(get_yaml_from_goal_type(self.ResourceCreateFromOuter.Goal))
+                                ),
                             },
-                            "feedback": {},
-                            "result": {"success": "success"},
-                            "schema": ros_action_to_json_schema(self.ResourceCreateFromOuter),
-                            "goal_default": yaml.safe_load(
-                                io.StringIO(get_yaml_from_goal_type(self.ResourceCreateFromOuter.Goal))
-                            )
-                        },
-                        "create_resource": {
-                            "type": self.ResourceCreateFromOuterEasy,
-                            "goal": {
-                                "res_id": "res_id",
-                                "class_name": "class_name",
-                                "parent": "parent",
-                                "device_id": "device_id",
-                                "bind_locations": "bind_locations",
-                                "liquid_input_slot": "liquid_input_slot[]",
-                                "liquid_type": "liquid_type[]",
-                                "liquid_volume": "liquid_volume[]",
-                                "slot_on_deck": "slot_on_deck",
+                            "create_resource": {
+                                "type": self.ResourceCreateFromOuterEasy,
+                                "goal": {
+                                    "res_id": "res_id",
+                                    "class_name": "class_name",
+                                    "parent": "parent",
+                                    "device_id": "device_id",
+                                    "bind_locations": "bind_locations",
+                                    "liquid_input_slot": "liquid_input_slot[]",
+                                    "liquid_type": "liquid_type[]",
+                                    "liquid_volume": "liquid_volume[]",
+                                    "slot_on_deck": "slot_on_deck",
+                                },
+                                "feedback": {},
+                                "result": {"success": "success"},
+                                "schema": ros_action_to_json_schema(self.ResourceCreateFromOuterEasy),
+                                "goal_default": yaml.safe_load(
+                                    io.StringIO(get_yaml_from_goal_type(self.ResourceCreateFromOuterEasy.Goal))
+                                ),
                             },
-                            "feedback": {},
-                            "result": {"success": "success"},
-                            "schema": ros_action_to_json_schema(self.ResourceCreateFromOuterEasy),
-                            "goal_default": yaml.safe_load(
-                                io.StringIO(get_yaml_from_goal_type(self.ResourceCreateFromOuterEasy.Goal))
-                            )
+                            "test_latency": {
+                                "type": self.EmptyIn,
+                                "goal": {},
+                                "feedback": {},
+                                "result": {"latency_ms": "latency_ms", "time_diff_ms": "time_diff_ms"},
+                                "schema": ros_action_to_json_schema(self.EmptyIn),
+                                "goal_default": {},
+                            },
                         },
                     },
-                },
-                "icon": "icon_device.webp",
-                "registry_type": "device",
-                "schema": {"properties": {}, "additionalProperties": False, "type": "object"},
-                "file_path": "/",
+                    "icon": "icon_device.webp",
+                    "registry_type": "device",
+                    "schema": {"properties": {}, "additionalProperties": False, "type": "object"},
+                    "file_path": "/",
+                }
             }
-        })
+        )
         logger.debug(f"[UniLab Registry] ----------Setup----------")
         self.registry_paths = [Path(path).absolute() for path in self.registry_paths]
         for i, path in enumerate(self.registry_paths):
