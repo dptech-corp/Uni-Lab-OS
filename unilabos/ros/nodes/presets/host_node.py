@@ -12,8 +12,14 @@ from rclpy.action import ActionClient, get_action_server_names_and_types_by_node
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.service import Service
 from unilabos_msgs.msg import Resource  # type: ignore
-from unilabos_msgs.srv import ResourceAdd, ResourceGet, ResourceDelete, ResourceUpdate, ResourceList, \
-    SerialCommand  # type: ignore
+from unilabos_msgs.srv import (
+    ResourceAdd,
+    ResourceGet,
+    ResourceDelete,
+    ResourceUpdate,
+    ResourceList,
+    SerialCommand,
+)  # type: ignore
 from unique_identifier_msgs.msg import UUID
 
 from unilabos.registry.registry import lab_registry
@@ -100,16 +106,26 @@ class HostNode(BaseROS2DeviceNode):
         # 创建设备、动作客户端和目标存储
         self.devices_names: Dict[str, str] = {device_id: self.namespace}  # 存储设备名称和命名空间的映射
         self.devices_instances: Dict[str, ROS2DeviceNode] = {}  # 存储设备实例
-        self.device_machine_names: Dict[str, str] = {device_id: "本地", }  # 存储设备ID到机器名称的映射
+        self.device_machine_names: Dict[str, str] = {
+            device_id: "本地",
+        }  # 存储设备ID到机器名称的映射
         self._action_clients: Dict[str, ActionClient] = {  # 为了方便了解实际的数据类型，host的默认写好
             "/devices/host_node/create_resource": ActionClient(
-                self, lab_registry.ResourceCreateFromOuterEasy, "/devices/host_node/create_resource", callback_group=self.callback_group
+                self,
+                lab_registry.ResourceCreateFromOuterEasy,
+                "/devices/host_node/create_resource",
+                callback_group=self.callback_group,
             ),
             "/devices/host_node/create_resource_detailed": ActionClient(
-                self, lab_registry.ResourceCreateFromOuter, "/devices/host_node/create_resource_detailed", callback_group=self.callback_group
-            )
+                self,
+                lab_registry.ResourceCreateFromOuter,
+                "/devices/host_node/create_resource_detailed",
+                callback_group=self.callback_group,
+            ),
         }  # 用来存储多个ActionClient实例
-        self._action_value_mappings: Dict[str, Dict] = {}  # 用来存储多个ActionClient的type, goal, feedback, result的变量名映射关系
+        self._action_value_mappings: Dict[str, Dict] = (
+            {}
+        )  # 用来存储多个ActionClient的type, goal, feedback, result的变量名映射关系
         self._goals: Dict[str, Any] = {}  # 用来存储多个目标的状态
         self._online_devices: Set[str] = {f"{self.namespace}/{device_id}"}  # 用于跟踪在线设备
         self._last_discovery_time = 0.0  # 上次设备发现的时间
@@ -123,8 +139,11 @@ class HostNode(BaseROS2DeviceNode):
         self.device_status_timestamps = {}  # 用来存储设备状态最后更新时间
 
         from unilabos.app.mq import mqtt_client
-        for device_config in lab_registry.obtain_registry_device_info():
-            mqtt_client.publish_registry(device_config["id"], device_config)
+
+        for device_info in lab_registry.obtain_registry_device_info():
+            mqtt_client.publish_registry(device_info["id"], device_info)
+        for resource_info in lab_registry.obtain_registry_resource_info():
+            mqtt_client.publish_registry(resource_info["id"], resource_info)
 
         # 首次发现网络中的设备
         self._discover_devices()
@@ -149,21 +168,20 @@ class HostNode(BaseROS2DeviceNode):
             ].items():
                 controller_config["update_rate"] = update_rate
                 self.initialize_controller(controller_id, controller_config)
-        resources_config.insert(0, {
-            "id": "host_node",
-            "name": "host_node",
-            "parent": None,
-            "type": "device",
-            "class": "host_node",
-            "position": {
-                "x": 0,
-                "y": 0,
-                "z": 0
+        resources_config.insert(
+            0,
+            {
+                "id": "host_node",
+                "name": "host_node",
+                "parent": None,
+                "type": "device",
+                "class": "host_node",
+                "position": {"x": 0, "y": 0, "z": 0},
+                "config": {},
+                "data": {},
+                "children": [],
             },
-            "config": {},
-            "data": {},
-            "children": []
-        })
+        )
         resource_with_parent_name = []
         resource_ids_to_instance = {i["id"]: i for i in resources_config}
         for res in resources_config:
@@ -233,7 +251,7 @@ class HostNode(BaseROS2DeviceNode):
                     target=self._send_re_register,
                     args=(sclient,),
                     daemon=True,
-                    name=f"ROSDevice{self.device_id}_query_host_name_{namespace}"
+                    name=f"ROSDevice{self.device_id}_query_host_name_{namespace}",
                 ).start()
             elif device_key not in self._online_devices:
                 # 设备重新上线
@@ -244,7 +262,7 @@ class HostNode(BaseROS2DeviceNode):
                     target=self._send_re_register,
                     args=(sclient,),
                     daemon=True,
-                    name=f"ROSDevice{self.device_id}_query_host_name_{namespace}"
+                    name=f"ROSDevice{self.device_id}_query_host_name_{namespace}",
                 ).start()
 
         # 检测离线设备
@@ -288,7 +306,7 @@ class HostNode(BaseROS2DeviceNode):
                         self, action_type, action_id, callback_group=self.callback_group
                     )
                     self.lab_logger().debug(f"[Host Node] Created ActionClient (Discovery): {action_id}")
-                    action_name = action_id[len(namespace) + 1:]
+                    action_name = action_id[len(namespace) + 1 :]
                     edge_device_id = namespace[9:]
                     # from unilabos.app.mq import mqtt_client
                     # info_with_schema = ros_action_to_json_schema(action_type)
@@ -301,52 +319,81 @@ class HostNode(BaseROS2DeviceNode):
                 except Exception as e:
                     self.lab_logger().error(f"[Host Node] Failed to create ActionClient for {action_id}: {str(e)}")
 
-    def create_resource_detailed(self, resources: list["Resource"], device_ids: list[str], bind_parent_ids: list[str], bind_locations: list[Point], other_calling_params: list[str]):
-        for resource, device_id, bind_parent_id, bind_location, other_calling_param in zip(resources, device_ids, bind_parent_ids, bind_locations, other_calling_params):
+    def create_resource_detailed(
+        self,
+        resources: list["Resource"],
+        device_ids: list[str],
+        bind_parent_ids: list[str],
+        bind_locations: list[Point],
+        other_calling_params: list[str],
+    ):
+        for resource, device_id, bind_parent_id, bind_location, other_calling_param in zip(
+            resources, device_ids, bind_parent_ids, bind_locations, other_calling_params
+        ):
             # 这里要求device_id传入必须是edge_device_id
             namespace = "/devices/" + device_id
             srv_address = f"/srv{namespace}/append_resource"
             sclient = self.create_client(SerialCommand, srv_address)
             sclient.wait_for_service()
             request = SerialCommand.Request()
-            request.command = json.dumps({
-                "resource": resource,  # 单个/单组 可为 list[list[Resource]]
-                "namespace": namespace,
-                "edge_device_id": device_id,
-                "bind_parent_id": bind_parent_id,
-                "bind_location": {
-                    "x": bind_location.x,
-                    "y": bind_location.y,
-                    "z": bind_location.z,
+            request.command = json.dumps(
+                {
+                    "resource": resource,  # 单个/单组 可为 list[list[Resource]]
+                    "namespace": namespace,
+                    "edge_device_id": device_id,
+                    "bind_parent_id": bind_parent_id,
+                    "bind_location": {
+                        "x": bind_location.x,
+                        "y": bind_location.y,
+                        "z": bind_location.z,
+                    },
+                    "other_calling_param": json.loads(other_calling_param) if other_calling_param else {},
                 },
-                "other_calling_param": json.loads(other_calling_param) if other_calling_param else {},
-            }, ensure_ascii=False)
+                ensure_ascii=False,
+            )
             response = sclient.call(request)
             pass
         pass
 
-    def create_resource(self, device_id: str, res_id: str, class_name: str, parent: str, bind_locations: Point, liquid_input_slot: list[int], liquid_type: list[str], liquid_volume: list[int], slot_on_deck: int):
-        init_new_res = initialize_resource({
-            "name": res_id,
-            "class": class_name,
-            "parent": parent,
-            "position": {
-                "x": bind_locations.x,
-                "y": bind_locations.y,
-                "z": bind_locations.z,
+    def create_resource(
+        self,
+        device_id: str,
+        res_id: str,
+        class_name: str,
+        parent: str,
+        bind_locations: Point,
+        liquid_input_slot: list[int],
+        liquid_type: list[str],
+        liquid_volume: list[int],
+        slot_on_deck: int,
+    ):
+        init_new_res = initialize_resource(
+            {
+                "name": res_id,
+                "class": class_name,
+                "parent": parent,
+                "position": {
+                    "x": bind_locations.x,
+                    "y": bind_locations.y,
+                    "z": bind_locations.z,
+                },
             }
-        })  # flatten的格式
+        )  # flatten的格式
         resources = [init_new_res]
         device_id = [device_id]
         bind_parent_id = [parent]
         bind_location = [bind_locations]
-        other_calling_param = [json.dumps({
-            "ADD_LIQUID_TYPE": liquid_type,
-            "LIQUID_VOLUME": liquid_volume,
-            "LIQUID_INPUT_SLOT": liquid_input_slot,
-            "initialize_full": False,
-            "slot": slot_on_deck
-        })]
+        other_calling_param = [
+            json.dumps(
+                {
+                    "ADD_LIQUID_TYPE": liquid_type,
+                    "LIQUID_VOLUME": liquid_volume,
+                    "LIQUID_INPUT_SLOT": liquid_input_slot,
+                    "initialize_full": False,
+                    "slot": slot_on_deck,
+                }
+            )
+        ]
 
         return self.create_resource_detailed(resources, device_id, bind_parent_id, bind_location, other_calling_param)
 
@@ -377,7 +424,9 @@ class HostNode(BaseROS2DeviceNode):
             if action_id not in self._action_clients:
                 action_type = action_value_mapping["type"]
                 self._action_clients[action_id] = ActionClient(self, action_type, action_id)
-                self.lab_logger().debug(f"[Host Node] Created ActionClient (Local): {action_id}")  # 子设备再创建用的是Discover发现的
+                self.lab_logger().debug(
+                    f"[Host Node] Created ActionClient (Local): {action_id}"
+                )  # 子设备再创建用的是Discover发现的
                 # from unilabos.app.mq import mqtt_client
                 # info_with_schema = ros_action_to_json_schema(action_type)
                 # mqtt_client.publish_actions(action_name, {

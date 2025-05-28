@@ -43,10 +43,6 @@ class MQTTClient:
     def _on_connect(self, client, userdata, flags, rc, properties=None):
         logger.info("[MQTT] Connected with result code " + str(rc))
         client.subscribe(f"labs/{MQConfig.lab_id}/job/start/", 0)
-        isok, data = devices()
-        if not isok:
-            logger.error("[MQTT] on_connect ErrorHostNotInit")
-            return
 
     def _on_message(self, client, userdata, msg) -> None:
         logger.info("[MQTT] on_message<<<< " + msg.topic + " " + str(msg.payload))
