@@ -192,7 +192,7 @@ def main():
             args_dict["resources_mesh_config"] = resource_visualization.resource_model
             start_backend(**args_dict)
             server_thread = threading.Thread(target=start_server, kwargs=dict(
-                open_browser=not args_dict["disable_browser"]
+                open_browser=not args_dict["disable_browser"], port=args_dict["port"],
             ))
             server_thread.start()
             asyncio.set_event_loop(asyncio.new_event_loop())
@@ -201,10 +201,10 @@ def main():
                 time.sleep(1)
         else:
             start_backend(**args_dict)
-            start_server(open_browser=not args_dict["disable_browser"])
+            start_server(open_browser=not args_dict["disable_browser"], port=args_dict["port"],)
     else:
         start_backend(**args_dict)
-        start_server(open_browser=not args_dict["disable_browser"])
+        start_server(open_browser=not args_dict["disable_browser"], port=args_dict["port"],)
 
 
 if __name__ == "__main__":
