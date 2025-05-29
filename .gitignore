@@ -6,6 +6,7 @@ __pycache__/
 .vscode
 *.py[cod]
 *$py.class
+service
 
 # C extensions
 *.so

@@ -5,7 +5,7 @@ float64[] flow_rates
 geometry_msgs/Point[] offsets
 float64[] liquid_height
 float64[] blow_out_air_volume
-string spread="wide"
+string spread
 ---
 bool success
 ---

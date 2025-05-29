@@ -12,7 +12,7 @@ import tempfile
 import os
 
 from unilabos.config.config import MQConfig
-from unilabos.app.controler import devices, job_add
+from unilabos.app.controler import job_add
 from unilabos.app.model import JobAddReq
 from unilabos.utils import logger
 from unilabos.utils.type_check import TypeEncoder
@@ -43,20 +43,14 @@ class MQTTClient:
     def _on_connect(self, client, userdata, flags, rc, properties=None):
         logger.info("[MQTT] Connected with result code " + str(rc))
         client.subscribe(f"labs/{MQConfig.lab_id}/job/start/", 0)
-        isok, data = devices()
-        if not isok:
-            logger.error("[MQTT] on_connect ErrorHostNotInit")
-            return
+        client.subscribe(f"labs/{MQConfig.lab_id}/pong/", 0)
 
     def _on_message(self, client, userdata, msg) -> None:
-        logger.info("[MQTT] on_message<<<< " + msg.topic + " " + str(msg.payload))
+        # logger.info("[MQTT] on_message<<<< " + msg.topic + " " + str(msg.payload))
         try:
             payload_str = msg.payload.decode("utf-8")
             payload_json = json.loads(payload_str)
-            logger.debug(f"Topic: {msg.topic}")
-            logger.debug("Payload:", json.dumps(payload_json, indent=2, ensure_ascii=False))
             if msg.topic == f"labs/{MQConfig.lab_id}/job/start/":
-                logger.debug("job_add", type(payload_json), payload_json)
                 if "data" not in payload_json:
                     payload_json["data"] = {}
                 if "action" in payload_json:
@@ -65,6 +59,14 @@ class MQTTClient:
                     payload_json["data"]["action_kwargs"] = payload_json.pop("action_kwargs")
                 job_req = JobAddReq.model_validate(payload_json)
                 data = job_add(job_req)
+                return
+            elif msg.topic == f"labs/{MQConfig.lab_id}/pong/":
+                # 处理pong响应，通知HostNode
+                from unilabos.ros.nodes.presets.host_node import HostNode
+
+                host_instance = HostNode.get_instance(0)
+                if host_instance:
+                    host_instance.handle_pong_response(payload_json)
                 return
 
         except json.JSONDecodeError as e:
@@ -181,6 +183,28 @@ class MQTTClient:
         address = f"labs/{MQConfig.lab_id}/actions/"
         self.client.publish(address, json.dumps(action_info), qos=2)
         logger.debug(f"Action data published: address: {address}, {action_id}, {action_info}")
+
+    def send_ping(self, ping_id: str, timestamp: float):
+        """发送ping消息到服务端"""
+        if self.mqtt_disable:
+            return
+        address = f"labs/{MQConfig.lab_id}/ping/"
+        ping_data = {"ping_id": ping_id, "client_timestamp": timestamp, "type": "ping"}
+        self.client.publish(address, json.dumps(ping_data), qos=2)
+
+    def setup_pong_subscription(self):
+        """设置pong消息订阅"""
+        if self.mqtt_disable:
+            return
+        pong_topic = f"labs/{MQConfig.lab_id}/pong/"
+        self.client.subscribe(pong_topic, 0)
+        logger.debug(f"Subscribed to pong topic: {pong_topic}")
+
+    def handle_pong(self, pong_data: dict):
+        """处理pong响应（这个方法会在收到pong消息时被调用）"""
+        logger.debug(f"Pong received: {pong_data}")
+        # 这里会被HostNode的ping-pong处理逻辑调用
+        pass
 
 
 mqtt_client = MQTTClient()

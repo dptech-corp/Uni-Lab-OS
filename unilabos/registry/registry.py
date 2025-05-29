@@ -1,5 +1,4 @@
 import io
-import json
 import os
 import sys
 from pathlib import Path
@@ -7,10 +6,9 @@ from typing import Any
 
 import yaml
 
-from unilabos.utils import logger
 from unilabos.ros.msgs.message_converter import msg_converter_manager, ros_action_to_json_schema
+from unilabos.utils import logger
 from unilabos.utils.decorator import singleton
-from unilabos.utils.type_check import TypeEncoder
 
 DEFAULT_PATHS = [Path(__file__).absolute().parent]
 
@@ -21,43 +19,16 @@ class Registry:
         self.registry_paths = DEFAULT_PATHS.copy()  # 使用copy避免修改默认值
         if registry_paths:
             self.registry_paths.extend(registry_paths)
-        action_type = self._replace_type_with_class(
-            "ResourceCreateFromOuter", "host_node", f"动作 add_resource_from_outer"
+        self.ResourceCreateFromOuter = self._replace_type_with_class(
+            "ResourceCreateFromOuter", "host_node", f"动作 create_resource_detailed"
         )
-        schema = ros_action_to_json_schema(action_type)
-        self.device_type_registry = {
-            "host_node": {
-                "description": "UniLabOS主机节点",
-                "class": {
-                    "module": "unilabos.ros.nodes.presets.host_node",
-                    "type": "python",
-                    "status_types": {},
-                    "action_value_mappings": {
-                        "add_resource_from_outer": {
-                            "type": msg_converter_manager.search_class("ResourceCreateFromOuter"),
-                            "goal": {
-                                "resources": "resources",
-                                "device_ids": "device_ids",
-                                "bind_parent_ids": "bind_parent_ids",
-                                "bind_locations": "bind_locations",
-                                "other_calling_params": "other_calling_params",
-                            },
-                            "feedback": {},
-                            "result": {
-                                "success": "success"
-                            },
-                            "schema": schema
-                        }
-                    }
-                },
-                "schema": {
-                    "properties": {},
-                    "additionalProperties": False,
-                    "type": "object"
-                },
-                "file_path": "/"
-            }
-        }
+        self.ResourceCreateFromOuterEasy = self._replace_type_with_class(
+            "ResourceCreateFromOuterEasy", "host_node", f"动作 create_resource"
+        )
+        self.EmptyIn = self._replace_type_with_class(
+            "EmptyIn", "host_node", f""
+        )
+        self.device_type_registry = {}
         self.resource_type_registry = {}
         self._setup_called = False  # 跟踪setup是否已调用
         # 其他状态变量
@@ -69,9 +40,70 @@ class Registry:
             logger.critical("[UniLab Registry] setup方法已被调用过，不允许多次调用")
             return
 
-        # 标记setup已被调用
-        self._setup_called = True
+        from unilabos.app.web.utils.action_utils import get_yaml_from_goal_type
 
+        self.device_type_registry.update(
+            {
+                "host_node": {
+                    "description": "UniLabOS主机节点",
+                    "class": {
+                        "module": "unilabos.ros.nodes.presets.host_node",
+                        "type": "python",
+                        "status_types": {},
+                        "action_value_mappings": {
+                            "create_resource_detailed": {
+                                "type": self.ResourceCreateFromOuter,
+                                "goal": {
+                                    "resources": "resources",
+                                    "device_ids": "device_ids",
+                                    "bind_parent_ids": "bind_parent_ids",
+                                    "bind_locations": "bind_locations",
+                                    "other_calling_params": "other_calling_params",
+                                },
+                                "feedback": {},
+                                "result": {"success": "success"},
+                                "schema": ros_action_to_json_schema(self.ResourceCreateFromOuter),
+                                "goal_default": yaml.safe_load(
+                                    io.StringIO(get_yaml_from_goal_type(self.ResourceCreateFromOuter.Goal))
+                                ),
+                            },
+                            "create_resource": {
+                                "type": self.ResourceCreateFromOuterEasy,
+                                "goal": {
+                                    "res_id": "res_id",
+                                    "class_name": "class_name",
+                                    "parent": "parent",
+                                    "device_id": "device_id",
+                                    "bind_locations": "bind_locations",
+                                    "liquid_input_slot": "liquid_input_slot[]",
+                                    "liquid_type": "liquid_type[]",
+                                    "liquid_volume": "liquid_volume[]",
+                                    "slot_on_deck": "slot_on_deck",
+                                },
+                                "feedback": {},
+                                "result": {"success": "success"},
+                                "schema": ros_action_to_json_schema(self.ResourceCreateFromOuterEasy),
+                                "goal_default": yaml.safe_load(
+                                    io.StringIO(get_yaml_from_goal_type(self.ResourceCreateFromOuterEasy.Goal))
+                                ),
+                            },
+                            "test_latency": {
+                                "type": self.EmptyIn,
+                                "goal": {},
+                                "feedback": {},
+                                "result": {"latency_ms": "latency_ms", "time_diff_ms": "time_diff_ms"},
+                                "schema": ros_action_to_json_schema(self.EmptyIn),
+                                "goal_default": {},
+                            },
+                        },
+                    },
+                    "icon": "icon_device.webp",
+                    "registry_type": "device",
+                    "schema": {"properties": {}, "additionalProperties": False, "type": "object"},
+                    "file_path": "/",
+                }
+            }
+        )
         logger.debug(f"[UniLab Registry] ----------Setup----------")
         self.registry_paths = [Path(path).absolute() for path in self.registry_paths]
         for i, path in enumerate(self.registry_paths):
@@ -81,6 +113,8 @@ class Registry:
             self.load_device_types(path)
             self.load_resource_types(path)
         logger.info("[UniLab Registry] 注册表设置完成")
+        # 标记setup已被调用
+        self._setup_called = True
 
     def load_resource_types(self, path: os.PathLike):
         abs_path = Path(path).absolute()
@@ -96,6 +130,9 @@ class Registry:
                     resource_info["file_path"] = str(file.absolute()).replace("\\", "/")
                     if "description" not in resource_info:
                         resource_info["description"] = ""
+                    if "icon" not in resource_info:
+                        resource_info["icon"] = ""
+                    resource_info["registry_type"] = "resource"
                 self.resource_type_registry.update(data)
                 logger.debug(
                     f"[UniLab Registry] Resource-{current_resource_number} File-{i+1}/{len(files)} "
@@ -145,6 +182,7 @@ class Registry:
         )
         current_device_number = len(self.device_type_registry) + 1
         from unilabos.app.web.utils.action_utils import get_yaml_from_goal_type
+
         for i, file in enumerate(files):
             data = yaml.safe_load(open(file, encoding="utf-8"))
             if data:
@@ -154,6 +192,9 @@ class Registry:
                     device_config["file_path"] = str(file.absolute()).replace("\\", "/")
                     if "description" not in device_config:
                         device_config["description"] = ""
+                    if "icon" not in device_config:
+                        device_config["icon"] = ""
+                    device_config["registry_type"] = "device"
                     if "class" in device_config:
                         # 处理状态类型
                         if "status_types" in device_config["class"]:
@@ -169,8 +210,15 @@ class Registry:
                                     action_config["type"] = self._replace_type_with_class(
                                         action_config["type"], device_id, f"动作 {action_name}"
                                     )
-                                    action_config["goal_default"] = yaml.safe_load(io.StringIO(get_yaml_from_goal_type(action_config["type"].Goal)))
-                                    action_config["schema"] = ros_action_to_json_schema(action_config["type"])
+                                    if action_config["type"] is not None:
+                                        action_config["goal_default"] = yaml.safe_load(
+                                            io.StringIO(get_yaml_from_goal_type(action_config["type"].Goal))
+                                        )
+                                        action_config["schema"] = ros_action_to_json_schema(action_config["type"])
+                                    else:
+                                        logger.warning(
+                                            f"[UniLab Registry] 设备 {device_id} 的动作 {action_name} 类型为空，跳过替换"
+                                        )
 
                 self.device_type_registry.update(data)
 
@@ -188,12 +236,16 @@ class Registry:
     def obtain_registry_device_info(self):
         devices = []
         for device_id, device_info in self.device_type_registry.items():
-            msg = {
-                "id": device_id,
-                **device_info
-            }
+            msg = {"id": device_id, **device_info}
             devices.append(msg)
         return devices
+
+    def obtain_registry_resource_info(self):
+        resources = []
+        for resource_id, resource_info in self.resource_type_registry.items():
+            msg = {"id": resource_id, **resource_info}
+            resources.append(msg)
+        return resources
 
 
 # 全局单例实例

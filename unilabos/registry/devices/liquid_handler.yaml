@@ -72,7 +72,7 @@ liquid_handler:
         feedback: { }
         result: { }
       mix:
-        type: DPLiquidHandlerMix
+        type: LiquidHandlerMix
         goal:
           targets: targets
           mix_time: mix_time
@@ -254,24 +254,6 @@ liquid_handler:
     required:
     - name
     additionalProperties: false
-
-dp_liquid_handler:
-  description: 通用液体处理
-  class:
-    module: unilabos.devices.liquid_handling.action_definition:DPLiquidHandler
-    type: python
-    status_types:
-      status: String
-    action_value_mappings:
-
-  schema:
-    type: object
-    properties:
-      name:
-        type: string
-        description: 物料名
-    required:
-    - name
 
 liquid_handler.revvity:
   class:
