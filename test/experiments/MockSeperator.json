@@ -1,0 +1,29 @@
+{
+    "nodes": [
+        {
+            "id": "MockSeparator1",
+            "name": "模拟分离器",
+            "children": [],
+            "parent": null,
+            "type": "device",
+            "class": "MockSeparator",
+            "position": {
+                "x": 620.6111111111111,
+                "y": 171,
+                "z": 0
+            },
+            "config": {
+                "port": "MOCK"
+            },
+            "data": {
+                "status": "Idle",
+                "power_state": "Off",
+                "settling_time": 0.0,
+                "valve_state": "Closed",
+                "shake_time": 0.0,
+                "shake_status": "Not Shaking"
+            }
+        }
+    ],
+    "links": []
+}

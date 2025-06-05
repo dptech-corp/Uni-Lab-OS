@@ -1,0 +1,61 @@
+MockSeparator:  
+  description: Simplified Mock Separator Device  
+  class:  
+    module: unilabos.devices.Mock.MockSeparator.MockSeparator:MockSeparator  
+    type: python  
+    status_types:  
+      status: String  
+      power_state: String  
+      settling_time: Float64  
+      valve_state: String  
+      shake_time: Float64  
+      shake_status: String  
+    action_value_mappings:  
+      shake:  
+        type: SendCmd  
+        goal:  
+          command: shake_time  
+        feedback:  
+          status: status  
+        result:  
+          success: success  
+      valve_open_cmd:  
+        type: SendCmd  
+        goal:  
+          command: command  
+        feedback:  
+          status: status  
+        result:  
+          success: success  
+      power_control:  
+        type: SendCmd  
+        goal:  
+          command: power_state  
+        feedback: {}  
+        result:  
+          success: success  
+  schema:  
+    type: object  
+    properties:  
+      status:  
+        type: string  
+        description: Current status of the separator  
+      power_state:  
+        type: string  
+        description: Power state (On/Off)  
+      settling_time:  
+        type: number  
+        description: Settling time in seconds  
+      valve_state:  
+        type: string  
+        description: Valve state (Open/Closed)  
+      shake_time:  
+        type: number  
+        description: Remaining shake time in seconds  
+      shake_status:  
+        type: string  
+        description: Current shake state (e.g. Shaking, Settling, Idle)  
+    required:  
+      - status  
+      - power_state  
+    additionalProperties: false
