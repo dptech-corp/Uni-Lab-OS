@@ -1,0 +1,65 @@
+MockHeater:  
+  description: Mock Heater Device  
+  class:  
+    module: unilabos.devices.Mock.MockHeater.MockHeater:MockHeater  
+    type: python  
+    status_types:  
+      current_temperature: Float64  
+      target_temperature: Float64  
+      status: String  
+      power_on: Bool  
+      is_heating: Bool  
+      heating_power: Float64  
+      max_temperature: Float64  
+    action_value_mappings:  
+      set_temperature:  
+        type: SendCmd  
+        goal:  
+          command: temperature  
+        feedback: {}  
+        result:  
+          success: success  
+      set_heating_power:  
+        type: SendCmd  
+        goal:  
+          command: power  
+        feedback: {}  
+        result:  
+          success: success  
+      power_on_off:  
+        type: SendCmd  
+        goal:  
+          command: power_state  
+        feedback: {}  
+        result:  
+          success: success  
+  schema:  
+    type: object  
+    properties:  
+      current_temperature:  
+        type: number  
+        description: Current temperature of the heater  
+      target_temperature:  
+        type: number  
+        description: Target temperature setting  
+      status:  
+        type: string  
+        description: Current status of the device  
+      power_on:  
+        type: boolean  
+        description: Power state of the device  
+      is_heating:  
+        type: boolean  
+        description: Whether the device is actively heating  
+      heating_power:  
+        type: number  
+        description: Current heating power percentage  
+      max_temperature:  
+        type: number  
+        description: Maximum heating temperature limit  
+    required:  
+      - current_temperature  
+      - target_temperature  
+      - status  
+      - power_on  
+    additionalProperties: false
