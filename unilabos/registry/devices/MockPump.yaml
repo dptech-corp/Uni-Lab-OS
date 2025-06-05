@@ -1,0 +1,107 @@
+mock_pump:  
+  description: Mock Pump Device  
+  class:  
+    module: unilabos.devices.Mock.MockPump.MockPump:MockPump  
+    type: python  
+    status_types:  
+      status: String  
+      power_state: String  
+      pump_state: String  
+      flow_rate: Float64  
+      target_flow_rate: Float64  
+      pressure: Float64  
+      total_volume: Float64  
+      direction: String  
+      max_flow_rate: Float64  
+      max_pressure: Float64  
+    action_value_mappings:  
+      power_control:  
+        type: SendCmd  
+        goal:  
+          command: power_state  
+        feedback: {}  
+        result:  
+          success: success  
+      set_flow_rate:  
+        type: SendCmd  
+        goal:  
+          command: flow_rate  
+        feedback: {}  
+        result:  
+          success: success  
+      start_pump:  
+        type: SendCmd  
+        goal: {}  
+        feedback: {}  
+        result:  
+          success: success  
+      stop_pump:  
+        type: SendCmd  
+        goal: {}  
+        feedback: {}  
+        result:  
+          success: success  
+      pause_pump:  
+        type: SendCmd  
+        goal: {}  
+        feedback: {}  
+        result:  
+          success: success  
+      resume_pump:  
+        type: SendCmd  
+        goal: {}  
+        feedback: {}  
+        result:  
+          success: success  
+      set_direction:  
+        type: SendCmd  
+        goal:  
+          command: direction  
+        feedback: {}  
+        result:  
+          success: success  
+      reset_volume_counter:  
+        type: SendCmd  
+        goal: {}  
+        feedback: {}  
+        result:  
+          success: success  
+  schema:  
+    type: object  
+    properties:  
+      status:  
+        type: string  
+        description: Current status of the pump  
+      power_state:  
+        type: string  
+        description: Power state (On/Off)  
+      pump_state:  
+        type: string  
+        description: Pump operation state (Running/Stopped/Paused)  
+      flow_rate:  
+        type: number  
+        description: Current flow rate in mL/min  
+      target_flow_rate:  
+        type: number  
+        description: Target flow rate in mL/min  
+      pressure:  
+        type: number  
+        description: Current pressure in bar  
+      total_volume:  
+        type: number  
+        description: Total accumulated volume in mL  
+      direction:  
+        type: string  
+        description: Pump direction (Forward/Reverse)  
+      max_flow_rate:  
+        type: number  
+        description: Maximum flow rate in mL/min  
+      max_pressure:  
+        type: number  
+        description: Maximum pressure in bar  
+    required:  
+      - status  
+      - power_state  
+      - pump_state  
+      - flow_rate  
+    additionalProperties: false
