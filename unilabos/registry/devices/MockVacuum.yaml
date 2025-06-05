@@ -1,0 +1,92 @@
+MockVacuum:  
+  description: Mock Vacuum Pump Device  
+  class:  
+    module: unilabos.devices.Mock.MockVacuum.MockVacuum:MockVacuum  
+    type: python  
+    status_types:  
+      status: String  
+      power_state: String  
+      pump_state: String  
+      vacuum_level: Float64  
+      target_vacuum: Float64  
+      pump_speed: Float64  
+      pump_efficiency: Float64  
+      max_pump_speed: Float64  
+    action_value_mappings:  
+      power_control:  
+        type: SendCmd  
+        goal:  
+          command: power_state  
+        feedback: {}  
+        result:  
+          success: success  
+      set_vacuum_level:  
+        type: SendCmd  
+        goal:  
+          command: vacuum_level  
+        feedback: {}  
+        result:  
+          success: success  
+      start_vacuum:  
+        type: SendCmd  
+        goal: {}  
+        feedback: {}  
+        result:  
+          success: success  
+      stop_vacuum:  
+        type: SendCmd  
+        goal: {}  
+        feedback: {}  
+        result:  
+          success: success  
+      pause_vacuum:  
+        type: SendCmd  
+        goal: {}  
+        feedback: {}  
+        result:  
+          success: success  
+      resume_vacuum:  
+        type: SendCmd  
+        goal: {}  
+        feedback: {}  
+        result:  
+          success: success  
+      vent_to_atmosphere:  
+        type: SendCmd  
+        goal: {}  
+        feedback: {}  
+        result:  
+          success: success  
+  schema:  
+    type: object  
+    properties:  
+      status:  
+        type: string  
+        description: Current status of the vacuum pump  
+      power_state:  
+        type: string  
+        description: Power state (On/Off)  
+      pump_state:  
+        type: string  
+        description: Pump operation state (Running/Stopped/Paused)  
+      vacuum_level:  
+        type: number  
+        description: Current vacuum level in mbar  
+      target_vacuum:  
+        type: number  
+        description: Target vacuum level in mbar  
+      pump_speed:  
+        type: number  
+        description: Current pump speed in L/s  
+      pump_efficiency:  
+        type: number  
+        description: Pump efficiency percentage  
+      max_pump_speed:  
+        type: number  
+        description: Maximum pump speed in L/s  
+    required:  
+      - status  
+      - power_state  
+      - pump_state  
+      - vacuum_level  
+    additionalProperties: false
