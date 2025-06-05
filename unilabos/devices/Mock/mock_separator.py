@@ -1,18 +1,19 @@
 import time
 import threading
 
+
 class MockSeparator:
     def __init__(self, port: str = "MOCK"):
         self.port = port
 
         # 基本状态属性
-        self._power_state: str = "Off"    # 电源：On 或 Off
-        self._status: str = "Idle"         # 当前总体状态
+        self._power_state: str = "Off"  # 电源：On 或 Off
+        self._status: str = "Idle"  # 当前总体状态
         self._valve_state: str = "Closed"  # 阀门状态：Open 或 Closed
-        self._settling_time: float = 0.0   # 静置时间（秒）
+        self._settling_time: float = 0.0  # 静置时间（秒）
 
         # 搅拌相关属性
-        self._shake_time: float = 0.0      # 剩余摇摆时间（秒）
+        self._shake_time: float = 0.0  # 剩余摇摆时间（秒）
         self._shake_status: str = "Not Shaking"  # 摇摆状态
 
         # 用于后台模拟 shake 动作
@@ -104,7 +105,7 @@ class MockSeparator:
                 time.sleep(1)
                 with self._thread_lock:
                     self._settling_time = max(0.0, self._settling_time - 1)
-        
+
         self._operation_thread = threading.Thread(target=_run_shake)
         self._operation_thread.daemon = True
         self._operation_thread.start()
@@ -152,8 +153,9 @@ class MockSeparator:
                 "valve_state": self._valve_state,
                 "settling_time": self._settling_time,
                 "shake_time": self._shake_time,
-                "shake_status": self._shake_status
+                "shake_status": self._shake_status,
             }
+
 
 # 主函数用于测试
 if __name__ == "__main__":
@@ -171,7 +173,11 @@ if __name__ == "__main__":
     for i in range(20):
         time.sleep(1)
         info = separator.get_status_info()
-        print(f"第{i+1}秒: 状态={info['status']}, 静置时间={info['settling_time']:.1f}秒, 阀门状态={info['valve_state']}, shake_time={info['shake_time']:.1f}, shake_status={info['shake_status']}")
+        print(
+            f"第{i+1}秒: 状态={info['status']}, 静置时间={info['settling_time']:.1f}秒, "
+            f"阀门状态={info['valve_state']}, shake_time={info['shake_time']:.1f}, "
+            f"shake_status={info['shake_status']}"
+        )
 
     # 模拟打开阀门
     print("打开阀门...", separator.set_valve("open"))

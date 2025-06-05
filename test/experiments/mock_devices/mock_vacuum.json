@@ -6,7 +6,7 @@
             "children": [],  
             "parent": null,  
             "type": "device",  
-            "class": "MockVacuum",  
+            "class": "mock_vacuum",  
             "position": {  
                 "x": 620.6111111111111,  
                 "y": 171,  

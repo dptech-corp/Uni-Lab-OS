@@ -1,12 +1,12 @@
 {  
     "nodes": [  
         {  
-            "id": "MockHeater1",  
-            "name": "模拟加热器",  
+            "id": "MockStirrer1",  
+            "name": "模拟搅拌器",  
             "children": [],  
             "parent": null,  
             "type": "device",  
-            "class": "MockHeater",  
+            "class": "mock_stirrer",  
             "position": {  
                 "x": 620.6111111111111,  
                 "y": 171,  
@@ -16,12 +16,16 @@
                 "port": "MOCK"  
             },  
             "data": {  
-                "current_temperature": 25.0,  
-                "target_temperature": 25.0,  
                 "status": "Idle",  
-                "power_on": false,  
-                "is_heating": false,  
+                "power_state": "Off",  
+                "stir_speed": 0.0,  
+                "target_stir_speed": 0.0,  
+                "stir_state": "Stopped",  
+                "temperature": 25.0,  
+                "target_temperature": 25.0,  
+                "heating_state": "Off",  
                 "heating_power": 0.0,  
+                "max_stir_speed": 2000.0,  
                 "max_temperature": 300.0  
             }  
         }  

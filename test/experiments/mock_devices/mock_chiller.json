@@ -1,12 +1,12 @@
 {  
     "nodes": [  
         {  
-            "id": "MockSolenoidValve1",  
-            "name": "模拟电磁阀",  
+            "id": "MockChiller1",  
+            "name": "模拟冷却器",  
             "children": [],  
             "parent": null,  
             "type": "device",  
-            "class": "MockSolenoidValve",  
+            "class": "mock_chiller",  
             "position": {  
                 "x": 620.6111111111111,  
                 "y": 171,  
@@ -16,8 +16,12 @@
                 "port": "MOCK"  
             },  
             "data": {  
+                "current_temperature": 25.0,  
+                "target_temperature": 25.0,  
                 "status": "Idle",  
-                "valve_status": "Closed"  
+                "power_on": false,  
+                "is_cooling": false,  
+                "is_heating": false  
             }  
         }  
     ],  
