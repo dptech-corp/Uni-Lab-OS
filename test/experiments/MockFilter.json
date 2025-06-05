@@ -1,0 +1,30 @@
+{  
+    "nodes": [  
+        {  
+            "id": "MockFilter1",  
+            "name": "模拟过滤器",  
+            "children": [],  
+            "parent": null,  
+            "type": "device",  
+            "class": "MockFilter",  
+            "position": {  
+                "x": 620.6111111111111,  
+                "y": 171,  
+                "z": 0  
+            },  
+            "config": {  
+                "port": "MOCK"  
+            },  
+            "data": {  
+                "status": "Idle",  
+                "is_filtering": false,  
+                "filter_efficiency": 95.0,  
+                "flow_rate": 0.0,  
+                "pressure_drop": 0.0,  
+                "filter_life": 100.0,  
+                "power_on": false  
+            }  
+        }  
+    ],  
+    "links": []  
+}

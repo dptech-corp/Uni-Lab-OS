@@ -1,0 +1,70 @@
+MockFilter:  
+  description: Mock Filter Device  
+  class:  
+    module: unilabos.devices.Mock.MockFilter.MockFilter:MockFilter  
+    type: python  
+    status_types:  
+      status: String  
+      is_filtering: Bool  
+      filter_efficiency: Float64  
+      flow_rate: Float64  
+      pressure_drop: Float64  
+      filter_life: Float64  
+      power_on: Bool  
+    action_value_mappings:  
+      start_filtering:  
+        type: SendCmd  
+        goal:  
+          command: flow_rate  
+        feedback: {}  
+        result:  
+          success: success  
+      stop_filtering:  
+        type: SendCmd  
+        goal: {}  
+        feedback: {}  
+        result:  
+          success: success  
+      power_on_off:  
+        type: SendCmd  
+        goal:  
+          command: power_state  
+        feedback: {}  
+        result:  
+          success: success  
+      replace_filter:  
+        type: SendCmd  
+        goal: {}  
+        feedback: {}  
+        result:  
+          success: success  
+  schema:  
+    type: object  
+    properties:  
+      status:  
+        type: string  
+        description: Current status of the filter  
+      is_filtering:  
+        type: boolean  
+        description: Whether the filter is actively filtering  
+      filter_efficiency:  
+        type: number  
+        description: Filter efficiency percentage  
+      flow_rate:  
+        type: number  
+        description: Current flow rate in L/min  
+      pressure_drop:  
+        type: number  
+        description: Pressure drop across the filter in Pa  
+      filter_life:  
+        type: number  
+        description: Remaining filter life percentage  
+      power_on:  
+        type: boolean  
+        description: Power state of the device  
+    required:  
+      - status  
+      - is_filtering  
+      - filter_efficiency  
+      - power_on  
+    additionalProperties: false
