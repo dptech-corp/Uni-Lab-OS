@@ -1,0 +1,41 @@
+MockSolenoidValve:  
+  description: Mock Solenoid Valve Device  
+  class:  
+    module: unilabos.devices.Mock.MockSolenoidValve.MockSolenoidValve:MockSolenoidValve  
+    type: python  
+    status_types:  
+      status: String  
+      valve_status: String  
+    action_value_mappings:  
+      set_valve_status:  
+        type: SendCmd  
+        goal:  
+          command: status  
+        feedback: {}  
+        result:  
+          success: success  
+      open_valve:  
+        type: SendCmd  
+        goal: {}  
+        feedback: {}  
+        result:  
+          success: success  
+      close_valve:  
+        type: SendCmd  
+        goal: {}  
+        feedback: {}  
+        result:  
+          success: success  
+  schema:  
+    type: object  
+    properties:  
+      status:  
+        type: string  
+        description: Current status of the valve  
+      valve_status:  
+        type: string  
+        description: Valve status (Open/Closed)  
+    required:  
+      - status  
+      - valve_status  
+    additionalProperties: false
