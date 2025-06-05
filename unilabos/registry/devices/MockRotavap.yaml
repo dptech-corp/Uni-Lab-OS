@@ -1,0 +1,114 @@
+mock_rotavap:  
+  description: Mock Rotavap Device  
+  class:  
+    module: unilabos.devices.Mock.MockRotavap.MockRotavap:MockRotavap  
+    type: python  
+    status_types:  
+      status: String  
+      power_state: String  
+      rotate_state: String  
+      rotate_time: Float64  
+      rotate_speed: Float64  
+      pump_state: String  
+      pump_time: Float64  
+      vacuum_level: Float64  
+      temperature: Float64  
+      target_temperature: Float64  
+      success: String  
+    action_value_mappings:  
+      set_timer:  
+        type: SendCmd  
+        goal:  
+          command: command  
+        feedback: {}  
+        result:  
+          success: success  
+      power_control:  
+        type: SendCmd  
+        goal:  
+          command: power_state  
+        feedback: {}  
+        result:  
+          success: success  
+      set_rotate_time:  
+        type: SendCmd  
+        goal:  
+          command: time_seconds  
+        feedback: {}  
+        result:  
+          success: success  
+      set_pump_time:  
+        type: SendCmd  
+        goal:  
+          command: time_seconds  
+        feedback: {}  
+        result:  
+          success: success  
+      set_rotate_speed:  
+        type: SendCmd  
+        goal:  
+          command: speed  
+        feedback: {}  
+        result:  
+          success: success  
+      set_temperature:  
+        type: SendCmd  
+        goal:  
+          command: temperature  
+        feedback: {}  
+        result:  
+          success: success  
+      start_rotation:  
+        type: SendCmd  
+        goal: {}  
+        feedback: {}  
+        result:  
+          success: success  
+      start_pump:  
+        type: SendCmd  
+        goal: {}  
+        feedback: {}  
+        result:  
+          success: success  
+  schema:  
+    type: object  
+    properties:  
+      status:  
+        type: string  
+        description: Current status of the rotavap  
+      power_state:  
+        type: string  
+        description: Power state (On/Off)  
+      rotate_state:  
+        type: string  
+        description: Rotation state (Running/Stopped)  
+      rotate_time:  
+        type: number  
+        description: Remaining rotation time in seconds  
+      rotate_speed:  
+        type: number  
+        description: Rotation speed in rpm  
+      pump_state:  
+        type: string  
+        description: Pump state (Running/Stopped)  
+      pump_time:  
+        type: number  
+        description: Remaining pump time in seconds  
+      vacuum_level:  
+        type: number  
+        description: Current vacuum level in mbar  
+      temperature:  
+        type: number  
+        description: Current water bath temperature  
+      target_temperature:  
+        type: number  
+        description: Target water bath temperature  
+      success:  
+        type: string  
+        description: Operation success status  
+    required:  
+      - status  
+      - rotate_time  
+      - pump_time  
+      - temperature  
+    additionalProperties: false
