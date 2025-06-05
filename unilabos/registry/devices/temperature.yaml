@@ -63,3 +63,57 @@ tempsensor:
         feedback: {}
         result:
           success: success
+MockChiller:  
+  description: Mock Chiller Device  
+  class:  
+    module: unilabos.devices.Mock.MockChiller.MockChiller:MockChiller  
+    type: python  
+    status_types:  
+      current_temperature: Float64  
+      target_temperature: Float64  
+      status: String  
+      power_on: Bool  
+      is_cooling: Bool  
+      is_heating: Bool  
+    action_value_mappings:  
+      set_temperature:  
+        type: SendCmd  
+        goal:  
+          command: temperature  
+        feedback: {}  
+        result:  
+          success: success  
+      power_on_off:  
+        type: SendCmd  
+        goal:  
+          command: power_state  
+        feedback: {}  
+        result:  
+          success: success  
+  schema:  
+    type: object  
+    properties:  
+      current_temperature:  
+        type: number  
+        description: Current temperature of the chiller  
+      target_temperature:  
+        type: number  
+        description: Target temperature setting  
+      status:  
+        type: string  
+        description: Current status of the device  
+      power_on:  
+        type: boolean  
+        description: Power state of the device  
+      is_cooling:  
+        type: boolean  
+        description: Whether the device is actively cooling  
+      is_heating:  
+        type: boolean  
+        description: Whether the device is actively heating  
+    required:  
+      - current_temperature  
+      - target_temperature  
+      - status  
+      - power_on  
+    additionalProperties: false
