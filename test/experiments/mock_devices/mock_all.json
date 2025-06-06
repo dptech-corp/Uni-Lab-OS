@@ -1,0 +1,235 @@
+{
+    "nodes": [
+        {
+            "id": "MockStirrer1",
+            "name": "模拟搅拌器",
+            "children": [],
+            "parent": null,
+            "type": "device",
+            "class": "mock_stirrer",
+            "position": {
+                "x": 100,
+                "y": 100,
+                "z": 0
+            },
+            "config": {
+                "port": "MOCK"
+            },
+            "data": {
+                "status": "Idle",
+                "power_state": "Off",
+                "stir_speed": 0.0,
+                "target_stir_speed": 0.0,
+                "stir_state": "Stopped",
+                "temperature": 25.0,
+                "target_temperature": 25.0,
+                "heating_state": "Off",
+                "heating_power": 0.0,
+                "max_stir_speed": 2000.0,
+                "max_temperature": 300.0
+            }
+        },
+        {
+            "id": "MockVacuum1",
+            "name": "模拟真空泵",
+            "children": [],
+            "parent": null,
+            "type": "device",
+            "class": "mock_vacuum",
+            "position": {
+                "x": 300,
+                "y": 100,
+                "z": 0
+            },
+            "config": {
+                "port": "MOCK"
+            },
+            "data": {
+                "status": "Idle",
+                "power_state": "Off",
+                "pump_state": "Stopped",
+                "vacuum_level": 1013.25,
+                "target_vacuum": 50.0,
+                "pump_speed": 0.0,
+                "pump_efficiency": 95.0,
+                "max_pump_speed": 100.0
+            }
+        },
+        {
+            "id": "MockSeparator1",
+            "name": "模拟分离器",
+            "children": [],
+            "parent": null,
+            "type": "device",
+            "class": "mock_separator",
+            "position": {
+                "x": 500,
+                "y": 100,
+                "z": 0
+            },
+            "config": {
+                "port": "MOCK"
+            },
+            "data": {
+                "status": "Idle",
+                "power_state": "Off",
+                "settling_time": 0.0,
+                "valve_state": "Closed",
+                "shake_time": 0.0,
+                "shake_status": "Not Shaking"
+            }
+        },
+        {
+            "id": "MockSolenoidValve1",
+            "name": "模拟电磁阀",
+            "children": [],
+            "parent": null,
+            "type": "device",
+            "class": "mock_solenoid_valve",
+            "position": {
+                "x": 700,
+                "y": 100,
+                "z": 0
+            },
+            "config": {
+                "port": "MOCK"
+            },
+            "data": {
+                "status": "Idle",
+                "valve_status": "Closed"
+            }
+        },
+        {
+            "id": "MockRotavap1",
+            "name": "模拟旋转蒸发器",
+            "children": [],
+            "parent": null,
+            "type": "device",
+            "class": "mock_rotavap",
+            "position": {
+                "x": 100,
+                "y": 300,
+                "z": 0
+            },
+            "config": {
+                "port": "MOCK"
+            },
+            "data": {
+                "status": "Idle",
+                "power_state": "Off",
+                "rotate_state": "Stopped",
+                "rotate_time": 0.0,
+                "rotate_speed": 0.0,
+                "pump_state": "Stopped",
+                "pump_time": 0.0,
+                "vacuum_level": 1013.25,
+                "temperature": 25.0,
+                "target_temperature": 25.0,
+                "success": "True"
+            }
+        },
+        {
+            "id": "MockHeater1",
+            "name": "模拟加热器",
+            "children": [],
+            "parent": null,
+            "type": "device",
+            "class": "mock_heater",
+            "position": {
+                "x": 300,
+                "y": 300,
+                "z": 0
+            },
+            "config": {
+                "port": "MOCK"
+            },
+            "data": {
+                "current_temperature": 25.0,
+                "target_temperature": 25.0,
+                "status": "Idle",
+                "power_on": false,
+                "is_heating": false,
+                "heating_power": 0.0,
+                "max_temperature": 300.0
+            }
+        },
+        {
+            "id": "MockPump1",
+            "name": "模拟泵设备",
+            "children": [],
+            "parent": null,
+            "type": "device",
+            "class": "mock_pump",
+            "position": {
+                "x": 500,
+                "y": 300,
+                "z": 0
+            },
+            "config": {
+                "port": "MOCK"
+            },
+            "data": {
+                "status": "Idle",
+                "power_state": "Off",
+                "pump_state": "Stopped",
+                "flow_rate": 0.0,
+                "target_flow_rate": 0.0,
+                "pressure": 0.0,
+                "total_volume": 0.0,
+                "direction": "Forward",
+                "max_flow_rate": 100.0,
+                "max_pressure": 10.0
+            }
+        },
+        {
+            "id": "MockChiller1",
+            "name": "模拟冷却器",
+            "children": [],
+            "parent": null,
+            "type": "device",
+            "class": "mock_chiller",
+            "position": {
+                "x": 700,
+                "y": 300,
+                "z": 0
+            },
+            "config": {
+                "port": "MOCK"
+            },
+            "data": {
+                "current_temperature": 25.0,
+                "target_temperature": 25.0,
+                "status": "Idle",
+                "power_on": false,
+                "is_cooling": false,
+                "is_heating": false
+            }
+        },
+        {
+            "id": "MockFilter1",
+            "name": "模拟过滤器",
+            "children": [],
+            "parent": null,
+            "type": "device",
+            "class": "mock_filter",
+            "position": {
+                "x": 400,
+                "y": 500,
+                "z": 0
+            },
+            "config": {
+                "port": "MOCK"
+            },
+            "data": {
+                "status": "Idle",
+                "is_filtering": false,
+                "filter_efficiency": 95.0,
+                "flow_rate": 0.0,
+                "pressure_drop": 0.0,
+                "filter_life": 100.0,
+                "power_on": false
+            }
+        }
+    ],
+    "links": []
+}

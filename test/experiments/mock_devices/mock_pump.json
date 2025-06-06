@@ -1,0 +1,33 @@
+{  
+    "nodes": [  
+        {  
+            "id": "MockPump1",  
+            "name": "模拟泵设备",  
+            "children": [],  
+            "parent": null,  
+            "type": "device",  
+            "class": "mock_pump",  
+            "position": {  
+                "x": 620.6111111111111,  
+                "y": 171,  
+                "z": 0  
+            },  
+            "config": {  
+                "port": "MOCK"  
+            },  
+            "data": {  
+                "status": "Idle",  
+                "power_state": "Off",  
+                "pump_state": "Stopped",  
+                "flow_rate": 0.0,  
+                "target_flow_rate": 0.0,  
+                "pressure": 0.0,  
+                "total_volume": 0.0,  
+                "direction": "Forward",  
+                "max_flow_rate": 100.0,  
+                "max_pressure": 10.0  
+            }  
+        }  
+    ],  
+    "links": []  
+}
