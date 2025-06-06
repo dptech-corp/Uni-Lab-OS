@@ -1,0 +1,44 @@
+# 色谱表征设备
+hplc.agilent:
+  description: HPLC device
+  class:
+    module: unilabos.devices.hplc.AgilentHPLC:HPLCDriver
+    type: python
+    status_types:
+      device_status: String
+      could_run: Bool
+      driver_init_ok: Bool
+      is_running: Bool
+      finish_status: String
+      status_text: String
+    action_value_mappings:
+      execute_command_from_outer:
+        type: SendCmd
+        goal:
+          command: command
+        feedback: {}
+        result:
+          success: success
+  schema:
+    properties:
+      device_status:
+        type: string
+      could_run:
+        type: boolean
+      driver_init_ok:
+        type: boolean
+      is_running:
+        type: boolean
+      finish_status:
+        type: string
+      status_text:
+        type: string
+    required:
+    - device_status
+    - could_run
+    - driver_init_ok
+    - is_running
+    - finish_status
+    - status_text
+    additionalProperties: false
+    type: object
