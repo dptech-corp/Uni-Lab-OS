@@ -1,0 +1,17 @@
+moveit.toyo_xyz:
+  description: Toyo XYZ
+  class:
+    module: unilabos.devices.ros_dev.moveit_interface:MoveitInterface
+    type: ros2
+  model:
+    type: device
+    mesh: toyo_xyz
+
+moveit.benyao_arm:
+  description: Benyao Arm
+  class:
+    module: unilabos.devices.ros_dev.moveit_interface:MoveitInterface
+    type: ros2
+  model:
+    type: device
+    mesh: benyao_arm

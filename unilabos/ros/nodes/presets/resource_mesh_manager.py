@@ -124,6 +124,8 @@ class ResourceMeshManager(BaseROS2DeviceNode):
         """检查move_group节点是否已初始化完成"""
 
         # 获取当前可用的节点列表
+        if len(self.resource_tf_dict) == 0:
+            return
         tf_ready = self.tf_buffer.can_transform("world", next(iter(self.resource_tf_dict.keys())), rclpy.time.Time(),rclpy.duration.Duration(seconds=2))
         
         # if tf_ready:
@@ -397,7 +399,8 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                 transform = self.tf_buffer.lookup_transform(
                     parent_id,
                     resource_id,
-                    rclpy.time.Time(seconds=0)
+                    self.get_clock().now(),
+                    timeout=rclpy.duration.Duration(seconds=10)
                 )
                 
                 # 提取转换中的位置和旋转信息

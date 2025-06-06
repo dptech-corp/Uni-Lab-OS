@@ -232,3 +232,4 @@ CATKIN_IGNORE
 /**/local_config.py
 
 *.graphml
+unilabos/device_mesh/view_robot.rviz

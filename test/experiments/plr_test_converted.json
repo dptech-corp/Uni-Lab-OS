@@ -163,7 +163,7 @@
             "type": "plate",
             "class": "opentrons_96_filtertiprack_1000ul",
             "position": {
-                "x": 0,
+                "x": 265.0,
                 "y": 0,
                 "z": 69
             },
@@ -5762,8 +5762,8 @@
             "type": "plate",
             "class": "nest_96_wellplate_2ml_deep",
             "position": {
-                "x": 265.0,
-                "y": 0,
+                "x": 0,
+                "y": 90.5,
                 "z": 69
             },
             "config": {
@@ -9622,6 +9622,65 @@
                 "liquids": [],
                 "pending_liquids": [],
                 "liquid_history": []
+            }
+        },
+        {
+            "id": "benyao",
+            "name": "benyao",
+            "children": [
+            ],
+            "parent": null,
+            "type": "device",
+            "class": "moveit.benyao_arm",
+            "position": {
+                "x": -500,
+                "y": 1000,
+                "z": -100
+            },
+            "config": {
+                "moveit_type": "benyao_arm",
+                "joint_poses": {
+                    "arm": {
+                        "hotel_1": [1.05, 0.568, -1.0821, 0.0, 1.0821],
+                        "home": [0.865, 0.09, 0.8727, 0.0, -0.8727]
+                    }
+                },
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": -1.5708,
+                    "type": "Rotation"
+                },
+                "device_config": {
+                }
+            },
+            "data": {
+            }
+        },
+        {
+            "id": "hotel",
+            "name": "hotel",
+            "children": [
+            ],
+            "parent": null,
+            "type": "device",
+            "class": "hotel.thermo_orbitor_rs2_hotel",
+            "position": {
+                "x": 0,
+                "y": -700,
+                "z": -10
+            },
+            "config": {
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0,
+                    "type": "Rotation"
+                },
+                "device_config": {
+                }
+            },
+            "data": {
             }
         }
     ],
