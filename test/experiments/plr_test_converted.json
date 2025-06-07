@@ -5756,7 +5756,8 @@
                 "plate_well_D12",
                 "plate_well_E12",
                 "plate_well_F12",
-                "plate_well_G12"
+                "plate_well_G12",
+                "plate_well_H12"
             ],
             "parent": "deck",
             "type": "plate",

@@ -392,6 +392,8 @@ class ResourceMeshManager(BaseROS2DeviceNode):
             planning_scene.is_diff = True
             planning_scene.robot_state.is_diff = True
             time_start = self.get_clock().now()
+            count = 0
+
             for resource_id, target_parent in cmd_dict.items():
                 parent_id = target_parent
                 if target_parent == '__trash':
@@ -453,15 +455,20 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                     collision_object.link_name = target_parent
                 planning_scene.robot_state.attached_collision_objects.append(collision_object)
 
-            #     collision_object = AttachedCollisionObject(
-            #         link_name=target_parent,
-            #         object=CollisionObject(
-            #             id=resource_id,
-            #             operation=CollisionObject.ADD   
-            #         )
-            #     )
-                
-            #     self.__planning_scene.robot_state.attached_collision_objects.append(collision_object)
+                count += 1
+
+                if count > 30:
+                    req = ApplyPlanningScene.Request()
+                    req.scene = planning_scene
+                    self.publish_resource_tf()
+                    self._apply_planning_scene_service.call(req)
+                    self.__planning_scene_publisher.publish(planning_scene)
+                    count = 0
+
+                    planning_scene = PlanningScene()
+                    planning_scene.is_diff = True
+                    planning_scene.robot_state.is_diff = True
+
             req = ApplyPlanningScene.Request()
             req.scene = planning_scene
             self.publish_resource_tf()
