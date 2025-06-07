@@ -161,7 +161,7 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                 self.resource_model[resource_config['id']] = {
                     'mesh': f"{str(self.mesh_path)}/device_mesh/resources/{model_config['mesh']}",
                     'mesh_tf': model_config['mesh_tf']}
-                if model_config['children_mesh'] is not None:
+                if 'children_mesh' in model_config.keys():
                     self.resource_model[f"{resource_config['id']}_"] = {
                         'mesh': f"{str(self.mesh_path)}/device_mesh/resources/{model_config['children_mesh']}",
                         'mesh_tf': model_config['children_mesh_tf']
@@ -300,7 +300,7 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                     "world",
                     resource_id,
                     rclpy.time.Time(seconds=0),
-                    rclpy.duration.Duration(seconds=5)
+                    # rclpy.duration.Duration(seconds=5)
                 )
                 
                 # 提取当前位姿信息
@@ -391,6 +391,7 @@ class ResourceMeshManager(BaseROS2DeviceNode):
             planning_scene = PlanningScene()
             planning_scene.is_diff = True
             planning_scene.robot_state.is_diff = True
+            time_start = self.get_clock().now()
             for resource_id, target_parent in cmd_dict.items():
                 parent_id = target_parent
                 if target_parent == '__trash':
@@ -399,7 +400,7 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                 transform = self.tf_buffer.lookup_transform(
                     parent_id,
                     resource_id,
-                    self.get_clock().now(),
+                    time_start,
                     timeout=rclpy.duration.Duration(seconds=10)
                 )
                 
@@ -463,11 +464,12 @@ class ResourceMeshManager(BaseROS2DeviceNode):
             #     self.__planning_scene.robot_state.attached_collision_objects.append(collision_object)
             req = ApplyPlanningScene.Request()
             req.scene = planning_scene
-            self._apply_planning_scene_service.call_async(req)
+            self.publish_resource_tf()
+            self._apply_planning_scene_service.call(req)
             self.__planning_scene_publisher.publish(planning_scene)
 
             # self.__collision_object_publisher.publish(CollisionObject())
-            self.publish_resource_tf()
+
             
         except Exception as e:
             self.get_logger().error(f"更新资源TF字典失败: {e}")
@@ -483,7 +485,7 @@ class ResourceMeshManager(BaseROS2DeviceNode):
         遍历资源配置字典，为每个在resource_model中有对应模型的资源添加碰撞网格
         
         该方法检查每个资源ID是否在self.resource_model中有对应的3D模型文件路径，
-        如果有，则调用add_collision_mesh方法将其添加到碰撞环境中。
+        
         """
         self.get_logger().info('开始添加资源碰撞网格')
 
@@ -492,6 +494,7 @@ class ResourceMeshManager(BaseROS2DeviceNode):
         ).scene
         planning_scene = PlanningScene()
         planning_scene.is_diff = True
+        count = 0
         for resource_id, tf_info in resource_tf_dict.items():
             
             if resource_id in self.resource_model:
@@ -519,6 +522,7 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                     quat_xyzw=q,
                     frame_id=resource_id
                 )
+                count += 1
                 planning_scene.world.collision_objects.append(collision_object)
             elif f"{tf_info['parent']}_" in self.resource_model:
                 # 获取资源的父级框架ID
@@ -547,15 +551,26 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                     quat_xyzw=q,
                     frame_id=resource_id
                 )
-
+                count += 1
                 planning_scene.world.collision_objects.append(collision_object)
+
+            if count > 30:
+                req = ApplyPlanningScene.Request()
+                req.scene = planning_scene
+                self.publish_resource_tf()
+                self._apply_planning_scene_service.call(req)
+                self.__planning_scene_publisher.publish(planning_scene)
+                count = 0
+                
+                planning_scene = PlanningScene()
+                planning_scene.is_diff = True
 
         req = ApplyPlanningScene.Request()
         req.scene = planning_scene
-        self._apply_planning_scene_service.call_async(req)
-        self.__planning_scene_publisher.publish(planning_scene)
         self.publish_resource_tf()
-        
+        self._apply_planning_scene_service.call(req)
+        self.__planning_scene_publisher.publish(planning_scene)
+
         self.get_logger().info('资源碰撞网格添加完成')
 
 
