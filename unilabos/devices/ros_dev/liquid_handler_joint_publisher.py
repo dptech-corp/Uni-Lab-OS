@@ -118,7 +118,7 @@ class LiquidHandlerJointPublisher(BaseROS2DeviceNode):
             str_dict[resource] = link_name
 
         goal_msg.command = json.dumps(str_dict)
-        self.resource_action_client.send_goal(goal_msg)
+        self.resource_action_client.send_goal_async(goal_msg)
     
     def resource_move(self, resource_id:str, link_name:str, channels:list[int]):
         resource = resource_id.rsplit("_",1)
@@ -247,10 +247,13 @@ class LiquidHandlerJointPublisher(BaseROS2DeviceNode):
             link_name =  self.lh_devices[parent_id]['joint_config']['link_names'][z_index]
             link_name =  f'{parent_id}_{link_name}'
             self.resource_move(resource_name_, link_name, [0,1,2,3,4,5,6,7])
+            time.sleep(1)
         elif option == "drop_trash":
             self.resource_move(resource_name_, "__trash", [0,1,2,3,4,5,6,7])
+            time.sleep(1)
         elif option == "drop":
             self.resource_move(resource_name_, "world", [0,1,2,3,4,5,6,7])
+            time.sleep(1)
         self.move_to(joint_positions_target_zero, speed, parent_id)
 
 
