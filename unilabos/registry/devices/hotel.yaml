@@ -1,0 +1,9 @@
+hotel.thermo_orbitor_rs2_hotel:
+  description: Thermo Orbitor RS2 Hotel
+  class: 
+    module: unilabos.devices.resource_container.container:HotelContainer
+    type: python
+  model:
+    type: device
+    mesh: thermo_orbitor_rs2_hotel
+

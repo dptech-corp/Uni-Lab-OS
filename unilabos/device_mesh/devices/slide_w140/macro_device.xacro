@@ -8,11 +8,11 @@
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:macro name="slide_w140" params="mesh_path:='' length:=0.1 min_d:=0.1 max_d:=0.1 slider_d:=0.14 parent_link:='' station_name:='' device_name:='' x:=0 y:=0 z:=0 r:=0" >
+  <xacro:macro name="slide_w140" params="mesh_path:='' length:=0.1 min_d:=0.1 max_d:=0.1 slider_d:=0.14 parent_link:='' station_name:='' device_name:='' x:=0 y:=0 z:=0 rx:=0 ry:=0 r:=0" >
 
 
     <joint name="${station_name}${device_name}base_link_joint" type="fixed">
-      <origin xyz="${x} ${y} ${z}" rpy="0 0 ${r}" />
+      <origin xyz="${x} ${y} ${z}" rpy="${rx} ${ry} ${r}" />
       <parent link="${parent_link}"/>
       <child link="${station_name}${device_name}device_link"/>
       <axis xyz="0 0 0"/>
