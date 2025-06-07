@@ -5,7 +5,7 @@ int32[] use_channels
 float64[] flow_rates
 geometry_msgs/Point[] offsets
 int32[] blow_out_air_volume
-string spread="wide"
+string spread
 ---
 # 结果字段
 bool success

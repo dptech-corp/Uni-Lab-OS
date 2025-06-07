@@ -12,7 +12,7 @@ separator.homemade:
         goal:
           stir_time: stir_time,
           stir_speed: stir_speed
-          settling_time": settling_time
+          settling_time: settling_time
         feedback:
           status: status
         result: 

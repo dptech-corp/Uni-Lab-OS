@@ -3,6 +3,25 @@ vacuum_pump.mock:
   class:
     module: unilabos.devices.pump_and_valve.vacuum_pump_mock:VacuumPumpMock
     type: python
+    status_types:
+      status: String
+    action_value_mappings:
+      open:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result: {}
+      close:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result: {}
+      set_status:
+        type: StrSingleInput
+        goal:
+          string: string
+        feedback: {}
+        result: {}
 
 gas_source.mock:
   description: Mock gas source

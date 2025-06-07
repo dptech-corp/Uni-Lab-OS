@@ -18,7 +18,6 @@ if unilabos_dir not in sys.path:
 
 from unilabos.config.config import load_config, BasicConfig, _update_config_from_env
 from unilabos.utils.banner_print import print_status, print_unilab_banner
-from unilabos.device_mesh.resource_visalization import ResourceVisualization
 
 
 def parse_args():
@@ -188,11 +187,12 @@ def main():
     if args_dict["visual"] != "disable":
         enable_rviz = args_dict["visual"] == "rviz"
         if devices_and_resources is not None:
+            from unilabos.device_mesh.resource_visalization import ResourceVisualization  # 此处开启后，logger会变更为INFO，有需要请调整
             resource_visualization = ResourceVisualization(devices_and_resources, args_dict["resources_config"] ,enable_rviz=enable_rviz)
             args_dict["resources_mesh_config"] = resource_visualization.resource_model
             start_backend(**args_dict)
             server_thread = threading.Thread(target=start_server, kwargs=dict(
-                open_browser=not args_dict["disable_browser"]
+                open_browser=not args_dict["disable_browser"], port=args_dict["port"],
             ))
             server_thread.start()
             asyncio.set_event_loop(asyncio.new_event_loop())
@@ -201,10 +201,10 @@ def main():
                 time.sleep(1)
         else:
             start_backend(**args_dict)
-            start_server(open_browser=not args_dict["disable_browser"])
+            start_server(open_browser=not args_dict["disable_browser"], port=args_dict["port"],)
     else:
         start_backend(**args_dict)
-        start_server(open_browser=not args_dict["disable_browser"])
+        start_server(open_browser=not args_dict["disable_browser"], port=args_dict["port"],)
 
 
 if __name__ == "__main__":
