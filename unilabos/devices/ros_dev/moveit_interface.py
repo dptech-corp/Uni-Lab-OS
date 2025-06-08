@@ -70,7 +70,7 @@ class MoveitInterface:
             while self.resource_action is None:
                 self.resource_action = self.check_tf_update_actions()
                 time.sleep(1)
-            self.resource_client = ActionClient(self, SendCmd, self.resource_action)
+            self.resource_client = ActionClient(self._ros_node, SendCmd, self.resource_action)
             self.resource_action_ok = True
             while not self.resource_client.wait_for_server(timeout_sec=5.0):
                 self._ros_node.lab_logger().info("等待 TfUpdate 服务器...")
