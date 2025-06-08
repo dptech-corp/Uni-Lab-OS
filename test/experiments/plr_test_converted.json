@@ -210,14 +210,14 @@
             "type": "device",
             "class": "",
             "position": {
-                "x": 7.2,
-                "y": 68.3,
+                "x": 11.804,
+                "y": 71.704,
                 "z": 9.47
             },
             "config": {
                 "type": "TipSpot",
-                "size_x": 9.0,
-                "size_y": 9.0,
+                "size_x": 5.112,
+                "size_y": 5.112,
                 "size_z": 0,
                 "rotation": {
                     "x": 0,
@@ -229,19 +229,19 @@
                 "model": null,
                 "prototype_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             },
             "data": {
                 "tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 },
                 "tip_state": {
                     "liquids": [],
@@ -250,10 +250,10 @@
                 },
                 "pending_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             }
         },
@@ -266,14 +266,14 @@
             "type": "device",
             "class": "",
             "position": {
-                "x": 7.2,
-                "y": 59.3,
+                "x": 11.804,
+                "y": 62.704,
                 "z": 9.47
             },
             "config": {
                 "type": "TipSpot",
-                "size_x": 9.0,
-                "size_y": 9.0,
+                "size_x": 5.112,
+                "size_y": 5.112,
                 "size_z": 0,
                 "rotation": {
                     "x": 0,
@@ -285,19 +285,19 @@
                 "model": null,
                 "prototype_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             },
             "data": {
                 "tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 },
                 "tip_state": {
                     "liquids": [],
@@ -306,10 +306,10 @@
                 },
                 "pending_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             }
         },
@@ -322,14 +322,14 @@
             "type": "device",
             "class": "",
             "position": {
-                "x": 7.2,
-                "y": 50.3,
+                "x": 11.804,
+                "y": 53.704,
                 "z": 9.47
             },
             "config": {
                 "type": "TipSpot",
-                "size_x": 9.0,
-                "size_y": 9.0,
+                "size_x": 5.112,
+                "size_y": 5.112,
                 "size_z": 0,
                 "rotation": {
                     "x": 0,
@@ -341,19 +341,19 @@
                 "model": null,
                 "prototype_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             },
             "data": {
                 "tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 },
                 "tip_state": {
                     "liquids": [],
@@ -362,10 +362,10 @@
                 },
                 "pending_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             }
         },
@@ -378,14 +378,14 @@
             "type": "device",
             "class": "",
             "position": {
-                "x": 7.2,
-                "y": 41.3,
+                "x": 11.804,
+                "y": 44.704,
                 "z": 9.47
             },
             "config": {
                 "type": "TipSpot",
-                "size_x": 9.0,
-                "size_y": 9.0,
+                "size_x": 5.112,
+                "size_y": 5.112,
                 "size_z": 0,
                 "rotation": {
                     "x": 0,
@@ -397,19 +397,19 @@
                 "model": null,
                 "prototype_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             },
             "data": {
                 "tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 },
                 "tip_state": {
                     "liquids": [],
@@ -418,10 +418,10 @@
                 },
                 "pending_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             }
         },
@@ -434,14 +434,14 @@
             "type": "device",
             "class": "",
             "position": {
-                "x": 7.2,
-                "y": 32.3,
+                "x": 11.804,
+                "y": 35.704,
                 "z": 9.47
             },
             "config": {
                 "type": "TipSpot",
-                "size_x": 9.0,
-                "size_y": 9.0,
+                "size_x": 5.112,
+                "size_y": 5.112,
                 "size_z": 0,
                 "rotation": {
                     "x": 0,
@@ -453,19 +453,19 @@
                 "model": null,
                 "prototype_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             },
             "data": {
                 "tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 },
                 "tip_state": {
                     "liquids": [],
@@ -474,10 +474,10 @@
                 },
                 "pending_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             }
         },
@@ -490,14 +490,14 @@
             "type": "device",
             "class": "",
             "position": {
-                "x": 7.2,
-                "y": 23.3,
+                "x": 11.804,
+                "y": 26.704,
                 "z": 9.47
             },
             "config": {
                 "type": "TipSpot",
-                "size_x": 9.0,
-                "size_y": 9.0,
+                "size_x": 5.112,
+                "size_y": 5.112,
                 "size_z": 0,
                 "rotation": {
                     "x": 0,
@@ -509,19 +509,19 @@
                 "model": null,
                 "prototype_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             },
             "data": {
                 "tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 },
                 "tip_state": {
                     "liquids": [],
@@ -530,10 +530,10 @@
                 },
                 "pending_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             }
         },
@@ -546,14 +546,14 @@
             "type": "device",
             "class": "",
             "position": {
-                "x": 7.2,
-                "y": 14.3,
+                "x": 11.804,
+                "y": 17.704,
                 "z": 9.47
             },
             "config": {
                 "type": "TipSpot",
-                "size_x": 9.0,
-                "size_y": 9.0,
+                "size_x": 5.112,
+                "size_y": 5.112,
                 "size_z": 0,
                 "rotation": {
                     "x": 0,
@@ -565,19 +565,19 @@
                 "model": null,
                 "prototype_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             },
             "data": {
                 "tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 },
                 "tip_state": {
                     "liquids": [],
@@ -586,10 +586,10 @@
                 },
                 "pending_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             }
         },
@@ -602,14 +602,14 @@
             "type": "device",
             "class": "",
             "position": {
-                "x": 7.2,
-                "y": 5.3,
+                "x": 11.804,
+                "y": 8.704,
                 "z": 9.47
             },
             "config": {
                 "type": "TipSpot",
-                "size_x": 9.0,
-                "size_y": 9.0,
+                "size_x": 5.112,
+                "size_y": 5.112,
                 "size_z": 0,
                 "rotation": {
                     "x": 0,
@@ -621,19 +621,19 @@
                 "model": null,
                 "prototype_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             },
             "data": {
                 "tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 },
                 "tip_state": {
                     "liquids": [],
@@ -642,10 +642,10 @@
                 },
                 "pending_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             }
         },
@@ -658,14 +658,14 @@
             "type": "device",
             "class": "",
             "position": {
-                "x": 16.2,
-                "y": 68.3,
+                "x": 20.804,
+                "y": 71.704,
                 "z": 9.47
             },
             "config": {
                 "type": "TipSpot",
-                "size_x": 9.0,
-                "size_y": 9.0,
+                "size_x": 5.112,
+                "size_y": 5.112,
                 "size_z": 0,
                 "rotation": {
                     "x": 0,
@@ -677,19 +677,19 @@
                 "model": null,
                 "prototype_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             },
             "data": {
                 "tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 },
                 "tip_state": {
                     "liquids": [],
@@ -698,10 +698,10 @@
                 },
                 "pending_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             }
         },
@@ -714,14 +714,14 @@
             "type": "device",
             "class": "",
             "position": {
-                "x": 16.2,
-                "y": 59.3,
+                "x": 20.804,
+                "y": 62.704,
                 "z": 9.47
             },
             "config": {
                 "type": "TipSpot",
-                "size_x": 9.0,
-                "size_y": 9.0,
+                "size_x": 5.112,
+                "size_y": 5.112,
                 "size_z": 0,
                 "rotation": {
                     "x": 0,
@@ -733,19 +733,19 @@
                 "model": null,
                 "prototype_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             },
             "data": {
                 "tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 },
                 "tip_state": {
                     "liquids": [],
@@ -754,10 +754,10 @@
                 },
                 "pending_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             }
         },
@@ -770,14 +770,14 @@
             "type": "device",
             "class": "",
             "position": {
-                "x": 16.2,
-                "y": 50.3,
+                "x": 20.804,
+                "y": 53.704,
                 "z": 9.47
             },
             "config": {
                 "type": "TipSpot",
-                "size_x": 9.0,
-                "size_y": 9.0,
+                "size_x": 5.112,
+                "size_y": 5.112,
                 "size_z": 0,
                 "rotation": {
                     "x": 0,
@@ -789,19 +789,19 @@
                 "model": null,
                 "prototype_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             },
             "data": {
                 "tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 },
                 "tip_state": {
                     "liquids": [],
@@ -810,10 +810,10 @@
                 },
                 "pending_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             }
         },
@@ -826,14 +826,14 @@
             "type": "device",
             "class": "",
             "position": {
-                "x": 16.2,
-                "y": 41.3,
+                "x": 20.804,
+                "y": 44.704,
                 "z": 9.47
             },
             "config": {
                 "type": "TipSpot",
-                "size_x": 9.0,
-                "size_y": 9.0,
+                "size_x": 5.112,
+                "size_y": 5.112,
                 "size_z": 0,
                 "rotation": {
                     "x": 0,
@@ -845,19 +845,19 @@
                 "model": null,
                 "prototype_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             },
             "data": {
                 "tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 },
                 "tip_state": {
                     "liquids": [],
@@ -866,10 +866,10 @@
                 },
                 "pending_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             }
         },
@@ -882,14 +882,14 @@
             "type": "device",
             "class": "",
             "position": {
-                "x": 16.2,
-                "y": 32.3,
+                "x": 20.804,
+                "y": 35.704,
                 "z": 9.47
             },
             "config": {
                 "type": "TipSpot",
-                "size_x": 9.0,
-                "size_y": 9.0,
+                "size_x": 5.112,
+                "size_y": 5.112,
                 "size_z": 0,
                 "rotation": {
                     "x": 0,
@@ -901,19 +901,19 @@
                 "model": null,
                 "prototype_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             },
             "data": {
                 "tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 },
                 "tip_state": {
                     "liquids": [],
@@ -922,10 +922,10 @@
                 },
                 "pending_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             }
         },
@@ -938,14 +938,14 @@
             "type": "device",
             "class": "",
             "position": {
-                "x": 16.2,
-                "y": 23.3,
+                "x": 20.804,
+                "y": 26.704,
                 "z": 9.47
             },
             "config": {
                 "type": "TipSpot",
-                "size_x": 9.0,
-                "size_y": 9.0,
+                "size_x": 5.112,
+                "size_y": 5.112,
                 "size_z": 0,
                 "rotation": {
                     "x": 0,
@@ -957,19 +957,19 @@
                 "model": null,
                 "prototype_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             },
             "data": {
                 "tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 },
                 "tip_state": {
                     "liquids": [],
@@ -978,10 +978,10 @@
                 },
                 "pending_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             }
         },
@@ -994,14 +994,14 @@
             "type": "device",
             "class": "",
             "position": {
-                "x": 16.2,
-                "y": 14.3,
+                "x": 20.804,
+                "y": 17.704,
                 "z": 9.47
             },
             "config": {
                 "type": "TipSpot",
-                "size_x": 9.0,
-                "size_y": 9.0,
+                "size_x": 5.112,
+                "size_y": 5.112,
                 "size_z": 0,
                 "rotation": {
                     "x": 0,
@@ -1013,19 +1013,19 @@
                 "model": null,
                 "prototype_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             },
             "data": {
                 "tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 },
                 "tip_state": {
                     "liquids": [],
@@ -1034,10 +1034,10 @@
                 },
                 "pending_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             }
         },
@@ -1050,14 +1050,14 @@
             "type": "device",
             "class": "",
             "position": {
-                "x": 16.2,
-                "y": 5.3,
+                "x": 20.804,
+                "y": 8.704,
                 "z": 9.47
             },
             "config": {
                 "type": "TipSpot",
-                "size_x": 9.0,
-                "size_y": 9.0,
+                "size_x": 5.112,
+                "size_y": 5.112,
                 "size_z": 0,
                 "rotation": {
                     "x": 0,
@@ -1069,19 +1069,19 @@
                 "model": null,
                 "prototype_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             },
             "data": {
                 "tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 },
                 "tip_state": {
                     "liquids": [],
@@ -1090,15 +1090,13 @@
                 },
                 "pending_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 88,
                     "has_filter": true,
-                    "maximal_volume": 20.0,
-                    "fitting_depth": 3.29
+                    "maximal_volume": 1000.0,
+                    "fitting_depth": 7.95
                 }
             }
         },
-
-
         {
             "id": "plate_well",
             "name": "plate_well",
@@ -1555,8 +1553,6 @@
                 "liquid_history": []
             }
         },
-
-
         {
             "id": "plate_well_A11",
             "name": "plate_well_A11",
@@ -1869,12 +1865,10 @@
                 "liquid_history": []
             }
         },
-
         {
             "id": "benyao",
             "name": "benyao",
-            "children": [
-            ],
+            "children": [],
             "parent": null,
             "type": "device",
             "class": "moveit.benyao_arm",
@@ -1887,8 +1881,20 @@
                 "moveit_type": "benyao_arm",
                 "joint_poses": {
                     "arm": {
-                        "hotel_1": [1.05, 0.568, -1.0821, 0.0, 1.0821],
-                        "home": [0.865, 0.09, 0.8727, 0.0, -0.8727]
+                        "hotel_1": [
+                            1.05,
+                            0.568,
+                            -1.0821,
+                            0.0,
+                            1.0821
+                        ],
+                        "home": [
+                            0.865,
+                            0.09,
+                            0.8727,
+                            0.0,
+                            -0.8727
+                        ]
                     }
                 },
                 "rotation": {
@@ -1897,17 +1903,14 @@
                     "z": -1.5708,
                     "type": "Rotation"
                 },
-                "device_config": {
-                }
+                "device_config": {}
             },
-            "data": {
-            }
+            "data": {}
         },
         {
             "id": "hotel",
             "name": "hotel",
-            "children": [
-            ],
+            "children": [],
             "parent": null,
             "type": "device",
             "class": "hotel.thermo_orbitor_rs2_hotel",
@@ -1923,11 +1926,9 @@
                     "z": 0,
                     "type": "Rotation"
                 },
-                "device_config": {
-                }
+                "device_config": {}
             },
-            "data": {
-            }
+            "data": {}
         }
     ],
     "links": []

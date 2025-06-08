@@ -80,11 +80,11 @@ def main(
             'joint_republisher',
             host_node.resource_tracker
         )
+        lh_joint_pub = LiquidHandlerJointPublisher(resources_config=resources_config, resource_tracker=host_node.resource_tracker)
+        executor.add_node(lh_joint_pub)
 
         executor.add_node(resource_mesh_manager)
         executor.add_node(joint_republisher)
-    lh_joint_pub = LiquidHandlerJointPublisher(resources_config=resources_config, resource_tracker=host_node.resource_tracker)
-    executor.add_node(lh_joint_pub)
 
     thread = threading.Thread(target=executor.spin, daemon=True, name="host_executor_thread")
     thread.start()
