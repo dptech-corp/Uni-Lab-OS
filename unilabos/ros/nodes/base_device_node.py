@@ -924,6 +924,12 @@ class ROS2DeviceNode:
             )
         self._ros_node: BaseROS2DeviceNode
         self._ros_node.lab_logger().info(f"初始化完成 {self._ros_node.uuid} {self.driver_is_ros}")
+        self.driver_instance._ros_node = self._ros_node  # type: ignore
+        if hasattr(self.driver_instance, "post_init"):
+            try:
+                self.driver_instance.post_init(self._ros_node)  # type: ignore
+            except Exception as e:
+                self._ros_node.lab_logger().error(f"设备后初始化失败: {e}")
 
     def _start_loop(self):
         def run_event_loop():
