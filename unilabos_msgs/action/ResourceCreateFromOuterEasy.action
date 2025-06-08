@@ -8,5 +8,6 @@ string[] liquid_type
 float32[] liquid_volume
 int32 slot_on_deck
 ---
+string return_info
 bool success
 ---

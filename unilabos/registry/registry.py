@@ -25,9 +25,7 @@ class Registry:
         self.ResourceCreateFromOuterEasy = self._replace_type_with_class(
             "ResourceCreateFromOuterEasy", "host_node", f"动作 create_resource"
         )
-        self.EmptyIn = self._replace_type_with_class(
-            "EmptyIn", "host_node", f""
-        )
+        self.EmptyIn = self._replace_type_with_class("EmptyIn", "host_node", f"")
         self.device_type_registry = {}
         self.resource_type_registry = {}
         self._setup_called = False  # 跟踪setup是否已调用
@@ -66,6 +64,7 @@ class Registry:
                                 "goal_default": yaml.safe_load(
                                     io.StringIO(get_yaml_from_goal_type(self.ResourceCreateFromOuter.Goal))
                                 ),
+                                "handles": {},
                             },
                             "create_resource": {
                                 "type": self.ResourceCreateFromOuterEasy,
@@ -86,6 +85,15 @@ class Registry:
                                 "goal_default": yaml.safe_load(
                                     io.StringIO(get_yaml_from_goal_type(self.ResourceCreateFromOuterEasy.Goal))
                                 ),
+                                "handles": {
+                                    "output": [{
+                                        "handler_key": "Labware",
+                                        "label": "Labware",
+                                        "data_type": "resource",
+                                        "data_source": "handle",
+                                        "data_key": "liquid"
+                                    }]
+                                },
                             },
                             "test_latency": {
                                 "type": self.EmptyIn,
@@ -94,11 +102,14 @@ class Registry:
                                 "result": {"latency_ms": "latency_ms", "time_diff_ms": "time_diff_ms"},
                                 "schema": ros_action_to_json_schema(self.EmptyIn),
                                 "goal_default": {},
+                                "handles": {},
                             },
                         },
                     },
                     "icon": "icon_device.webp",
                     "registry_type": "device",
+                    "handles": [],
+                    "init_param_schema": {},
                     "schema": {"properties": {}, "additionalProperties": False, "type": "object"},
                     "file_path": "/",
                 }
@@ -132,6 +143,10 @@ class Registry:
                         resource_info["description"] = ""
                     if "icon" not in resource_info:
                         resource_info["icon"] = ""
+                    if "handles" not in resource_info:
+                        resource_info["handles"] = []
+                    if "init_param_schema" not in resource_info:
+                        resource_info["init_param_schema"] = {}
                     resource_info["registry_type"] = "resource"
                 self.resource_type_registry.update(data)
                 logger.debug(
@@ -194,6 +209,10 @@ class Registry:
                         device_config["description"] = ""
                     if "icon" not in device_config:
                         device_config["icon"] = ""
+                    if "handles" not in device_config:
+                        device_config["handles"] = []
+                    if "init_param_schema" not in device_config:
+                        device_config["init_param_schema"] = {}
                     device_config["registry_type"] = "device"
                     if "class" in device_config:
                         # 处理状态类型
@@ -206,6 +225,8 @@ class Registry:
                         # 处理动作值映射
                         if "action_value_mappings" in device_config["class"]:
                             for action_name, action_config in device_config["class"]["action_value_mappings"].items():
+                                if "handles" not in action_config:
+                                    action_config["handles"] = []
                                 if "type" in action_config:
                                     action_config["type"] = self._replace_type_with_class(
                                         action_config["type"], device_id, f"动作 {action_name}"

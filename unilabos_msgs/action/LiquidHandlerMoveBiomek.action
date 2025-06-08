@@ -1,4 +1,6 @@
-int32 int_input
+string source
+string target
+
 ---
 string return_info
 bool success

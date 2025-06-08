@@ -4,5 +4,6 @@ string[] bind_parent_ids
 geometry_msgs/Point[] bind_locations
 string[] other_calling_params
 ---
+string return_info
 bool success
 ---

@@ -29,6 +29,8 @@ set(action_files
   "action/HeatChillStart.action"
   "action/HeatChillStop.action"
 
+  "action/LiquidHandlerProtocolCreation.action"
+
   "action/LiquidHandlerAspirate.action"
   "action/LiquidHandlerDiscardTips.action"
   "action/LiquidHandlerDispense.action"
@@ -43,6 +45,11 @@ set(action_files
   "action/LiquidHandlerReturnTips96.action"
   "action/LiquidHandlerStamp.action"
   "action/LiquidHandlerTransfer.action"
+
+  "action/LiquidHandlerTransferBiomek.action"
+  "action/LiquidHandlerIncubateBiomek.action"
+  "action/LiquidHandlerMoveBiomek.action"
+  "action/LiquidHandlerOscillateBiomek.action"
 
   "action/LiquidHandlerAdd.action"
   "action/LiquidHandlerMix.action"

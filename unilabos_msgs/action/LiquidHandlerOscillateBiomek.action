@@ -1,4 +1,6 @@
-int32 int_input
+int32 rpm
+int32 time
+
 ---
 string return_info
 bool success

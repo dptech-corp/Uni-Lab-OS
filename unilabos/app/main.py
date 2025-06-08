@@ -10,6 +10,8 @@ from copy import deepcopy
 
 import yaml
 
+from unilabos.resources.graphio import tree_to_list
+
 # 首先添加项目根目录到路径
 current_dir = os.path.dirname(os.path.abspath(__file__))
 unilabos_dir = os.path.dirname(os.path.dirname(current_dir))
@@ -144,19 +146,19 @@ def main():
             else read_graphml(args_dict["graph"])
         )
         devices_and_resources = dict_from_graph(graph_res.physical_setup_graph)
-        args_dict["resources_config"] = initialize_resources(list(deepcopy(devices_and_resources).values()))
+        # args_dict["resources_config"] = initialize_resources(list(deepcopy(devices_and_resources).values()))
+        args_dict["resources_config"] = list(devices_and_resources.values())
         args_dict["devices_config"] = dict_to_nested_dict(deepcopy(devices_and_resources), devices_only=False)
-        # args_dict["resources_config"] = dict_to_tree(devices_and_resources, devices_only=False)
-
         args_dict["graph"] = graph_res.physical_setup_graph
     else:
         if args_dict["devices"] is None or args_dict["resources"] is None:
             print_status("Either graph or devices and resources must be provided.", "error")
             sys.exit(1)
         args_dict["devices_config"] = json.load(open(args_dict["devices"], encoding="utf-8"))
-        args_dict["resources_config"] = initialize_resources(
-            list(json.load(open(args_dict["resources"], encoding="utf-8")).values())
-        )
+        # args_dict["resources_config"] = initialize_resources(
+        #     list(json.load(open(args_dict["resources"], encoding="utf-8")).values())
+        # )
+        args_dict["resources_config"] = list(json.load(open(args_dict["resources"], encoding="utf-8")).values())
 
     print_status(f"{len(args_dict['resources_config'])} Resources loaded:", "info")
     for i in args_dict["resources_config"]:

@@ -151,7 +151,7 @@ class HostNode(BaseROS2DeviceNode):
             mqtt_client.publish_registry(device_info["id"], device_info)
         for resource_info in lab_registry.obtain_registry_resource_info():
             mqtt_client.publish_registry(resource_info["id"], resource_info)
-
+        time.sleep(1) # 等待MQTT连接稳定
         # 首次发现网络中的设备
         self._discover_devices()
 
@@ -203,8 +203,12 @@ class HostNode(BaseROS2DeviceNode):
         try:
             for bridge in self.bridges:
                 if hasattr(bridge, "resource_add"):
-                    self.lab_logger().info("[Host Node-Resource] Adding resources to bridge.")
-                    resource_add_res = bridge.resource_add(add_schema(resource_with_parent_name))
+                    resource_start_time = time.time()
+                    resource_add_res = bridge.resource_add(add_schema(resource_with_parent_name), True)
+                    resource_end_time = time.time()
+                    self.lab_logger().info(
+                        f"[Host Node-Resource] 物料上传 {round(resource_end_time - resource_start_time, 5) * 1000} ms"
+                    )
         except Exception as ex:
             self.lab_logger().error("[Host Node-Resource] 添加物料出错！")
             self.lab_logger().error(traceback.format_exc())
@@ -610,13 +614,21 @@ class HostNode(BaseROS2DeviceNode):
         """获取结果回调"""
         result_msg = future.result().result
         result_data = convert_from_ros_msg(result_msg)
+        status = "success"
+        try:
+            ret = json.loads(result_data.get("return_info", "{}"))  # 确保返回信息是有效的JSON
+            suc = ret.get("suc", False)
+            if not suc:
+                status = "failed"
+        except json.JSONDecodeError:
+            status = "failed"
         self.lab_logger().info(f"[Host Node] Result for {action_id} ({uuid_str}): success")
         self.lab_logger().debug(f"[Host Node] Result data: {result_data}")
 
         if uuid_str:
             for bridge in self.bridges:
                 if hasattr(bridge, "publish_job_status"):
-                    bridge.publish_job_status(result_data, uuid_str, "success")
+                    bridge.publish_job_status(result_data, uuid_str, status, result_data.get("return_info", "{}"))
 
     def cancel_goal(self, goal_uuid: str) -> None:
         """取消目标"""
@@ -856,7 +868,6 @@ class HostNode(BaseROS2DeviceNode):
         测试网络延迟的action实现
         通过5次ping-pong机制校对时间误差并计算实际延迟
         """
-        import time
         import uuid as uuid_module
 
         self.lab_logger().info("=" * 60)

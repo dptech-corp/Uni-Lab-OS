@@ -12,6 +12,7 @@ bool is_96_well
 float64[] top
 string[] none_keys
 ---
+string return_info
 bool success
 ---
 # 反馈

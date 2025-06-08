@@ -22,9 +22,76 @@ vacuum_pump.mock:
           string: string
         feedback: {}
         result: {}
+  handles:
+    input:
+    - handler_key: fluid-input
+      label: Fluid Input
+      data_type: fluid
+      io_type: target
+      data_source: handle
+      data_key: fluid_in
+    output:
+    - handler_key: fluid-output
+      label: Fluid Output
+      data_type: fluid
+      io_type: source
+      data_source: executor
+      data_key: fluid_out
+  init_param_schema:
+    type: object
+    properties:
+      port:
+        type: string
+        description: "通信端口"
+        default: "COM6"
+    required:
+    - port
 
 gas_source.mock:
   description: Mock gas source
   class:
     module: unilabos.devices.pump_and_valve.vacuum_pump_mock:VacuumPumpMock
     type: python
+    status_types:
+      status: String
+    action_value_mappings:
+      open:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result: {}
+      close:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result: {}
+      set_status:
+        type: StrSingleInput
+        goal:
+          string: string
+        feedback: {}
+        result: {}
+  handles:
+    input:
+    - handler_key: fluid-input
+      label: Fluid Input
+      data_type: fluid
+      io_type: target
+      data_source: handle
+      data_key: fluid_in
+    output:
+    - handler_key: fluid-output
+      label: Fluid Output
+      data_type: fluid
+      io_type: source
+      data_source: executor
+      data_key: fluid_out
+  init_param_schema:
+    type: object
+    properties:
+      port:
+        type: string
+        description: "通信端口"
+        default: "COM6"
+    required:
+    - port

@@ -1,5 +1,6 @@
 liquid_handler:
   description: Liquid handler device controlled by pylabrobot
+  icon: icon_yiyezhan.webp
   class:
     module: unilabos.devices.liquid_handling.liquid_handler_abstract:LiquidHandlerAbstract
     type: python
@@ -22,8 +23,8 @@ liquid_handler:
           is_96_well: is_96_well
           top: top
           none_keys: none_keys
-        feedback: { }
-        result: { }
+        feedback: {}
+        result: {}
       add_liquid:
         type: LiquidHandlerAdd
         goal:
@@ -43,8 +44,8 @@ liquid_handler:
           mix_rate: mix_rate
           mix_liquid_height: mix_liquid_height
           none_keys: none_keys
-        feedback: { }
-        result: { }
+        feedback: {}
+        result: {}
       transfer_liquid:
         type: LiquidHandlerTransfer
         goal:
@@ -69,8 +70,8 @@ liquid_handler:
           mix_liquid_height: mix_liquid_height
           delays: delays
           none_keys: none_keys
-        feedback: { }
-        result: { }
+        feedback: {}
+        result: {}
       mix:
         type: LiquidHandlerMix
         goal:
@@ -81,16 +82,16 @@ liquid_handler:
           offsets: offsets
           mix_rate: mix_rate
           none_keys: none_keys
-        feedback: { }
-        result: { }
+        feedback: {}
+        result: {}
       move_to:
         type: LiquidHandlerMoveTo
         goal:
           well: well
           dis_to_top: dis_to_top
           channel: channel
-        feedback: { }
-        result: { }
+        feedback: {}
+        result: {}
       aspirate:
         type: LiquidHandlerAspirate
         goal:
@@ -245,6 +246,21 @@ liquid_handler:
           target_vols: target_vols
           aspiration_flow_rate: aspiration_flow_rate
           dispense_flow_rates: dispense_flow_rates
+  handles:
+    input:
+    - handler_key: liquid-input
+      label: Liquid Input
+      data_type: resource
+      io_type: target
+      data_source: handle
+      data_key: liquid
+    output:
+    - handler_key: liquid-output
+      label: Liquid Output
+      data_type: resource
+      io_type: source
+      data_source: executor
+      data_key: liquid
   schema:
     type: object
     properties:
@@ -272,3 +288,174 @@ liquid_handler.revvity:
           status: status
         result:
           success: success
+
+liquid_handler.biomek:
+  description: Biomek液体处理器设备，基于pylabrobot控制
+  icon: icon_yiyezhan.webp
+  class:
+    module: unilabos.devices.liquid_handling.biomek:LiquidHandlerBiomek
+    type: python
+    status_types: {}
+    action_value_mappings:
+      create_protocol:
+        type: LiquidHandlerProtocolCreation
+        goal:
+          protocol_name: protocol_name
+          protocol_description: protocol_description
+          protocol_version: protocol_version
+          protocol_author: protocol_author
+          protocol_date: protocol_date
+          protocol_type: protocol_type
+          none_keys: none_keys
+        feedback: {}
+        result: {}
+      run_protocol:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result: {}
+      transfer_liquid:
+        type: LiquidHandlerTransfer
+        goal:
+          asp_vols: asp_vols
+          dis_vols: dis_vols
+          sources: sources
+          targets: targets
+          tip_racks: tip_racks
+          use_channels: use_channels
+          asp_flow_rates: asp_flow_rates
+          dis_flow_rates: dis_flow_rates
+          offsets: offsets
+          touch_tip: touch_tip
+          liquid_height: liquid_height
+          blow_out_air_volume: blow_out_air_volume
+          spread: spread
+          is_96_well: is_96_well
+          mix_stage: mix_stage
+          mix_times: mix_times
+          mix_vol: mix_vol
+          mix_rate: mix_rate
+          mix_liquid_height: mix_liquid_height
+          delays: delays
+          none_keys: none_keys
+        feedback: {}
+        result: {}
+        handles:
+          input:
+            - handler_key: liquid-input
+              label: Liquid Input
+              data_type: resource
+              io_type: target
+              data_source: handle
+              data_key: liquid
+          output:
+            - handler_key: liquid-output
+              label: Liquid Output
+              data_type: resource
+              io_type: source
+              data_source: executor
+              data_key: liquid
+      transfer_biomek:
+        type: LiquidHandlerTransferBiomek
+        goal:
+          source: source
+          target: target
+          tip_rack: tip_rack
+          volume: volume
+          aspirate_techniques: aspirate_techniques
+          dispense_techniques: dispense_techniques
+        feedback: {}
+        result: {}
+        handles:
+          input:
+            - handler_key: sources
+              label: sources
+              data_type: resource
+              data_source: handle
+              data_key: liquid
+            - handler_key: targets
+              label: targets
+              data_type: resource
+              data_source: executor
+              data_key: liquid
+            - handler_key: tip_rack
+              label: tip_rack
+              data_type: resource
+              data_source: executor
+              data_key: liquid
+          output:
+            - handler_key: sources_out
+              label: sources
+              data_type: resource
+              data_source: handle
+              data_key: liquid
+            - handler_key: targets_out
+              label: targets
+              data_type: resource
+              data_source: executor
+              data_key: liquid
+      oscillation_biomek:
+        type: LiquidHandlerOscillateBiomek
+        goal:
+          rpm: rpm
+          time: time
+        feedback: {}
+        result: {}
+        handles:
+          input:
+            - handler_key: plate
+              label: plate
+              data_type: resource
+              data_source: handle
+              data_key: liquid
+          output:
+            - handler_key: plate_out
+              label: plate
+              data_type: resource
+              data_source: handle
+              data_key: liquid
+      move_biomek:
+        type: LiquidHandlerMoveBiomek
+        goal:
+          source: resource
+          target: target
+        feedback: {}
+        result:
+          name: name
+        handles:
+          input:
+            - handler_key: sources
+              label: sources
+              data_type: resource
+              data_source: handle
+              data_key: liquid
+          output:
+            - handler_key: targets
+              label: targets
+              data_type: resource
+              data_source: handle
+              data_key: liquid
+      incubation_biomek:
+        type: LiquidHandlerIncubateBiomek
+        goal:
+          time: time
+        feedback: {}
+        result: {}
+        handles:
+          input:
+            - handler_key: plate
+              label: plate
+              data_type: resource
+              data_source: handle
+              data_key: liquid
+          output:
+            - handler_key: plate_out
+              label: plate
+              data_type: resource
+              data_source: handle
+              data_key: liquid
+  schema:
+    type: object
+    properties: {}
+    required: []
+    additionalProperties: false
