@@ -21,7 +21,6 @@ class MoveitInterface:
     def __init__(self, moveit_type, joint_poses, rotation=None, device_config=None):
         self.device_config = device_config
         self.rotation = rotation
-        self.callback_group = ReentrantCallbackGroup()
         self.data_config = json.load(
             open(
                 f"{Path(__file__).parent.parent.parent.absolute()}/device_mesh/devices/{moveit_type}/config/move_group.json",
