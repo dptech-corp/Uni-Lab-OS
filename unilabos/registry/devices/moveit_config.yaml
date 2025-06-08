@@ -15,3 +15,16 @@ moveit.benyao_arm:
   model:
     type: device
     mesh: benyao_arm
+  action_value_mappings:
+    set_position:
+      type: SendCmd
+      feedback: {}
+      result: {}
+    pick_and_place:
+      type: SendCmd
+      feedback: {}
+      result: {}
+    set_status:
+      type: SendCmd
+      feedback: {}
+      result: {}
