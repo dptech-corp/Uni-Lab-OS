@@ -125,6 +125,7 @@ def slave(
     executor.add_node(n)
 
     if visual != "disable":
+        from unilabos.ros.nodes.presets.joint_republisher import JointRepublisher
         resource_mesh_manager = ResourceMeshManager(
             resources_mesh_config,
             resources_config,
