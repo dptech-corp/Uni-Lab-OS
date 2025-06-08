@@ -239,8 +239,15 @@ class MoveitInterface:
                             )
 
                 if "lift_height" in cmd_dict.keys():
-
-                    retval = self.moveit2[cmd_dict["move_group"]].compute_fk(joint_positions_)
+                    retval = None
+                    retry = config.get("retry", 10)
+                    while retval is None and retry > 0:
+                        retval = self.moveit2[cmd_dict["move_group"]].compute_fk(joint_positions_)
+                        time.sleep(0.1)
+                        retry -= 1
+                    if retval is None:
+                        result.success = False
+                        return result
                     pose = [retval.pose.position.x, retval.pose.position.y, retval.pose.position.z]
                     quaternion = [
                         retval.pose.orientation.x,
