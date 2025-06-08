@@ -12,7 +12,7 @@ from rclpy.callback_groups import ReentrantCallbackGroup
 from moveit_msgs.msg import JointConstraint, Constraints
 from copy import deepcopy
 
-from pymoveit2 import MoveIt2, GripperInterface
+from unilabos.devices.ros_dev.moveit2 import MoveIt2
 
 import numpy as np
 from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode
