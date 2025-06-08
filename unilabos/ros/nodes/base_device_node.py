@@ -740,16 +740,23 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                     self.lab_logger().info(f"更新资源状态: {k}")
                     r = ResourceUpdate.Request()
                     # 仅当action_kwargs[k]不为None时尝试转换
-                    akv = action_kwargs[k]
+                    akv = action_kwargs[k]  # 已经是完成转换的物料了，只需要转换成ros msg Resource了
                     apv = action_paramtypes[k]
                     final_type = get_type_class(apv)
                     if final_type is None:
                         continue
                     try:
-                        r.resources = [
-                            convert_to_ros_msg(Resource, self.resource_tracker.root_resource(rs))
-                            for rs in convert_resources_from_type(akv, final_type)  # type: ignore  # FIXME  # 考虑反查到最大的
-                        ]
+                        seen = set()
+                        unique_resources = []
+                        for rs in akv:
+                            res = self.resource_tracker.parent_resource(rs)  # 获取 resource 对象
+                            if id(res) not in seen:
+                                seen.add(id(res))
+                                converted_list = convert_resources_from_type([res], final_type)
+                                unique_resources.extend([convert_to_ros_msg(Resource, converted) for converted in converted_list])
+
+                        r.resources = unique_resources
+
                         response = await self._resource_clients["resource_update"].call_async(r)
                         self.lab_logger().debug(f"资源更新结果: {response}")
                     except Exception as e:

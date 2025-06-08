@@ -6,7 +6,6 @@ import time
 from typing import Optional, Dict, Any, List
 
 import rclpy
-from unilabos.ros.nodes.presets.joint_republisher import JointRepublisher
 from unilabos.ros.nodes.presets.resource_mesh_manager import ResourceMeshManager
 from unilabos.ros.nodes.resource_tracker import DeviceNodeResourceTracker
 from unilabos.devices.ros_dev.liquid_handler_joint_publisher import LiquidHandlerJointPublisher
@@ -70,6 +69,8 @@ def main(
     )
 
     if visual != "disable":
+        from unilabos.ros.nodes.presets.joint_republisher import JointRepublisher
+
         resource_mesh_manager = ResourceMeshManager(
             resources_mesh_config,
             resources_config,
@@ -80,11 +81,11 @@ def main(
             'joint_republisher',
             host_node.resource_tracker
         )
-        lh_joint_pub = LiquidHandlerJointPublisher(resources_config=resources_config, resource_tracker=host_node.resource_tracker)
-        executor.add_node(lh_joint_pub)
-
+        lh_joint_pub = LiquidHandlerJointPublisher(resources_config=resources_config,
+                                                   resource_tracker=host_node.resource_tracker)
         executor.add_node(resource_mesh_manager)
         executor.add_node(joint_republisher)
+        executor.add_node(lh_joint_pub)
 
     thread = threading.Thread(target=executor.spin, daemon=True, name="host_executor_thread")
     thread.start()

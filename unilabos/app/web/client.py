@@ -60,7 +60,7 @@ class HTTPClient:
             Dict: 返回的资源数据
         """
         response = requests.get(
-            f"{self.remote_addr}/lab/resource/",
+            f"{self.remote_addr}/lab/resource/?edge_format=1",
             params={"id": id, "with_children": with_children},
             headers={"Authorization": f"lab {self.auth}"},
             timeout=5,
@@ -96,7 +96,7 @@ class HTTPClient:
             Response: API响应对象
         """
         response = requests.patch(
-            f"{self.remote_addr}/lab/resource/batch_update/",
+            f"{self.remote_addr}/lab/resource/batch_update/?edge_format=1",
             json=resources,
             headers={"Authorization": f"lab {self.auth}"},
             timeout=5,

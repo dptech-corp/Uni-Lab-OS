@@ -326,8 +326,6 @@ def convert_resources_to_type(
         elif all(issubclass(t, ResourcePLR) for t in resource_type):
             resources_tree = dict_to_tree({r["id"]: r for r in resources_list})
             return [resource_ulab_to_plr(r, plr_model) for r in resources_tree]
-
-
     else:
         return None
 

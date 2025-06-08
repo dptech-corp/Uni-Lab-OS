@@ -1,3 +1,5 @@
+from typing import List, Tuple, Any
+
 from unilabos.utils.log import logger
 
 
@@ -5,12 +7,12 @@ class DeviceNodeResourceTracker(object):
 
     def __init__(self):
         self.resources = []
-        self.root_resource2resource = {}
+        self.resource2parent_resource = {}
         pass
 
-    def root_resource(self, resource):
-        if id(resource) in self.root_resource2resource:
-            return self.root_resource2resource[id(resource)]
+    def parent_resource(self, resource):
+        if id(resource) in self.resource2parent_resource:
+            return self.resource2parent_resource[id(resource)]
         else:
             return resource
 
@@ -44,20 +46,21 @@ class DeviceNodeResourceTracker(object):
                     self.loop_find_resource(r, resource_cls_type, identifier_key, getattr(query_resource, identifier_key))
                 )
         assert len(res_list) == 1, f"{query_resource} 找到多个资源，请检查资源是否唯一: {res_list}"
-        self.root_resource2resource[id(query_resource)] = res_list[0]
+        self.resource2parent_resource[id(query_resource)] = res_list[0][0]
+        self.resource2parent_resource[id(res_list[0][1])] = res_list[0][0]
         # 后续加入其他对比方式
-        return res_list[0]
+        return res_list[0][1]
 
-    def loop_find_resource(self, resource, target_resource_cls_type, identifier_key, compare_value):
+    def loop_find_resource(self, resource, target_resource_cls_type, identifier_key, compare_value, parent_res=None) -> List[Tuple[Any, Any]]:
         res_list = []
         # print(resource, target_resource_cls_type, identifier_key, compare_value)
         children = getattr(resource, "children", [])
         for child in children:
-            res_list.extend(self.loop_find_resource(child, target_resource_cls_type, identifier_key, compare_value))
+            res_list.extend(self.loop_find_resource(child, target_resource_cls_type, identifier_key, compare_value, resource))
         if target_resource_cls_type == type(resource) or target_resource_cls_type == dict:
             if hasattr(resource, identifier_key):
                 if getattr(resource, identifier_key) == compare_value:
-                    res_list.append(resource)
+                    res_list.append((parent_res, resource))
         return res_list
 
     def filter_find_list(self, res_list, compare_std_dict):
