@@ -87,7 +87,7 @@ class Registry:
                                 ),
                                 "handles": {
                                     "output": [{
-                                        "handler_key": "Labware",
+                                        "handler_key": "labware",
                                         "label": "Labware",
                                         "data_type": "resource",
                                         "data_source": "handle",
