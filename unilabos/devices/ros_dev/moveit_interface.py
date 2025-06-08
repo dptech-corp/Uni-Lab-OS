@@ -5,7 +5,6 @@ from pathlib import Path
 
 from moveit_msgs.msg import JointConstraint, Constraints
 from rclpy.action import ActionClient
-from rclpy.callback_groups import ReentrantCallbackGroup
 from tf2_ros import Buffer, TransformListener
 from unilabos_msgs.action import SendCmd
 
