@@ -10,6 +10,7 @@ from pylabrobot.resources import (
     Container,
     Coordinate,
 )
+import copy
 from unilabos_msgs.msg import Resource
 
 from unilabos.ros.nodes.resource_tracker import DeviceNodeResourceTracker  # type: ignore
@@ -61,7 +62,7 @@ class LiquidHandlerBiomek:
                             'LocalPattern': True, 
                             'Operation': 'Aspirate', 
                             'OverrideHeight': False, 
-                            'Pattern': (True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True),
+                            'Pattern': (True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True),
                             'Prototype': 'MC P300 High', 
                             'ReferencedPattern': '', 
                             'RowsFirst': False, 
@@ -450,8 +451,8 @@ class LiquidHandlerBiomek:
         """
         items = []
 
-        asp_params = self.aspirate_techniques.get(aspirate_techniques, {})
-        dis_params = self.dispense_techniques.get(dispense_techniques, {})
+        asp_params = copy.deepcopy(self.aspirate_techniques[aspirate_techniques])
+        dis_params = copy.deepcopy(self.dispense_techniques[dispense_techniques])
 
         asp_params['Position'] = source
         dis_params['Position'] = target
@@ -564,7 +565,7 @@ class LiquidHandlerBiomek:
 
 
 if __name__ == "__main__":
-  
+
     print("=== Biomek完整流程测试 ===")
     print("包含: 仪器设置 + 完整实验步骤")
     
@@ -963,15 +964,6 @@ if __name__ == "__main__":
         "id": "working plate on P11",
         "parent": "deck",
         "slot_on_deck": "P11",
-        "class_name": "BCDeep96Round",
-        "liquid_type": [],
-        "liquid_volume": [],
-        "liquid_input_wells": []
-    },
-    {
-        "id": "working plate on P12",
-        "parent": "deck",
-        "slot_on_deck": "P12",
         "class_name": "BCDeep96Round",
         "liquid_type": [],
         "liquid_volume": [],

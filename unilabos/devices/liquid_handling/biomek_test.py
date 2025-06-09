@@ -15,6 +15,7 @@ from typing import List, Sequence, Optional, Union, Literal
 import json
 import pathlib
 from typing import Sequence, Optional, List, Union, Literal
+import copy
 
 
 
@@ -67,7 +68,7 @@ class LiquidHandlerBiomek:
                             'LocalPattern': True, 
                             'Operation': 'Aspirate', 
                             'OverrideHeight': False, 
-                            'Pattern': (True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True),
+                            'Pattern': (True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True),
                             'Prototype': 'MC P300 High', 
                             'ReferencedPattern': '', 
                             'RowsFirst': False, 
@@ -351,8 +352,9 @@ class LiquidHandlerBiomek:
         """
         items = []
 
-        asp_params = self.aspirate_techniques.get(aspirate_techniques, {})
-        dis_params = self.dispense_techniques.get(dispense_techniques, {})
+        asp_params = copy.deepcopy(self.aspirate_techniques[aspirate_techniques])
+        dis_params = copy.deepcopy(self.dispense_techniques[dispense_techniques])
+
 
         asp_params['Position'] = source
         dis_params['Position'] = target
@@ -403,7 +405,9 @@ class LiquidHandlerBiomek:
         transfer_params["Solvent"] = 'Water'
         transfer_params["TipLocation"] = tip_rack
         tmp={'transfer': transfer_params}
+       
         self.temp_protocol["steps"].append(tmp)
+        
 
         return
 
@@ -873,15 +877,6 @@ if __name__ == "__main__":
         "liquid_input_wells": []
     },
     {
-        "id": "working plate on P12",
-        "parent": "deck",
-        "slot_on_deck": "P12",
-        "class_name": "BCDeep96Round",
-        "liquid_type": [],
-        "liquid_volume": [],
-        "liquid_input_wells": []
-    },
-    {
         "id": "working plate on P13",
         "parent": "deck",
         "slot_on_deck": "P13",
@@ -968,6 +963,7 @@ if __name__ == "__main__":
         print(f"步骤 {step['step_number']}: {description}")
         
         if operation == 'transfer':
+            
             handler.transfer_biomek(
                 source=parameters['source'],
                 target=parameters['target'],
