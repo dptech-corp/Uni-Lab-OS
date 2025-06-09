@@ -7,30 +7,35 @@ mock_chiller:
       current_temperature: Float64
       target_temperature: Float64
       status: String
-      power_on: Bool
       is_cooling: Bool
       is_heating: Bool
+      vessel: String         # 新增
+      purpose: String        # 新增
     action_value_mappings:
-      set_temperature:
-        type: FloatSingleInput
-        goal:
-          float_in: temperature
-        feedback: {}
-        result:
-          success: success
-      power_on_off:
-        type: StrSingleInput
-        goal:
-          string: power_state
-        feedback: {}
-        result:
-          success: success
       emergency_stop:
         type: EmptyIn
         goal: {}
         feedback: {}
         result:
           success: success
+      heat_chill_start:
+        type: HeatChillStart
+        goal:
+          vessel: vessel
+          temp: temp
+          purpose: purpose
+        feedback: {}
+        result:
+          success: success
+          status: status
+      heat_chill_stop:
+        type: HeatChillStop
+        goal:
+          vessel: vessel
+        feedback: {}
+        result:
+          success: success
+          status: status
   schema:
     type: object
     properties:
@@ -43,20 +48,24 @@ mock_chiller:
       status:
         type: string
         description: Current status of the device
-      power_on:
-        type: boolean
-        description: Power state of the device
       is_cooling:
         type: boolean
         description: Whether the device is actively cooling
       is_heating:
         type: boolean
         description: Whether the device is actively heating
+      vessel:                # 新增
+        type: string
+        description: Current vessel being processed
+      purpose:               # 新增
+        type: string
+        description: Purpose of the current operation
     required:
     - current_temperature
     - target_temperature
     - status
-    - power_on
+    - vessel
+    - purpose
     additionalProperties: false
 mock_filter:
   description: Mock Filter Device
@@ -66,29 +75,40 @@ mock_filter:
     status_types:
       status: String
       is_filtering: Bool
-      filter_efficiency: Float64
       flow_rate: Float64
       pressure_drop: Float64
       filter_life: Float64
-      power_on: Bool
+      vessel: String
+      filtrate_vessel: String
+      filtered_volume: Float64
+      progress: Float64
+      stir: Bool
+      stir_speed: Float64
+      temperature: Float64
+      continue_heatchill: Bool
+      target_volume: Float64
     action_value_mappings:
-      start_filtering:
-        type: FloatSingleInput
+      filter:
+        type: Filter
         goal:
-          float_in: flow_rate
-        feedback: {}
+          vessel: vessel
+          filtrate_vessel: filtrate_vessel
+          stir: stir
+          stir_speed: stir_speed
+          temp: temp
+          continue_heatchill: continue_heatchill
+          volume: volume
+        feedback:
+          progress: progress
+          current_temp: current_temp
+          filtered_volume: filtered_volume
+          current_status: current_status
         result:
           success: success
+          message: message
       stop_filtering:
         type: EmptyIn
         goal: {}
-        feedback: {}
-        result:
-          success: success
-      power_on_off:
-        type: StrSingleInput
-        goal:
-          string: power_state
         feedback: {}
         result:
           success: success
@@ -107,9 +127,6 @@ mock_filter:
       is_filtering:
         type: boolean
         description: Whether the filter is actively filtering
-      filter_efficiency:
-        type: number
-        description: Filter efficiency percentage
       flow_rate:
         type: number
         description: Current flow rate in L/min
@@ -125,8 +142,12 @@ mock_filter:
     required:
     - status
     - is_filtering
-    - filter_efficiency
-    - power_on
+    - flow_rate
+    - filter_life
+    - vessel
+    - filtrate_vessel
+    - filtered_volume
+    - progress
     additionalProperties: false
 mock_heater:
   description: Mock Heater Device
@@ -137,29 +158,48 @@ mock_heater:
       current_temperature: Float64
       target_temperature: Float64
       status: String
-      power_on: Bool
       is_heating: Bool
       heating_power: Float64
       max_temperature: Float64
+      vessel: String
+      purpose: String
+      stir: Bool
+      stir_speed: Float64
     action_value_mappings:
-      set_temperature:
-        type: FloatSingleInput
+      heat_chill_start:
+        type: HeatChillStart
         goal:
-          float_in: temperature
-        feedback: {}
+          vessel: vessel
+          temp: temp
+          purpose: purpose
+        feedback:
+          status: status
         result:
           success: success
-      set_heating_power:
-        type: FloatSingleInput
+      heat_chill_stop:
+        type: HeatChillStop
         goal:
-          float_in: power
-        feedback: {}
+          vessel: vessel
+        feedback:
+          status: status
         result:
           success: success
-      power_on_off:
-        type: StrSingleInput
+      heat_chill:
+        type: HeatChill
         goal:
-          string: power_state
+          vessel: vessel
+          temp: temp
+          time: time
+          stir: stir
+          stir_speed: stir_speed
+          purpose: purpose
+        feedback:
+          status: status
+        result:
+          success: success
+      emergency_stop:
+        type: EmptyIn
+        goal: {}
         feedback: {}
         result:
           success: success
@@ -168,16 +208,13 @@ mock_heater:
     properties:
       current_temperature:
         type: number
-        description: Current temperature of the heater
+        description: Current temperature of the heater in °C
       target_temperature:
         type: number
-        description: Target temperature setting
+        description: Target temperature setting in °C
       status:
         type: string
         description: Current status of the device
-      power_on:
-        type: boolean
-        description: Power state of the device
       is_heating:
         type: boolean
         description: Whether the device is actively heating
@@ -186,12 +223,25 @@ mock_heater:
         description: Current heating power percentage
       max_temperature:
         type: number
-        description: Maximum heating temperature limit
+        description: Maximum temperature limit
+      vessel:
+        type: string
+        description: Current vessel being heated
+      purpose:
+        type: string
+        description: Purpose of the heating operation
+      stir:
+        type: boolean
+        description: Whether stirring is enabled
+      stir_speed:
+        type: number
+        description: Current stirring speed
     required:
     - current_temperature
     - target_temperature
     - status
-    - power_on
+    - vessel
+    - purpose
     additionalProperties: false
 mock_pump:
   description: Mock Pump Device
@@ -200,42 +250,47 @@ mock_pump:
     type: python
     status_types:
       status: String
-      power_state: String
       pump_state: String
       flow_rate: Float64
       target_flow_rate: Float64
       pressure: Float64
       total_volume: Float64
-      direction: String
       max_flow_rate: Float64
       max_pressure: Float64
+      from_vessel: String
+      to_vessel: String
+      transfer_volume: Float64
+      amount: String
+      transfer_time: Float64
+      is_viscous: Bool
+      rinsing_solvent: String
+      rinsing_volume: Float64
+      rinsing_repeats: Int32
+      is_solid: Bool
+      time_spent: Float64
+      time_remaining: Float64
+      current_device: String
     action_value_mappings:
-      power_control:
-        type: StrSingleInput
-        goal:
-          string: power_state
-        feedback: {}
-        result:
-          success: success
-      set_flow_rate:
-        type: FloatSingleInput
-        goal:
-          float_in: flow_rate
-        feedback: {}
-        result:
-          success: success
-      start_pump:
-        type: EmptyIn
-        goal: {}
-        feedback: {}
-        result:
-          success: success
-      stop_pump:
-        type: EmptyIn
-        goal: {}
-        feedback: {}
-        result:
-          success: success
+      pump_transfer:
+          type: PumpTransfer
+          goal:
+            from_vessel: from_vessel
+            to_vessel: to_vessel
+            volume: volume
+            amount: amount
+            time: time
+            viscous: viscous
+            rinsing_solvent: rinsing_solvent
+            rinsing_volume: rinsing_volume
+            rinsing_repeats: rinsing_repeats
+            solid: solid
+          feedback:
+            status: status
+            current_device: current_device
+            time_spent: time_spent
+            time_remaining: time_remaining
+          result:
+            success: success
       pause_pump:
         type: EmptyIn
         goal: {}
@@ -245,13 +300,6 @@ mock_pump:
       resume_pump:
         type: EmptyIn
         goal: {}
-        feedback: {}
-        result:
-          success: success
-      set_direction:
-        type: StrSingleInput
-        goal:
-          string: direction
         feedback: {}
         result:
           success: success
@@ -267,9 +315,6 @@ mock_pump:
       status:
         type: string
         description: Current status of the pump
-      power_state:
-        type: string
-        description: Power state (On/Off)
       pump_state:
         type: string
         description: Pump operation state (Running/Stopped/Paused)
@@ -285,20 +330,51 @@ mock_pump:
       total_volume:
         type: number
         description: Total accumulated volume in mL
-      direction:
-        type: string
-        description: Pump direction (Forward/Reverse)
       max_flow_rate:
         type: number
         description: Maximum flow rate in mL/min
       max_pressure:
         type: number
         description: Maximum pressure in bar
+      from_vessel:
+        type: string
+        description: Source vessel for transfer
+      to_vessel:
+        type: string
+        description: Target vessel for transfer
+      transfer_volume:
+        type: number
+        description: Volume to transfer in mL
+      amount:
+        type: string
+        description: Amount description
+      transfer_time:
+        type: number
+        description: Transfer time in seconds
+      is_viscous:
+        type: boolean
+        description: Whether the liquid is viscous
+      rinsing_solvent:
+        type: string
+        description: Solvent used for rinsing
+      rinsing_volume:
+        type: number
+        description: Volume used for rinsing
+      rinsing_repeats:
+        type: integer
+        description: Number of rinsing cycles
+      is_solid:
+        type: boolean
+        description: Whether transferring solid material
+      current_device:
+        type: string
+        description: Current device identifier
     required:
     - status
-    - power_state
     - pump_state
     - flow_rate
+    - from_vessel
+    - to_vessel
     additionalProperties: false
 mock_rotavap:
   description: Mock Rotavap Device
@@ -307,7 +383,6 @@ mock_rotavap:
     type: python
     status_types:
       status: String
-      power_state: String
       rotate_state: String
       rotate_time: Float64
       rotate_speed: Float64
@@ -322,13 +397,6 @@ mock_rotavap:
         type: StrSingleInput
         goal:
           string: command
-        feedback: {}
-        result:
-          success: success
-      power_control:
-        type: StrSingleInput
-        goal:
-          string: power_state
         feedback: {}
         result:
           success: success
@@ -378,9 +446,6 @@ mock_rotavap:
       status:
         type: string
         description: Current status of the rotavap
-      power_state:
-        type: string
-        description: Power state (On/Off)
       rotate_state:
         type: string
         description: Rotation state (Running/Stopped)
@@ -421,12 +486,49 @@ mock_separator:
     type: python
     status_types:
       status: String
-      power_state: String
       settling_time: Float64
       valve_state: String
       shake_time: Float64
       shake_status: String
+      current_device: String
+      purpose: String
+      product_phase: String
+      from_vessel: String
+      separation_vessel: String
+      to_vessel: String
+      waste_phase_to_vessel: String
+      solvent: String
+      solvent_volume: Float64
+      through: String
+      repeats: Int32
+      stir_time: Float64
+      stir_speed: Float64
+      time_spent: Float64
+      time_remaining: Float64
     action_value_mappings:
+      separate:
+        type: Separate
+        goal:
+          purpose: purpose
+          product_phase: product_phase
+          from_vessel: from_vessel
+          separation_vessel: separation_vessel
+          to_vessel: to_vessel
+          waste_phase_to_vessel: waste_phase_to_vessel
+          solvent: solvent
+          solvent_volume: solvent_volume
+          through: through
+          repeats: repeats
+          stir_time: stir_time
+          stir_speed: stir_speed
+          settling_time: settling_time
+        feedback:
+          status: status
+          current_device: current_device
+          time_spent: time_spent
+          time_remaining: time_remaining
+        result:
+          success: success
       shake:
         type: FloatSingleInput
         goal:
@@ -435,16 +537,16 @@ mock_separator:
           status: status
         result:
           success: success
-      power_control:
-        type: StrSingleInput
-        goal:
-          string: power_state
-        feedback: {}
-        result:
-          success: success
       stop_operations:
         type: EmptyIn
         goal: {}
+        feedback: {}
+        result:
+          success: success
+      set_valve:
+        type: StrSingleInput
+        goal:
+          string: command
         feedback: {}
         result:
           success: success
@@ -454,9 +556,6 @@ mock_separator:
       status:
         type: string
         description: Current status of the separator
-      power_state:
-        type: string
-        description: Power state (On/Off)
       settling_time:
         type: number
         description: Settling time in seconds
@@ -468,10 +567,27 @@ mock_separator:
         description: Remaining shake time in seconds
       shake_status:
         type: string
-        description: Current shake state (e.g. Shaking, Settling, Idle)
+        description: Current shake state
+      purpose:
+        type: string
+        description: Separation purpose (wash/extract)
+      product_phase:
+        type: string
+        description: Product phase (top/bottom)
+      from_vessel:
+        type: string
+        description: Source vessel
+      separation_vessel:
+        type: string
+        description: Vessel for separation
+      to_vessel:
+        type: string
+        description: Target vessel
     required:
     - status
-    - power_state
+    - valve_state
+    - shake_status
+    - current_device
     additionalProperties: false
 mock_solenoid_valve:
   description: Mock Solenoid Valve Device
@@ -521,7 +637,6 @@ mock_stirrer:
     type: python
     status_types:
       status: String
-      power_state: String
       stir_speed: Float64
       target_stir_speed: Float64
       stir_state: String
@@ -532,13 +647,6 @@ mock_stirrer:
       max_stir_speed: Float64
       max_temperature: Float64
     action_value_mappings:
-      power_control:
-        type: StrSingleInput
-        goal:
-          string: power_state
-        feedback: {}
-        result:
-          success: success
       set_stir_speed:
         type: FloatSingleInput
         goal:
@@ -578,9 +686,6 @@ mock_stirrer:
       status:
         type: string
         description: Current status of the stirrer
-      power_state:
-        type: string
-        description: Power state (On/Off)
       stir_speed:
         type: number
         description: Current stirring speed in rpm
@@ -613,6 +718,85 @@ mock_stirrer:
     - stir_speed
     - temperature
     - power_state
+    additionalProperties: false
+mock_stirrer_new:
+  description: Mock Stirrer Device (Copy Version)
+  class:
+    module: unilabos.devices.mock.mock_stirrer_new:MockStirrer_new
+    type: python
+    status_types:
+      status: String
+      vessel: String
+      purpose: String
+      stir_speed: Float64
+      target_stir_speed: Float64
+      stir_state: String
+      stir_time: Float64
+      settling_time: Float64
+      progress: Float64
+      max_stir_speed: Float64
+    action_value_mappings:
+      start_stir:
+        type: StartStir
+        goal:
+          vessel: vessel
+          stir_speed: stir_speed
+          purpose: purpose
+        feedback:
+          progress: progress
+          current_speed: stir_speed
+          current_status: status
+        result:
+          success: success
+          message: message
+      stir:
+        type: Stir
+        goal:
+          stir_time: stir_time
+          stir_speed: stir_speed
+          settling_time: settling_time
+        feedback:
+          status: status
+        result:
+          success: success
+      stop_stir:
+        type: StopStir
+        goal:
+          vessel: vessel
+        feedback:
+          progress: progress
+          current_status: status
+        result:
+          success: success
+          message: message
+  schema:
+    type: object
+    properties:
+      status:
+        type: string
+      vessel:
+        type: string
+      purpose:
+        type: string
+      stir_speed:
+        type: number
+      target_stir_speed:
+        type: number
+      stir_state:
+        type: string
+      stir_time:
+        type: number
+      settling_time:
+        type: number
+      progress:
+        type: number
+      max_stir_speed:
+        type: number
+    required:
+    - status
+    - stir_speed
+    - stir_state
+    - vessel
     additionalProperties: false
 mock_vacuum:
   description: Mock Vacuum Pump Device
