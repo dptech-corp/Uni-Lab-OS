@@ -125,8 +125,13 @@ class ResourceVisualization:
                         new_dev.set("parent_link", "world")
                         new_dev.set("mesh_path", str(self.mesh_path))
                         new_dev.set("device_name", node["id"]+"_")
-                        if node["parent"] is not None:
-                            new_dev.set("station_name", node["parent"]+'_')
+                        # if node["parent"] is not None:
+                        #     new_dev.set("station_name", node["parent"]+'_')
+
+                        print('o'*20)
+                        node["parent"]
+                        node["id"]
+                        print('o'*20)
                         new_dev.set("x",str(float(node["position"]["x"])/1000))
                         new_dev.set("y",str(float(node["position"]["y"])/1000))
                         new_dev.set("z",str(float(node["position"]["z"])/1000))

@@ -15,7 +15,7 @@
         "y":{
             "first_joint":{
             "factor":-0.001,
-            "offset":0.163
+            "offset":0.166
             }
         },
         "x":{

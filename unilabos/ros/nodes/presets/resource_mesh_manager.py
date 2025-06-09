@@ -190,7 +190,8 @@ class ResourceMeshManager(BaseROS2DeviceNode):
 
                 pass
             elif parent is not None and resource_id in self.resource_model:
-                parent_link = f"{self.resource_config_dict[parent]['parent']}_{parent}_device_link".replace("None_","")
+                # parent_link = f"{self.resource_config_dict[parent]['parent']}_{parent}_device_link".replace("None_","")
+                parent_link = f"{parent}_device_link".replace("None_","")
 
             else:
 

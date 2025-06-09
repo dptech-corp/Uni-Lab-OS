@@ -57,7 +57,8 @@ class LiquidHandlerJointPublisher(BaseROS2DeviceNode):
             if resource['class'] == 'liquid_handler':
                 deck_id = resource['config']['data']['children'][0]['_resource_child_name']
                 deck_class = resource['config']['data']['children'][0]['_resource_type'].split(':')[-1]
-                key = f'{resource["id"]}_{deck_id}'
+                key = f'{deck_id}'
+                # key = f'{resource["id"]}_{deck_id}'
                 self.lh_devices[key] = {
                     'joint_msg':JointState(
                         name=[f'{key}_{x}' for x in joint_config[deck_class]['joint_names']],
@@ -67,7 +68,9 @@ class LiquidHandlerJointPublisher(BaseROS2DeviceNode):
                 }
                 self.deck_list.append(deck_id)
 
-
+        print('='*20)
+        print(self.lh_devices)
+        print('='*20)
         self.j_action       = ActionServer(
             self,
             SendCmd,
@@ -103,7 +106,7 @@ class LiquidHandlerJointPublisher(BaseROS2DeviceNode):
         try:
             if parent_id in self.deck_list:
                 p_ = self.resources_config[parent_id]['parent']
-                str_ = f'{p_}_{parent_id}'
+                str_ = f'{parent_id}'
                 return str(str_)
             else:
                 return self.find_resource_parent(parent_id)
@@ -215,6 +218,10 @@ class LiquidHandlerJointPublisher(BaseROS2DeviceNode):
         
         parent_id = self.find_resource_parent(resource_name_)
 
+
+        print('!'*20)
+        print(parent_id)
+        print('!'*20)
         if x_joint is None:
             xa,xb = next(iter(self.lh_devices[parent_id]['joint_config']['x'].items()))
             x_joint_config = {xa:xb}
