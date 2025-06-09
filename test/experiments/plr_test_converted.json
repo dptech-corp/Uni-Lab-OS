@@ -5930,8 +5930,8 @@
                 "cross_section_type": "rectangle"
             },
             "data": {
-                "liquids": [],
-                "pending_liquids": [],
+                "liquids": [["water", 50.0]],
+                "pending_liquids": [["water", 50.0]],
                 "liquid_history": []
             }
         },
@@ -5969,8 +5969,8 @@
                 "cross_section_type": "rectangle"
             },
             "data": {
-                "liquids": [],
-                "pending_liquids": [],
+                "liquids": [["water", 50.0]],
+                "pending_liquids": [["water", 50.0]],
                 "liquid_history": []
             }
         },
@@ -6008,8 +6008,8 @@
                 "cross_section_type": "rectangle"
             },
             "data": {
-                "liquids": [],
-                "pending_liquids": [],
+                "liquids": [["water", 50.0]],
+                "pending_liquids": [["water", 50.0]],
                 "liquid_history": []
             }
         },
@@ -6047,8 +6047,8 @@
                 "cross_section_type": "rectangle"
             },
             "data": {
-                "liquids": [],
-                "pending_liquids": [],
+                "liquids": [["water", 50.0]],
+                "pending_liquids": [["water", 50.0]],
                 "liquid_history": []
             }
         },
@@ -6086,8 +6086,8 @@
                 "cross_section_type": "rectangle"
             },
             "data": {
-                "liquids": [],
-                "pending_liquids": [],
+                "liquids": [["water", 50.0]],
+                "pending_liquids": [["water", 50.0]],
                 "liquid_history": []
             }
         },
@@ -6125,8 +6125,8 @@
                 "cross_section_type": "rectangle"
             },
             "data": {
-                "liquids": [],
-                "pending_liquids": [],
+                "liquids": [["water", 50.0]],
+                "pending_liquids": [["water", 50.0]],
                 "liquid_history": []
             }
         },
@@ -6164,8 +6164,8 @@
                 "cross_section_type": "rectangle"
             },
             "data": {
-                "liquids": [],
-                "pending_liquids": [],
+                "liquids": [["water", 50.0]],
+                "pending_liquids": [["water", 50.0]],
                 "liquid_history": []
             }
         },
@@ -6203,8 +6203,8 @@
                 "cross_section_type": "rectangle"
             },
             "data": {
-                "liquids": [],
-                "pending_liquids": [],
+                "liquids": [["water", 50.0]],
+                "pending_liquids": [["water", 50.0]],
                 "liquid_history": []
             }
         },
