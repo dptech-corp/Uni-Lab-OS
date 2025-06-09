@@ -292,9 +292,17 @@ class MoveitInterface:
                         )
                         end_pose = deep_pose
 
-                    retval_ik = self.moveit2[cmd_dict["move_group"]].compute_ik(
-                        position=end_pose, quat_xyzw=quaternion, constraints=Constraints(joint_constraints=constraints)
-                    )
+                    retval_ik = None
+                    retry = config.get("retry", 10)
+                    while retval_ik is None and retry > 0:
+                        retval_ik = self.moveit2[cmd_dict["move_group"]].compute_ik(
+                            position=end_pose, quat_xyzw=quaternion, constraints=Constraints(joint_constraints=constraints)
+                        )
+                        time.sleep(0.1)
+                        retry -= 1
+                    if retval_ik is None:
+                        result.success = False
+                        return result
                     position_ = [
                         retval_ik.position[retval_ik.name.index(i)]
                         for i in self.moveit2[cmd_dict["move_group"]].joint_names
