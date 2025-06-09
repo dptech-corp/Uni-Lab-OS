@@ -16,16 +16,27 @@
                 "port": "MOCK"  
             },  
             "data": {  
-                "status": "Idle",  
-                "power_state": "Off",  
+                "status": "Idle",
+                "current_device": "MockPump1",
                 "pump_state": "Stopped",  
                 "flow_rate": 0.0,  
                 "target_flow_rate": 0.0,  
                 "pressure": 0.0,  
                 "total_volume": 0.0,  
-                "direction": "Forward",  
                 "max_flow_rate": 100.0,  
-                "max_pressure": 10.0  
+                "max_pressure": 10.0,
+                "from_vessel": "",
+                "to_vessel": "",
+                "transfer_volume": 0.0,
+                "amount": "",
+                "transfer_time": 0.0,
+                "is_viscous": false,
+                "rinsing_solvent": "",
+                "rinsing_volume": 0.0,
+                "rinsing_repeats": 0,
+                "is_solid": false,
+                "time_spent": 0.0,
+                "time_remaining": 0.0
             }  
         }  
     ],  

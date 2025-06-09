@@ -17,7 +17,6 @@
             },  
             "data": {  
                 "status": "Idle",  
-                "power_state": "Off",  
                 "rotate_state": "Stopped",  
                 "rotate_time": 0.0,  
                 "rotate_speed": 0.0,  

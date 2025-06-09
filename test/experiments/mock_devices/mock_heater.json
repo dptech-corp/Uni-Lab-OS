@@ -19,10 +19,13 @@
                 "current_temperature": 25.0,  
                 "target_temperature": 25.0,  
                 "status": "Idle",  
-                "power_on": false,  
                 "is_heating": false,  
                 "heating_power": 0.0,  
-                "max_temperature": 300.0  
+                "max_temperature": 300.0,
+                "vessel": "Unknown",
+                "purpose": "Unknown",
+                "stir": false,
+                "stir_speed": 0.0
             }  
         }  
     ],  

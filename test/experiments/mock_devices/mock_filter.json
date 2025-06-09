@@ -18,11 +18,17 @@
             "data": {  
                 "status": "Idle",  
                 "is_filtering": false,  
-                "filter_efficiency": 95.0,  
-                "flow_rate": 0.0,  
-                "pressure_drop": 0.0,  
-                "filter_life": 100.0,  
-                "power_on": false  
+                "flow_rate": 0.0,
+                "filter_life": 100.0,
+                "vessel": "",
+                "filtrate_vessel": "",
+                "filtered_volume": 0.0,
+                "target_volume": 0.0,
+                "progress": 0.0,
+                "stir": false,
+                "stir_speed": 0.0,
+                "temperature": 25.0,
+                "continue_heatchill": false
             }  
         }  
     ],  

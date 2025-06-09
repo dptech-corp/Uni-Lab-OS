@@ -1,12 +1,12 @@
 {  
     "nodes": [  
         {  
-            "id": "MockStirrer1",  
-            "name": "模拟搅拌器",  
+            "id": "MockStirrer1COPY",  
+            "name": "模拟搅拌器(Copy)",  
             "children": [],  
             "parent": null,  
             "type": "device",  
-            "class": "mock_stirrer",  
+            "class": "mock_stirrer_new",  
             "position": {  
                 "x": 620.6111111111111,  
                 "y": 171,  
@@ -16,16 +16,16 @@
                 "port": "MOCK"  
             },  
             "data": {  
-                "status": "Idle",   
+                "status": "Idle",
+                "vessel": "",
+                "purpose": "",
                 "stir_speed": 0.0,  
                 "target_stir_speed": 0.0,  
-                "stir_state": "Stopped",  
-                "temperature": 25.0,  
-                "target_temperature": 25.0,  
-                "heating_state": "Off",  
-                "heating_power": 0.0,  
-                "max_stir_speed": 2000.0,  
-                "max_temperature": 300.0  
+                "stir_state": "Stopped",
+                "stir_time": 0.0,
+                "settling_time": 0.0,
+                "progress": 0.0,
+                "max_stir_speed": 2000.0
             }  
         }  
     ],  

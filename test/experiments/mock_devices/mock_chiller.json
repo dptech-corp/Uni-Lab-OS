@@ -19,9 +19,10 @@
                 "current_temperature": 25.0,  
                 "target_temperature": 25.0,  
                 "status": "Idle",  
-                "power_on": false,  
                 "is_cooling": false,  
-                "is_heating": false  
+                "is_heating": false,
+                "vessel": "",
+                "purpose": ""
             }  
         }  
     ],  
