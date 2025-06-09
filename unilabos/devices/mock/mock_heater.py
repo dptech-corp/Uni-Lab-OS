@@ -1,7 +1,6 @@
 import time
 import threading
 
-
 class MockHeater:
     def __init__(self, port: str = "MOCK"):
         self.port = port
@@ -9,13 +8,21 @@ class MockHeater:
         self._target_temperature: float = 25.0
         self._status: str = "Idle"
         self._is_heating: bool = False
-        self._power_on: bool = False
         self._heating_power: float = 0.0  # 加热功率百分比 0-100
         self._max_temperature: float = 300.0  # 最大加热温度
+        
+        # 新增加的属性
+        self._vessel: str = "Unknown"
+        self._purpose: str = "Unknown"
+        self._stir: bool = False
+        self._stir_speed: float = 0.0
 
         # 模拟加热过程的线程
         self._heating_thread = None
-        self._running = False
+        self._running = True
+        self._heating_thread = threading.Thread(target=self._heating_control_loop)
+        self._heating_thread.daemon = True
+        self._heating_thread.start()
 
     @property
     def current_temperature(self) -> float:
@@ -33,11 +40,6 @@ class MockHeater:
         return self._status
 
     @property
-    def power_on(self) -> bool:
-        """电源状态"""
-        return self._power_on
-
-    @property
     def is_heating(self) -> bool:
         """是否正在加热"""
         return self._is_heating
@@ -51,6 +53,79 @@ class MockHeater:
     def max_temperature(self) -> float:
         """最大加热温度"""
         return self._max_temperature
+    
+    @property
+    def vessel(self) -> str:
+        """当前操作的容器名称"""
+        return self._vessel
+
+    @property
+    def purpose(self) -> str:
+        """操作目的"""
+        return self._purpose
+
+    @property
+    def stir(self) -> bool:
+        """是否搅拌"""
+        return self._stir
+
+    @property
+    def stir_speed(self) -> float:
+        """搅拌速度"""
+        return self._stir_speed
+
+    def heat_chill_start(self, vessel: str, temp: float, purpose: str) -> dict:
+        """开始加热/制冷过程"""
+        self._vessel = str(vessel)
+        self._purpose = str(purpose)
+        self._target_temperature = float(temp)
+
+        diff = self._target_temperature - self._current_temperature
+        if abs(diff) < 0.1:
+            self._status = "At Target Temperature"
+            self._is_heating = False
+        elif diff > 0:
+            self._status = "Heating"
+            self._is_heating = True
+        else:
+            self._status = "Cooling Down"
+            self._is_heating = False
+
+        return {"success": True, "status": self._status}
+
+    def heat_chill_stop(self, vessel: str) -> dict:
+        """停止加热/制冷"""
+        if vessel != self._vessel:
+            return {"success": False, "status": f"Wrong vessel: expected {self._vessel}, got {vessel}"}
+            
+        self._status = "Stopped"
+        self._is_heating = False
+        self._heating_power = 0.0
+        
+        return {"success": True, "status": self._status}
+
+    def heat_chill(self, vessel: str, temp: float, time: float, 
+                  stir: bool = False, stir_speed: float = 0.0, 
+                  purpose: str = "Unknown") -> dict:
+        """完整的加热/制冷控制"""
+        self._vessel = str(vessel)
+        self._target_temperature = float(temp)
+        self._purpose = str(purpose)
+        self._stir = stir
+        self._stir_speed = stir_speed
+
+        diff = self._target_temperature - self._current_temperature
+        if abs(diff) < 0.1:
+            self._status = "At Target Temperature"
+            self._is_heating = False
+        elif diff > 0:
+            self._status = "Heating"
+            self._is_heating = True
+        else:
+            self._status = "Cooling Down"
+            self._is_heating = False
+
+        return {"success": True, "status": self._status}
 
     def set_temperature(self, temperature: float):
         """设置目标温度 - 需要在注册表添加的设备动作"""
@@ -58,10 +133,6 @@ class MockHeater:
             temperature = float(temperature)
         except ValueError:
             self._status = "Error: Invalid temperature value"
-            return False
-
-        if not self._power_on:
-            self._status = "Error: Power Off"
             return False
 
         if temperature > self._max_temperature:
@@ -83,33 +154,12 @@ class MockHeater:
             self._status = "Error: Invalid power value"
             return False
 
-        if not self._power_on:
-            self._status = "Error: Power Off"
-            return False
-
         self._heating_power = max(0.0, min(100.0, power))  # 限制在0-100%
         return True
 
-    def power_on_off(self, power_state: str):
-        """开关机控制，接收字符串命令 "On" 或 "Off" """
-        power_state = power_state.capitalize()
-        if power_state not in ["On", "Off"]:
-            self._status = "Error: Invalid power state"
-            return "Error"
-        self._power_on = True if power_state == "On" else False
-        if self._power_on:
-            self._status = "Power On"
-            self._start_heating_control()
-        else:
-            self._status = "Power Off"
-            self._stop_heating_control()
-            self._is_heating = False
-            self._heating_power = 0.0
-        return "Success"
-
     def _start_heating_control(self):
         """启动加热控制线程"""
-        if not self._running and self._power_on:
+        if not self._running:
             self._running = True
             self._heating_thread = threading.Thread(target=self._heating_control_loop)
             self._heating_thread.daemon = True
@@ -122,41 +172,31 @@ class MockHeater:
             self._heating_thread.join(timeout=1.0)
 
     def _heating_control_loop(self):
-        """加热控制循环 - 模拟真实加热器的温度变化"""
-        while self._running and self._power_on:
+        """加热控制循环"""
+        while self._running:
+            # 如果状态是 Stopped，不改变温度
+            if self._status == "Stopped":
+                time.sleep(1.0)
+                continue
+                
             temp_diff = self._target_temperature - self._current_temperature
 
-            if abs(temp_diff) < 0.5:  # 温度接近目标值
+            if abs(temp_diff) < 0.1:
                 self._status = "At Target Temperature"
                 self._is_heating = False
-                self._heating_power = 10.0  # 维持温度的最小功率
-            elif temp_diff > 0:  # 需要加热
+                self._heating_power = 10.0
+            elif temp_diff > 0:
                 self._status = "Heating"
                 self._is_heating = True
-                # 根据温差调整加热功率
-                if temp_diff > 50:
-                    self._heating_power = 100.0
-                elif temp_diff > 20:
-                    self._heating_power = 80.0
-                elif temp_diff > 10:
-                    self._heating_power = 60.0
-                else:
-                    self._heating_power = 40.0
-
-                # 模拟加热过程，加热速度与功率成正比
-                heating_rate = self._heating_power / 100.0 * 2.0  # 最大每秒升温2度
-                self._current_temperature += heating_rate
-            else:  # 目标温度低于当前温度，自然冷却
+                self._heating_power = min(100.0, abs(temp_diff) * 2)
+                self._current_temperature += 0.5
+            else:
                 self._status = "Cooling Down"
                 self._is_heating = False
                 self._heating_power = 0.0
-                # 模拟自然冷却，每秒降低0.2度
                 self._current_temperature -= 0.2
 
-            # 限制温度范围
-            self._current_temperature = max(20.0, min(self._max_temperature, self._current_temperature))
-
-            time.sleep(1.0)  # 每秒更新一次
+            time.sleep(1.0)
 
     def emergency_stop(self):
         """紧急停止"""
@@ -171,32 +211,37 @@ class MockHeater:
             "current_temperature": self._current_temperature,
             "target_temperature": self._target_temperature,
             "status": self._status,
-            "power_on": self._power_on,
             "is_heating": self._is_heating,
             "heating_power": self._heating_power,
             "max_temperature": self._max_temperature,
+            "vessel": self._vessel,
+            "purpose": self._purpose,
+            "stir": self._stir,
+            "stir_speed": self._stir_speed
         }
-
 
 # 用于测试的主函数
 if __name__ == "__main__":
     heater = MockHeater()
 
-    # 测试基本功能
     print("启动加热器测试...")
-    heater.power_on_off("On")
     print(f"初始状态: {heater.get_status_info()}")
 
     # 设置目标温度为80度
     heater.set_temperature(80.0)
 
     # 模拟运行15秒
-    for i in range(15):
-        time.sleep(1)
-        print(
-            f"第{i+1}秒: 当前温度={heater.current_temperature:.1f}°C, 功率={heater.heating_power:.1f}%, "
-            f"状态={heater.status}"
-        )
+    try:
+        for i in range(15):
+            time.sleep(1)
+            status = heater.get_status_info()
+            print(
+                f"\r温度: {status['current_temperature']:.1f}°C / {status['target_temperature']:.1f}°C | "
+                f"功率: {status['heating_power']:.1f}% | 状态: {status['status']}",
+                end=""
+            )
+    except KeyboardInterrupt:
+        heater.emergency_stop()
+        print("\n测试被手动停止")
 
-    heater.emergency_stop()
-    print("测试完成")
+    print("\n测试完成")

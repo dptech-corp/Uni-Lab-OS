@@ -22,7 +22,6 @@ class MockRotavap:
 
         # 设备基本状态属性
         self._status: str = "Idle"  # 设备状态：Idle, Running, Error, Stopped
-        self._power_state: str = "Off"  # 电源状态：On, Off
 
         # 旋转相关属性
         self._rotate_state: str = "Stopped"  # 旋转状态：Running, Stopped
@@ -55,10 +54,6 @@ class MockRotavap:
     @property
     def status(self) -> str:
         return self._status
-
-    @property
-    def power_state(self) -> str:
-        return self._power_state
 
     @property
     def rotate_state(self) -> str:
@@ -95,33 +90,6 @@ class MockRotavap:
     # ==================== 设备控制方法 ====================
     # 这些方法需要在注册表中添加，会作为ActionServer接受控制指令
 
-    def power_control(self, power_state: str = "On") -> str:
-        """
-        电源控制方法
-
-        Args:
-            power_state (str): 电源状态，可选值："On", "Off"
-
-        Returns:
-            str: 操作结果状态 ("Success", "Error")
-        """
-        if power_state not in ["On", "Off"]:
-            self._status = "Error: Invalid power state"
-            self.success = "False"
-            return "Error"
-
-        self._power_state = power_state
-
-        if power_state == "On":
-            self._status = "Power On"
-            self._start_operation()
-        else:
-            self._status = "Power Off"
-            self.stop_all_operations()
-
-        self.success = "True"
-        return "Success"
-
     def set_timer(self, command: str) -> str:
         """
         设置定时器 - 兼容现有RotavapOne接口
@@ -132,10 +100,6 @@ class MockRotavap:
         Returns:
             str: 操作结果状态 ("Success", "Error")
         """
-        if self._power_state != "On":
-            self._status = "Error: Power Off"
-            self.success = "False"
-            return "Error"
 
         try:
             timer = json.loads(command)
@@ -165,9 +129,6 @@ class MockRotavap:
         Returns:
             str: 操作结果状态 ("Success", "Error")
         """
-        if self._power_state != "On":
-            self._status = "Error: Power Off"
-            return "Error"
 
         self.success = "False"
         self._rotate_time = max(0.0, float(time_seconds))
@@ -185,9 +146,6 @@ class MockRotavap:
         Returns:
             str: 操作结果状态 ("Success", "Error")
         """
-        if self._power_state != "On":
-            self._status = "Error: Power Off"
-            return "Error"
 
         self.success = "False"
         self._pump_time = max(0.0, float(time_seconds))
@@ -205,9 +163,6 @@ class MockRotavap:
         Returns:
             str: 操作结果状态 ("Success", "Error")
         """
-        if self._power_state != "On":
-            self._status = "Error: Power Off"
-            return "Error"
 
         if speed < 0 or speed > self._max_rotate_speed:
             self._status = f"Error: Speed out of range (0-{self._max_rotate_speed})"
@@ -227,9 +182,6 @@ class MockRotavap:
         Returns:
             str: 操作结果状态 ("Success", "Error")
         """
-        if self._power_state != "On":
-            self._status = "Error: Power Off"
-            return "Error"
 
         if temperature < 0 or temperature > self._max_temperature:
             self._status = f"Error: Temperature out of range (0-{self._max_temperature})"
@@ -237,6 +189,10 @@ class MockRotavap:
 
         self._target_temperature = temperature
         self._status = "Temperature set"
+
+        # 启动操作线程以开始温度控制
+        self._start_operation()
+        
         return "Success"
 
     def start_rotation(self) -> str:
@@ -246,9 +202,6 @@ class MockRotavap:
         Returns:
             str: 操作结果状态 ("Success", "Error")
         """
-        if self._power_state != "On":
-            self._status = "Error: Power Off"
-            return "Error"
 
         if self._rotate_time <= 0:
             self._status = "Error: No rotate time set"
@@ -265,9 +218,6 @@ class MockRotavap:
         Returns:
             str: 操作结果状态 ("Success", "Error")
         """
-        if self._power_state != "On":
-            self._status = "Error: Power Off"
-            return "Error"
 
         if self._pump_time <= 0:
             self._status = "Error: No pump time set"
@@ -313,7 +263,7 @@ class MockRotavap:
         这个方法启动一个后台线程来模拟旋蒸的实际运行过程。
         """
         with self._thread_lock:
-            if not self._running and self._power_state == "On":
+            if not self._running:
                 self._running = True
                 self._operation_thread = threading.Thread(target=self._operation_loop)
                 self._operation_thread.daemon = True
@@ -340,7 +290,7 @@ class MockRotavap:
         3. 真空度控制
         4. 状态更新
         """
-        while self._running and self._power_state == "On":
+        while self._running:
             try:
                 # 处理旋转时间倒计时
                 if self._rotate_time > 0:
@@ -385,7 +335,6 @@ class MockRotavap:
                 break
 
         # 循环结束时的清理工作
-        if self._power_state == "On":
             self._status = "Idle"
 
     def get_status_info(self) -> dict:
@@ -397,7 +346,6 @@ class MockRotavap:
         """
         return {
             "status": self._status,
-            "power_state": self._power_state,
             "rotate_state": self._rotate_state,
             "rotate_time": self._rotate_time,
             "rotate_speed": self._rotate_speed,
@@ -416,7 +364,6 @@ if __name__ == "__main__":
 
     # 测试基本功能
     print("启动旋转蒸发器测试...")
-    rotavap.power_control("On")
     print(f"初始状态: {rotavap.get_status_info()}")
 
     # 设置定时器

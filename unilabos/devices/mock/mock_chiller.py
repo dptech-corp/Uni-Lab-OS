@@ -10,11 +10,15 @@ class MockChiller:
         self._status: str = "Idle"
         self._is_cooling: bool = False
         self._is_heating: bool = False
-        self._power_on: bool = False
+        self._vessel = "Unknown"
+        self._purpose = "Unknown"
 
         # 模拟温度变化的线程
         self._temperature_thread = None
-        self._running = False
+        self._running = True
+        self._temperature_thread = threading.Thread(target=self._temperature_control_loop)
+        self._temperature_thread.daemon = True
+        self._temperature_thread.start()
 
     @property
     def current_temperature(self) -> float:
@@ -32,11 +36,6 @@ class MockChiller:
         return self._status
 
     @property
-    def power_on(self) -> bool:
-        """电源状态"""
-        return self._power_on
-
-    @property
     def is_cooling(self) -> bool:
         """是否正在冷却"""
         return self._is_cooling
@@ -46,17 +45,22 @@ class MockChiller:
         """是否正在加热"""
         return self._is_heating
 
-    def set_temperature(self, temperature: float):
-        """设置目标温度 - 需要在注册表添加的设备动作"""
-        if not self._power_on:
-            self._status = "Error: Power Off"
-            return False
+    @property
+    def vessel(self) -> str:
+        """当前操作的容器名称"""
+        return self._vessel
 
-        # 将传入温度转换为 float，并限制在允许范围内
-        temperature = float(temperature)
-        self._target_temperature = temperature
+    @property
+    def purpose(self) -> str:
+        """当前操作目的"""
+        return self._purpose
 
-        # 立即更新状态
+    def heat_chill_start(self, vessel: str, temp: float, purpose: str):
+        """设置目标温度并记录容器和目的"""
+        self._vessel = str(vessel)
+        self._purpose = str(purpose)
+        self._target_temperature = float(temp)
+
         diff = self._target_temperature - self._current_temperature
         if abs(diff) < 0.1:
             self._status = "At Target Temperature"
@@ -71,31 +75,37 @@ class MockChiller:
             self._is_heating = True
             self._is_cooling = False
 
-        # 启动温度控制
         self._start_temperature_control()
         return True
-
-    def power_on_off(self, power_state: str):
-        """开关机控制"""
-        if power_state == "on":
-            self._power_on = True
-            # 不在这里直接设置状态和加热/制冷标志
-            self._start_temperature_control()
-        else:
-            self._power_on = False
-            self._status = "Power Off"
-            self._stop_temperature_control()
-            self._is_cooling = False
-            self._is_heating = False
+    
+    def heat_chill_stop(self, vessel: str):
+        """停止加热/制冷"""
+        if vessel != self._vessel:
+            return {"success": False, "status": f"Wrong vessel: expected {self._vessel}, got {vessel}"}
+            
+        # 停止温度控制线程，锁定当前温度
+        self._stop_temperature_control()
+        
+        # 更新状态
+        self._status = "Stopped"
+        self._is_cooling = False
+        self._is_heating = False
+        
+        # 重新启动线程但保持温度
+        self._running = True
+        self._temperature_thread = threading.Thread(target=self._temperature_control_loop)
+        self._temperature_thread.daemon = True
+        self._temperature_thread.start()
+        
+        return {"success": True, "status": self._status}
 
     def _start_temperature_control(self):
         """启动温度控制线程"""
-        if self._power_on:  # 移除 not self._running 检查
-            self._running = True
-            if self._temperature_thread is None or not self._temperature_thread.is_alive():
-                self._temperature_thread = threading.Thread(target=self._temperature_control_loop)
-                self._temperature_thread.daemon = True
-                self._temperature_thread.start()
+        self._running = True
+        if self._temperature_thread is None or not self._temperature_thread.is_alive():
+            self._temperature_thread = threading.Thread(target=self._temperature_control_loop)
+            self._temperature_thread.daemon = True
+            self._temperature_thread.start()
 
     def _stop_temperature_control(self):
         """停止温度控制"""
@@ -105,30 +115,30 @@ class MockChiller:
 
     def _temperature_control_loop(self):
         """温度控制循环 - 模拟真实冷却器的温度变化"""
-        while self._running and self._power_on:
+        while self._running:
+            # 如果状态是 Stopped，不改变温度
+            if self._status == "Stopped":
+                time.sleep(1.0)
+                continue
+                
             temp_diff = self._target_temperature - self._current_temperature
 
-            if abs(temp_diff) < 0.1:  # 将判断范围从0.5改小到0.1
+            if abs(temp_diff) < 0.1:
                 self._status = "At Target Temperature"
                 self._is_cooling = False
                 self._is_heating = False
-            elif temp_diff < 0:  # 需要冷却
+            elif temp_diff < 0:
                 self._status = "Cooling"
                 self._is_cooling = True
                 self._is_heating = False
-                # 模拟冷却过程，每秒降低0.5度
                 self._current_temperature -= 0.5
-            else:  # 需要加热
+            else:
                 self._status = "Heating"
                 self._is_heating = True
                 self._is_cooling = False
-                # 模拟加热过程，每秒升高0.3度
                 self._current_temperature += 0.3
 
-            # 限制温度范围
-            self._current_temperature = max(-20.0, min(80.0, self._current_temperature))
-
-            time.sleep(1.0)  # 每秒更新一次
+            time.sleep(1.0)
 
     def emergency_stop(self):
         """紧急停止"""
@@ -143,9 +153,10 @@ class MockChiller:
             "current_temperature": self._current_temperature,
             "target_temperature": self._target_temperature,
             "status": self._status,
-            "power_on": self._power_on,
             "is_cooling": self._is_cooling,
             "is_heating": self._is_heating,
+            "vessel": self._vessel,
+            "purpose": self._purpose,
         }
 
 
@@ -155,11 +166,7 @@ if __name__ == "__main__":
 
     # 测试基本功能
     print("启动冷却器测试...")
-    chiller.power_on_off("on")
     print(f"初始状态: {chiller.get_status_info()}")
-
-    # 设置目标温度为5度
-    chiller.set_temperature(5.0)
 
     # 模拟运行10秒
     for i in range(10):
