@@ -49,7 +49,7 @@ conda env update --file unilabos-[YOUR_OS].yml -n environment_name
 
 # Currently, you need to install the `unilabos_msgs` package
 # You can download the system-specific package from the Release page
-conda install ros-humble-unilabos-msgs-0.9.2-xxxxx.tar.bz2
+conda install ros-humble-unilabos-msgs-0.9.3-xxxxx.tar.bz2
 
 # Install PyLabRobot and other prerequisites
 git clone https://github.com/PyLabRobot/pylabrobot plr_repo
