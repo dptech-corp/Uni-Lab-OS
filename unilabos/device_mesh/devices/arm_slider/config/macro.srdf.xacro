@@ -4,7 +4,7 @@
     A URDF file must exist for this robot as well, where the joints and the links that are referenced are defined
 -->
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-    <xacro:macro name="benyao_arm_srdf" params="device_name">
+    <xacro:macro name="arm_slider_srdf" params="device_name">
         <!--GROUPS: Representation of a set of joints and links. This can be useful for specifying DOF to plan for, defining arms, end effectors, etc-->
         <!--LINKS: When a link is specified, the parent joint of that link (if it exists) is automatically included-->
         <!--JOINTS: When a joint is specified, the child link of that joint (which will always exist) is automatically included-->

@@ -9645,19 +9645,19 @@
 
 
         {
-            "id": "benyao",
-            "name": "benyao",
+            "id": "arm_slider",
+            "name": "arm_slider",
             "children": [],
             "parent": null,
             "type": "device",
-            "class": "moveit.benyao_arm",
+            "class": "moveit.arm_slider",
             "position": {
                 "x": -500,
                 "y": 1000,
                 "z": -100
             },
             "config": {
-                "moveit_type": "benyao_arm",
+                "moveit_type": "arm_slider",
                 "joint_poses": {
                     "arm": {
                         "hotel_1": [

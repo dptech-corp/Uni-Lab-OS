@@ -8,14 +8,14 @@
             ],
             "parent": null,
             "type": "device",
-            "class": "moveit.benyao_arm",
+            "class": "moveit.arm_slider",
             "position": {
                 "x": 0,
                 "y": 0,
                 "z": 0
             },
             "config": {
-                "moveit_type": "benyao_arm",
+                "moveit_type": "arm_slider",
                 "joint_poses": {
                     "arm": {
                         "home": [0.0, 0.2, 0.0, 0.0, 0.0],

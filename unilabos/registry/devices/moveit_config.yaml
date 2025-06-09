@@ -27,11 +27,11 @@ moveit.toyo_xyz:
     type: device
     mesh: toyo_xyz
 
-moveit.benyao_arm:
-  description: Benyao Arm
+moveit.arm_slider:
+  description: Arm with Slider
   model:
     type: device
-    mesh: benyao_arm
+    mesh: arm_slider
   class:
     module: unilabos.devices.ros_dev.moveit_interface:MoveitInterface
     type: python

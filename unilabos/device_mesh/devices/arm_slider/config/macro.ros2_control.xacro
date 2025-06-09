@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-    <xacro:macro name="benyao_arm_ros2_control" params="device_name mesh_path">
-        <xacro:property name="initial_positions" value="${load_yaml(mesh_path + '/devices/benyao_arm/config/initial_positions.yaml')['initial_positions']}"/>
+    <xacro:macro name="arm_slider_ros2_control" params="device_name mesh_path">
+        <xacro:property name="initial_positions" value="${load_yaml(mesh_path + '/devices/arm_slider/config/initial_positions.yaml')['initial_positions']}"/>
 
-        <ros2_control name="${device_name}benyao_arm" type="system">
+        <ros2_control name="${device_name}arm_slider" type="system">
             <hardware>
                 <!-- By default, set up controllers for simulation. This won't work on real hardware -->
                 <plugin>mock_components/GenericSystem</plugin>

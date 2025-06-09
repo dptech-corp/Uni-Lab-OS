@@ -1,9 +1,9 @@
 <?xml version="1.0" ?>
-<robot xmlns:xacro="http://ros.org/wiki/xacro" name="benyao_arm">
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="arm_slider">
 
-  <xacro:macro name="benyao_arm" params="mesh_path:='' parent_link:='' station_name:='' device_name:='' x:=0 y:=0 z:=0 rx:=0 ry:=0 r:=0">
+  <xacro:macro name="arm_slider" params="mesh_path:='' parent_link:='' station_name:='' device_name:='' x:=0 y:=0 z:=0 rx:=0 ry:=0 r:=0">
     <!-- Read .yaml files from disk, load content into properties -->
-    <xacro:property name= "joint_limit_parameters" value="${xacro.load_yaml(mesh_path + '/devices/benyao_arm/joint_limit.yaml')}"/>
+    <xacro:property name= "joint_limit_parameters" value="${xacro.load_yaml(mesh_path + '/devices/arm_slider/joint_limit.yaml')}"/>
 
     <!-- Extract subsections from yaml dictionaries -->
     <xacro:property name= "sec_limits" value="${joint_limit_parameters['joint_limits']}"/>
@@ -40,7 +40,7 @@
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/devices/benyao_arm/meshes/arm_slideway.STL"/>
+          <mesh filename="file://${mesh_path}/devices/arm_slider/meshes/arm_slideway.STL"/>
         </geometry>
         <material name="">
           <color rgba="0.752941176470588 0.752941176470588 0.752941176470588 1"/>
@@ -49,7 +49,7 @@
       <collision>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/devices/benyao_arm/meshes/arm_slideway.STL"/>
+          <mesh filename="file://${mesh_path}/devices/arm_slider/meshes/arm_slideway.STL"/>
         </geometry>
       </collision>
     </link>
@@ -75,7 +75,7 @@
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/devices/benyao_arm/meshes/arm_base.STL"/>
+          <mesh filename="file://${mesh_path}/devices/arm_slider/meshes/arm_base.STL"/>
         </geometry>
         <material name="">
           <color rgba="1 1 1 1"/>
@@ -84,7 +84,7 @@
       <collision>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/devices/benyao_arm/meshes/arm_base.STL"/>
+          <mesh filename="file://${mesh_path}/devices/arm_slider/meshes/arm_base.STL"/>
         </geometry>
       </collision>
     </link>
@@ -98,7 +98,7 @@
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/devices/benyao_arm/meshes/arm_link_1.STL"/>
+          <mesh filename="file://${mesh_path}/devices/arm_slider/meshes/arm_link_1.STL"/>
         </geometry>
         <material name="">
           <color rgba="1 1 1 1"/>
@@ -107,7 +107,7 @@
       <collision>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/devices/benyao_arm/meshes/arm_link_1.STL"/>
+          <mesh filename="file://${mesh_path}/devices/arm_slider/meshes/arm_link_1.STL"/>
         </geometry>
       </collision>
     </link>
@@ -131,7 +131,7 @@
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/devices/benyao_arm/meshes/arm_link_2.STL"/>
+          <mesh filename="file://${mesh_path}/devices/arm_slider/meshes/arm_link_2.STL"/>
         </geometry>
         <material name="">
           <color rgba="1 1 1 1"/>
@@ -140,7 +140,7 @@
       <collision>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/devices/benyao_arm/meshes/arm_link_2.STL"/>
+          <mesh filename="file://${mesh_path}/devices/arm_slider/meshes/arm_link_2.STL"/>
         </geometry>
       </collision>
     </link>
@@ -164,7 +164,7 @@
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/devices/benyao_arm/meshes/arm_link_3.STL"/>
+          <mesh filename="file://${mesh_path}/devices/arm_slider/meshes/arm_link_3.STL"/>
         </geometry>
         <material name="">
           <color rgba="1 1 1 1"/>
@@ -173,7 +173,7 @@
       <collision>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/devices/benyao_arm/meshes/arm_link_3.STL"/>
+          <mesh filename="file://${mesh_path}/devices/arm_slider/meshes/arm_link_3.STL"/>
         </geometry>
       </collision>
     </link>
@@ -197,7 +197,7 @@
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/devices/benyao_arm/meshes/gripper_base.STL"/>
+          <mesh filename="file://${mesh_path}/devices/arm_slider/meshes/gripper_base.STL"/>
         </geometry>
         <material name="">
           <color rgba="1 1 1 1"/>
@@ -206,7 +206,7 @@
       <collision>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/devices/benyao_arm/meshes/gripper_base.STL"/>
+          <mesh filename="file://${mesh_path}/devices/arm_slider/meshes/gripper_base.STL"/>
         </geometry>
       </collision>
     </link>
@@ -230,7 +230,7 @@
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/devices/benyao_arm/meshes/gripper_right.STL"/>
+          <mesh filename="file://${mesh_path}/devices/arm_slider/meshes/gripper_right.STL"/>
         </geometry>
         <material name="">
           <color rgba="1 1 1 1"/>
@@ -239,7 +239,7 @@
       <collision>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/devices/benyao_arm/meshes/gripper_right.STL"/>
+          <mesh filename="file://${mesh_path}/devices/arm_slider/meshes/gripper_right.STL"/>
         </geometry>
       </collision>
     </link>
@@ -263,7 +263,7 @@
       <visual>
         <origin rpy="0 3.1416 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/devices/benyao_arm/meshes/gripper_left.STL"/>
+          <mesh filename="file://${mesh_path}/devices/arm_slider/meshes/gripper_left.STL"/>
         </geometry>
         <material name="">
           <color rgba="1 1 1 1"/>
@@ -272,7 +272,7 @@
       <collision>
         <origin rpy="0 3.1416 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="file://${mesh_path}/devices/benyao_arm/meshes/gripper_left.STL"/>
+          <mesh filename="file://${mesh_path}/devices/arm_slider/meshes/gripper_left.STL"/>
         </geometry>
       </collision>
     </link>
