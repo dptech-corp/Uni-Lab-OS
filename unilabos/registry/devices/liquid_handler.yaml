@@ -358,8 +358,8 @@ liquid_handler.biomek:
       transfer_biomek:
         type: LiquidHandlerTransferBiomek
         goal:
-          source: source
-          target: target
+          sources: sources
+          targets: targets
           tip_rack: tip_rack
           volume: volume
           aspirate_techniques: aspirate_techniques
@@ -417,8 +417,8 @@ liquid_handler.biomek:
       move_biomek:
         type: LiquidHandlerMoveBiomek
         goal:
-          source: resource
-          target: target
+          source: sources
+          target: targets
         feedback: {}
         result:
           name: name

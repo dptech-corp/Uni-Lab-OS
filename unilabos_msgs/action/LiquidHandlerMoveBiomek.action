@@ -1,5 +1,5 @@
-string source
-string target
+string sources
+string targets
 
 ---
 string return_info
