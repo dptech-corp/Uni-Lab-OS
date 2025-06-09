@@ -243,6 +243,7 @@ class LiquidHandlerJointPublisher(BaseROS2DeviceNode):
 
         self.move_to(joint_positions_target_zero, speed, parent_id)
         self.move_to(joint_positions_target, speed, parent_id)
+        time.sleep(1)
         if option == "pick":
             link_name =  self.lh_devices[parent_id]['joint_config']['link_names'][z_index]
             link_name =  f'{parent_id}_{link_name}'

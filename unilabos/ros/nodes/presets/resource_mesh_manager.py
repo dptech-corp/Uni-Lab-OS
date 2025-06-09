@@ -391,7 +391,8 @@ class ResourceMeshManager(BaseROS2DeviceNode):
             planning_scene = PlanningScene()
             planning_scene.is_diff = True
             planning_scene.robot_state.is_diff = True
-            time_start = self.get_clock().now()
+            # time_start = self.get_clock().now()
+            time_start = rclpy.time.Time(seconds=0)
             count = 0
 
             for resource_id, target_parent in cmd_dict.items():
