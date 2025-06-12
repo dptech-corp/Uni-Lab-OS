@@ -8,6 +8,7 @@ float64 residence_time         # 物质在过滤介质中的停留时间，可�
 ---
 bool success                    # 操作是否成功
 string message                  # 结果消息
+string return_info
 ---
 string status                   # 当前状态描述
 float64 progress               # 进度百分比 (0-100)
