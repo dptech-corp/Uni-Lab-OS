@@ -1,6 +1,7 @@
 import json
 import time
 import traceback
+from typing import Optional
 import uuid
 
 import paho.mqtt.client as mqtt
@@ -161,12 +162,14 @@ class MQTTClient:
         status = {"data": device_status.get(device_id, {}), "device_id": device_id}
         address = f"labs/{MQConfig.lab_id}/devices/"
         self.client.publish(address, json.dumps(status), qos=2)
-        logger.critical(f"Device status published: address: {address}, {status}")
+        logger.debug(f"Device status published: address: {address}, {status}")
 
-    def publish_job_status(self, feedback_data: dict, job_id: str, status: str):
+    def publish_job_status(self, feedback_data: dict, job_id: str, status: str, return_info: Optional[str] = None):
         if self.mqtt_disable:
             return
-        jobdata = {"job_id": job_id, "data": feedback_data, "status": status}
+        if return_info is None:
+            return_info = "{}"
+        jobdata = {"job_id": job_id, "data": feedback_data, "status": status, "return_info": return_info}
         self.client.publish(f"labs/{MQConfig.lab_id}/job/list/", json.dumps(jobdata), qos=2)
 
     def publish_registry(self, device_id: str, device_info: dict):

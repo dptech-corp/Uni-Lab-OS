@@ -1,0 +1,56 @@
+moveit.toyo_xyz:
+  description: Toyo XYZ
+  class:
+    module: unilabos.devices.ros_dev.moveit_interface:MoveitInterface
+    type: python
+    action_value_mappings:
+      set_position:
+        type: SendCmd
+        goal:
+          command: command
+        feedback: { }
+        result: { }
+      pick_and_place:
+        type: SendCmd
+        goal:
+          command: command
+        feedback: { }
+        result: { }
+      set_status:
+        type: SendCmd
+        goal:
+          command: command
+        feedback: { }
+        result: { }
+
+  model:
+    type: device
+    mesh: toyo_xyz
+
+moveit.arm_slider:
+  description: Arm with Slider
+  model:
+    type: device
+    mesh: arm_slider
+  class:
+    module: unilabos.devices.ros_dev.moveit_interface:MoveitInterface
+    type: python
+    action_value_mappings:
+      set_position:
+        type: SendCmd
+        goal:
+          command: command
+        feedback: {}
+        result: {}
+      pick_and_place:
+        type: SendCmd
+        goal:
+          command: command
+        feedback: {}
+        result: {}
+      set_status:
+        type: SendCmd
+        goal:
+          command: command
+        feedback: {}
+        result: {}

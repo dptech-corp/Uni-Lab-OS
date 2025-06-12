@@ -7,5 +7,6 @@ float64[] liquid_height
 float64[] blow_out_air_volume
 string spread
 ---
+string return_info
 bool success
 ---

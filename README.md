@@ -12,7 +12,11 @@
 [![GitHub Issues](https://img.shields.io/github/issues/dptech-corp/Uni-Lab-OS.svg)](https://github.com/dptech-corp/Uni-Lab-OS/issues)
 [![GitHub License](https://img.shields.io/github/license/dptech-corp/Uni-Lab-OS.svg)](https://github.com/dptech-corp/Uni-Lab-OS/blob/main/LICENSE)
 
-Uni-Lab Operating System is a platform for laboratory automation, designed to connect and control various experimental equipment, enabling automation and standardization of experimental workflows.
+Uni-Lab-OS is a platform for laboratory automation, designed to connect and control various experimental equipment, enabling automation and standardization of experimental workflows.
+
+## 🏆 Competition
+
+Join the [Intelligent Organic Chemistry Synthesis Competition](https://bohrium.dp.tech/competitions/1451645258) to explore automated synthesis with Uni-Lab-OS!
 
 ## Key Features
 
@@ -45,7 +49,7 @@ conda env update --file unilabos-[YOUR_OS].yml -n environment_name
 
 # Currently, you need to install the `unilabos_msgs` package
 # You can download the system-specific package from the Release page
-conda install ros-humble-unilabos-msgs-0.9.1-xxxxx.tar.bz2
+conda install ros-humble-unilabos-msgs-0.9.4-xxxxx.tar.bz2
 
 # Install PyLabRobot and other prerequisites
 git clone https://github.com/PyLabRobot/pylabrobot plr_repo

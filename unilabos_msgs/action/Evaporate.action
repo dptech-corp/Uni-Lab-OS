@@ -5,6 +5,7 @@ float64 temp
 float64 time
 float64 stir_speed
 ---
+string return_info
 bool success
 ---
 string status

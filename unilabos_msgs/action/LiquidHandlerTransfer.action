@@ -20,6 +20,7 @@ float64 mix_liquid_height
 int32[] delays
 string[] none_keys
 ---
+string return_info
 bool success
 ---
 # 反馈

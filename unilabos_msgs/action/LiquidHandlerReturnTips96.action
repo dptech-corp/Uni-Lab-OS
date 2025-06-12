@@ -3,6 +3,7 @@
 bool allow_nonzero_volume
 ---
 # 结果字段
+string return_info
 bool success
 ---
 # 反馈字段 

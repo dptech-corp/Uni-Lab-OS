@@ -6,13 +6,8 @@ import asyncio
 import time
 
 from pylabrobot.liquid_handling import LiquidHandler
-from pylabrobot.resources import (
-    Resource,
-    TipRack,
-    Container,
-    Coordinate,
-    Well
-)
+from pylabrobot.resources import Resource, TipRack, Container, Coordinate, Well
+
 
 class LiquidHandlerAbstract(LiquidHandler):
     """Extended LiquidHandler with additional operations."""
@@ -20,6 +15,19 @@ class LiquidHandlerAbstract(LiquidHandler):
     # ---------------------------------------------------------------
     # REMOVE LIQUID --------------------------------------------------
     # ---------------------------------------------------------------
+
+    async def create_protocol(
+        self,
+        protocol_name: str,
+        protocol_description: str,
+        protocol_version: str,
+        protocol_author: str,
+        protocol_date: str,
+        protocol_type: str,
+        none_keys: List[str] = [],
+    ):
+        """Create a new protocol with the given metadata."""
+        pass
 
     async def remove_liquid(
         self,
@@ -35,26 +43,26 @@ class LiquidHandlerAbstract(LiquidHandler):
         spread: Optional[Literal["wide", "tight", "custom"]] = "wide",
         delays: Optional[List[int]] = None,
         is_96_well: Optional[bool] = False,
-        top: Optional[List(float)] = None,
-        none_keys: List[str] = []
+        top: Optional[List[float]] = None,
+        none_keys: List[str] = [],
     ):
         """A complete *remove* (aspirate → waste) operation."""
         trash = self.deck.get_trash_area()
         try:
             if is_96_well:
-                pass # This mode is not verified
+                pass  # This mode is not verified
             else:
                 if len(vols) != len(sources):
                     raise ValueError("Length of `vols` must match `sources`.")
 
                 for src, vol in zip(sources, vols):
-                    self.move_to(src, dis_to_top=top[0] if top else 0)
+                    await self.move_to(src, dis_to_top=top[0] if top else 0)
                     tip = next(self.current_tip)
                     await self.pick_up_tips(tip)
                     await self.aspirate(
                         resources=[src],
                         vols=[vol],
-                        use_channels=use_channels, # only aspirate96 used, default to None
+                        use_channels=use_channels,  # only aspirate96 used, default to None
                         flow_rates=[flow_rates[0]] if flow_rates else None,
                         offsets=[offsets[0]] if offsets else None,
                         liquid_height=[liquid_height[0]] if liquid_height else None,
@@ -64,15 +72,15 @@ class LiquidHandlerAbstract(LiquidHandler):
                     await self.custom_delay(seconds=delays[0] if delays else 0)
                     await self.dispense(
                         resources=waste_liquid,
-                         vols=[vol],
-                         use_channels=use_channels,
-                         flow_rates=[flow_rates[1]] if flow_rates else None,
-                         offsets=[offsets[1]] if offsets else None,
-                         liquid_height=[liquid_height[1]] if liquid_height else None,
-                         blow_out_air_volume=blow_out_air_volume[1] if blow_out_air_volume else None,
-                         spread=spread,
-                     )
-                    await self.discard_tips() # For now, each of tips is discarded after use
+                        vols=[vol],
+                        use_channels=use_channels,
+                        flow_rates=[flow_rates[1]] if flow_rates else None,
+                        offsets=[offsets[1]] if offsets else None,
+                        liquid_height=[liquid_height[1]] if liquid_height else None,
+                        blow_out_air_volume=blow_out_air_volume[1] if blow_out_air_volume else None,
+                        spread=spread,
+                    )
+                    await self.discard_tips()  # For now, each of tips is discarded after use
 
         except Exception as e:
             raise RuntimeError(f"Liquid removal failed: {e}") from e
@@ -100,13 +108,13 @@ class LiquidHandlerAbstract(LiquidHandler):
         mix_vol: Optional[int] = None,
         mix_rate: Optional[int] = None,
         mix_liquid_height: Optional[float] = None,
-        none_keys: List[str] = []
+        none_keys: List[str] = [],
     ):
         """A complete *add* (aspirate reagent → dispense into targets) operation."""
 
         try:
             if is_96_well:
-                pass # This mode is not verified.
+                pass  # This mode is not verified.
             else:
                 if len(asp_vols) != len(targets):
                     raise ValueError("Length of `vols` must match `targets`.")
@@ -122,7 +130,7 @@ class LiquidHandlerAbstract(LiquidHandler):
                         offsets=[offsets[0]] if offsets else None,
                         liquid_height=[liquid_height[0]] if liquid_height else None,
                         blow_out_air_volume=[blow_out_air_volume[0]] if blow_out_air_volume else None,
-                        spread=spread
+                        spread=spread,
                     )
                     if delays is not None:
                         await self.custom_delay(seconds=delays[0])
@@ -144,7 +152,8 @@ class LiquidHandlerAbstract(LiquidHandler):
                         mix_vol=mix_vol,
                         offsets=offsets if offsets else None,
                         height_to_bottom=mix_liquid_height if mix_liquid_height else None,
-                        mix_rate=mix_rate if mix_rate else None)
+                        mix_rate=mix_rate if mix_rate else None,
+                    )
                     if delays is not None:
                         await self.custom_delay(seconds=delays[1])
                     await self.touch_tip(targets[_])
@@ -158,13 +167,13 @@ class LiquidHandlerAbstract(LiquidHandler):
     # ---------------------------------------------------------------
     async def transfer_liquid(
         self,
-        asp_vols: Union[List[float], float],
-        dis_vols: Union[List[float], float],
         sources: Sequence[Container],
         targets: Sequence[Container],
         tip_racks: Sequence[TipRack],
         *,
         use_channels: Optional[List[int]] = None,
+        asp_vols: Union[List[float], float],
+        dis_vols: Union[List[float], float],
         asp_flow_rates: Optional[List[Optional[float]]] = None,
         dis_flow_rates: Optional[List[Optional[float]]] = None,
         offsets: Optional[List[Coordinate]] = None,
@@ -179,7 +188,7 @@ class LiquidHandlerAbstract(LiquidHandler):
         mix_rate: Optional[int] = None,
         mix_liquid_height: Optional[float] = None,
         delays: Optional[List[int]] = None,
-        none_keys: List[str] = []
+        none_keys: List[str] = [],
     ):
         """Transfer liquid from each *source* well/plate to the corresponding *target*.
 
@@ -201,14 +210,15 @@ class LiquidHandlerAbstract(LiquidHandler):
             # 96‑channel head mode
             # ------------------------------------------------------------------
             if is_96_well:
-                pass # This mode is not verified
+                pass  # This mode is not verified
             else:
                 if not (len(asp_vols) == len(sources) and len(dis_vols) == len(targets)):
                     raise ValueError("`sources`, `targets`, and `vols` must have the same length.")
 
                 tip_iter = self.iter_tips(tip_racks)
-                for src, tgt, asp_vol, asp_flow_rate, dis_vol, dis_flow_rate in (
-                        zip(sources, targets, asp_vols, asp_flow_rates, dis_vols, dis_flow_rates)):
+                for src, tgt, asp_vol, asp_flow_rate, dis_vol, dis_flow_rate in zip(
+                    sources, targets, asp_vols, asp_flow_rates, dis_vols, dis_flow_rates
+                ):
                     tip = next(tip_iter)
                     await self.pick_up_tips(tip)
                     # Aspirate from source
@@ -247,9 +257,9 @@ class LiquidHandlerAbstract(LiquidHandler):
         except Exception as exc:
             raise RuntimeError(f"Liquid transfer failed: {exc}") from exc
 
-# ---------------------------------------------------------------
-# Helper utilities
-# ---------------------------------------------------------------
+    # ---------------------------------------------------------------
+    # Helper utilities
+    # ---------------------------------------------------------------
 
     async def custom_delay(self, seconds=0, msg=None):
         """
@@ -266,28 +276,26 @@ class LiquidHandlerAbstract(LiquidHandler):
                 print(f"Done: {msg}")
                 print(f"Current time: {time.strftime('%H:%M:%S')}")
 
-    async def touch_tip(self,
-                        targets: Sequence[Container],
-                        ):
+    async def touch_tip(self, targets: Sequence[Container]):
         """Touch the tip to the side of the well."""
         await self.aspirate(
             resources=[targets],
             vols=[0],
             use_channels=None,
             flow_rates=None,
-            offsets=[Coordinate(x=-targets.get_size_x()/2,y=0,z=0)],
+            offsets=[Coordinate(x=-targets.get_size_x() / 2, y=0, z=0)],
             liquid_height=None,
-            blow_out_air_volume=None
+            blow_out_air_volume=None,
         )
-        #await self.custom_delay(seconds=1) # In the simulation, we do not need to wait
+        # await self.custom_delay(seconds=1) # In the simulation, we do not need to wait
         await self.aspirate(
             resources=[targets],
             vols=[0],
             use_channels=None,
             flow_rates=None,
-            offsets=[Coordinate(x=targets.get_size_x()/2,y=0,z=0)],
+            offsets=[Coordinate(x=targets.get_size_x() / 2, y=0, z=0)],
             liquid_height=None,
-            blow_out_air_volume=None
+            blow_out_air_volume=None,
         )
 
     async def mix(
@@ -298,9 +306,9 @@ class LiquidHandlerAbstract(LiquidHandler):
         height_to_bottom: Optional[float] = None,
         offsets: Optional[Coordinate] = None,
         mix_rate: Optional[float] = None,
-        none_keys: List[str] = []
+        none_keys: List[str] = [],
     ):
-        if mix_time is None: # No mixing required
+        if mix_time is None:  # No mixing required
             return
         """Mix the liquid in the target wells."""
         for _ in range(mix_time):
@@ -333,7 +341,7 @@ class LiquidHandlerAbstract(LiquidHandler):
         tip_iter = self.iter_tips(tip_racks)
         self.current_tip = tip_iter
 
-    async def move_to(self, well: Well, dis_to_top: float = 0 , channel: int = 0):
+    async def move_to(self, well: Well, dis_to_top: float = 0, channel: int = 0):
         """
         Move a single channel to a specific well with a given z-height.
 
@@ -352,4 +360,3 @@ class LiquidHandlerAbstract(LiquidHandler):
         await self.move_channel_x(channel, abs_loc.x)
         await self.move_channel_y(channel, abs_loc.y)
         await self.move_channel_z(channel, abs_loc.z + well_height + dis_to_top)
-

@@ -5,6 +5,6 @@ io_snrd:
     type: python
     hardware_interface:
       name: modbus_client
-      extra_info: address
+      extra_info: []
       read: read_io_coil
       write: write_io_coil

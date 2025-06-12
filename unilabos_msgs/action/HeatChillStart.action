@@ -3,6 +3,7 @@ string vessel
 float64 temp
 string purpose
 ---
+string return_info
 bool success
 ---
 string status

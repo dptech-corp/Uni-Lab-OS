@@ -1,5 +1,4 @@
 import copy
-import functools
 import json
 import threading
 import time
@@ -20,16 +19,29 @@ from rclpy.service import Service
 from unilabos_msgs.action import SendCmd
 from unilabos_msgs.srv._serial_command import SerialCommand_Request, SerialCommand_Response
 
-from unilabos.resources.graphio import convert_resources_to_type, convert_resources_from_type, resource_ulab_to_plr, \
-    initialize_resources, list_to_nested_dict, dict_to_tree, resource_plr_to_ulab, tree_to_list
+from unilabos.resources.graphio import (
+    convert_resources_to_type,
+    convert_resources_from_type,
+    resource_ulab_to_plr,
+    initialize_resources,
+    dict_to_tree,
+    resource_plr_to_ulab,
+    tree_to_list,
+)
 from unilabos.ros.msgs.message_converter import (
     convert_to_ros_msg,
     convert_from_ros_msg,
     convert_from_ros_msg_with_mapping,
-    convert_to_ros_msg_with_mapping, ros_action_to_json_schema,
+    convert_to_ros_msg_with_mapping,
 )
-from unilabos_msgs.srv import ResourceAdd, ResourceGet, ResourceDelete, ResourceUpdate, ResourceList, \
-    SerialCommand  # type: ignore
+from unilabos_msgs.srv import (
+    ResourceAdd,
+    ResourceGet,
+    ResourceDelete,
+    ResourceUpdate,
+    ResourceList,
+    SerialCommand,
+)  # type: ignore
 from unilabos_msgs.msg import Resource  # type: ignore
 
 from unilabos.ros.nodes.resource_tracker import DeviceNodeResourceTracker
@@ -37,7 +49,7 @@ from unilabos.ros.x.rclpyx import get_event_loop
 from unilabos.ros.utils.driver_creator import ProtocolNodeCreator, PyLabRobotCreator, DeviceClassCreator
 from unilabos.utils.async_util import run_async_func
 from unilabos.utils.log import info, debug, warning, error, critical, logger
-from unilabos.utils.type_check import get_type_class, TypeEncoder
+from unilabos.utils.type_check import get_type_class, TypeEncoder, serialize_result_info
 
 T = TypeVar("T")
 
@@ -292,7 +304,9 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                 self.create_ros_action_server(action_name, action_value_mapping)
 
         # 创建线程池执行器
-        self._executor = ThreadPoolExecutor(max_workers=max(len(action_value_mappings), 1), thread_name_prefix=f"ROSDevice{self.device_id}")
+        self._executor = ThreadPoolExecutor(
+            max_workers=max(len(action_value_mappings), 1), thread_name_prefix=f"ROSDevice{self.device_id}"
+        )
 
         # 创建资源管理客户端
         self._resource_clients: Dict[str, Client] = {
@@ -329,12 +343,14 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             ADD_LIQUID_TYPE = other_calling_param.pop("ADD_LIQUID_TYPE", [])
             LIQUID_VOLUME = other_calling_param.pop("LIQUID_VOLUME", [])
             LIQUID_INPUT_SLOT = other_calling_param.pop("LIQUID_INPUT_SLOT", [])
-            slot = other_calling_param.pop("slot", -1)
-            if slot >= 0:  # slot为负数的时候采用assign方法
+            slot = other_calling_param.pop("slot", "-1")
+            if slot != "-1":  # slot为负数的时候采用assign方法
                 other_calling_param["slot"] = slot
             # 本地拿到这个物料，可能需要先做初始化?
             if isinstance(resources, list):
-                if len(resources) == 1 and isinstance(resources[0], list) and not initialize_full:  # 取消，不存在的情况
+                if (
+                    len(resources) == 1 and isinstance(resources[0], list) and not initialize_full
+                ):  # 取消，不存在的情况
                     # 预先initialize过，以整组的形式传入
                     request.resources = [convert_to_ros_msg(Resource, resource_) for resource_ in resources[0]]
                 elif initialize_full:
@@ -349,6 +365,25 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             response = rclient.call(request)
             # 应该先add_resource了
             res.response = "OK"
+            # 如果driver自己就有assign的方法，那就使用driver自己的assign方法
+            if hasattr(self.driver_instance, "create_resource"):
+                create_resource_func = getattr(self.driver_instance, "create_resource")
+                try:
+                    ret = create_resource_func(
+                        resource_tracker=self.resource_tracker,
+                        resources=request.resources,
+                        bind_parent_id=bind_parent_id,
+                        bind_location=location,
+                        liquid_input_slot=LIQUID_INPUT_SLOT,
+                        liquid_type=ADD_LIQUID_TYPE,
+                        liquid_volume=LIQUID_VOLUME,
+                        slot_on_deck=slot,
+                    )
+                    res.response = serialize_result_info("", True, ret)
+                except Exception as e:
+                    traceback.print_exc()
+                    res.response = serialize_result_info(traceback.format_exc(), False, {})
+                return res
             # 接下来该根据bind_parent_id进行assign了，目前只有plr可以进行assign，不然没有办法输入到物料系统中
             resource = self.resource_tracker.figure_resource({"name": bind_parent_id})
             # request.resources = [convert_to_ros_msg(Resource, resources)]
@@ -359,6 +394,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                 from pylabrobot.resources import Coordinate
                 from pylabrobot.resources import OTDeck
                 from pylabrobot.resources import Plate
+
                 contain_model = not isinstance(resource, Deck)
                 if isinstance(resource, ResourcePLR):
                     # resources.list()
@@ -366,25 +402,39 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                     plr_instance = resource_ulab_to_plr(resources_tree[0], contain_model)
                     if isinstance(plr_instance, Plate):
                         empty_liquid_info_in = [(None, 0)] * plr_instance.num_items
-                        for liquid_type, liquid_volume, liquid_input_slot in zip(ADD_LIQUID_TYPE, LIQUID_VOLUME, LIQUID_INPUT_SLOT):
+                        for liquid_type, liquid_volume, liquid_input_slot in zip(
+                            ADD_LIQUID_TYPE, LIQUID_VOLUME, LIQUID_INPUT_SLOT
+                        ):
                             empty_liquid_info_in[liquid_input_slot] = (liquid_type, liquid_volume)
                         plr_instance.set_well_liquids(empty_liquid_info_in)
                     if isinstance(resource, OTDeck) and "slot" in other_calling_param:
+                        other_calling_param["slot"] = int(other_calling_param["slot"])
                         resource.assign_child_at_slot(plr_instance, **other_calling_param)
                     else:
-                        _discard_slot = other_calling_param.pop("slot", -1)
-                        resource.assign_child_resource(plr_instance, Coordinate(location["x"], location["y"], location["z"]), **other_calling_param)
-                    request2.resources = [convert_to_ros_msg(Resource, r) for r in tree_to_list([resource_plr_to_ulab(resource)])]
+                        _discard_slot = other_calling_param.pop("slot", "-1")
+                        resource.assign_child_resource(
+                            plr_instance,
+                            Coordinate(location["x"], location["y"], location["z"]),
+                            **other_calling_param,
+                        )
+                    request2.resources = [
+                        convert_to_ros_msg(Resource, r) for r in tree_to_list([resource_plr_to_ulab(resource)])
+                    ]
                     rclient2.call(request2)
                 # 发送给ResourceMeshManager
                 action_client = ActionClient(
-                    self, SendCmd, "/devices/resource_mesh_manager/add_resource_mesh", callback_group=self.callback_group
+                    self,
+                    SendCmd,
+                    "/devices/resource_mesh_manager/add_resource_mesh",
+                    callback_group=self.callback_group,
                 )
                 goal = SendCmd.Goal()
-                goal.command = json.dumps({
-                    "resources": resources,
-                    "bind_parent_id": bind_parent_id,
-                })
+                goal.command = json.dumps(
+                    {
+                        "resources": resources,
+                        "bind_parent_id": bind_parent_id,
+                    }
+                )
                 future = action_client.send_goal_async(goal, goal_uuid=uuid.uuid4())
 
                 def done_cb(*args):
@@ -401,10 +451,16 @@ class BaseROS2DeviceNode(Node, Generic[T]):
         # noinspection PyTypeChecker
         self._service_server: Dict[str, Service] = {
             "query_host_name": self.create_service(
-                SerialCommand, f"/srv{self.namespace}/query_host_name", query_host_name_cb, callback_group=self.callback_group
+                SerialCommand,
+                f"/srv{self.namespace}/query_host_name",
+                query_host_name_cb,
+                callback_group=self.callback_group,
             ),
             "append_resource": self.create_service(
-                SerialCommand, f"/srv{self.namespace}/append_resource", append_resource, callback_group=self.callback_group
+                SerialCommand,
+                f"/srv{self.namespace}/append_resource",
+                append_resource,
+                callback_group=self.callback_group,
             ),
         }
 
@@ -433,6 +489,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
         registered_devices[self.device_id] = device_info
         from unilabos.config.config import BasicConfig
         from unilabos.ros.nodes.presets.host_node import HostNode
+
         if not BasicConfig.is_host_mode:
             sclient = self.create_client(SerialCommand, "/node_info_update")
             # 启动线程执行发送任务
@@ -440,7 +497,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                 target=self.send_slave_node_info,
                 args=(sclient,),
                 daemon=True,
-                name=f"ROSDevice{self.device_id}_send_slave_node_info"
+                name=f"ROSDevice{self.device_id}_send_slave_node_info",
             ).start()
         else:
             host_node = HostNode.get_instance(0)
@@ -451,12 +508,18 @@ class BaseROS2DeviceNode(Node, Generic[T]):
         sclient.wait_for_service()
         request = SerialCommand.Request()
         from unilabos.config.config import BasicConfig
-        request.command = json.dumps({
-            "SYNC_SLAVE_NODE_INFO": {
-                "machine_name": BasicConfig.machine_name,
-                "type": "slave",
-                "edge_device_id": self.device_id
-            }}, ensure_ascii=False, cls=TypeEncoder)
+
+        request.command = json.dumps(
+            {
+                "SYNC_SLAVE_NODE_INFO": {
+                    "machine_name": BasicConfig.machine_name,
+                    "type": "slave",
+                    "edge_device_id": self.device_id,
+                }
+            },
+            ensure_ascii=False,
+            cls=TypeEncoder,
+        )
 
         # 发送异步请求并等待结果
         future = sclient.call_async(request)
@@ -529,6 +592,11 @@ class BaseROS2DeviceNode(Node, Generic[T]):
         """创建动作执行回调函数"""
 
         async def execute_callback(goal_handle: ServerGoalHandle):
+            # 初始化结果信息变量
+            execution_error = ""
+            execution_success = False
+            action_return_value = None
+
             self.lab_logger().info(f"执行动作: {action_name}")
             goal = goal_handle.request
 
@@ -568,7 +636,11 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                                     current_resources.extend(response.resources)
                             else:
                                 r = ResourceGet.Request()
-                                r.id = action_kwargs[k]["id"] if v == "unilabos_msgs/Resource" else action_kwargs[k][0]["id"]
+                                r.id = (
+                                    action_kwargs[k]["id"]
+                                    if v == "unilabos_msgs/Resource"
+                                    else action_kwargs[k][0]["id"]
+                                )
                                 r.with_children = True
                                 response = await self._resource_clients["resource_get"].call_async(r)
                                 current_resources.extend(response.resources)
@@ -591,7 +663,19 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             if asyncio.iscoroutinefunction(ACTION):
                 try:
                     self.lab_logger().info(f"异步执行动作 {ACTION}")
-                    future = ROS2DeviceNode.run_async_func(ACTION, **action_kwargs)
+                    future = ROS2DeviceNode.run_async_func(ACTION, trace_error=False, **action_kwargs)
+
+                    def _handle_future_exception(fut):
+                        nonlocal execution_error, execution_success, action_return_value
+                        try:
+                            action_return_value = fut.result()
+                            execution_success = True
+                        except Exception as e:
+                            execution_error = traceback.format_exc()
+                            error(f"异步任务 {ACTION.__name__} 报错了")
+                            error(traceback.format_exc())
+
+                    future.add_done_callback(_handle_future_exception)
                 except Exception as e:
                     self.lab_logger().error(f"创建异步任务失败: {traceback.format_exc()}")
                     raise e
@@ -600,9 +684,12 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                 future = self._executor.submit(ACTION, **action_kwargs)
 
                 def _handle_future_exception(fut):
+                    nonlocal execution_error, execution_success, action_return_value
                     try:
-                        fut.result()
+                        action_return_value = fut.result()
+                        execution_success = True
                     except Exception as e:
+                        execution_error = traceback.format_exc()
                         error(f"同步任务 {ACTION.__name__} 报错了")
                         error(traceback.format_exc())
 
@@ -659,16 +746,23 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                     self.lab_logger().info(f"更新资源状态: {k}")
                     r = ResourceUpdate.Request()
                     # 仅当action_kwargs[k]不为None时尝试转换
-                    akv = action_kwargs[k]
+                    akv = action_kwargs[k]  # 已经是完成转换的物料了，只需要转换成ros msg Resource了
                     apv = action_paramtypes[k]
                     final_type = get_type_class(apv)
                     if final_type is None:
                         continue
                     try:
-                        r.resources = [
-                            convert_to_ros_msg(Resource, self.resource_tracker.root_resource(rs))
-                            for rs in convert_resources_from_type(akv, final_type)  # type: ignore  # FIXME  # 考虑反查到最大的
-                        ]
+                        seen = set()
+                        unique_resources = []
+                        for rs in akv:
+                            res = self.resource_tracker.parent_resource(rs)  # 获取 resource 对象
+                            if id(res) not in seen:
+                                seen.add(id(res))
+                                converted_list = convert_resources_from_type([res], final_type)
+                                unique_resources.extend([convert_to_ros_msg(Resource, converted) for converted in converted_list])
+
+                        r.resources = unique_resources
+
                         response = await self._resource_clients["resource_update"].call_async(r)
                         self.lab_logger().debug(f"资源更新结果: {response}")
                     except Exception as e:
@@ -693,6 +787,8 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             for attr_name in result_msg_types.keys():
                 if attr_name in ["success", "reached_goal"]:
                     setattr(result_msg, attr_name, True)
+                elif attr_name == "return_info":
+                    setattr(result_msg, attr_name, serialize_result_info(execution_error, execution_success, action_return_value))
 
             self.lab_logger().info(f"动作 {action_name} 完成并返回结果")
             return result_msg
@@ -738,8 +834,8 @@ class ROS2DeviceNode:
         return cls._loop
 
     @classmethod
-    def run_async_func(cls, func, **kwargs):
-        return run_async_func(func, loop=cls._loop, **kwargs)
+    def run_async_func(cls, func, trace_error=True, **kwargs):
+        return run_async_func(func, loop=cls._loop, trace_error=trace_error, **kwargs)
 
     @property
     def driver_instance(self):
@@ -791,7 +887,11 @@ class ROS2DeviceNode:
         self.resource_tracker = DeviceNodeResourceTracker()
 
         # use_pylabrobot_creator 使用 cls的包路径检测
-        use_pylabrobot_creator = driver_class.__module__.startswith("pylabrobot") or driver_class.__name__ == "LiquidHandlerAbstract"
+        use_pylabrobot_creator = (
+            driver_class.__module__.startswith("pylabrobot")
+            or driver_class.__name__ == "LiquidHandlerAbstract"
+            or driver_class.__name__ == "LiquidHandlerBiomek"
+        )
 
         # TODO: 要在创建之前预先请求服务器是否有当前id的物料，放到resource_tracker中，让pylabrobot进行创建
         # 创建设备类实例
@@ -830,6 +930,12 @@ class ROS2DeviceNode:
             )
         self._ros_node: BaseROS2DeviceNode
         self._ros_node.lab_logger().info(f"初始化完成 {self._ros_node.uuid} {self.driver_is_ros}")
+        self.driver_instance._ros_node = self._ros_node  # type: ignore
+        if hasattr(self.driver_instance, "post_init"):
+            try:
+                self.driver_instance.post_init(self._ros_node)  # type: ignore
+            except Exception as e:
+                self._ros_node.lab_logger().error(f"设备后初始化失败: {e}")
 
     def _start_loop(self):
         def run_event_loop():

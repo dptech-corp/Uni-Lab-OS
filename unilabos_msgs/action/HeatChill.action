@@ -6,6 +6,7 @@ bool stir
 float64 stir_speed
 string purpose
 ---
+string return_info
 bool success
 ---
 string status

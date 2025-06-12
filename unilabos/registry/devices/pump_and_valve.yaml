@@ -23,17 +23,48 @@ syringe_pump_with_valve.runze:
         type: string
         description: The position of the valve
     required:
-      - status
-      - position
-      - valve_position
+    - status
+    - position
+    - valve_position
     additionalProperties: false
-
 
 solenoid_valve.mock:
   description: Mock solenoid valve
   class:
     module: unilabos.devices.pump_and_valve.solenoid_valve_mock:SolenoidValveMock
     type: python
+    status_types:
+      status: String
+      valve_position: String
+    action_value_mappings:
+      open:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result: {}
+      close:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result: {}
+  handles:
+    input:
+    - handler_key: fluid-input
+      label: Fluid Input
+      data_type: fluid
+    output:
+    - handler_key: fluid-output
+      label: Fluid Output
+      data_type: fluid
+  init_param_schema:
+    type: object
+    properties:
+      port:
+        type: string
+        description: "通信端口"
+        default: "COM6"
+    required:
+    - port
 
 solenoid_valve:
   description: Solenoid valve

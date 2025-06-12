@@ -8,6 +8,7 @@ int32[] blow_out_air_volume
 string spread
 ---
 # 结果字段
+string return_info
 bool success
 ---
 # 反馈字段 

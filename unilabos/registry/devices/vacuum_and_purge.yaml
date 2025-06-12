@@ -22,6 +22,30 @@ vacuum_pump.mock:
           string: string
         feedback: {}
         result: {}
+  handles:
+    input:
+    - handler_key: fluid-input
+      label: Fluid Input
+      data_type: fluid
+      io_type: target
+      data_source: handle
+      data_key: fluid_in
+    output:
+    - handler_key: fluid-output
+      label: Fluid Output
+      data_type: fluid
+      io_type: source
+      data_source: executor
+      data_key: fluid_out
+  init_param_schema:
+    type: object
+    properties:
+      port:
+        type: string
+        description: "通信端口"
+        default: "COM6"
+    required:
+    - port
 
 gas_source.mock:
   description: Mock gas source
@@ -47,3 +71,27 @@ gas_source.mock:
           string: string
         feedback: {}
         result: {}
+  handles:
+    input:
+    - handler_key: fluid-input
+      label: Fluid Input
+      data_type: fluid
+      io_type: target
+      data_source: handle
+      data_key: fluid_in
+    output:
+    - handler_key: fluid-output
+      label: Fluid Output
+      data_type: fluid
+      io_type: source
+      data_source: executor
+      data_key: fluid_out
+  init_param_schema:
+    type: object
+    properties:
+      port:
+        type: string
+        description: "通信端口"
+        default: "COM6"
+    required:
+    - port
