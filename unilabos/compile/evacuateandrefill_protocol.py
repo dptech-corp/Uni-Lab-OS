@@ -69,14 +69,14 @@ def generate_evacuateandrefill_protocol(
                 "device_id": vacuum_backbone["pump"],
                 "action_name": "set_status",
                 "action_kwargs": {
-                    "command": "ON"
+                    "string": "ON"
                 }
             },
             {
                 "device_id": vacuum_backbone["gas"],
                 "action_name": "set_status",
                 "action_kwargs": {
-                    "command": "OFF"
+                    "string": "OFF"
                 }
             }
         ])
@@ -106,14 +106,14 @@ def generate_evacuateandrefill_protocol(
                 "device_id": vacuum_backbone["pump"],
                 "action_name": "set_status",
                 "action_kwargs": {
-                    "command": "OFF"
+                    "string": "OFF"
                 }
             },
             {
                 "device_id": vacuum_backbone["gas"],
                 "action_name": "set_status",
                 "action_kwargs": {
-                    "command": "ON"
+                    "string": "ON"
                 }
             }
         ])
@@ -125,7 +125,7 @@ def generate_evacuateandrefill_protocol(
                 "device_id": vacuum_backbone["gas"],
                 "action_name": "set_status",
                 "action_kwargs": {
-                    "command": "OFF"
+                    "string": "OFF"
                 }
             }
         )

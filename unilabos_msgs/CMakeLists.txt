@@ -24,6 +24,12 @@ find_package(geometry_msgs REQUIRED)
 
 set(action_files
   "action/SendCmd.action"
+  "action/CleanVessel.action"
+  "action/Dissolve.action"
+  "action/FilterThrough.action"
+  "action/RunColumn.action"
+  "action/Wait.action"
+  "action/WashSolid.action"
   "action/Stir.action"
   "action/HeatChill.action"
   "action/HeatChillStart.action"

@@ -12,10 +12,10 @@ class VacuumPumpMock:
     def get_status(self) -> str:
         return self._status
     
-    def set_status(self, position):
+    def set_status(self, string):
         time.sleep(5)
         
-        self._status = position
+        self._status = string
         time.sleep(5)
 
     def open(self):
