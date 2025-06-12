@@ -1,6 +1,7 @@
 import time
 import asyncio
 import traceback
+from types import MethodType
 from typing import Union
 
 import rclpy
@@ -87,7 +88,10 @@ class ROS2ProtocolNode(BaseROS2DeviceNode):
 
                     # 如果硬件接口是字符串，通过通信设备提供
                     if isinstance(name, str) and name in self.sub_devices:
+                        communicate_device = self.sub_devices[name]
+                        communicate_hardware_info = communicate_device.ros_node_instance._hardware_interface
                         self._setup_hardware_proxy(d, self.sub_devices[name], read, write)
+                        self.lab_logger().info(f"\n通信代理：为子设备{device_id}\n    添加了{read}方法(来源：{name} {communicate_hardware_info['write']}) \n    添加了{write}方法(来源：{name} {communicate_hardware_info['read']})")
 
     def _setup_protocol_names(self, protocol_type):
         # 处理协议类型
@@ -241,20 +245,23 @@ class ROS2ProtocolNode(BaseROS2DeviceNode):
 
     def _setup_hardware_proxy(self, device: ROS2DeviceNode, communication_device: ROS2DeviceNode, read_method, write_method):
         """为设备设置硬件接口代理"""
-        extra_info = [getattr(device.driver_instance, info) for info in communication_device.ros_node_instance._hardware_interface.get("extra_info", [])]
-        write_func = getattr(communication_device.ros_node_instance, communication_device.ros_node_instance._hardware_interface["write"])
-        read_func = getattr(communication_device.ros_node_instance, communication_device.ros_node_instance._hardware_interface["read"])
+        # extra_info = [getattr(device.driver_instance, info) for info in communication_device.ros_node_instance._hardware_interface.get("extra_info", [])]
+        write_func = getattr(communication_device.driver_instance, communication_device.ros_node_instance._hardware_interface["write"])
+        read_func = getattr(communication_device.driver_instance, communication_device.ros_node_instance._hardware_interface["read"])
 
-        def _read():
-            return read_func(*extra_info)
+        def _read(*args, **kwargs):
+            return read_func(*args, **kwargs)
 
-        def _write(command):
-            return write_func(*extra_info, command)
+        def _write(*args, **kwargs):
+            return write_func(*args, **kwargs)
 
         if read_method:
-            setattr(device.driver_instance, read_method, _read)
+            bound_read = MethodType(_read, device.driver_instance)
+            setattr(device.driver_instance, read_method, bound_read)
+
         if write_method:
-            setattr(device.driver_instance, write_method, _write)
+            bound_write = MethodType(_write, device.driver_instance)
+            setattr(device.driver_instance, write_method, bound_write)
 
 
     async def _update_resources(self, goal, protocol_kwargs):

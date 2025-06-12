@@ -342,6 +342,7 @@ class HostNode(BaseROS2DeviceNode):
         bind_locations: list[Point],
         other_calling_params: list[str],
     ):
+        responses = []
         for resource, device_id, bind_parent_id, bind_location, other_calling_param in zip(
             resources, device_ids, bind_parent_ids, bind_locations, other_calling_params
         ):
@@ -367,8 +368,8 @@ class HostNode(BaseROS2DeviceNode):
                 ensure_ascii=False,
             )
             response = sclient.call(request)
-            pass
-        pass
+            responses.append(response)
+        return responses
 
     def create_resource(
         self,
@@ -380,7 +381,7 @@ class HostNode(BaseROS2DeviceNode):
         liquid_input_slot: list[int],
         liquid_type: list[str],
         liquid_volume: list[int],
-        slot_on_deck: int,
+        slot_on_deck: str,
     ):
         init_new_res = initialize_resource(
             {

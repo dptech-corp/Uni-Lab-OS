@@ -343,8 +343,8 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             ADD_LIQUID_TYPE = other_calling_param.pop("ADD_LIQUID_TYPE", [])
             LIQUID_VOLUME = other_calling_param.pop("LIQUID_VOLUME", [])
             LIQUID_INPUT_SLOT = other_calling_param.pop("LIQUID_INPUT_SLOT", [])
-            slot = other_calling_param.pop("slot", -1)
-            if slot >= 0:  # slot为负数的时候采用assign方法
+            slot = other_calling_param.pop("slot", "-1")
+            if slot != "-1":  # slot为负数的时候采用assign方法
                 other_calling_param["slot"] = slot
             # 本地拿到这个物料，可能需要先做初始化?
             if isinstance(resources, list):
@@ -368,16 +368,21 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             # 如果driver自己就有assign的方法，那就使用driver自己的assign方法
             if hasattr(self.driver_instance, "create_resource"):
                 create_resource_func = getattr(self.driver_instance, "create_resource")
-                create_resource_func(
-                    resource_tracker=self.resource_tracker,
-                    resources=request.resources,
-                    bind_parent_id=bind_parent_id,
-                    bind_location=location,
-                    liquid_input_slot=LIQUID_INPUT_SLOT,
-                    liquid_type=ADD_LIQUID_TYPE,
-                    liquid_volume=LIQUID_VOLUME,
-                    slot_on_deck=slot,
-                )
+                try:
+                    ret = create_resource_func(
+                        resource_tracker=self.resource_tracker,
+                        resources=request.resources,
+                        bind_parent_id=bind_parent_id,
+                        bind_location=location,
+                        liquid_input_slot=LIQUID_INPUT_SLOT,
+                        liquid_type=ADD_LIQUID_TYPE,
+                        liquid_volume=LIQUID_VOLUME,
+                        slot_on_deck=slot,
+                    )
+                    res.response = serialize_result_info("", True, ret)
+                except Exception as e:
+                    traceback.print_exc()
+                    res.response = serialize_result_info(traceback.format_exc(), False, {})
                 return res
             # 接下来该根据bind_parent_id进行assign了，目前只有plr可以进行assign，不然没有办法输入到物料系统中
             resource = self.resource_tracker.figure_resource({"name": bind_parent_id})
@@ -403,9 +408,10 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                             empty_liquid_info_in[liquid_input_slot] = (liquid_type, liquid_volume)
                         plr_instance.set_well_liquids(empty_liquid_info_in)
                     if isinstance(resource, OTDeck) and "slot" in other_calling_param:
+                        other_calling_param["slot"] = int(other_calling_param["slot"])
                         resource.assign_child_at_slot(plr_instance, **other_calling_param)
                     else:
-                        _discard_slot = other_calling_param.pop("slot", -1)
+                        _discard_slot = other_calling_param.pop("slot", "-1")
                         resource.assign_child_resource(
                             plr_instance,
                             Coordinate(location["x"], location["y"], location["z"]),
