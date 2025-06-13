@@ -1,5 +1,5 @@
 # 光学表征设备：红外、紫外可见、拉曼等
-raman_home_made:
+raman.home_made:
   description: Raman spectroscopy device
   class:
     module: unilabos.devices.raman_uv.home_made_raman:RamanObj
@@ -22,46 +22,24 @@ raman_home_made:
     - status
     additionalProperties: false
     type: object
-hplc.agilent:
-  description: HPLC device
+
+raman.opsky_ATR30007:
+  description: Raman spectroscopy device
   class:
-    module: unilabos.devices.hplc.AgilentHPLC:HPLCDriver
+    module: unilabos.devices.raman_uv.opsky_raman:ATR30007
     type: python
     status_types:
-      device_status: String
-      could_run: Bool
-      driver_init_ok: Bool
-      is_running: Bool
-      finish_status: String
-      status_text: String
+      status: String
     action_value_mappings:
-      execute_command_from_outer:
-        type: SendCmd
+      start_Raman:
+        type: GetRaman
         goal:
-          command: command
-        feedback: {}
-        result:
-          success: success
-  schema:
-    properties:
-      device_status:
-        type: string
-      could_run:
-        type: boolean
-      driver_init_ok:
-        type: boolean
-      is_running:
-        type: boolean
-      finish_status:
-        type: string
-      status_text:
-        type: string
-    required:
-    - device_status
-    - could_run
-    - driver_init_ok
-    - is_running
-    - finish_status
-    - status_text
-    additionalProperties: false
-    type: object
+          integtime: IntegTime
+          ldpower: LdPower
+          ldwave: LdWave
+          ccdtemp: CCDTemp
+          filename: filename
+          saveroot: saveroot
+        feedback:
+          status: status
+        result: {}

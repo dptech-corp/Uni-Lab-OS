@@ -90,6 +90,8 @@ set(action_files
   "action/Evaporate.action"
   "action/EvacuateAndRefill.action"
 
+  "action/GetRaman.action"
+
   "action/WorkStationRun.action"
   "action/AGVTransfer.action"
 )
