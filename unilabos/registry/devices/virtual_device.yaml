@@ -100,24 +100,16 @@ virtual_stirrer:
           status: status
         result:
           success: success
-  # 虚拟搅拌器节点配置 - 只有一个连接点，用于连接需要搅拌的容器
+  # 虚拟搅拌器节点配置 - 机械连接设备，单一双向连接点
   handles:
-    input:
+    bidirectional:
     - handler_key: stirrer-vessel
       label: Vessel Connection
-      data_type: resource
-      io_type: target
+      data_type: mechanical
+      io_type: bidirectional
       data_source: handle
       data_key: vessel
-      description: "搅拌器连接的反应容器，提供机械搅拌功能"
-    output:
-    - handler_key: stirrer-vessel-out
-      label: Stirred Vessel
-      data_type: resource
-      io_type: source
-      data_source: executor
-      data_key: vessel
-      description: "经过搅拌处理的反应容器"
+      description: "搅拌器的机械连接口，直接与反应容器连接提供搅拌功能"
   schema:
     type: object
     properties:
@@ -414,24 +406,16 @@ virtual_heatchill:
           status: status
         result:
           success: success
-  # 虚拟加热/冷却器节点配置 - 温控设备，单一连接点用于放置容器
+  # 虚拟加热/冷却器节点配置 - 温控设备，单一双向连接点用于放置容器
   handles:
-    input:
+    bidirectional:
     - handler_key: heatchill-vessel
       label: Vessel Connection
-      data_type: resource
-      io_type: target
+      data_type: mechanical
+      io_type: bidirectional
       data_source: handle
       data_key: vessel
-      description: "放置在加热/冷却台上的反应容器"
-    output:
-    - handler_key: heatchill-vessel-out
-      label: Temperature Controlled Vessel
-      data_type: resource
-      io_type: source
-      data_source: executor
-      data_key: vessel
-      description: "经过温度控制处理的反应容器"
+      description: "加热/冷却器的物理连接口，容器直接放置在设备上进行温度控制"
   schema:
     type: object
     properties:
