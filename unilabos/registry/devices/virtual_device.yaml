@@ -1,3 +1,49 @@
+# 虚拟设备清单及连接特性
+
+# 1. virtual_pump - 虚拟泵
+# 描述：具有多通道阀门特性的泵，根据valve_position可连接多个容器
+# 连接特性：1个输入口 + 1个输出口（当前配置，实际应该有多个输出口）
+# 数据类型：fluid（流体连接）
+
+# 2. virtual_stirrer - 虚拟搅拌器  
+# 描述：机械连接设备，提供搅拌功能
+# 连接特性：1个双向连接点（bidirectional）
+# 数据类型：mechanical（机械连接）
+
+# 3a. virtual_valve - 虚拟八通阀门
+# 描述：8通阀门（实际配置为7通），可切换流向
+# 连接特性：1个口连接注射泵 + 7个输出口
+# 数据类型：fluid（流体连接）
+
+# 3b. virtual_solenoid_valve (电磁阀门)
+# 描述：简单的开关型电磁阀，只有开启和关闭两个状态
+# 连接特性：1个输入口 + 1个输出口，控制通断
+# 数据类型：fluid（流体连接）
+
+# 4. virtual_centrifuge - 虚拟离心机
+# 描述：单个样品处理设备，原地处理样品
+# 连接特性：1个输入口 + 1个输出口
+# 数据类型：resource（资源/样品连接）
+
+# 5. virtual_filter - 虚拟过滤器
+# 描述：分离设备，将样品分离为滤液和滤渣
+# 连接特性：1个输入口 + 2个输出口（滤液和滤渣）
+# 数据类型：resource（资源/样品连接）
+
+# 6. virtual_heatchill - 虚拟加热/冷却器
+# 描述：温控设备，容器直接放置在设备上进行温度控制
+# 连接特性：1个双向连接点（bidirectional）
+# 数据类型：mechanical（机械/物理接触连接）
+
+# 7. virtual_transfer_pump - 虚拟转移泵（注射器式）
+# 描述：注射器式转移泵，通过同一个口吸入和排出液体
+# 连接特性：1个双向连接点（bidirectional）
+# 数据类型：fluid（流体连接）
+
+# 8. virtual_column - 虚拟色谱柱
+# 描述：分离纯化设备，用于样品纯化
+# 连接特性：1个输入口 + 1个输出口
+# 数据类型：resource（资源/样品连接）
 virtual_pump:
   description: Virtual Pump for PumpTransferProtocol Testing
   class:
@@ -124,10 +170,10 @@ virtual_stirrer:
         default: 1000.0
     additionalProperties: false
 
-virtual_valve:
-  description: Virtual Valve for AddProtocol Testing
+virtual_multiway_valve:
+  description: Virtual 8-Way Valve for flow direction control
   class:
-    module: unilabos.devices.virtual.virtual_valve:VirtualValve
+    module: unilabos.devices.virtual.virtual_multiway_valve:VirtualMultiwayValve
     type: python
     status_types:
       status: String
@@ -139,10 +185,90 @@ virtual_valve:
       set_position:
         type: SendCmd
         goal:
-          command: position
+          position: position
         feedback: {}
         result:
           success: success
+  # 八通阀门节点配置 - 1个输入口，8个输出口，可切换流向
+  handles:
+    input:
+    - handler_key: multiway-valve-inlet
+      label: Valve Inlet
+      data_type: fluid
+      io_type: target
+      data_source: handle
+      data_key: fluid_in
+      description: "八通阀门进液口，接收来源流体"
+    output:
+    - handler_key: multiway-valve-port-1
+      label: Port 1
+      data_type: fluid
+      io_type: source
+      data_source: executor
+      data_key: fluid_port_1
+      description: "八通阀门端口1，position=1时流体从此口流出"
+    - handler_key: multiway-valve-port-2
+      label: Port 2
+      data_type: fluid
+      io_type: source
+      data_source: executor
+      data_key: fluid_port_2
+      description: "八通阀门端口2，position=2时流体从此口流出"
+    - handler_key: multiway-valve-port-3
+      label: Port 3
+      data_type: fluid
+      io_type: source
+      data_source: executor
+      data_key: fluid_port_3
+      description: "八通阀门端口3，position=3时流体从此口流出"
+    - handler_key: multiway-valve-port-4
+      label: Port 4
+      data_type: fluid
+      io_type: source
+      data_source: executor
+      data_key: fluid_port_4
+      description: "八通阀门端口4，position=4时流体从此口流出"
+    - handler_key: multiway-valve-port-5
+      label: Port 5
+      data_type: fluid
+      io_type: source
+      data_source: executor
+      data_key: fluid_port_5
+      description: "八通阀门端口5，position=5时流体从此口流出"
+    - handler_key: multiway-valve-port-6
+      label: Port 6
+      data_type: fluid
+      io_type: source
+      data_source: executor
+      data_key: fluid_port_6
+      description: "八通阀门端口6，position=6时流体从此口流出"
+    - handler_key: multiway-valve-port-7
+      label: Port 7
+      data_type: fluid
+      io_type: source
+      data_source: executor
+      data_key: fluid_port_7
+      description: "八通阀门端口7，position=7时流体从此口流出"
+  schema:
+    type: object
+    properties:
+      port:
+        type: string
+        default: "VIRTUAL"
+      positions:
+        type: integer
+        default: 8
+    additionalProperties: false
+virtual_solenoid_valve:
+  description: Virtual Solenoid Valve for simple on/off flow control
+  class:
+    module: unilabos.devices.virtual.virtual_solenoid_valve:VirtualSolenoidValve
+    type: python
+    status_types:
+      status: String
+      valve_state: String  # "open" or "closed"
+      is_open: Boolean
+    action_value_mappings:
       open:
         type: EmptyIn
         goal: {}
@@ -155,77 +281,36 @@ virtual_valve:
         feedback: {}
         result:
           success: success
-  # 虚拟阀门节点配置 - 6通阀门，1个输入口，6个输出口，可切换流向
+      set_state:
+        type: BoolSingleInput
+        goal:
+          state: state
+        feedback: {}
+        result:
+          success: success
+  # 电磁阀门节点配置 - 双向流通的开关型阀门，流动方向由泵决定
   handles:
-    input:
-    - handler_key: valve-inlet
-      label: Valve Inlet
+    bidirectional:
+    - handler_key: solenoid-valve-port
+      label: Valve Port
       data_type: fluid
-      io_type: target
+      io_type: bidirectional
       data_source: handle
-      data_key: fluid_in
-      description: "阀门进液口，接收来源流体"
-    output:
-    - handler_key: valve-port-1
-      label: Port 1
-      data_type: fluid
-      io_type: source
-      data_source: executor
-      data_key: fluid_port_1
-      description: "阀门端口1，position=1时流体从此口流出"
-    - handler_key: valve-port-2
-      label: Port 2
-      data_type: fluid
-      io_type: source
-      data_source: executor
-      data_key: fluid_port_2
-      description: "阀门端口2，position=2时流体从此口流出"
-    - handler_key: valve-port-3
-      label: Port 3
-      data_type: fluid
-      io_type: source
-      data_source: executor
-      data_key: fluid_port_3
-      description: "阀门端口3，position=3时流体从此口流出"
-    - handler_key: valve-port-4
-      label: Port 4
-      data_type: fluid
-      io_type: source
-      data_source: executor
-      data_key: fluid_port_4
-      description: "阀门端口4，position=4时流体从此口流出"
-    - handler_key: valve-port-5
-      label: Port 5
-      data_type: fluid
-      io_type: source
-      data_source: executor
-      data_key: fluid_port_5
-      description: "阀门端口5，position=5时流体从此口流出"
-    - handler_key: valve-port-6
-      label: Port 6
-      data_type: fluid
-      io_type: source
-      data_source: executor
-      data_key: fluid_port_6
-      description: "阀门端口6，position=6时流体从此口流出"
-    - handler_key: valve-port-7
-      label: Port 7
-      data_type: fluid
-      io_type: source
-      data_source: executor
-      data_key: fluid_port_6
-      description: "阀门端口7，position=6时流体从此口流出"   
+      data_key: fluid_port
+      description: "电磁阀的双向流体口，开启时允许流体双向通过，关闭时完全阻断"
   schema:
     type: object
     properties:
       port:
         type: string
         default: "VIRTUAL"
-      positions:
-        type: integer
-        default: 7
+      voltage:
+        type: number
+        default: 12.0
+      response_time:
+        type: number
+        default: 0.1
     additionalProperties: false
-
 virtual_centrifuge:
   description: Virtual Centrifuge for CentrifugeProtocol Testing
   class:
