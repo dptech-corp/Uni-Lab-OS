@@ -12,6 +12,7 @@ string get_direction
 string put_direction
 ---
 # 结果字段
+string return_info
 bool success
 ---
 # 反馈字段 

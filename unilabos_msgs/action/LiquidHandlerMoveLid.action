@@ -12,6 +12,7 @@ string put_direction
 float64 pickup_distance_from_top
 ---
 # 结果字段
+string return_info
 bool success
 ---
 # 反馈字段 

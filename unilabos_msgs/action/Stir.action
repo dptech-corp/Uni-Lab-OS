@@ -3,6 +3,7 @@ float64 stir_time
 float64 stir_speed
 float64 settling_time
 ---
+string return_info
 bool success
 ---
 string status

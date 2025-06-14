@@ -13,6 +13,7 @@ float64 stir_time # Optional. Time stir for after adding solvent, before separat
 float64 stir_speed # Optional. Speed to stir at after adding solvent, before separation of phases.
 float64 settling_time # Optional. Time
 ---
+string return_info
 bool success
 ---
 string status

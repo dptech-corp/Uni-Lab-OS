@@ -1,0 +1,388 @@
+virtual_pump:
+  description: Virtual Pump for PumpTransferProtocol Testing
+  class:
+    module: unilabos.devices.virtual.virtual_pump:VirtualPump
+    type: python
+    status_types:
+      status: String
+      position: Float64
+      valve_position: Int32  # 修复：使用 Int32 而不是 String
+      max_volume: Float64
+      current_volume: Float64
+    action_value_mappings:
+      transfer:
+        type: PumpTransfer
+        goal:
+          from_vessel: from_vessel
+          to_vessel: to_vessel
+          volume: volume
+          amount: amount
+          time: time
+          viscous: viscous
+          rinsing_solvent: rinsing_solvent
+          rinsing_volume: rinsing_volume
+          rinsing_repeats: rinsing_repeats
+          solid: solid
+        feedback:
+          status: status
+        result:
+          success: success
+      set_valve_position:
+        type: FloatSingleInput
+        goal:
+          Int32: Int32  
+        feedback:
+          status: status
+        result:
+          success: success
+  schema:
+    type: object
+    properties:
+      port:
+        type: string
+        default: "VIRTUAL"
+      max_volume:
+        type: number
+        default: 25.0
+    additionalProperties: false
+
+virtual_stirrer:
+  description: Virtual Stirrer for StirProtocol Testing
+  class:
+    module: unilabos.devices.virtual.virtual_stirrer:VirtualStirrer
+    type: python
+    status_types:
+      status: String
+    action_value_mappings:
+      stir:
+        type: Stir
+        goal:
+          stir_time: stir_time
+          stir_speed: stir_speed
+          settling_time: settling_time
+        feedback:
+          status: status
+        result:
+          success: success
+      start_stir:
+        type: ProtocolStartStir
+        goal:
+          vessel: vessel
+          stir_speed: stir_speed
+          purpose: purpose
+        feedback:
+          status: status
+        result:
+          success: success
+      stop_stir:
+        type: ProtocolStopStir
+        goal:
+          vessel: vessel
+        feedback:
+          status: status
+        result:
+          success: success
+  schema:
+    type: object
+    properties:
+      port:
+        type: string
+        default: "VIRTUAL"
+      max_temp:
+        type: number
+        default: 100.0
+      max_speed:
+        type: number
+        default: 1000.0
+    additionalProperties: false
+
+virtual_valve:
+  description: Virtual Valve for AddProtocol Testing
+  class:
+    module: unilabos.devices.virtual.virtual_valve:VirtualValve
+    type: python
+    status_types:
+      status: String
+      valve_state: String
+      current_position: Int32
+      target_position: Int32
+      max_positions: Int32
+    action_value_mappings:
+      set_position:
+        type: SendCmd
+        goal:
+          command: position
+        feedback: {}
+        result:
+          success: success
+      open:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result:
+          success: success
+      close:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result:
+          success: success
+  schema:
+    type: object
+    properties:
+      port:
+        type: string
+        default: "VIRTUAL"
+      positions:
+        type: integer
+        default: 6
+    additionalProperties: false
+
+virtual_centrifuge:
+  description: Virtual Centrifuge for CentrifugeProtocol Testing
+  class:
+    module: unilabos.devices.virtual.virtual_centrifuge:VirtualCentrifuge
+    type: python
+    status_types:
+      status: String
+      current_speed: Float64
+      target_speed: Float64
+      current_temp: Float64
+      target_temp: Float64
+      max_speed: Float64
+      max_temp: Float64
+      min_temp: Float64
+      centrifuge_state: String
+      time_remaining: Float64
+    action_value_mappings:
+      centrifuge:
+        type: ProtocolCentrifuge
+        goal:
+          vessel: vessel
+          speed: speed
+          time: time
+          temp: temp
+        feedback:
+          progress: progress
+          current_speed: current_speed
+          current_temp: current_temp
+          current_status: status
+        result:
+          success: success
+          message: message
+  schema:
+    type: object
+    properties:
+      port:
+        type: string
+        default: "VIRTUAL"
+      max_speed:
+        type: number
+        default: 15000.0
+      max_temp:
+        type: number
+        default: 40.0
+      min_temp:
+        type: number
+        default: 4.0
+    additionalProperties: false
+
+virtual_filter:
+  description: Virtual Filter for FilterProtocol Testing
+  class:
+    module: unilabos.devices.virtual.virtual_filter:VirtualFilter
+    type: python
+    status_types:
+      status: String
+      filter_state: String
+      current_temp: Float64
+      target_temp: Float64
+      max_temp: Float64
+      stir_speed: Float64
+      max_stir_speed: Float64
+      filtered_volume: Float64
+      progress: Float64
+      message: String
+    action_value_mappings:
+      filter_sample:
+        type: ProtocolFilter
+        goal:
+          vessel: vessel
+          filtrate_vessel: filtrate_vessel
+          stir: stir
+          stir_speed: stir_speed
+          temp: temp
+          continue_heatchill: continue_heatchill
+          volume: volume
+        feedback:
+          progress: progress
+          current_temp: current_temp
+          filtered_volume: filtered_volume
+          current_status: status
+        result:
+          success: success
+          message: message
+  schema:
+    type: object
+    properties:
+      port:
+        type: string
+        default: "VIRTUAL"
+      max_temp:
+        type: number
+        default: 100.0
+      max_stir_speed:
+        type: number
+        default: 1000.0
+    additionalProperties: false
+
+virtual_heatchill:
+  description: Virtual HeatChill for HeatChillProtocol Testing
+  class:
+    module: unilabos.devices.virtual.virtual_heatchill:VirtualHeatChill
+    type: python
+    status_types:
+      status: String
+    action_value_mappings:
+      heat_chill:
+        type: HeatChill
+        goal:
+          vessel: vessel
+          temp: temp
+          time: time
+          stir: stir
+          stir_speed: stir_speed
+          purpose: purpose
+        feedback:
+          status: status
+        result:
+          success: success
+      heat_chill_start:
+        type: HeatChillStart
+        goal:
+          vessel: vessel
+          temp: temp
+          purpose: purpose
+        feedback:
+          status: status
+        result:
+          success: success
+      heat_chill_stop:
+        type: HeatChillStop
+        goal:
+          vessel: vessel
+        feedback:
+          status: status
+        result:
+          success: success
+  schema:
+    type: object
+    properties:
+      port:
+        type: string
+        default: "VIRTUAL"
+      max_temp:
+        type: number
+        default: 200.0
+      min_temp:
+        type: number
+        default: -80.0
+      max_stir_speed:
+        type: number
+        default: 1000.0
+    additionalProperties: false
+
+virtual_transfer_pump:
+  description: Virtual Transfer Pump for TransferProtocol Testing
+  class:
+    module: unilabos.devices.virtual.virtual_transferpump:VirtualTransferPump
+    type: python
+    status_types:
+      status: String
+      current_volume: Float64
+      max_volume: Float64
+      transfer_rate: Float64
+      from_vessel: String
+      to_vessel: String
+      progress: Float64
+      transferred_volume: Float64
+      current_status: String
+    action_value_mappings:
+      transfer:
+        type: ProtocolTransfer
+        goal:
+          from_vessel: from_vessel
+          to_vessel: to_vessel
+          volume: volume
+          amount: amount
+          time: time
+          viscous: viscous
+          rinsing_solvent: rinsing_solvent
+          rinsing_volume: rinsing_volume
+          rinsing_repeats: rinsing_repeats
+          solid: solid
+        feedback:
+          progress: progress
+          transferred_volume: transferred_volume
+          current_status: current_status
+        result:
+          success: success
+          message: message
+  schema:
+    type: object
+    properties:
+      port:
+        type: string
+        default: "VIRTUAL"
+      max_volume:
+        type: number
+        default: 50.0
+      transfer_rate:
+        type: number
+        default: 5.0
+    additionalProperties: false
+
+virtual_column:
+  description: Virtual Column for RunColumn Protocol Testing
+  class:
+    module: unilabos.devices.virtual.virtual_column:VirtualColumn
+    type: python
+    status_types:
+      status: String
+      column_state: String
+      current_flow_rate: Float64
+      max_flow_rate: Float64
+      column_length: Float64
+      column_diameter: Float64
+      processed_volume: Float64
+      progress: Float64
+      current_status: String
+    action_value_mappings:
+      run_column:
+        type: ProtocolRunColumn
+        goal:
+          from_vessel: from_vessel
+          to_vessel: to_vessel
+          column: column
+        feedback:
+          status: current_status
+          progress: progress
+        result:
+          success: success
+          message: message
+  schema:
+    type: object
+    properties:
+      port:
+        type: string
+        default: "VIRTUAL"
+      max_flow_rate:
+        type: number
+        default: 10.0
+      column_length:
+        type: number
+        default: 25.0
+      column_diameter:
+        type: number
+        default: 2.0
+    additionalProperties: false

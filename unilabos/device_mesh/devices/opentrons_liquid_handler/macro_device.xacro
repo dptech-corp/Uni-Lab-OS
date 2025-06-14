@@ -3,11 +3,10 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
   <xacro:macro name="opentrons_liquid_handler" 
-  params="parent_link:='' station_name:='' device_name:='' x:=0 y:=0 z:=0 r:=0 mesh_path:=''">
-
+  params="parent_link:='' station_name:='' device_name:='' x:=0 y:=0 z:=0 rx:=0 ry:=0 r:=0 mesh_path:=''">
 
     <joint name="${station_name}${device_name}base_link_joint" type="fixed">
-      <origin xyz="${x} ${y} ${z}" rpy="0 0 ${r}" />
+      <origin xyz="${x} ${y} ${z}" rpy="${rx} ${ry} ${r}" />
       <parent link="${parent_link}"/>
       <child link="${station_name}${device_name}device_link"/>
       <axis xyz="0 0 0"/>

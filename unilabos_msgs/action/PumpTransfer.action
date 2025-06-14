@@ -10,6 +10,7 @@ float64 rinsing_volume
 int32 rinsing_repeats
 bool solid
 ---
+string return_info
 bool success
 ---
 string status

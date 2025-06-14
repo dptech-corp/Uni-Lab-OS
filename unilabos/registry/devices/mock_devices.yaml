@@ -1,0 +1,892 @@
+mock_chiller:
+  description: Mock Chiller Device
+  class:
+    module: unilabos.devices.mock.mock_chiller:MockChiller
+    type: python
+    status_types:
+      current_temperature: Float64
+      target_temperature: Float64
+      status: String
+      is_cooling: Bool
+      is_heating: Bool
+      vessel: String         # 新增
+      purpose: String        # 新增
+    action_value_mappings:
+      emergency_stop:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result:
+          success: success
+      heat_chill_start:
+        type: HeatChillStart
+        goal:
+          vessel: vessel
+          temp: temp
+          purpose: purpose
+        feedback: {}
+        result:
+          success: success
+          status: status
+      heat_chill_stop:
+        type: HeatChillStop
+        goal:
+          vessel: vessel
+        feedback: {}
+        result:
+          success: success
+          status: status
+  schema:
+    type: object
+    properties:
+      current_temperature:
+        type: number
+        description: Current temperature of the chiller in °C
+      target_temperature:
+        type: number
+        description: Target temperature setting in °C
+      status:
+        type: string
+        description: Current status of the device
+      is_cooling:
+        type: boolean
+        description: Whether the device is actively cooling
+      is_heating:
+        type: boolean
+        description: Whether the device is actively heating
+      vessel:                # 新增
+        type: string
+        description: Current vessel being processed
+      purpose:               # 新增
+        type: string
+        description: Purpose of the current operation
+    required:
+    - current_temperature
+    - target_temperature
+    - status
+    - vessel
+    - purpose
+    additionalProperties: false
+mock_filter:
+  description: Mock Filter Device
+  class:
+    module: unilabos.devices.mock.mock_filter:MockFilter
+    type: python
+    status_types:
+      status: String
+      is_filtering: Bool
+      flow_rate: Float64
+      pressure_drop: Float64
+      filter_life: Float64
+      vessel: String
+      filtrate_vessel: String
+      filtered_volume: Float64
+      progress: Float64
+      stir: Bool
+      stir_speed: Float64
+      temperature: Float64
+      continue_heatchill: Bool
+      target_volume: Float64
+    action_value_mappings:
+      filter:
+        type: ProtocolFilter
+        goal:
+          vessel: vessel
+          filtrate_vessel: filtrate_vessel
+          stir: stir
+          stir_speed: stir_speed
+          temp: temp
+          continue_heatchill: continue_heatchill
+          volume: volume
+        feedback:
+          progress: progress
+          current_temp: current_temp
+          filtered_volume: filtered_volume
+          current_status: current_status
+        result:
+          success: success
+          message: message
+      stop_filtering:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result:
+          success: success
+      replace_filter:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result:
+          success: success
+  schema:
+    type: object
+    properties:
+      status:
+        type: string
+        description: Current status of the filter
+      is_filtering:
+        type: boolean
+        description: Whether the filter is actively filtering
+      flow_rate:
+        type: number
+        description: Current flow rate in L/min
+      pressure_drop:
+        type: number
+        description: Pressure drop across the filter in Pa
+      filter_life:
+        type: number
+        description: Remaining filter life percentage
+      power_on:
+        type: boolean
+        description: Power state of the device
+    required:
+    - status
+    - is_filtering
+    - flow_rate
+    - filter_life
+    - vessel
+    - filtrate_vessel
+    - filtered_volume
+    - progress
+    additionalProperties: false
+mock_heater:
+  description: Mock Heater Device
+  class:
+    module: unilabos.devices.mock.mock_heater:MockHeater
+    type: python
+    status_types:
+      current_temperature: Float64
+      target_temperature: Float64
+      status: String
+      is_heating: Bool
+      heating_power: Float64
+      max_temperature: Float64
+      vessel: String
+      purpose: String
+      stir: Bool
+      stir_speed: Float64
+    action_value_mappings:
+      heat_chill_start:
+        type: HeatChillStart
+        goal:
+          vessel: vessel
+          temp: temp
+          purpose: purpose
+        feedback:
+          status: status
+        result:
+          success: success
+      heat_chill_stop:
+        type: HeatChillStop
+        goal:
+          vessel: vessel
+        feedback:
+          status: status
+        result:
+          success: success
+      heat_chill:
+        type: HeatChill
+        goal:
+          vessel: vessel
+          temp: temp
+          time: time
+          stir: stir
+          stir_speed: stir_speed
+          purpose: purpose
+        feedback:
+          status: status
+        result:
+          success: success
+      emergency_stop:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result:
+          success: success
+  schema:
+    type: object
+    properties:
+      current_temperature:
+        type: number
+        description: Current temperature of the heater in °C
+      target_temperature:
+        type: number
+        description: Target temperature setting in °C
+      status:
+        type: string
+        description: Current status of the device
+      is_heating:
+        type: boolean
+        description: Whether the device is actively heating
+      heating_power:
+        type: number
+        description: Current heating power percentage
+      max_temperature:
+        type: number
+        description: Maximum temperature limit
+      vessel:
+        type: string
+        description: Current vessel being heated
+      purpose:
+        type: string
+        description: Purpose of the heating operation
+      stir:
+        type: boolean
+        description: Whether stirring is enabled
+      stir_speed:
+        type: number
+        description: Current stirring speed
+    required:
+    - current_temperature
+    - target_temperature
+    - status
+    - vessel
+    - purpose
+    additionalProperties: false
+mock_pump:
+  description: Mock Pump Device
+  class:
+    module: unilabos.devices.mock.mock_pump:MockPump
+    type: python
+    status_types:
+      status: String
+      pump_state: String
+      flow_rate: Float64
+      target_flow_rate: Float64
+      pressure: Float64
+      total_volume: Float64
+      max_flow_rate: Float64
+      max_pressure: Float64
+      from_vessel: String
+      to_vessel: String
+      transfer_volume: Float64
+      amount: String
+      transfer_time: Float64
+      is_viscous: Bool
+      rinsing_solvent: String
+      rinsing_volume: Float64
+      rinsing_repeats: Int32
+      is_solid: Bool
+      time_spent: Float64
+      time_remaining: Float64
+      current_device: String
+    action_value_mappings:
+      pump_transfer:
+          type: PumpTransfer
+          goal:
+            from_vessel: from_vessel
+            to_vessel: to_vessel
+            volume: volume
+            amount: amount
+            time: time
+            viscous: viscous
+            rinsing_solvent: rinsing_solvent
+            rinsing_volume: rinsing_volume
+            rinsing_repeats: rinsing_repeats
+            solid: solid
+          feedback:
+            status: status
+            current_device: current_device
+            time_spent: time_spent
+            time_remaining: time_remaining
+          result:
+            success: success
+      pause_pump:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result:
+          success: success
+      resume_pump:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result:
+          success: success
+      reset_volume_counter:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result:
+          success: success
+  schema:
+    type: object
+    properties:
+      status:
+        type: string
+        description: Current status of the pump
+      pump_state:
+        type: string
+        description: Pump operation state (Running/Stopped/Paused)
+      flow_rate:
+        type: number
+        description: Current flow rate in mL/min
+      target_flow_rate:
+        type: number
+        description: Target flow rate in mL/min
+      pressure:
+        type: number
+        description: Current pressure in bar
+      total_volume:
+        type: number
+        description: Total accumulated volume in mL
+      max_flow_rate:
+        type: number
+        description: Maximum flow rate in mL/min
+      max_pressure:
+        type: number
+        description: Maximum pressure in bar
+      from_vessel:
+        type: string
+        description: Source vessel for transfer
+      to_vessel:
+        type: string
+        description: Target vessel for transfer
+      transfer_volume:
+        type: number
+        description: Volume to transfer in mL
+      amount:
+        type: string
+        description: Amount description
+      transfer_time:
+        type: number
+        description: Transfer time in seconds
+      is_viscous:
+        type: boolean
+        description: Whether the liquid is viscous
+      rinsing_solvent:
+        type: string
+        description: Solvent used for rinsing
+      rinsing_volume:
+        type: number
+        description: Volume used for rinsing
+      rinsing_repeats:
+        type: integer
+        description: Number of rinsing cycles
+      is_solid:
+        type: boolean
+        description: Whether transferring solid material
+      current_device:
+        type: string
+        description: Current device identifier
+    required:
+    - status
+    - pump_state
+    - flow_rate
+    - from_vessel
+    - to_vessel
+    additionalProperties: false
+mock_rotavap:
+  description: Mock Rotavap Device
+  class:
+    module: unilabos.devices.mock.mock_rotavap:MockRotavap
+    type: python
+    status_types:
+      status: String
+      rotate_state: String
+      rotate_time: Float64
+      rotate_speed: Float64
+      pump_state: String
+      pump_time: Float64
+      vacuum_level: Float64
+      temperature: Float64
+      target_temperature: Float64
+      success: String
+    action_value_mappings:
+      set_timer:
+        type: StrSingleInput
+        goal:
+          string: command
+        feedback: {}
+        result:
+          success: success
+      set_rotate_time:
+        type: FloatSingleInput
+        goal:
+          float_in: time_seconds
+        feedback: {}
+        result:
+          success: success
+      set_pump_time:
+        type: FloatSingleInput
+        goal:
+          float_in: time_seconds
+        feedback: {}
+        result:
+          success: success
+      set_rotate_speed:
+        type: FloatSingleInput
+        goal:
+          float_in: speed
+        feedback: {}
+        result:
+          success: success
+      set_temperature:
+        type: FloatSingleInput
+        goal:
+          float_in: temperature
+        feedback: {}
+        result:
+          success: success
+      start_rotation:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result:
+          success: success
+      start_pump:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result:
+          success: success
+  schema:
+    type: object
+    properties:
+      status:
+        type: string
+        description: Current status of the rotavap
+      rotate_state:
+        type: string
+        description: Rotation state (Running/Stopped)
+      rotate_time:
+        type: number
+        description: Remaining rotation time in seconds
+      rotate_speed:
+        type: number
+        description: Rotation speed in rpm
+      pump_state:
+        type: string
+        description: Pump state (Running/Stopped)
+      pump_time:
+        type: number
+        description: Remaining pump time in seconds
+      vacuum_level:
+        type: number
+        description: Current vacuum level in mbar
+      temperature:
+        type: number
+        description: Current water bath temperature
+      target_temperature:
+        type: number
+        description: Target water bath temperature
+      success:
+        type: string
+        description: Operation success status
+    required:
+    - status
+    - rotate_time
+    - pump_time
+    - temperature
+    additionalProperties: false
+mock_separator:
+  description: Simplified Mock Separator Device
+  class:
+    module: unilabos.devices.mock.mock_separator:MockSeparator
+    type: python
+    status_types:
+      status: String
+      settling_time: Float64
+      valve_state: String
+      shake_time: Float64
+      shake_status: String
+      current_device: String
+      purpose: String
+      product_phase: String
+      from_vessel: String
+      separation_vessel: String
+      to_vessel: String
+      waste_phase_to_vessel: String
+      solvent: String
+      solvent_volume: Float64
+      through: String
+      repeats: Int32
+      stir_time: Float64
+      stir_speed: Float64
+      time_spent: Float64
+      time_remaining: Float64
+    action_value_mappings:
+      separate:
+        type: Separate
+        goal:
+          purpose: purpose
+          product_phase: product_phase
+          from_vessel: from_vessel
+          separation_vessel: separation_vessel
+          to_vessel: to_vessel
+          waste_phase_to_vessel: waste_phase_to_vessel
+          solvent: solvent
+          solvent_volume: solvent_volume
+          through: through
+          repeats: repeats
+          stir_time: stir_time
+          stir_speed: stir_speed
+          settling_time: settling_time
+        feedback:
+          status: status
+          current_device: current_device
+          time_spent: time_spent
+          time_remaining: time_remaining
+        result:
+          success: success
+      shake:
+        type: FloatSingleInput
+        goal:
+          float_in: shake_time
+        feedback:
+          status: status
+        result:
+          success: success
+      stop_operations:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result:
+          success: success
+      set_valve:
+        type: StrSingleInput
+        goal:
+          string: command
+        feedback: {}
+        result:
+          success: success
+  schema:
+    type: object
+    properties:
+      status:
+        type: string
+        description: Current status of the separator
+      settling_time:
+        type: number
+        description: Settling time in seconds
+      valve_state:
+        type: string
+        description: Valve state (Open/Closed)
+      shake_time:
+        type: number
+        description: Remaining shake time in seconds
+      shake_status:
+        type: string
+        description: Current shake state
+      purpose:
+        type: string
+        description: Separation purpose (wash/extract)
+      product_phase:
+        type: string
+        description: Product phase (top/bottom)
+      from_vessel:
+        type: string
+        description: Source vessel
+      separation_vessel:
+        type: string
+        description: Vessel for separation
+      to_vessel:
+        type: string
+        description: Target vessel
+    required:
+    - status
+    - valve_state
+    - shake_status
+    - current_device
+    additionalProperties: false
+mock_solenoid_valve:
+  description: Mock Solenoid Valve Device
+  class:
+    module: unilabos.devices.mock.mock_solenoid_valve:MockSolenoidValve
+    type: python
+    status_types:
+      status: String
+      valve_status: String
+    action_value_mappings:
+      set_valve_status:
+        type: StrSingleInput
+        goal:
+          string: status
+        feedback: {}
+        result:
+          success: success
+      open_valve:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result:
+          success: success
+      close_valve:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result:
+          success: success
+  schema:
+    type: object
+    properties:
+      status:
+        type: string
+        description: Current status of the valve
+      valve_status:
+        type: string
+        description: Valve status (Open/Closed)
+    required:
+    - status
+    - valve_status
+    additionalProperties: false
+mock_stirrer:
+  description: Mock Stirrer Device
+  class:
+    module: unilabos.devices.mock.mock_stirrer:MockStirrer
+    type: python
+    status_types:
+      status: String
+      stir_speed: Float64
+      target_stir_speed: Float64
+      stir_state: String
+      temperature: Float64
+      target_temperature: Float64
+      heating_state: String
+      heating_power: Float64
+      max_stir_speed: Float64
+      max_temperature: Float64
+    action_value_mappings:
+      set_stir_speed:
+        type: FloatSingleInput
+        goal:
+          float_in: speed
+        feedback: {}
+        result:
+          success: success
+      set_temperature:
+        type: FloatSingleInput
+        goal:
+          float_in: temperature
+        feedback: {}
+        result:
+          success: success
+      start_stirring:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result:
+          success: success
+      stop_stirring:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result:
+          success: success
+      heating_control:
+        type: StrSingleInput
+        goal:
+          string: heating_state
+        feedback: {}
+        result:
+          success: success
+  schema:
+    type: object
+    properties:
+      status:
+        type: string
+        description: Current status of the stirrer
+      stir_speed:
+        type: number
+        description: Current stirring speed in rpm
+      target_stir_speed:
+        type: number
+        description: Target stirring speed in rpm
+      stir_state:
+        type: string
+        description: Stirring state (Running/Stopped)
+      temperature:
+        type: number
+        description: Current temperature in °C
+      target_temperature:
+        type: number
+        description: Target temperature in °C
+      heating_state:
+        type: string
+        description: Heating state (On/Off)
+      heating_power:
+        type: number
+        description: Current heating power percentage
+      max_stir_speed:
+        type: number
+        description: Maximum stirring speed in rpm
+      max_temperature:
+        type: number
+        description: Maximum temperature in °C
+    required:
+    - status
+    - stir_speed
+    - temperature
+    - power_state
+    additionalProperties: false
+mock_stirrer_new:
+  description: Mock Stirrer Device (Copy Version)
+  class:
+    module: unilabos.devices.mock.mock_stirrer_new:MockStirrer_new
+    type: python
+    status_types:
+      status: String
+      vessel: String
+      purpose: String
+      stir_speed: Float64
+      target_stir_speed: Float64
+      stir_state: String
+      stir_time: Float64
+      settling_time: Float64
+      progress: Float64
+      max_stir_speed: Float64
+    action_value_mappings:
+      start_stir:
+        type: ProtocolStartStir
+        goal:
+          vessel: vessel
+          stir_speed: stir_speed
+          purpose: purpose
+        feedback:
+          progress: progress
+          current_speed: stir_speed
+          current_status: status
+        result:
+          success: success
+          message: message
+      stir:
+        type: Stir
+        goal:
+          stir_time: stir_time
+          stir_speed: stir_speed
+          settling_time: settling_time
+        feedback:
+          status: status
+        result:
+          success: success
+      stop_stir:
+        type: ProtocolStopStir
+        goal:
+          vessel: vessel
+        feedback:
+          progress: progress
+          current_status: status
+        result:
+          success: success
+          message: message
+  schema:
+    type: object
+    properties:
+      status:
+        type: string
+      vessel:
+        type: string
+      purpose:
+        type: string
+      stir_speed:
+        type: number
+      target_stir_speed:
+        type: number
+      stir_state:
+        type: string
+      stir_time:
+        type: number
+      settling_time:
+        type: number
+      progress:
+        type: number
+      max_stir_speed:
+        type: number
+    required:
+    - status
+    - stir_speed
+    - stir_state
+    - vessel
+    additionalProperties: false
+mock_vacuum:
+  description: Mock Vacuum Pump Device
+  class:
+    module: unilabos.devices.mock.mock_vacuum:MockVacuum
+    type: python
+    status_types:
+      status: String
+      power_state: String
+      pump_state: String
+      vacuum_level: Float64
+      target_vacuum: Float64
+      pump_speed: Float64
+      pump_efficiency: Float64
+      max_pump_speed: Float64
+    action_value_mappings:
+      power_control:
+        type: StrSingleInput
+        goal:
+          string: power_state
+        feedback: {}
+        result:
+          success: success
+      set_vacuum_level:
+        type: FloatSingleInput
+        goal:
+          float_in: vacuum_level
+        feedback: {}
+        result:
+          success: success
+      start_vacuum:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result:
+          success: success
+      stop_vacuum:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result:
+          success: success
+      pause_vacuum:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result:
+          success: success
+      resume_vacuum:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result:
+          success: success
+      vent_to_atmosphere:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result:
+          success: success
+  schema:
+    type: object
+    properties:
+      status:
+        type: string
+        description: Current status of the vacuum pump
+      power_state:
+        type: string
+        description: Power state (On/Off)
+      pump_state:
+        type: string
+        description: Pump operation state (Running/Stopped/Paused)
+      vacuum_level:
+        type: number
+        description: Current vacuum level in mbar
+      target_vacuum:
+        type: number
+        description: Target vacuum level in mbar
+      pump_speed:
+        type: number
+        description: Current pump speed in L/s
+      pump_efficiency:
+        type: number
+        description: Pump efficiency percentage
+      max_pump_speed:
+        type: number
+        description: Maximum pump speed in L/s
+    required:
+    - status
+    - power_state
+    - pump_state
+    - vacuum_level
+    additionalProperties: false

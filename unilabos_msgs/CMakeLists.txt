@@ -13,6 +13,7 @@ endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
+  add_compile_options(-include cstdint)
 endif()
 
 # find dependencies
@@ -28,6 +29,25 @@ set(action_files
   "action/HeatChillStart.action"
   "action/HeatChillStop.action"
 
+  "action/ProtocolCleanVessel.action"
+  "action/ProtocolDissolve.action"
+  "action/ProtocolFilterThrough.action"
+  "action/ProtocolRunColumn.action"
+  "action/ProtocolWait.action"
+  "action/ProtocolWashSolid.action"
+  "action/ProtocolFilter.action"
+
+  "action/ProtocolCentrifuge.action"
+  "action/ProtocolCrystallize.action"
+  "action/ProtocolDry.action"
+  "action/ProtocolPurge.action"
+  "action/ProtocolStartPurge.action"
+  "action/ProtocolStartStir.action"
+  "action/ProtocolStopPurge.action"
+  "action/ProtocolStopStir.action"
+  "action/ProtocolTransfer.action"
+
+  "action/LiquidHandlerProtocolCreation.action"
   "action/LiquidHandlerAspirate.action"
   "action/LiquidHandlerDiscardTips.action"
   "action/LiquidHandlerDispense.action"
@@ -42,6 +62,11 @@ set(action_files
   "action/LiquidHandlerReturnTips96.action"
   "action/LiquidHandlerStamp.action"
   "action/LiquidHandlerTransfer.action"
+
+  "action/LiquidHandlerTransferBiomek.action"
+  "action/LiquidHandlerIncubateBiomek.action"
+  "action/LiquidHandlerMoveBiomek.action"
+  "action/LiquidHandlerOscillateBiomek.action"
 
   "action/LiquidHandlerAdd.action"
   "action/LiquidHandlerMix.action"

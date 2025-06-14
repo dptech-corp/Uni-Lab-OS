@@ -131,7 +131,7 @@ _msg_converter: Dict[Type, Any] = {
     Bool: lambda x: Bool(data=bool(x)),
     str: str,
     String: lambda x: String(data=str(x)),
-    Point: lambda x: Point(x=x.x, y=x.y, z=x.z),
+    Point: lambda x: Point(x=x.x, y=x.y, z=x.z) if not isinstance(x, dict) else Point(x=x.get("x", 0.0), y=x.get("y", 0.0), z=x.get("z", 0.0)),
     Resource: lambda x: Resource(
         id=x.get("id", ""),
         name=x.get("name", ""),
@@ -141,7 +141,7 @@ _msg_converter: Dict[Type, Any] = {
         type=x.get("type", ""),
         category=x.get("class", "") or x.get("type", ""),
         pose=(
-            Pose(position=Point(x=float(x.get("position", {}).get("x", 0)), y=float(x.get("position", {}).get("y", 0)), z=float(x.get("position", {}).get("z", 0))))
+            Pose(position=Point(x=float(x.get("position", {}).get("x", 0.0)), y=float(x.get("position", {}).get("y", 0.0)), z=float(x.get("position", {}).get("z", 0.0))))
             if x.get("position", None) is not None
             else Pose()
         ),

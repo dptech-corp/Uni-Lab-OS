@@ -15,6 +15,7 @@ int32 mix_rate
 float64 mix_liquid_height
 string[] none_keys
 ---
+string return_info
 bool success
 ---
 # 反馈

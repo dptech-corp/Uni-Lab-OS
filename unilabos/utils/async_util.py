@@ -5,7 +5,7 @@ from asyncio import get_event_loop
 from unilabos.utils.log import error
 
 
-def run_async_func(func, *, loop=None, **kwargs):
+def run_async_func(func, *, loop=None, trace_error=True, **kwargs):
     if loop is None:
         loop = get_event_loop()
 
@@ -17,5 +17,6 @@ def run_async_func(func, *, loop=None, **kwargs):
             error(traceback.format_exc())
 
     future = asyncio.run_coroutine_threadsafe(func(**kwargs), loop)
-    future.add_done_callback(_handle_future_exception)
+    if trace_error:
+        future.add_done_callback(_handle_future_exception)
     return future

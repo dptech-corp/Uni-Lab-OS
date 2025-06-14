@@ -1,0 +1,35 @@
+{
+    "nodes": [
+
+        {
+            "id": "benyao",
+            "name": "benyao",
+            "children": [
+            ],
+            "parent": null,
+            "type": "device",
+            "class": "moveit.arm_slider",
+            "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+            },
+            "config": {
+                "moveit_type": "arm_slider",
+                "joint_poses": {
+                    "arm": {
+                        "home": [0.0, 0.2, 0.0, 0.0, 0.0],
+                        "pick": [1.2, 0.0, 0.0, 0.0, 0.0]
+                    }
+                },
+                "device_config": {
+                }
+            },
+            "data": {
+            }
+        }
+    ],
+    "links": [
+        
+    ]
+}

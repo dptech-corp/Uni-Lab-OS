@@ -4,18 +4,16 @@ import time
 class VacuumPumpMock:
     def __init__(self, port: str = "COM6"):
         self._status = "OPEN"
-    
+
     @property
     def status(self) -> str:
         return self._status
 
     def get_status(self) -> str:
         return self._status
-    
-    def set_status(self, position):
-        time.sleep(5)
-        
-        self._status = position
+
+    def set_status(self, string):
+        self._status = string
         time.sleep(5)
 
     def open(self):

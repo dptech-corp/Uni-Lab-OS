@@ -1,4 +1,4 @@
-import collections
+import collections.abc
 import json
 from typing import get_origin, get_args
 
@@ -21,3 +21,46 @@ class TypeEncoder(json.JSONEncoder):
             return str(obj)[8:-2]
         return super().default(obj)
 
+
+class ResultInfoEncoder(json.JSONEncoder):
+    """专门用于处理任务执行结果信息的JSON编码器"""
+
+    def default(self, obj):
+        # 优先处理类型对象
+        if isinstance(obj, type):
+            return str(obj)[8:-2]
+
+        # 对于无法序列化的对象，统一转换为字符串
+        try:
+            # 尝试调用 __dict__ 或者其他序列化方法
+            if hasattr(obj, "__dict__"):
+                return obj.__dict__
+            elif hasattr(obj, "_asdict"):  # namedtuple
+                return obj._asdict()
+            elif hasattr(obj, "to_dict"):
+                return obj.to_dict()
+            elif hasattr(obj, "dict"):
+                return obj.dict()
+            else:
+                # 如果都不行，转换为字符串
+                return str(obj)
+        except Exception:
+            # 如果转换失败，直接返回字符串表示
+            return str(obj)
+
+
+def serialize_result_info(error: str, suc: bool, return_value=None) -> str:
+    """
+    序列化任务执行结果信息
+
+    Args:
+        error: 错误信息字符串
+        suc: 是否成功的布尔值
+        return_value: 返回值，可以是任何类型
+
+    Returns:
+        JSON字符串格式的结果信息
+    """
+    result_info = {"error": error, "suc": suc, "return_value": return_value}
+
+    return json.dumps(result_info, ensure_ascii=False, cls=ResultInfoEncoder)

@@ -9,7 +9,7 @@ try:
     from pylabrobot.resources.resource import Resource as ResourcePLR
 except ImportError:
     pass
-
+from typing import Union, get_origin, get_args
 
 physical_setup_graph: nx.Graph = None
 
@@ -298,7 +298,6 @@ def nested_dict_to_list(nested_dict: dict) -> list[dict]:  # FIXME 是tree？
 
     return result
 
-
 def convert_resources_to_type(
     resources_list: list[dict], resource_type: type, *, plr_model: bool = False
 ) -> Union[list[dict], dict, None, "ResourcePLR"]:
@@ -320,9 +319,13 @@ def convert_resources_to_type(
             return resource_ulab_to_plr(resources_list, plr_model)
         resources_tree = dict_to_tree({r["id"]: r for r in resources_list})
         return resource_ulab_to_plr(resources_tree[0], plr_model)
-    elif isinstance(resource_type, list) and all(issubclass(t, ResourcePLR) for t in resource_type):
-        resources_tree = dict_to_tree({r["id"]: r for r in resources_list})
-        return [resource_ulab_to_plr(r, plr_model) for r in resources_tree]
+    elif isinstance(resource_type, list) :
+        if all((get_origin(t) is Union) for t in resource_type):
+            resources_tree = dict_to_tree({r["id"]: r for r in resources_list})
+            return [resource_ulab_to_plr(r, plr_model) for r in resources_tree]
+        elif all(issubclass(t, ResourcePLR) for t in resource_type):
+            resources_tree = dict_to_tree({r["id"]: r for r in resources_list})
+            return [resource_ulab_to_plr(r, plr_model) for r in resources_tree]
     else:
         return None
 
@@ -343,9 +346,13 @@ def convert_resources_from_type(resources_list, resource_type: type) -> Union[li
     elif isinstance(resource_type, type) and issubclass(resource_type, ResourcePLR):
         resources_tree = [resource_plr_to_ulab(resources_list)]
         return tree_to_list(resources_tree)
-    elif isinstance(resource_type, list) and all(issubclass(t, ResourcePLR) for t in resource_type):
-        resources_tree = [resource_plr_to_ulab(r) for r in resources_list]
-        return tree_to_list(resources_tree)
+    elif isinstance(resource_type, list) :
+        if all((get_origin(t) is Union) for t in resource_type):
+            resources_tree = [resource_plr_to_ulab(r) for r in resources_list]
+            return tree_to_list(resources_tree)
+        elif all(issubclass(t, ResourcePLR) for t in resource_type):
+            resources_tree = [resource_plr_to_ulab(r) for r in resources_list]
+            return tree_to_list(resources_tree)
     else:
         return None
 
