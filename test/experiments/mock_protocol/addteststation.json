@@ -25,7 +25,7 @@
                 "z": 0
             },
             "config": {
-                "protocol_type": ["AddProtocol", "TransferProtocol", "StirProtocol", "StartStirProtocol", "StopStirProtocol"]
+                "protocol_type": ["AddProtocol", "TransferProtocol", "StartStirProtocol", "StopStirProtocol"]
             },
             "data": {}
         },

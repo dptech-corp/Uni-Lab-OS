@@ -89,7 +89,7 @@ mock_filter:
       target_volume: Float64
     action_value_mappings:
       filter:
-        type: ProtocolFilter
+        type: Filter
         goal:
           vessel: vessel
           filtrate_vessel: filtrate_vessel
@@ -737,7 +737,7 @@ mock_stirrer_new:
       max_stir_speed: Float64
     action_value_mappings:
       start_stir:
-        type: ProtocolStartStir
+        type: StartStir
         goal:
           vessel: vessel
           stir_speed: stir_speed
@@ -760,7 +760,7 @@ mock_stirrer_new:
         result:
           success: success
       stop_stir:
-        type: ProtocolStopStir
+        type: StopStir
         goal:
           vessel: vessel
         feedback:
