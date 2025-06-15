@@ -80,26 +80,26 @@ class VirtualSolenoidValve:
         
         return "Valve closed"
 
-    def set_state(self, state: Union[bool, str]):
+    def set_state(self, command: Union[bool, str]):
         """
-        设置阀门状态
-        
+        设置阀门状态 - 兼容 SendCmd 类型
+    
         Args:
-            state: True/False 或 "open"/"close"
+            command: True/False 或 "open"/"close"
         """
-        if isinstance(state, bool):
-            return self.open() if state else self.close()
-        elif isinstance(state, str):
-            if state.lower() in ["open", "on", "true", "1"]:
+        if isinstance(command, bool):
+            return self.open() if command else self.close()
+        elif isinstance(command, str):
+            if command.lower() in ["open", "on", "true", "1"]:
                 return self.open()
-            elif state.lower() in ["close", "closed", "off", "false", "0"]:
+            elif command.lower() in ["close", "closed", "off", "false", "0"]:
                 return self.close()
             else:
                 self._status = "Error"
-                return "Error: Invalid state"
+                return "Error: Invalid command"
         else:
             self._status = "Error"
-            return "Error: Invalid state type"
+            return "Error: Invalid command type"
 
     def toggle(self):
         """切换阀门状态"""

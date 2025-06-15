@@ -185,7 +185,7 @@ virtual_multiway_valve:
       set_position:
         type: SendCmd
         goal:
-          position: position
+          command: position
         feedback: {}
         result:
           success: success
@@ -267,7 +267,7 @@ virtual_solenoid_valve:
     status_types:
       status: String
       valve_state: String  # "open" or "closed"
-      is_open: Boolean
+      is_open: Bool
     action_value_mappings:
       open:
         type: EmptyIn
@@ -282,9 +282,9 @@ virtual_solenoid_valve:
         result:
           success: success
       set_state:
-        type: BoolSingleInput
+        type: SendCmd
         goal:
-          state: state
+          command: command 
         feedback: {}
         result:
           success: success

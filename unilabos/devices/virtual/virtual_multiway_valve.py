@@ -36,15 +36,20 @@ class VirtualMultiwayValve:
         """获取当前阀门位置"""
         return self._current_position
 
-    def set_position(self, position: Union[int, str]):
+    def set_position(self, command: Union[int, str]):
         """
-        设置阀门位置
+        设置阀门位置 - 兼容 SendCmd 类型
         
         Args:
-            position: 目标位置 (1-8)
+            command: 目标位置 (1-8) 或位置字符串
         """
         try:
-            pos = int(position)
+            # 如果是字符串形式的位置，先转换为数字
+            if isinstance(command, str):
+                pos = int(command)
+            else:
+                pos = int(command)
+                
             if pos < 1 or pos > self.max_positions:
                 raise ValueError(f"Position must be between 1 and {self.max_positions}")
             
