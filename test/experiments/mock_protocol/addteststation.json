@@ -4,58 +4,83 @@
             "id": "AddTestStation",
             "name": "添加试剂测试工作站",
             "children": [
-                "pump_add",
-                "flask_1",
-                "flask_2", 
-                "flask_3",
-                "flask_4",
-                "reactor",
+                "transfer_pump",
+                "multiway_valve", 
                 "stirrer",
-                "flask_air"
+                "flask_reagent1",
+                "flask_reagent2",
+                "flask_reagent3",
+                "flask_reagent4",
+                "reactor",
+                "flask_waste",
+                "flask_rinsing",
+                "flask_buffer"
             ],
             "parent": null,
             "type": "device",
             "class": "workstation",
             "position": {
-                "x": 620.6111111111111,
+                "x": 620,
                 "y": 171,
                 "z": 0
             },
             "config": {
-                "protocol_type": ["AddProtocol", "PumpTransferProtocol", "CleanProtocol"]
+                "protocol_type": ["AddProtocol", "TransferProtocol", "StartStirProtocol", "StopStirProtocol"]
             },
             "data": {}
         },
         {
-            "id": "pump_add",
-            "name": "pump_add",
+            "id": "transfer_pump",
+            "name": "注射器泵",
             "children": [],
             "parent": "AddTestStation",
             "type": "device",
-            "class": "virtual_pump",
+            "class": "virtual_transfer_pump",
             "position": {
-                "x": 520.6111111111111,
+                "x": 520,
                 "y": 300,
                 "z": 0
             },
             "config": {
                 "port": "VIRTUAL",
-                "max_volume": 25.0
+                "max_volume": 50.0,
+                "transfer_rate": 5.0
             },
             "data": {
                 "status": "Idle"
             }
         },
         {
+            "id": "multiway_valve",
+            "name": "八通阀门",
+            "children": [],
+            "parent": "AddTestStation",
+            "type": "device",
+            "class": "virtual_multiway_valve",
+            "position": {
+                "x": 420,
+                "y": 300,
+                "z": 0
+            },
+            "config": {
+                "port": "VIRTUAL",
+                "positions": 8
+            },
+            "data": {
+                "status": "Idle",
+                "current_position": 1
+            }
+        },
+        {
             "id": "stirrer",
-            "name": "stirrer",
+            "name": "搅拌器",
             "children": [],
             "parent": "AddTestStation",
             "type": "device",
             "class": "virtual_stirrer",
             "position": {
-                "x": 698.1111111111111,
-                "y": 478,
+                "x": 720,
+                "y": 450,
                 "z": 0
             },
             "config": {
@@ -68,110 +93,115 @@
             }
         },
         {
-            "id": "flask_1",
-            "name": "通用试剂瓶1",
+            "id": "flask_reagent1",
+            "name": "试剂瓶1 (甲醇)",
             "children": [],
             "parent": "AddTestStation",
             "type": "container",
             "class": null,
             "position": {
                 "x": 100,
-                "y": 428,
+                "y": 400,
                 "z": 0
             },
             "config": {
-                "max_volume": 2000.0
+                "max_volume": 1000.0
             },
             "data": {
-                "liquid": []
+                "liquid": [
+                    {
+                        "name": "甲醇",
+                        "volume": 800.0,
+                        "concentration": "99.9%"
+                    }
+                ]
             }
         },
         {
-            "id": "flask_2",
-            "name": "通用试剂瓶2",
+            "id": "flask_reagent2",
+            "name": "试剂瓶2 (乙醇)",
             "children": [],
             "parent": "AddTestStation",
             "type": "container",
             "class": null,
             "position": {
-                "x": 250,
-                "y": 428,
+                "x": 180,
+                "y": 400,
                 "z": 0
             },
             "config": {
-                "max_volume": 2000.0
+                "max_volume": 1000.0
             },
             "data": {
-                "liquid": []
+                "liquid": [
+                    {
+                        "name": "乙醇",
+                        "volume": 750.0,
+                        "concentration": "95%"
+                    }
+                ]
             }
         },
         {
-            "id": "flask_3",
-            "name": "通用试剂瓶3",
+            "id": "flask_reagent3",
+            "name": "试剂瓶3 (丙酮)",
             "children": [],
             "parent": "AddTestStation",
             "type": "container",
             "class": null,
             "position": {
-                "x": 400,
-                "y": 428,
+                "x": 260,
+                "y": 400,
                 "z": 0
             },
             "config": {
-                "max_volume": 2000.0
+                "max_volume": 1000.0
             },
             "data": {
-                "liquid": []
+                "liquid": [
+                    {
+                        "name": "丙酮",
+                        "volume": 900.0,
+                        "concentration": "99.5%"
+                    }
+                ]
             }
         },
         {
-            "id": "flask_4",
-            "name": "通用试剂瓶4",
+            "id": "flask_reagent4",
+            "name": "试剂瓶4 (二氯甲烷)",
             "children": [],
             "parent": "AddTestStation",
             "type": "container",
             "class": null,
             "position": {
-                "x": 550,
-                "y": 428,
+                "x": 340,
+                "y": 400,
                 "z": 0
             },
             "config": {
-                "max_volume": 2000.0
+                "max_volume": 1000.0
             },
             "data": {
-                "liquid": []
+                "liquid": [
+                    {
+                        "name": "二氯甲烷",
+                        "volume": 850.0,
+                        "concentration": "99.8%"
+                    }
+                ]
             }
         },
         {
             "id": "reactor",
-            "name": "reactor",
+            "name": "反应器",
             "children": [],
             "parent": "AddTestStation",
             "type": "container",
             "class": null,
             "position": {
-                "x": 698.1111111111111,
-                "y": 428,
-                "z": 0
-            },
-            "config": {
-                "max_volume": 5000.0
-            },
-            "data": {
-                "liquid": []
-            }
-        },
-        {
-            "id": "flask_air",
-            "name": "flask_air",
-            "children": [],
-            "parent": "AddTestStation",
-            "type": "container",
-            "class": null,
-            "position": {
-                "x": 800,
-                "y": 300,
+                "x": 720,
+                "y": 400,
                 "z": 0
             },
             "config": {
@@ -179,71 +209,167 @@
             },
             "data": {
                 "liquid": []
+            }
+        },
+        {
+            "id": "flask_waste",
+            "name": "废液瓶",
+            "children": [],
+            "parent": "AddTestStation",
+            "type": "container",
+            "class": null,
+            "position": {
+                "x": 850,
+                "y": 400,
+                "z": 0
+            },
+            "config": {
+                "max_volume": 3000.0
+            },
+            "data": {
+                "liquid": []
+            }
+        },
+        {
+            "id": "flask_rinsing",
+            "name": "冲洗液瓶",
+            "children": [],
+            "parent": "AddTestStation",
+            "type": "container",
+            "class": null,
+            "position": {
+                "x": 950,
+                "y": 300,
+                "z": 0
+            },
+            "config": {
+                "max_volume": 1000.0
+            },
+            "data": {
+                "liquid": [
+                    {
+                        "name": "去离子水",
+                        "volume": 800.0,
+                        "concentration": "纯净"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "flask_buffer",
+            "name": "缓冲液瓶",
+            "children": [],
+            "parent": "AddTestStation",
+            "type": "container",
+            "class": null,
+            "position": {
+                "x": 950,
+                "y": 400,
+                "z": 0
+            },
+            "config": {
+                "max_volume": 1000.0
+            },
+            "data": {
+                "liquid": [
+                    {
+                        "name": "磷酸盐缓冲液",
+                        "volume": 700.0,
+                        "concentration": "0.1M, pH 7.4"
+                    }
+                ]
             }
         }
     ],
     "links": [
         {
-            "source": "stirrer",
+            "source": "transfer_pump",
+            "target": "multiway_valve",
+            "type": "physical",
+            "port": {
+                "transfer_pump": "syringe-port",
+                "multiway_valve": "multiway-valve-inlet"
+            }
+        },
+        {
+            "source": "multiway_valve",
+            "target": "flask_reagent1",
+            "type": "physical",
+            "port": {
+                "multiway_valve": "multiway-valve-port-1",
+                "flask_reagent1": "top"
+            }
+        },
+        {
+            "source": "multiway_valve",
+            "target": "flask_reagent2",
+            "type": "physical",
+            "port": {
+                "multiway_valve": "multiway-valve-port-2",
+                "flask_reagent2": "top"
+            }
+        },
+        {
+            "source": "multiway_valve",
+            "target": "flask_reagent3",
+            "type": "physical",
+            "port": {
+                "multiway_valve": "multiway-valve-port-3",
+                "flask_reagent3": "top"
+            }
+        },
+        {
+            "source": "multiway_valve",
+            "target": "flask_reagent4",
+            "type": "physical",
+            "port": {
+                "multiway_valve": "multiway-valve-port-4",
+                "flask_reagent4": "top"
+            }
+        },
+        {
+            "source": "multiway_valve",
             "target": "reactor",
             "type": "physical",
             "port": {
-                "stirrer": "top",
-                "reactor": "bottom"
-            }
-        },
-        {
-            "source": "pump_add",
-            "target": "flask_1",
-            "type": "physical",
-            "port": {
-                "pump_add": "outlet",
-                "flask_1": "top"
-            }
-        },
-        {
-            "source": "pump_add",
-            "target": "flask_2",
-            "type": "physical",
-            "port": {
-                "pump_add": "inlet",
-                "flask_2": "top"
-            }
-        },
-        {
-            "source": "pump_add",
-            "target": "flask_3",
-            "type": "physical",
-            "port": {
-                "pump_add": "inlet",
-                "flask_3": "top"
-            }
-        },
-        {
-            "source": "pump_add",
-            "target": "flask_4",
-            "type": "physical",
-            "port": {
-                "pump_add": "inlet",
-                "flask_4": "top"
-            }
-        },
-        {
-            "source": "pump_add",
-            "target": "reactor",
-            "type": "physical",
-            "port": {
-                "pump_add": "outlet",
+                "multiway_valve": "multiway-valve-port-5",
                 "reactor": "top"
             }
         },
         {
-            "source": "pump_add",
-            "target": "flask_air",
+            "source": "multiway_valve",
+            "target": "flask_waste",
             "type": "physical",
             "port": {
-                "pump_add": "inlet",
-                "flask_air": "top"
+                "multiway_valve": "multiway-valve-port-6",
+                "flask_waste": "top"
+            }
+        },
+        {
+            "source": "multiway_valve",
+            "target": "flask_rinsing",
+            "type": "physical",
+            "port": {
+                "multiway_valve": "multiway-valve-port-7",
+                "flask_rinsing": "top"
+            }
+        },
+        {
+            "source": "multiway_valve",
+            "target": "flask_buffer",
+            "type": "physical",
+            "port": {
+                "multiway_valve": "multiway-valve-port-8",
+                "flask_buffer": "top"
+            }
+        },
+        {
+            "source": "stirrer",
+            "target": "reactor",
+            "type": "physical",
+            "port": {
+                "stirrer": "stirrer-vessel",
+                "reactor": "bottom"
             }
         }
     ]
