@@ -30,7 +30,7 @@
             "children": [],
             "parent": "ReactorX",
             "type": "container",
-            "class": null,
+            "class": "container",
             "position": {
                 "x": 698.1111111111111,
                 "y": 428,
