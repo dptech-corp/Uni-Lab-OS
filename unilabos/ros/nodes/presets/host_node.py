@@ -193,15 +193,20 @@ class HostNode(BaseROS2DeviceNode):
         )
         resource_with_parent_name = []
         resource_ids_to_instance = {i["id"]: i for i in resources_config}
+        resource_name_to_with_parent_name = {}
         for res in resources_config:
             if res.get("parent") and res.get("type") == "device" and res.get("class"):
                 parent_id = res.get("parent")
                 parent_res = resource_ids_to_instance[parent_id]
                 if parent_res.get("type") == "device" and parent_res.get("class"):
                     resource_with_parent_name.append(copy.deepcopy(res))
+                    resource_name_to_with_parent_name[resource_with_parent_name[-1]["id"]] = f"{parent_res['id']}/{res['id']}"
                     resource_with_parent_name[-1]["id"] = f"{parent_res['id']}/{res['id']}"
                     continue
             resource_with_parent_name.append(copy.deepcopy(res))
+        for edge in self.resources_edge_config:
+            edge["source"] = resource_name_to_with_parent_name.get(edge.get("source"), edge.get("source"))
+            edge["target"] = resource_name_to_with_parent_name.get(edge.get("target"), edge.get("target"))
         try:
             for bridge in self.bridges:
                 if hasattr(bridge, "resource_add"):

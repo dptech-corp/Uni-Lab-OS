@@ -486,20 +486,17 @@
             "name": "气源",
             "children": [],
             "parent": "ComprehensiveProtocolStation",
-            "type": "device",
+            "type": "container",
             "class": "container",
             "position": {
                 "x": 650,
                 "y": 150,
                 "z": 0
             },
-            "config": {
+            "config": {},
+            "data": {
                 "gas_type": "nitrogen",
                 "max_pressure": 5.0
-            },
-            "data": {
-                "status": "Off",
-                "current_pressure": 0.0
             }
         },
         {

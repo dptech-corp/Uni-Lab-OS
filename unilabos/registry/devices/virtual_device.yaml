@@ -543,7 +543,6 @@ virtual_transfer_pump:
       current_volume: Float64
       max_volume: Float64
       transfer_rate: Float64
-      from_vessel: String
     action_value_mappings:
       transfer:
         type: Transfer
