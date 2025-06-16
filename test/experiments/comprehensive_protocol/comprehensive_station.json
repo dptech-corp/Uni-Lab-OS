@@ -486,8 +486,8 @@
             "name": "气源",
             "children": [],
             "parent": "ComprehensiveProtocolStation",
-            "type": "container",
-            "class": "container",
+            "type": "device",
+            "class": "virtual_gas_source",
             "position": {
                 "x": 650,
                 "y": 150,
