@@ -77,8 +77,7 @@
                 "z": 0
             },
             "config": {
-                "positions": 8,
-                "current_position": 1
+                "positions": 8
             },
             "data": {
                 "valve_state": "Ready",
@@ -98,8 +97,7 @@
                 "z": 0
             },
             "config": {
-                "positions": 8,
-                "current_position": 1
+                "positions": 8
             },
             "data": {
                 "valve_state": "Ready",
@@ -489,7 +487,7 @@
             "children": [],
             "parent": "ComprehensiveProtocolStation",
             "type": "device",
-            "class": "gas_source.mock",
+            "class": "container",
             "position": {
                 "x": 650,
                 "y": 150,
