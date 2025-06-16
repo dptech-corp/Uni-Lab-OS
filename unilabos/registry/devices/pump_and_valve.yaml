@@ -48,12 +48,12 @@ solenoid_valve.mock:
         feedback: {}
         result: {}
   handles:
-    - handler_key: fluid-input
-      label: Fluid Input
+    - handler_key: 0
+      label: 0
       data_type: fluid
       side: NORTH
-    - handler_key: fluid-output
-      label: Fluid Output
+    - handler_key: 1
+      label: 1
       data_type: fluid
       side: SOUTH
   init_param_schema:

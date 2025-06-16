@@ -1,0 +1,14 @@
+container:
+  description: regular organic container
+  class: 
+    module: unilabos.resources.container:RegularContainer
+    type: unilabos
+  handles:
+    - handler_key: top
+      label: top
+      data_type: fluid
+      side: NORTH
+    - handler_key: bottom
+      label: bottom
+      data_type: fluid
+      side: SOUTH
