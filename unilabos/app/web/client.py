@@ -46,6 +46,8 @@ class HTTPClient:
             headers={"Authorization": f"lab {self.auth}"},
             timeout=5,
         )
+        if response.status_code != 200:
+            logger.error(f"添加物料关系失败: {response.text}")
         return response
 
     def resource_add(self, resources: List[Dict[str, Any]], database_process_later: bool) -> requests.Response:
@@ -64,6 +66,8 @@ class HTTPClient:
             headers={"Authorization": f"lab {self.auth}"},
             timeout=5,
         )
+        if response.status_code != 200:
+            logger.error(f"添加物料失败: {response.text}")
         return response
 
     def resource_get(self, id: str, with_children: bool = False) -> Dict[str, Any]:

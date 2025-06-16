@@ -14,9 +14,10 @@ class VirtualPumpMode(Enum):
 class VirtualPump:
     """虚拟泵类 - 模拟泵的基本功能，无需实际硬件"""
     
-    def __init__(self, device_id: str = None, max_volume: float = 25.0, mode: VirtualPumpMode = VirtualPumpMode.Normal):
+    def __init__(self, device_id: str = None, max_volume: float = 25.0, mode: VirtualPumpMode = VirtualPumpMode.Normal, transfer_rate=0):
         self.device_id = device_id or "virtual_pump"
         self.max_volume = max_volume
+        self._transfer_rate = transfer_rate
         self.mode = mode
         
         # 状态变量
@@ -24,7 +25,7 @@ class VirtualPump:
         self._position = 0.0  # 当前柱塞位置 (ml)
         self._max_velocity = 5.0  # 默认最大速度 (ml/s)
         self._current_volume = 0.0  # 当前注射器中的体积
-        
+
         self.logger = logging.getLogger(f"VirtualPump.{self.device_id}")
         
     async def initialize(self) -> bool:
@@ -60,6 +61,10 @@ class VirtualPump:
     def max_velocity(self) -> float:
         return self._max_velocity
     
+    @property
+    def transfer_rate(self) -> float:
+        return self._transfer_rate
+
     def set_max_velocity(self, velocity: float):
         """设置最大速度 (ml/s)"""
         self._max_velocity = max(0.1, min(50.0, velocity))  # 限制在合理范围内

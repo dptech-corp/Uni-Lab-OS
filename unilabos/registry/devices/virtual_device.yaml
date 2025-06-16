@@ -44,6 +44,17 @@
 # 描述：分离纯化设备，用于样品纯化
 # 连接特性：1个输入口 + 1个输出口
 # 数据类型：resource（资源/样品连接）
+
+# 9. virtual_rotavap - 虚拟旋转蒸发仪
+# 描述：旋转蒸发仪用于溶剂蒸发和浓缩，具有加热、旋转和真空功能
+# 连接特性：1个输入口（样品），1个输出口（浓缩物），1个冷凝器出口（回收溶剂）
+# 数据类型：resource（资源/样品连接）
+
+# 10. virtual_separator - 虚拟分液器
+# 描述：分液器用于两相液体的分离，可进行萃取和洗涤操作
+# 连接特性：1个输入口（混合液），2个输出口（上相和下相）
+# 数据类型：fluid（流体连接）
+
 virtual_pump:
   description: Virtual Pump for PumpTransferProtocol Testing
   class:
@@ -52,7 +63,7 @@ virtual_pump:
     status_types:
       status: String
       position: Float64
-      valve_position: Int32  # 修复：使用 Int32 而不是 String
+      valve_position: Int32 # 修复：使用 Int32 而不是 String
       max_volume: Float64
       current_volume: Float64
     action_value_mappings:
@@ -83,13 +94,13 @@ virtual_pump:
           success: success
   # 虚拟泵节点配置 - 具有多通道阀门特性，根据valve_position可连接多个容器
   handles:
-    - handler_key: pump-inlet
-      label: Pump Inlet
-      data_type: fluid
-      io_type: target
-      data_source: handle
-      data_key: fluid_in
-      description: "泵的进液口，连接源容器"
+  - handler_key: pump-inlet
+    label: Pump Inlet
+    data_type: fluid
+    io_type: target
+    data_source: handle
+    data_key: fluid_in
+    description: "泵的进液口，连接源容器"
   schema:
     type: object
     properties:
@@ -139,14 +150,14 @@ virtual_stirrer:
           success: success
   # 虚拟搅拌器节点配置 - 机械连接设备，单一双向连接点
   handles:
-    - handler_key: stirrer-vessel
-      label: Vessel Connection
-      data_type: mechanical
-      side: SOUTH
-      io_type: undirected
-      data_source: handle
-      data_key: vessel
-      description: "搅拌器的机械连接口，直接与反应容器连接提供搅拌功能"
+  - handler_key: stirrer-vessel
+    label: Vessel Connection
+    data_type: mechanical
+    side: SOUTH
+    io_type: undirected
+    data_source: handle
+    data_key: vessel
+    description: "搅拌器的机械连接口，直接与反应容器连接提供搅拌功能"
   schema:
     type: object
     properties:
@@ -182,77 +193,77 @@ virtual_multiway_valve:
           success: success
   # 八通阀门节点配置 - 1个输入口，8个输出口，可切换流向
   handles:
-    - handler_key: multiway-valve-inlet
-      label: Valve Inlet
-      data_type: fluid
-      io_type: target
-      data_source: handle
-      data_key: fluid_in
-      description: "八通阀门进液口，接收来源流体"
-    - handler_key: multiway-valve-port-1
-      label: 1
-      data_type: fluid
-      side: NORTH
-      io_type: source
-      data_source: executor
-      data_key: fluid_port_1
-      description: "八通阀门端口1，position=1时流体从此口流出"
-    - handler_key: multiway-valve-port-2
-      label: 2
-      data_type: fluid
-      side: EAST
-      io_type: source
-      data_source: executor
-      data_key: fluid_port_2
-      description: "八通阀门端口2，position=2时流体从此口流出"
-    - handler_key: multiway-valve-port-3
-      label: 3
-      data_type: fluid
-      side: EAST
-      io_type: source
-      data_source: executor
-      data_key: fluid_port_3
-      description: "八通阀门端口3，position=3时流体从此口流出"
-    - handler_key: multiway-valve-port-4
-      label: 4
-      data_type: fluid
-      side: SOUTH
-      io_type: source
-      data_source: executor
-      data_key: fluid_port_4
-      description: "八通阀门端口4，position=4时流体从此口流出"
-    - handler_key: multiway-valve-port-5
-      label: 5
-      data_type: fluid
-      side: SOUTH
-      io_type: source
-      data_source: executor
-      data_key: fluid_port_5
-      description: "八通阀门端口5，position=5时流体从此口流出"
-    - handler_key: multiway-valve-port-7
-      label: 7
-      data_type: fluid
-      side: WEST
-      io_type: source
-      data_source: executor
-      data_key: fluid_port_7
-      description: "八通阀门端口7，position=7时流体从此口流出"
-    - handler_key: multiway-valve-port-6
-      label: 6
-      data_type: fluid
-      side: WEST
-      io_type: source
-      data_source: executor
-      data_key: fluid_port_6
-      description: "八通阀门端口6，position=6时流体从此口流出"
-    - handler_key: multiway-valve-port-8
-      label: 8
-      data_type: fluid
-      side: NORTH
-      io_type: source
-      data_source: executor
-      data_key: fluid_port_8
-      description: "八通阀门端口8，position=8时流体从此口流出"
+  - handler_key: multiway-valve-inlet
+    label: Valve Inlet
+    data_type: fluid
+    io_type: target
+    data_source: handle
+    data_key: fluid_in
+    description: "八通阀门进液口，接收来源流体"
+  - handler_key: multiway-valve-port-1
+    label: 1
+    data_type: fluid
+    side: NORTH
+    io_type: source
+    data_source: executor
+    data_key: fluid_port_1
+    description: "八通阀门端口1，position=1时流体从此口流出"
+  - handler_key: multiway-valve-port-2
+    label: 2
+    data_type: fluid
+    side: EAST
+    io_type: source
+    data_source: executor
+    data_key: fluid_port_2
+    description: "八通阀门端口2，position=2时流体从此口流出"
+  - handler_key: multiway-valve-port-3
+    label: 3
+    data_type: fluid
+    side: EAST
+    io_type: source
+    data_source: executor
+    data_key: fluid_port_3
+    description: "八通阀门端口3，position=3时流体从此口流出"
+  - handler_key: multiway-valve-port-4
+    label: 4
+    data_type: fluid
+    side: SOUTH
+    io_type: source
+    data_source: executor
+    data_key: fluid_port_4
+    description: "八通阀门端口4，position=4时流体从此口流出"
+  - handler_key: multiway-valve-port-5
+    label: 5
+    data_type: fluid
+    side: SOUTH
+    io_type: source
+    data_source: executor
+    data_key: fluid_port_5
+    description: "八通阀门端口5，position=5时流体从此口流出"
+  - handler_key: multiway-valve-port-7
+    label: 7
+    data_type: fluid
+    side: WEST
+    io_type: source
+    data_source: executor
+    data_key: fluid_port_7
+    description: "八通阀门端口7，position=7时流体从此口流出"
+  - handler_key: multiway-valve-port-6
+    label: 6
+    data_type: fluid
+    side: WEST
+    io_type: source
+    data_source: executor
+    data_key: fluid_port_6
+    description: "八通阀门端口6，position=6时流体从此口流出"
+  - handler_key: multiway-valve-port-8
+    label: 8
+    data_type: fluid
+    side: NORTH
+    io_type: source
+    data_source: executor
+    data_key: fluid_port_8
+    description: "八通阀门端口8，position=8时流体从此口流出"
   schema:
     type: object
     properties:
@@ -270,19 +281,19 @@ virtual_solenoid_valve:
     type: python
     status_types:
       status: String
-      valve_state: String  # "open" or "closed"
+      valve_state: String # "open" or "closed"
       is_open: Bool
     action_value_mappings:
       open:
         type: SendCmd
-        goal: 
+        goal:
           command: "open"
         feedback: {}
         result:
           success: success
       close:
         type: SendCmd
-        goal: 
+        goal:
           command: "close"
         feedback: {}
         result:
@@ -290,26 +301,26 @@ virtual_solenoid_valve:
       set_state:
         type: SendCmd
         goal:
-          command: command 
+          command: command
         feedback: {}
         result:
           success: success
   # 电磁阀门节点配置 - 双向流通的开关型阀门，流动方向由泵决定
   handles:
-    - handler_key: solenoid-valve-port-in
-      label: in
-      data_type: fluid
-      io_type: undirected
-      data_source: handle
-      data_key: fluid_port
-      description: "电磁阀的双向流体口，开启时允许流体双向通过，关闭时完全阻断"
-    - handler_key: solenoid-valve-port-out
-      label: out
-      data_type: fluid
-      io_type: undirected
-      data_source: handle
-      data_key: fluid_port
-      description: "电磁阀的双向流体口，开启时允许流体双向通过，关闭时完全阻断"
+  - handler_key: solenoid-valve-port-in
+    label: in
+    data_type: fluid
+    io_type: undirected
+    data_source: handle
+    data_key: fluid_port
+    description: "电磁阀的双向流体口，开启时允许流体双向通过，关闭时完全阻断"
+  - handler_key: solenoid-valve-port-out
+    label: out
+    data_type: fluid
+    io_type: undirected
+    data_source: handle
+    data_key: fluid_port
+    description: "电磁阀的双向流体口，开启时允许流体双向通过，关闭时完全阻断"
   schema:
     type: object
     properties:
@@ -357,13 +368,13 @@ virtual_centrifuge:
           message: message
   # 虚拟离心机节点配置 - 单个样品处理设备，输入输出都是同一个样品容器
   handles:
-    - handler_key: centrifuge-sample
-      label: Sample Input/Output
-      data_type: transport
-      io_type: undirected
-      data_source: handle
-      data_key: vessel
-      description: "需要离心的样品容器"
+  - handler_key: centrifuge-sample
+    label: Sample Input/Output
+    data_type: transport
+    io_type: undirected
+    data_source: handle
+    data_key: vessel
+    description: "需要离心的样品容器"
   schema:
     type: object
     properties:
@@ -418,30 +429,30 @@ virtual_filter:
           message: message
   # 虚拟过滤器节点配置 - 分离设备，1个输入(原始样品)，2个输出(滤液和滤渣)
   handles:
-    - handler_key: filter-in
-      label: Input
-      data_type: fluid
-      side: NORTH
-      io_type: target
-      data_source: handle
-      data_key: vessel
-      description: "需要过滤的原始样品容器"
-    - handler_key: filter-filtrate-out
-      label: Output
-      data_type: fluid
-      side: SOUTH
-      io_type: source
-      data_source: executor
-      data_key: filtrate_vessel
-      description: "过滤后的滤液容器"
-    - handler_key: filter-residue-out
-      label: Residue
-      data_type: resource
-      side: WEST
-      io_type: source
-      data_source: executor
-      data_key: residue_vessel
-      description: "过滤后的滤渣(固体残留物)"
+  - handler_key: filter-in
+    label: Input
+    data_type: fluid
+    side: NORTH
+    io_type: target
+    data_source: handle
+    data_key: vessel
+    description: "需要过滤的原始样品容器"
+  - handler_key: filter-filtrate-out
+    label: Output
+    data_type: fluid
+    side: SOUTH
+    io_type: source
+    data_source: executor
+    data_key: filtrate_vessel
+    description: "过滤后的滤液容器"
+  - handler_key: filter-residue-out
+    label: Residue
+    data_type: resource
+    side: WEST
+    io_type: source
+    data_source: executor
+    data_key: residue_vessel
+    description: "过滤后的滤渣(固体残留物)"
   schema:
     type: object
     properties:
@@ -497,14 +508,14 @@ virtual_heatchill:
           success: success
   # 虚拟加热/冷却器节点配置 - 温控设备，单一双向连接点用于放置容器
   handles:
-    - handler_key: heatchill-vessel
-      label: Connection
-      data_type: mechanical
-      side: NORTH
-      io_type: undirected
-      data_source: handle
-      data_key: vessel
-      description: "加热/冷却器的物理连接口，容器直接放置在设备上进行温度控制"
+  - handler_key: heatchill-vessel
+    label: Connection
+    data_type: mechanical
+    side: NORTH
+    io_type: undirected
+    data_source: handle
+    data_key: vessel
+    description: "加热/冷却器的物理连接口，容器直接放置在设备上进行温度控制"
   schema:
     type: object
     properties:
@@ -516,7 +527,7 @@ virtual_heatchill:
         default: 200.0
       min_temp:
         type: number
-        default: -80.0
+        default: -80
       max_stir_speed:
         type: number
         default: 1000.0
@@ -533,10 +544,6 @@ virtual_transfer_pump:
       max_volume: Float64
       transfer_rate: Float64
       from_vessel: String
-      to_vessel: String
-      progress: Float64
-      transferred_volume: Float64
-      current_status: String
     action_value_mappings:
       transfer:
         type: Transfer
@@ -612,22 +619,22 @@ virtual_column:
           message: message
   # 虚拟色谱柱节点配置 - 分离纯化设备，1个样品输入口，1个纯化产物输出口
   handles:
-    - handler_key: column-sample-inlet
-      label: Sample Input
-      data_type: fluid
-      side: NORTH
-      io_type: target
-      data_source: handle
-      data_key: from_vessel
-      description: "需要纯化的样品输入口"
-    - handler_key: column-product-outlet
-      label: Purified Product
-      data_type: fluid
-      side: SOUTH
-      io_type: source
-      data_source: executor
-      data_key: to_vessel
-      description: "经过色谱柱纯化的产物输出口"
+  - handler_key: column-sample-inlet
+    label: Sample Input
+    data_type: fluid
+    side: NORTH
+    io_type: target
+    data_source: handle
+    data_key: from_vessel
+    description: "需要纯化的样品输入口"
+  - handler_key: column-product-outlet
+    label: Purified Product
+    data_type: fluid
+    side: SOUTH
+    io_type: source
+    data_source: executor
+    data_key: to_vessel
+    description: "经过色谱柱纯化的产物输出口"
   schema:
     type: object
     properties:
@@ -643,4 +650,156 @@ virtual_column:
       column_diameter:
         type: number
         default: 2.0
+    additionalProperties: false
+
+virtual_rotavap:
+  description: Virtual Rotary Evaporator for EvaporateProtocol Testing
+  class:
+    module: unilabos.devices.virtual.virtual_rotavap:VirtualRotavap
+    type: python
+    status_types:
+      status: String
+      rotavap_state: String
+      current_temp: Float64
+      target_temp: Float64
+      max_temp: Float64
+      rotation_speed: Float64
+      max_rotation_speed: Float64
+      vacuum_pressure: Float64
+      evaporated_volume: Float64
+      progress: Float64
+      message: String
+    action_value_mappings:
+      evaporate:
+        type: Evaporate
+        goal:
+          vessel: vessel
+          pressure: pressure
+          temp: temp
+          time: time
+          stir_speed: stir_speed
+        feedback:
+          progress: progress
+          current_temp: current_temp
+          evaporated_volume: evaporated_volume
+          current_status: status
+        result:
+          success: success
+          message: message
+  # 虚拟旋转蒸发仪节点配置 - 蒸发浓缩设备，1个输入口(样品)，2个输出口(浓缩物和冷凝液)
+  handles:
+  - handler_key: rotavap-sample-inlet
+    label: Sample Input
+    data_type: fluid
+    side: NORTH
+    io_type: target
+    data_source: handle
+    data_key: vessel
+    description: "需要蒸发的样品输入口"
+  - handler_key: rotavap-concentrate-outlet
+    label: Concentrate
+    data_type: fluid
+    side: SOUTH
+    io_type: source
+    data_source: executor
+    data_key: concentrate_vessel
+    description: "蒸发浓缩后的产物输出口"
+  - handler_key: rotavap-distillate-outlet
+    label: Distillate
+    data_type: fluid
+    side: WEST
+    io_type: source
+    data_source: executor
+    data_key: distillate_vessel
+    description: "冷凝回收的溶剂输出口"
+  schema:
+    type: object
+    properties:
+      port:
+        type: string
+        default: "VIRTUAL"
+      max_temp:
+        type: number
+        default: 180.0
+      max_rotation_speed:
+        type: number
+        default: 280.0
+    additionalProperties: false
+
+virtual_separator:
+  description: Virtual Separator for SeparateProtocol Testing
+  class:
+    module: unilabos.devices.virtual.virtual_separator:VirtualSeparator
+    type: python
+    status_types:
+      status: String
+      separator_state: String
+      volume: Float64
+      has_phases: Bool
+      phase_separation: Bool
+      stir_speed: Float64
+      settling_time: Float64
+      progress: Float64
+      message: String
+    action_value_mappings:
+      separate:
+        type: Separate
+        goal:
+          purpose: purpose
+          product_phase: product_phase
+          from_vessel: from_vessel
+          separation_vessel: separation_vessel
+          to_vessel: to_vessel
+          waste_phase_to_vessel: waste_phase_to_vessel
+          solvent: solvent
+          solvent_volume: solvent_volume
+          through: through
+          repeats: repeats
+          stir_time: stir_time
+          stir_speed: stir_speed
+          settling_time: settling_time
+        feedback:
+          progress: progress
+          current_status: status
+        result:
+          success: success
+          message: message
+  # 虚拟分液器节点配置 - 分离设备，1个输入口(混合液)，2个输出口(上相和下相)
+  handles:
+  - handler_key: separator-inlet
+    label: Mixed Input
+    data_type: fluid
+    side: NORTH
+    io_type: target
+    data_source: handle
+    data_key: from_vessel
+    description: "需要分离的混合液体输入口"
+  - handler_key: separator-top-outlet
+    label: Top Phase
+    data_type: fluid
+    side: EAST
+    io_type: source
+    data_source: executor
+    data_key: top_outlet
+    description: "上相（轻相）液体输出口"
+  - handler_key: separator-bottom-outlet
+    label: Bottom Phase
+    data_type: fluid
+    side: SOUTH
+    io_type: source
+    data_source: executor
+    data_key: bottom_outlet
+    description: "下相（重相）液体输出口"
+  schema:
+    type: object
+    properties:
+      port:
+        type: string
+        default: "VIRTUAL"
+      volume:
+        type: number
+        default: 250.0
+      has_phases:
+        type: boolean
+        default: true
     additionalProperties: false
