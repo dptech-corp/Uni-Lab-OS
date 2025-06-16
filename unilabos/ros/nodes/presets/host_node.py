@@ -58,6 +58,7 @@ class HostNode(BaseROS2DeviceNode):
         device_id: str,
         devices_config: Dict[str, Any],
         resources_config: list,
+        resources_edge_config: list[dict],
         physical_setup_graph: Optional[Dict[str, Any]] = None,
         controllers_config: Optional[Dict[str, Any]] = None,
         bridges: Optional[List[Any]] = None,
@@ -96,6 +97,7 @@ class HostNode(BaseROS2DeviceNode):
         self.server_latest_timestamp = 0.0  #
         self.devices_config = devices_config
         self.resources_config = resources_config
+        self.resources_edge_config = resources_edge_config
         self.physical_setup_graph = physical_setup_graph
         if controllers_config is None:
             controllers_config = {}
@@ -203,11 +205,18 @@ class HostNode(BaseROS2DeviceNode):
         try:
             for bridge in self.bridges:
                 if hasattr(bridge, "resource_add"):
+                    from unilabos.app.web.client import HTTPClient
+                    client: HTTPClient = bridge
                     resource_start_time = time.time()
-                    resource_add_res = bridge.resource_add(add_schema(resource_with_parent_name), True)
+                    resource_add_res = client.resource_add(add_schema(resource_with_parent_name), True)
                     resource_end_time = time.time()
                     self.lab_logger().info(
                         f"[Host Node-Resource] 物料上传 {round(resource_end_time - resource_start_time, 5) * 1000} ms"
+                    )
+                    resource_add_res = client.resource_edge_add(self.resources_edge_config, True)
+                    resource_edge_end_time = time.time()
+                    self.lab_logger().info(
+                        f"[Host Node-Resource] 物料关系上传 {round(resource_edge_end_time - resource_end_time, 5) * 1000} ms"
                     )
         except Exception as ex:
             self.lab_logger().error("[Host Node-Resource] 添加物料出错！")
@@ -757,8 +766,10 @@ class HostNode(BaseROS2DeviceNode):
         self.lab_logger().info(f"[Host Node-Resource] Add request received: {len(resources)} resources")
 
         success = False
-        if len(self.bridges) > 0:
-            r = self.bridges[-1].resource_add(add_schema(resources))
+        if len(self.bridges) > 0:  # 边的提交待定
+            from unilabos.app.web.client import HTTPClient
+            client: HTTPClient = self.bridges[-1]
+            r = client.resource_add(add_schema(resources), False)
             success = bool(r)
 
         response.success = success

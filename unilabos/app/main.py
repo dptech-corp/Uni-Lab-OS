@@ -10,7 +10,7 @@ from copy import deepcopy
 
 import yaml
 
-from unilabos.resources.graphio import tree_to_list
+from unilabos.resources.graphio import tree_to_list, modify_to_backend_format
 
 # 首先添加项目根目录到路径
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -136,15 +136,16 @@ def main():
 
     # 注册表
     build_registry(args_dict["registry_path"])
-
+    resource_edge_info = []
     devices_and_resources = None
     if args_dict["graph"] is not None:
         import unilabos.resources.graphio as graph_res
-        graph_res.physical_setup_graph = (
-            read_node_link_json(args_dict["graph"])
-            if args_dict["graph"].endswith(".json")
-            else read_graphml(args_dict["graph"])
-        )
+        if args_dict["graph"].endswith(".json"):
+            graph, data = read_node_link_json(args_dict["graph"])
+        else:
+            graph, data = read_graphml(args_dict["graph"])
+        graph_res.physical_setup_graph = graph
+        resource_edge_info = modify_to_backend_format(data["links"])
         devices_and_resources = dict_from_graph(graph_res.physical_setup_graph)
         # args_dict["resources_config"] = initialize_resources(list(deepcopy(devices_and_resources).values()))
         args_dict["resources_config"] = list(devices_and_resources.values())
@@ -185,6 +186,7 @@ def main():
         signal.signal(signal.SIGTERM, _exit)
         mqtt_client.start()
     args_dict["resources_mesh_config"] = {}
+    args_dict["resources_edge_config"] = resource_edge_info
     # web visiualize 2D
     if args_dict["visual"] != "disable":
         enable_rviz = args_dict["visual"] == "rviz"

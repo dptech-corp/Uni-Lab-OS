@@ -45,6 +45,7 @@ def exit() -> None:
 def main(
     devices_config: Dict[str, Any] = {},
     resources_config: list=[],
+    resources_edge_config: list=[],
     graph: Optional[Dict[str, Any]] = None,
     controllers_config: Dict[str, Any] = {},
     bridges: List[Any] = [],
@@ -62,6 +63,7 @@ def main(
         "host_node",
         devices_config,
         resources_config,
+        resources_edge_config,
         graph,
         controllers_config,
         bridges,
@@ -97,6 +99,7 @@ def main(
 def slave(
     devices_config: Dict[str, Any] = {},
     resources_config=[],
+    resources_edge_config=[],
     graph: Optional[Dict[str, Any]] = None,
     controllers_config: Dict[str, Any] = {},
     bridges: List[Any] = [],
