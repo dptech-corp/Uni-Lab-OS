@@ -19,6 +19,7 @@ from rclpy.service import Service
 from unilabos_msgs.action import SendCmd
 from unilabos_msgs.srv._serial_command import SerialCommand_Request, SerialCommand_Response
 
+from unilabos.resources.container import RegularContainer
 from unilabos.resources.graphio import (
     convert_resources_to_type,
     convert_resources_from_type,
@@ -344,6 +345,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             LIQUID_VOLUME = other_calling_param.pop("LIQUID_VOLUME", [])
             LIQUID_INPUT_SLOT = other_calling_param.pop("LIQUID_INPUT_SLOT", [])
             slot = other_calling_param.pop("slot", "-1")
+            resource = None
             if slot != "-1":  # slot为负数的时候采用assign方法
                 other_calling_param["slot"] = slot
             # 本地拿到这个物料，可能需要先做初始化?
@@ -362,6 +364,28 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                 if initialize_full:
                     resources = initialize_resources([resources])
                 request.resources = [convert_to_ros_msg(Resource, resources)]
+            if len(LIQUID_INPUT_SLOT) and LIQUID_INPUT_SLOT[0] == -1:
+                container_instance = request.resources[0]
+                container_query_dict: dict = resources
+                found_resources = self.resource_tracker.figure_resource({"id": container_query_dict["name"]}, try_mode=True)
+                if not len(found_resources):
+                    self.resource_tracker.add_resource(container_instance)
+                    logger.info(f"添加物料{container_query_dict['name']}到资源跟踪器")
+                else:
+                    assert len(found_resources) == 1, f"找到多个同名物料: {container_query_dict['name']}, 请检查物料系统"
+                    resource = found_resources[0]
+                    if isinstance(resource, Resource):
+                        regular_container = RegularContainer(resource.id)
+                        regular_container.ulr_resource = resource
+                        regular_container.ulr_resource_data.update(json.loads(container_instance.data))
+                        logger.info(f"更新物料{container_query_dict['name']}的数据{resource.data} ULR")
+                    elif isinstance(resource, dict):
+                        if "data" not in resource:
+                            resource["data"] = {}
+                        resource["data"].update(json.loads(container_instance.data))
+                        logger.info(f"更新物料{container_query_dict['name']}的数据{resource['data']} dict")
+                    else:
+                        logger.info(f"更新物料{container_query_dict['name']}出现不支持的数据类型{type(resource)} {resource}")
             response = rclient.call(request)
             # 应该先add_resource了
             res.response = "OK"
@@ -385,7 +409,8 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                     res.response = serialize_result_info(traceback.format_exc(), False, {})
                 return res
             # 接下来该根据bind_parent_id进行assign了，目前只有plr可以进行assign，不然没有办法输入到物料系统中
-            resource = self.resource_tracker.figure_resource({"name": bind_parent_id})
+            if bind_parent_id != self.node_name:
+                resource = self.resource_tracker.figure_resource({"name": bind_parent_id})  # 拿到父节点，进行具体assign等操作
             # request.resources = [convert_to_ros_msg(Resource, resources)]
 
             try:
@@ -435,7 +460,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                         "bind_parent_id": bind_parent_id,
                     }
                 )
-                future = action_client.send_goal_async(goal, goal_uuid=uuid.uuid4())
+                future = action_client.send_goal_async(goal)
 
                 def done_cb(*args):
                     self.lab_logger().info(f"向meshmanager发送新增resource完成")
@@ -901,9 +926,9 @@ class ROS2DeviceNode:
             from unilabos.ros.nodes.presets.protocol_node import ROS2ProtocolNode
 
             if self._driver_class is ROS2ProtocolNode:
-                self._driver_creator = ProtocolNodeCreator(driver_class, children=children)
+                self._driver_creator = ProtocolNodeCreator(driver_class, children=children, resource_tracker=self.resource_tracker)
             else:
-                self._driver_creator = DeviceClassCreator(driver_class)
+                self._driver_creator = DeviceClassCreator(driver_class, children=children, resource_tracker=self.resource_tracker)
 
         if driver_is_ros:
             driver_params["device_id"] = device_id

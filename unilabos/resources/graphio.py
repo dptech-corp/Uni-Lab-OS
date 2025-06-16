@@ -4,6 +4,10 @@ import json
 from typing import Union
 import numpy as np
 import networkx as nx
+from unilabos_msgs.msg import Resource
+
+from unilabos.resources.container import RegularContainer
+from unilabos.ros.msgs.message_converter import convert_from_ros_msg_with_mapping, convert_to_ros_msg
 
 try:
     from pylabrobot.resources.resource import Resource as ResourcePLR
@@ -466,6 +470,10 @@ def initialize_resource(resource_config: dict) -> list[dict]:
             if resource_config.get("position") is not None:
                 r["position"] = resource_config["position"]
             r = tree_to_list([r])
+        elif resource_class_config["type"] == "unilabos":
+            res_instance: RegularContainer = RESOURCE(id=resource_config["name"])
+            res_instance.ulr_resource = convert_to_ros_msg(Resource, {k:v for k,v in resource_config.items() if k != "class"})
+            r = [res_instance.get_ulr_resource_as_dict()]
         elif isinstance(RESOURCE, dict):
             r = [RESOURCE.copy()]
 

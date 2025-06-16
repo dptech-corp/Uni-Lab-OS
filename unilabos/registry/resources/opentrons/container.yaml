@@ -1,0 +1,5 @@
+container:
+  description: regular organic container
+  class: 
+    module: unilabos.resources.container:RegularContainer
+    type: unilabos

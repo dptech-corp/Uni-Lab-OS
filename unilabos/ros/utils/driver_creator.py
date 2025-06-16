@@ -33,7 +33,7 @@ class DeviceClassCreator(Generic[T]):
     这个类提供了从任意类创建实例的通用方法。
     """
 
-    def __init__(self, cls: Type[T]):
+    def __init__(self, cls: Type[T], children: Dict[str, Any], resource_tracker: DeviceNodeResourceTracker):
         """
         初始化设备类创建器
 
@@ -42,6 +42,18 @@ class DeviceClassCreator(Generic[T]):
         """
         self.device_cls = cls
         self.device_instance: Optional[T] = None
+        self.children = children
+        self.resource_tracker = resource_tracker
+
+    def attach_resource(self):
+        """
+        附加资源到设备类实例
+        """
+        if self.device_instance is not None:
+            for c in self.children.values():
+                if c["type"] == "container":
+                    self.resource_tracker.add_resource(c)
+
 
     def create_instance(self, data: Dict[str, Any]) -> T:
         """
@@ -60,6 +72,7 @@ class DeviceClassCreator(Generic[T]):
             }
         )
         self.post_create()
+        self.attach_resource()
         return self.device_instance
 
     def get_instance(self) -> Optional[T]:
@@ -90,13 +103,14 @@ class PyLabRobotCreator(DeviceClassCreator[T]):
             cls: PyLabRobot设备类
             children: 子资源字典，用于资源替换
         """
-        super().__init__(cls)
-        self.children = children
-        self.resource_tracker = resource_tracker
+        super().__init__(cls, children, resource_tracker)
         # 检查类是否具有deserialize方法
         self.has_deserialize = hasattr(cls, "deserialize") and callable(getattr(cls, "deserialize"))
         if not self.has_deserialize:
             logger.warning(f"类 {cls.__name__} 没有deserialize方法，将使用标准构造函数")
+
+    def attach_resource(self):
+        pass  # 只能增加实例化物料，原来默认物料仅为字典查询
 
     def _process_resource_mapping(self, resource, source_type):
         if source_type == dict:
@@ -260,7 +274,7 @@ class ProtocolNodeCreator(DeviceClassCreator[T]):
     这个类提供了针对ProtocolNode设备类的实例创建方法，处理children参数。
     """
 
-    def __init__(self, cls: Type[T], children: Dict[str, Any]):
+    def __init__(self, cls: Type[T], children: Dict[str, Any], resource_tracker: DeviceNodeResourceTracker):
         """
         初始化ProtocolNode设备类创建器
 
@@ -268,8 +282,7 @@ class ProtocolNodeCreator(DeviceClassCreator[T]):
             cls: ProtocolNode设备类
             children: 子资源字典，用于资源替换
         """
-        super().__init__(cls)
-        self.children = children
+        super().__init__(cls, children, resource_tracker)
 
     def create_instance(self, data: Dict[str, Any]) -> T:
         """
@@ -282,8 +295,7 @@ class ProtocolNodeCreator(DeviceClassCreator[T]):
             ProtocolNode设备类实例
         """
         try:
-
-            # 创建实例
+            # 创建实例，额外补充一个给protocol node的字段，后面考虑取消
             data["children"] = self.children
             self.device_instance = super(ProtocolNodeCreator, self).create_instance(data)
             self.post_create()

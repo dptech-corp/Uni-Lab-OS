@@ -383,18 +383,24 @@ class HostNode(BaseROS2DeviceNode):
         liquid_volume: list[int],
         slot_on_deck: str,
     ):
-        init_new_res = initialize_resource(
-            {
-                "name": res_id,
-                "class": class_name,
-                "parent": parent,
-                "position": {
-                    "x": bind_locations.x,
-                    "y": bind_locations.y,
-                    "z": bind_locations.z,
-                },
-            }
-        )  # flatten的格式
+        res_creation_input = {
+            "name": res_id,
+            "class": class_name,
+            "parent": parent,
+            "position": {
+                "x": bind_locations.x,
+                "y": bind_locations.y,
+                "z": bind_locations.z,
+            },
+        }
+        if len(liquid_input_slot) and liquid_input_slot[0] == -1:  # 目前container只逐个创建
+            res_creation_input.update({
+                "data": {
+                    "liquid_type": liquid_type[0] if liquid_type else None,
+                    "liquid_volume": liquid_volume[0] if liquid_volume else None,
+                }
+            })
+        init_new_res = initialize_resource(res_creation_input)  # flatten的格式
         resources = init_new_res  # initialize_resource已经返回list[dict]
         device_ids = [device_id]
         bind_parent_id = [parent]

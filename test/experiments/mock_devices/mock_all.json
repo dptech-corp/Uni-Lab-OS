@@ -3,7 +3,9 @@
         {  
             "id": "MockChiller1",  
             "name": "模拟冷却器",  
-            "children": [],  
+            "children": [
+                "MockContainerForChiller1"
+            ],
             "parent": null,  
             "type": "device",  
             "class": "mock_chiller",  
@@ -24,6 +26,22 @@
                 "vessel": "",
                 "purpose": ""
             }  
+        },
+        {
+            "id": "MockContainerForChiller1",
+            "name": "模拟容器",
+            "type": "container",
+            "parent": "MockChiller1",
+            "position": {
+                "x": 5,
+                "y": 0,
+                "z": 0
+            },
+            "data": {
+                "liquid_type": "CuCl2",
+                "liquid_volume": "100"
+            },
+            "children": []
         },
         {  
             "id": "MockFilter1",  
