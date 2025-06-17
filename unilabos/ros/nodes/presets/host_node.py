@@ -22,6 +22,7 @@ from unilabos_msgs.srv import (
 )  # type: ignore
 from unique_identifier_msgs.msg import UUID
 
+from unilabos.config.config import BasicConfig
 from unilabos.registry.registry import lab_registry
 from unilabos.resources.graphio import initialize_resource
 from unilabos.resources.registry import add_schema
@@ -146,13 +147,15 @@ class HostNode(BaseROS2DeviceNode):
 
         self.device_status = {}  # 用来存储设备状态
         self.device_status_timestamps = {}  # 用来存储设备状态最后更新时间
+        if BasicConfig.upload_registry:
+            from unilabos.app.mq import mqtt_client
 
-        from unilabos.app.mq import mqtt_client
-
-        for device_info in lab_registry.obtain_registry_device_info():
-            mqtt_client.publish_registry(device_info["id"], device_info)
-        for resource_info in lab_registry.obtain_registry_resource_info():
-            mqtt_client.publish_registry(resource_info["id"], resource_info)
+            for device_info in lab_registry.obtain_registry_device_info():
+                mqtt_client.publish_registry(device_info["id"], device_info)
+            for resource_info in lab_registry.obtain_registry_resource_info():
+                mqtt_client.publish_registry(resource_info["id"], resource_info)
+        else:
+            self.lab_logger().warning("本次启动注册表不报送云端，如果您需要联网调试，请使用unilab-register命令进行单独报送，或者在启动命令增加--upload_registry")
         time.sleep(1) # 等待MQTT连接稳定
         # 首次发现网络中的设备
         self._discover_devices()
@@ -195,18 +198,18 @@ class HostNode(BaseROS2DeviceNode):
         resource_ids_to_instance = {i["id"]: i for i in resources_config}
         resource_name_to_with_parent_name = {}
         for res in resources_config:
-            if res.get("parent") and res.get("type") == "device" and res.get("class"):
-                parent_id = res.get("parent")
-                parent_res = resource_ids_to_instance[parent_id]
-                if parent_res.get("type") == "device" and parent_res.get("class"):
-                    resource_with_parent_name.append(copy.deepcopy(res))
-                    resource_name_to_with_parent_name[resource_with_parent_name[-1]["id"]] = f"{parent_res['id']}/{res['id']}"
-                    resource_with_parent_name[-1]["id"] = f"{parent_res['id']}/{res['id']}"
-                    continue
+            # if res.get("parent") and res.get("type") == "device" and res.get("class"):
+            #     parent_id = res.get("parent")
+            #     parent_res = resource_ids_to_instance[parent_id]
+            #     if parent_res.get("type") == "device" and parent_res.get("class"):
+            #         resource_with_parent_name.append(copy.deepcopy(res))
+            #         resource_name_to_with_parent_name[resource_with_parent_name[-1]["id"]] = f"{parent_res['id']}/{res['id']}"
+            #         resource_with_parent_name[-1]["id"] = f"{parent_res['id']}/{res['id']}"
+            #         continue
             resource_with_parent_name.append(copy.deepcopy(res))
-        for edge in self.resources_edge_config:
-            edge["source"] = resource_name_to_with_parent_name.get(edge.get("source"), edge.get("source"))
-            edge["target"] = resource_name_to_with_parent_name.get(edge.get("target"), edge.get("target"))
+        # for edge in self.resources_edge_config:
+        #     edge["source"] = resource_name_to_with_parent_name.get(edge.get("source"), edge.get("source"))
+        #     edge["target"] = resource_name_to_with_parent_name.get(edge.get("target"), edge.get("target"))
         try:
             for bridge in self.bridges:
                 if hasattr(bridge, "resource_add"):

@@ -10,8 +10,9 @@ from unilabos.utils import logger
 class BasicConfig:
     ENV = "pro"  # 'test'
     config_path = ""
-    is_host_mode = True  # 从registry.py移动过来
+    is_host_mode = True
     slave_no_host = False  # 是否跳过rclient.wait_for_service()
+    upload_registry = False
     machine_name = "undefined"
     vis_2d_enable = False
 
