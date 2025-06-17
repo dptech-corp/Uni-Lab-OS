@@ -122,39 +122,39 @@
     ],
     "links": [
         {
-            "source": "reactor",
-            "target": "vacuum_valve",
-            "type": "physical",
+            "source": "vacuum_valve",
+            "target": "reactor",
+            "type": "fluid",
             "port": {
                 "reactor": "top",
-                "vacuum_valve": "1"
+                "vacuum_valve": "out"
             }
         },
         {
-            "source": "reactor",
-            "target": "gas_valve",
-            "type": "physical",
+            "source": "gas_valve",
+            "target": "reactor",
+            "type": "fluid",
             "port": {
                 "reactor": "top",
-                "gas_valve": "1"
+                "gas_valve": "out"
             }
         },
         {
-            "source": "vacuum_pump",
-            "target": "vacuum_valve",
-            "type": "physical",
+            "source": "vacuum_valve",
+            "target": "vacuum_pump",
+            "type": "fluid",
             "port": {
                 "vacuum_pump": "out",
-                "vacuum_valve": "0"
+                "vacuum_valve": "in"
             }
         },
         {
-            "source": "gas_source",
-            "target": "gas_valve",
-            "type": "physical",
+            "source": "gas_valve",
+            "target": "gas_source",
+            "type": "fluid",
             "port": {
                 "gas_source": "out",
-                "gas_valve": "0"
+                "gas_valve": "in"
             }
         }
     ]

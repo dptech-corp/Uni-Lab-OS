@@ -730,7 +730,7 @@
             "type": "fluid",
             "port": {
                 "multiway_valve_2": "2",
-                "solenoid_valve_1": "1"
+                "solenoid_valve_1": "in"
             }
         },
         {
@@ -739,7 +739,7 @@
             "target": "vacuum_pump_1",
             "type": "fluid",
             "port": {
-                "solenoid_valve_1": "2",
+                "solenoid_valve_1": "out",
                 "vacuum_pump_1": "vacuumpump"
             }
         },
@@ -750,7 +750,7 @@
             "type": "fluid",
             "port": {
                 "multiway_valve_2": "3",
-                "solenoid_valve_2": "1"
+                "solenoid_valve_2": "in"
             }
         },
         {
@@ -759,7 +759,7 @@
             "target": "gas_source_1",
             "type": "fluid",
             "port": {
-                "solenoid_valve_2": "2",
+                "solenoid_valve_2": "out",
                 "gas_source_1": "gassource"
             }
         },

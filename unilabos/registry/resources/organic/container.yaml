@@ -6,9 +6,16 @@ container:
   handles:
     - handler_key: top
       label: top
+      io_type: target
       data_type: fluid
       side: NORTH
     - handler_key: bottom
       label: bottom
+      io_type: source
       data_type: fluid
+      side: SOUTH
+    - handler_key: bind
+      label: bind
+      io_type: target
+      data_type: mechanical
       side: SOUTH

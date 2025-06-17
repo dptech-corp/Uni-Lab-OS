@@ -107,10 +107,10 @@ virtual_pump:
           success: success
   # 虚拟泵节点配置 - 具有多通道阀门特性，根据valve_position可连接多个容器
   handles:
-  - handler_key: pump-inlet
-    label: Pump Inlet
+  - handler_key: pumpio
+    label: pumpio
     data_type: fluid
-    io_type: target
+    io_type: source
     data_source: handle
     data_key: fluid_in
     description: "泵的进液口，连接源容器"
@@ -168,7 +168,7 @@ virtual_stirrer:
     label: stirrer
     data_type: mechanical
     side: NORTH
-    io_type: undirected
+    io_type: source
     data_source: handle
     data_key: vessel
     description: "搅拌器的机械连接口，直接与反应容器连接提供搅拌功能"
@@ -323,19 +323,19 @@ virtual_solenoid_valve:
           success: success
   # 电磁阀门节点配置 - 双向流通的开关型阀门，流动方向由泵决定
   handles:
-  - handler_key: 1
-    label: 1
+  - handler_key: in
+    label: in
     data_type: fluid
     side: NORTH
-    io_type: undirected
+    io_type: target
     data_source: handle
     data_key: fluid_port_in
     description: "电磁阀的双向流体口，开启时允许流体双向通过，关闭时完全阻断"
-  - handler_key: 2
-    label: 2
+  - handler_key: out
+    label: out
     data_type: fluid
     side: SOUTH
-    io_type: undirected
+    io_type: source
     data_source: handle
     data_key: fluid_port_out
     description: "电磁阀的双向流体口，开启时允许流体双向通过，关闭时完全阻断"
@@ -391,7 +391,7 @@ virtual_centrifuge:
     label: centrifuge
     data_type: transport
     side: NORTH
-    io_type: undirected
+    io_type: target
     data_source: handle
     data_key: vessel
     description: "需要离心的样品容器"
@@ -534,7 +534,7 @@ virtual_heatchill:
     label: heatchill
     data_type: mechanical
     side: NORTH
-    io_type: undirected
+    io_type: source
     data_source: handle
     data_key: vessel
     description: "加热/冷却器的物理连接口，容器直接放置在设备上进行温度控制"
@@ -593,7 +593,7 @@ virtual_transfer_pump:
     label: transferpump
     data_type: fluid
     side: SOUTH
-    io_type: undirected
+    io_type: source
     data_source: handle
     data_key: fluid_port
     description: "注射器式转移泵的唯一连接口，通过阀门切换实现吸入和排出"
@@ -716,7 +716,7 @@ virtual_rotavap:
     label: rotavap-sample
     data_type: fluid
     side: NORTH
-    io_type: undirected
+    io_type: target
     data_source: handle
     data_key: vessel
     description: "样品的双向连接口，可放入需要蒸发的样品，蒸发完成后取出浓缩物"
@@ -787,7 +787,7 @@ virtual_separator:
     label: separatorin
     data_type: fluid
     side: NORTH
-    io_type: undirected
+    io_type: target
     data_source: handle
     data_key: from_vessel
     description: "需要分离的混合液体输入口"
@@ -844,7 +844,7 @@ virtual_vacuum_pump:
     label: vacuumpump
     data_type: fluid
     side: SOUTH
-    io_type: target
+    io_type: source
     data_source: handle
     data_key: fluid_in
     description: "真空泵进气口，连接需要抽真空的容器或管路"
