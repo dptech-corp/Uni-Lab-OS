@@ -110,7 +110,8 @@ class ROS2ProtocolNode(BaseROS2DeviceNode):
 
     def initialize_device(self, device_id, device_config):
         """初始化设备并创建相应的动作客户端"""
-        device_id_abs = f"{self.device_id}/{device_id}"
+        # device_id_abs = f"{self.device_id}/{device_id}"
+        device_id_abs = f"{device_id}"
         self.lab_logger().info(f"初始化子设备: {device_id_abs}")
         d = self.sub_devices[device_id] = initialize_device_from_dict(device_id_abs, device_config)
 
