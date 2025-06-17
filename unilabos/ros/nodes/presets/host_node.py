@@ -213,12 +213,12 @@ class HostNode(BaseROS2DeviceNode):
                     from unilabos.app.web.client import HTTPClient
                     client: HTTPClient = bridge
                     resource_start_time = time.time()
-                    resource_add_res = client.resource_add(add_schema(resource_with_parent_name), True)
+                    resource_add_res = client.resource_add(add_schema(resource_with_parent_name), False)
                     resource_end_time = time.time()
                     self.lab_logger().info(
                         f"[Host Node-Resource] 物料上传 {round(resource_end_time - resource_start_time, 5) * 1000} ms"
                     )
-                    resource_add_res = client.resource_edge_add(self.resources_edge_config, True)
+                    resource_add_res = client.resource_edge_add(self.resources_edge_config, False)
                     resource_edge_end_time = time.time()
                     self.lab_logger().info(
                         f"[Host Node-Resource] 物料关系上传 {round(resource_edge_end_time - resource_end_time, 5) * 1000} ms"
