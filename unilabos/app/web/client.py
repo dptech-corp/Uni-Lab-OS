@@ -44,10 +44,10 @@ class HTTPClient:
             f"{self.remote_addr}/lab/resource/edge/batch_create/?database_process_later={1 if database_process_later else 0}",
             json=resources,
             headers={"Authorization": f"lab {self.auth}"},
-            timeout=5,
+            timeout=100,
         )
-        if response.status_code != 200:
-            logger.error(f"添加物料关系失败: {response.text}")
+        if response.status_code != 200 and response.status_code != 201:
+            logger.error(f"添加物料关系失败: {response.status_code}, {response.text}")
         return response
 
     def resource_add(self, resources: List[Dict[str, Any]], database_process_later: bool) -> requests.Response:
@@ -64,7 +64,7 @@ class HTTPClient:
             f"{self.remote_addr}/lab/resource/?database_process_later={1 if database_process_later else 0}",
             json=resources,
             headers={"Authorization": f"lab {self.auth}"},
-            timeout=5,
+            timeout=100,
         )
         if response.status_code != 200:
             logger.error(f"添加物料失败: {response.text}")
@@ -85,7 +85,7 @@ class HTTPClient:
             f"{self.remote_addr}/lab/resource/?edge_format=1",
             params={"id": id, "with_children": with_children},
             headers={"Authorization": f"lab {self.auth}"},
-            timeout=5,
+            timeout=20,
         )
         return response.json()
 
@@ -103,7 +103,7 @@ class HTTPClient:
             f"{self.remote_addr}/lab/resource/batch_delete/",
             params={"id": id},
             headers={"Authorization": f"lab {self.auth}"},
-            timeout=5,
+            timeout=20,
         )
         return response
 
@@ -121,7 +121,7 @@ class HTTPClient:
             f"{self.remote_addr}/lab/resource/batch_update/?edge_format=1",
             json=resources,
             headers={"Authorization": f"lab {self.auth}"},
-            timeout=5,
+            timeout=100,
         )
         return response
 
