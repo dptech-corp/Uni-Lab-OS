@@ -74,6 +74,11 @@ def parse_args():
         help="Slave模式下跳过等待host服务",
     )
     parser.add_argument(
+        "--upload_registry",
+        action="store_true",
+        help="启动unilab时同时报送注册表信息",
+    )
+    parser.add_argument(
         "--config",
         type=str,
         default=None,
@@ -117,6 +122,7 @@ def main():
     # 设置BasicConfig参数
     BasicConfig.is_host_mode = not args_dict.get("without_host", False)
     BasicConfig.slave_no_host = args_dict.get("slave_no_host", False)
+    BasicConfig.upload_registry = args_dict.get("upload_registry", False)
     machine_name = os.popen("hostname").read().strip()
     machine_name = "".join([c if c.isalnum() or c == "_" else "_" for c in machine_name])
     BasicConfig.machine_name = machine_name

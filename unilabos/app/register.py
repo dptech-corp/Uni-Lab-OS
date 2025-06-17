@@ -15,15 +15,15 @@ def register_devices_and_resources(mqtt_client, lab_registry):
 
     # 注册设备信息
     for device_info in lab_registry.obtain_registry_device_info():
-        mqtt_client.publish_registry(device_info["id"], device_info)
+        mqtt_client.publish_registry(device_info["id"], device_info, False)
         logger.debug(f"[UniLab Register] 注册设备: {device_info['id']}")
 
     # 注册资源信息
     for resource_info in lab_registry.obtain_registry_resource_info():
-        mqtt_client.publish_registry(resource_info["id"], resource_info)
+        mqtt_client.publish_registry(resource_info["id"], resource_info, False)
         logger.debug(f"[UniLab Register] 注册资源: {resource_info['id']}")
 
-    time.sleep(20)
+    time.sleep(10)
 
     logger.info("[UniLab Register] 设备和资源注册完成.")
 
@@ -53,6 +53,10 @@ def main():
     load_config_from_file(args.config)
 
     from unilabos.app.mq import mqtt_client
+
+    # 连接mqtt
+    mqtt_client.start()
+
     from unilabos.registry.registry import lab_registry
 
     # 注册设备和资源
