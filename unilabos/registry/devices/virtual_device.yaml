@@ -202,7 +202,14 @@ virtual_multiway_valve:
       set_position:
         type: SendCmd
         goal:
-          command: position
+          command: command
+        feedback: {}
+        result:
+          success: success
+      set_valve_position:
+        type: SendCmd
+        goal:
+          command: command
         feedback: {}
         result:
           success: success
@@ -559,13 +566,14 @@ virtual_transfer_pump:
   description: Virtual Transfer Pump for TransferProtocol Testing (Syringe-style)
   icon: Pump.webp
   class:
-    module: unilabos.devices.virtual.virtual_transferpump:VirtualPump
+    module: unilabos.devices.virtual.virtual_transferpump:VirtualTransferPump
     type: python
     status_types:
       status: String
       current_volume: Float64
       max_volume: Float64
       transfer_rate: Float64
+      position: Float64
     action_value_mappings:
       transfer:
         type: Transfer
@@ -587,6 +595,18 @@ virtual_transfer_pump:
         result:
           success: success
           message: message
+      set_position:
+        type: SetPumpPosition  # ← 使用新的动作类型
+        goal:
+          position: position        # ← 直接映射参数名
+          max_velocity: max_velocity # ← 直接映射参数名
+        feedback:
+          status: status
+          current_position: current_position
+          progress: progress
+        result:
+          success: success
+          message: message
   # 注射器式转移泵节点配置 - 只有一个双向连接口，可吸入和排出液体
   handles:
   - handler_key: transferpump
@@ -603,12 +623,15 @@ virtual_transfer_pump:
       port:
         type: string
         default: "VIRTUAL"
+        description: "通信端口"
       max_volume:
         type: number
         default: 50.0
+        description: "最大注射器容量 (mL)"
       transfer_rate:
         type: number
         default: 5.0
+        description: "默认转移速率 (mL/s)"
     additionalProperties: false
 
 virtual_column:

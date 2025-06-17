@@ -46,7 +46,7 @@ set(action_files
   "action/StopPurge.action"
   "action/StopStir.action"
   "action/Transfer.action"
-
+  "action/SetPumpPosition.action"
   "action/LiquidHandlerProtocolCreation.action"
   "action/LiquidHandlerAspirate.action"
   "action/LiquidHandlerDiscardTips.action"

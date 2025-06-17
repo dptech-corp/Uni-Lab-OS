@@ -192,6 +192,16 @@ class VirtualMultiwayValve:
     def __str__(self):
         return f"VirtualMultiwayValve(Position: {self._current_position}/{self.max_positions}, Port: {self.get_current_port()}, Status: {self._status})"
 
+    def set_valve_position(self, command: Union[int, str]):
+        """
+        设置阀门位置 - 兼容pump_protocol调用
+        这是set_position的别名方法，用于兼容pump_protocol.py
+        
+        Args:
+            command: 目标位置 (0-8) 或位置字符串
+        """
+        return self.set_position(command)
+
 
 # 使用示例
 if __name__ == "__main__":
