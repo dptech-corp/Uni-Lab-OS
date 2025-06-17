@@ -6,8 +6,8 @@
                 virtual_heatchill()                                                             加热器
                 virtual_stirrer()                                                               搅拌器
                 virtual_solenoid_valve()                                                        电磁阀
-                vacuum_pump()                       vacuum_pump.mock                            真空泵
-                gas_source()                                                                    气源
+                virtual_vacuum_pump(√)                       vacuum_pump.mock                            真空泵
+                virtual_gas_source(√)                                                                    气源
                 virtual_filter()                                                                过滤器
                 virtual_column(√)                                                               层析柱
                 separator()                         homemade_grbl_conductivity                  分液漏斗
@@ -24,9 +24,9 @@
                 DissolveProtocol()
                 FilterThroughProtocol()
                 WashSolidProtocol()
-                SeparateProtocol(√)
-                EvaporateProtocol(√)
+                SeparateProtocol()
+                EvaporateProtocol()
                 HeatChillProtocol()
                 HeatChillStartProtocol()
                 HeatChillStopProtocol()
-                EvacuateAndRefillProtocol(√)
+                EvacuateAndRefillProtocol()

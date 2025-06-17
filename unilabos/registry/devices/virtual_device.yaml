@@ -55,8 +55,21 @@
 # 连接特性：1个输入口（混合液），2个输出口（上相和下相）
 # 数据类型：fluid（流体连接）
 
+# 11. virtual_vacuum_pump - 虚拟真空泵
+# 描述：真空泵设备，用于抽真空操作和真空/充气循环
+# 连接特性：1个输入口（连接需要抽真空的系统）
+# 数据类型：fluid（流体连接）
+# 主要功能：开启/关闭、状态控制（ON/OFF）
+
+# 12. virtual_gas_source - 虚拟气源
+# 描述：气源设备，用于充气操作和真空/充气循环
+# 连接特性：1个输出口（向系统提供加压气体）
+# 数据类型：fluid（流体连接）
+# 主要功能：开启/关闭、状态控制（ON/OFF）
+
 virtual_pump:
   description: Virtual Pump for PumpTransferProtocol Testing
+  #icon: 这个注册的设备应该是写错了，后续删掉
   class:
     module: unilabos.devices.virtual.virtual_pump:VirtualPump
     type: python
@@ -114,6 +127,7 @@ virtual_pump:
 
 virtual_stirrer:
   description: Virtual Stirrer for StirProtocol Testing
+  icon: Stirrer.webp
   class:
     module: unilabos.devices.virtual.virtual_stirrer:VirtualStirrer
     type: python
@@ -174,6 +188,7 @@ virtual_stirrer:
 
 virtual_multiway_valve:
   description: Virtual 8-Way Valve for flow direction control
+  icon: EightPipeline.webp
   class:
     module: unilabos.devices.virtual.virtual_multiway_valve:VirtualMultiwayValve
     type: python
@@ -276,6 +291,7 @@ virtual_multiway_valve:
     additionalProperties: false
 virtual_solenoid_valve:
   description: Virtual Solenoid Valve for simple on/off flow control
+  #icon: SolenoidValve.webp暂时还没有
   class:
     module: unilabos.devices.virtual.virtual_solenoid_valve:VirtualSolenoidValve
     type: python
@@ -336,6 +352,7 @@ virtual_solenoid_valve:
     additionalProperties: false
 virtual_centrifuge:
   description: Virtual Centrifuge for CentrifugeProtocol Testing
+  #icon: Centrifuge.webp暂时还没有
   class:
     module: unilabos.devices.virtual.virtual_centrifuge:VirtualCentrifuge
     type: python
@@ -394,6 +411,7 @@ virtual_centrifuge:
 
 virtual_filter:
   description: Virtual Filter for FilterProtocol Testing
+  icon: Filter.webp
   class:
     module: unilabos.devices.virtual.virtual_filter:VirtualFilter
     type: python
@@ -469,6 +487,7 @@ virtual_filter:
 
 virtual_heatchill:
   description: Virtual HeatChill for HeatChillProtocol Testing
+  icon: Heater.webp
   class:
     module: unilabos.devices.virtual.virtual_heatchill:VirtualHeatChill
     type: python
@@ -535,6 +554,7 @@ virtual_heatchill:
 
 virtual_transfer_pump:
   description: Virtual Transfer Pump for TransferProtocol Testing (Syringe-style)
+  icon: Pump.webp
   class:
     module: unilabos.devices.virtual.virtual_transferpump:VirtualPump
     type: python
@@ -590,6 +610,7 @@ virtual_transfer_pump:
 
 virtual_column:
   description: Virtual Column for RunColumn Protocol Testing
+  #icon: Column.webp暂时还没有
   class:
     module: unilabos.devices.virtual.virtual_column:VirtualColumn
     type: python
@@ -653,6 +674,7 @@ virtual_column:
 
 virtual_rotavap:
   description: Virtual Rotary Evaporator for EvaporateProtocol Testing
+  icon: Rotaryevaporator.webp
   class:
     module: unilabos.devices.virtual.virtual_rotavap:VirtualRotavap
     type: python
@@ -727,6 +749,7 @@ virtual_rotavap:
 
 virtual_separator:
   description: Virtual Separator for SeparateProtocol Testing
+  icon: Separator.webp
   class:
     module: unilabos.devices.virtual.virtual_separator:VirtualSeparator
     type: python
@@ -805,6 +828,7 @@ virtual_separator:
 
 virtual_vacuum_pump:
   description: Virtual vacuum pump
+  icon: Vacuum.webp
   class:
     module: unilabos.devices.virtual.virtual_vacuum_pump:VirtualVacuumPump
     type: python
@@ -846,6 +870,7 @@ virtual_vacuum_pump:
 
 virtual_gas_source:
   description: Virtual gas source
+  #icon: GasSource.webp暂时还没有
   class:
     module: unilabos.devices.virtual.virtual_gas_source:VirtualGasSource
     type: python
