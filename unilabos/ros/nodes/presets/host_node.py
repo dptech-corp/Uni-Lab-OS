@@ -147,12 +147,12 @@ class HostNode(BaseROS2DeviceNode):
         self.device_status = {}  # 用来存储设备状态
         self.device_status_timestamps = {}  # 用来存储设备状态最后更新时间
 
-        from unilabos.app.mq import mqtt_client
-
-        for device_info in lab_registry.obtain_registry_device_info():
-            mqtt_client.publish_registry(device_info["id"], device_info)
-        for resource_info in lab_registry.obtain_registry_resource_info():
-            mqtt_client.publish_registry(resource_info["id"], resource_info)
+        # from unilabos.app.mq import mqtt_client
+        #
+        # for device_info in lab_registry.obtain_registry_device_info():
+        #     mqtt_client.publish_registry(device_info["id"], device_info)
+        # for resource_info in lab_registry.obtain_registry_resource_info():
+        #     mqtt_client.publish_registry(resource_info["id"], resource_info)
         time.sleep(1) # 等待MQTT连接稳定
         # 首次发现网络中的设备
         self._discover_devices()

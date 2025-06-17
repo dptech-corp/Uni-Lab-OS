@@ -17,6 +17,7 @@ setup(
     entry_points={
         'console_scripts': [
             "unilab = unilabos.app.main:main",
+            "unilab-register = unilabos.app.register:main"
         ],
     },
 )

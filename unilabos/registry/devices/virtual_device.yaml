@@ -211,6 +211,7 @@ virtual_multiway_valve:
   - handler_key: transferpump
     label: transferpump
     data_type: fluid
+    side: NORTH
     io_type: target
     data_source: handle
     data_key: fluid_in

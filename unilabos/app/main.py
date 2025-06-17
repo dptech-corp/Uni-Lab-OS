@@ -22,6 +22,21 @@ from unilabos.config.config import load_config, BasicConfig, _update_config_from
 from unilabos.utils.banner_print import print_status, print_unilab_banner
 
 
+def load_config_from_file(config_path):
+    if config_path is None:
+        config_path = os.environ.get("UNILABOS.BASICCONFIG.CONFIG_PATH", None)
+    if config_path:
+        if not os.path.exists(config_path):
+            print_status(f"配置文件 {config_path} 不存在", "error")
+        elif not config_path.endswith(".py"):
+            print_status(f"配置文件 {config_path} 不是Python文件，必须以.py结尾", "error")
+        else:
+            load_config(config_path)
+    else:
+        print_status(f"启动 UniLab-OS时，配置文件参数未正确传入 --config '{config_path}' 尝试本地配置...", "warning")
+        load_config(config_path)
+
+
 def parse_args():
     """解析命令行参数"""
     parser = argparse.ArgumentParser(description="Start Uni-Lab Edge server.")
@@ -97,18 +112,7 @@ def main():
 
     # 加载配置文件，优先加载config，然后从env读取
     config_path = args_dict.get("config")
-    if config_path is None:
-        config_path = os.environ.get("UNILABOS.BASICCONFIG.CONFIG_PATH", None)
-    if config_path:
-        if not os.path.exists(config_path):
-            print_status(f"配置文件 {config_path} 不存在", "error")
-        elif not config_path.endswith(".py"):
-            print_status(f"配置文件 {config_path} 不是Python文件，必须以.py结尾", "error")
-        else:
-            load_config(config_path)
-    else:
-        print_status(f"启动 UniLab-OS时，配置文件参数未正确传入 --config '{config_path}' 尝试本地配置...", "warning")
-        load_config(config_path)
+    load_config_from_file(config_path)
 
     # 设置BasicConfig参数
     BasicConfig.is_host_mode = not args_dict.get("without_host", False)
