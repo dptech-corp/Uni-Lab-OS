@@ -155,7 +155,7 @@ class HostNode(BaseROS2DeviceNode):
             for resource_info in lab_registry.obtain_registry_resource_info():
                 mqtt_client.publish_registry(resource_info["id"], resource_info)
         else:
-            self.lab_logger().warning("本次启动注册表不报送云端，如果您需要联网调试，请使用unilab-register命令进行单独报送")
+            self.lab_logger().warning("本次启动注册表不报送云端，如果您需要联网调试，请使用unilab-register命令进行单独报送，或者在启动命令增加--upload_registry")
         time.sleep(1) # 等待MQTT连接稳定
         # 首次发现网络中的设备
         self._discover_devices()
