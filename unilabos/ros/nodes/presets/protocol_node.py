@@ -214,7 +214,7 @@ class ROS2ProtocolNode(BaseROS2DeviceNode):
         if device_id in ["", None, "self"]:
             action_id = f"/devices/{self.device_id}/{action_name}"
         else:
-            action_id = f"/devices/{self.device_id}/{device_id}/{action_name}"
+            action_id = f"/devices/{device_id}/{action_name}"  # 执行时取消了主节点信息 /{self.device_id}
 
         # 检查动作客户端是否存在
         if action_id not in self._action_clients:
