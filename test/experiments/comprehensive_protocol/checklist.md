@@ -1,6 +1,6 @@
 1. 用到的仪器
-                virtual_multiway_valve()                                                        八通阀门
-                virtual_transfer_pump()                                                         转移泵
+                virtual_multiway_valve(√)                                                     八通阀门
+                virtual_transfer_pump(√)                                                        转移泵
                 virtual_centrifuge()                                                            离心机
                 virtual_rotavap()                                                               旋蒸仪
                 virtual_heatchill()                                                             加热器
@@ -12,21 +12,23 @@
                 virtual_column(√)                                                               层析柱
                 separator()                         homemade_grbl_conductivity                  分液漏斗
 2. 用到的protocol
-                AddProtocol()
-                TransferProtocol()                  应该用pump_protocol.py删掉transfer
-                StartStirProtocol()
-                StopStirProtocol()
-                StirProtocol()
-                RunColumnProtocol()
-                CentrifugeProtocol()
-                FilterProtocol()
-                CleanVesselProtocol()
-                DissolveProtocol()
-                FilterThroughProtocol()
-                WashSolidProtocol()
-                SeparateProtocol()
-                EvaporateProtocol()
-                HeatChillProtocol()
-                HeatChillStartProtocol()
-                HeatChillStopProtocol()
-                EvacuateAndRefillProtocol()
+    PumpTransferProtocol: generate_pump_protocol_with_rinsing,                      (√)
+    这个重复了，删掉CleanProtocol: generate_clean_protocol,
+    SeparateProtocol: generate_separate_protocol,                           (×)
+    EvaporateProtocol: generate_evaporate_protocol,                                 (√)
+    EvacuateAndRefillProtocol: generate_evacuateandrefill_protocol,                 (√)
+    CentrifugeProtocol: generate_centrifuge_protocol,                               (√)
+    AddProtocol: generate_add_protocol,                                             (√)
+    FilterProtocol: generate_filter_protocol,                                       (√)
+    HeatChillProtocol: generate_heat_chill_protocol,                                (√)
+    HeatChillStartProtocol: generate_heat_chill_start_protocol,                     (√)
+    HeatChillStopProtocol: generate_heat_chill_stop_protocol,                       (√)
+    StirProtocol: generate_stir_protocol,                                           (√)
+    StartStirProtocol: generate_start_stir_protocol,                                (√)
+    StopStirProtocol: generate_stop_stir_protocol,                                  (√)
+    这个重复了，删掉TransferProtocol: generate_transfer_protocol,
+    CleanVesselProtocol: generate_clean_vessel_protocol,                            (√)
+    DissolveProtocol: generate_dissolve_protocol,                                   (√)
+    FilterThroughProtocol: generate_filter_through_protocol,                (×)
+    RunColumnProtocol: generate_run_column_protocol,                        (×)
+    WashSolidProtocol: generate_wash_solid_protocol,                        (×)

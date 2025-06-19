@@ -133,6 +133,11 @@ virtual_stirrer:
     type: python
     status_types:
       status: String
+      operation_mode: String       # 操作模式
+      current_vessel: String       # 当前容器  
+      current_speed: Float64       # 当前搅拌速度
+      is_stirring: Bool           # 是否搅拌
+      remaining_time: Float64     # 剩余时间
     action_value_mappings:
       stir:
         type: Stir
@@ -162,28 +167,28 @@ virtual_stirrer:
           status: status
         result:
           success: success
-  # 虚拟搅拌器节点配置 - 机械连接设备，单一双向连接点
+  # 虚拟搅拌器节点配置 - 机械连接设备，双向连接点用于搅拌容器
   handles:
   - handler_key: stirrer
     label: stirrer
     data_type: mechanical
     side: NORTH
-    io_type: source
+    io_type: undirected
     data_source: handle
     data_key: vessel
-    description: "搅拌器的机械连接口，直接与反应容器连接提供搅拌功能"
+    description: "搅拌器的机械连接口，容器通过机械连接进行搅拌"
   schema:
     type: object
     properties:
       port:
         type: string
         default: "VIRTUAL"
-      max_temp:
-        type: number
-        default: 100.0
       max_speed:
         type: number
-        default: 1000.0
+        default: 1500.0
+      min_speed:
+        type: number
+        default: 50.0
     additionalProperties: false
 
 virtual_multiway_valve:
@@ -308,17 +313,24 @@ virtual_solenoid_valve:
       valve_state: String # "open" or "closed"
       is_open: Bool
     action_value_mappings:
+      set_valve_position:
+        type: SendCmd
+        goal:
+          command: command  # 确保参数名匹配
+        feedback: {}
+        result:
+          success: success
       open:
         type: SendCmd
         goal:
-          command: "open"
+          command: "OPEN"
         feedback: {}
         result:
           success: success
       close:
         type: SendCmd
         goal:
-          command: "close"
+          command: "CLOSED"
         feedback: {}
         result:
           success: success
@@ -331,22 +343,22 @@ virtual_solenoid_valve:
           success: success
   # 电磁阀门节点配置 - 双向流通的开关型阀门，流动方向由泵决定
   handles:
-  - handler_key: in
-    label: in
+  - handler_key: inlet
+    label: inlet
     data_type: fluid
     side: NORTH
     io_type: target
     data_source: handle
     data_key: fluid_port_in
-    description: "电磁阀的双向流体口，开启时允许流体双向通过，关闭时完全阻断"
-  - handler_key: out
-    label: out
+    description: "电磁阀的进液口"
+  - handler_key: outlet
+    label: outlet
     data_type: fluid
     side: SOUTH
     io_type: source
     data_source: handle
     data_key: fluid_port_out
-    description: "电磁阀的双向流体口，开启时允许流体双向通过，关闭时完全阻断"
+    description: "电磁阀的出液口"
   schema:
     type: object
     properties:
@@ -377,6 +389,8 @@ virtual_centrifuge:
       min_temp: Float64
       centrifuge_state: String
       time_remaining: Float64
+      progress: Float64            # 添加这个状态
+      message: String              # 添加这个状态
     action_value_mappings:
       centrifuge:
         type: Centrifuge
@@ -422,23 +436,22 @@ virtual_centrifuge:
 
 virtual_filter:
   description: Virtual Filter for FilterProtocol Testing
-  icon: Filter.webp
+  #icon: Filter.webp暂时还没有
   class:
     module: unilabos.devices.virtual.virtual_filter:VirtualFilter
     type: python
     status_types:
       status: String
-      filter_state: String
-      current_temp: Float64
-      target_temp: Float64
-      max_temp: Float64
-      stir_speed: Float64
-      max_stir_speed: Float64
-      filtered_volume: Float64
       progress: Float64
+      current_temp: Float64
+      filtered_volume: Float64
+      current_status: String
       message: String
+      max_temp: Float64
+      max_stir_speed: Float64
+      max_volume: Float64
     action_value_mappings:
-      filter_sample:
+      filter:
         type: Filter
         goal:
           vessel: vessel
@@ -452,36 +465,21 @@ virtual_filter:
           progress: progress
           current_temp: current_temp
           filtered_volume: filtered_volume
-          current_status: status
+          current_status: current_status
         result:
           success: success
           message: message
-  # 虚拟过滤器节点配置 - 分离设备，1个输入(原始样品)，2个输出(滤液和滤渣)
+          return_info: message
+  # 过滤器节点配置 - 固液分离设备
   handles:
-  - handler_key: filterin
-    label: filterin
-    data_type: fluid
+  - handler_key: filter
+    label: filter
+    data_type: transport
     side: NORTH
-    io_type: target
+    io_type: source
     data_source: handle
     data_key: vessel
-    description: "需要过滤的原始样品容器"
-  - handler_key: filtrate_out
-    label: filtrate_out
-    data_type: fluid
-    side: SOUTH
-    io_type: source
-    data_source: executor
-    data_key: filtrate_vessel
-    description: "过滤后的滤液容器"
-  - handler_key: filter-residue-out
-    label: Residue
-    data_type: resource
-    side: WEST
-    io_type: source
-    data_source: executor
-    data_key: residue_vessel
-    description: "过滤后的滤渣(固体残留物)"
+    description: "需要过滤的样品容器"
   schema:
     type: object
     properties:
@@ -494,6 +492,9 @@ virtual_filter:
       max_stir_speed:
         type: number
         default: 1000.0
+      max_volume:
+        type: number
+        default: 500.0
     additionalProperties: false
 
 virtual_heatchill:
@@ -504,6 +505,10 @@ virtual_heatchill:
     type: python
     status_types:
       status: String
+      operation_mode: String         # 保留：操作模式
+      is_stirring: Bool             # 保留：是否搅拌
+      stir_speed: Float64           # 保留：搅拌速度
+      # remaining_time: Float64       # 保留：剩余时间
     action_value_mappings:
       heat_chill:
         type: HeatChill
@@ -536,7 +541,7 @@ virtual_heatchill:
           status: status
         result:
           success: success
-  # 虚拟加热/冷却器节点配置 - 温控设备，单一双向连接点用于放置容器
+  # 虚拟加热/冷却器节点配置
   handles:
   - handler_key: heatchill
     label: heatchill
@@ -709,14 +714,14 @@ virtual_rotavap:
       status: String
       rotavap_state: String
       current_temp: Float64
-      target_temp: Float64
-      max_temp: Float64
       rotation_speed: Float64
-      max_rotation_speed: Float64
       vacuum_pressure: Float64
       evaporated_volume: Float64
       progress: Float64
+      remaining_time: Float64
       message: String
+      max_temp: Float64
+      max_rotation_speed: Float64
     action_value_mappings:
       evaporate:
         type: Evaporate
@@ -730,11 +735,11 @@ virtual_rotavap:
           progress: progress
           current_temp: current_temp
           evaporated_volume: evaporated_volume
-          current_status: status
+          status: status
         result:
           success: success
           message: message
-  # 虚拟旋转蒸发仪节点配置 - 1个双向口(样品进出)，1个单向输出口(冷凝溶剂)
+  # 虚拟旋转蒸发仪节点配置 - 1个样品口
   handles:
   - handler_key: rotavap-sample
     label: rotavap-sample
@@ -743,15 +748,7 @@ virtual_rotavap:
     io_type: target
     data_source: handle
     data_key: vessel
-    description: "样品的双向连接口，可放入需要蒸发的样品，蒸发完成后取出浓缩物"
-  - handler_key: rotavap-distillate-outlet
-    label: Distillate Outlet
-    data_type: fluid
-    side: WEST
-    io_type: source
-    data_source: executor
-    data_key: distillate_vessel
-    description: "冷凝回收的溶剂单向输出口，连接收集瓶"
+    description: "样品连接口，放入需要蒸发的样品"
   schema:
     type: object
     properties:

@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import time as time_module  # 重命名time模块，避免与参数冲突
 from typing import Dict, Any
 
 class VirtualHeatChill:
@@ -19,18 +20,13 @@ class VirtualHeatChill:
         self.logger = logging.getLogger(f"VirtualHeatChill.{self.device_id}")
         self.data = {}
         
-        # 添加调试信息
-        print(f"=== VirtualHeatChill {self.device_id} is being created! ===")
-        print(f"=== Config: {self.config} ===")
-        print(f"=== Kwargs: {kwargs} ===")
-        
         # 从config或kwargs中获取配置参数
         self.port = self.config.get('port') or kwargs.get('port', 'VIRTUAL')
         self._max_temp = self.config.get('max_temp') or kwargs.get('max_temp', 200.0)
         self._min_temp = self.config.get('min_temp') or kwargs.get('min_temp', -80.0)
         self._max_stir_speed = self.config.get('max_stir_speed') or kwargs.get('max_stir_speed', 1000.0)
         
-        # 处理其他kwargs参数，但跳过已知的配置参数
+        # 处理其他kwargs参数
         skip_keys = {'port', 'max_temp', 'min_temp', 'max_stir_speed'}
         for key, value in kwargs.items():
             if key not in skip_keys and not hasattr(self, key):
@@ -38,70 +34,177 @@ class VirtualHeatChill:
     
     async def initialize(self) -> bool:
         """Initialize virtual heat chill"""
-        print(f"=== VirtualHeatChill {self.device_id} initialize() called! ===")
         self.logger.info(f"Initializing virtual heat chill {self.device_id}")
+        
+        # 初始化状态信息
         self.data.update({
-            "status": "Idle"
+            "status": "Idle",
+            "operation_mode": "Idle",
+            "is_stirring": False,
+            "stir_speed": 0.0,
+            "remaining_time": 0.0,
         })
         return True
     
     async def cleanup(self) -> bool:
         """Cleanup virtual heat chill"""
         self.logger.info(f"Cleaning up virtual heat chill {self.device_id}")
+        self.data.update({
+            "status": "Offline",
+            "operation_mode": "Offline",
+            "is_stirring": False,
+            "stir_speed": 0.0,
+            "remaining_time": 0.0
+        })
         return True
     
     async def heat_chill(self, vessel: str, temp: float, time: float, stir: bool, 
                         stir_speed: float, purpose: str) -> bool:
-        """Execute heat chill action - matches HeatChill action exactly"""
-        self.logger.info(f"HeatChill: vessel={vessel}, temp={temp}°C, time={time}s, stir={stir}, stir_speed={stir_speed}, purpose={purpose}")
+        """Execute heat chill action - 按实际时间运行，实时更新剩余时间"""
+        self.logger.info(f"HeatChill: vessel={vessel}, temp={temp}°C, time={time}s, stir={stir}, stir_speed={stir_speed}")
         
         # 验证参数
         if temp > self._max_temp or temp < self._min_temp:
-            self.logger.error(f"Temperature {temp} outside range {self._min_temp}-{self._max_temp}")
-            self.data["status"] = f"温度 {temp} 超出范围"
+            error_msg = f"温度 {temp}°C 超出范围 ({self._min_temp}°C - {self._max_temp}°C)"
+            self.logger.error(error_msg)
+            self.data.update({
+                "status": f"Error: {error_msg}",
+                "operation_mode": "Error"
+            })
             return False
         
         if stir and stir_speed > self._max_stir_speed:
-            self.logger.error(f"Stir speed {stir_speed} exceeds maximum {self._max_stir_speed}")
-            self.data["status"] = f"搅拌速度 {stir_speed} 超出范围"
+            error_msg = f"搅拌速度 {stir_speed} RPM 超出最大值 {self._max_stir_speed} RPM"
+            self.logger.error(error_msg)
+            self.data.update({
+                "status": f"Error: {error_msg}",
+                "operation_mode": "Error"
+            })
             return False
         
-        # 开始加热/冷却
+        # 确定操作模式
+        if temp > 25.0:
+            operation_mode = "Heating"
+            status_action = "加热"
+        elif temp < 25.0:
+            operation_mode = "Cooling"
+            status_action = "冷却"
+        else:
+            operation_mode = "Maintaining"
+            status_action = "保温"
+        
+        # **修复**: 使用重命名的time模块
+        start_time = time_module.time()
+        total_time = time
+        
+        # 开始操作
+        stir_info = f" | 搅拌: {stir_speed} RPM" if stir else ""
         self.data.update({
-            "status": f"加热/冷却中: {vessel} 至 {temp}°C"
+            "status": f"运行中: {status_action} {vessel} 至 {temp}°C | 剩余: {total_time:.0f}s{stir_info}",
+            "operation_mode": operation_mode,
+            "is_stirring": stir,
+            "stir_speed": stir_speed if stir else 0.0,
+            "remaining_time": total_time,
         })
         
-        # 模拟加热/冷却时间
-        simulation_time = min(time, 10.0)  # 最多等待10秒用于测试
-        await asyncio.sleep(simulation_time)
+        # **修复**: 在等待过程中每秒更新剩余时间
+        while True:
+            current_time = time_module.time()  # 使用重命名的time模块
+            elapsed = current_time - start_time
+            remaining = max(0, total_time - elapsed)
+            
+            # 更新剩余时间和状态
+            self.data.update({
+                "remaining_time": remaining,
+                "status": f"运行中: {status_action} {vessel} 至 {temp}°C | 剩余: {remaining:.0f}s{stir_info}"
+            })
+            
+            # 如果时间到了，退出循环
+            if remaining <= 0:
+                break
+            
+            # 等待1秒后再次检查
+            await asyncio.sleep(1.0)
         
-        # 加热/冷却完成
-        self.data["status"] = f"完成: {vessel} 已达到 {temp}°C"
+        # 操作完成
+        final_stir_info = f" | 搅拌: {stir_speed} RPM" if stir else ""
+        self.data.update({
+            "status": f"完成: {vessel} 已达到 {temp}°C | 用时: {total_time:.0f}s{final_stir_info}",
+            "operation_mode": "Completed",
+            "remaining_time": 0.0,
+            "is_stirring": False,
+            "stir_speed": 0.0
+        })
         
-        self.logger.info(f"HeatChill completed for vessel {vessel} at {temp}°C")
+        self.logger.info(f"HeatChill completed for vessel {vessel} at {temp}°C after {total_time}s")
         return True
     
     async def heat_chill_start(self, vessel: str, temp: float, purpose: str) -> bool:
-        """Start heat chill - matches HeatChillStart action exactly"""
-        self.logger.info(f"HeatChillStart: vessel={vessel}, temp={temp}°C, purpose={purpose}")
+        """Start continuous heat chill"""
+        self.logger.info(f"HeatChillStart: vessel={vessel}, temp={temp}°C")
         
         # 验证参数
         if temp > self._max_temp or temp < self._min_temp:
-            self.logger.error(f"Temperature {temp} outside range {self._min_temp}-{self._max_temp}")
-            self.data["status"] = f"温度 {temp} 超出范围"
+            error_msg = f"温度 {temp}°C 超出范围 ({self._min_temp}°C - {self._max_temp}°C)"
+            self.logger.error(error_msg)
+            self.data.update({
+                "status": f"Error: {error_msg}",
+                "operation_mode": "Error"
+            })
             return False
         
-        self.data["status"] = f"开始加热/冷却: {vessel} 至 {temp}°C"
+        # 确定操作模式
+        if temp > 25.0:
+            operation_mode = "Heating"
+            status_action = "持续加热"
+        elif temp < 25.0:
+            operation_mode = "Cooling"
+            status_action = "持续冷却"
+        else:
+            operation_mode = "Maintaining"
+            status_action = "恒温保持"
+        
+        self.data.update({
+            "status": f"启动: {status_action} {vessel} 至 {temp}°C | 持续运行",
+            "operation_mode": operation_mode,
+            "is_stirring": False,
+            "stir_speed": 0.0,
+            "remaining_time": -1.0,  # -1 表示持续运行
+        })
+        
         return True
     
     async def heat_chill_stop(self, vessel: str) -> bool:
-        """Stop heat chill - matches HeatChillStop action exactly"""
+        """Stop heat chill"""
         self.logger.info(f"HeatChillStop: vessel={vessel}")
         
-        self.data["status"] = f"停止加热/冷却: {vessel}"
+        self.data.update({
+            "status": f"已停止: {vessel} 温控停止",
+            "operation_mode": "Stopped",
+            "is_stirring": False,
+            "stir_speed": 0.0,
+            "remaining_time": 0.0,
+        })
+        
         return True
     
-    # 状态属性 - 只保留 action 中定义的 feedback
+    # 状态属性
     @property
     def status(self) -> str:
         return self.data.get("status", "Idle")
+    
+    @property
+    def operation_mode(self) -> str:
+        return self.data.get("operation_mode", "Idle")
+    
+    @property
+    def is_stirring(self) -> bool:
+        return self.data.get("is_stirring", False)
+    
+    @property
+    def stir_speed(self) -> float:
+        return self.data.get("stir_speed", 0.0)
+    
+    @property
+    def remaining_time(self) -> float:
+        return self.data.get("remaining_time", 0.0)

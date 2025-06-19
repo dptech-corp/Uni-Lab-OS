@@ -1,4 +1,5 @@
 import time
+import asyncio
 from typing import Union
 
 
@@ -6,15 +7,29 @@ class VirtualSolenoidValve:
     """
     虚拟电磁阀门 - 简单的开关型阀门，只有开启和关闭两个状态
     """
-    def __init__(self, port: str = "VIRTUAL", voltage: float = 12.0, response_time: float = 0.1):
-        self.port = port
-        self.voltage = voltage
-        self.response_time = response_time
+    def __init__(self, device_id: str = None, config: dict = None, **kwargs):
+        # 从配置中获取参数，提供默认值
+        if config is None:
+            config = {}
+        
+        self.device_id = device_id
+        self.port = config.get("port", "VIRTUAL")
+        self.voltage = config.get("voltage", 12.0)
+        self.response_time = config.get("response_time", 0.1)
         
         # 状态属性
         self._status = "Idle"
         self._valve_state = "Closed"  # "Open" or "Closed"
         self._is_open = False
+
+    async def initialize(self) -> bool:
+        """初始化设备"""
+        self._status = "Idle"
+        return True
+
+    async def cleanup(self) -> bool:
+        """清理资源"""
+        return True
 
     @property
     def status(self) -> str:
@@ -32,55 +47,62 @@ class VirtualSolenoidValve:
         """获取阀门位置状态"""
         return "OPEN" if self._is_open else "CLOSED"
 
-    def set_valve_position(self, position: Union[str, bool]):
+    async def set_valve_position(self, command: str = None, **kwargs):
         """
-        设置阀门位置
+        设置阀门位置 - ROS动作接口
         
         Args:
-            position: "OPEN"/"CLOSED" 或 True/False
+            command: "OPEN"/"CLOSED" 或其他控制命令
         """
+        if command is None:
+            return {"success": False, "message": "Missing command parameter"}
+        
+        print(f"SOLENOID_VALVE: {self.device_id} 接收到命令: {command}")
+        
         self._status = "Busy"
         
         # 模拟阀门响应时间
-        time.sleep(self.response_time)
+        await asyncio.sleep(self.response_time)
         
-        if isinstance(position, str):
-            target_open = position.upper() == "OPEN"
-        elif isinstance(position, bool):
-            target_open = position
+        # 处理不同的命令格式
+        if isinstance(command, str):
+            cmd_upper = command.upper()
+            if cmd_upper in ["OPEN", "ON", "TRUE", "1"]:
+                self._is_open = True
+                self._valve_state = "Open"
+                result_msg = f"Valve {self.device_id} opened"
+            elif cmd_upper in ["CLOSED", "CLOSE", "OFF", "FALSE", "0"]:
+                self._is_open = False
+                self._valve_state = "Closed"
+                result_msg = f"Valve {self.device_id} closed"
+            else:
+                # 可能是端口名称，处理路径设置
+                # 对于简单电磁阀，任何非关闭命令都视为开启
+                self._is_open = True
+                self._valve_state = "Open"
+                result_msg = f"Valve {self.device_id} set to position: {command}"
         else:
             self._status = "Error"
-            return "Error: Invalid position"
+            return {"success": False, "message": "Invalid command type"}
         
-        self._is_open = target_open
-        self._valve_state = "Open" if target_open else "Closed"
         self._status = "Idle"
+        print(f"SOLENOID_VALVE: {result_msg}")
         
-        return f"Valve {'opened' if target_open else 'closed'}"
+        return {
+            "success": True, 
+            "message": result_msg,
+            "valve_position": self.get_valve_position()
+        }
 
-    def open(self):
-        """打开电磁阀"""
-        self._status = "Busy"
-        time.sleep(self.response_time)
-        
-        self._is_open = True
-        self._valve_state = "Open"
-        self._status = "Idle"
-        
-        return "Valve opened"
+    async def open(self, **kwargs):
+        """打开电磁阀 - ROS动作接口"""
+        return await self.set_valve_position(command="OPEN")
 
-    def close(self):
-        """关闭电磁阀"""
-        self._status = "Busy"
-        time.sleep(self.response_time)
-        
-        self._is_open = False
-        self._valve_state = "Closed"
-        self._status = "Idle"
-        
-        return "Valve closed"
+    async def close(self, **kwargs):
+        """关闭电磁阀 - ROS动作接口"""
+        return await self.set_valve_position(command="CLOSED")
 
-    def set_state(self, command: Union[bool, str]):
+    async def set_state(self, command: Union[bool, str], **kwargs):
         """
         设置阀门状态 - 兼容 SendCmd 类型
     
@@ -88,18 +110,13 @@ class VirtualSolenoidValve:
             command: True/False 或 "open"/"close"
         """
         if isinstance(command, bool):
-            return self.open() if command else self.close()
+            cmd_str = "OPEN" if command else "CLOSED"
         elif isinstance(command, str):
-            if command.lower() in ["open", "on", "true", "1"]:
-                return self.open()
-            elif command.lower() in ["close", "closed", "off", "false", "0"]:
-                return self.close()
-            else:
-                self._status = "Error"
-                return "Error: Invalid command"
+            cmd_str = command
         else:
-            self._status = "Error"
-            return "Error: Invalid command type"
+            return {"success": False, "message": "Invalid command type"}
+        
+        return await self.set_valve_position(command=cmd_str)
 
     def toggle(self):
         """切换阀门状态"""
@@ -115,6 +132,7 @@ class VirtualSolenoidValve:
     def get_state(self) -> dict:
         """获取阀门完整状态"""
         return {
+            "device_id": self.device_id,
             "port": self.port,
             "voltage": self.voltage,
             "response_time": self.response_time,
@@ -124,28 +142,6 @@ class VirtualSolenoidValve:
             "position": self.get_valve_position()
         }
 
-    def reset(self):
+    async def reset(self):
         """重置阀门到关闭状态"""
-        return self.close()
-
-    def test_cycle(self, cycles: int = 3, delay: float = 1.0):
-        """
-        测试阀门开关循环
-        
-        Args:
-            cycles: 循环次数
-            delay: 每次开关间隔时间(秒)
-        """
-        results = []
-        for i in range(cycles):
-            # 打开
-            result_open = self.open()
-            results.append(f"Cycle {i+1} - Open: {result_open}")
-            time.sleep(delay)
-            
-            # 关闭
-            result_close = self.close()
-            results.append(f"Cycle {i+1} - Close: {result_close}")
-            time.sleep(delay)
-        
-        return results
+        return await self.close()

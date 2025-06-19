@@ -8,7 +8,12 @@ from .agv_transfer_protocol import generate_agv_transfer_protocol
 from .add_protocol import generate_add_protocol
 from .centrifuge_protocol import generate_centrifuge_protocol
 from .filter_protocol import generate_filter_protocol
-from .heatchill_protocol import generate_heat_chill_protocol, generate_heat_chill_start_protocol, generate_heat_chill_stop_protocol
+from .heatchill_protocol import (
+    generate_heat_chill_protocol, 
+    generate_heat_chill_start_protocol, 
+    generate_heat_chill_stop_protocol,
+    generate_heat_chill_to_temp_protocol  # 保留导入，但不注册为协议
+)
 from .stir_protocol import generate_stir_protocol, generate_start_stir_protocol, generate_stop_stir_protocol
 from .transfer_protocol import generate_transfer_protocol
 from .clean_vessel_protocol import generate_clean_vessel_protocol
@@ -32,6 +37,7 @@ action_protocol_generators = {
     HeatChillProtocol: generate_heat_chill_protocol,
     HeatChillStartProtocol: generate_heat_chill_start_protocol,
     HeatChillStopProtocol: generate_heat_chill_stop_protocol,
+    # HeatChillToTempProtocol: generate_heat_chill_to_temp_protocol,  # **移除这行**
     StirProtocol: generate_stir_protocol,
     StartStirProtocol: generate_start_stir_protocol,
     StopStirProtocol: generate_stop_stir_protocol,
