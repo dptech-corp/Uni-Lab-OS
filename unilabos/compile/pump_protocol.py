@@ -8,7 +8,8 @@ def is_integrated_pump(node_name):
 
 def find_connected_pump(G, valve_node):
     for neighbor in G.neighbors(valve_node):
-        if "pump" in G.nodes[neighbor]["class"]:
+        node_class = G.nodes[neighbor].get("class") or ""  # 防止 None
+        if "pump" in node_class:
             return neighbor
     raise ValueError(f"未找到与阀 {valve_node} 唯一相连的泵节点")
 

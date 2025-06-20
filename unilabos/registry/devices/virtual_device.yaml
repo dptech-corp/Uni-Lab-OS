@@ -641,7 +641,7 @@ virtual_transfer_pump:
     additionalProperties: false
 
 virtual_column:
-  description: Virtual Column for RunColumn Protocol Testing
+  description: Virtual Column Chromatography Device for RunColumn Protocol Testing
   #icon: Column.webp暂时还没有
   class:
     module: unilabos.devices.virtual.virtual_column:VirtualColumn
@@ -664,29 +664,31 @@ virtual_column:
           to_vessel: to_vessel
           column: column
         feedback:
-          status: current_status
           progress: progress
+          processed_volume: processed_volume
+          current_status: current_status
         result:
           success: success
-          message: message
-  # 虚拟色谱柱节点配置 - 分离纯化设备，1个样品输入口，1个纯化产物输出口
+          message: current_status
+          return_info: current_status
+  # 柱层析设备节点配置 - 色谱分离设备
   handles:
   - handler_key: columnin
     label: columnin
-    data_type: fluid
-    side: NORTH
-    io_type: target
+    data_type: transport
+    side: WEST
+    io_type: sink
     data_source: handle
     data_key: from_vessel
-    description: "需要纯化的样品输入口"
+    description: "样品输入口"
   - handler_key: columnout
     label: columnout
-    data_type: fluid
-    side: SOUTH
+    data_type: transport
+    side: EAST
     io_type: source
-    data_source: executor
+    data_source: handle
     data_key: to_vessel
-    description: "经过色谱柱纯化的产物输出口"
+    description: "产物输出口"
   schema:
     type: object
     properties:

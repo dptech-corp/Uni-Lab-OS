@@ -29,6 +29,8 @@
     这个重复了，删掉TransferProtocol: generate_transfer_protocol,
     CleanVesselProtocol: generate_clean_vessel_protocol,                            (√)
     DissolveProtocol: generate_dissolve_protocol,                                   (√)
-    FilterThroughProtocol: generate_filter_through_protocol,                (×)
+    FilterThroughProtocol: generate_filter_through_protocol,                        (√)
     RunColumnProtocol: generate_run_column_protocol,                        (×)
     WashSolidProtocol: generate_wash_solid_protocol,                        (×)
+
+上下文体积搜索
