@@ -140,8 +140,8 @@
             }
         },
         {
-            "source": "vacuum_valve",
-            "target": "vacuum_pump",
+            "source": "vacuum_pump",
+            "target": "vacuum_valve",
             "type": "fluid",
             "port": {
                 "vacuum_pump": "out",
@@ -149,8 +149,8 @@
             }
         },
         {
-            "source": "gas_valve",
-            "target": "gas_source",
+            "source": "gas_source",
+            "target": "gas_valve",
             "type": "fluid",
             "port": {
                 "gas_source": "out",

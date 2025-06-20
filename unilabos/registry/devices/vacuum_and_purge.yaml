@@ -26,7 +26,7 @@ vacuum_pump.mock:
     - handler_key: out
       label: out
       data_type: fluid
-      io_type: target
+      io_type: source
       data_source: handle
       data_key: fluid_in
   init_param_schema:
