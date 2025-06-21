@@ -28,7 +28,7 @@
             "config": {
                 "protocol_type": [
                     "CleanVesselProtocol",
-                    "PumpTransferProtocol", 
+                    "PumpTransferProtocol",
                     "HeatChillProtocol",
                     "HeatChillStartProtocol",
                     "HeatChillStopProtocol"
@@ -148,7 +148,7 @@
             "children": [],
             "parent": "CleanVesselProtocolTestStation",
             "type": "container",
-            "class": null,
+            "class": "container",
             "position": {
                 "x": 50,
                 "y": 500,
@@ -172,7 +172,7 @@
             "children": [],
             "parent": "CleanVesselProtocolTestStation",
             "type": "container",
-            "class": null,
+            "class": "container",
             "position": {
                 "x": 150,
                 "y": 500,
@@ -196,7 +196,7 @@
             "children": [],
             "parent": "CleanVesselProtocolTestStation",
             "type": "container",
-            "class": null,
+            "class": "container",
             "position": {
                 "x": 250,
                 "y": 500,
@@ -220,7 +220,7 @@
             "children": [],
             "parent": "CleanVesselProtocolTestStation",
             "type": "container",
-            "class": null,
+            "class": "container",
             "position": {
                 "x": 350,
                 "y": 500,
@@ -239,7 +239,7 @@
             "children": [],
             "parent": "CleanVesselProtocolTestStation",
             "type": "container",
-            "class": null,
+            "class": "container",
             "position": {
                 "x": 600,
                 "y": 450,
@@ -263,7 +263,7 @@
             "children": [],
             "parent": "CleanVesselProtocolTestStation",
             "type": "container",
-            "class": null,
+            "class": "container",
             "position": {
                 "x": 800,
                 "y": 450,
@@ -287,7 +287,7 @@
             "children": [],
             "parent": "CleanVesselProtocolTestStation",
             "type": "container",
-            "class": null,
+            "class": "container",
             "position": {
                 "x": 700,
                 "y": 550,
@@ -328,7 +328,7 @@
             "target": "flask_air",
             "type": "fluid",
             "port": {
-                "multiway_valve_1": "1",
+                "multiway_valve_1": "6",
                 "flask_air": "top"
             }
         },
@@ -339,7 +339,7 @@
             "type": "fluid",
             "port": {
                 "multiway_valve_1": "2",
-                "flask_water": "outlet"
+                "flask_water": "top"
             }
         },
         {
@@ -349,7 +349,7 @@
             "type": "fluid",
             "port": {
                 "multiway_valve_1": "3",
-                "flask_acetone": "outlet"
+                "flask_acetone": "top"
             }
         },
         {
@@ -359,7 +359,7 @@
             "type": "fluid",
             "port": {
                 "multiway_valve_1": "4",
-                "flask_ethanol": "outlet"
+                "flask_ethanol": "top"
             }
         },
         {
@@ -379,7 +379,7 @@
             "type": "fluid",
             "port": {
                 "multiway_valve_2": "2",
-                "main_reactor": "inlet"
+                "main_reactor": "top"
             }
         },
         {
@@ -389,7 +389,7 @@
             "type": "fluid",
             "port": {
                 "multiway_valve_2": "3",
-                "secondary_reactor": "inlet"
+                "secondary_reactor": "top"
             }
         },
         {
@@ -399,7 +399,7 @@
             "type": "fluid",
             "port": {
                 "multiway_valve_2": "4",
-                "waste_workup": "inlet"
+                "waste_workup": "top"
             }
         },
         {
@@ -409,7 +409,7 @@
             "type": "fluid",
             "port": {
                 "multiway_valve_2": "5",
-                "flask_air": "bottom"
+                "flask_air": "top"
             }
         },
         {
@@ -419,7 +419,7 @@
             "type": "mechanical",
             "port": {
                 "heatchill_1": "heatchill",
-                "main_reactor": "heating_jacket"
+                "main_reactor": "bind"
             }
         }
     ]

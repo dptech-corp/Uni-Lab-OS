@@ -2,17 +2,17 @@
 
 # 1. virtual_pump - 虚拟泵
 # 描述：具有多通道阀门特性的泵，根据valve_position可连接多个容器
-# 连接特性：1个输入口 + 1个输出口（当前配置，实际应该有多个输出口）
+# 连接特性：1个输入口 + 1个输出口
 # 数据类型：fluid（流体连接）
 
 # 2. virtual_stirrer - 虚拟搅拌器  
 # 描述：机械连接设备，提供搅拌功能
-# 连接特性：1个双向连接点（undirected）
+# 连接特性：1个连接点
 # 数据类型：mechanical（机械连接）
 
 # 3a. virtual_valve - 虚拟八通阀门
-# 描述：8通阀门（实际配置为7通），可切换流向
-# 连接特性：1个口连接注射泵 + 7个输出口
+# 描述：8通阀门，可切换流向
+# 连接特性：1个口连接注射泵 + 多个输出口
 # 数据类型：fluid（流体连接）
 
 # 3b. virtual_solenoid_valve (电磁阀门)
@@ -32,12 +32,12 @@
 
 # 6. virtual_heatchill - 虚拟加热/冷却器
 # 描述：温控设备，容器直接放置在设备上进行温度控制
-# 连接特性：1个双向连接点（undirected）
+# 连接特性：1个连接点
 # 数据类型：mechanical（机械/物理接触连接）
 
 # 7. virtual_transfer_pump - 虚拟转移泵（注射器式）
 # 描述：注射器式转移泵，通过同一个口吸入和排出液体
-# 连接特性：1个双向连接点（undirected）
+# 连接特性：1个连接点
 # 数据类型：fluid（流体连接）
 
 # 8. virtual_column - 虚拟色谱柱
@@ -57,26 +57,23 @@
 
 # 11. virtual_vacuum_pump - 虚拟真空泵
 # 描述：真空泵设备，用于抽真空操作和真空/充气循环
-# 连接特性：1个输入口（连接需要抽真空的系统）
+# 连接特性：1个输出口（连接需要抽真空的系统）
 # 数据类型：fluid（流体连接）
-# 主要功能：开启/关闭、状态控制（ON/OFF）
 
 # 12. virtual_gas_source - 虚拟气源
 # 描述：气源设备，用于充气操作和真空/充气循环
 # 连接特性：1个输出口（向系统提供加压气体）
 # 数据类型：fluid（流体连接）
-# 主要功能：开启/关闭、状态控制（ON/OFF）
 
 virtual_pump:
   description: Virtual Pump for PumpTransferProtocol Testing
-  #icon: 这个注册的设备应该是写错了，后续删掉
   class:
     module: unilabos.devices.virtual.virtual_pump:VirtualPump
     type: python
     status_types:
       status: String
       position: Float64
-      valve_position: Int32 # 修复：使用 Int32 而不是 String
+      valve_position: Int32
       max_volume: Float64
       current_volume: Float64
     action_value_mappings:
@@ -105,7 +102,6 @@ virtual_pump:
           status: status
         result:
           success: success
-  # 虚拟泵节点配置 - 具有多通道阀门特性，根据valve_position可连接多个容器
   handles:
   - handler_key: pumpio
     label: pumpio
@@ -113,7 +109,7 @@ virtual_pump:
     io_type: source
     data_source: handle
     data_key: fluid_in
-    description: "泵的进液口，连接源容器"
+    description: "泵的输出口"
   schema:
     type: object
     properties:
@@ -133,11 +129,11 @@ virtual_stirrer:
     type: python
     status_types:
       status: String
-      operation_mode: String       # 操作模式
-      current_vessel: String       # 当前容器  
-      current_speed: Float64       # 当前搅拌速度
-      is_stirring: Bool           # 是否搅拌
-      remaining_time: Float64     # 剩余时间
+      operation_mode: String
+      current_vessel: String
+      current_speed: Float64
+      is_stirring: Bool
+      remaining_time: Float64
     action_value_mappings:
       stir:
         type: Stir
@@ -167,16 +163,15 @@ virtual_stirrer:
           status: status
         result:
           success: success
-  # 虚拟搅拌器节点配置 - 机械连接设备，双向连接点用于搅拌容器
   handles:
   - handler_key: stirrer
     label: stirrer
     data_type: mechanical
     side: NORTH
-    io_type: undirected
+    io_type: source
     data_source: handle
     data_key: vessel
-    description: "搅拌器的机械连接口，容器通过机械连接进行搅拌"
+    description: "搅拌器的机械连接口"
   schema:
     type: object
     properties:
@@ -218,7 +213,6 @@ virtual_multiway_valve:
         feedback: {}
         result:
           success: success
-  # 八通阀门节点配置 - 1个输入口，8个输出口，可切换流向
   handles:
   - handler_key: transferpump
     label: transferpump
@@ -227,7 +221,7 @@ virtual_multiway_valve:
     io_type: target
     data_source: handle
     data_key: fluid_in
-    description: "八通阀门进液口，接收来源流体"
+    description: "八通阀门进液口"
   - handler_key: 1
     label: 1
     data_type: fluid
@@ -235,7 +229,7 @@ virtual_multiway_valve:
     io_type: source
     data_source: executor
     data_key: fluid_port_1
-    description: "八通阀门端口1，position=1时流体从此口流出"
+    description: "八通阀门端口1"
   - handler_key: 2
     label: 2
     data_type: fluid
@@ -243,7 +237,7 @@ virtual_multiway_valve:
     io_type: source
     data_source: executor
     data_key: fluid_port_2
-    description: "八通阀门端口2，position=2时流体从此口流出"
+    description: "八通阀门端口2"
   - handler_key: 3
     label: 3
     data_type: fluid
@@ -251,7 +245,7 @@ virtual_multiway_valve:
     io_type: source
     data_source: executor
     data_key: fluid_port_3
-    description: "八通阀门端口3，position=3时流体从此口流出"
+    description: "八通阀门端口3"
   - handler_key: 4
     label: 4
     data_type: fluid
@@ -259,7 +253,7 @@ virtual_multiway_valve:
     io_type: source
     data_source: executor
     data_key: fluid_port_4
-    description: "八通阀门端口4，position=4时流体从此口流出"
+    description: "八通阀门端口4"
   - handler_key: 5
     label: 5
     data_type: fluid
@@ -267,15 +261,7 @@ virtual_multiway_valve:
     io_type: source
     data_source: executor
     data_key: fluid_port_5
-    description: "八通阀门端口5，position=5时流体从此口流出"
-  - handler_key: 7
-    label: 7
-    data_type: fluid
-    side: WEST
-    io_type: source
-    data_source: executor
-    data_key: fluid_port_7
-    description: "八通阀门端口7，position=7时流体从此口流出"
+    description: "八通阀门端口5"
   - handler_key: 6
     label: 6
     data_type: fluid
@@ -283,7 +269,15 @@ virtual_multiway_valve:
     io_type: source
     data_source: executor
     data_key: fluid_port_6
-    description: "八通阀门端口6，position=6时流体从此口流出"
+    description: "八通阀门端口6"
+  - handler_key: 7
+    label: 7
+    data_type: fluid
+    side: WEST
+    io_type: source
+    data_source: executor
+    data_key: fluid_port_7
+    description: "八通阀门端口7"
   - handler_key: 8
     label: 8
     data_type: fluid
@@ -291,7 +285,7 @@ virtual_multiway_valve:
     io_type: source
     data_source: executor
     data_key: fluid_port_8
-    description: "八通阀门端口8，position=8时流体从此口流出"
+    description: "八通阀门端口8"
   schema:
     type: object
     properties:
@@ -302,21 +296,21 @@ virtual_multiway_valve:
         type: integer
         default: 8
     additionalProperties: false
+
 virtual_solenoid_valve:
   description: Virtual Solenoid Valve for simple on/off flow control
-  #icon: SolenoidValve.webp暂时还没有
   class:
     module: unilabos.devices.virtual.virtual_solenoid_valve:VirtualSolenoidValve
     type: python
     status_types:
       status: String
-      valve_state: String # "open" or "closed"
+      valve_state: String
       is_open: Bool
     action_value_mappings:
       set_valve_position:
         type: SendCmd
         goal:
-          command: command  # 确保参数名匹配
+          command: command
         feedback: {}
         result:
           success: success
@@ -341,18 +335,17 @@ virtual_solenoid_valve:
         feedback: {}
         result:
           success: success
-  # 电磁阀门节点配置 - 双向流通的开关型阀门，流动方向由泵决定
   handles:
-  - handler_key: inlet
-    label: inlet
+  - handler_key: in
+    label: in
     data_type: fluid
     side: NORTH
     io_type: target
     data_source: handle
     data_key: fluid_port_in
     description: "电磁阀的进液口"
-  - handler_key: outlet
-    label: outlet
+  - handler_key: out
+    label: out
     data_type: fluid
     side: SOUTH
     io_type: source
@@ -372,9 +365,9 @@ virtual_solenoid_valve:
         type: number
         default: 0.1
     additionalProperties: false
+
 virtual_centrifuge:
   description: Virtual Centrifuge for CentrifugeProtocol Testing
-  #icon: Centrifuge.webp暂时还没有
   class:
     module: unilabos.devices.virtual.virtual_centrifuge:VirtualCentrifuge
     type: python
@@ -389,8 +382,8 @@ virtual_centrifuge:
       min_temp: Float64
       centrifuge_state: String
       time_remaining: Float64
-      progress: Float64            # 添加这个状态
-      message: String              # 添加这个状态
+      progress: Float64
+      message: String
     action_value_mappings:
       centrifuge:
         type: Centrifuge
@@ -407,7 +400,6 @@ virtual_centrifuge:
         result:
           success: success
           message: message
-  # 虚拟离心机节点配置 - 单个样品处理设备，输入输出都是同一个样品容器
   handles:
   - handler_key: centrifuge
     label: centrifuge
@@ -436,7 +428,6 @@ virtual_centrifuge:
 
 virtual_filter:
   description: Virtual Filter for FilterProtocol Testing
-  #icon: Filter.webp暂时还没有
   class:
     module: unilabos.devices.virtual.virtual_filter:VirtualFilter
     type: python
@@ -470,16 +461,31 @@ virtual_filter:
           success: success
           message: message
           return_info: message
-  # 过滤器节点配置 - 固液分离设备
   handles:
-  - handler_key: filter
-    label: filter
+  - handler_key: filter_in
+    label: filter_in
     data_type: transport
     side: NORTH
+    io_type: target
+    data_source: handle
+    data_key: vessel_in
+    description: "需要过滤的样品容器"
+  - handler_key: filtrate_out
+    label: filtrate_out
+    data_type: transport
+    side: SOUTH
     io_type: source
     data_source: handle
-    data_key: vessel
-    description: "需要过滤的样品容器"
+    data_key: filtrate_out
+    description: "滤液出口"
+  - handler_key: retentate_out
+    label: retentate_out
+    data_type: transport
+    side: EAST
+    io_type: source
+    data_source: handle
+    data_key: retentate_out
+    description: "滤渣/固体出口"
   schema:
     type: object
     properties:
@@ -505,10 +511,9 @@ virtual_heatchill:
     type: python
     status_types:
       status: String
-      operation_mode: String         # 保留：操作模式
-      is_stirring: Bool             # 保留：是否搅拌
-      stir_speed: Float64           # 保留：搅拌速度
-      # remaining_time: Float64       # 保留：剩余时间
+      operation_mode: String
+      is_stirring: Bool
+      stir_speed: Float64
     action_value_mappings:
       heat_chill:
         type: HeatChill
@@ -541,7 +546,6 @@ virtual_heatchill:
           status: status
         result:
           success: success
-  # 虚拟加热/冷却器节点配置
   handles:
   - handler_key: heatchill
     label: heatchill
@@ -550,7 +554,7 @@ virtual_heatchill:
     io_type: source
     data_source: handle
     data_key: vessel
-    description: "加热/冷却器的物理连接口，容器直接放置在设备上进行温度控制"
+    description: "加热/冷却器的物理连接口"
   schema:
     type: object
     properties:
@@ -602,10 +606,10 @@ virtual_transfer_pump:
           success: success
           message: message
       set_position:
-        type: SetPumpPosition  # ← 使用新的动作类型
+        type: SetPumpPosition
         goal:
-          position: position        # ← 直接映射参数名
-          max_velocity: max_velocity # ← 直接映射参数名
+          position: position
+          max_velocity: max_velocity
         feedback:
           status: status
           current_position: current_position
@@ -613,7 +617,6 @@ virtual_transfer_pump:
         result:
           success: success
           message: message
-  # 注射器式转移泵节点配置 - 只有一个双向连接口，可吸入和排出液体
   handles:
   - handler_key: transferpump
     label: transferpump
@@ -622,7 +625,7 @@ virtual_transfer_pump:
     io_type: source
     data_source: handle
     data_key: fluid_port
-    description: "注射器式转移泵的唯一连接口，通过阀门切换实现吸入和排出"
+    description: "注射器式转移泵的连接口"
   schema:
     type: object
     properties:
@@ -642,7 +645,6 @@ virtual_transfer_pump:
 
 virtual_column:
   description: Virtual Column Chromatography Device for RunColumn Protocol Testing
-  #icon: Column.webp暂时还没有
   class:
     module: unilabos.devices.virtual.virtual_column:VirtualColumn
     type: python
@@ -671,13 +673,12 @@ virtual_column:
           success: success
           message: current_status
           return_info: current_status
-  # 柱层析设备节点配置 - 色谱分离设备
   handles:
   - handler_key: columnin
     label: columnin
     data_type: transport
     side: WEST
-    io_type: sink
+    io_type: target
     data_source: handle
     data_key: from_vessel
     description: "样品输入口"
@@ -741,16 +742,31 @@ virtual_rotavap:
         result:
           success: success
           message: message
-  # 虚拟旋转蒸发仪节点配置 - 1个样品口
   handles:
-  - handler_key: rotavap-sample
-    label: rotavap-sample
+  - handler_key: sample_in
+    label: sample_in
     data_type: fluid
     side: NORTH
     io_type: target
     data_source: handle
-    data_key: vessel
-    description: "样品连接口，放入需要蒸发的样品"
+    data_key: vessel_in
+    description: "样品连接口"
+  - handler_key: product_out
+    label: product_out
+    data_type: fluid
+    side: SOUTH
+    io_type: source
+    data_source: handle
+    data_key: product_out
+    description: "浓缩产物出口"
+  - handler_key: solvent_out
+    label: solvent_out
+    data_type: fluid
+    side: EAST
+    io_type: source
+    data_source: handle
+    data_key: solvent_out
+    description: "冷凝溶剂出口"
   schema:
     type: object
     properties:
@@ -804,24 +820,31 @@ virtual_separator:
         result:
           success: success
           message: message
-  # 虚拟分液器节点配置 - 分离设备，1个输入口(混合液)，2个输出口(上相和下相)
   handles:
-  - handler_key: separatorin
-    label: separatorin
+  - handler_key: separator_in
+    label: separator_in
     data_type: fluid
     side: NORTH
     io_type: target
     data_source: handle
     data_key: from_vessel
     description: "需要分离的混合液体输入口"
-  - handler_key: separatorout
-    label: separatorout
+  - handler_key: bottom_phase_out
+    label: bottom_phase_out
     data_type: fluid
     side: SOUTH
     io_type: source
     data_source: executor
     data_key: bottom_outlet
     description: "下相（重相）液体输出口"
+  - handler_key: top_phase_out
+    label: top_phase_out
+    data_type: fluid
+    side: EAST
+    io_type: source
+    data_source: executor
+    data_key: top_outlet
+    description: "上相（轻相）液体输出口"
   schema:
     type: object
     properties:
@@ -861,7 +884,6 @@ virtual_vacuum_pump:
           string: string
         feedback: {}
         result: {}
-  # 虚拟真空泵节点配置 - 真空设备，1个输入口连接需要抽真空的系统
   handles:
   - handler_key: vacuumpump
     label: vacuumpump
@@ -870,7 +892,7 @@ virtual_vacuum_pump:
     io_type: source
     data_source: handle
     data_key: fluid_in
-    description: "真空泵进气口，连接需要抽真空的容器或管路"
+    description: "真空泵进气口"
   schema:
     type: object
     properties:
@@ -882,7 +904,6 @@ virtual_vacuum_pump:
 
 virtual_gas_source:
   description: Virtual gas source
-  #icon: GasSource.webp暂时还没有
   class:
     module: unilabos.devices.virtual.virtual_gas_source:VirtualGasSource
     type: python
@@ -905,7 +926,6 @@ virtual_gas_source:
           string: string
         feedback: {}
         result: {}
-  # 虚拟气源节点配置 - 气体供应设备，1个输出口提供加压气体
   handles:
   - handler_key: gassource
     label: gassource
@@ -914,7 +934,7 @@ virtual_gas_source:
     io_type: source
     data_source: executor
     data_key: fluid_out
-    description: "气源出气口，向容器或管路提供加压气体"
+    description: "气源出气口"
   schema:
     type: object
     properties:
