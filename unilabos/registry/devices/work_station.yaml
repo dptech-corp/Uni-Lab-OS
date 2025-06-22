@@ -19,6 +19,24 @@ workstation:
           purpose: purpose
         feedback: {}
         result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: reagent
+              label: Reagent
+              data_type: resource
+              data_source: handle
+              data_key: reagent
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
 
       AGVTransferProtocol:
         type: AGVTransfer
@@ -39,6 +57,19 @@ workstation:
           temp: temp
         feedback: {}
         result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
 
       CleanProtocol:
         type: Clean
@@ -50,6 +81,24 @@ workstation:
           repeats: repeats
         feedback: {}
         result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: solvent
+              label: Solvent
+              data_type: resource
+              data_source: handle
+              data_key: solvent
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
 
       CleanVesselProtocol:
         type: CleanVessel
@@ -61,6 +110,24 @@ workstation:
           repeats: repeats
         feedback: {}
         result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: solvent
+              label: Solvent
+              data_type: resource
+              data_source: handle
+              data_key: solvent
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
 
       DissolveProtocol:
         type: Dissolve
@@ -74,6 +141,24 @@ workstation:
           stir_speed: stir_speed
         feedback: {}
         result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: solvent
+              label: Solvent
+              data_type: resource
+              data_source: handle
+              data_key: solvent
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
 
       EvacuateAndRefillProtocol:
         type: EvacuateAndRefill
@@ -83,6 +168,19 @@ workstation:
           repeats: repeats
         feedback: {}
         result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
 
       EvaporateProtocol:
         type: Evaporate
@@ -94,6 +192,19 @@ workstation:
           stir_speed: stir_speed
         feedback: {}
         result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
 
       FilterProtocol:
         type: Filter
@@ -107,6 +218,19 @@ workstation:
           volume: volume
         feedback: {}
         result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
 
       FilterThroughProtocol:
         type: FilterThrough
@@ -120,6 +244,34 @@ workstation:
           residence_time: residence_time
         feedback: {}
         result: {}
+        handles:
+          input:
+            - handler_key: from_vessel
+              label: From Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: to_vessel
+              label: To Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+            - handler_key: solvent
+              label: Eluting Solvent
+              data_type: resource
+              data_source: handle
+              data_key: solvent
+          output:
+            - handler_key: from_vessel_out
+              label: From Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: to_vessel_out
+              label: To Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
 
       HeatChillProtocol:
         type: HeatChill
@@ -132,6 +284,19 @@ workstation:
           purpose: purpose
         feedback: {}
         result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
 
       HeatChillStartProtocol:
         type: HeatChillStart
@@ -141,6 +306,19 @@ workstation:
           purpose: purpose
         feedback: {}
         result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
 
       HeatChillStopProtocol:
         type: HeatChillStop
@@ -148,6 +326,19 @@ workstation:
           vessel: vessel
         feedback: {}
         result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
 
       PumpTransferProtocol:
         type: PumpTransfer
@@ -164,6 +355,34 @@ workstation:
           solid: solid
         feedback: {}
         result: {}
+        handles:
+          input:
+            - handler_key: from_vessel
+              label: From Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: to_vessel
+              label: To Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+            - handler_key: solvent
+              label: Rinsing Solvent
+              data_type: resource
+              data_source: handle
+              data_key: solvent
+          output:
+            - handler_key: from_vessel_out
+              label: From Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: to_vessel_out
+              label: To Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
 
       RunColumnProtocol:
         type: RunColumn
@@ -173,6 +392,29 @@ workstation:
           column: column
         feedback: {}
         result: {}
+        handles:
+          input:
+            - handler_key: from_vessel
+              label: From Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: to_vessel
+              label: To Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+          output:
+            - handler_key: from_vessel_out
+              label: From Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: to_vessel_out
+              label: To Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
 
       SeparateProtocol:
         type: Separate
@@ -192,6 +434,34 @@ workstation:
           settling_time: settling_time
         feedback: {}
         result: {}
+        handles:
+          input:
+            - handler_key: from_vessel
+              label: From Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: to_vessel
+              label: To Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+            - handler_key: solvent
+              label: Solvent
+              data_type: resource
+              data_source: handle
+              data_key: solvent
+          output:
+            - handler_key: from_vessel_out
+              label: From Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: to_vessel_out
+              label: To Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
 
       StartStirProtocol:
         type: StartStir
@@ -201,6 +471,19 @@ workstation:
           purpose: purpose
         feedback: {}
         result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
 
       StirProtocol:
         type: Stir
@@ -217,6 +500,19 @@ workstation:
           vessel: vessel
         feedback: {}
         result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
 
       TransferProtocol:
         type: Transfer
@@ -233,6 +529,24 @@ workstation:
           solid: solid
         feedback: {}
         result: {}
+        handles:
+          input:
+            - handler_key: from_vessel
+              label: From Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: solvent
+              label: Rinsing Solvent
+              data_type: resource
+              data_source: handle
+              data_key: solvent
+          output:
+            - handler_key: to_vessel
+              label: To Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
 
       WashSolidProtocol:
         type: WashSolid
@@ -248,3 +562,31 @@ workstation:
           repeats: repeats
         feedback: {}
         result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: solvent
+              label: Solvent
+              data_type: resource
+              data_source: handle
+              data_key: solvent
+            - handler_key: filtrate_vessel
+              label: Filtrate Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+          output:
+            - handler_key: vessel_out
+              label: Vessel Out
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: filtrate_vessel_out
+              label: Filtrate Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
