@@ -301,9 +301,9 @@
             }
         }
     ],
-    "links": [
+        "links": [
         {
-            "id": "link_pump1_valve1",
+            "id": "link_pump1_to_valve1",
             "source": "transfer_pump_1",
             "target": "multiway_valve_1",
             "type": "fluid",
@@ -313,7 +313,7 @@
             }
         },
         {
-            "id": "link_pump2_valve2",
+            "id": "link_pump2_to_valve2",
             "source": "transfer_pump_2",
             "target": "multiway_valve_2",
             "type": "fluid",
@@ -323,17 +323,7 @@
             }
         },
         {
-            "id": "link_valve1_air",
-            "source": "multiway_valve_1",
-            "target": "flask_air",
-            "type": "fluid",
-            "port": {
-                "multiway_valve_1": "6",
-                "flask_air": "top"
-            }
-        },
-        {
-            "id": "link_valve1_water",
+            "id": "link_valve1_to_water",
             "source": "multiway_valve_1",
             "target": "flask_water",
             "type": "fluid",
@@ -343,7 +333,7 @@
             }
         },
         {
-            "id": "link_valve1_acetone",
+            "id": "link_valve1_to_acetone",
             "source": "multiway_valve_1",
             "target": "flask_acetone",
             "type": "fluid",
@@ -353,7 +343,7 @@
             }
         },
         {
-            "id": "link_valve1_ethanol",
+            "id": "link_valve1_to_ethanol",
             "source": "multiway_valve_1",
             "target": "flask_ethanol",
             "type": "fluid",
@@ -363,17 +353,27 @@
             }
         },
         {
-            "id": "link_valve1_valve2",
+            "id": "link_valve1_to_air",
+            "source": "multiway_valve_1",
+            "target": "flask_air",
+            "type": "fluid",
+            "port": {
+                "multiway_valve_1": "6",
+                "flask_air": "top"
+            }
+        },
+        {
+            "id": "link_valve1_to_valve2_for_cleaning",
             "source": "multiway_valve_1",
             "target": "multiway_valve_2",
             "type": "fluid",
             "port": {
-                "multiway_valve_1": "5",
-                "multiway_valve_2": "1"
+                "multiway_valve_1": "1",
+                "multiway_valve_2": "8"
             }
         },
         {
-            "id": "link_valve2_main_reactor",
+            "id": "link_valve2_to_main_reactor_in",
             "source": "multiway_valve_2",
             "target": "main_reactor",
             "type": "fluid",
@@ -383,7 +383,7 @@
             }
         },
         {
-            "id": "link_valve2_secondary_reactor",
+            "id": "link_valve2_to_secondary_reactor_in",
             "source": "multiway_valve_2",
             "target": "secondary_reactor",
             "type": "fluid",
@@ -393,7 +393,27 @@
             }
         },
         {
-            "id": "link_valve2_waste",
+            "id": "link_main_reactor_out_to_valve2",
+            "source": "main_reactor",
+            "target": "multiway_valve_2",
+            "type": "fluid",
+            "port": {
+                "main_reactor": "bottom",
+                "multiway_valve_2": "6"
+            }
+        },
+        {
+            "id": "link_secondary_reactor_out_to_valve2",
+            "source": "secondary_reactor",
+            "target": "multiway_valve_2",
+            "type": "fluid",
+            "port": {
+                "secondary_reactor": "bottom",
+                "multiway_valve_2": "7"
+            }
+        },
+        {
+            "id": "link_valve2_to_waste",
             "source": "multiway_valve_2",
             "target": "waste_workup",
             "type": "fluid",
@@ -403,23 +423,23 @@
             }
         },
         {
-            "id": "link_valve2_air_return",
-            "source": "multiway_valve_2",
-            "target": "flask_air",
-            "type": "fluid",
-            "port": {
-                "multiway_valve_2": "5",
-                "flask_air": "top"
-            }
-        },
-        {
-            "id": "link_heatchill1_main_reactor",
+            "id": "link_heatchill1_to_main_reactor",
             "source": "heatchill_1",
             "target": "main_reactor",
             "type": "mechanical",
             "port": {
                 "heatchill_1": "heatchill",
                 "main_reactor": "bind"
+            }
+        },
+        {
+            "id": "link_heatchill1_to_secondary_reactor",
+            "source": "heatchill_1",
+            "target": "secondary_reactor",
+            "type": "mechanical",
+            "port": {
+                "heatchill_1": "heatchill",
+                "secondary_reactor": "bind"
             }
         }
     ]
