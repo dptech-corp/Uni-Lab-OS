@@ -845,6 +845,14 @@ virtual_separator:
     data_source: executor
     data_key: top_outlet
     description: "上相（轻相）液体输出口"
+  - handler_key: bind
+    label: bind
+    io_type: target
+    data_type: mechanical
+    side: WEST
+    data_source: handle
+    data_key: mechanical_port
+    description: "用于连接搅拌器等机械设备的接口"
   schema:
     type: object
     properties:

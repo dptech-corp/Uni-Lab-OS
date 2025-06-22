@@ -1,7 +1,7 @@
 {
     "nodes": [
         {
-            "id": "ComprehensiveProtocolStation",
+            "id": "OrganicSynthesisStation",
             "name": "综合协议测试工作站",
             "children": [
                 "multiway_valve_1",
@@ -69,7 +69,7 @@
             "id": "multiway_valve_1",
             "name": "八通阀门1",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "device",
             "class": "virtual_multiway_valve",
             "position": {
@@ -89,7 +89,7 @@
             "id": "multiway_valve_2",
             "name": "八通阀门2",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "device",
             "class": "virtual_multiway_valve",
             "position": {
@@ -109,7 +109,7 @@
             "id": "transfer_pump_1",
             "name": "转移泵1",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "device",
             "class": "virtual_transfer_pump",
             "position": {
@@ -130,7 +130,7 @@
             "id": "transfer_pump_2",
             "name": "转移泵2",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "device",
             "class": "virtual_transfer_pump",
             "position": {
@@ -151,7 +151,7 @@
             "id": "reagent_bottle_1",
             "name": "试剂瓶1-DMF",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "container",
             "class": "container",
             "position": {
@@ -172,7 +172,7 @@
             "id": "reagent_bottle_2",
             "name": "试剂瓶2-乙酸乙酯",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "container",
             "class": "container",
             "position": {
@@ -193,7 +193,7 @@
             "id": "reagent_bottle_3",
             "name": "试剂瓶3-己烷",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "container",
             "class": "container",
             "position": {
@@ -214,7 +214,7 @@
             "id": "reagent_bottle_4",
             "name": "试剂瓶4-甲醇",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "container",
             "class": "container",
             "position": {
@@ -235,7 +235,7 @@
             "id": "reagent_bottle_5",
             "name": "试剂瓶5-水",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "container",
             "class": "container",
             "position": {
@@ -256,7 +256,7 @@
             "id": "centrifuge_1",
             "name": "离心机",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "device",
             "class": "virtual_centrifuge",
             "position": {
@@ -278,7 +278,7 @@
             "id": "rotavap_1",
             "name": "旋转蒸发仪",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "device",
             "class": "virtual_rotavap",
             "position": {
@@ -300,7 +300,7 @@
             "id": "main_reactor",
             "name": "主反应器",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "container",
             "class": "container",
             "position": {
@@ -324,7 +324,7 @@
             "id": "heater_1",
             "name": "加热器",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "device",
             "class": "virtual_heatchill",
             "position": {
@@ -345,7 +345,7 @@
             "id": "stirrer_1",
             "name": "搅拌器1",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "device",
             "class": "virtual_stirrer",
             "position": {
@@ -365,7 +365,7 @@
             "id": "stirrer_2",
             "name": "搅拌器2",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "device",
             "class": "virtual_stirrer",
             "position": {
@@ -385,7 +385,7 @@
             "id": "waste_bottle_1",
             "name": "废液瓶1",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "container",
             "class": "container",
             "position": {
@@ -404,7 +404,7 @@
             "id": "waste_bottle_2",
             "name": "废液瓶2",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "container",
             "class": "container",
             "position": {
@@ -423,7 +423,7 @@
             "id": "solenoid_valve_1",
             "name": "电磁阀1",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "device",
             "class": "virtual_solenoid_valve",
             "position": {
@@ -444,7 +444,7 @@
             "id": "solenoid_valve_2",
             "name": "电磁阀2",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "device",
             "class": "virtual_solenoid_valve",
             "position": {
@@ -465,7 +465,7 @@
             "id": "vacuum_pump_1",
             "name": "真空泵",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "device",
             "class": "virtual_vacuum_pump",
             "position": {
@@ -486,7 +486,7 @@
             "id": "gas_source_1",
             "name": "气源",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "device",
             "class": "virtual_gas_source",
             "position": {
@@ -504,7 +504,7 @@
             "id": "filter_1",
             "name": "过滤器",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "device",
             "class": "virtual_filter",
             "position": {
@@ -525,7 +525,7 @@
             "id": "column_1",
             "name": "洗脱柱",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "device",
             "class": "virtual_column",
             "position": {
@@ -547,7 +547,7 @@
             "id": "separator_1",
             "name": "分液器",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "device",
             "class": "virtual_separator",
             "position": {
@@ -568,7 +568,7 @@
             "id": "collection_bottle_1",
             "name": "接收瓶1",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "container",
             "class": "container",
             "position": {
@@ -587,7 +587,7 @@
             "id": "collection_bottle_2",
             "name": "接收瓶2",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "container",
             "class": "container",
             "position": {
@@ -606,7 +606,7 @@
             "id": "collection_bottle_3",
             "name": "接收瓶3",
             "children": [],
-            "parent": "ComprehensiveProtocolStation",
+            "parent": "OrganicSynthesisStation",
             "type": "container",
             "class": "container",
             "position": {
@@ -854,16 +854,6 @@
             }
         },
         {
-            "id": "link_filter_collection1",
-            "source": "filter_1",
-            "target": "collection_bottle_1",
-            "type": "transport",
-            "port": {
-                "filter_1": "filtrate_out",
-                "collection_bottle_1": "top"
-            }
-        },
-        {
             "id": "link_separator_waste2",
             "source": "separator_1",
             "target": "waste_bottle_2",
@@ -881,6 +871,26 @@
             "port": {
                 "stirrer_2": "stirrer",
                 "separator_1": "bind"
+            }
+        },
+        {
+        "id": "link_filter_filtrate_to_collection1",
+        "source": "filter_1",
+        "target": "collection_bottle_1",
+        "type": "transport",
+        "port": {
+            "filter_1": "filtrate_out",
+            "collection_bottle_1": "top"
+        }
+        },
+        {
+            "id": "link_filter_retentate_to_waste1",
+            "source": "filter_1",
+            "target": "waste_bottle_1",
+            "type": "transport",
+            "port": {
+                "filter_1": "retentate_out",
+                "waste_bottle_1": "top"
             }
         }
     ]
