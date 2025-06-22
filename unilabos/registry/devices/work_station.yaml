@@ -225,9 +225,19 @@ workstation:
               data_type: resource
               data_source: handle
               data_key: vessel
+            - handler_key: filtrate_vessel
+              label: Filtrate Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
           output:
             - handler_key: vessel_out
               label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+            - handler_key: filtrate_out
+              label: Filtrate Vessel
               data_type: resource
               data_source: executor
               data_key: vessel
@@ -493,6 +503,19 @@ workstation:
           settling_time: settling_time
         feedback: {}
         result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
 
       StopStirProtocol:
         type: StopStir
@@ -536,13 +559,23 @@ workstation:
               data_type: resource
               data_source: handle
               data_key: vessel
+            - handler_key: to_vessel
+              label: To Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
             - handler_key: solvent
               label: Rinsing Solvent
               data_type: resource
               data_source: handle
               data_key: solvent
           output:
-            - handler_key: to_vessel
+            - handler_key: from_vessel_out
+              label: From Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: to_vessel_out
               label: To Vessel
               data_type: resource
               data_source: executor

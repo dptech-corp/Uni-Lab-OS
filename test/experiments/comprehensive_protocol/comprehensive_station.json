@@ -2,7 +2,7 @@
     "nodes": [
         {
             "id": "OrganicSynthesisStation",
-            "name": "综合协议测试工作站",
+            "name": "有机化学流程综合测试工作站",
             "children": [
                 "multiway_valve_1",
                 "multiway_valve_2",
