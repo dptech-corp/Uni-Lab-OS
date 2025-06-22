@@ -852,6 +852,36 @@
                 "heater_1": "heatchill",
                 "main_reactor": "bind"
             }
+        },
+        {
+            "id": "link_filter_collection1",
+            "source": "filter_1",
+            "target": "collection_bottle_1",
+            "type": "transport",
+            "port": {
+                "filter_1": "filtrate_out",
+                "collection_bottle_1": "top"
+            }
+        },
+        {
+            "id": "link_separator_waste2",
+            "source": "separator_1",
+            "target": "waste_bottle_2",
+            "type": "fluid",
+            "port": {
+                "separator_1": "top_phase_out",
+                "waste_bottle_2": "top"
+            }
+        },
+        {
+            "id": "mech_stirrer2_separator",
+            "source": "stirrer_2",
+            "target": "separator_1",
+            "type": "mechanical",
+            "port": {
+                "stirrer_2": "stirrer",
+                "separator_1": "bind"
+            }
         }
     ]
 }

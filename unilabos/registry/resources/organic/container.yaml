@@ -1,5 +1,6 @@
 container:
   description: regular organic container
+  icon: Flask.webp
   class: 
     module: unilabos.resources.container:RegularContainer
     type: unilabos
