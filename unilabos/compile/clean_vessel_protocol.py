@@ -5,9 +5,13 @@ from .pump_protocol import generate_pump_protocol
 
 def find_solvent_vessel(G: nx.DiGraph, solvent: str) -> str:
     """
-    查找溶剂容器，支持多种命名模式
+    查找溶剂容器，支持多种匹配模式：
+    1. 容器名称匹配（如 flask_water, reagent_bottle_1-DMF）
+    2. 容器内液体类型匹配（如 liquid_type: "DMF", "ethanol"）
     """
-    # 可能的溶剂容器命名模式
+    print(f"CLEAN_VESSEL: 正在查找溶剂 '{solvent}' 的容器...")
+    
+    # 第一步：通过容器名称匹配
     possible_names = [
         f"flask_{solvent}",           # flask_water, flask_ethanol
         f"bottle_{solvent}",          # bottle_water, bottle_ethanol  
@@ -16,13 +20,87 @@ def find_solvent_vessel(G: nx.DiGraph, solvent: str) -> str:
         f"{solvent}_bottle",          # water_bottle, ethanol_bottle
         f"{solvent}",                 # 直接用溶剂名
         f"solvent_{solvent}",         # solvent_water, solvent_ethanol
+        f"reagent_bottle_{solvent}",  # reagent_bottle_DMF
     ]
     
+    # 尝试名称匹配
     for vessel_name in possible_names:
         if vessel_name in G.nodes():
+            print(f"CLEAN_VESSEL: 通过名称匹配找到容器: {vessel_name}")
             return vessel_name
     
-    raise ValueError(f"未找到溶剂 '{solvent}' 的容器。尝试了以下名称: {possible_names}")
+    # 第二步：通过模糊名称匹配（名称中包含溶剂名）
+    for node_id in G.nodes():
+        if G.nodes[node_id].get('type') == 'container':
+            # 检查节点ID或名称中是否包含溶剂名
+            node_name = G.nodes[node_id].get('name', '').lower()
+            if (solvent.lower() in node_id.lower() or 
+                solvent.lower() in node_name):
+                print(f"CLEAN_VESSEL: 通过模糊名称匹配找到容器: {node_id} (名称: {node_name})")
+                return node_id
+    
+    # 第三步：通过液体类型匹配
+    for node_id in G.nodes():
+        if G.nodes[node_id].get('type') == 'container':
+            vessel_data = G.nodes[node_id].get('data', {})
+            liquids = vessel_data.get('liquid', [])
+            
+            for liquid in liquids:
+                if isinstance(liquid, dict):
+                    # 支持两种格式的液体类型字段
+                    liquid_type = liquid.get('liquid_type') or liquid.get('name', '')
+                    reagent_name = vessel_data.get('reagent_name', '')
+                    config_reagent = G.nodes[node_id].get('config', {}).get('reagent', '')
+                    
+                    # 检查多个可能的字段
+                    if (liquid_type.lower() == solvent.lower() or 
+                        reagent_name.lower() == solvent.lower() or
+                        config_reagent.lower() == solvent.lower()):
+                        print(f"CLEAN_VESSEL: 通过液体类型匹配找到容器: {node_id}")
+                        print(f"  - liquid_type: {liquid_type}")
+                        print(f"  - reagent_name: {reagent_name}")
+                        print(f"  - config.reagent: {config_reagent}")
+                        return node_id
+    
+    # 第四步：列出所有可用的容器信息帮助调试
+    available_containers = []
+    for node_id in G.nodes():
+        if G.nodes[node_id].get('type') == 'container':
+            vessel_data = G.nodes[node_id].get('data', {})
+            config_data = G.nodes[node_id].get('config', {})
+            liquids = vessel_data.get('liquid', [])
+            
+            container_info = {
+                'id': node_id,
+                'name': G.nodes[node_id].get('name', ''),
+                'liquid_types': [],
+                'reagent_name': vessel_data.get('reagent_name', ''),
+                'config_reagent': config_data.get('reagent', '')
+            }
+            
+            for liquid in liquids:
+                if isinstance(liquid, dict):
+                    liquid_type = liquid.get('liquid_type') or liquid.get('name', '')
+                    if liquid_type:
+                        container_info['liquid_types'].append(liquid_type)
+            
+            available_containers.append(container_info)
+    
+    print(f"CLEAN_VESSEL: 可用容器列表:")
+    for container in available_containers:
+        print(f"  - {container['id']}: {container['name']}")
+        print(f"    液体类型: {container['liquid_types']}")
+        print(f"    试剂名称: {container['reagent_name']}")
+        print(f"    配置试剂: {container['config_reagent']}")
+    
+    raise ValueError(f"未找到溶剂 '{solvent}' 的容器。尝试了名称匹配: {possible_names}")
+
+
+def find_solvent_vessel_by_any_match(G: nx.DiGraph, solvent: str) -> str:
+    """
+    增强版溶剂容器查找，支持各种匹配方式的别名函数
+    """
+    return find_solvent_vessel(G, solvent)
 
 
 def find_waste_vessel(G: nx.DiGraph) -> str:
@@ -282,3 +360,80 @@ def generate_organic_clean_protocol(
     action_sequence.extend(water_actions)
     
     return action_sequence
+
+
+def get_vessel_liquid_volume(G: nx.DiGraph, vessel: str) -> float:
+    """获取容器中的液体体积（修复版）"""
+    if vessel not in G.nodes():
+        return 0.0
+    
+    vessel_data = G.nodes[vessel].get('data', {})
+    liquids = vessel_data.get('liquid', [])
+    
+    total_volume = 0.0
+    for liquid in liquids:
+        if isinstance(liquid, dict):
+            # 支持两种格式：新格式 (name, volume) 和旧格式 (liquid_type, liquid_volume)
+            volume = liquid.get('volume') or liquid.get('liquid_volume', 0.0)
+            total_volume += volume
+    
+    return total_volume
+
+
+def get_vessel_liquid_types(G: nx.DiGraph, vessel: str) -> List[str]:
+    """获取容器中所有液体的类型"""
+    if vessel not in G.nodes():
+        return []
+    
+    vessel_data = G.nodes[vessel].get('data', {})
+    liquids = vessel_data.get('liquid', [])
+    
+    liquid_types = []
+    for liquid in liquids:
+        if isinstance(liquid, dict):
+            # 支持两种格式的液体类型字段
+            liquid_type = liquid.get('liquid_type') or liquid.get('name', '')
+            if liquid_type:
+                liquid_types.append(liquid_type)
+    
+    return liquid_types
+
+
+def find_vessel_by_content(G: nx.DiGraph, content: str) -> List[str]:
+    """
+    根据内容物查找所有匹配的容器
+    返回匹配容器的ID列表
+    """
+    matching_vessels = []
+    
+    for node_id in G.nodes():
+        if G.nodes[node_id].get('type') == 'container':
+            # 检查容器名称匹配
+            node_name = G.nodes[node_id].get('name', '').lower()
+            if content.lower() in node_id.lower() or content.lower() in node_name:
+                matching_vessels.append(node_id)
+                continue
+            
+            # 检查液体类型匹配
+            vessel_data = G.nodes[node_id].get('data', {})
+            liquids = vessel_data.get('liquid', [])
+            config_data = G.nodes[node_id].get('config', {})
+            
+            # 检查 reagent_name 和 config.reagent
+            reagent_name = vessel_data.get('reagent_name', '').lower()
+            config_reagent = config_data.get('reagent', '').lower()
+            
+            if (content.lower() == reagent_name or 
+                content.lower() == config_reagent):
+                matching_vessels.append(node_id)
+                continue
+            
+            # 检查液体列表
+            for liquid in liquids:
+                if isinstance(liquid, dict):
+                    liquid_type = liquid.get('liquid_type') or liquid.get('name', '')
+                    if liquid_type.lower() == content.lower():
+                        matching_vessels.append(node_id)
+                        break
+    
+    return matching_vessels
