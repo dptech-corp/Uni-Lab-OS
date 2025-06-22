@@ -3,248 +3,248 @@ workstation:
   class:
     module: unilabos.ros.nodes.presets.protocol_node:ROS2ProtocolNode
     type: ros2
-  action_value_mappings:
-    AddProtocol:
-      type: Add
-      goal:
-        vessel: vessel
-        reagent: reagent
-        volume: volume
-        mass: mass
-        amount: amount
-        time: time
-        stir: stir
-        stir_speed: stir_speed
-        viscous: viscous
-        purpose: purpose
-      feedback: {}
-      result: {}
+    action_value_mappings:
+      AddProtocol:
+        type: Add
+        goal:
+          vessel: vessel
+          reagent: reagent
+          volume: volume
+          mass: mass
+          amount: amount
+          time: time
+          stir: stir
+          stir_speed: stir_speed
+          viscous: viscous
+          purpose: purpose
+        feedback: {}
+        result: {}
 
-    AGVTransferProtocol:
-      type: AGVTransfer
-      goal:
-        from_repo: from_repo
-        from_repo_position: from_repo_position
-        to_repo: to_repo
-        to_repo_position: to_repo_position
-      feedback: {}
-      result: {}
+      AGVTransferProtocol:
+        type: AGVTransfer
+        goal:
+          from_repo: from_repo
+          from_repo_position: from_repo_position
+          to_repo: to_repo
+          to_repo_position: to_repo_position
+        feedback: {}
+        result: {}
 
-    CentrifugeProtocol:
-      type: Centrifuge
-      goal:
-        vessel: vessel
-        speed: speed
-        time: time
-        temp: temp
-      feedback: {}
-      result: {}
+      CentrifugeProtocol:
+        type: Centrifuge
+        goal:
+          vessel: vessel
+          speed: speed
+          time: time
+          temp: temp
+        feedback: {}
+        result: {}
 
-    CleanProtocol:
-      type: Clean
-      goal:
-        vessel: vessel
-        solvent: solvent
-        volume: volume
-        temp: temp
-        repeats: repeats
-      feedback: {}
-      result: {}
+      CleanProtocol:
+        type: Clean
+        goal:
+          vessel: vessel
+          solvent: solvent
+          volume: volume
+          temp: temp
+          repeats: repeats
+        feedback: {}
+        result: {}
 
-    CleanVesselProtocol:
-      type: CleanVessel
-      goal:
-        vessel: vessel
-        solvent: solvent
-        volume: volume
-        temp: temp
-        repeats: repeats
-      feedback: {}
-      result: {}
+      CleanVesselProtocol:
+        type: CleanVessel
+        goal:
+          vessel: vessel
+          solvent: solvent
+          volume: volume
+          temp: temp
+          repeats: repeats
+        feedback: {}
+        result: {}
 
-    DissolveProtocol:
-      type: Dissolve
-      goal:
-        vessel: vessel
-        solvent: solvent
-        volume: volume
-        amount: amount
-        temp: temp
-        time: time
-        stir_speed: stir_speed
-      feedback: {}
-      result: {}
+      DissolveProtocol:
+        type: Dissolve
+        goal:
+          vessel: vessel
+          solvent: solvent
+          volume: volume
+          amount: amount
+          temp: temp
+          time: time
+          stir_speed: stir_speed
+        feedback: {}
+        result: {}
 
-    EvacuateAndRefillProtocol:
-      type: EvacuateAndRefill
-      goal:
-        vessel: vessel
-        gas: gas
-        repeats: repeats
-      feedback: {}
-      result: {}
+      EvacuateAndRefillProtocol:
+        type: EvacuateAndRefill
+        goal:
+          vessel: vessel
+          gas: gas
+          repeats: repeats
+        feedback: {}
+        result: {}
 
-    EvaporateProtocol:
-      type: Evaporate
-      goal:
-        vessel: vessel
-        pressure: pressure
-        temp: temp
-        time: time
-        stir_speed: stir_speed
-      feedback: {}
-      result: {}
+      EvaporateProtocol:
+        type: Evaporate
+        goal:
+          vessel: vessel
+          pressure: pressure
+          temp: temp
+          time: time
+          stir_speed: stir_speed
+        feedback: {}
+        result: {}
 
-    FilterProtocol:
-      type: Filter
-      goal:
-        vessel: vessel
-        filtrate_vessel: filtrate_vessel
-        stir: stir
-        stir_speed: stir_speed
-        temp: temp
-        continue_heatchill: continue_heatchill
-        volume: volume
-      feedback: {}
-      result: {}
+      FilterProtocol:
+        type: Filter
+        goal:
+          vessel: vessel
+          filtrate_vessel: filtrate_vessel
+          stir: stir
+          stir_speed: stir_speed
+          temp: temp
+          continue_heatchill: continue_heatchill
+          volume: volume
+        feedback: {}
+        result: {}
 
-    FilterThroughProtocol:
-      type: FilterThrough
-      goal:
-        from_vessel: from_vessel
-        to_vessel: to_vessel
-        filter_through: filter_through
-        eluting_solvent: eluting_solvent
-        eluting_volume: eluting_volume
-        eluting_repeats: eluting_repeats
-        residence_time: residence_time
-      feedback: {}
-      result: {}
+      FilterThroughProtocol:
+        type: FilterThrough
+        goal:
+          from_vessel: from_vessel
+          to_vessel: to_vessel
+          filter_through: filter_through
+          eluting_solvent: eluting_solvent
+          eluting_volume: eluting_volume
+          eluting_repeats: eluting_repeats
+          residence_time: residence_time
+        feedback: {}
+        result: {}
 
-    HeatChillProtocol:
-      type: HeatChill
-      goal:
-        vessel: vessel
-        temp: temp
-        time: time
-        stir: stir
-        stir_speed: stir_speed
-        purpose: purpose
-      feedback: {}
-      result: {}
+      HeatChillProtocol:
+        type: HeatChill
+        goal:
+          vessel: vessel
+          temp: temp
+          time: time
+          stir: stir
+          stir_speed: stir_speed
+          purpose: purpose
+        feedback: {}
+        result: {}
 
-    HeatChillStartProtocol:
-      type: HeatChillStart
-      goal:
-        vessel: vessel
-        temp: temp
-        purpose: purpose
-      feedback: {}
-      result: {}
+      HeatChillStartProtocol:
+        type: HeatChillStart
+        goal:
+          vessel: vessel
+          temp: temp
+          purpose: purpose
+        feedback: {}
+        result: {}
 
-    HeatChillStopProtocol:
-      type: HeatChillStop
-      goal:
-        vessel: vessel
-      feedback: {}
-      result: {}
+      HeatChillStopProtocol:
+        type: HeatChillStop
+        goal:
+          vessel: vessel
+        feedback: {}
+        result: {}
 
-    PumpTransferProtocol:
-      type: PumpTransfer
-      goal:
-        from_vessel: from_vessel
-        to_vessel: to_vessel
-        volume: volume
-        amount: amount
-        time: time
-        viscous: viscous
-        rinsing_solvent: rinsing_solvent
-        rinsing_volume: rinsing_volume
-        rinsing_repeats: rinsing_repeats
-        solid: solid
-      feedback: {}
-      result: {}
+      PumpTransferProtocol:
+        type: PumpTransfer
+        goal:
+          from_vessel: from_vessel
+          to_vessel: to_vessel
+          volume: volume
+          amount: amount
+          time: time
+          viscous: viscous
+          rinsing_solvent: rinsing_solvent
+          rinsing_volume: rinsing_volume
+          rinsing_repeats: rinsing_repeats
+          solid: solid
+        feedback: {}
+        result: {}
 
-    RunColumnProtocol:
-      type: RunColumn
-      goal:
-        from_vessel: from_vessel
-        to_vessel: to_vessel
-        column: column
-      feedback: {}
-      result: {}
+      RunColumnProtocol:
+        type: RunColumn
+        goal:
+          from_vessel: from_vessel
+          to_vessel: to_vessel
+          column: column
+        feedback: {}
+        result: {}
 
-    SeparateProtocol:
-      type: Separate
-      goal:
-        purpose: purpose
-        product_phase: product_phase
-        from_vessel: from_vessel
-        separation_vessel: separation_vessel
-        to_vessel: to_vessel
-        waste_phase_to_vessel: waste_phase_to_vessel
-        solvent: solvent
-        solvent_volume: solvent_volume
-        through: through
-        repeats: repeats
-        stir_time: stir_time
-        stir_speed: stir_speed
-        settling_time: settling_time
-      feedback: {}
-      result: {}
+      SeparateProtocol:
+        type: Separate
+        goal:
+          purpose: purpose
+          product_phase: product_phase
+          from_vessel: from_vessel
+          separation_vessel: separation_vessel
+          to_vessel: to_vessel
+          waste_phase_to_vessel: waste_phase_to_vessel
+          solvent: solvent
+          solvent_volume: solvent_volume
+          through: through
+          repeats: repeats
+          stir_time: stir_time
+          stir_speed: stir_speed
+          settling_time: settling_time
+        feedback: {}
+        result: {}
 
-    StartStirProtocol:
-      type: StartStir
-      goal:
-        vessel: vessel
-        stir_speed: stir_speed
-        purpose: purpose
-      feedback: {}
-      result: {}
+      StartStirProtocol:
+        type: StartStir
+        goal:
+          vessel: vessel
+          stir_speed: stir_speed
+          purpose: purpose
+        feedback: {}
+        result: {}
 
-    StirProtocol:
-      type: Stir
-      goal:
-        stir_time: stir_time
-        stir_speed: stir_speed
-        settling_time: settling_time
-      feedback: {}
-      result: {}
+      StirProtocol:
+        type: Stir
+        goal:
+          stir_time: stir_time
+          stir_speed: stir_speed
+          settling_time: settling_time
+        feedback: {}
+        result: {}
 
-    StopStirProtocol:
-      type: StopStir
-      goal:
-        vessel: vessel
-      feedback: {}
-      result: {}
+      StopStirProtocol:
+        type: StopStir
+        goal:
+          vessel: vessel
+        feedback: {}
+        result: {}
 
-    TransferProtocol:
-      type: Transfer
-      goal:
-        from_vessel: from_vessel
-        to_vessel: to_vessel
-        volume: volume
-        amount: amount
-        time: time
-        viscous: viscous
-        rinsing_solvent: rinsing_solvent
-        rinsing_volume: rinsing_volume
-        rinsing_repeats: rinsing_repeats
-        solid: solid
-      feedback: {}
-      result: {}
+      TransferProtocol:
+        type: Transfer
+        goal:
+          from_vessel: from_vessel
+          to_vessel: to_vessel
+          volume: volume
+          amount: amount
+          time: time
+          viscous: viscous
+          rinsing_solvent: rinsing_solvent
+          rinsing_volume: rinsing_volume
+          rinsing_repeats: rinsing_repeats
+          solid: solid
+        feedback: {}
+        result: {}
 
-    WashSolidProtocol:
-      type: WashSolid
-      goal:
-        vessel: vessel
-        solvent: solvent
-        volume: volume
-        filtrate_vessel: filtrate_vessel
-        temp: temp
-        stir: stir
-        stir_speed: stir_speed
-        time: time
-        repeats: repeats
-      feedback: {}
-      result: {}
+      WashSolidProtocol:
+        type: WashSolid
+        goal:
+          vessel: vessel
+          solvent: solvent
+          volume: volume
+          filtrate_vessel: filtrate_vessel
+          temp: temp
+          stir: stir
+          stir_speed: stir_speed
+          time: time
+          repeats: repeats
+        feedback: {}
+        result: {}
