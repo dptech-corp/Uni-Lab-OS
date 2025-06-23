@@ -1,0 +1,19 @@
+# 电化学表征设备：电化学工作站、电池测试柜
+electrochem_station.DongHua:
+  description: Donghua electrochem_station
+  class:
+    module: unilabos.devices.electrochem.dh_7000:DH7000
+    type: python
+    status_types:
+      status: String
+    action_value_mappings:
+      dh_cmd:
+        type: WorkStationRun
+        goal:
+          wf_name: method
+          params: command
+          resource: resource
+        feedback:
+          status: status
+        result:
+          success: success

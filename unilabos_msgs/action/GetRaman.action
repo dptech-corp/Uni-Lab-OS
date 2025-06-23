@@ -1,0 +1,13 @@
+# Goal
+int32 integtime
+int32 ldpower
+bool ldwave
+float64 ccdtemp
+string filename
+string saveroot
+---
+# Result
+string success
+---
+# Feedback
+string status
