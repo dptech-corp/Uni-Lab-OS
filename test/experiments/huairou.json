@@ -1,0 +1,17 @@
+{
+    "nodes": [
+        {
+            "id": "huairou",
+            "name": "huairou",
+            "children": [
+            ],
+            "parent": null,
+            "type": "device",
+            "class": "huairou",
+            "config": {
+            },
+            "data": {
+            }
+        }
+    ]
+}
