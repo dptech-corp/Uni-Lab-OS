@@ -172,13 +172,14 @@ class MQTTClient:
         jobdata = {"job_id": job_id, "data": feedback_data, "status": status, "return_info": return_info}
         self.client.publish(f"labs/{MQConfig.lab_id}/job/list/", json.dumps(jobdata), qos=2)
 
-    def publish_registry(self, device_id: str, device_info: dict):
+    def publish_registry(self, device_id: str, device_info: dict, print_debug: bool = True):
         if self.mqtt_disable:
             return
         address = f"labs/{MQConfig.lab_id}/registry/"
         registry_data = json.dumps({device_id: device_info}, ensure_ascii=False, cls=TypeEncoder)
         self.client.publish(address, registry_data, qos=2)
-        logger.debug(f"Registry data published: address: {address}, {registry_data}")
+        if print_debug:
+            logger.debug(f"Registry data published: address: {address}, {registry_data}")
 
     def publish_actions(self, action_id: str, action_info: dict):
         if self.mqtt_disable:

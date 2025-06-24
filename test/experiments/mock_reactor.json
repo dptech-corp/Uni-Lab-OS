@@ -30,14 +30,17 @@
             "children": [],
             "parent": "ReactorX",
             "type": "container",
-            "class": null,
+            "class": "container",
             "position": {
                 "x": 698.1111111111111,
                 "y": 428,
                 "z": 0
             },
             "config": {
-                "max_volume": 5000.0
+                "max_volume": 5000.0,
+                "size_x": 200.0,
+                "size_y": 200.0,
+                "size_z": 200.0
             },
             "data": {
                 "liquid": [
@@ -71,7 +74,7 @@
             "type": "device",
             "class": "solenoid_valve.mock",
             "position": {
-                "x": 620.6111111111111,
+                "x": 780,
                 "y": 171,
                 "z": 0
             },
@@ -89,7 +92,7 @@
             "type": "device",
             "class": "vacuum_pump.mock",
             "position": {
-                "x": 620.6111111111111,
+                "x": 500,
                 "y": 171,
                 "z": 0
             },
@@ -107,7 +110,7 @@
             "type": "device",
             "class": "gas_source.mock",
             "position": {
-                "x": 620.6111111111111,
+                "x": 900,
                 "y": 171,
                 "z": 0
             },
@@ -119,39 +122,39 @@
     ],
     "links": [
         {
-            "source": "reactor",
-            "target": "vacuum_valve",
-            "type": "physical",
+            "source": "vacuum_valve",
+            "target": "reactor",
+            "type": "fluid",
             "port": {
                 "reactor": "top",
-                "vacuum_valve": "1"
+                "vacuum_valve": "out"
             }
         },
         {
-            "source": "reactor",
-            "target": "gas_valve",
-            "type": "physical",
+            "source": "gas_valve",
+            "target": "reactor",
+            "type": "fluid",
             "port": {
                 "reactor": "top",
-                "gas_valve": "1"
+                "gas_valve": "out"
             }
         },
         {
             "source": "vacuum_pump",
             "target": "vacuum_valve",
-            "type": "physical",
+            "type": "fluid",
             "port": {
                 "vacuum_pump": "out",
-                "vacuum_valve": "0"
+                "vacuum_valve": "in"
             }
         },
         {
             "source": "gas_source",
             "target": "gas_valve",
-            "type": "physical",
+            "type": "fluid",
             "port": {
                 "gas_source": "out",
-                "gas_valve": "0"
+                "gas_valve": "in"
             }
         }
     ]

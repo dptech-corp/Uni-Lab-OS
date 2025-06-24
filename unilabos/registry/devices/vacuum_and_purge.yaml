@@ -23,20 +23,12 @@ vacuum_pump.mock:
         feedback: {}
         result: {}
   handles:
-    input:
-    - handler_key: fluid-input
-      label: Fluid Input
-      data_type: fluid
-      io_type: target
-      data_source: handle
-      data_key: fluid_in
-    output:
-    - handler_key: fluid-output
-      label: Fluid Output
+    - handler_key: out
+      label: out
       data_type: fluid
       io_type: source
-      data_source: executor
-      data_key: fluid_out
+      data_source: handle
+      data_key: fluid_in
   init_param_schema:
     type: object
     properties:
@@ -72,16 +64,8 @@ gas_source.mock:
         feedback: {}
         result: {}
   handles:
-    input:
-    - handler_key: fluid-input
-      label: Fluid Input
-      data_type: fluid
-      io_type: target
-      data_source: handle
-      data_key: fluid_in
-    output:
-    - handler_key: fluid-output
-      label: Fluid Output
+    - handler_key: out
+      label: out
       data_type: fluid
       io_type: source
       data_source: executor

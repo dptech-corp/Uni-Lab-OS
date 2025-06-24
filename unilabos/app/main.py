@@ -10,7 +10,7 @@ from copy import deepcopy
 
 import yaml
 
-from unilabos.resources.graphio import tree_to_list
+from unilabos.resources.graphio import tree_to_list, modify_to_backend_format
 
 # 首先添加项目根目录到路径
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -20,6 +20,21 @@ if unilabos_dir not in sys.path:
 
 from unilabos.config.config import load_config, BasicConfig, _update_config_from_env
 from unilabos.utils.banner_print import print_status, print_unilab_banner
+
+
+def load_config_from_file(config_path):
+    if config_path is None:
+        config_path = os.environ.get("UNILABOS.BASICCONFIG.CONFIG_PATH", None)
+    if config_path:
+        if not os.path.exists(config_path):
+            print_status(f"配置文件 {config_path} 不存在", "error")
+        elif not config_path.endswith(".py"):
+            print_status(f"配置文件 {config_path} 不是Python文件，必须以.py结尾", "error")
+        else:
+            load_config(config_path)
+    else:
+        print_status(f"启动 UniLab-OS时，配置文件参数未正确传入 --config '{config_path}' 尝试本地配置...", "warning")
+        load_config(config_path)
 
 
 def parse_args():
@@ -57,6 +72,11 @@ def parse_args():
         "--slave_no_host",
         action="store_true",
         help="Slave模式下跳过等待host服务",
+    )
+    parser.add_argument(
+        "--upload_registry",
+        action="store_true",
+        help="启动unilab时同时报送注册表信息",
     )
     parser.add_argument(
         "--config",
@@ -97,22 +117,12 @@ def main():
 
     # 加载配置文件，优先加载config，然后从env读取
     config_path = args_dict.get("config")
-    if config_path is None:
-        config_path = os.environ.get("UNILABOS.BASICCONFIG.CONFIG_PATH", None)
-    if config_path:
-        if not os.path.exists(config_path):
-            print_status(f"配置文件 {config_path} 不存在", "error")
-        elif not config_path.endswith(".py"):
-            print_status(f"配置文件 {config_path} 不是Python文件，必须以.py结尾", "error")
-        else:
-            load_config(config_path)
-    else:
-        print_status(f"启动 UniLab-OS时，配置文件参数未正确传入 --config '{config_path}' 尝试本地配置...", "warning")
-        load_config(config_path)
+    load_config_from_file(config_path)
 
     # 设置BasicConfig参数
     BasicConfig.is_host_mode = not args_dict.get("without_host", False)
     BasicConfig.slave_no_host = args_dict.get("slave_no_host", False)
+    BasicConfig.upload_registry = args_dict.get("upload_registry", False)
     machine_name = os.popen("hostname").read().strip()
     machine_name = "".join([c if c.isalnum() or c == "_" else "_" for c in machine_name])
     BasicConfig.machine_name = machine_name
@@ -136,15 +146,16 @@ def main():
 
     # 注册表
     build_registry(args_dict["registry_path"])
-
+    resource_edge_info = []
     devices_and_resources = None
     if args_dict["graph"] is not None:
         import unilabos.resources.graphio as graph_res
-        graph_res.physical_setup_graph = (
-            read_node_link_json(args_dict["graph"])
-            if args_dict["graph"].endswith(".json")
-            else read_graphml(args_dict["graph"])
-        )
+        if args_dict["graph"].endswith(".json"):
+            graph, data = read_node_link_json(args_dict["graph"])
+        else:
+            graph, data = read_graphml(args_dict["graph"])
+        graph_res.physical_setup_graph = graph
+        resource_edge_info = modify_to_backend_format(data["links"])
         devices_and_resources = dict_from_graph(graph_res.physical_setup_graph)
         # args_dict["resources_config"] = initialize_resources(list(deepcopy(devices_and_resources).values()))
         args_dict["resources_config"] = list(devices_and_resources.values())
@@ -185,6 +196,7 @@ def main():
         signal.signal(signal.SIGTERM, _exit)
         mqtt_client.start()
     args_dict["resources_mesh_config"] = {}
+    args_dict["resources_edge_config"] = resource_edge_info
     # web visiualize 2D
     if args_dict["visual"] != "disable":
         enable_rviz = args_dict["visual"] == "rviz"

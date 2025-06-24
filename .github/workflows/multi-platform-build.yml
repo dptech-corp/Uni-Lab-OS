@@ -1,0 +1,132 @@
+name: Multi-Platform Conda Build
+
+on:
+  push:
+    branches: [ main, dev ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, dev ]
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: '选择构建平台 (逗号分隔): linux-64, osx-64, osx-arm64, win-64'
+        required: false
+        default: 'osx-arm64'
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - os: ubuntu-latest
+          platform: linux-64
+          env_file: unilabos-linux-64.yaml
+        - os: macos-13 # Intel
+          platform: osx-64
+          env_file: unilabos-osx-64.yaml
+        - os: macos-latest # ARM64
+          platform: osx-arm64
+          env_file: unilabos-osx-arm64.yaml
+        - os: windows-latest
+          platform: win-64
+          env_file: unilabos-win64.yaml
+
+    runs-on: ${{ matrix.os }}
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Check if platform should be built
+      id: should_build
+      run: |
+        if [[ "${{ github.event_name }}" != "workflow_dispatch" ]]; then
+          echo "should_build=true" >> $GITHUB_OUTPUT
+        elif [[ -z "${{ github.event.inputs.platforms }}" ]]; then
+          echo "should_build=true" >> $GITHUB_OUTPUT
+        elif [[ "${{ github.event.inputs.platforms }}" == *"${{ matrix.platform }}"* ]]; then
+          echo "should_build=true" >> $GITHUB_OUTPUT
+        else
+          echo "should_build=false" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Setup Miniconda
+      if: steps.should_build.outputs.should_build == 'true'
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        miniconda-version: "latest"
+        channels: conda-forge,robostack-staging,defaults
+        channel-priority: strict
+        activate-environment: build-env
+        auto-activate-base: false
+        auto-update-conda: false
+        show-channel-urls: true
+
+    - name: Install boa and build tools
+      if: steps.should_build.outputs.should_build == 'true'
+      run: |
+        conda install -c conda-forge boa conda-build
+
+    - name: Show environment info
+      if: steps.should_build.outputs.should_build == 'true'
+      run: |
+        conda info
+        conda list | grep -E "(boa|conda-build)"
+        echo "Platform: ${{ matrix.platform }}"
+        echo "OS: ${{ matrix.os }}"
+
+    - name: Build conda package
+      if: steps.should_build.outputs.should_build == 'true'
+      run: |
+        if [[ "${{ matrix.platform }}" == "osx-arm64" ]]; then
+          boa build -m ./recipes/conda_build_config.yaml -m ./recipes/macos_sdk_config.yaml ./recipes/ros-humble-unilabos-msgs
+        else
+          boa build -m ./recipes/conda_build_config.yaml ./recipes/ros-humble-unilabos-msgs
+        fi
+
+    - name: List built packages
+      if: steps.should_build.outputs.should_build == 'true'
+      run: |
+        echo "Built packages in conda-bld:"
+        find $CONDA_PREFIX/conda-bld -name "*.tar.bz2" | head -10
+        ls -la $CONDA_PREFIX/conda-bld/${{ matrix.platform }}/ || echo "${{ matrix.platform }} directory not found"
+        ls -la $CONDA_PREFIX/conda-bld/noarch/ || echo "noarch directory not found"
+        echo "CONDA_PREFIX: $CONDA_PREFIX"
+        echo "Full path would be: $CONDA_PREFIX/conda-bld/**/*.tar.bz2"
+
+    - name: Prepare artifacts for upload
+      if: steps.should_build.outputs.should_build == 'true'
+      run: |
+        mkdir -p ${{ runner.temp }}/conda-packages
+        find $CONDA_PREFIX/conda-bld -name "*.tar.bz2" -exec cp {} ${{ runner.temp }}/conda-packages/ \;
+        echo "Copied files to temp directory:"
+        ls -la ${{ runner.temp }}/conda-packages/
+
+    - name: Upload conda package artifacts
+      if: steps.should_build.outputs.should_build == 'true'
+      uses: actions/upload-artifact@v4
+      with:
+        name: conda-package-${{ matrix.platform }}
+        path: ${{ runner.temp }}/conda-packages
+        if-no-files-found: warn
+        retention-days: 30
+
+    - name: Create release assets (on tags)
+      if: steps.should_build.outputs.should_build == 'true' && startsWith(github.ref, 'refs/tags/')
+      run: |
+        mkdir -p release-assets
+        find $CONDA_PREFIX/conda-bld -name "*.tar.bz2" -exec cp {} release-assets/ \;
+
+    - name: Upload to release
+      if: steps.should_build.outputs.should_build == 'true' && startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: release-assets/*
+        draft: false
+        prerelease: false

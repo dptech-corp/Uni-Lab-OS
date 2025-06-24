@@ -48,14 +48,16 @@ solenoid_valve.mock:
         feedback: {}
         result: {}
   handles:
-    input:
-    - handler_key: fluid-input
-      label: Fluid Input
+    - handler_key: in
+      label: in
+      io_type: target
       data_type: fluid
-    output:
-    - handler_key: fluid-output
-      label: Fluid Output
+      side: NORTH
+    - handler_key: out
+      label: out
+      io_type: source
       data_type: fluid
+      side: SOUTH
   init_param_schema:
     type: object
     properties:
@@ -71,3 +73,13 @@ solenoid_valve:
   class:
     module: unilabos.devices.pump_and_valve.solenoid_valve:SolenoidValve
     type: python
+    status_types:
+      status: String
+      valve_position: String
+    action_value_mappings:
+      set_valve_position:
+        type: StrSingleInput
+        goal:
+          string: position
+        feedback: {}
+        result: {}

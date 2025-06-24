@@ -100,7 +100,7 @@ _action_mapping: Dict[Type, Dict[str, Any]] = {
 
 # 添加Protocol action类型到映射
 for py_msgtype in imsg.__all__:
-    if py_msgtype not in _action_mapping and py_msgtype.endswith("Protocol"):
+    if py_msgtype not in _action_mapping and (py_msgtype.endswith("Protocol") or py_msgtype.startswith("Protocol")):
         try:
             protocol_class = msg_converter_manager.get_class(f"unilabos.messages.{py_msgtype}")
             action_name = py_msgtype.replace("Protocol", "")
@@ -117,6 +117,7 @@ for py_msgtype in imsg.__all__:
                     "result": {k: k for k in action_type.Result().get_fields_and_field_types().keys()},
                 }
         except Exception:
+            traceback.print_exc()
             logger.debug(f"Failed to load Protocol class: {py_msgtype}")
 
 # Python到ROS消息转换器

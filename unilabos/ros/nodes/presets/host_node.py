@@ -22,6 +22,7 @@ from unilabos_msgs.srv import (
 )  # type: ignore
 from unique_identifier_msgs.msg import UUID
 
+from unilabos.config.config import BasicConfig
 from unilabos.registry.registry import lab_registry
 from unilabos.resources.graphio import initialize_resource
 from unilabos.resources.registry import add_schema
@@ -58,6 +59,7 @@ class HostNode(BaseROS2DeviceNode):
         device_id: str,
         devices_config: Dict[str, Any],
         resources_config: list,
+        resources_edge_config: list[dict],
         physical_setup_graph: Optional[Dict[str, Any]] = None,
         controllers_config: Optional[Dict[str, Any]] = None,
         bridges: Optional[List[Any]] = None,
@@ -96,6 +98,7 @@ class HostNode(BaseROS2DeviceNode):
         self.server_latest_timestamp = 0.0  #
         self.devices_config = devices_config
         self.resources_config = resources_config
+        self.resources_edge_config = resources_edge_config
         self.physical_setup_graph = physical_setup_graph
         if controllers_config is None:
             controllers_config = {}
@@ -144,13 +147,15 @@ class HostNode(BaseROS2DeviceNode):
 
         self.device_status = {}  # 用来存储设备状态
         self.device_status_timestamps = {}  # 用来存储设备状态最后更新时间
+        if BasicConfig.upload_registry:
+            from unilabos.app.mq import mqtt_client
 
-        from unilabos.app.mq import mqtt_client
-
-        for device_info in lab_registry.obtain_registry_device_info():
-            mqtt_client.publish_registry(device_info["id"], device_info)
-        for resource_info in lab_registry.obtain_registry_resource_info():
-            mqtt_client.publish_registry(resource_info["id"], resource_info)
+            for device_info in lab_registry.obtain_registry_device_info():
+                mqtt_client.publish_registry(device_info["id"], device_info)
+            for resource_info in lab_registry.obtain_registry_resource_info():
+                mqtt_client.publish_registry(resource_info["id"], resource_info)
+        else:
+            self.lab_logger().warning("本次启动注册表不报送云端，如果您需要联网调试，请使用unilab-register命令进行单独报送，或者在启动命令增加--upload_registry")
         time.sleep(1) # 等待MQTT连接稳定
         # 首次发现网络中的设备
         self._discover_devices()
@@ -191,23 +196,35 @@ class HostNode(BaseROS2DeviceNode):
         )
         resource_with_parent_name = []
         resource_ids_to_instance = {i["id"]: i for i in resources_config}
+        resource_name_to_with_parent_name = {}
         for res in resources_config:
-            if res.get("parent") and res.get("type") == "device" and res.get("class"):
-                parent_id = res.get("parent")
-                parent_res = resource_ids_to_instance[parent_id]
-                if parent_res.get("type") == "device" and parent_res.get("class"):
-                    resource_with_parent_name.append(copy.deepcopy(res))
-                    resource_with_parent_name[-1]["id"] = f"{parent_res['id']}/{res['id']}"
-                    continue
+            # if res.get("parent") and res.get("type") == "device" and res.get("class"):
+            #     parent_id = res.get("parent")
+            #     parent_res = resource_ids_to_instance[parent_id]
+            #     if parent_res.get("type") == "device" and parent_res.get("class"):
+            #         resource_with_parent_name.append(copy.deepcopy(res))
+            #         resource_name_to_with_parent_name[resource_with_parent_name[-1]["id"]] = f"{parent_res['id']}/{res['id']}"
+            #         resource_with_parent_name[-1]["id"] = f"{parent_res['id']}/{res['id']}"
+            #         continue
             resource_with_parent_name.append(copy.deepcopy(res))
+        # for edge in self.resources_edge_config:
+        #     edge["source"] = resource_name_to_with_parent_name.get(edge.get("source"), edge.get("source"))
+        #     edge["target"] = resource_name_to_with_parent_name.get(edge.get("target"), edge.get("target"))
         try:
             for bridge in self.bridges:
                 if hasattr(bridge, "resource_add"):
+                    from unilabos.app.web.client import HTTPClient
+                    client: HTTPClient = bridge
                     resource_start_time = time.time()
-                    resource_add_res = bridge.resource_add(add_schema(resource_with_parent_name), True)
+                    resource_add_res = client.resource_add(add_schema(resource_with_parent_name), False)
                     resource_end_time = time.time()
                     self.lab_logger().info(
                         f"[Host Node-Resource] 物料上传 {round(resource_end_time - resource_start_time, 5) * 1000} ms"
+                    )
+                    resource_add_res = client.resource_edge_add(self.resources_edge_config, False)
+                    resource_edge_end_time = time.time()
+                    self.lab_logger().info(
+                        f"[Host Node-Resource] 物料关系上传 {round(resource_edge_end_time - resource_end_time, 5) * 1000} ms"
                     )
         except Exception as ex:
             self.lab_logger().error("[Host Node-Resource] 添加物料出错！")
@@ -383,18 +400,24 @@ class HostNode(BaseROS2DeviceNode):
         liquid_volume: list[int],
         slot_on_deck: str,
     ):
-        init_new_res = initialize_resource(
-            {
-                "name": res_id,
-                "class": class_name,
-                "parent": parent,
-                "position": {
-                    "x": bind_locations.x,
-                    "y": bind_locations.y,
-                    "z": bind_locations.z,
-                },
-            }
-        )  # flatten的格式
+        res_creation_input = {
+            "name": res_id,
+            "class": class_name,
+            "parent": parent,
+            "position": {
+                "x": bind_locations.x,
+                "y": bind_locations.y,
+                "z": bind_locations.z,
+            },
+        }
+        if len(liquid_input_slot) and liquid_input_slot[0] == -1:  # 目前container只逐个创建
+            res_creation_input.update({
+                "data": {
+                    "liquid_type": liquid_type[0] if liquid_type else None,
+                    "liquid_volume": liquid_volume[0] if liquid_volume else None,
+                }
+            })
+        init_new_res = initialize_resource(res_creation_input)  # flatten的格式
         resources = init_new_res  # initialize_resource已经返回list[dict]
         device_ids = [device_id]
         bind_parent_id = [parent]
@@ -751,8 +774,10 @@ class HostNode(BaseROS2DeviceNode):
         self.lab_logger().info(f"[Host Node-Resource] Add request received: {len(resources)} resources")
 
         success = False
-        if len(self.bridges) > 0:
-            r = self.bridges[-1].resource_add(add_schema(resources))
+        if len(self.bridges) > 0:  # 边的提交待定
+            from unilabos.app.web.client import HTTPClient
+            client: HTTPClient = self.bridges[-1]
+            r = client.resource_add(add_schema(resources), False)
             success = bool(r)
 
         response.success = success

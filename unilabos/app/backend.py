@@ -8,6 +8,7 @@ def start_backend(
     backend: str,
     devices_config: dict = {},
     resources_config: list = [],
+    resources_edge_config: list = [],
     graph=None,
     controllers_config: dict = {},
     bridges=[],
@@ -31,7 +32,7 @@ def start_backend(
     
     backend_thread = threading.Thread(
         target=main if not without_host else slave,
-        args=(devices_config, resources_config, graph, controllers_config, bridges, visual, resources_mesh_config),
+        args=(devices_config, resources_config, resources_edge_config, graph, controllers_config, bridges, visual, resources_mesh_config),
         name="backend_thread",
         daemon=True,
     )

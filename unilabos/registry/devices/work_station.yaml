@@ -3,5 +3,623 @@ workstation:
   class:
     module: unilabos.ros.nodes.presets.protocol_node:ROS2ProtocolNode
     type: ros2
-  schema:
-    properties: {}
+    action_value_mappings:
+      AddProtocol:
+        type: Add
+        goal:
+          vessel: vessel
+          reagent: reagent
+          volume: volume
+          mass: mass
+          amount: amount
+          time: time
+          stir: stir
+          stir_speed: stir_speed
+          viscous: viscous
+          purpose: purpose
+        feedback: {}
+        result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: reagent
+              label: Reagent
+              data_type: resource
+              data_source: handle
+              data_key: reagent
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+
+      AGVTransferProtocol:
+        type: AGVTransfer
+        goal:
+          from_repo: from_repo
+          from_repo_position: from_repo_position
+          to_repo: to_repo
+          to_repo_position: to_repo_position
+        feedback: {}
+        result: {}
+
+      CentrifugeProtocol:
+        type: Centrifuge
+        goal:
+          vessel: vessel
+          speed: speed
+          time: time
+          temp: temp
+        feedback: {}
+        result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+
+      CleanProtocol:
+        type: Clean
+        goal:
+          vessel: vessel
+          solvent: solvent
+          volume: volume
+          temp: temp
+          repeats: repeats
+        feedback: {}
+        result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: solvent
+              label: Solvent
+              data_type: resource
+              data_source: handle
+              data_key: solvent
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+
+      CleanVesselProtocol:
+        type: CleanVessel
+        goal:
+          vessel: vessel
+          solvent: solvent
+          volume: volume
+          temp: temp
+          repeats: repeats
+        feedback: {}
+        result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: solvent
+              label: Solvent
+              data_type: resource
+              data_source: handle
+              data_key: solvent
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+
+      DissolveProtocol:
+        type: Dissolve
+        goal:
+          vessel: vessel
+          solvent: solvent
+          volume: volume
+          amount: amount
+          temp: temp
+          time: time
+          stir_speed: stir_speed
+        feedback: {}
+        result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: solvent
+              label: Solvent
+              data_type: resource
+              data_source: handle
+              data_key: solvent
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+
+      EvacuateAndRefillProtocol:
+        type: EvacuateAndRefill
+        goal:
+          vessel: vessel
+          gas: gas
+          repeats: repeats
+        feedback: {}
+        result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+
+      EvaporateProtocol:
+        type: Evaporate
+        goal:
+          vessel: vessel
+          pressure: pressure
+          temp: temp
+          time: time
+          stir_speed: stir_speed
+        feedback: {}
+        result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+
+      FilterProtocol:
+        type: Filter
+        goal:
+          vessel: vessel
+          filtrate_vessel: filtrate_vessel
+          stir: stir
+          stir_speed: stir_speed
+          temp: temp
+          continue_heatchill: continue_heatchill
+          volume: volume
+        feedback: {}
+        result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: filtrate_vessel
+              label: Filtrate Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+            - handler_key: filtrate_out
+              label: Filtrate Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+
+      FilterThroughProtocol:
+        type: FilterThrough
+        goal:
+          from_vessel: from_vessel
+          to_vessel: to_vessel
+          filter_through: filter_through
+          eluting_solvent: eluting_solvent
+          eluting_volume: eluting_volume
+          eluting_repeats: eluting_repeats
+          residence_time: residence_time
+        feedback: {}
+        result: {}
+        handles:
+          input:
+            - handler_key: from_vessel
+              label: From Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: to_vessel
+              label: To Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+            - handler_key: solvent
+              label: Eluting Solvent
+              data_type: resource
+              data_source: handle
+              data_key: solvent
+          output:
+            - handler_key: from_vessel_out
+              label: From Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: to_vessel_out
+              label: To Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+
+      HeatChillProtocol:
+        type: HeatChill
+        goal:
+          vessel: vessel
+          temp: temp
+          time: time
+          stir: stir
+          stir_speed: stir_speed
+          purpose: purpose
+        feedback: {}
+        result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+
+      HeatChillStartProtocol:
+        type: HeatChillStart
+        goal:
+          vessel: vessel
+          temp: temp
+          purpose: purpose
+        feedback: {}
+        result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+
+      HeatChillStopProtocol:
+        type: HeatChillStop
+        goal:
+          vessel: vessel
+        feedback: {}
+        result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+
+      PumpTransferProtocol:
+        type: PumpTransfer
+        goal:
+          from_vessel: from_vessel
+          to_vessel: to_vessel
+          volume: volume
+          amount: amount
+          time: time
+          viscous: viscous
+          rinsing_solvent: rinsing_solvent
+          rinsing_volume: rinsing_volume
+          rinsing_repeats: rinsing_repeats
+          solid: solid
+        feedback: {}
+        result: {}
+        handles:
+          input:
+            - handler_key: from_vessel
+              label: From Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: to_vessel
+              label: To Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+            - handler_key: solvent
+              label: Rinsing Solvent
+              data_type: resource
+              data_source: handle
+              data_key: solvent
+          output:
+            - handler_key: from_vessel_out
+              label: From Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: to_vessel_out
+              label: To Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+
+      RunColumnProtocol:
+        type: RunColumn
+        goal:
+          from_vessel: from_vessel
+          to_vessel: to_vessel
+          column: column
+        feedback: {}
+        result: {}
+        handles:
+          input:
+            - handler_key: from_vessel
+              label: From Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: to_vessel
+              label: To Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+          output:
+            - handler_key: from_vessel_out
+              label: From Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: to_vessel_out
+              label: To Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+
+      SeparateProtocol:
+        type: Separate
+        goal:
+          purpose: purpose
+          product_phase: product_phase
+          from_vessel: from_vessel
+          separation_vessel: separation_vessel
+          to_vessel: to_vessel
+          waste_phase_to_vessel: waste_phase_to_vessel
+          solvent: solvent
+          solvent_volume: solvent_volume
+          through: through
+          repeats: repeats
+          stir_time: stir_time
+          stir_speed: stir_speed
+          settling_time: settling_time
+        feedback: {}
+        result: {}
+        handles:
+          input:
+            - handler_key: from_vessel
+              label: From Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: to_vessel
+              label: To Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+            - handler_key: solvent
+              label: Solvent
+              data_type: resource
+              data_source: handle
+              data_key: solvent
+          output:
+            - handler_key: from_vessel_out
+              label: From Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: to_vessel_out
+              label: To Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+
+      StartStirProtocol:
+        type: StartStir
+        goal:
+          vessel: vessel
+          stir_speed: stir_speed
+          purpose: purpose
+        feedback: {}
+        result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+
+      StirProtocol:
+        type: Stir
+        goal:
+          stir_time: stir_time
+          stir_speed: stir_speed
+          settling_time: settling_time
+        feedback: {}
+        result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+
+      StopStirProtocol:
+        type: StopStir
+        goal:
+          vessel: vessel
+        feedback: {}
+        result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+          output:
+            - handler_key: vessel_out
+              label: Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+
+      TransferProtocol:
+        type: Transfer
+        goal:
+          from_vessel: from_vessel
+          to_vessel: to_vessel
+          volume: volume
+          amount: amount
+          time: time
+          viscous: viscous
+          rinsing_solvent: rinsing_solvent
+          rinsing_volume: rinsing_volume
+          rinsing_repeats: rinsing_repeats
+          solid: solid
+        feedback: {}
+        result: {}
+        handles:
+          input:
+            - handler_key: from_vessel
+              label: From Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: to_vessel
+              label: To Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+            - handler_key: solvent
+              label: Rinsing Solvent
+              data_type: resource
+              data_source: handle
+              data_key: solvent
+          output:
+            - handler_key: from_vessel_out
+              label: From Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: to_vessel_out
+              label: To Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+
+      WashSolidProtocol:
+        type: WashSolid
+        goal:
+          vessel: vessel
+          solvent: solvent
+          volume: volume
+          filtrate_vessel: filtrate_vessel
+          temp: temp
+          stir: stir
+          stir_speed: stir_speed
+          time: time
+          repeats: repeats
+        feedback: {}
+        result: {}
+        handles:
+          input:
+            - handler_key: vessel
+              label: Vessel
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: solvent
+              label: Solvent
+              data_type: resource
+              data_source: handle
+              data_key: solvent
+            - handler_key: filtrate_vessel
+              label: Filtrate Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel
+          output:
+            - handler_key: vessel_out
+              label: Vessel Out
+              data_type: resource
+              data_source: handle
+              data_key: vessel
+            - handler_key: filtrate_vessel_out
+              label: Filtrate Vessel
+              data_type: resource
+              data_source: executor
+              data_key: vessel

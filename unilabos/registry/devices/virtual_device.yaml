@@ -1,0 +1,961 @@
+# 虚拟设备清单及连接特性
+
+# 1. virtual_pump - 虚拟泵
+# 描述：具有多通道阀门特性的泵，根据valve_position可连接多个容器
+# 连接特性：1个输入口 + 1个输出口
+# 数据类型：fluid（流体连接）
+
+# 2. virtual_stirrer - 虚拟搅拌器  
+# 描述：机械连接设备，提供搅拌功能
+# 连接特性：1个连接点
+# 数据类型：mechanical（机械连接）
+
+# 3a. virtual_valve - 虚拟八通阀门
+# 描述：8通阀门，可切换流向
+# 连接特性：1个口连接注射泵 + 多个输出口
+# 数据类型：fluid（流体连接）
+
+# 3b. virtual_solenoid_valve (电磁阀门)
+# 描述：简单的开关型电磁阀，只有开启和关闭两个状态
+# 连接特性：1个输入口 + 1个输出口，控制通断
+# 数据类型：fluid（流体连接）
+
+# 4. virtual_centrifuge - 虚拟离心机
+# 描述：单个样品处理设备，原地处理样品
+# 连接特性：1个输入口 + 1个输出口
+# 数据类型：resource（资源/样品连接）
+
+# 5. virtual_filter - 虚拟过滤器
+# 描述：分离设备，将样品分离为滤液和滤渣
+# 连接特性：1个输入口 + 2个输出口（滤液和滤渣）
+# 数据类型：resource（资源/样品连接）
+
+# 6. virtual_heatchill - 虚拟加热/冷却器
+# 描述：温控设备，容器直接放置在设备上进行温度控制
+# 连接特性：1个连接点
+# 数据类型：mechanical（机械/物理接触连接）
+
+# 7. virtual_transfer_pump - 虚拟转移泵（注射器式）
+# 描述：注射器式转移泵，通过同一个口吸入和排出液体
+# 连接特性：1个连接点
+# 数据类型：fluid（流体连接）
+
+# 8. virtual_column - 虚拟色谱柱
+# 描述：分离纯化设备，用于样品纯化
+# 连接特性：1个输入口 + 1个输出口
+# 数据类型：resource（资源/样品连接）
+
+# 9. virtual_rotavap - 虚拟旋转蒸发仪
+# 描述：旋转蒸发仪用于溶剂蒸发和浓缩，具有加热、旋转和真空功能
+# 连接特性：1个输入口（样品），1个输出口（浓缩物），1个冷凝器出口（回收溶剂）
+# 数据类型：resource（资源/样品连接）
+
+# 10. virtual_separator - 虚拟分液器
+# 描述：分液器用于两相液体的分离，可进行萃取和洗涤操作
+# 连接特性：1个输入口（混合液），2个输出口（上相和下相）
+# 数据类型：fluid（流体连接）
+
+# 11. virtual_vacuum_pump - 虚拟真空泵
+# 描述：真空泵设备，用于抽真空操作和真空/充气循环
+# 连接特性：1个输出口（连接需要抽真空的系统）
+# 数据类型：fluid（流体连接）
+
+# 12. virtual_gas_source - 虚拟气源
+# 描述：气源设备，用于充气操作和真空/充气循环
+# 连接特性：1个输出口（向系统提供加压气体）
+# 数据类型：fluid（流体连接）
+
+virtual_pump:
+  description: Virtual Pump for PumpTransferProtocol Testing
+  class:
+    module: unilabos.devices.virtual.virtual_pump:VirtualPump
+    type: python
+    status_types:
+      status: String
+      position: Float64
+      valve_position: Int32
+      max_volume: Float64
+      current_volume: Float64
+    action_value_mappings:
+      transfer:
+        type: PumpTransfer
+        goal:
+          from_vessel: from_vessel
+          to_vessel: to_vessel
+          volume: volume
+          amount: amount
+          time: time
+          viscous: viscous
+          rinsing_solvent: rinsing_solvent
+          rinsing_volume: rinsing_volume
+          rinsing_repeats: rinsing_repeats
+          solid: solid
+        feedback:
+          status: status
+        result:
+          success: success
+      set_valve_position:
+        type: FloatSingleInput
+        goal:
+          float_in: valve_position
+        feedback:
+          status: status
+        result:
+          success: success
+  handles:
+  - handler_key: pumpio
+    label: pumpio
+    data_type: fluid
+    io_type: source
+    data_source: handle
+    data_key: fluid_in
+    description: "泵的输出口"
+  schema:
+    type: object
+    properties:
+      port:
+        type: string
+        default: "VIRTUAL"
+      max_volume:
+        type: number
+        default: 25.0
+    additionalProperties: false
+
+virtual_stirrer:
+  description: Virtual Stirrer for StirProtocol Testing
+  icon: Stirrer.webp
+  class:
+    module: unilabos.devices.virtual.virtual_stirrer:VirtualStirrer
+    type: python
+    status_types:
+      status: String
+      operation_mode: String
+      current_vessel: String
+      current_speed: Float64
+      is_stirring: Bool
+      remaining_time: Float64
+    action_value_mappings:
+      stir:
+        type: Stir
+        goal:
+          stir_time: stir_time
+          stir_speed: stir_speed
+          settling_time: settling_time
+        feedback:
+          status: status
+        result:
+          success: success
+      start_stir:
+        type: StartStir
+        goal:
+          vessel: vessel
+          stir_speed: stir_speed
+          purpose: purpose
+        feedback:
+          status: status
+        result:
+          success: success
+      stop_stir:
+        type: StopStir
+        goal:
+          vessel: vessel
+        feedback:
+          status: status
+        result:
+          success: success
+  handles:
+  - handler_key: stirrer
+    label: stirrer
+    data_type: mechanical
+    side: NORTH
+    io_type: source
+    data_source: handle
+    data_key: vessel
+    description: "搅拌器的机械连接口"
+  schema:
+    type: object
+    properties:
+      port:
+        type: string
+        default: "VIRTUAL"
+      max_speed:
+        type: number
+        default: 1500.0
+      min_speed:
+        type: number
+        default: 50.0
+    additionalProperties: false
+
+virtual_multiway_valve:
+  description: Virtual 8-Way Valve for flow direction control
+  icon: EightPipeline.webp
+  class:
+    module: unilabos.devices.virtual.virtual_multiway_valve:VirtualMultiwayValve
+    type: python
+    status_types:
+      status: String
+      valve_state: String
+      current_position: Int32
+      target_position: Int32
+      max_positions: Int32
+    action_value_mappings:
+      set_position:
+        type: SendCmd
+        goal:
+          command: command
+        feedback: {}
+        result:
+          success: success
+      set_valve_position:
+        type: SendCmd
+        goal:
+          command: command
+        feedback: {}
+        result:
+          success: success
+  handles:
+  - handler_key: transferpump
+    label: transferpump
+    data_type: fluid
+    side: NORTH
+    io_type: target
+    data_source: handle
+    data_key: fluid_in
+    description: "八通阀门进液口"
+  - handler_key: 1
+    label: 1
+    data_type: fluid
+    side: NORTH
+    io_type: source
+    data_source: executor
+    data_key: fluid_port_1
+    description: "八通阀门端口1"
+  - handler_key: 2
+    label: 2
+    data_type: fluid
+    side: EAST
+    io_type: source
+    data_source: executor
+    data_key: fluid_port_2
+    description: "八通阀门端口2"
+  - handler_key: 3
+    label: 3
+    data_type: fluid
+    side: EAST
+    io_type: source
+    data_source: executor
+    data_key: fluid_port_3
+    description: "八通阀门端口3"
+  - handler_key: 4
+    label: 4
+    data_type: fluid
+    side: SOUTH
+    io_type: source
+    data_source: executor
+    data_key: fluid_port_4
+    description: "八通阀门端口4"
+  - handler_key: 5
+    label: 5
+    data_type: fluid
+    side: SOUTH
+    io_type: source
+    data_source: executor
+    data_key: fluid_port_5
+    description: "八通阀门端口5"
+  - handler_key: 6
+    label: 6
+    data_type: fluid
+    side: WEST
+    io_type: source
+    data_source: executor
+    data_key: fluid_port_6
+    description: "八通阀门端口6"
+  - handler_key: 7
+    label: 7
+    data_type: fluid
+    side: WEST
+    io_type: source
+    data_source: executor
+    data_key: fluid_port_7
+    description: "八通阀门端口7"
+  - handler_key: 8
+    label: 8
+    data_type: fluid
+    side: NORTH
+    io_type: source
+    data_source: executor
+    data_key: fluid_port_8
+    description: "八通阀门端口8"
+  schema:
+    type: object
+    properties:
+      port:
+        type: string
+        default: "VIRTUAL"
+      positions:
+        type: integer
+        default: 8
+    additionalProperties: false
+
+virtual_solenoid_valve:
+  description: Virtual Solenoid Valve for simple on/off flow control
+  class:
+    module: unilabos.devices.virtual.virtual_solenoid_valve:VirtualSolenoidValve
+    type: python
+    status_types:
+      status: String
+      valve_state: String
+      is_open: Bool
+    action_value_mappings:
+      set_valve_position:
+        type: SendCmd
+        goal:
+          command: command
+        feedback: {}
+        result:
+          success: success
+      open:
+        type: SendCmd
+        goal:
+          command: "OPEN"
+        feedback: {}
+        result:
+          success: success
+      close:
+        type: SendCmd
+        goal:
+          command: "CLOSED"
+        feedback: {}
+        result:
+          success: success
+      set_state:
+        type: SendCmd
+        goal:
+          command: command
+        feedback: {}
+        result:
+          success: success
+  handles:
+  - handler_key: in
+    label: in
+    data_type: fluid
+    side: NORTH
+    io_type: target
+    data_source: handle
+    data_key: fluid_port_in
+    description: "电磁阀的进液口"
+  - handler_key: out
+    label: out
+    data_type: fluid
+    side: SOUTH
+    io_type: source
+    data_source: handle
+    data_key: fluid_port_out
+    description: "电磁阀的出液口"
+  schema:
+    type: object
+    properties:
+      port:
+        type: string
+        default: "VIRTUAL"
+      voltage:
+        type: number
+        default: 12.0
+      response_time:
+        type: number
+        default: 0.1
+    additionalProperties: false
+
+virtual_centrifuge:
+  description: Virtual Centrifuge for CentrifugeProtocol Testing
+  class:
+    module: unilabos.devices.virtual.virtual_centrifuge:VirtualCentrifuge
+    type: python
+    status_types:
+      status: String
+      current_speed: Float64
+      target_speed: Float64
+      current_temp: Float64
+      target_temp: Float64
+      max_speed: Float64
+      max_temp: Float64
+      min_temp: Float64
+      centrifuge_state: String
+      time_remaining: Float64
+      progress: Float64
+      message: String
+    action_value_mappings:
+      centrifuge:
+        type: Centrifuge
+        goal:
+          vessel: vessel
+          speed: speed
+          time: time
+          temp: temp
+        feedback:
+          progress: progress
+          current_speed: current_speed
+          current_temp: current_temp
+          current_status: status
+        result:
+          success: success
+          message: message
+  handles:
+  - handler_key: centrifuge
+    label: centrifuge
+    data_type: transport
+    side: NORTH
+    io_type: target
+    data_source: handle
+    data_key: vessel
+    description: "需要离心的样品容器"
+  schema:
+    type: object
+    properties:
+      port:
+        type: string
+        default: "VIRTUAL"
+      max_speed:
+        type: number
+        default: 15000.0
+      max_temp:
+        type: number
+        default: 40.0
+      min_temp:
+        type: number
+        default: 4.0
+    additionalProperties: false
+
+virtual_filter:
+  description: Virtual Filter for FilterProtocol Testing
+  class:
+    module: unilabos.devices.virtual.virtual_filter:VirtualFilter
+    type: python
+    status_types:
+      status: String
+      progress: Float64
+      current_temp: Float64
+      filtered_volume: Float64
+      current_status: String
+      message: String
+      max_temp: Float64
+      max_stir_speed: Float64
+      max_volume: Float64
+    action_value_mappings:
+      filter:
+        type: Filter
+        goal:
+          vessel: vessel
+          filtrate_vessel: filtrate_vessel
+          stir: stir
+          stir_speed: stir_speed
+          temp: temp
+          continue_heatchill: continue_heatchill
+          volume: volume
+        feedback:
+          progress: progress
+          current_temp: current_temp
+          filtered_volume: filtered_volume
+          current_status: current_status
+        result:
+          success: success
+          message: message
+          return_info: message
+  handles:
+  - handler_key: filter_in
+    label: filter_in
+    data_type: transport
+    side: NORTH
+    io_type: target
+    data_source: handle
+    data_key: vessel_in
+    description: "需要过滤的样品容器"
+  - handler_key: filtrate_out
+    label: filtrate_out
+    data_type: transport
+    side: SOUTH
+    io_type: source
+    data_source: handle
+    data_key: filtrate_out
+    description: "滤液出口"
+  - handler_key: retentate_out
+    label: retentate_out
+    data_type: transport
+    side: EAST
+    io_type: source
+    data_source: handle
+    data_key: retentate_out
+    description: "滤渣/固体出口"
+  schema:
+    type: object
+    properties:
+      port:
+        type: string
+        default: "VIRTUAL"
+      max_temp:
+        type: number
+        default: 100.0
+      max_stir_speed:
+        type: number
+        default: 1000.0
+      max_volume:
+        type: number
+        default: 500.0
+    additionalProperties: false
+
+virtual_heatchill:
+  description: Virtual HeatChill for HeatChillProtocol Testing
+  icon: Heater.webp
+  class:
+    module: unilabos.devices.virtual.virtual_heatchill:VirtualHeatChill
+    type: python
+    status_types:
+      status: String
+      operation_mode: String
+      is_stirring: Bool
+      stir_speed: Float64
+    action_value_mappings:
+      heat_chill:
+        type: HeatChill
+        goal:
+          vessel: vessel
+          temp: temp
+          time: time
+          stir: stir
+          stir_speed: stir_speed
+          purpose: purpose
+        feedback:
+          status: status
+        result:
+          success: success
+      heat_chill_start:
+        type: HeatChillStart
+        goal:
+          vessel: vessel
+          temp: temp
+          purpose: purpose
+        feedback:
+          status: status
+        result:
+          success: success
+      heat_chill_stop:
+        type: HeatChillStop
+        goal:
+          vessel: vessel
+        feedback:
+          status: status
+        result:
+          success: success
+  handles:
+  - handler_key: heatchill
+    label: heatchill
+    data_type: mechanical
+    side: NORTH
+    io_type: source
+    data_source: handle
+    data_key: vessel
+    description: "加热/冷却器的物理连接口"
+  schema:
+    type: object
+    properties:
+      port:
+        type: string
+        default: "VIRTUAL"
+      max_temp:
+        type: number
+        default: 200.0
+      min_temp:
+        type: number
+        default: -80
+      max_stir_speed:
+        type: number
+        default: 1000.0
+    additionalProperties: false
+
+virtual_transfer_pump:
+  description: Virtual Transfer Pump for TransferProtocol Testing (Syringe-style)
+  icon: Pump.webp
+  class:
+    module: unilabos.devices.virtual.virtual_transferpump:VirtualTransferPump
+    type: python
+    status_types:
+      status: String
+      current_volume: Float64
+      max_volume: Float64
+      transfer_rate: Float64
+      position: Float64
+    action_value_mappings:
+      transfer:
+        type: Transfer
+        goal:
+          from_vessel: from_vessel
+          to_vessel: to_vessel
+          volume: volume
+          amount: amount
+          time: time
+          viscous: viscous
+          rinsing_solvent: rinsing_solvent
+          rinsing_volume: rinsing_volume
+          rinsing_repeats: rinsing_repeats
+          solid: solid
+        feedback:
+          progress: progress
+          transferred_volume: transferred_volume
+          current_status: current_status
+        result:
+          success: success
+          message: message
+      set_position:
+        type: SetPumpPosition
+        goal:
+          position: position
+          max_velocity: max_velocity
+        feedback:
+          status: status
+          current_position: current_position
+          progress: progress
+        result:
+          success: success
+          message: message
+  handles:
+  - handler_key: transferpump
+    label: transferpump
+    data_type: fluid
+    side: SOUTH
+    io_type: source
+    data_source: handle
+    data_key: fluid_port
+    description: "注射器式转移泵的连接口"
+  schema:
+    type: object
+    properties:
+      port:
+        type: string
+        default: "VIRTUAL"
+        description: "通信端口"
+      max_volume:
+        type: number
+        default: 50.0
+        description: "最大注射器容量 (mL)"
+      transfer_rate:
+        type: number
+        default: 5.0
+        description: "默认转移速率 (mL/s)"
+    additionalProperties: false
+
+virtual_column:
+  description: Virtual Column Chromatography Device for RunColumn Protocol Testing
+  class:
+    module: unilabos.devices.virtual.virtual_column:VirtualColumn
+    type: python
+    status_types:
+      status: String
+      column_state: String
+      current_flow_rate: Float64
+      max_flow_rate: Float64
+      column_length: Float64
+      column_diameter: Float64
+      processed_volume: Float64
+      progress: Float64
+      current_status: String
+    action_value_mappings:
+      run_column:
+        type: RunColumn
+        goal:
+          from_vessel: from_vessel
+          to_vessel: to_vessel
+          column: column
+        feedback:
+          progress: progress
+          processed_volume: processed_volume
+          current_status: current_status
+        result:
+          success: success
+          message: current_status
+          return_info: current_status
+  handles:
+  - handler_key: columnin
+    label: columnin
+    data_type: transport
+    side: WEST
+    io_type: target
+    data_source: handle
+    data_key: from_vessel
+    description: "样品输入口"
+  - handler_key: columnout
+    label: columnout
+    data_type: transport
+    side: EAST
+    io_type: source
+    data_source: handle
+    data_key: to_vessel
+    description: "产物输出口"
+  schema:
+    type: object
+    properties:
+      port:
+        type: string
+        default: "VIRTUAL"
+      max_flow_rate:
+        type: number
+        default: 10.0
+      column_length:
+        type: number
+        default: 25.0
+      column_diameter:
+        type: number
+        default: 2.0
+    additionalProperties: false
+
+virtual_rotavap:
+  description: Virtual Rotary Evaporator for EvaporateProtocol Testing
+  icon: Rotaryevaporator.webp
+  class:
+    module: unilabos.devices.virtual.virtual_rotavap:VirtualRotavap
+    type: python
+    status_types:
+      status: String
+      rotavap_state: String
+      current_temp: Float64
+      rotation_speed: Float64
+      vacuum_pressure: Float64
+      evaporated_volume: Float64
+      progress: Float64
+      remaining_time: Float64
+      message: String
+      max_temp: Float64
+      max_rotation_speed: Float64
+    action_value_mappings:
+      evaporate:
+        type: Evaporate
+        goal:
+          vessel: vessel
+          pressure: pressure
+          temp: temp
+          time: time
+          stir_speed: stir_speed
+        feedback:
+          progress: progress
+          current_temp: current_temp
+          evaporated_volume: evaporated_volume
+          status: status
+        result:
+          success: success
+          message: message
+  handles:
+  - handler_key: sample_in
+    label: sample_in
+    data_type: fluid
+    side: NORTH
+    io_type: target
+    data_source: handle
+    data_key: vessel_in
+    description: "样品连接口"
+  - handler_key: product_out
+    label: product_out
+    data_type: fluid
+    side: SOUTH
+    io_type: source
+    data_source: handle
+    data_key: product_out
+    description: "浓缩产物出口"
+  - handler_key: solvent_out
+    label: solvent_out
+    data_type: fluid
+    side: EAST
+    io_type: source
+    data_source: handle
+    data_key: solvent_out
+    description: "冷凝溶剂出口"
+  schema:
+    type: object
+    properties:
+      port:
+        type: string
+        default: "VIRTUAL"
+      max_temp:
+        type: number
+        default: 180.0
+      max_rotation_speed:
+        type: number
+        default: 280.0
+    additionalProperties: false
+
+virtual_separator:
+  description: Virtual Separator for SeparateProtocol Testing
+  icon: Separator.webp
+  class:
+    module: unilabos.devices.virtual.virtual_separator:VirtualSeparator
+    type: python
+    status_types:
+      status: String
+      separator_state: String
+      volume: Float64
+      has_phases: Bool
+      phase_separation: Bool
+      stir_speed: Float64
+      settling_time: Float64
+      progress: Float64
+      message: String
+    action_value_mappings:
+      separate:
+        type: Separate
+        goal:
+          purpose: purpose
+          product_phase: product_phase
+          from_vessel: from_vessel
+          separation_vessel: separation_vessel
+          to_vessel: to_vessel
+          waste_phase_to_vessel: waste_phase_to_vessel
+          solvent: solvent
+          solvent_volume: solvent_volume
+          through: through
+          repeats: repeats
+          stir_time: stir_time
+          stir_speed: stir_speed
+          settling_time: settling_time
+        feedback:
+          progress: progress
+          current_status: status
+        result:
+          success: success
+          message: message
+  handles:
+  - handler_key: separator_in
+    label: separator_in
+    data_type: fluid
+    side: NORTH
+    io_type: target
+    data_source: handle
+    data_key: from_vessel
+    description: "需要分离的混合液体输入口"
+  - handler_key: bottom_phase_out
+    label: bottom_phase_out
+    data_type: fluid
+    side: SOUTH
+    io_type: source
+    data_source: executor
+    data_key: bottom_outlet
+    description: "下相（重相）液体输出口"
+  - handler_key: top_phase_out
+    label: top_phase_out
+    data_type: fluid
+    side: EAST
+    io_type: source
+    data_source: executor
+    data_key: top_outlet
+    description: "上相（轻相）液体输出口"
+  - handler_key: bind
+    label: bind
+    io_type: target
+    data_type: mechanical
+    side: WEST
+    data_source: handle
+    data_key: mechanical_port
+    description: "用于连接搅拌器等机械设备的接口"
+  schema:
+    type: object
+    properties:
+      port:
+        type: string
+        default: "VIRTUAL"
+      volume:
+        type: number
+        default: 250.0
+      has_phases:
+        type: boolean
+        default: true
+    additionalProperties: false
+
+virtual_vacuum_pump:
+  description: Virtual vacuum pump
+  icon: Vacuum.webp
+  class:
+    module: unilabos.devices.virtual.virtual_vacuum_pump:VirtualVacuumPump
+    type: python
+    status_types:
+      status: String
+    action_value_mappings:
+      open:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result: {}
+      close:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result: {}
+      set_status:
+        type: StrSingleInput
+        goal:
+          string: string
+        feedback: {}
+        result: {}
+  handles:
+  - handler_key: vacuumpump
+    label: vacuumpump
+    data_type: fluid
+    side: SOUTH
+    io_type: source
+    data_source: handle
+    data_key: fluid_in
+    description: "真空泵进气口"
+  schema:
+    type: object
+    properties:
+      port:
+        type: string
+        default: "VIRTUAL"
+        description: "通信端口"
+    additionalProperties: false
+
+virtual_gas_source:
+  description: Virtual gas source
+  class:
+    module: unilabos.devices.virtual.virtual_gas_source:VirtualGasSource
+    type: python
+    status_types:
+      status: String
+    action_value_mappings:
+      open:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result: {}
+      close:
+        type: EmptyIn
+        goal: {}
+        feedback: {}
+        result: {}
+      set_status:
+        type: StrSingleInput
+        goal:
+          string: string
+        feedback: {}
+        result: {}
+  handles:
+  - handler_key: gassource
+    label: gassource
+    data_type: fluid
+    side: SOUTH
+    io_type: source
+    data_source: executor
+    data_key: fluid_out
+    description: "气源出气口"
+  schema:
+    type: object
+    properties:
+      port:
+        type: string
+        default: "VIRTUAL"
+        description: "通信端口"
+      gas_type:
+        type: string
+        default: "nitrogen"
+        description: "气体类型"
+      max_pressure:
+        type: number
+        default: 5.0
+        description: "最大输出压力 (bar)"
+    additionalProperties: false

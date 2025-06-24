@@ -16,7 +16,6 @@ from jinja2 import Environment, FileSystemLoader
 
 from unilabos.config.config import BasicConfig
 from unilabos.registry.registry import lab_registry
-from unilabos.app.mq import mqtt_client
 from unilabos.ros.msgs.message_converter import msg_converter_manager
 from unilabos.utils.log import error
 from unilabos.utils.type_check import TypeEncoder

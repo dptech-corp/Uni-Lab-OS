@@ -30,7 +30,27 @@ class HTTPClient:
             self.auth = MQConfig.lab_id
         info(f"HTTPClient 初始化完成: remote_addr={self.remote_addr}")
 
-    def resource_add(self, resources: List[Dict[str, Any]], database_process_later:bool) -> requests.Response:
+    def resource_edge_add(self, resources: List[Dict[str, Any]], database_process_later: bool) -> requests.Response:
+        """
+        添加资源
+
+        Args:
+            resources: 要添加的资源列表
+            database_process_later: 后台处理资源
+        Returns:
+            Response: API响应对象
+        """
+        response = requests.post(
+            f"{self.remote_addr}/lab/resource/edge/batch_create/?database_process_later={1 if database_process_later else 0}",
+            json=resources,
+            headers={"Authorization": f"lab {self.auth}"},
+            timeout=100,
+        )
+        if response.status_code != 200 and response.status_code != 201:
+            logger.error(f"添加物料关系失败: {response.status_code}, {response.text}")
+        return response
+
+    def resource_add(self, resources: List[Dict[str, Any]], database_process_later: bool) -> requests.Response:
         """
         添加资源
 
@@ -44,8 +64,10 @@ class HTTPClient:
             f"{self.remote_addr}/lab/resource/?database_process_later={1 if database_process_later else 0}",
             json=resources,
             headers={"Authorization": f"lab {self.auth}"},
-            timeout=5,
+            timeout=100,
         )
+        if response.status_code != 200:
+            logger.error(f"添加物料失败: {response.text}")
         return response
 
     def resource_get(self, id: str, with_children: bool = False) -> Dict[str, Any]:
@@ -63,7 +85,7 @@ class HTTPClient:
             f"{self.remote_addr}/lab/resource/?edge_format=1",
             params={"id": id, "with_children": with_children},
             headers={"Authorization": f"lab {self.auth}"},
-            timeout=5,
+            timeout=20,
         )
         return response.json()
 
@@ -81,7 +103,7 @@ class HTTPClient:
             f"{self.remote_addr}/lab/resource/batch_delete/",
             params={"id": id},
             headers={"Authorization": f"lab {self.auth}"},
-            timeout=5,
+            timeout=20,
         )
         return response
 
@@ -99,7 +121,7 @@ class HTTPClient:
             f"{self.remote_addr}/lab/resource/batch_update/?edge_format=1",
             json=resources,
             headers={"Authorization": f"lab {self.auth}"},
-            timeout=5,
+            timeout=100,
         )
         return response
 

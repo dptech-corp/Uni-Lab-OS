@@ -234,3 +234,7 @@ CATKIN_IGNORE
 
 *.graphml
 unilabos/device_mesh/view_robot.rviz
+
+
+# Certs
+**/.certs
