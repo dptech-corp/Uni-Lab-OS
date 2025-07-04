@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 project(unilabos_msgs)
 
 # Default to C99
@@ -28,7 +28,11 @@ set(action_files
   "action/HeatChill.action"
   "action/HeatChillStart.action"
   "action/HeatChillStop.action"
-
+  "action/AdjustPH.action"
+  "action/ResetHandling.action"
+  "action/Dry.action"
+  "action/Hydrogenate.action"
+  "action/Recrystallize.action"
   "action/CleanVessel.action"
   "action/Dissolve.action"
   "action/FilterThrough.action"
@@ -39,7 +43,6 @@ set(action_files
   "action/Add.action"
   "action/Centrifuge.action"
   "action/Crystallize.action"
-  "action/Dry.action"
   "action/Purge.action"
   "action/StartPurge.action"
   "action/StartStir.action"

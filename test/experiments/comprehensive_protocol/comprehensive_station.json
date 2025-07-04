@@ -23,8 +23,10 @@
                 "waste_bottle_2",
                 "solenoid_valve_1",
                 "solenoid_valve_2",
+                "solenoid_valve_3",
                 "vacuum_pump_1",
                 "gas_source_1",
+                "h2_gas_source",
                 "filter_1",
                 "column_1",
                 "separator_1",
@@ -60,7 +62,12 @@
                     "HeatChillStartProtocol",
                     "HeatChillStopProtocol",
                     "EvacuateAndRefillProtocol",
-                    "PumpTransferProtocol"
+                    "PumpTransferProtocol",
+                    "AdjustPHProtocol",
+                    "ResetHandlingProtocol",
+                    "DryProtocol",
+                    "HydrogenateProtocol",
+                    "RecrystallizeProtocol"
                 ]
             },
             "data": {}
@@ -462,6 +469,28 @@
             }
         },
         {
+            "id": "solenoid_valve_3",
+            "name": "氢气电磁阀",
+            "children": [],
+            "parent": "OrganicSynthesisStation",
+            "type": "device",
+            "class": "virtual_solenoid_valve",
+            "position": {
+                "x": 450,
+                "y": 400,
+                "z": 0
+            },
+            "config": {
+                "voltage": 12.0,
+                "response_time": 0.1,
+                "gas_compatible": true
+            },
+            "data": {
+                "valve_state": "Closed",
+                "is_open": false
+            }
+        },
+        {
             "id": "vacuum_pump_1",
             "name": "真空泵",
             "children": [],
@@ -498,6 +527,29 @@
             "data": {
                 "gas_type": "nitrogen",
                 "max_pressure": 5.0
+            }
+        },
+        {
+            "id": "h2_gas_source",
+            "name": "氢气气源",
+            "children": [],
+            "parent": "OrganicSynthesisStation",
+            "type": "device",
+            "class": "virtual_gas_source",
+            "position": {
+                "x": 500,
+                "y": 350,
+                "z": 0
+            },
+            "config": {
+                "max_pressure": 10.0,
+                "gas_type": "hydrogen"
+            },
+            "data": {
+                "gas_type": "hydrogen",
+                "max_pressure": 10.0,
+                "current_pressure": 0.0,
+                "status": "OFF"
             }
         },
         {
@@ -874,14 +926,14 @@
             }
         },
         {
-        "id": "link_filter_filtrate_to_collection1",
-        "source": "filter_1",
-        "target": "collection_bottle_1",
-        "type": "transport",
-        "port": {
-            "filter_1": "filtrateout",
-            "collection_bottle_1": "top"
-        }
+            "id": "link_filter_filtrate_to_collection1",
+            "source": "filter_1",
+            "target": "collection_bottle_1",
+            "type": "transport",
+            "port": {
+                "filter_1": "filtrateout",
+                "collection_bottle_1": "top"
+            }
         },
         {
             "id": "link_filter_retentate_to_waste1",
@@ -891,6 +943,26 @@
             "port": {
                 "filter_1": "retentateout",
                 "waste_bottle_1": "top"
+            }
+        },
+        {
+            "id": "link_h2_gas_to_valve3",
+            "source": "h2_gas_source",
+            "target": "solenoid_valve_3",
+            "type": "fluid",
+            "port": {
+                "h2_gas_source": "gassource",
+                "solenoid_valve_3": "in"
+            }
+        },
+        {
+            "id": "link_valve3_to_reactor",
+            "source": "solenoid_valve_3",
+            "target": "main_reactor",
+            "type": "fluid",
+            "port": {
+                "solenoid_valve_3": "out",
+                "main_reactor": "top"
             }
         }
     ]

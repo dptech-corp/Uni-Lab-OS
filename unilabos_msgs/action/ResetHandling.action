@@ -1,0 +1,10 @@
+# Request
+string solvent
+---
+# Result
+bool success
+string message
+---
+# Feedback
+string status
+float64 progress

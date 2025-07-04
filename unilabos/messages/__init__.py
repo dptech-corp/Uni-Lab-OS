@@ -178,6 +178,31 @@ class WashSolidProtocol(BaseModel):
     time: float = 0.0
     repeats: int = 1
 
+class AdjustPHProtocol(BaseModel):
+    vessel: str = Field(..., description="目标容器")
+    ph_value: float = Field(..., description="目标pH值")  # 改为 ph_value
+    reagent: str = Field(..., description="酸碱试剂名称")
+    # 移除其他可选参数，使用默认值
+
+class ResetHandlingProtocol(BaseModel):
+    solvent: str = Field(..., description="溶剂名称")
+
+class DryProtocol(BaseModel):
+    compound: str = Field(..., description="化合物名称")
+    vessel: str = Field(..., description="目标容器")
+
+class RecrystallizeProtocol(BaseModel):
+    ratio: str = Field(..., description="溶剂比例（如 '1:1', '3:7'）")
+    solvent1: str = Field(..., description="第一种溶剂名称")
+    solvent2: str = Field(..., description="第二种溶剂名称")
+    vessel: str = Field(..., description="目标容器")
+    volume: float = Field(..., description="总体积 (mL)")
+
+class HydrogenateProtocol(BaseModel):
+    temp: str = Field(..., description="反应温度（如 '45 °C'）")
+    time: str = Field(..., description="反应时间（如 '2 h'）")
+    vessel: str = Field(..., description="反应容器")
+
 __all__ = [
     "Point3D", "PumpTransferProtocol", "CleanProtocol", "SeparateProtocol", 
     "EvaporateProtocol", "EvacuateAndRefillProtocol", "AGVTransferProtocol", 
@@ -185,6 +210,8 @@ __all__ = [
     "HeatChillProtocol", "HeatChillStartProtocol", "HeatChillStopProtocol", 
     "StirProtocol", "StartStirProtocol", "StopStirProtocol", 
     "TransferProtocol", "CleanVesselProtocol", "DissolveProtocol", 
-    "FilterThroughProtocol", "RunColumnProtocol", "WashSolidProtocol"
+    "FilterThroughProtocol", "RunColumnProtocol", "WashSolidProtocol",
+    "AdjustPHProtocol", "ResetHandlingProtocol", "DryProtocol", 
+    "RecrystallizeProtocol", "HydrogenateProtocol"
 ]
 # End Protocols
