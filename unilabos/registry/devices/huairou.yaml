@@ -1,0 +1,118 @@
+huairou:
+  description: huairou Device
+  class:
+    module: unilabos.devices.huairou.opcua_client:OPCUADeviceClient
+    type: python
+    # status_types:
+    #   variables:dict
+    action_value_mappings:
+      connect:
+          type: SendCmd
+          goal:
+            command: {}
+          feedback: {}
+          result:
+            success: success
+      disconnect:
+        type: SendCmd
+        goal:
+          command: {}
+        feedback: {}
+        result:
+          success: success
+      read_variable:
+        type: SendCmd
+        goal:
+          command: variable_name
+        feedback: value
+        result:
+          success: success
+      write_variable:
+        type: SendCmd
+        goal: command
+        feedback: {}
+        result:
+          success: success
+      read_all_variables:
+        type: SendCmd
+        goal: {}
+        feedback: 
+          results: results
+        result:
+          success: success
+      write_multiple_variables:
+        type: SendCmd
+        goal: command
+        feedback: {}
+        result:
+          success: success
+      set_tank_numbers:
+        type: SendCmd
+        goal: 
+          command: command
+        feedback: {}
+        result:
+          success: success
+      trigger_grab_actions:
+        type: SendCmd
+        goal: command
+        feedback: {}
+        result:
+          success: success
+      set_stirring_speeds:
+        type: SendCmd
+        goal: command
+        feedback: {}
+        result:
+          success: success
+      set_pump_speeds:
+        type: SendCmd
+        goal: command
+        feedback: {}
+        result:
+          success: success
+      set_liquid_parameters:
+        type: SendCmd
+        goal: command
+        feedback: {}
+        result:
+          success: success
+      trigger_cleaning_actions:
+        type: SendCmd
+        goal: command
+        feedback: {}
+        result:
+          success: success
+      check_alarms:
+        type: SendCmd
+        goal: {}
+        feedback: alarms
+        result:
+          success: success
+      emergency_stop:
+        type: SendCmd
+        goal: {}
+        feedback: {}
+        result:
+          success: success
+      diagnose_variable_types:
+        type: SendCmd
+        goal: {}
+        feedback: {}
+        result:
+          success: success
+      write_variable_with_type:
+        type: SendCmd
+        goal: command
+        feedback: {}
+        result:
+          success: success      
+  schema:
+    type: object
+    properties:
+      is_connected:
+        type: bool
+        description: Current status of the pump
+    required:
+    - is_connected
+    additionalProperties: false
