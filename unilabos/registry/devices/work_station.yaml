@@ -2355,6 +2355,381 @@ workstation:
           title: initialize_device参数
           type: object
         type: UniLabJsonCommand
+      AdjustPHProtocol:
+        feedback: {}
+        goal:
+          vessel: vessel
+          ph_value: ph_value
+          reagent: reagent
+        goal_default:
+          vessel: ''
+          ph_value: 7.0
+          reagent: ''
+        handles:
+          input:
+          - data_key: vessel
+            data_source: handle
+            data_type: resource
+            handler_key: Vessel
+            label: Vessel
+          - data_key: reagent
+            data_source: handle
+            data_type: resource
+            handler_key: reagent
+            label: Reagent
+          output:
+          - data_key: vessel
+            data_source: executor
+            data_type: resource
+            handler_key: VesselOut
+            label: Vessel
+        result: {}
+        schema:
+          description: ROS Action AdjustPH 的 JSON Schema
+          properties:
+            feedback:
+              description: Action 反馈 - 执行过程中从服务器发送到客户端
+              properties:
+                status:
+                  type: string
+                progress:
+                  type: number
+              required:
+              - status
+              - progress
+              title: AdjustPH_Feedback
+              type: object
+            goal:
+              description: Action 目标 - 从客户端发送到服务器
+              properties:
+                vessel:
+                  type: string
+                ph_value:
+                  type: number
+                reagent:
+                  type: string
+              required:
+              - vessel
+              - ph_value
+              - reagent
+              title: AdjustPH_Goal
+              type: object
+            result:
+              description: Action 结果 - 完成后从服务器发送到客户端
+              properties:
+                message:
+                  type: string
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - success
+              - message
+              - return_info
+              title: AdjustPH_Result
+              type: object
+          required:
+          - goal
+          title: AdjustPH
+          type: object
+        type: AdjustPH
+      ResetHandlingProtocol:
+        feedback: {}
+        goal:
+          solvent: solvent
+        goal_default:
+          solvent: ''
+        handles:
+          input:
+          - data_key: solvent
+            data_source: handle
+            data_type: resource
+            handler_key: solvent
+            label: Solvent
+          output: []
+        result: {}
+        schema:
+          description: ROS Action ResetHandling 的 JSON Schema
+          properties:
+            feedback:
+              description: Action 反馈 - 执行过程中从服务器发送到客户端
+              properties:
+                status:
+                  type: string
+                progress:
+                  type: number
+              required:
+              - status
+              - progress
+              title: ResetHandling_Feedback
+              type: object
+            goal:
+              description: Action 目标 - 从客户端发送到服务器
+              properties:
+                solvent:
+                  type: string
+              required:
+              - solvent
+              title: ResetHandling_Goal
+              type: object
+            result:
+              description: Action 结果 - 完成后从服务器发送到客户端
+              properties:
+                message:
+                  type: string
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - success
+              - message
+              - return_info
+              title: ResetHandling_Result
+              type: object
+          required:
+          - goal
+          title: ResetHandling
+          type: object
+        type: ResetHandling
+      DryProtocol:
+        feedback: {}
+        goal:
+          compound: compound
+          vessel: vessel
+        goal_default:
+          compound: ''
+          vessel: ''
+        handles:
+          input:
+          - data_key: vessel
+            data_source: handle
+            data_type: resource
+            handler_key: Vessel
+            label: Vessel
+          output:
+          - data_key: vessel
+            data_source: executor
+            data_type: resource
+            handler_key: VesselOut
+            label: Vessel
+        result: {}
+        schema:
+          description: ROS Action Dry 的 JSON Schema
+          properties:
+            feedback:
+              description: Action 反馈 - 执行过程中从服务器发送到客户端
+              properties:
+                status:
+                  type: string
+                progress:
+                  type: number
+              required:
+              - status
+              - progress
+              title: Dry_Feedback
+              type: object
+            goal:
+              description: Action 目标 - 从客户端发送到服务器
+              properties:
+                compound:
+                  type: string
+                vessel:
+                  type: string
+              required:
+              - compound
+              - vessel
+              title: Dry_Goal
+              type: object
+            result:
+              description: Action 结果 - 完成后从服务器发送到客户端
+              properties:
+                message:
+                  type: string
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - success
+              - message
+              - return_info
+              title: Dry_Result
+              type: object
+          required:
+          - goal
+          title: Dry
+          type: object
+        type: Dry
+      HydrogenateProtocol:
+        feedback: {}
+        goal:
+          temp: temp
+          time: time
+          vessel: vessel
+        goal_default:
+          temp: ''
+          time: ''
+          vessel: ''
+        handles:
+          input:
+          - data_key: vessel
+            data_source: handle
+            data_type: resource
+            handler_key: Vessel
+            label: Vessel
+          output:
+          - data_key: vessel
+            data_source: executor
+            data_type: resource
+            handler_key: VesselOut
+            label: Vessel
+        result: {}
+        schema:
+          description: ROS Action Hydrogenate 的 JSON Schema
+          properties:
+            feedback:
+              description: Action 反馈 - 执行过程中从服务器发送到客户端
+              properties:
+                status:
+                  type: string
+                progress:
+                  type: number
+              required:
+              - status
+              - progress
+              title: Hydrogenate_Feedback
+              type: object
+            goal:
+              description: Action 目标 - 从客户端发送到服务器
+              properties:
+                temp:
+                  type: string
+                time:
+                  type: string
+                vessel:
+                  type: string
+              required:
+              - temp
+              - time
+              - vessel
+              title: Hydrogenate_Goal
+              type: object
+            result:
+              description: Action 结果 - 完成后从服务器发送到客户端
+              properties:
+                message:
+                  type: string
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - success
+              - message
+              - return_info
+              title: Hydrogenate_Result
+              type: object
+          required:
+          - goal
+          title: Hydrogenate
+          type: object
+        type: Hydrogenate
+      RecrystallizeProtocol:
+        feedback: {}
+        goal:
+          ratio: ratio
+          solvent1: solvent1
+          solvent2: solvent2
+          vessel: vessel
+          volume: volume
+        goal_default:
+          ratio: ''
+          solvent1: ''
+          solvent2: ''
+          vessel: ''
+          volume: 0.0
+        handles:
+          input:
+          - data_key: vessel
+            data_source: handle
+            data_type: resource
+            handler_key: Vessel
+            label: Vessel
+          - data_key: solvent
+            data_source: handle
+            data_type: resource
+            handler_key: solvent1
+            label: Solvent 1
+          - data_key: solvent
+            data_source: handle
+            data_type: resource
+            handler_key: solvent2
+            label: Solvent 2
+          output:
+          - data_key: vessel
+            data_source: executor
+            data_type: resource
+            handler_key: VesselOut
+            label: Vessel
+        result: {}
+        schema:
+          description: ROS Action Recrystallize 的 JSON Schema
+          properties:
+            feedback:
+              description: Action 反馈 - 执行过程中从服务器发送到客户端
+              properties:
+                status:
+                  type: string
+                progress:
+                  type: number
+              required:
+              - status
+              - progress
+              title: Recrystallize_Feedback
+              type: object
+            goal:
+              description: Action 目标 - 从客户端发送到服务器
+              properties:
+                ratio:
+                  type: string
+                solvent1:
+                  type: string
+                solvent2:
+                  type: string
+                vessel:
+                  type: string
+                volume:
+                  type: number
+              required:
+              - ratio
+              - solvent1
+              - solvent2
+              - vessel
+              - volume
+              title: Recrystallize_Goal
+              type: object
+            result:
+              description: Action 结果 - 完成后从服务器发送到客户端
+              properties:
+                message:
+                  type: string
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - success
+              - message
+              - return_info
+              title: Recrystallize_Result
+              type: object
+          required:
+          - goal
+          title: Recrystallize
+          type: object
+        type: Recrystallize
     module: unilabos.ros.nodes.presets.protocol_node:ROS2ProtocolNode
     status_types: {}
     type: ros2
