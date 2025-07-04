@@ -6,6 +6,7 @@ string reagent
 # Result - 标准结果格式
 bool success
 string message
+string return_info
 ---
 # Feedback - 标准反馈格式
 string status

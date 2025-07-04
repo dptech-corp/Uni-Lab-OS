@@ -8,6 +8,7 @@ float64 volume
 # Result
 bool success
 string message
+string return_info
 ---
 # Feedback
 string status

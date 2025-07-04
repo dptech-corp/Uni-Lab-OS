@@ -4,6 +4,7 @@ string solvent
 # Result
 bool success
 string message
+string return_info
 ---
 # Feedback
 string status
