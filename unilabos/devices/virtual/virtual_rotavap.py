@@ -71,11 +71,24 @@ class VirtualRotavap:
         pressure: float = 0.1, 
         temp: float = 60.0, 
         time: float = 1800.0,  # 30分钟默认
-        stir_speed: float = 100.0
+        stir_speed: float = 100.0,
+        solvent: str = "",  # 🔧 新增参数
+        **kwargs  # 🔧 接受额外参数
     ) -> bool:
-        """Execute evaporate action - 简化的蒸发流程"""
-        self.logger.info(f"Evaporate: vessel={vessel}, pressure={pressure} bar, temp={temp}°C, time={time}s, rotation={stir_speed} RPM")
-
+        """Execute evaporate action - 兼容性增强版"""
+        
+        # 参数预处理
+        if solvent:
+            self.logger.info(f"识别到溶剂: {solvent}")
+            # 根据溶剂调整参数
+            solvent_lower = solvent.lower()
+            if any(s in solvent_lower for s in ['water', 'aqueous']):
+                temp = max(temp, 80.0)
+                pressure = max(pressure, 0.2)
+                self.logger.info("水系溶剂：调整参数")
+        
+        self.logger.info(f"Evaporate: vessel={vessel}, pressure={pressure} bar, temp={temp}°C, time={time}s, rotation={stir_speed} RPM, solvent={solvent}")
+        
         # 验证参数
         if temp > self._max_temp or temp < 10.0:
             error_msg = f"温度 {temp}°C 超出范围 (10-{self._max_temp}°C)"

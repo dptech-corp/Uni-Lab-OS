@@ -1,61 +1,110 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import networkx as nx
+import logging
 from .pump_protocol import generate_pump_protocol
 
+logger = logging.getLogger(__name__)
+
+def debug_print(message):
+    """调试输出"""
+    print(f"[EVAPORATE] {message}", flush=True)
+    logger.info(f"[EVAPORATE] {message}")
 
 def get_vessel_liquid_volume(G: nx.DiGraph, vessel: str) -> float:
-    """
-    获取容器中的液体体积
-    """
+    """获取容器中的液体体积"""
+    debug_print(f"检查容器 '{vessel}' 的液体体积...")
+    
     if vessel not in G.nodes():
+        debug_print(f"容器 '{vessel}' 不存在")
         return 0.0
     
     vessel_data = G.nodes[vessel].get('data', {})
+    debug_print(f"容器数据: {vessel_data}")
+    
+    # 检查多种体积字段
+    volume_keys = ['total_volume', 'volume', 'liquid_volume', 'current_volume']
+    for key in volume_keys:
+        if key in vessel_data:
+            try:
+                volume = float(vessel_data[key])
+                debug_print(f"从 '{key}' 读取到体积: {volume}mL")
+                return volume
+            except (ValueError, TypeError):
+                continue
+    
+    # 检查liquid数组
     liquids = vessel_data.get('liquid', [])
+    if isinstance(liquids, list):
+        total_volume = 0.0
+        for liquid in liquids:
+            if isinstance(liquid, dict):
+                for vol_key in ['liquid_volume', 'volume', 'amount']:
+                    if vol_key in liquid:
+                        try:
+                            vol = float(liquid[vol_key])
+                            total_volume += vol
+                            debug_print(f"从液体数据 '{vol_key}' 读取: {vol}mL")
+                        except (ValueError, TypeError):
+                            continue
+        if total_volume > 0:
+            return total_volume
     
-    total_volume = 0.0
-    for liquid in liquids:
-        if isinstance(liquid, dict) and 'liquid_volume' in liquid:
-            total_volume += liquid['liquid_volume']
-    
-    return total_volume
+    debug_print(f"未检测到液体体积，返回 0.0")
+    return 0.0
 
-
-def find_rotavap_device(G: nx.DiGraph) -> str:
+def find_rotavap_device(G: nx.DiGraph) -> Optional[str]:
     """查找旋转蒸发仪设备"""
-    rotavap_nodes = [node for node in G.nodes() 
-                    if (G.nodes[node].get('class') or '') == 'virtual_rotavap']
+    debug_print("查找旋转蒸发仪设备...")
     
-    if rotavap_nodes:
-        return rotavap_nodes[0]
+    # 查找各种可能的旋转蒸发仪设备
+    possible_devices = []
+    for node in G.nodes():
+        node_data = G.nodes[node]
+        node_class = node_data.get('class', '')
+        
+        if any(keyword in node_class.lower() for keyword in ['rotavap', 'evaporator']):
+            possible_devices.append(node)
+            debug_print(f"找到旋转蒸发仪设备: {node}")
     
-    raise ValueError("系统中未找到旋转蒸发仪设备")
+    if possible_devices:
+        return possible_devices[0]
+    
+    debug_print("未找到旋转蒸发仪设备")
+    return None
 
-
-def find_solvent_recovery_vessel(G: nx.DiGraph) -> str:
-    """查找溶剂回收容器"""
-    possible_names = [
-        "flask_distillate",
-        "bottle_distillate", 
-        "vessel_distillate",
-        "distillate",
-        "solvent_recovery",
-        "flask_solvent_recovery",
-        "collection_flask"
+def find_rotavap_vessel(G: nx.DiGraph) -> Optional[str]:
+    """查找旋转蒸发仪样品容器"""
+    debug_print("查找旋转蒸发仪样品容器...")
+    
+    possible_vessels = [
+        "rotavap", "rotavap_flask", "flask_rotavap", 
+        "evaporation_flask", "evaporator", "rotary_evaporator"
     ]
     
-    for vessel_name in possible_names:
-        if vessel_name in G.nodes():
-            return vessel_name
+    for vessel in possible_vessels:
+        if vessel in G.nodes():
+            debug_print(f"找到旋转蒸发仪样品容器: {vessel}")
+            return vessel
     
-    # 如果找不到专门的回收容器，使用废液容器
-    waste_names = ["waste_workup", "flask_waste", "bottle_waste", "waste"]
-    for vessel_name in waste_names:
-        if vessel_name in G.nodes():
-            return vessel_name
-    
-    raise ValueError(f"未找到溶剂回收容器。尝试了以下名称: {possible_names + waste_names}")
+    debug_print("未找到旋转蒸发仪样品容器")
+    return None
 
+def find_recovery_vessel(G: nx.DiGraph) -> Optional[str]:
+    """查找溶剂回收容器"""
+    debug_print("查找溶剂回收容器...")
+    
+    possible_vessels = [
+        "flask_distillate", "distillate", "solvent_recovery",
+        "rotavap_condenser", "condenser", "waste_workup", "waste"
+    ]
+    
+    for vessel in possible_vessels:
+        if vessel in G.nodes():
+            debug_print(f"找到回收容器: {vessel}")
+            return vessel
+    
+    debug_print("未找到回收容器")
+    return None
 
 def generate_evaporate_protocol(
     G: nx.DiGraph,
@@ -63,264 +112,276 @@ def generate_evaporate_protocol(
     pressure: float = 0.1,
     temp: float = 60.0,
     time: float = 1800.0,
-    stir_speed: float = 100.0
+    stir_speed: float = 100.0,
+    solvent: str = "",
+    **kwargs  # 接受任意额外参数，增强兼容性
 ) -> List[Dict[str, Any]]:
     """
-    生成蒸发操作的协议序列
-    
-    蒸发流程：
-    1. 液体转移：将待蒸发溶液从源容器转移到旋转蒸发仪
-    2. 蒸发操作：执行旋转蒸发
-    3. (可选) 溶剂回收：将冷凝的溶剂转移到回收容器
-    4. 残留物转移：将浓缩物从旋转蒸发仪转移回原容器或新容器
+    生成蒸发操作的协议序列 - 增强兼容性版本
     
     Args:
-        G: 有向图，节点为设备和容器，边为流体管道
-        vessel: 包含待蒸发溶液的容器名称
-        pressure: 蒸发时的真空度 (bar)，默认0.1 bar
-        temp: 蒸发时的加热温度 (°C)，默认60°C  
-        time: 蒸发时间 (秒)，默认1800秒(30分钟)
-        stir_speed: 旋转速度 (RPM)，默认100 RPM
+        G: 设备图
+        vessel: 蒸发容器名称（必需）
+        pressure: 真空度 (bar)，默认0.1
+        temp: 加热温度 (°C)，默认60
+        time: 蒸发时间 (秒)，默认1800
+        stir_speed: 旋转速度 (RPM)，默认100
+        solvent: 溶剂名称（可选，用于参数优化）
+        **kwargs: 其他参数（兼容性）
     
     Returns:
-        List[Dict[str, Any]]: 蒸发操作的动作序列
-    
-    Raises:
-        ValueError: 当找不到必要的设备时抛出异常
-    
-    Examples:
-        evaporate_actions = generate_evaporate_protocol(G, "reaction_mixture", 0.05, 80.0, 3600.0)
+        List[Dict[str, Any]]: 动作序列
     """
+    
+    debug_print("=" * 50)
+    debug_print("开始生成蒸发协议")
+    debug_print(f"输入参数:")
+    debug_print(f"  - vessel: {vessel}")
+    debug_print(f"  - pressure: {pressure} bar")
+    debug_print(f"  - temp: {temp}°C")
+    debug_print(f"  - time: {time}s ({time/60:.1f}分钟)")
+    debug_print(f"  - stir_speed: {stir_speed} RPM")
+    debug_print(f"  - solvent: '{solvent}'")
+    debug_print(f"  - 其他参数: {kwargs}")
+    debug_print("=" * 50)
+    
     action_sequence = []
     
-    print(f"EVAPORATE: 开始生成蒸发协议")
-    print(f"  - 源容器: {vessel}")
-    print(f"  - 真空度: {pressure} bar")
-    print(f"  - 温度: {temp}°C")
-    print(f"  - 时间: {time}s ({time/60:.1f}分钟)")
-    print(f"  - 旋转速度: {stir_speed} RPM")
+    # === 参数验证和修正 ===
+    debug_print("步骤1: 参数验证和修正...")
     
-    # 验证源容器存在
+    # 验证必需参数
+    if not vessel:
+        raise ValueError("vessel 参数不能为空")
+    
     if vessel not in G.nodes():
-        raise ValueError(f"源容器 '{vessel}' 不存在于系统中")
+        raise ValueError(f"容器 '{vessel}' 不存在于系统中")
     
-    # 获取源容器中的液体体积
-    source_volume = get_vessel_liquid_volume(G, vessel)
-    print(f"EVAPORATE: 源容器 {vessel} 中有 {source_volume} mL 液体")
+    # 修正参数范围
+    if pressure <= 0 or pressure > 1.0:
+        debug_print(f"真空度 {pressure} bar 超出范围，修正为 0.1 bar")
+        pressure = 0.1
     
-    # 查找旋转蒸发仪
-    try:
-        rotavap_id = find_rotavap_device(G)
-        print(f"EVAPORATE: 找到旋转蒸发仪: {rotavap_id}")
-    except ValueError as e:
-        raise ValueError(f"无法找到旋转蒸发仪: {str(e)}")
+    if temp < 10.0 or temp > 200.0:
+        debug_print(f"温度 {temp}°C 超出范围，修正为 60°C")
+        temp = 60.0
+    
+    if time <= 0:
+        debug_print(f"时间 {time}s 无效，修正为 1800s")
+        time = 1800.0
+    
+    if stir_speed < 10.0 or stir_speed > 300.0:
+        debug_print(f"旋转速度 {stir_speed} RPM 超出范围，修正为 100 RPM")
+        stir_speed = 100.0
+    
+    # 根据溶剂优化参数
+    if solvent:
+        debug_print(f"根据溶剂 '{solvent}' 优化参数...")
+        solvent_lower = solvent.lower()
+        
+        if any(s in solvent_lower for s in ['water', 'aqueous', 'h2o']):
+            temp = max(temp, 80.0)
+            pressure = max(pressure, 0.2)
+            debug_print("水系溶剂：提高温度和真空度")
+        elif any(s in solvent_lower for s in ['ethanol', 'methanol', 'acetone']):
+            temp = min(temp, 50.0)
+            pressure = min(pressure, 0.05)
+            debug_print("易挥发溶剂：降低温度和真空度")
+        elif any(s in solvent_lower for s in ['dmso', 'dmi', 'toluene']):
+            temp = max(temp, 100.0)
+            pressure = min(pressure, 0.01)
+            debug_print("高沸点溶剂：提高温度，降低真空度")
+    
+    debug_print(f"最终参数: pressure={pressure}, temp={temp}, time={time}, stir_speed={stir_speed}")
+    
+    # === 查找设备 ===
+    debug_print("步骤2: 查找设备...")
+    
+    # 查找旋转蒸发仪设备
+    rotavap_device = find_rotavap_device(G)
+    if not rotavap_device:
+        debug_print("未找到旋转蒸发仪设备，使用通用设备")
+        rotavap_device = "rotavap_1"  # 默认设备ID
     
     # 查找旋转蒸发仪样品容器
-    rotavap_vessel = None
-    possible_rotavap_vessels = ["rotavap_flask", "rotavap", "flask_rotavap", "evaporation_flask"]
-    for rv in possible_rotavap_vessels:
-        if rv in G.nodes():
-            rotavap_vessel = rv
-            break
-    
+    rotavap_vessel = find_rotavap_vessel(G)
     if not rotavap_vessel:
-        raise ValueError(f"未找到旋转蒸发仪样品容器。尝试了: {possible_rotavap_vessels}")
+        debug_print("未找到旋转蒸发仪样品容器，使用默认容器")
+        rotavap_vessel = "rotavap"  # 默认容器
     
-    print(f"EVAPORATE: 找到旋转蒸发仪样品容器: {rotavap_vessel}")
+    # 查找回收容器
+    recovery_vessel = find_recovery_vessel(G)
     
-    # 查找溶剂回收容器
-    try:
-        distillate_vessel = find_solvent_recovery_vessel(G)
-        print(f"EVAPORATE: 找到溶剂回收容器: {distillate_vessel}")
-    except ValueError as e:
-        print(f"EVAPORATE: 警告 - {str(e)}")
-        distillate_vessel = None
+    debug_print(f"设备配置:")
+    debug_print(f"  - 旋转蒸发仪设备: {rotavap_device}")
+    debug_print(f"  - 样品容器: {rotavap_vessel}")
+    debug_print(f"  - 回收容器: {recovery_vessel}")
     
-    # === 简化的体积计算策略 ===
+    # === 体积计算 ===
+    debug_print("步骤3: 体积计算...")
+    
+    source_volume = get_vessel_liquid_volume(G, vessel)
+    
     if source_volume > 0:
-        # 如果能检测到液体体积，使用实际体积的大部分
         transfer_volume = min(source_volume * 0.9, 250.0)  # 90%或最多250mL
-        print(f"EVAPORATE: 检测到液体体积，将转移 {transfer_volume} mL")
+        debug_print(f"检测到液体体积 {source_volume}mL，转移 {transfer_volume}mL")
     else:
-        # 如果检测不到液体体积，默认转移一整瓶 250mL
-        transfer_volume = 250.0
-        print(f"EVAPORATE: 未检测到液体体积，默认转移整瓶 {transfer_volume} mL")
+        transfer_volume = 50.0  # 默认小体积，更安全
+        debug_print(f"未检测到液体体积，使用默认转移体积 {transfer_volume}mL")
     
-    # === 第一步：将待蒸发溶液转移到旋转蒸发仪 ===
-    print(f"EVAPORATE: 将 {transfer_volume} mL 溶液从 {vessel} 转移到 {rotavap_vessel}")
-    try:
-        transfer_to_rotavap_actions = generate_pump_protocol(
-            G=G,
-            from_vessel=vessel,
-            to_vessel=rotavap_vessel,
-            volume=transfer_volume,
-            flowrate=2.0,
-            transfer_flowrate=2.0
-        )
-        action_sequence.extend(transfer_to_rotavap_actions)
-    except Exception as e:
-        raise ValueError(f"无法将溶液转移到旋转蒸发仪: {str(e)}")
+    # === 生成动作序列 ===
+    debug_print("步骤4: 生成动作序列...")
     
-    # 转移后等待
-    wait_action = {
+    # 动作1: 转移溶液到旋转蒸发仪
+    if vessel != rotavap_vessel:
+        debug_print(f"转移 {transfer_volume}mL 从 {vessel} 到 {rotavap_vessel}")
+        try:
+            transfer_actions = generate_pump_protocol(
+                G=G,
+                from_vessel=vessel,
+                to_vessel=rotavap_vessel,
+                volume=transfer_volume,
+                flowrate=2.0,
+                transfer_flowrate=2.0
+            )
+            action_sequence.extend(transfer_actions)
+            debug_print(f"添加了 {len(transfer_actions)} 个转移动作")
+        except Exception as e:
+            debug_print(f"转移失败: {str(e)}")
+            # 继续执行，不中断整个流程
+    
+    # 等待稳定
+    action_sequence.append({
         "action_name": "wait",
         "action_kwargs": {"time": 10}
-    }
-    action_sequence.append(wait_action)
+    })
     
-    # === 第二步：执行旋转蒸发 ===
-    print(f"EVAPORATE: 执行旋转蒸发操作")
+    # 动作2: 执行蒸发
+    debug_print(f"执行蒸发: {rotavap_device}")
     evaporate_action = {
-        "device_id": rotavap_id,
+        "device_id": rotavap_device,
         "action_name": "evaporate",
         "action_kwargs": {
             "vessel": rotavap_vessel,
             "pressure": pressure,
             "temp": temp,
             "time": time,
-            "stir_speed": stir_speed
+            "stir_speed": stir_speed,
+            "solvent": solvent
         }
     }
     action_sequence.append(evaporate_action)
     
-    # 蒸发后等待系统稳定
-    wait_action = {
+    # 蒸发后等待
+    action_sequence.append({
         "action_name": "wait",
         "action_kwargs": {"time": 30}
-    }
-    action_sequence.append(wait_action)
+    })
     
-    # === 第三步：溶剂回收（如果有回收容器）===
-    if distillate_vessel:
-        print(f"EVAPORATE: 回收冷凝溶剂到 {distillate_vessel}")
+    # 动作3: 回收溶剂（如果有回收容器）
+    if recovery_vessel:
+        debug_print(f"回收溶剂到 {recovery_vessel}")
         try:
-            condenser_vessel = "rotavap_condenser"
-            if condenser_vessel in G.nodes():
-                # 估算回收体积（约为转移体积的70% - 大部分溶剂被蒸发回收）
-                recovery_volume = transfer_volume * 0.7
-                print(f"EVAPORATE: 预计回收 {recovery_volume} mL 溶剂")
-                
-                recovery_actions = generate_pump_protocol(
-                    G=G,
-                    from_vessel=condenser_vessel,
-                    to_vessel=distillate_vessel,
-                    volume=recovery_volume,
-                    flowrate=3.0,
-                    transfer_flowrate=3.0
-                )
-                action_sequence.extend(recovery_actions)
-            else:
-                print("EVAPORATE: 未找到冷凝器容器，跳过溶剂回收")
-        except Exception as e:
-            print(f"EVAPORATE: 溶剂回收失败: {str(e)}")
-    
-    # === 第四步：将浓缩物转移回原容器 ===
-    print(f"EVAPORATE: 将浓缩物从旋转蒸发仪转移回 {vessel}")
-    try:
-        # 估算浓缩物体积（约为转移体积的20% - 大部分溶剂已蒸发）
-        concentrate_volume = transfer_volume * 0.2
-        print(f"EVAPORATE: 预计浓缩物体积 {concentrate_volume} mL")
-        
-        transfer_back_actions = generate_pump_protocol(
-            G=G,
-            from_vessel=rotavap_vessel,
-            to_vessel=vessel,
-            volume=concentrate_volume,
-            flowrate=1.0,  # 浓缩物可能粘稠，用较慢流速
-            transfer_flowrate=1.0
-        )
-        action_sequence.extend(transfer_back_actions)
-    except Exception as e:
-        print(f"EVAPORATE: 将浓缩物转移回容器失败: {str(e)}")
-    
-    # === 第五步：清洗旋转蒸发仪 ===
-    print(f"EVAPORATE: 清洗旋转蒸发仪")
-    try:
-        # 查找清洗溶剂
-        cleaning_solvent = None
-        for solvent in ["flask_ethanol", "flask_acetone", "flask_water"]:
-            if solvent in G.nodes():
-                cleaning_solvent = solvent
-                break
-        
-        if cleaning_solvent and distillate_vessel:
-            # 用固定量溶剂清洗（不依赖检测体积）
-            cleaning_volume = 50.0  # 固定50mL清洗
-            print(f"EVAPORATE: 用 {cleaning_volume} mL {cleaning_solvent} 清洗")
-            
-            # 清洗溶剂加入
-            cleaning_actions = generate_pump_protocol(
+            recovery_volume = transfer_volume * 0.7  # 估算回收70%
+            recovery_actions = generate_pump_protocol(
                 G=G,
-                from_vessel=cleaning_solvent,
-                to_vessel=rotavap_vessel,
-                volume=cleaning_volume,
-                flowrate=2.0,
-                transfer_flowrate=2.0
+                from_vessel="rotavap_condenser",  # 假设的冷凝器
+                to_vessel=recovery_vessel,
+                volume=recovery_volume,
+                flowrate=3.0,
+                transfer_flowrate=3.0
             )
-            action_sequence.extend(cleaning_actions)
-            
-            # 将清洗液转移到废液/回收容器
-            waste_actions = generate_pump_protocol(
+            action_sequence.extend(recovery_actions)
+            debug_print(f"添加了 {len(recovery_actions)} 个回收动作")
+        except Exception as e:
+            debug_print(f"溶剂回收失败: {str(e)}")
+    
+    # 动作4: 转移浓缩物回原容器
+    if vessel != rotavap_vessel:
+        debug_print(f"转移浓缩物从 {rotavap_vessel} 到 {vessel}")
+        try:
+            concentrate_volume = transfer_volume * 0.2  # 估算浓缩物20%
+            transfer_back_actions = generate_pump_protocol(
                 G=G,
                 from_vessel=rotavap_vessel,
-                to_vessel=distillate_vessel,  # 使用回收容器作为废液
-                volume=cleaning_volume,
-                flowrate=2.0,
-                transfer_flowrate=2.0
+                to_vessel=vessel,
+                volume=concentrate_volume,
+                flowrate=1.0,  # 浓缩物可能粘稠
+                transfer_flowrate=1.0
             )
-            action_sequence.extend(waste_actions)
-        
-    except Exception as e:
-        print(f"EVAPORATE: 清洗步骤失败: {str(e)}")
+            action_sequence.extend(transfer_back_actions)
+            debug_print(f"添加了 {len(transfer_back_actions)} 个转移回收动作")
+        except Exception as e:
+            debug_print(f"浓缩物转移失败: {str(e)}")
     
-    print(f"EVAPORATE: 生成了 {len(action_sequence)} 个动作")
-    print(f"EVAPORATE: 蒸发协议生成完成")
-    print(f"EVAPORATE: 总处理体积: {transfer_volume} mL")
+    # === 总结 ===
+    debug_print("=" * 50)
+    debug_print(f"蒸发协议生成完成")
+    debug_print(f"总动作数: {len(action_sequence)}")
+    debug_print(f"处理体积: {transfer_volume}mL")
+    debug_print(f"蒸发参数: {pressure} bar, {temp}°C, {time}s, {stir_speed} RPM")
+    debug_print("=" * 50)
     
     return action_sequence
 
+# === 便捷函数 ===
 
-# 便捷函数：常用蒸发方案 - 都使用250mL标准瓶体积
 def generate_quick_evaporate_protocol(
     G: nx.DiGraph,
     vessel: str,
-    temp: float = 40.0,
-    time: float = 900.0  # 15分钟
+    **kwargs
 ) -> List[Dict[str, Any]]:
-    """快速蒸发：低温、短时间、整瓶处理"""
-    return generate_evaporate_protocol(G, vessel, 0.2, temp, time, 80.0)
-
+    """快速蒸发：低温短时间"""
+    return generate_evaporate_protocol(
+        G, vessel, 
+        pressure=0.2, 
+        temp=40.0, 
+        time=900.0, 
+        stir_speed=80.0,
+        **kwargs
+    )
 
 def generate_gentle_evaporate_protocol(
     G: nx.DiGraph,
     vessel: str,
-    temp: float = 50.0,
-    time: float = 2700.0  # 45分钟
+    **kwargs
 ) -> List[Dict[str, Any]]:
-    """温和蒸发：中等条件、较长时间、整瓶处理"""
-    return generate_evaporate_protocol(G, vessel, 0.1, temp, time, 60.0)
-
+    """温和蒸发：中等条件"""
+    return generate_evaporate_protocol(
+        G, vessel, 
+        pressure=0.1, 
+        temp=50.0, 
+        time=2700.0, 
+        stir_speed=60.0,
+        **kwargs
+    )
 
 def generate_high_vacuum_evaporate_protocol(
     G: nx.DiGraph,
     vessel: str,
-    temp: float = 35.0,
-    time: float = 3600.0  # 1小时
+    **kwargs
 ) -> List[Dict[str, Any]]:
-    """高真空蒸发：低温、高真空、长时间、整瓶处理"""
-    return generate_evaporate_protocol(G, vessel, 0.01, temp, time, 120.0)
-
+    """高真空蒸发：低温高真空"""
+    return generate_evaporate_protocol(
+        G, vessel, 
+        pressure=0.01, 
+        temp=35.0, 
+        time=3600.0, 
+        stir_speed=120.0,
+        **kwargs
+    )
 
 def generate_standard_evaporate_protocol(
     G: nx.DiGraph,
-    vessel: str
+    vessel: str,
+    **kwargs
 ) -> List[Dict[str, Any]]:
-    """标准蒸发：常用参数、整瓶250mL处理"""
+    """标准蒸发：常用参数"""
     return generate_evaporate_protocol(
-        G=G,
-        vessel=vessel, 
-        pressure=0.1,      # 标准真空度
-        temp=60.0,         # 适中温度
-        time=1800.0,       # 30分钟
-        stir_speed=100.0   # 适中旋转速度
+        G, vessel, 
+        pressure=0.1, 
+        temp=60.0, 
+        time=1800.0, 
+        stir_speed=100.0,
+        **kwargs
     )

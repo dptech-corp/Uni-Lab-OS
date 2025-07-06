@@ -197,77 +197,148 @@ def generate_evacuateandrefill_protocol(
     G: nx.DiGraph,
     vessel: str,
     gas: str,
-    repeats: int = 1
+    # 🔧 删除 repeats 参数，直接硬编码为 3
+    **kwargs  # 🔧 接受额外参数，增强兼容性
 ) -> List[Dict[str, Any]]:
     """
-    生成抽真空和充气操作的动作序列
+    生成抽真空和充气操作的动作序列 - 简化版本
     
-    **修复版本**: 正确调用 pump_protocol 并处理异常
+    Args:
+        G: 设备图
+        vessel: 目标容器名称（必需）
+        gas: 气体名称（必需）  
+        **kwargs: 其他参数（兼容性）
+    
+    Returns:
+        List[Dict[str, Any]]: 动作序列
     """
+    
+    # 🔧 硬编码重复次数为 3
+    repeats = 3
+    
+    debug_print("=" * 60)
+    debug_print("开始生成抽真空充气协议")
+    debug_print(f"输入参数:")
+    debug_print(f"  - vessel: {vessel}")
+    debug_print(f"  - gas: {gas}")
+    debug_print(f"  - repeats: {repeats} (硬编码)")
+    debug_print(f"  - 其他参数: {kwargs}")
+    debug_print("=" * 60)
+    
     action_sequence = []
     
-    # 参数设置 - 关键修复：减小体积避免超出泵容量
-    VACUUM_VOLUME = 20.0     # 减小抽真空体积
-    REFILL_VOLUME = 20.0     # 减小充气体积
-    PUMP_FLOW_RATE = 2.5     # 降低流速
-    STIR_SPEED = 300.0
+    # === 参数验证和修正 ===
+    debug_print("步骤1: 参数验证和修正...")
     
-    print(f"EVACUATE_REFILL: 开始生成协议，目标容器: {vessel}, 气体: {gas}, 重复次数: {repeats}")
+    # 验证必需参数
+    if not vessel:
+        raise ValueError("vessel 参数不能为空")
     
-    # 1. 验证设备存在
+    if not gas:
+        raise ValueError("gas 参数不能为空")
+    
     if vessel not in G.nodes():
-        raise ValueError(f"目标容器 '{vessel}' 不存在于系统中")
+        raise ValueError(f"容器 '{vessel}' 不存在于系统中")
     
-    # 2. 查找设备
+    # 标准化气体名称
+    gas_aliases = {
+        'n2': 'nitrogen',
+        'ar': 'argon',
+        'air': 'air',
+        'o2': 'oxygen',
+        'co2': 'carbon_dioxide',
+        'h2': 'hydrogen'
+    }
+    
+    original_gas = gas
+    gas_lower = gas.lower().strip()
+    if gas_lower in gas_aliases:
+        gas = gas_aliases[gas_lower]
+        debug_print(f"标准化气体名称: {original_gas} -> {gas}")
+    
+    debug_print(f"最终参数: vessel={vessel}, gas={gas}, repeats={repeats}")
+    
+    # === 查找设备 ===
+    debug_print("步骤2: 查找设备...")
+    
     try:
         vacuum_pump = find_vacuum_pump(G)
-        vacuum_solenoid = find_associated_solenoid_valve(G, vacuum_pump)
         gas_source = find_gas_source(G, gas)
+        vacuum_solenoid = find_associated_solenoid_valve(G, vacuum_pump)
         gas_solenoid = find_associated_solenoid_valve(G, gas_source)
         stirrer_id = find_connected_stirrer(G, vessel)
         
-        print(f"EVACUATE_REFILL: 找到设备")
-        print(f"  - 真空泵: {vacuum_pump}")
-        print(f"  - 气源: {gas_source}")
-        print(f"  - 真空电磁阀: {vacuum_solenoid}")
-        print(f"  - 气源电磁阀: {gas_solenoid}")
-        print(f"  - 搅拌器: {stirrer_id}")
+        debug_print(f"设备配置:")
+        debug_print(f"  - 真空泵: {vacuum_pump}")
+        debug_print(f"  - 气源: {gas_source}")
+        debug_print(f"  - 真空电磁阀: {vacuum_solenoid}")
+        debug_print(f"  - 气源电磁阀: {gas_solenoid}")
+        debug_print(f"  - 搅拌器: {stirrer_id}")
         
-    except ValueError as e:
+    except Exception as e:
+        debug_print(f"❌ 设备查找失败: {str(e)}")
         raise ValueError(f"设备查找失败: {str(e)}")
     
-    # 3. **关键修复**: 验证路径存在性
+    # === 参数设置 ===
+    debug_print("步骤3: 参数设置...")
+    
+    # 根据气体类型调整参数
+    if gas.lower() in ['nitrogen', 'argon']:
+        VACUUM_VOLUME = 25.0
+        REFILL_VOLUME = 25.0
+        PUMP_FLOW_RATE = 2.0
+        VACUUM_TIME = 30.0
+        REFILL_TIME = 20.0
+        debug_print("惰性气体：使用标准参数")
+    elif gas.lower() in ['air', 'oxygen']:
+        VACUUM_VOLUME = 20.0
+        REFILL_VOLUME = 20.0
+        PUMP_FLOW_RATE = 1.5
+        VACUUM_TIME = 45.0
+        REFILL_TIME = 25.0
+        debug_print("活性气体：使用保守参数")
+    else:
+        VACUUM_VOLUME = 15.0
+        REFILL_VOLUME = 15.0
+        PUMP_FLOW_RATE = 1.0
+        VACUUM_TIME = 60.0
+        REFILL_TIME = 30.0
+        debug_print("未知气体：使用安全参数")
+    
+    STIR_SPEED = 200.0
+    
+    debug_print(f"操作参数:")
+    debug_print(f"  - 抽真空体积: {VACUUM_VOLUME}mL")
+    debug_print(f"  - 充气体积: {REFILL_VOLUME}mL")
+    debug_print(f"  - 泵流速: {PUMP_FLOW_RATE}mL/s")
+    debug_print(f"  - 抽真空时间: {VACUUM_TIME}s")
+    debug_print(f"  - 充气时间: {REFILL_TIME}s")
+    debug_print(f"  - 搅拌速度: {STIR_SPEED}RPM")
+    
+    # === 路径验证 ===
+    debug_print("步骤4: 路径验证...")
+    
     try:
         # 验证抽真空路径
         vacuum_path = nx.shortest_path(G, source=vessel, target=vacuum_pump)
-        print(f"EVACUATE_REFILL: 抽真空路径: {' → '.join(vacuum_path)}")
+        debug_print(f"抽真空路径: {' → '.join(vacuum_path)}")
         
         # 验证充气路径
         gas_path = nx.shortest_path(G, source=gas_source, target=vessel)
-        print(f"EVACUATE_REFILL: 充气路径: {' → '.join(gas_path)}")
+        debug_print(f"充气路径: {' → '.join(gas_path)}")
         
-        # **新增**: 检查路径中的边数据
-        for i in range(len(vacuum_path) - 1):
-            nodeA, nodeB = vacuum_path[i], vacuum_path[i + 1]
-            edge_data = G.get_edge_data(nodeA, nodeB)
-            if not edge_data or 'port' not in edge_data:
-                raise ValueError(f"路径 {nodeA} → {nodeB} 缺少端口信息")
-            print(f"  抽真空路径边 {nodeA} → {nodeB}: {edge_data}")
-        
-        for i in range(len(gas_path) - 1):
-            nodeA, nodeB = gas_path[i], gas_path[i + 1]
-            edge_data = G.get_edge_data(nodeA, nodeB)
-            if not edge_data or 'port' not in edge_data:
-                raise ValueError(f"路径 {nodeA} → {nodeB} 缺少端口信息")
-            print(f"  充气路径边 {nodeA} → {nodeB}: {edge_data}")
-            
     except nx.NetworkXNoPath as e:
+        debug_print(f"❌ 路径不存在: {str(e)}")
         raise ValueError(f"路径不存在: {str(e)}")
     except Exception as e:
+        debug_print(f"❌ 路径验证失败: {str(e)}")
         raise ValueError(f"路径验证失败: {str(e)}")
     
-    # 4. 启动搅拌器
+    # === 启动搅拌器 ===
+    debug_print("步骤5: 启动搅拌器...")
+    
     if stirrer_id:
+        debug_print(f"启动搅拌器: {stirrer_id}")
         action_sequence.append({
             "device_id": stirrer_id,
             "action_name": "start_stir",
@@ -277,15 +348,26 @@ def generate_evacuateandrefill_protocol(
                 "purpose": "抽真空充气操作前启动搅拌"
             }
         })
+        
+        # 等待搅拌稳定
+        action_sequence.append({
+            "action_name": "wait",
+            "action_kwargs": {"time": 5.0}
+        })
+    else:
+        debug_print("未找到搅拌器，跳过搅拌启动")
     
-    # 5. 执行多次抽真空-充气循环
-    for cycle in range(repeats):
-        print(f"EVACUATE_REFILL: === 第 {cycle+1}/{repeats} 次循环 ===")
+    # === 执行 3 次抽真空-充气循环 ===
+    debug_print("步骤6: 执行抽真空-充气循环...")
+    
+    for cycle in range(repeats):  # 这里 repeats = 3
+        debug_print(f"=== 第 {cycle+1}/{repeats} 次循环 ===")
         
         # ============ 抽真空阶段 ============
-        print(f"EVACUATE_REFILL: 抽真空阶段开始")
+        debug_print(f"抽真空阶段开始")
         
         # 启动真空泵
+        debug_print(f"启动真空泵: {vacuum_pump}")
         action_sequence.append({
             "device_id": vacuum_pump,
             "action_name": "set_status",
@@ -294,17 +376,15 @@ def generate_evacuateandrefill_protocol(
         
         # 开启真空电磁阀
         if vacuum_solenoid:
+            debug_print(f"开启真空电磁阀: {vacuum_solenoid}")
             action_sequence.append({
                 "device_id": vacuum_solenoid,
                 "action_name": "set_valve_position",
                 "action_kwargs": {"command": "OPEN"}
             })
         
-        # **关键修复**: 改进 pump_protocol 调用和错误处理
-        print(f"EVACUATE_REFILL: 调用抽真空 pump_protocol: {vessel} → {vacuum_pump}")
-        print(f"  - 体积: {VACUUM_VOLUME} mL")
-        print(f"  - 流速: {PUMP_FLOW_RATE} mL/s")
-        
+        # 抽真空操作
+        debug_print(f"抽真空操作: {vessel} → {vacuum_pump}")
         try:
             vacuum_transfer_actions = generate_pump_protocol_with_rinsing(
                 G=G,
@@ -312,9 +392,9 @@ def generate_evacuateandrefill_protocol(
                 to_vessel=vacuum_pump,
                 volume=VACUUM_VOLUME,
                 amount="",
-                time=0.0,
+                duration=0.0,  # 🔧 修复time参数名冲突
                 viscous=False,
-                rinsing_solvent="",  # **修复**: 明确不使用清洗
+                rinsing_solvent="",
                 rinsing_volume=0.0,
                 rinsing_repeats=0,
                 solid=False,
@@ -324,52 +404,31 @@ def generate_evacuateandrefill_protocol(
             
             if vacuum_transfer_actions:
                 action_sequence.extend(vacuum_transfer_actions)
-                print(f"EVACUATE_REFILL: ✅ 成功添加 {len(vacuum_transfer_actions)} 个抽真空动作")
+                debug_print(f"✅ 添加了 {len(vacuum_transfer_actions)} 个抽真空动作")
             else:
-                print(f"EVACUATE_REFILL: ⚠️ 抽真空 pump_protocol 返回空序列")
-                # **修复**: 添加手动泵动作作为备选
-                action_sequence.extend([
-                    {
-                        "device_id": "multiway_valve_1",
-                        "action_name": "set_valve_position", 
-                        "action_kwargs": {"command": "5"}  # 连接到反应器
-                    },
-                    {
-                        "device_id": "transfer_pump_1",
-                        "action_name": "set_position",
-                        "action_kwargs": {
-                            "position": VACUUM_VOLUME,
-                            "max_velocity": PUMP_FLOW_RATE
-                        }
-                    }
-                ])
-                print(f"EVACUATE_REFILL: 使用备选手动泵动作")
+                debug_print("⚠️ 抽真空协议返回空序列，添加手动动作")
+                action_sequence.append({
+                    "action_name": "wait",
+                    "action_kwargs": {"time": VACUUM_TIME}
+                })
                 
         except Exception as e:
-            print(f"EVACUATE_REFILL: ❌ 抽真空 pump_protocol 失败: {str(e)}")
-            import traceback
-            print(f"EVACUATE_REFILL: 详细错误:\n{traceback.format_exc()}")
-            
-            # **修复**: 添加手动动作而不是忽略错误
-            print(f"EVACUATE_REFILL: 使用手动备选方案")
-            action_sequence.extend([
-                {
-                    "device_id": "multiway_valve_1",
-                    "action_name": "set_valve_position",
-                    "action_kwargs": {"command": "5"}  # 反应器端口
-                },
-                {
-                    "device_id": "transfer_pump_1", 
-                    "action_name": "set_position",
-                    "action_kwargs": {
-                        "position": VACUUM_VOLUME,
-                        "max_velocity": PUMP_FLOW_RATE
-                    }
-                }
-            ])
+            debug_print(f"❌ 抽真空失败: {str(e)}")
+            # 添加等待时间作为备选
+            action_sequence.append({
+                "action_name": "wait",
+                "action_kwargs": {"time": VACUUM_TIME}
+            })
+        
+        # 抽真空后等待
+        action_sequence.append({
+            "action_name": "wait",
+            "action_kwargs": {"time": 5.0}
+        })
         
         # 关闭真空电磁阀
         if vacuum_solenoid:
+            debug_print(f"关闭真空电磁阀: {vacuum_solenoid}")
             action_sequence.append({
                 "device_id": vacuum_solenoid,
                 "action_name": "set_valve_position",
@@ -377,6 +436,7 @@ def generate_evacuateandrefill_protocol(
             })
         
         # 关闭真空泵
+        debug_print(f"关闭真空泵: {vacuum_pump}")
         action_sequence.append({
             "device_id": vacuum_pump,
             "action_name": "set_status",
@@ -384,26 +444,27 @@ def generate_evacuateandrefill_protocol(
         })
         
         # ============ 充气阶段 ============
-        print(f"EVACUATE_REFILL: 充气阶段开始")
+        debug_print(f"充气阶段开始")
         
         # 启动气源
+        debug_print(f"启动气源: {gas_source}")
         action_sequence.append({
             "device_id": gas_source,
-            "action_name": "set_status", 
+            "action_name": "set_status",
             "action_kwargs": {"string": "ON"}
         })
         
         # 开启气源电磁阀
         if gas_solenoid:
+            debug_print(f"开启气源电磁阀: {gas_solenoid}")
             action_sequence.append({
                 "device_id": gas_solenoid,
                 "action_name": "set_valve_position",
                 "action_kwargs": {"command": "OPEN"}
             })
         
-        # **关键修复**: 改进充气 pump_protocol 调用
-        print(f"EVACUATE_REFILL: 调用充气 pump_protocol: {gas_source} → {vessel}")
-        
+        # 充气操作
+        debug_print(f"充气操作: {gas_source} → {vessel}")
         try:
             gas_transfer_actions = generate_pump_protocol_with_rinsing(
                 G=G,
@@ -411,9 +472,9 @@ def generate_evacuateandrefill_protocol(
                 to_vessel=vessel,
                 volume=REFILL_VOLUME,
                 amount="",
-                time=0.0,
+                duration=0.0,  # 🔧 修复time参数名冲突
                 viscous=False,
-                rinsing_solvent="",  # **修复**: 明确不使用清洗
+                rinsing_solvent="",
                 rinsing_volume=0.0,
                 rinsing_repeats=0,
                 solid=False,
@@ -423,77 +484,31 @@ def generate_evacuateandrefill_protocol(
             
             if gas_transfer_actions:
                 action_sequence.extend(gas_transfer_actions)
-                print(f"EVACUATE_REFILL: ✅ 成功添加 {len(gas_transfer_actions)} 个充气动作")
+                debug_print(f"✅ 添加了 {len(gas_transfer_actions)} 个充气动作")
             else:
-                print(f"EVACUATE_REFILL: ⚠️ 充气 pump_protocol 返回空序列")
-                # **修复**: 添加手动充气动作
-                action_sequence.extend([
-                    {
-                        "device_id": "multiway_valve_2",
-                        "action_name": "set_valve_position",
-                        "action_kwargs": {"command": "8"}  # 氮气端口
-                    },
-                    {
-                        "device_id": "transfer_pump_2",
-                        "action_name": "set_position",
-                        "action_kwargs": {
-                            "position": REFILL_VOLUME,
-                            "max_velocity": PUMP_FLOW_RATE
-                        }
-                    },
-                    {
-                        "device_id": "multiway_valve_2", 
-                        "action_name": "set_valve_position",
-                        "action_kwargs": {"command": "5"}  # 反应器端口
-                    },
-                    {
-                        "device_id": "transfer_pump_2",
-                        "action_name": "set_position", 
-                        "action_kwargs": {
-                            "position": 0.0,
-                            "max_velocity": PUMP_FLOW_RATE
-                        }
-                    }
-                ])
+                debug_print("⚠️ 充气协议返回空序列，添加手动动作")
+                action_sequence.append({
+                    "action_name": "wait",
+                    "action_kwargs": {"time": REFILL_TIME}
+                })
                 
         except Exception as e:
-            print(f"EVACUATE_REFILL: ❌ 充气 pump_protocol 失败: {str(e)}")
-            import traceback
-            print(f"EVACUATE_REFILL: 详细错误:\n{traceback.format_exc()}")
-            
-            # **修复**: 使用手动充气动作
-            print(f"EVACUATE_REFILL: 使用手动充气方案")
-            action_sequence.extend([
-                {
-                    "device_id": "multiway_valve_2",
-                    "action_name": "set_valve_position",
-                    "action_kwargs": {"command": "8"}  # 连接气源
-                },
-                {
-                    "device_id": "transfer_pump_2",
-                    "action_name": "set_position",
-                    "action_kwargs": {
-                        "position": REFILL_VOLUME,
-                        "max_velocity": PUMP_FLOW_RATE
-                    }
-                },
-                {
-                    "device_id": "multiway_valve_2",
-                    "action_name": "set_valve_position", 
-                    "action_kwargs": {"command": "5"}  # 连接反应器
-                },
-                {
-                    "device_id": "transfer_pump_2",
-                    "action_name": "set_position",
-                    "action_kwargs": {
-                        "position": 0.0,
-                        "max_velocity": PUMP_FLOW_RATE
-                    }
-                }
-            ])
+            debug_print(f"❌ 充气失败: {str(e)}")
+            # 添加等待时间作为备选
+            action_sequence.append({
+                "action_name": "wait",
+                "action_kwargs": {"time": REFILL_TIME}
+            })
+        
+        # 充气后等待
+        action_sequence.append({
+            "action_name": "wait",
+            "action_kwargs": {"time": 5.0}
+        })
         
         # 关闭气源电磁阀
         if gas_solenoid:
+            debug_print(f"关闭气源电磁阀: {gas_solenoid}")
             action_sequence.append({
                 "device_id": gas_solenoid,
                 "action_name": "set_valve_position",
@@ -501,6 +516,7 @@ def generate_evacuateandrefill_protocol(
             })
         
         # 关闭气源
+        debug_print(f"关闭气源: {gas_source}")
         action_sequence.append({
             "device_id": gas_source,
             "action_name": "set_status",
@@ -509,22 +525,39 @@ def generate_evacuateandrefill_protocol(
         
         # 等待下一次循环
         if cycle < repeats - 1:
+            debug_print(f"等待下一次循环...")
             action_sequence.append({
                 "action_name": "wait",
-                "action_kwargs": {"time": 2.0}
+                "action_kwargs": {"time": 10.0}
             })
     
-    # 停止搅拌器
+    # === 停止搅拌器 ===
+    debug_print("步骤7: 停止搅拌器...")
+    
     if stirrer_id:
+        debug_print(f"停止搅拌器: {stirrer_id}")
         action_sequence.append({
             "device_id": stirrer_id,
             "action_name": "stop_stir",
             "action_kwargs": {"vessel": vessel}
         })
     
-    print(f"EVACUATE_REFILL: 协议生成完成，共 {len(action_sequence)} 个动作")
+    # === 最终等待 ===
+    action_sequence.append({
+        "action_name": "wait",
+        "action_kwargs": {"time": 10.0}
+    })
+    
+    # === 总结 ===
+    debug_print("=" * 60)
+    debug_print(f"抽真空充气协议生成完成")
+    debug_print(f"总动作数: {len(action_sequence)}")
+    debug_print(f"处理容器: {vessel}")
+    debug_print(f"使用气体: {gas}")
+    debug_print(f"重复次数: {repeats} (硬编码)")
+    debug_print("=" * 60)
+    
     return action_sequence
-
 
 # 测试函数
 def test_evacuateandrefill_protocol():

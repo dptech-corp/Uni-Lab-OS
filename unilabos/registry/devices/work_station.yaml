@@ -755,11 +755,9 @@ workstation:
         feedback: {}
         goal:
           gas: gas
-          repeats: repeats
           vessel: vessel
         goal_default:
           gas: ''
-          repeats: 0
           vessel: ''
         handles:
           input:
@@ -827,16 +825,11 @@ workstation:
               properties:
                 gas:
                   type: string
-                repeats:
-                  maximum: 2147483647
-                  minimum: -2147483648
-                  type: integer
                 vessel:
                   type: string
               required:
               - vessel
               - gas
-              - repeats
               title: EvacuateAndRefill_Goal
               type: object
             result:
@@ -859,110 +852,65 @@ workstation:
       EvaporateProtocol:
         feedback: {}
         goal:
+          vessel: vessel
           pressure: pressure
-          stir_speed: stir_speed
           temp: temp
           time: time
-          vessel: vessel
+          stir_speed: stir_speed
+          solvent: solvent
         goal_default:
-          pressure: 0.0
-          stir_speed: 0.0
-          temp: 0.0
-          time: 0.0
           vessel: ''
+          pressure: 0.1
+          temp: 60.0
+          time: 1800.0
+          stir_speed: 100.0
+          solvent: ''
         handles:
           input:
           - data_key: vessel
             data_source: handle
             data_type: resource
-            handler_key: Vessel
-            label: Vessel
+            handler_key: vessel
+            label: Evaporation Vessel
           output:
           - data_key: vessel
-            data_source: executor
+            data_source: handle
             data_type: resource
-            handler_key: VesselOut
-            label: Vessel
+            handler_key: vessel_out
+            label: Evaporation Vessel
         result: {}
         schema:
           description: ROS Action Evaporate 的 JSON Schema
           properties:
-            feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
-              properties:
-                current_device:
-                  type: string
-                status:
-                  type: string
-                time_remaining:
-                  properties:
-                    nanosec:
-                      maximum: 4294967295
-                      minimum: 0
-                      type: integer
-                    sec:
-                      maximum: 2147483647
-                      minimum: -2147483648
-                      type: integer
-                  required:
-                  - sec
-                  - nanosec
-                  title: Duration
-                  type: object
-                time_spent:
-                  properties:
-                    nanosec:
-                      maximum: 4294967295
-                      minimum: 0
-                      type: integer
-                    sec:
-                      maximum: 2147483647
-                      minimum: -2147483648
-                      type: integer
-                  required:
-                  - sec
-                  - nanosec
-                  title: Duration
-                  type: object
-              required:
-              - status
-              - current_device
-              - time_spent
-              - time_remaining
-              title: Evaporate_Feedback
-              type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
+              description: Action 目标
               properties:
-                pressure:
-                  type: number
-                stir_speed:
-                  type: number
-                temp:
-                  type: number
-                time:
-                  type: number
                 vessel:
                   type: string
+                  description: 蒸发容器名称
+                pressure:
+                  type: number
+                  default: 0.1
+                  description: 真空度 (bar)
+                temp:
+                  type: number
+                  default: 60.0
+                  description: 加热温度 (°C)
+                time:
+                  type: number
+                  default: 1800.0
+                  description: 蒸发时间 (秒)
+                stir_speed:
+                  type: number
+                  default: 100.0
+                  description: 旋转速度 (RPM)
+                solvent:
+                  type: string
+                  default: ''
+                  description: 溶剂名称
               required:
               - vessel
-              - pressure
-              - temp
-              - time
-              - stir_speed
               title: Evaporate_Goal
-              type: object
-            result:
-              description: Action 结果 - 完成后从服务器发送到客户端
-              properties:
-                return_info:
-                  type: string
-                success:
-                  type: boolean
-              required:
-              - return_info
-              - success
-              title: Evaporate_Result
               type: object
           required:
           - goal
@@ -972,20 +920,20 @@ workstation:
       FilterProtocol:
         feedback: {}
         goal:
-          continue_heatchill: continue_heatchill
+          vessel: vessel
           filtrate_vessel: filtrate_vessel
           stir: stir
           stir_speed: stir_speed
           temp: temp
-          vessel: vessel
+          continue_heatchill: continue_heatchill
           volume: volume
         goal_default:
-          continue_heatchill: false
+          vessel: ''
           filtrate_vessel: ''
           stir: false
           stir_speed: 0.0
-          temp: 0.0
-          vessel: ''
+          temp: 25.0
+          continue_heatchill: false
           volume: 0.0
         handles:
           input:
@@ -994,7 +942,7 @@ workstation:
             data_type: resource
             handler_key: Vessel
             label: Vessel
-          - data_key: vessel
+          - data_key: filtrate_vessel
             data_source: handle
             data_type: resource
             handler_key: filtrate_vessel
@@ -1005,7 +953,7 @@ workstation:
             data_type: resource
             handler_key: VesselOut
             label: Vessel
-          - data_key: vessel
+          - data_key: filtrate_vessel
             data_source: executor
             data_type: resource
             handler_key: filtrate_out
@@ -1035,28 +983,35 @@ workstation:
             goal:
               description: Action 目标 - 从客户端发送到服务器
               properties:
-                continue_heatchill:
-                  type: boolean
-                filtrate_vessel:
-                  type: string
-                stir:
-                  type: boolean
-                stir_speed:
-                  type: number
-                temp:
-                  type: number
                 vessel:
                   type: string
+                  description: 过滤容器名称
+                filtrate_vessel:
+                  type: string
+                  default: ''
+                  description: 滤液容器名称（可选）
+                stir:
+                  type: boolean
+                  default: false
+                  description: 是否搅拌
+                stir_speed:
+                  type: number
+                  default: 0.0
+                  description: 搅拌速度
+                temp:
+                  type: number
+                  default: 25.0
+                  description: 温度
+                continue_heatchill:
+                  type: boolean
+                  default: false
+                  description: 是否继续加热冷却
                 volume:
                   type: number
+                  default: 0.0
+                  description: 过滤体积
               required:
               - vessel
-              - filtrate_vessel
-              - stir
-              - stir_speed
-              - temp
-              - continue_heatchill
-              - volume
               title: Filter_Goal
               type: object
             result:
@@ -1193,19 +1148,27 @@ workstation:
       HeatChillProtocol:
         feedback: {}
         goal:
-          purpose: purpose
-          stir: stir
-          stir_speed: stir_speed
+          vessel: vessel
           temp: temp
           time: time
-          vessel: vessel
+          temp_spec: temp_spec
+          time_spec: time_spec
+          pressure: pressure
+          reflux_solvent: reflux_solvent
+          stir: stir
+          stir_speed: stir_speed
+          purpose: purpose
         goal_default:
-          purpose: ''
-          stir: false
-          stir_speed: 0.0
-          temp: 0.0
-          time: 0.0
           vessel: ''
+          temp: 25.0
+          time: 300.0
+          temp_spec: ''
+          time_spec: ''
+          pressure: ''
+          reflux_solvent: ''
+          stir: false
+          stir_speed: 300.0
+          purpose: ''
         handles:
           input:
           - data_key: vessel
@@ -1224,7 +1187,7 @@ workstation:
           description: ROS Action HeatChill 的 JSON Schema
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
+              description: Action 反馈
               properties:
                 status:
                   type: string
@@ -1233,39 +1196,64 @@ workstation:
               title: HeatChill_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
+              description: Action 目标
               properties:
-                purpose:
-                  type: string
-                stir:
-                  type: boolean
-                stir_speed:
-                  type: number
-                temp:
-                  type: number
-                time:
-                  type: number
                 vessel:
                   type: string
+                  description: 加热容器名称
+                temp:
+                  type: number
+                  default: 25.0
+                  description: 目标温度
+                time:
+                  type: number
+                  default: 300.0
+                  description: 加热时间
+                temp_spec:
+                  type: string
+                  default: ''
+                  description: 温度规格
+                time_spec:
+                  type: string
+                  default: ''
+                  description: 时间规格
+                pressure:
+                  type: string
+                  default: ''
+                  description: 压力规格
+                reflux_solvent:
+                  type: string
+                  default: ''
+                  description: 回流溶剂名称
+                stir:
+                  type: boolean
+                  default: false
+                  description: 是否搅拌
+                stir_speed:
+                  type: number
+                  default: 300.0
+                  description: 搅拌速度
+                purpose:
+                  type: string
+                  default: ''
+                  description: 操作目的
               required:
               - vessel
-              - temp
-              - time
-              - stir
-              - stir_speed
-              - purpose
               title: HeatChill_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
+              description: Action 结果
               properties:
+                message:
+                  type: string
                 return_info:
                   type: string
                 success:
                   type: boolean
               required:
-              - return_info
               - success
+              - message
+              - return_info
               title: HeatChill_Result
               type: object
           required:
@@ -1412,6 +1400,11 @@ workstation:
           to_vessel: to_vessel
           viscous: viscous
           volume: volume
+          flowrate: flowrate
+          transfer_flowrate: transfer_flowrate
+          rate_spec: rate_spec
+          event: event
+          through: through
         goal_default:
           amount: ''
           from_vessel: ''
@@ -1423,6 +1416,11 @@ workstation:
           to_vessel: ''
           viscous: false
           volume: 0.0
+          flowrate: 0.0
+          transfer_flowrate: 0.0
+          rate_spec: ''
+          event: ''
+          through: ''
         handles:
           input:
           - data_key: vessel
@@ -1453,7 +1451,7 @@ workstation:
             label: To Vessel
         result: {}
         schema:
-          description: ROS Action PumpTransfer 的 JSON Schema
+          description: ROS Action PumpTransfer 的 JSON Schema（兼容增强版）
           properties:
             feedback:
               description: Action 反馈 - 执行过程中从服务器发送到客户端
@@ -1463,34 +1461,8 @@ workstation:
                 status:
                   type: string
                 time_remaining:
-                  properties:
-                    nanosec:
-                      maximum: 4294967295
-                      minimum: 0
-                      type: integer
-                    sec:
-                      maximum: 2147483647
-                      minimum: -2147483648
-                      type: integer
-                  required:
-                  - sec
-                  - nanosec
-                  title: Duration
                   type: object
                 time_spent:
-                  properties:
-                    nanosec:
-                      maximum: 4294967295
-                      minimum: 0
-                      type: integer
-                    sec:
-                      maximum: 2147483647
-                      minimum: -2147483648
-                      type: integer
-                  required:
-                  - sec
-                  - nanosec
-                  title: Duration
                   type: object
               required:
               - status
@@ -1506,35 +1478,35 @@ workstation:
                   type: string
                 from_vessel:
                   type: string
-                rinsing_repeats:
-                  maximum: 2147483647
-                  minimum: -2147483648
-                  type: integer
+                to_vessel:
+                  type: string
+                volume:
+                  type: number
+                time:
+                  type: number
+                viscous:
+                  type: boolean
                 rinsing_solvent:
                   type: string
                 rinsing_volume:
                   type: number
+                rinsing_repeats:
+                  type: integer
                 solid:
                   type: boolean
-                time:
+                flowrate:
                   type: number
-                to_vessel:
+                transfer_flowrate:
+                  type: number
+                rate_spec:
                   type: string
-                viscous:
-                  type: boolean
-                volume:
-                  type: number
+                event:
+                  type: string
+                through:
+                  type: string
               required:
               - from_vessel
               - to_vessel
-              - volume
-              - amount
-              - time
-              - viscous
-              - rinsing_solvent
-              - rinsing_volume
-              - rinsing_repeats
-              - solid
               title: PumpTransfer_Goal
               type: object
             result:
@@ -1888,13 +1860,21 @@ workstation:
       StirProtocol:
         feedback: {}
         goal:
-          settling_time: settling_time
-          stir_speed: stir_speed
+          vessel: vessel
+          time: time
+          event: event
+          time_spec: time_spec
           stir_time: stir_time
+          stir_speed: stir_speed
+          settling_time: settling_time
         goal_default:
-          settling_time: 0.0
-          stir_speed: 0.0
-          stir_time: 0.0
+          vessel: ''
+          time: '5 min'
+          event: ''
+          time_spec: ''
+          stir_time: 300.0
+          stir_speed: 200.0
+          settling_time: 60.0
         handles:
           input:
           - data_key: vessel
@@ -1913,7 +1893,7 @@ workstation:
           description: ROS Action Stir 的 JSON Schema
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
+              description: Action 反馈
               properties:
                 status:
                   type: string
@@ -1922,30 +1902,52 @@ workstation:
               title: Stir_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
+              description: Action 目标
               properties:
-                settling_time:
-                  type: number
-                stir_speed:
-                  type: number
+                vessel:
+                  type: string
+                  description: 搅拌容器名称
+                time:
+                  type: string
+                  default: '5 min'
+                  description: 搅拌时间
+                event:
+                  type: string
+                  default: ''
+                  description: 事件标识
+                time_spec:
+                  type: string
+                  default: ''
+                  description: 时间规格
                 stir_time:
                   type: number
+                  default: 300.0
+                  description: 搅拌时间（秒）
+                stir_speed:
+                  type: number
+                  default: 200.0
+                  description: 搅拌速度
+                settling_time:
+                  type: number
+                  default: 60.0
+                  description: 沉降时间
               required:
-              - stir_time
-              - stir_speed
-              - settling_time
+              - vessel
               title: Stir_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
+              description: Action 结果
               properties:
+                message:
+                  type: string
                 return_info:
                   type: string
                 success:
                   type: boolean
               required:
-              - return_info
               - success
+              - message
+              - return_info
               title: Stir_Result
               type: object
           required:
@@ -2000,16 +2002,13 @@ workstation:
             result:
               description: Action 结果 - 完成后从服务器发送到客户端
               properties:
-                message:
-                  type: string
                 return_info:
                   type: string
                 success:
                   type: boolean
               required:
-              - success
-              - message
               - return_info
+              - success
               title: StopStir_Result
               type: object
           required:
@@ -2149,25 +2148,25 @@ workstation:
       WashSolidProtocol:
         feedback: {}
         goal:
-          filtrate_vessel: filtrate_vessel
-          repeats: repeats
+          vessel: vessel
           solvent: solvent
+          volume: volume
+          filtrate_vessel: filtrate_vessel
+          temp: temp
           stir: stir
           stir_speed: stir_speed
-          temp: temp
           time: time
-          vessel: vessel
-          volume: volume
+          repeats: repeats
         goal_default:
-          filtrate_vessel: ''
-          repeats: 0
+          vessel: ''
           solvent: ''
+          volume: 0.0
+          filtrate_vessel: ''
+          temp: 25.0
           stir: false
           stir_speed: 0.0
-          temp: 0.0
           time: 0.0
-          vessel: ''
-          volume: 0.0
+          repeats: 1
         handles:
           input:
           - data_key: vessel
@@ -2180,8 +2179,8 @@ workstation:
             data_type: resource
             handler_key: solvent
             label: Solvent
-          - data_key: vessel
-            data_source: executor
+          - data_key: filtrate_vessel
+            data_source: handle
             data_type: resource
             handler_key: filtrate_vessel
             label: Filtrate Vessel
@@ -2191,7 +2190,7 @@ workstation:
             data_type: resource
             handler_key: VesselOut
             label: Vessel Out
-          - data_key: vessel
+          - data_key: filtrate_vessel
             data_source: executor
             data_type: resource
             handler_key: filtrate_vessel_out
@@ -2215,36 +2214,45 @@ workstation:
             goal:
               description: Action 目标 - 从客户端发送到服务器
               properties:
-                filtrate_vessel:
-                  type: string
-                repeats:
-                  maximum: 2147483647
-                  minimum: -2147483648
-                  type: integer
-                solvent:
-                  type: string
-                stir:
-                  type: boolean
-                stir_speed:
-                  type: number
-                temp:
-                  type: number
-                time:
-                  type: number
                 vessel:
                   type: string
+                  description: 装有固体的容器名称
+                solvent:
+                  type: string
+                  description: 清洗溶剂名称
                 volume:
                   type: number
+                  description: 清洗溶剂体积
+                filtrate_vessel:
+                  type: string
+                  default: ''
+                  description: 滤液收集容器（可选）
+                temp:
+                  type: number
+                  default: 25.0
+                  description: 清洗温度
+                stir:
+                  type: boolean
+                  default: false
+                  description: 是否搅拌
+                stir_speed:
+                  type: number
+                  default: 0.0
+                  description: 搅拌速度
+                time:
+                  type: number
+                  default: 0.0
+                  description: 清洗时间
+                repeats:
+                  type: integer
+                  default: 1
+                  minimum: 1
+                  maximum: 10
+                  description: 重复次数
               required:
               - vessel
               - solvent
               - volume
-              - filtrate_vessel
-              - temp
-              - stir
-              - stir_speed
-              - time
-              - repeats
               title: WashSolid_Goal
               type: object
             result:
@@ -2645,7 +2653,7 @@ workstation:
           vessel: vessel
           volume: volume
         goal_default:
-          ratio: ''
+          ratio: 1.0
           solvent1: ''
           solvent2: ''
           vessel: ''
@@ -2657,12 +2665,12 @@ workstation:
             data_type: resource
             handler_key: Vessel
             label: Vessel
-          - data_key: solvent
+          - data_key: solvent1
             data_source: handle
             data_type: resource
             handler_key: solvent1
             label: Solvent 1
-          - data_key: solvent
+          - data_key: solvent2
             data_source: handle
             data_type: resource
             handler_key: solvent2
@@ -2680,10 +2688,10 @@ workstation:
             feedback:
               description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties:
-                status:
-                  type: string
                 progress:
                   type: number
+                status:
+                  type: string
               required:
               - status
               - progress
@@ -2693,7 +2701,7 @@ workstation:
               description: Action 目标 - 从客户端发送到服务器
               properties:
                 ratio:
-                  type: string
+                  type: number
                 solvent1:
                   type: string
                 solvent2:

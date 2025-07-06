@@ -1,9 +1,10 @@
-# Organic
+# Organic Synthesis Station Evaporate Action
 string vessel
 float64 pressure
 float64 temp
 float64 time
 float64 stir_speed
+string solvent
 ---
 string return_info
 bool success

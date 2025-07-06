@@ -1,7 +1,6 @@
-# Organic
+# Organic Synthesis Station EvacuateAndRefill Action
 string vessel
 string gas
-int32 repeats
 ---
 string return_info
 bool success
