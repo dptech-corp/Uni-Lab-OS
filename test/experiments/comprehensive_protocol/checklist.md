@@ -70,7 +70,7 @@ class SeparateProtocol(BaseModel):
     repeats: int       <Separate product_phase="bottom" purpose="extract" repeats="3" solvent="CH2Cl2" vessel="separator" volume="?"/>
     stir_time: float<Separate product_phase="top" product_vessel="flask" purpose="separate" vessel="separator" waste_vessel="separator"/>
     stir_speed: float
-    settling_time: float
+    settling_time: float                写了action
 
 
 class EvaporateProtocol(BaseModel):
@@ -102,7 +102,7 @@ class AddProtocol(BaseModel):
     vessel="main_reactor" volume="2.67 mL"/>
     <Add ratio="?" reagent="tetrahydrofuran|tert-butanol" vessel="main_reactor" volume="?"/>
     viscous: bool
-    purpose: str
+    purpose: str                        写了action
 
 class CentrifugeProtocol(BaseModel):
     vessel: str
@@ -127,7 +127,7 @@ class HeatChillProtocol(BaseModel):
                                         <HeatChill temp="256 °C" time="?" vessel="main_reactor"/>
                                         <HeatChill reflux_solvent="methanol" temp_spec="reflux" time="2 h" vessel="main_reactor"/>
                                         <HeatChillToTemp temp_spec="room temperature" vessel="main_reactor"/>
-    stir: bool
+    stir: bool                          处理了
     stir_speed: float
     purpose: str
 
@@ -180,7 +180,7 @@ class DissolveProtocol(BaseModel):
     amount: str = ""   <Dissolve mass="12.9 g" reagent="4-tert-butylbenzyl bromide" vessel="main_reactor"/>
     temp: float = 25.0  <Dissolve solvent="diisopropyl ether" vessel="rotavap" volume="?"/>
     time: float = 0.0
-    stir_speed: float = 0.0
+    stir_speed: float = 0.0     写了action
 
 class FilterThroughProtocol(BaseModel):
     from_vessel: str
@@ -194,7 +194,7 @@ class FilterThroughProtocol(BaseModel):
 class RunColumnProtocol(BaseModel):
     from_vessel: str
     to_vessel: str              <RunColumn Rf="?" column="column" from_vessel="rotavap" pct1="40 %" pct2="50 %" solvent1="ethyl acetate" solvent2="hexane" to_vessel="rotavap"/>
-    column: str
+    column: str                 写了action
 
 class WashSolidProtocol(BaseModel):
     vessel: str

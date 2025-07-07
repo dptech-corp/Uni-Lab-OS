@@ -2956,217 +2956,126 @@ virtual_solenoid_valve:
           - goal
           title: open参数
           type: object
-        type: UniLabJsonCommandAsync
-      auto-reset:
-        feedback: {}
-        goal: {}
-        goal_default: {}
-        handles: []
-        result: {}
-        schema:
-          description: reset的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties: {}
-              required: []
-              type: object
-            result: {}
-          required:
-          - goal
-          title: reset参数
-          type: object
-        type: UniLabJsonCommandAsync
-      auto-set_state:
+        type: UniLabJsonCommand
+      auto-set_status:
         feedback: {}
         goal: {}
         goal_default:
-          command: null
+          string: null
         handles: []
         result: {}
         schema:
-          description: set_state的参数schema
+          description: set_status的参数schema
           properties:
             feedback: {}
             goal:
               properties:
-                command:
+                string:
                   type: string
               required:
-              - command
+              - string
               type: object
             result: {}
           required:
           - goal
-          title: set_state参数
-          type: object
-        type: UniLabJsonCommandAsync
-      auto-set_valve_position:
-        feedback: {}
-        goal: {}
-        goal_default:
-          command: null
-        handles: []
-        result: {}
-        schema:
-          description: set_valve_position的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                command:
-                  type: string
-              required: []
-              type: object
-            result: {}
-          required:
-          - goal
-          title: set_valve_position参数
-          type: object
-        type: UniLabJsonCommandAsync
-      auto-toggle:
-        feedback: {}
-        goal: {}
-        goal_default: {}
-        handles: []
-        result: {}
-        schema:
-          description: toggle的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties: {}
-              required: []
-              type: object
-            result: {}
-          required:
-          - goal
-          title: toggle参数
+          title: set_status参数
           type: object
         type: UniLabJsonCommand
       close:
         feedback: {}
-        goal:
-          command: CLOSED
-        goal_default:
-          command: ''
+        goal: {}
+        goal_default: {}
         handles: []
-        result:
-          success: success
+        result: {}
         schema:
-          description: ROS Action SendCmd 的 JSON Schema
+          description: ROS Action EmptyIn 的 JSON Schema
           properties:
             feedback:
               description: Action 反馈 - 执行过程中从服务器发送到客户端
-              properties:
-                status:
-                  type: string
-              required:
-              - status
-              title: SendCmd_Feedback
+              properties: {}
+              required: []
+              title: EmptyIn_Feedback
               type: object
             goal:
               description: Action 目标 - 从客户端发送到服务器
-              properties:
-                command:
-                  type: string
-              required:
-              - command
-              title: SendCmd_Goal
+              properties: {}
+              required: []
+              title: EmptyIn_Goal
               type: object
             result:
               description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
-                success:
-                  type: boolean
               required:
               - return_info
-              - success
-              title: SendCmd_Result
+              title: EmptyIn_Result
               type: object
           required:
           - goal
-          title: SendCmd
+          title: EmptyIn
           type: object
-        type: SendCmd
+        type: EmptyIn
       open:
         feedback: {}
-        goal:
-          command: OPEN
-        goal_default:
-          command: ''
+        goal: {}
+        goal_default: {}
         handles: []
-        result:
-          success: success
+        result: {}
         schema:
-          description: ROS Action SendCmd 的 JSON Schema
+          description: ROS Action EmptyIn 的 JSON Schema
           properties:
             feedback:
               description: Action 反馈 - 执行过程中从服务器发送到客户端
-              properties:
-                status:
-                  type: string
-              required:
-              - status
-              title: SendCmd_Feedback
+              properties: {}
+              required: []
+              title: EmptyIn_Feedback
               type: object
             goal:
               description: Action 目标 - 从客户端发送到服务器
-              properties:
-                command:
-                  type: string
-              required:
-              - command
-              title: SendCmd_Goal
+              properties: {}
+              required: []
+              title: EmptyIn_Goal
               type: object
             result:
               description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
-                success:
-                  type: boolean
               required:
               - return_info
-              - success
-              title: SendCmd_Result
+              title: EmptyIn_Result
               type: object
           required:
           - goal
-          title: SendCmd
+          title: EmptyIn
           type: object
-        type: SendCmd
-      set_state:
+        type: EmptyIn
+      set_status:
         feedback: {}
         goal:
-          command: command
+          string: string
         goal_default:
-          command: ''
+          string: ''
         handles: []
-        result:
-          success: success
+        result: {}
         schema:
-          description: ROS Action SendCmd 的 JSON Schema
+          description: ROS Action StrSingleInput 的 JSON Schema
           properties:
             feedback:
               description: Action 反馈 - 执行过程中从服务器发送到客户端
-              properties:
-                status:
-                  type: string
-              required:
-              - status
-              title: SendCmd_Feedback
+              properties: {}
+              required: []
+              title: StrSingleInput_Feedback
               type: object
             goal:
               description: Action 目标 - 从客户端发送到服务器
               properties:
-                command:
+                string:
                   type: string
               required:
-              - command
-              title: SendCmd_Goal
+              - string
+              title: StrSingleInput_Goal
               type: object
             result:
               description: Action 结果 - 完成后从服务器发送到客户端
@@ -3178,60 +3087,13 @@ virtual_solenoid_valve:
               required:
               - return_info
               - success
-              title: SendCmd_Result
+              title: StrSingleInput_Result
               type: object
           required:
           - goal
-          title: SendCmd
+          title: StrSingleInput
           type: object
-        type: SendCmd
-      set_valve_position:
-        feedback: {}
-        goal:
-          command: command
-        goal_default:
-          command: ''
-        handles: []
-        result:
-          success: success
-        schema:
-          description: ROS Action SendCmd 的 JSON Schema
-          properties:
-            feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
-              properties:
-                status:
-                  type: string
-              required:
-              - status
-              title: SendCmd_Feedback
-              type: object
-            goal:
-              description: Action 目标 - 从客户端发送到服务器
-              properties:
-                command:
-                  type: string
-              required:
-              - command
-              title: SendCmd_Goal
-              type: object
-            result:
-              description: Action 结果 - 完成后从服务器发送到客户端
-              properties:
-                return_info:
-                  type: string
-                success:
-                  type: boolean
-              required:
-              - return_info
-              - success
-              title: SendCmd_Result
-              type: object
-          required:
-          - goal
-          title: SendCmd
-          type: object
-        type: SendCmd
+        type: StrSingleInput
     module: unilabos.devices.virtual.virtual_solenoid_valve:VirtualSolenoidValve
     status_types:
       is_open: bool
@@ -3321,6 +3183,7 @@ virtual_stirrer:
           properties:
             feedback: {}
             goal:
+
               properties: {}
               required: []
               type: object
@@ -4503,4 +4366,126 @@ virtual_vacuum_pump:
           type: string
       required:
       - status
+      type: object
+virtual_solid_dispenser:
+  class:
+    action_value_mappings:
+      auto-cleanup:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result: {}
+        schema:
+          description: cleanup的参数schema
+          type: object
+        type: UniLabJsonCommandAsync
+      auto-initialize:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result: {}
+        schema:
+          description: initialize的参数schema
+          type: object
+        type: UniLabJsonCommandAsync
+      auto-add_solid:
+        feedback: {}
+        goal: {}
+        goal_default:
+          vessel: main_reactor
+          reagent: ''
+          mass: ''
+          mol: ''
+          purpose: ''
+        handles: []
+        result: {}
+        schema:
+          description: add_solid的参数schema
+          type: object
+        type: UniLabJsonCommandAsync
+      add_solid:
+        feedback:
+          current_status: status
+          progress: progress
+        goal:
+          vessel: vessel
+          reagent: reagent
+          mass: mass
+          mol: mol
+          purpose: purpose
+        goal_default:
+          vessel: 'main_reactor'
+          reagent: ''
+          mass: ''
+          mol: ''
+          purpose: ''
+        handles: []
+        result:
+          message: message
+          success: success
+          return_info: return_info
+        schema:
+          description: ROS Action AddSolid 的 JSON Schema
+          type: object
+        type: AddSolid
+    module: unilabos.devices.virtual.virtual_solid_dispenser:VirtualSolidDispenser
+    status_types:
+      status: str
+      current_reagent: str
+      dispensed_amount: float
+      total_operations: int
+    type: python
+  description: Virtual Solid Dispenser for Add Protocol Solid Reagents
+  handles:
+  - data_key: SolidIn
+    data_source: handle
+    data_type: resource
+    description: 固体试剂进料口
+    handler_key: SolidIn
+    io_type: target
+    label: SolidIn
+    side: WEST
+  - data_key: SolidOut
+    data_source: executor
+    data_type: resource
+    description: 固体试剂出料口
+    handler_key: SolidOut
+    io_type: source
+    label: SolidOut
+    side: EAST
+  icon: ''
+  init_param_schema:
+    config:
+      properties:
+        config:
+          type: object
+        device_id:
+          type: string
+        max_capacity:
+          type: number
+          default: 100.0
+          description: 最大加样容量 (g)
+        precision:
+          type: number
+          default: 0.001
+          description: 加样精度 (g)
+      required: []
+      type: object
+    data:
+      properties:
+        status:
+          type: string
+        current_reagent:
+          type: string
+        dispensed_amount:
+          type: number
+        total_operations:
+          type: integer
+      required:
+      - status
+      - current_reagent
+      - dispensed_amount
+      - total_operations
       type: object

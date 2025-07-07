@@ -32,7 +32,11 @@
                 "separator_1",
                 "collection_bottle_1",
                 "collection_bottle_2",
-                "collection_bottle_3"
+                "collection_bottle_3",
+                "solid_dispenser_1",
+                "solid_reagent_bottle_1",
+                "solid_reagent_bottle_2",
+                "solid_reagent_bottle_3"
             ],
             "parent": null,
             "type": "device",
@@ -672,6 +676,98 @@
             "data": {
                 "current_volume": 0.0
             }
+        },
+        {
+            "id": "solid_dispenser_1",
+            "name": "固体粉末加样器",
+            "children": [],
+            "parent": "OrganicSynthesisStation",
+            "type": "device",
+            "class": "virtual_solid_dispenser",
+            "position": {
+                "x": 600,
+                "y": 300,
+                "z": 0
+            },
+            "config": {
+                "max_capacity": 100.0,
+                "precision": 0.001
+            },
+            "data": {
+                "status": "Ready",
+                "current_reagent": "",
+                "dispensed_amount": 0.0,
+                "total_operations": 0
+            }
+        },
+        {
+            "id": "solid_reagent_bottle_1",
+            "name": "固体试剂瓶1-氯化钠",
+            "children": [],
+            "parent": "OrganicSynthesisStation",
+            "type": "container",
+            "class": "container",
+            "position": {
+                "x": 550,
+                "y": 250,
+                "z": 0
+            },
+            "config": {
+                "volume": 500.0,
+                "reagent": "sodium_chloride",
+                "physical_state": "solid"
+            },
+            "data": {
+                "current_mass": 500.0,
+                "reagent_name": "sodium_chloride",
+                "physical_state": "solid"
+            }
+        },
+        {
+            "id": "solid_reagent_bottle_2",
+            "name": "固体试剂瓶2-碳酸钠",
+            "children": [],
+            "parent": "OrganicSynthesisStation",
+            "type": "container",
+            "class": "container",
+            "position": {
+                "x": 600,
+                "y": 250,
+                "z": 0
+            },
+            "config": {
+                "volume": 500.0,
+                "reagent": "sodium_carbonate",
+                "physical_state": "solid"
+            },
+            "data": {
+                "current_mass": 500.0,
+                "reagent_name": "sodium_carbonate",
+                "physical_state": "solid"
+            }
+        },
+        {
+            "id": "solid_reagent_bottle_3",
+            "name": "固体试剂瓶3-氯化镁",
+            "children": [],
+            "parent": "OrganicSynthesisStation",
+            "type": "container",
+            "class": "container",
+            "position": {
+                "x": 650,
+                "y": 250,
+                "z": 0
+            },
+            "config": {
+                "volume": 500.0,
+                "reagent": "magnesium_chloride",
+                "physical_state": "solid"
+            },
+            "data": {
+                "current_mass": 500.0,
+                "reagent_name": "magnesium_chloride",
+                "physical_state": "solid"
+            }
         }
     ],
     "links": [
@@ -963,6 +1059,46 @@
             "port": {
                 "solenoid_valve_3": "out",
                 "main_reactor": "top"
+            }
+        },
+        {
+            "id": "link_solid_dispenser_to_reactor",
+            "source": "solid_dispenser_1",
+            "target": "main_reactor",
+            "type": "resource",
+            "port": {
+                "solid_dispenser_1": "SolidOut",
+                "main_reactor": "top"
+            }
+        },
+        {
+            "id": "link_solid_bottle1_to_dispenser",
+            "source": "solid_reagent_bottle_1",
+            "target": "solid_dispenser_1",
+            "type": "resource",
+            "port": {
+                "solid_reagent_bottle_1": "top",
+                "solid_dispenser_1": "SolidIn"
+            }
+        },
+        {
+            "id": "link_solid_bottle2_to_dispenser",
+            "source": "solid_reagent_bottle_2",
+            "target": "solid_dispenser_1",
+            "type": "resource",
+            "port": {
+                "solid_reagent_bottle_2": "top",
+                "solid_dispenser_1": "SolidIn"
+            }
+        },
+        {
+            "id": "link_solid_bottle3_to_dispenser",
+            "source": "solid_reagent_bottle_3",
+            "target": "solid_dispenser_1",
+            "type": "resource",
+            "port": {
+                "solid_reagent_bottle_3": "top",
+                "solid_dispenser_1": "SolidIn"
             }
         }
     ]
