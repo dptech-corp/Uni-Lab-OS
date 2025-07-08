@@ -257,8 +257,13 @@ workstation:
           volume: volume
         goal_default:
           amount: ''
+          equiv: ''
+          event: ''
           mass: 0.0
+          mol: ''
           purpose: ''
+          rate_spec: ''
+          ratio: ''
           reagent: ''
           stir: false
           stir_speed: 0.0
@@ -305,9 +310,19 @@ workstation:
               properties:
                 amount:
                   type: string
+                equiv:
+                  type: string
+                event:
+                  type: string
                 mass:
                   type: number
+                mol:
+                  type: string
                 purpose:
+                  type: string
+                rate_spec:
+                  type: string
+                ratio:
                   type: string
                 reagent:
                   type: string
@@ -334,6 +349,11 @@ workstation:
               - stir_speed
               - viscous
               - purpose
+              - event
+              - mol
+              - rate_spec
+              - equiv
+              - ratio
               title: Add_Goal
               type: object
             result:
@@ -356,6 +376,85 @@ workstation:
           title: Add
           type: object
         type: Add
+      AdjustPHProtocol:
+        feedback: {}
+        goal:
+          ph_value: ph_value
+          reagent: reagent
+          vessel: vessel
+        goal_default:
+          ph_value: 0.0
+          reagent: ''
+          vessel: ''
+        handles:
+          input:
+          - data_key: vessel
+            data_source: handle
+            data_type: resource
+            handler_key: Vessel
+            label: Vessel
+          - data_key: reagent
+            data_source: handle
+            data_type: resource
+            handler_key: reagent
+            label: Reagent
+          output:
+          - data_key: vessel
+            data_source: executor
+            data_type: resource
+            handler_key: VesselOut
+            label: Vessel
+        result: {}
+        schema:
+          description: ROS Action AdjustPH 的 JSON Schema
+          properties:
+            feedback:
+              description: Action 反馈 - 执行过程中从服务器发送到客户端
+              properties:
+                progress:
+                  type: number
+                status:
+                  type: string
+              required:
+              - status
+              - progress
+              title: AdjustPH_Feedback
+              type: object
+            goal:
+              description: Action 目标 - 从客户端发送到服务器
+              properties:
+                ph_value:
+                  type: number
+                reagent:
+                  type: string
+                vessel:
+                  type: string
+              required:
+              - vessel
+              - ph_value
+              - reagent
+              title: AdjustPH_Goal
+              type: object
+            result:
+              description: Action 结果 - 完成后从服务器发送到客户端
+              properties:
+                message:
+                  type: string
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - success
+              - message
+              - return_info
+              title: AdjustPH_Result
+              type: object
+          required:
+          - goal
+          title: AdjustPH
+          type: object
+        type: AdjustPH
       CentrifugeProtocol:
         feedback: {}
         goal:
@@ -664,6 +763,9 @@ workstation:
           volume: volume
         goal_default:
           amount: ''
+          mass: ''
+          mol: ''
+          reagent: ''
           solvent: ''
           stir_speed: 0.0
           temp: 0.0
@@ -709,6 +811,12 @@ workstation:
               properties:
                 amount:
                   type: string
+                mass:
+                  type: string
+                mol:
+                  type: string
+                reagent:
+                  type: string
                 solvent:
                   type: string
                 stir_speed:
@@ -729,6 +837,9 @@ workstation:
               - temp
               - time
               - stir_speed
+              - mass
+              - mol
+              - reagent
               title: Dissolve_Goal
               type: object
             result:
@@ -751,6 +862,75 @@ workstation:
           title: Dissolve
           type: object
         type: Dissolve
+      DryProtocol:
+        feedback: {}
+        goal:
+          compound: compound
+          vessel: vessel
+        goal_default:
+          compound: ''
+          vessel: ''
+        handles:
+          input:
+          - data_key: vessel
+            data_source: handle
+            data_type: resource
+            handler_key: Vessel
+            label: Vessel
+          output:
+          - data_key: vessel
+            data_source: executor
+            data_type: resource
+            handler_key: VesselOut
+            label: Vessel
+        result: {}
+        schema:
+          description: ROS Action Dry 的 JSON Schema
+          properties:
+            feedback:
+              description: Action 反馈 - 执行过程中从服务器发送到客户端
+              properties:
+                progress:
+                  type: number
+                status:
+                  type: string
+              required:
+              - status
+              - progress
+              title: Dry_Feedback
+              type: object
+            goal:
+              description: Action 目标 - 从客户端发送到服务器
+              properties:
+                compound:
+                  type: string
+                vessel:
+                  type: string
+              required:
+              - compound
+              - vessel
+              title: Dry_Goal
+              type: object
+            result:
+              description: Action 结果 - 完成后从服务器发送到客户端
+              properties:
+                message:
+                  type: string
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - success
+              - message
+              - return_info
+              title: Dry_Result
+              type: object
+          required:
+          - goal
+          title: Dry
+          type: object
+        type: Dry
       EvacuateAndRefillProtocol:
         feedback: {}
         goal:
@@ -852,19 +1032,19 @@ workstation:
       EvaporateProtocol:
         feedback: {}
         goal:
-          vessel: vessel
           pressure: pressure
+          solvent: solvent
+          stir_speed: stir_speed
           temp: temp
           time: time
-          stir_speed: stir_speed
-          solvent: solvent
+          vessel: vessel
         goal_default:
-          vessel: ''
-          pressure: 0.1
-          temp: 60.0
-          time: 1800.0
-          stir_speed: 100.0
+          pressure: 0.0
           solvent: ''
+          stir_speed: 0.0
+          temp: 0.0
+          time: 0.0
+          vessel: ''
         handles:
           input:
           - data_key: vessel
@@ -882,35 +1062,85 @@ workstation:
         schema:
           description: ROS Action Evaporate 的 JSON Schema
           properties:
-            goal:
-              description: Action 目标
+            feedback:
+              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties:
-                vessel:
+                current_device:
                   type: string
-                  description: 蒸发容器名称
+                status:
+                  type: string
+                time_remaining:
+                  properties:
+                    nanosec:
+                      maximum: 4294967295
+                      minimum: 0
+                      type: integer
+                    sec:
+                      maximum: 2147483647
+                      minimum: -2147483648
+                      type: integer
+                  required:
+                  - sec
+                  - nanosec
+                  title: Duration
+                  type: object
+                time_spent:
+                  properties:
+                    nanosec:
+                      maximum: 4294967295
+                      minimum: 0
+                      type: integer
+                    sec:
+                      maximum: 2147483647
+                      minimum: -2147483648
+                      type: integer
+                  required:
+                  - sec
+                  - nanosec
+                  title: Duration
+                  type: object
+              required:
+              - status
+              - current_device
+              - time_spent
+              - time_remaining
+              title: Evaporate_Feedback
+              type: object
+            goal:
+              description: Action 目标 - 从客户端发送到服务器
+              properties:
                 pressure:
                   type: number
-                  default: 0.1
-                  description: 真空度 (bar)
-                temp:
-                  type: number
-                  default: 60.0
-                  description: 加热温度 (°C)
-                time:
-                  type: number
-                  default: 1800.0
-                  description: 蒸发时间 (秒)
-                stir_speed:
-                  type: number
-                  default: 100.0
-                  description: 旋转速度 (RPM)
                 solvent:
                   type: string
-                  default: ''
-                  description: 溶剂名称
+                stir_speed:
+                  type: number
+                temp:
+                  type: number
+                time:
+                  type: number
+                vessel:
+                  type: string
               required:
               - vessel
+              - pressure
+              - temp
+              - time
+              - stir_speed
+              - solvent
               title: Evaporate_Goal
+              type: object
+            result:
+              description: Action 结果 - 完成后从服务器发送到客户端
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: Evaporate_Result
               type: object
           required:
           - goal
@@ -920,20 +1150,20 @@ workstation:
       FilterProtocol:
         feedback: {}
         goal:
-          vessel: vessel
+          continue_heatchill: continue_heatchill
           filtrate_vessel: filtrate_vessel
           stir: stir
           stir_speed: stir_speed
           temp: temp
-          continue_heatchill: continue_heatchill
+          vessel: vessel
           volume: volume
         goal_default:
-          vessel: ''
+          continue_heatchill: false
           filtrate_vessel: ''
           stir: false
           stir_speed: 0.0
-          temp: 25.0
-          continue_heatchill: false
+          temp: 0.0
+          vessel: ''
           volume: 0.0
         handles:
           input:
@@ -983,35 +1213,28 @@ workstation:
             goal:
               description: Action 目标 - 从客户端发送到服务器
               properties:
-                vessel:
-                  type: string
-                  description: 过滤容器名称
-                filtrate_vessel:
-                  type: string
-                  default: ''
-                  description: 滤液容器名称（可选）
-                stir:
-                  type: boolean
-                  default: false
-                  description: 是否搅拌
-                stir_speed:
-                  type: number
-                  default: 0.0
-                  description: 搅拌速度
-                temp:
-                  type: number
-                  default: 25.0
-                  description: 温度
                 continue_heatchill:
                   type: boolean
-                  default: false
-                  description: 是否继续加热冷却
+                filtrate_vessel:
+                  type: string
+                stir:
+                  type: boolean
+                stir_speed:
+                  type: number
+                temp:
+                  type: number
+                vessel:
+                  type: string
                 volume:
                   type: number
-                  default: 0.0
-                  description: 过滤体积
               required:
               - vessel
+              - filtrate_vessel
+              - stir
+              - stir_speed
+              - temp
+              - continue_heatchill
+              - volume
               title: Filter_Goal
               type: object
             result:
@@ -1148,27 +1371,27 @@ workstation:
       HeatChillProtocol:
         feedback: {}
         goal:
-          vessel: vessel
-          temp: temp
-          time: time
-          temp_spec: temp_spec
-          time_spec: time_spec
           pressure: pressure
+          purpose: purpose
           reflux_solvent: reflux_solvent
           stir: stir
           stir_speed: stir_speed
-          purpose: purpose
+          temp: temp
+          temp_spec: temp_spec
+          time: time
+          time_spec: time_spec
+          vessel: vessel
         goal_default:
-          vessel: ''
-          temp: 25.0
-          time: 300.0
-          temp_spec: ''
-          time_spec: ''
           pressure: ''
+          purpose: ''
           reflux_solvent: ''
           stir: false
-          stir_speed: 300.0
-          purpose: ''
+          stir_speed: 0.0
+          temp: 0.0
+          temp_spec: ''
+          time: 0.0
+          time_spec: ''
+          vessel: ''
         handles:
           input:
           - data_key: vessel
@@ -1187,7 +1410,7 @@ workstation:
           description: ROS Action HeatChill 的 JSON Schema
           properties:
             feedback:
-              description: Action 反馈
+              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties:
                 status:
                   type: string
@@ -1196,53 +1419,43 @@ workstation:
               title: HeatChill_Feedback
               type: object
             goal:
-              description: Action 目标
+              description: Action 目标 - 从客户端发送到服务器
               properties:
-                vessel:
-                  type: string
-                  description: 加热容器名称
-                temp:
-                  type: number
-                  default: 25.0
-                  description: 目标温度
-                time:
-                  type: number
-                  default: 300.0
-                  description: 加热时间
-                temp_spec:
-                  type: string
-                  default: ''
-                  description: 温度规格
-                time_spec:
-                  type: string
-                  default: ''
-                  description: 时间规格
                 pressure:
                   type: string
-                  default: ''
-                  description: 压力规格
-                reflux_solvent:
-                  type: string
-                  default: ''
-                  description: 回流溶剂名称
-                stir:
-                  type: boolean
-                  default: false
-                  description: 是否搅拌
-                stir_speed:
-                  type: number
-                  default: 300.0
-                  description: 搅拌速度
                 purpose:
                   type: string
-                  default: ''
-                  description: 操作目的
+                reflux_solvent:
+                  type: string
+                stir:
+                  type: boolean
+                stir_speed:
+                  type: number
+                temp:
+                  type: number
+                temp_spec:
+                  type: string
+                time:
+                  type: number
+                time_spec:
+                  type: string
+                vessel:
+                  type: string
               required:
               - vessel
+              - temp
+              - time
+              - temp_spec
+              - time_spec
+              - pressure
+              - reflux_solvent
+              - stir
+              - stir_speed
+              - purpose
               title: HeatChill_Goal
               type: object
             result:
-              description: Action 结果
+              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 message:
                   type: string
@@ -1387,40 +1600,114 @@ workstation:
           title: HeatChillStop
           type: object
         type: HeatChillStop
+      HydrogenateProtocol:
+        feedback: {}
+        goal:
+          temp: temp
+          time: time
+          vessel: vessel
+        goal_default:
+          temp: ''
+          time: ''
+          vessel: ''
+        handles:
+          input:
+          - data_key: vessel
+            data_source: handle
+            data_type: resource
+            handler_key: Vessel
+            label: Vessel
+          output:
+          - data_key: vessel
+            data_source: executor
+            data_type: resource
+            handler_key: VesselOut
+            label: Vessel
+        result: {}
+        schema:
+          description: ROS Action Hydrogenate 的 JSON Schema
+          properties:
+            feedback:
+              description: Action 反馈 - 执行过程中从服务器发送到客户端
+              properties:
+                progress:
+                  type: number
+                status:
+                  type: string
+              required:
+              - status
+              - progress
+              title: Hydrogenate_Feedback
+              type: object
+            goal:
+              description: Action 目标 - 从客户端发送到服务器
+              properties:
+                temp:
+                  type: string
+                time:
+                  type: string
+                vessel:
+                  type: string
+              required:
+              - temp
+              - time
+              - vessel
+              title: Hydrogenate_Goal
+              type: object
+            result:
+              description: Action 结果 - 完成后从服务器发送到客户端
+              properties:
+                message:
+                  type: string
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - success
+              - message
+              - return_info
+              title: Hydrogenate_Result
+              type: object
+          required:
+          - goal
+          title: Hydrogenate
+          type: object
+        type: Hydrogenate
       PumpTransferProtocol:
         feedback: {}
         goal:
           amount: amount
+          event: event
+          flowrate: flowrate
           from_vessel: from_vessel
+          rate_spec: rate_spec
           rinsing_repeats: rinsing_repeats
           rinsing_solvent: rinsing_solvent
           rinsing_volume: rinsing_volume
           solid: solid
+          through: through
           time: time
           to_vessel: to_vessel
+          transfer_flowrate: transfer_flowrate
           viscous: viscous
           volume: volume
-          flowrate: flowrate
-          transfer_flowrate: transfer_flowrate
-          rate_spec: rate_spec
-          event: event
-          through: through
         goal_default:
           amount: ''
+          event: ''
+          flowrate: 0.0
           from_vessel: ''
+          rate_spec: ''
           rinsing_repeats: 0
           rinsing_solvent: ''
           rinsing_volume: 0.0
           solid: false
+          through: ''
           time: 0.0
           to_vessel: ''
+          transfer_flowrate: 0.0
           viscous: false
           volume: 0.0
-          flowrate: 0.0
-          transfer_flowrate: 0.0
-          rate_spec: ''
-          event: ''
-          through: ''
         handles:
           input:
           - data_key: vessel
@@ -1451,7 +1738,7 @@ workstation:
             label: To Vessel
         result: {}
         schema:
-          description: ROS Action PumpTransfer 的 JSON Schema（兼容增强版）
+          description: ROS Action PumpTransfer 的 JSON Schema
           properties:
             feedback:
               description: Action 反馈 - 执行过程中从服务器发送到客户端
@@ -1461,8 +1748,34 @@ workstation:
                 status:
                   type: string
                 time_remaining:
+                  properties:
+                    nanosec:
+                      maximum: 4294967295
+                      minimum: 0
+                      type: integer
+                    sec:
+                      maximum: 2147483647
+                      minimum: -2147483648
+                      type: integer
+                  required:
+                  - sec
+                  - nanosec
+                  title: Duration
                   type: object
                 time_spent:
+                  properties:
+                    nanosec:
+                      maximum: 4294967295
+                      minimum: 0
+                      type: integer
+                    sec:
+                      maximum: 2147483647
+                      minimum: -2147483648
+                      type: integer
+                  required:
+                  - sec
+                  - nanosec
+                  title: Duration
                   type: object
               required:
               - status
@@ -1476,37 +1789,52 @@ workstation:
               properties:
                 amount:
                   type: string
+                event:
+                  type: string
+                flowrate:
+                  type: number
                 from_vessel:
                   type: string
-                to_vessel:
+                rate_spec:
                   type: string
-                volume:
-                  type: number
-                time:
-                  type: number
-                viscous:
-                  type: boolean
+                rinsing_repeats:
+                  maximum: 2147483647
+                  minimum: -2147483648
+                  type: integer
                 rinsing_solvent:
                   type: string
                 rinsing_volume:
                   type: number
-                rinsing_repeats:
-                  type: integer
                 solid:
                   type: boolean
-                flowrate:
-                  type: number
-                transfer_flowrate:
-                  type: number
-                rate_spec:
-                  type: string
-                event:
-                  type: string
                 through:
                   type: string
+                time:
+                  type: number
+                to_vessel:
+                  type: string
+                transfer_flowrate:
+                  type: number
+                viscous:
+                  type: boolean
+                volume:
+                  type: number
               required:
               - from_vessel
               - to_vessel
+              - volume
+              - amount
+              - time
+              - viscous
+              - rinsing_solvent
+              - rinsing_volume
+              - rinsing_repeats
+              - solid
+              - flowrate
+              - transfer_flowrate
+              - rate_spec
+              - event
+              - through
               title: PumpTransfer_Goal
               type: object
             result:
@@ -1526,6 +1854,159 @@ workstation:
           title: PumpTransfer
           type: object
         type: PumpTransfer
+      RecrystallizeProtocol:
+        feedback: {}
+        goal:
+          ratio: ratio
+          solvent1: solvent1
+          solvent2: solvent2
+          vessel: vessel
+          volume: volume
+        goal_default:
+          ratio: ''
+          solvent1: ''
+          solvent2: ''
+          vessel: ''
+          volume: 0.0
+        handles:
+          input:
+          - data_key: vessel
+            data_source: handle
+            data_type: resource
+            handler_key: Vessel
+            label: Vessel
+          - data_key: solvent1
+            data_source: handle
+            data_type: resource
+            handler_key: solvent1
+            label: Solvent 1
+          - data_key: solvent2
+            data_source: handle
+            data_type: resource
+            handler_key: solvent2
+            label: Solvent 2
+          output:
+          - data_key: vessel
+            data_source: executor
+            data_type: resource
+            handler_key: VesselOut
+            label: Vessel
+        result: {}
+        schema:
+          description: ROS Action Recrystallize 的 JSON Schema
+          properties:
+            feedback:
+              description: Action 反馈 - 执行过程中从服务器发送到客户端
+              properties:
+                progress:
+                  type: number
+                status:
+                  type: string
+              required:
+              - status
+              - progress
+              title: Recrystallize_Feedback
+              type: object
+            goal:
+              description: Action 目标 - 从客户端发送到服务器
+              properties:
+                ratio:
+                  type: string
+                solvent1:
+                  type: string
+                solvent2:
+                  type: string
+                vessel:
+                  type: string
+                volume:
+                  type: number
+              required:
+              - ratio
+              - solvent1
+              - solvent2
+              - vessel
+              - volume
+              title: Recrystallize_Goal
+              type: object
+            result:
+              description: Action 结果 - 完成后从服务器发送到客户端
+              properties:
+                message:
+                  type: string
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - success
+              - message
+              - return_info
+              title: Recrystallize_Result
+              type: object
+          required:
+          - goal
+          title: Recrystallize
+          type: object
+        type: Recrystallize
+      ResetHandlingProtocol:
+        feedback: {}
+        goal:
+          solvent: solvent
+        goal_default:
+          solvent: ''
+        handles:
+          input:
+          - data_key: solvent
+            data_source: handle
+            data_type: resource
+            handler_key: solvent
+            label: Solvent
+          output: []
+        result: {}
+        schema:
+          description: ROS Action ResetHandling 的 JSON Schema
+          properties:
+            feedback:
+              description: Action 反馈 - 执行过程中从服务器发送到客户端
+              properties:
+                progress:
+                  type: number
+                status:
+                  type: string
+              required:
+              - status
+              - progress
+              title: ResetHandling_Feedback
+              type: object
+            goal:
+              description: Action 目标 - 从客户端发送到服务器
+              properties:
+                solvent:
+                  type: string
+              required:
+              - solvent
+              title: ResetHandling_Goal
+              type: object
+            result:
+              description: Action 结果 - 完成后从服务器发送到客户端
+              properties:
+                message:
+                  type: string
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - success
+              - message
+              - return_info
+              title: ResetHandling_Result
+              type: object
+          required:
+          - goal
+          title: ResetHandling
+          type: object
+        type: ResetHandling
       RunColumnProtocol:
         feedback: {}
         goal:
@@ -1535,6 +2016,12 @@ workstation:
         goal_default:
           column: ''
           from_vessel: ''
+          pct1: ''
+          pct2: ''
+          ratio: ''
+          rf: ''
+          solvent1: ''
+          solvent2: ''
           to_vessel: ''
         handles:
           input:
@@ -1582,12 +2069,30 @@ workstation:
                   type: string
                 from_vessel:
                   type: string
+                pct1:
+                  type: string
+                pct2:
+                  type: string
+                ratio:
+                  type: string
+                rf:
+                  type: string
+                solvent1:
+                  type: string
+                solvent2:
+                  type: string
                 to_vessel:
                   type: string
               required:
               - from_vessel
               - to_vessel
               - column
+              - rf
+              - pct1
+              - pct2
+              - solvent1
+              - solvent2
+              - ratio
               title: RunColumn_Goal
               type: object
             result:
@@ -1629,6 +2134,7 @@ workstation:
         goal_default:
           from_vessel: ''
           product_phase: ''
+          product_vessel: ''
           purpose: ''
           repeats: 0
           separation_vessel: ''
@@ -1639,7 +2145,10 @@ workstation:
           stir_time: 0.0
           through: ''
           to_vessel: ''
+          vessel: ''
+          volume: ''
           waste_phase_to_vessel: ''
+          waste_vessel: ''
         handles:
           input:
           - data_key: vessel
@@ -1723,6 +2232,8 @@ workstation:
                   type: string
                 product_phase:
                   type: string
+                product_vessel:
+                  type: string
                 purpose:
                   type: string
                 repeats:
@@ -1745,7 +2256,13 @@ workstation:
                   type: string
                 to_vessel:
                   type: string
+                vessel:
+                  type: string
+                volume:
+                  type: string
                 waste_phase_to_vessel:
+                  type: string
+                waste_vessel:
                   type: string
               required:
               - purpose
@@ -1761,18 +2278,25 @@ workstation:
               - stir_time
               - stir_speed
               - settling_time
+              - vessel
+              - volume
+              - product_vessel
+              - waste_vessel
               title: Separate_Goal
               type: object
             result:
               description: Action 结果 - 完成后从服务器发送到客户端
               properties:
+                message:
+                  type: string
                 return_info:
                   type: string
                 success:
                   type: boolean
               required:
-              - return_info
               - success
+              - message
+              - return_info
               title: Separate_Result
               type: object
           required:
@@ -1860,21 +2384,21 @@ workstation:
       StirProtocol:
         feedback: {}
         goal:
-          vessel: vessel
-          time: time
           event: event
-          time_spec: time_spec
-          stir_time: stir_time
-          stir_speed: stir_speed
           settling_time: settling_time
+          stir_speed: stir_speed
+          stir_time: stir_time
+          time: time
+          time_spec: time_spec
+          vessel: vessel
         goal_default:
-          vessel: ''
-          time: '5 min'
           event: ''
+          settling_time: 0.0
+          stir_speed: 0.0
+          stir_time: 0.0
+          time: ''
           time_spec: ''
-          stir_time: 300.0
-          stir_speed: 200.0
-          settling_time: 60.0
+          vessel: ''
         handles:
           input:
           - data_key: vessel
@@ -1893,7 +2417,7 @@ workstation:
           description: ROS Action Stir 的 JSON Schema
           properties:
             feedback:
-              description: Action 反馈
+              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties:
                 status:
                   type: string
@@ -1902,41 +2426,34 @@ workstation:
               title: Stir_Feedback
               type: object
             goal:
-              description: Action 目标
+              description: Action 目标 - 从客户端发送到服务器
               properties:
-                vessel:
-                  type: string
-                  description: 搅拌容器名称
-                time:
-                  type: string
-                  default: '5 min'
-                  description: 搅拌时间
                 event:
                   type: string
-                  default: ''
-                  description: 事件标识
-                time_spec:
-                  type: string
-                  default: ''
-                  description: 时间规格
-                stir_time:
-                  type: number
-                  default: 300.0
-                  description: 搅拌时间（秒）
-                stir_speed:
-                  type: number
-                  default: 200.0
-                  description: 搅拌速度
                 settling_time:
                   type: number
-                  default: 60.0
-                  description: 沉降时间
+                stir_speed:
+                  type: number
+                stir_time:
+                  type: number
+                time:
+                  type: string
+                time_spec:
+                  type: string
+                vessel:
+                  type: string
               required:
               - vessel
+              - time
+              - event
+              - time_spec
+              - stir_time
+              - stir_speed
+              - settling_time
               title: Stir_Goal
               type: object
             result:
-              description: Action 结果
+              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 message:
                   type: string
@@ -2002,13 +2519,16 @@ workstation:
             result:
               description: Action 结果 - 完成后从服务器发送到客户端
               properties:
+                message:
+                  type: string
                 return_info:
                   type: string
                 success:
                   type: boolean
               required:
-              - return_info
               - success
+              - message
+              - return_info
               title: StopStir_Result
               type: object
           required:
@@ -2148,25 +2668,25 @@ workstation:
       WashSolidProtocol:
         feedback: {}
         goal:
-          vessel: vessel
-          solvent: solvent
-          volume: volume
           filtrate_vessel: filtrate_vessel
-          temp: temp
+          repeats: repeats
+          solvent: solvent
           stir: stir
           stir_speed: stir_speed
+          temp: temp
           time: time
-          repeats: repeats
+          vessel: vessel
+          volume: volume
         goal_default:
-          vessel: ''
-          solvent: ''
-          volume: 0.0
           filtrate_vessel: ''
-          temp: 25.0
+          repeats: 0
+          solvent: ''
           stir: false
           stir_speed: 0.0
+          temp: 0.0
           time: 0.0
-          repeats: 1
+          vessel: ''
+          volume: 0.0
         handles:
           input:
           - data_key: vessel
@@ -2214,45 +2734,36 @@ workstation:
             goal:
               description: Action 目标 - 从客户端发送到服务器
               properties:
-                vessel:
-                  type: string
-                  description: 装有固体的容器名称
-                solvent:
-                  type: string
-                  description: 清洗溶剂名称
-                volume:
-                  type: number
-                  description: 清洗溶剂体积
                 filtrate_vessel:
                   type: string
-                  default: ''
-                  description: 滤液收集容器（可选）
-                temp:
-                  type: number
-                  default: 25.0
-                  description: 清洗温度
+                repeats:
+                  maximum: 2147483647
+                  minimum: -2147483648
+                  type: integer
+                solvent:
+                  type: string
                 stir:
                   type: boolean
-                  default: false
-                  description: 是否搅拌
                 stir_speed:
                   type: number
-                  default: 0.0
-                  description: 搅拌速度
+                temp:
+                  type: number
                 time:
                   type: number
-                  default: 0.0
-                  description: 清洗时间
-                repeats:
-                  type: integer
-                  default: 1
-                  minimum: 1
-                  maximum: 10
-                  description: 重复次数
+                vessel:
+                  type: string
+                volume:
+                  type: number
               required:
               - vessel
               - solvent
               - volume
+              - filtrate_vessel
+              - temp
+              - stir
+              - stir_speed
+              - time
+              - repeats
               title: WashSolid_Goal
               type: object
             result:
@@ -2363,381 +2874,6 @@ workstation:
           title: initialize_device参数
           type: object
         type: UniLabJsonCommand
-      AdjustPHProtocol:
-        feedback: {}
-        goal:
-          vessel: vessel
-          ph_value: ph_value
-          reagent: reagent
-        goal_default:
-          vessel: ''
-          ph_value: 7.0
-          reagent: ''
-        handles:
-          input:
-          - data_key: vessel
-            data_source: handle
-            data_type: resource
-            handler_key: Vessel
-            label: Vessel
-          - data_key: reagent
-            data_source: handle
-            data_type: resource
-            handler_key: reagent
-            label: Reagent
-          output:
-          - data_key: vessel
-            data_source: executor
-            data_type: resource
-            handler_key: VesselOut
-            label: Vessel
-        result: {}
-        schema:
-          description: ROS Action AdjustPH 的 JSON Schema
-          properties:
-            feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
-              properties:
-                status:
-                  type: string
-                progress:
-                  type: number
-              required:
-              - status
-              - progress
-              title: AdjustPH_Feedback
-              type: object
-            goal:
-              description: Action 目标 - 从客户端发送到服务器
-              properties:
-                vessel:
-                  type: string
-                ph_value:
-                  type: number
-                reagent:
-                  type: string
-              required:
-              - vessel
-              - ph_value
-              - reagent
-              title: AdjustPH_Goal
-              type: object
-            result:
-              description: Action 结果 - 完成后从服务器发送到客户端
-              properties:
-                message:
-                  type: string
-                return_info:
-                  type: string
-                success:
-                  type: boolean
-              required:
-              - success
-              - message
-              - return_info
-              title: AdjustPH_Result
-              type: object
-          required:
-          - goal
-          title: AdjustPH
-          type: object
-        type: AdjustPH
-      ResetHandlingProtocol:
-        feedback: {}
-        goal:
-          solvent: solvent
-        goal_default:
-          solvent: ''
-        handles:
-          input:
-          - data_key: solvent
-            data_source: handle
-            data_type: resource
-            handler_key: solvent
-            label: Solvent
-          output: []
-        result: {}
-        schema:
-          description: ROS Action ResetHandling 的 JSON Schema
-          properties:
-            feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
-              properties:
-                status:
-                  type: string
-                progress:
-                  type: number
-              required:
-              - status
-              - progress
-              title: ResetHandling_Feedback
-              type: object
-            goal:
-              description: Action 目标 - 从客户端发送到服务器
-              properties:
-                solvent:
-                  type: string
-              required:
-              - solvent
-              title: ResetHandling_Goal
-              type: object
-            result:
-              description: Action 结果 - 完成后从服务器发送到客户端
-              properties:
-                message:
-                  type: string
-                return_info:
-                  type: string
-                success:
-                  type: boolean
-              required:
-              - success
-              - message
-              - return_info
-              title: ResetHandling_Result
-              type: object
-          required:
-          - goal
-          title: ResetHandling
-          type: object
-        type: ResetHandling
-      DryProtocol:
-        feedback: {}
-        goal:
-          compound: compound
-          vessel: vessel
-        goal_default:
-          compound: ''
-          vessel: ''
-        handles:
-          input:
-          - data_key: vessel
-            data_source: handle
-            data_type: resource
-            handler_key: Vessel
-            label: Vessel
-          output:
-          - data_key: vessel
-            data_source: executor
-            data_type: resource
-            handler_key: VesselOut
-            label: Vessel
-        result: {}
-        schema:
-          description: ROS Action Dry 的 JSON Schema
-          properties:
-            feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
-              properties:
-                status:
-                  type: string
-                progress:
-                  type: number
-              required:
-              - status
-              - progress
-              title: Dry_Feedback
-              type: object
-            goal:
-              description: Action 目标 - 从客户端发送到服务器
-              properties:
-                compound:
-                  type: string
-                vessel:
-                  type: string
-              required:
-              - compound
-              - vessel
-              title: Dry_Goal
-              type: object
-            result:
-              description: Action 结果 - 完成后从服务器发送到客户端
-              properties:
-                message:
-                  type: string
-                return_info:
-                  type: string
-                success:
-                  type: boolean
-              required:
-              - success
-              - message
-              - return_info
-              title: Dry_Result
-              type: object
-          required:
-          - goal
-          title: Dry
-          type: object
-        type: Dry
-      HydrogenateProtocol:
-        feedback: {}
-        goal:
-          temp: temp
-          time: time
-          vessel: vessel
-        goal_default:
-          temp: ''
-          time: ''
-          vessel: ''
-        handles:
-          input:
-          - data_key: vessel
-            data_source: handle
-            data_type: resource
-            handler_key: Vessel
-            label: Vessel
-          output:
-          - data_key: vessel
-            data_source: executor
-            data_type: resource
-            handler_key: VesselOut
-            label: Vessel
-        result: {}
-        schema:
-          description: ROS Action Hydrogenate 的 JSON Schema
-          properties:
-            feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
-              properties:
-                status:
-                  type: string
-                progress:
-                  type: number
-              required:
-              - status
-              - progress
-              title: Hydrogenate_Feedback
-              type: object
-            goal:
-              description: Action 目标 - 从客户端发送到服务器
-              properties:
-                temp:
-                  type: string
-                time:
-                  type: string
-                vessel:
-                  type: string
-              required:
-              - temp
-              - time
-              - vessel
-              title: Hydrogenate_Goal
-              type: object
-            result:
-              description: Action 结果 - 完成后从服务器发送到客户端
-              properties:
-                message:
-                  type: string
-                return_info:
-                  type: string
-                success:
-                  type: boolean
-              required:
-              - success
-              - message
-              - return_info
-              title: Hydrogenate_Result
-              type: object
-          required:
-          - goal
-          title: Hydrogenate
-          type: object
-        type: Hydrogenate
-      RecrystallizeProtocol:
-        feedback: {}
-        goal:
-          ratio: ratio
-          solvent1: solvent1
-          solvent2: solvent2
-          vessel: vessel
-          volume: volume
-        goal_default:
-          ratio: 1.0
-          solvent1: ''
-          solvent2: ''
-          vessel: ''
-          volume: 0.0
-        handles:
-          input:
-          - data_key: vessel
-            data_source: handle
-            data_type: resource
-            handler_key: Vessel
-            label: Vessel
-          - data_key: solvent1
-            data_source: handle
-            data_type: resource
-            handler_key: solvent1
-            label: Solvent 1
-          - data_key: solvent2
-            data_source: handle
-            data_type: resource
-            handler_key: solvent2
-            label: Solvent 2
-          output:
-          - data_key: vessel
-            data_source: executor
-            data_type: resource
-            handler_key: VesselOut
-            label: Vessel
-        result: {}
-        schema:
-          description: ROS Action Recrystallize 的 JSON Schema
-          properties:
-            feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
-              properties:
-                progress:
-                  type: number
-                status:
-                  type: string
-              required:
-              - status
-              - progress
-              title: Recrystallize_Feedback
-              type: object
-            goal:
-              description: Action 目标 - 从客户端发送到服务器
-              properties:
-                ratio:
-                  type: number
-                solvent1:
-                  type: string
-                solvent2:
-                  type: string
-                vessel:
-                  type: string
-                volume:
-                  type: number
-              required:
-              - ratio
-              - solvent1
-              - solvent2
-              - vessel
-              - volume
-              title: Recrystallize_Goal
-              type: object
-            result:
-              description: Action 结果 - 完成后从服务器发送到客户端
-              properties:
-                message:
-                  type: string
-                return_info:
-                  type: string
-                success:
-                  type: boolean
-              required:
-              - success
-              - message
-              - return_info
-              title: Recrystallize_Result
-              type: object
-          required:
-          - goal
-          title: Recrystallize
-          type: object
-        type: Recrystallize
     module: unilabos.ros.nodes.presets.protocol_node:ROS2ProtocolNode
     status_types: {}
     type: ros2

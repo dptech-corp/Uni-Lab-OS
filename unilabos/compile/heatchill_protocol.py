@@ -247,6 +247,142 @@ def generate_heat_chill_protocol(
     
     return action_sequence
 
+
+def generate_heat_chill_to_temp_protocol(
+        G: nx.DiGraph,
+        vessel: str,
+        temp: float = 25.0,
+        time: float = 300.0,
+        temp_spec: str = "",
+        time_spec: str = "",
+        pressure: str = "",
+        reflux_solvent: str = "",
+        stir: bool = False,
+        stir_speed: float = 300.0,
+        purpose: str = "",
+        **kwargs  # 🔧 接受额外参数，增强兼容性
+) -> List[Dict[str, Any]]:
+    """
+    生成加热/冷却操作的协议序列
+
+    Args:
+        G: 设备图
+        vessel: 加热容器名称（必需）
+        temp: 目标温度 (°C)
+        time: 加热时间 (秒)
+        temp_spec: 温度规格（如 'room temperature', 'reflux'）
+        time_spec: 时间规格（如 'overnight', '2 h'）
+        pressure: 压力规格（如 '1 mbar'），不做特殊处理
+        reflux_solvent: 回流溶剂名称，不做特殊处理
+        stir: 是否搅拌
+        stir_speed: 搅拌速度 (RPM)
+        purpose: 操作目的
+        **kwargs: 其他参数（兼容性）
+
+    Returns:
+        List[Dict[str, Any]]: 加热操作的动作序列
+    """
+
+    debug_print("=" * 50)
+    debug_print("开始生成加热冷却协议")
+    debug_print(f"输入参数:")
+    debug_print(f"  - vessel: {vessel}")
+    debug_print(f"  - temp: {temp}°C")
+    debug_print(f"  - time: {time}s ({time / 60:.1f}分钟)")
+    debug_print(f"  - temp_spec: {temp_spec}")
+    debug_print(f"  - time_spec: {time_spec}")
+    debug_print(f"  - pressure: {pressure}")
+    debug_print(f"  - reflux_solvent: {reflux_solvent}")
+    debug_print(f"  - stir: {stir}")
+    debug_print(f"  - stir_speed: {stir_speed} RPM")
+    debug_print(f"  - purpose: {purpose}")
+    debug_print(f"  - 其他参数: {kwargs}")
+    debug_print("=" * 50)
+
+    action_sequence = []
+
+    # === 参数验证 ===
+    debug_print("步骤1: 参数验证...")
+
+    # 验证必需参数
+    if not vessel:
+        raise ValueError("vessel 参数不能为空")
+
+    if vessel not in G.nodes():
+        raise ValueError(f"容器 '{vessel}' 不存在于系统中")
+
+    # 温度解析：优先使用 temp_spec，然后是 temp
+    final_temp = temp
+    if temp_spec:
+        final_temp = parse_temp_spec(temp_spec)
+        debug_print(f"温度解析: '{temp_spec}' → {final_temp}°C")
+
+    # 时间解析：优先使用 time_spec，然后是 time
+    final_time = time
+    if time_spec:
+        final_time = parse_time_spec(time_spec)
+        debug_print(f"时间解析: '{time_spec}' → {final_time}s ({final_time / 60:.1f}分钟)")
+
+    # 参数范围验证
+    if final_temp < -50.0 or final_temp > 300.0:
+        debug_print(f"温度 {final_temp}°C 超出范围，修正为 25°C")
+        final_temp = 25.0
+
+    if final_time < 0:
+        debug_print(f"时间 {final_time}s 无效，修正为 300s")
+        final_time = 300.0
+
+    if stir_speed < 0 or stir_speed > 1500.0:
+        debug_print(f"搅拌速度 {stir_speed} RPM 超出范围，修正为 300 RPM")
+        stir_speed = 300.0
+
+    debug_print(f"✅ 参数验证通过")
+
+    # === 查找加热设备 ===
+    debug_print("步骤2: 查找加热设备...")
+
+    try:
+        heatchill_id = find_connected_heatchill(G, vessel)
+        debug_print(f"设备配置: 加热设备 = {heatchill_id}")
+
+    except Exception as e:
+        debug_print(f"❌ 设备查找失败: {str(e)}")
+        raise ValueError(f"无法找到加热设备: {str(e)}")
+
+    # === 执行加热操作 ===
+    debug_print("步骤3: 执行加热操作...")
+
+    heatchill_action = {
+        "device_id": heatchill_id,
+        "action_name": "heat_chill",
+        "action_kwargs": {
+            "vessel": vessel,
+            "temp": final_temp,
+            "time": final_time,
+            "stir": stir,
+            "stir_speed": stir_speed,
+            "purpose": purpose or f"加热到 {final_temp}°C"
+        }
+    }
+
+    action_sequence.append(heatchill_action)
+
+    # === 总结 ===
+    debug_print("=" * 50)
+    debug_print(f"加热冷却协议生成完成")
+    debug_print(f"总动作数: {len(action_sequence)}")
+    debug_print(f"加热容器: {vessel}")
+    debug_print(f"目标温度: {final_temp}°C")
+    debug_print(f"加热时间: {final_time}s ({final_time / 60:.1f}分钟)")
+    if pressure:
+        debug_print(f"压力参数: {pressure} (已接收，不做特殊处理)")
+    if reflux_solvent:
+        debug_print(f"回流溶剂: {reflux_solvent} (已接收，不做特殊处理)")
+    debug_print("=" * 50)
+
+    return action_sequence
+
+
 def generate_heat_chill_start_protocol(
     G: nx.DiGraph,
     vessel: str,

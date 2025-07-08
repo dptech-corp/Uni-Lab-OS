@@ -318,6 +318,12 @@ virtual_column:
         goal_default:
           column: ''
           from_vessel: ''
+          pct1: ''
+          pct2: ''
+          ratio: ''
+          rf: ''
+          solvent1: ''
+          solvent2: ''
           to_vessel: ''
         handles: []
         result:
@@ -346,12 +352,30 @@ virtual_column:
                   type: string
                 from_vessel:
                   type: string
+                pct1:
+                  type: string
+                pct2:
+                  type: string
+                ratio:
+                  type: string
+                rf:
+                  type: string
+                solvent1:
+                  type: string
+                solvent2:
+                  type: string
                 to_vessel:
                   type: string
               required:
               - from_vessel
               - to_vessel
               - column
+              - rf
+              - pct1
+              - pct2
+              - solvent1
+              - solvent2
+              - ratio
               title: RunColumn_Goal
               type: object
             result:
@@ -1155,11 +1179,15 @@ virtual_heatchill:
           time: time
           vessel: vessel
         goal_default:
+          pressure: ''
           purpose: ''
+          reflux_solvent: ''
           stir: false
           stir_speed: 0.0
           temp: 0.0
+          temp_spec: ''
           time: 0.0
+          time_spec: ''
           vessel: ''
         handles: []
         result:
@@ -1179,7 +1207,11 @@ virtual_heatchill:
             goal:
               description: Action 目标 - 从客户端发送到服务器
               properties:
+                pressure:
+                  type: string
                 purpose:
+                  type: string
+                reflux_solvent:
                   type: string
                 stir:
                   type: boolean
@@ -1187,14 +1219,22 @@ virtual_heatchill:
                   type: number
                 temp:
                   type: number
+                temp_spec:
+                  type: string
                 time:
                   type: number
+                time_spec:
+                  type: string
                 vessel:
                   type: string
               required:
               - vessel
               - temp
               - time
+              - temp_spec
+              - time_spec
+              - pressure
+              - reflux_solvent
               - stir
               - stir_speed
               - purpose
@@ -1203,13 +1243,16 @@ virtual_heatchill:
             result:
               description: Action 结果 - 完成后从服务器发送到客户端
               properties:
+                message:
+                  type: string
                 return_info:
                   type: string
                 success:
                   type: boolean
               required:
-              - return_info
               - success
+              - message
+              - return_info
               title: HeatChill_Result
               type: object
           required:
@@ -2048,13 +2091,18 @@ virtual_pump:
           volume: volume
         goal_default:
           amount: ''
+          event: ''
+          flowrate: 0.0
           from_vessel: ''
+          rate_spec: ''
           rinsing_repeats: 0
           rinsing_solvent: ''
           rinsing_volume: 0.0
           solid: false
+          through: ''
           time: 0.0
           to_vessel: ''
+          transfer_flowrate: 0.0
           viscous: false
           volume: 0.0
         handles: []
@@ -2112,7 +2160,13 @@ virtual_pump:
               properties:
                 amount:
                   type: string
+                event:
+                  type: string
+                flowrate:
+                  type: number
                 from_vessel:
+                  type: string
+                rate_spec:
                   type: string
                 rinsing_repeats:
                   maximum: 2147483647
@@ -2124,10 +2178,14 @@ virtual_pump:
                   type: number
                 solid:
                   type: boolean
+                through:
+                  type: string
                 time:
                   type: number
                 to_vessel:
                   type: string
+                transfer_flowrate:
+                  type: number
                 viscous:
                   type: boolean
                 volume:
@@ -2143,6 +2201,11 @@ virtual_pump:
               - rinsing_volume
               - rinsing_repeats
               - solid
+              - flowrate
+              - transfer_flowrate
+              - rate_spec
+              - event
+              - through
               title: PumpTransfer_Goal
               type: object
             result:
@@ -2325,6 +2388,7 @@ virtual_rotavap:
           vessel: vessel
         goal_default:
           pressure: 0.0
+          solvent: ''
           stir_speed: 0.0
           temp: 0.0
           time: 0.0
@@ -2385,6 +2449,8 @@ virtual_rotavap:
               properties:
                 pressure:
                   type: number
+                solvent:
+                  type: string
                 stir_speed:
                   type: number
                 temp:
@@ -2399,6 +2465,7 @@ virtual_rotavap:
               - temp
               - time
               - stir_speed
+              - solvent
               title: Evaporate_Goal
               type: object
             result:
@@ -2641,6 +2708,7 @@ virtual_separator:
         goal_default:
           from_vessel: ''
           product_phase: ''
+          product_vessel: ''
           purpose: ''
           repeats: 0
           separation_vessel: ''
@@ -2651,7 +2719,10 @@ virtual_separator:
           stir_time: 0.0
           through: ''
           to_vessel: ''
+          vessel: ''
+          volume: ''
           waste_phase_to_vessel: ''
+          waste_vessel: ''
         handles: []
         result:
           message: message
@@ -2710,6 +2781,8 @@ virtual_separator:
                   type: string
                 product_phase:
                   type: string
+                product_vessel:
+                  type: string
                 purpose:
                   type: string
                 repeats:
@@ -2732,7 +2805,13 @@ virtual_separator:
                   type: string
                 to_vessel:
                   type: string
+                vessel:
+                  type: string
+                volume:
+                  type: string
                 waste_phase_to_vessel:
+                  type: string
+                waste_vessel:
                   type: string
               required:
               - purpose
@@ -2748,18 +2827,25 @@ virtual_separator:
               - stir_time
               - stir_speed
               - settling_time
+              - vessel
+              - volume
+              - product_vessel
+              - waste_vessel
               title: Separate_Goal
               type: object
             result:
               description: Action 结果 - 完成后从服务器发送到客户端
               properties:
+                message:
+                  type: string
                 return_info:
                   type: string
                 success:
                   type: boolean
               required:
-              - return_info
               - success
+              - message
+              - return_info
               title: Separate_Result
               type: object
           required:
@@ -3149,6 +3235,180 @@ virtual_solenoid_valve:
       - valve_position
       - state
       type: object
+virtual_solid_dispenser:
+  class:
+    action_value_mappings:
+      add_solid:
+        feedback:
+          current_status: status
+          progress: progress
+        goal:
+          mass: mass
+          mol: mol
+          purpose: purpose
+          reagent: reagent
+          vessel: vessel
+        goal_default:
+          mass: ''
+          mol: ''
+          purpose: ''
+          reagent: ''
+          vessel: ''
+        handles: []
+        result:
+          message: message
+          return_info: return_info
+          success: success
+        schema:
+          description: ROS Action AddSolid 的 JSON Schema
+          properties:
+            feedback:
+              description: Action 反馈 - 执行过程中从服务器发送到客户端
+              properties:
+                current_status:
+                  type: string
+                progress:
+                  type: number
+              required:
+              - current_status
+              - progress
+              title: AddSolid_Feedback
+              type: object
+            goal:
+              description: Action 目标 - 从客户端发送到服务器
+              properties:
+                mass:
+                  type: string
+                mol:
+                  type: string
+                purpose:
+                  type: string
+                reagent:
+                  type: string
+                vessel:
+                  type: string
+              required:
+              - vessel
+              - reagent
+              - mass
+              - mol
+              - purpose
+              title: AddSolid_Goal
+              type: object
+            result:
+              description: Action 结果 - 完成后从服务器发送到客户端
+              properties:
+                message:
+                  type: string
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - success
+              - message
+              - return_info
+              title: AddSolid_Result
+              type: object
+          required:
+          - goal
+          title: AddSolid
+          type: object
+        type: AddSolid
+      auto-add_solid:
+        feedback: {}
+        goal: {}
+        goal_default:
+          mass: ''
+          mol: ''
+          purpose: ''
+          reagent: ''
+          vessel: main_reactor
+        handles: []
+        result: {}
+        schema:
+          description: add_solid的参数schema
+          type: object
+        type: UniLabJsonCommandAsync
+      auto-cleanup:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result: {}
+        schema:
+          description: cleanup的参数schema
+          type: object
+        type: UniLabJsonCommandAsync
+      auto-initialize:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result: {}
+        schema:
+          description: initialize的参数schema
+          type: object
+        type: UniLabJsonCommandAsync
+    module: unilabos.devices.virtual.virtual_solid_dispenser:VirtualSolidDispenser
+    status_types:
+      current_reagent: str
+      dispensed_amount: float
+      status: str
+      total_operations: int
+    type: python
+  description: Virtual Solid Dispenser for Add Protocol Solid Reagents
+  handles:
+  - data_key: SolidIn
+    data_source: handle
+    data_type: resource
+    description: 固体试剂进料口
+    handler_key: SolidIn
+    io_type: target
+    label: SolidIn
+    side: WEST
+  - data_key: SolidOut
+    data_source: executor
+    data_type: resource
+    description: 固体试剂出料口
+    handler_key: SolidOut
+    io_type: source
+    label: SolidOut
+    side: EAST
+  icon: ''
+  init_param_schema:
+    config:
+      properties:
+        config:
+          type: object
+        device_id:
+          type: string
+        max_capacity:
+          default: 100.0
+          description: 最大加样容量 (g)
+          type: number
+        precision:
+          default: 0.001
+          description: 加样精度 (g)
+          type: number
+      required: []
+      type: object
+    data:
+      properties:
+        current_reagent:
+          type: string
+        dispensed_amount:
+          type: number
+        status:
+          type: string
+        total_operations:
+          type: integer
+      required:
+      - status
+      - current_reagent
+      - dispensed_amount
+      - total_operations
+      type: object
 virtual_stirrer:
   class:
     action_value_mappings:
@@ -3183,7 +3443,6 @@ virtual_stirrer:
           properties:
             feedback: {}
             goal:
-
               properties: {}
               required: []
               type: object
@@ -3356,9 +3615,13 @@ virtual_stirrer:
           stir_speed: stir_speed
           stir_time: stir_time
         goal_default:
+          event: ''
           settling_time: 0.0
           stir_speed: 0.0
           stir_time: 0.0
+          time: ''
+          time_spec: ''
+          vessel: ''
         handles: []
         result:
           success: success
@@ -3377,13 +3640,25 @@ virtual_stirrer:
             goal:
               description: Action 目标 - 从客户端发送到服务器
               properties:
+                event:
+                  type: string
                 settling_time:
                   type: number
                 stir_speed:
                   type: number
                 stir_time:
                   type: number
+                time:
+                  type: string
+                time_spec:
+                  type: string
+                vessel:
+                  type: string
               required:
+              - vessel
+              - time
+              - event
+              - time_spec
               - stir_time
               - stir_speed
               - settling_time
@@ -3392,13 +3667,16 @@ virtual_stirrer:
             result:
               description: Action 结果 - 完成后从服务器发送到客户端
               properties:
+                message:
+                  type: string
                 return_info:
                   type: string
                 success:
                   type: boolean
               required:
-              - return_info
               - success
+              - message
+              - return_info
               title: Stir_Result
               type: object
           required:
@@ -4366,126 +4644,4 @@ virtual_vacuum_pump:
           type: string
       required:
       - status
-      type: object
-virtual_solid_dispenser:
-  class:
-    action_value_mappings:
-      auto-cleanup:
-        feedback: {}
-        goal: {}
-        goal_default: {}
-        handles: []
-        result: {}
-        schema:
-          description: cleanup的参数schema
-          type: object
-        type: UniLabJsonCommandAsync
-      auto-initialize:
-        feedback: {}
-        goal: {}
-        goal_default: {}
-        handles: []
-        result: {}
-        schema:
-          description: initialize的参数schema
-          type: object
-        type: UniLabJsonCommandAsync
-      auto-add_solid:
-        feedback: {}
-        goal: {}
-        goal_default:
-          vessel: main_reactor
-          reagent: ''
-          mass: ''
-          mol: ''
-          purpose: ''
-        handles: []
-        result: {}
-        schema:
-          description: add_solid的参数schema
-          type: object
-        type: UniLabJsonCommandAsync
-      add_solid:
-        feedback:
-          current_status: status
-          progress: progress
-        goal:
-          vessel: vessel
-          reagent: reagent
-          mass: mass
-          mol: mol
-          purpose: purpose
-        goal_default:
-          vessel: 'main_reactor'
-          reagent: ''
-          mass: ''
-          mol: ''
-          purpose: ''
-        handles: []
-        result:
-          message: message
-          success: success
-          return_info: return_info
-        schema:
-          description: ROS Action AddSolid 的 JSON Schema
-          type: object
-        type: AddSolid
-    module: unilabos.devices.virtual.virtual_solid_dispenser:VirtualSolidDispenser
-    status_types:
-      status: str
-      current_reagent: str
-      dispensed_amount: float
-      total_operations: int
-    type: python
-  description: Virtual Solid Dispenser for Add Protocol Solid Reagents
-  handles:
-  - data_key: SolidIn
-    data_source: handle
-    data_type: resource
-    description: 固体试剂进料口
-    handler_key: SolidIn
-    io_type: target
-    label: SolidIn
-    side: WEST
-  - data_key: SolidOut
-    data_source: executor
-    data_type: resource
-    description: 固体试剂出料口
-    handler_key: SolidOut
-    io_type: source
-    label: SolidOut
-    side: EAST
-  icon: ''
-  init_param_schema:
-    config:
-      properties:
-        config:
-          type: object
-        device_id:
-          type: string
-        max_capacity:
-          type: number
-          default: 100.0
-          description: 最大加样容量 (g)
-        precision:
-          type: number
-          default: 0.001
-          description: 加样精度 (g)
-      required: []
-      type: object
-    data:
-      properties:
-        status:
-          type: string
-        current_reagent:
-          type: string
-        dispensed_amount:
-          type: number
-        total_operations:
-          type: integer
-      required:
-      - status
-      - current_reagent
-      - dispensed_amount
-      - total_operations
       type: object

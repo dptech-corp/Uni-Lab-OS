@@ -778,17 +778,17 @@ def generate_pump_protocol_with_rinsing(
             )
             
             # 为每个动作添加唯一标识
-            for i, action in enumerate(pump_action_sequence):
-                if isinstance(action, dict):
-                    action['_protocol_id'] = protocol_id
-                    action['_action_sequence'] = i
-                elif isinstance(action, list):
-                    for j, sub_action in enumerate(action):
-                        if isinstance(sub_action, dict):
-                            sub_action['_protocol_id'] = protocol_id
-                            sub_action['_action_sequence'] = f"{i}_{j}"
-            
-            debug_print(f"📊 协议 {protocol_id} 生成完成，共 {len(pump_action_sequence)} 个动作")
+            # for i, action in enumerate(pump_action_sequence):
+            #     if isinstance(action, dict):
+            #         action['_protocol_id'] = protocol_id
+            #         action['_action_sequence'] = i
+            #     elif isinstance(action, list):
+            #         for j, sub_action in enumerate(action):
+            #             if isinstance(sub_action, dict):
+            #                 sub_action['_protocol_id'] = protocol_id
+            #                 sub_action['_action_sequence'] = f"{i}_{j}"
+            #
+            # debug_print(f"📊 协议 {protocol_id} 生成完成，共 {len(pump_action_sequence)} 个动作")
             debug_print(f"🔓 释放执行锁")
             return pump_action_sequence
             

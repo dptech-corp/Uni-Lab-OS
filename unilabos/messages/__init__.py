@@ -372,6 +372,30 @@ class HeatChillProtocol(BaseModel):
         
         return 300.0  # 默认5分钟
 
+
+class HeatChillStartProtocol(BaseModel):
+    # === 必需参数 ===
+    vessel: str = Field(..., description="加热容器名称")
+
+    # === 可选参数 - 温度相关 ===
+    temp: float = Field(25.0, description="目标温度 (°C)")
+    temp_spec: str = Field("", description="温度规格（如 'room temperature', 'reflux'）")
+
+    # === 可选参数 - 其他XDL参数 ===
+    pressure: str = Field("", description="压力规格（如 '1 mbar'），不做特殊处理")
+    reflux_solvent: str = Field("", description="回流溶剂名称，不做特殊处理")
+
+    # === 可选参数 - 搅拌相关 ===
+    stir: bool = Field(False, description="是否搅拌")
+    stir_speed: float = Field(300.0, description="搅拌速度 (RPM)")
+    purpose: str = Field("", description="操作目的")
+
+
+class HeatChillStopProtocol(BaseModel):
+    # === 必需参数 ===
+    vessel: str = Field(..., description="加热容器名称")
+
+
 class StirProtocol(BaseModel):
     # === 必需参数 ===
     vessel: str = Field(..., description="搅拌容器名称")
@@ -608,7 +632,8 @@ __all__ = [
     "Point3D", "PumpTransferProtocol", "CleanProtocol", "SeparateProtocol", 
     "EvaporateProtocol", "EvacuateAndRefillProtocol", "AGVTransferProtocol", 
     "CentrifugeProtocol", "AddProtocol", "FilterProtocol", 
-    "HeatChillProtocol", "HeatChillStartProtocol", "HeatChillStopProtocol", 
+    "HeatChillProtocol",
+    "HeatChillStartProtocol", "HeatChillStopProtocol",
     "StirProtocol", "StartStirProtocol", "StopStirProtocol", 
     "TransferProtocol", "CleanVesselProtocol", "DissolveProtocol", 
     "FilterThroughProtocol", "RunColumnProtocol", "WashSolidProtocol",

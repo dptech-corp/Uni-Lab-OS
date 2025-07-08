@@ -41,6 +41,7 @@ set(action_files
   "action/WashSolid.action"
   "action/Filter.action"
   "action/Add.action"
+  "action/AddSolid.action"
   "action/Centrifuge.action"
   "action/Crystallize.action"
   "action/Purge.action"
