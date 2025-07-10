@@ -1,6 +1,7 @@
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Union
 import networkx as nx
 import logging
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -8,6 +9,63 @@ def debug_print(message):
     """调试输出"""
     print(f"[EVAPORATE] {message}", flush=True)
     logger.info(f"[EVAPORATE] {message}")
+
+def parse_time_input(time_input: Union[str, float]) -> float:
+    """
+    解析时间输入，支持带单位的字符串
+    
+    Args:
+        time_input: 时间输入（如 "3 min", "180", "0.5 h" 等）
+    
+    Returns:
+        float: 时间（秒）
+    """
+    if isinstance(time_input, (int, float)):
+        return float(time_input)
+    
+    if not time_input or not str(time_input).strip():
+        return 180.0  # 默认3分钟
+    
+    time_str = str(time_input).lower().strip()
+    debug_print(f"解析时间输入: '{time_str}'")
+    
+    # 处理未知时间
+    if time_str in ['?', 'unknown', 'tbd']:
+        default_time = 180.0  # 默认3分钟
+        debug_print(f"检测到未知时间，使用默认值: {default_time}s")
+        return default_time
+    
+    # 移除空格并提取数字和单位
+    time_clean = re.sub(r'\s+', '', time_str)
+    
+    # 匹配数字和单位的正则表达式
+    match = re.match(r'([0-9]*\.?[0-9]+)\s*(s|sec|second|min|minute|h|hr|hour|d|day)?', time_clean)
+    
+    if not match:
+        # 如果无法解析，尝试直接转换为数字（默认秒）
+        try:
+            value = float(time_str)
+            debug_print(f"时间解析: {time_str} → {value}s（无单位，默认秒）")
+            return value
+        except ValueError:
+            debug_print(f"⚠️ 无法解析时间: '{time_str}'，使用默认值180s")
+            return 180.0
+    
+    value = float(match.group(1))
+    unit = match.group(2) or 's'  # 默认单位为秒
+    
+    # 转换为秒
+    if unit in ['min', 'minute']:
+        time_sec = value * 60.0  # min -> s
+    elif unit in ['h', 'hr', 'hour']:
+        time_sec = value * 3600.0  # h -> s
+    elif unit in ['d', 'day']:
+        time_sec = value * 86400.0  # d -> s
+    else:  # s, sec, second 或默认
+        time_sec = value  # 已经是s
+    
+    debug_print(f"时间转换: {value}{unit} → {time_sec}s")
+    return time_sec
 
 def find_rotavap_device(G: nx.DiGraph, vessel: str = None) -> Optional[str]:
     """
@@ -111,20 +169,20 @@ def generate_evaporate_protocol(
     vessel: str,
     pressure: float = 0.1,
     temp: float = 60.0,
-    time: float = 180.0,
+    time: Union[str, float] = "180",     # 🔧 修改：支持字符串时间
     stir_speed: float = 100.0,
     solvent: str = "",
-    **kwargs  # 接受任意额外参数，增强兼容性
+    **kwargs
 ) -> List[Dict[str, Any]]:
     """
-    生成蒸发操作的协议序列
+    生成蒸发操作的协议序列 - 支持单位
     
     Args:
         G: 设备图
         vessel: 容器名称或旋转蒸发仪名称
         pressure: 真空度 (bar)，默认0.1
         temp: 加热温度 (°C)，默认60
-        time: 蒸发时间 (秒)，默认180
+        time: 蒸发时间（支持 "3 min", "180", "0.5 h" 等）
         stir_speed: 旋转速度 (RPM)，默认100
         solvent: 溶剂名称（用于参数优化）
         **kwargs: 其他参数（兼容性）
@@ -134,12 +192,12 @@ def generate_evaporate_protocol(
     """
     
     debug_print("=" * 50)
-    debug_print("开始生成蒸发协议")
+    debug_print("开始生成蒸发协议（支持单位）")
     debug_print(f"输入参数:")
     debug_print(f"  - vessel: {vessel}")
     debug_print(f"  - pressure: {pressure} bar")
     debug_print(f"  - temp: {temp}°C")
-    debug_print(f"  - time: {time}s ({time/60:.1f}分钟)")
+    debug_print(f"  - time: {time} (类型: {type(time)})")
     debug_print(f"  - stir_speed: {stir_speed} RPM")
     debug_print(f"  - solvent: '{solvent}'")
     debug_print("=" * 50)
@@ -177,8 +235,15 @@ def generate_evaporate_protocol(
         debug_print(f"容器 '{vessel}' 不存在或类型不正确，使用旋转蒸发仪设备: {rotavap_device}")
         target_vessel = rotavap_device
     
-    # === 步骤3: 参数验证和修正 ===
-    debug_print("步骤3: 参数验证和修正...")
+    # === 🔧 新增：步骤3：单位解析处理 ===
+    debug_print("步骤3: 单位解析处理...")
+    
+    # 解析时间
+    final_time = parse_time_input(time)
+    debug_print(f"时间解析: {time} → {final_time}s ({final_time/60:.1f}分钟)")
+    
+    # === 步骤4: 参数验证和修正 ===
+    debug_print("步骤4: 参数验证和修正...")
     
     # 修正参数范围
     if pressure <= 0 or pressure > 1.0:
@@ -189,9 +254,9 @@ def generate_evaporate_protocol(
         debug_print(f"温度 {temp}°C 超出范围，修正为 60°C")
         temp = 60.0
     
-    if time <= 0:
-        debug_print(f"时间 {time}s 无效，修正为 1800s")
-        time = 1800.0
+    if final_time <= 0:
+        debug_print(f"时间 {final_time}s 无效，修正为 180s")
+        final_time = 180.0
     
     if stir_speed < 10.0 or stir_speed > 300.0:
         debug_print(f"旋转速度 {stir_speed} RPM 超出范围，修正为 100 RPM")
@@ -215,10 +280,10 @@ def generate_evaporate_protocol(
             pressure = min(pressure, 0.01)
             debug_print("高沸点溶剂：提高温度，降低真空度")
     
-    debug_print(f"最终参数: pressure={pressure}, temp={temp}, time={time}, stir_speed={stir_speed}")
+    debug_print(f"最终参数: pressure={pressure}, temp={temp}, time={final_time}, stir_speed={stir_speed}")
     
-    # === 步骤4: 生成动作序列 ===
-    debug_print("步骤4: 生成动作序列...")
+    # === 步骤5: 生成动作序列 ===
+    debug_print("步骤5: 生成动作序列...")
     
     action_sequence = []
     
@@ -237,7 +302,7 @@ def generate_evaporate_protocol(
             "vessel": target_vessel,
             "pressure": pressure,
             "temp": temp,
-            "time": time,
+            "time": final_time,
             "stir_speed": stir_speed,
             "solvent": solvent
         }
@@ -256,7 +321,7 @@ def generate_evaporate_protocol(
     debug_print(f"总动作数: {len(action_sequence)}")
     debug_print(f"旋转蒸发仪: {rotavap_device}")
     debug_print(f"目标容器: {target_vessel}")
-    debug_print(f"蒸发参数: {pressure} bar, {temp}°C, {time}s, {stir_speed} RPM")
+    debug_print(f"蒸发参数: {pressure} bar, {temp}°C, {final_time}s, {stir_speed} RPM")
     debug_print("=" * 50)
     
     return action_sequence
@@ -273,7 +338,7 @@ def generate_quick_evaporate_protocol(
         G, vessel, 
         pressure=0.2, 
         temp=40.0, 
-        time=900.0, 
+        time="15 min",  # 🔧 使用带单位的时间
         stir_speed=80.0,
         **kwargs
     )
@@ -288,7 +353,7 @@ def generate_gentle_evaporate_protocol(
         G, vessel, 
         pressure=0.1, 
         temp=50.0, 
-        time=2700.0, 
+        time="45 min",  # 🔧 使用带单位的时间
         stir_speed=60.0,
         **kwargs
     )
@@ -303,7 +368,7 @@ def generate_high_vacuum_evaporate_protocol(
         G, vessel, 
         pressure=0.01, 
         temp=35.0, 
-        time=3600.0, 
+        time="1 h",  # 🔧 使用带单位的时间
         stir_speed=120.0,
         **kwargs
     )
@@ -318,7 +383,22 @@ def generate_standard_evaporate_protocol(
         G, vessel, 
         pressure=0.1, 
         temp=60.0, 
-        time=1800.0, 
+        time="3 min",  # 🔧 使用带单位的时间
         stir_speed=100.0,
         **kwargs
     )
+
+# 测试函数
+def test_time_parsing():
+    """测试时间解析功能"""
+    print("=== EVAPORATE 时间解析测试 ===")
+    
+    test_times = ["3 min", "180", "0.5 h", "2 hours", "?", "unknown", "1.5", "30 s"]
+    for time_str in test_times:
+        result = parse_time_input(time_str)
+        print(f"时间解析: '{time_str}' → {result}s ({result/60:.1f}分钟)")
+    
+    print("✅ 测试完成")
+
+if __name__ == "__main__":
+    test_time_parsing()

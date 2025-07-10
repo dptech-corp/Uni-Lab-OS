@@ -58,12 +58,30 @@ class VirtualHeatChill:
         })
         return True
     
-    async def heat_chill(self, vessel: str, temp: float, time: float, stir: bool, 
+    async def heat_chill(self, vessel: str, temp: float, time, stir: bool, 
                         stir_speed: float, purpose: str) -> bool:
-        """Execute heat chill action - 按实际时间运行，实时更新剩余时间"""
-        self.logger.info(f"HeatChill: vessel={vessel}, temp={temp}°C, time={time}s, stir={stir}, stir_speed={stir_speed}")
+        """Execute heat chill action - 🔧 修复：确保参数类型正确"""
         
-        # 验证参数
+        # 🔧 关键修复：确保所有参数类型正确
+        try:
+            temp = float(temp)
+            time_value = float(time)  # 强制转换为浮点数
+            stir_speed = float(stir_speed)
+            stir = bool(stir)
+            vessel = str(vessel)
+            purpose = str(purpose)
+        except (ValueError, TypeError) as e:
+            error_msg = f"参数类型转换错误: temp={temp}({type(temp)}), time={time}({type(time)}), error={str(e)}"
+            self.logger.error(error_msg)
+            self.data.update({
+                "status": f"Error: {error_msg}",
+                "operation_mode": "Error"
+            })
+            return False
+        
+        self.logger.info(f"HeatChill: vessel={vessel}, temp={temp}°C, time={time_value}s, stir={stir}, stir_speed={stir_speed}")
+        
+        # 验证参数范围
         if temp > self._max_temp or temp < self._min_temp:
             error_msg = f"温度 {temp}°C 超出范围 ({self._min_temp}°C - {self._max_temp}°C)"
             self.logger.error(error_msg)
@@ -82,6 +100,15 @@ class VirtualHeatChill:
             })
             return False
         
+        if time_value <= 0:
+            error_msg = f"时间 {time_value}s 必须大于0"
+            self.logger.error(error_msg)
+            self.data.update({
+                "status": f"Error: {error_msg}",
+                "operation_mode": "Error"
+            })
+            return False
+        
         # 确定操作模式
         if temp > 25.0:
             operation_mode = "Heating"
@@ -93,9 +120,9 @@ class VirtualHeatChill:
             operation_mode = "Maintaining"
             status_action = "保温"
         
-        # **修复**: 使用重命名的time模块
+        # 🔧 修复：使用转换后的时间值
         start_time = time_module.time()
-        total_time = time
+        total_time = time_value  # 使用转换后的浮点数
         
         # 开始操作
         stir_info = f" | 搅拌: {stir_speed} RPM" if stir else ""
@@ -107,9 +134,9 @@ class VirtualHeatChill:
             "remaining_time": total_time,
         })
         
-        # **修复**: 在等待过程中每秒更新剩余时间
+        # 在等待过程中每秒更新剩余时间
         while True:
-            current_time = time_module.time()  # 使用重命名的time模块
+            current_time = time_module.time()
             elapsed = current_time - start_time
             remaining = max(0, total_time - elapsed)
             
@@ -141,6 +168,21 @@ class VirtualHeatChill:
     
     async def heat_chill_start(self, vessel: str, temp: float, purpose: str) -> bool:
         """Start continuous heat chill"""
+        
+        # 🔧 添加类型转换
+        try:
+            temp = float(temp)
+            vessel = str(vessel)
+            purpose = str(purpose)
+        except (ValueError, TypeError) as e:
+            error_msg = f"参数类型转换错误: {str(e)}"
+            self.logger.error(error_msg)
+            self.data.update({
+                "status": f"Error: {error_msg}",
+                "operation_mode": "Error"
+            })
+            return False
+        
         self.logger.info(f"HeatChillStart: vessel={vessel}, temp={temp}°C")
         
         # 验证参数
@@ -176,6 +218,15 @@ class VirtualHeatChill:
     
     async def heat_chill_stop(self, vessel: str) -> bool:
         """Stop heat chill"""
+        
+        # 🔧 添加类型转换
+        try:
+            vessel = str(vessel)
+        except (ValueError, TypeError) as e:
+            error_msg = f"参数类型转换错误: {str(e)}"
+            self.logger.error(error_msg)
+            return False
+        
         self.logger.info(f"HeatChillStop: vessel={vessel}")
         
         self.data.update({

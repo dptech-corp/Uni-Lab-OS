@@ -125,7 +125,7 @@ class EvaporateProtocol(BaseModel):
     # === 所有其他参数都改为可选，添加默认值 ===
     pressure: float = Field(0.1, description="真空度 (bar)，默认0.1 bar")
     temp: float = Field(60.0, description="加热温度 (°C)，默认60°C")
-    time: float = Field(1800.0, description="蒸发时间 (秒)，默认1800s (30分钟)")
+    time: float = Field(180.0, description="蒸发时间 (秒)，默认1800s (30分钟)")
     stir_speed: float = Field(100.0, description="旋转速度 (RPM)，默认100 RPM")
     
     # === 新版XDL兼容参数（可选） ===

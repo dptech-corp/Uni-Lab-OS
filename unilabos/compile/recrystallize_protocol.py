@@ -1,6 +1,78 @@
 import networkx as nx
-from typing import List, Dict, Any, Tuple
+import re
+from typing import List, Dict, Any, Tuple, Union
 from .pump_protocol import generate_pump_protocol_with_rinsing
+
+
+def parse_volume_with_units(volume_input: Union[str, float, int], default_unit: str = "mL") -> float:
+    """
+    解析带单位的体积输入
+    
+    Args:
+        volume_input: 体积输入（如 "100 mL", "2.5 L", "500", "?", 100.0）
+        default_unit: 默认单位（默认为毫升）
+    
+    Returns:
+        float: 体积（毫升）
+    """
+    if not volume_input:
+        return 0.0
+    
+    # 处理数值输入
+    if isinstance(volume_input, (int, float)):
+        result = float(volume_input)
+        print(f"RECRYSTALLIZE: 数值体积输入: {volume_input} → {result}mL（默认单位）")
+        return result
+    
+    # 处理字符串输入
+    volume_str = str(volume_input).lower().strip()
+    print(f"RECRYSTALLIZE: 解析体积字符串: '{volume_str}'")
+    
+    # 处理特殊值
+    if volume_str in ['?', 'unknown', 'tbd', 'to be determined']:
+        default_volume = 50.0  # 50mL默认值
+        print(f"RECRYSTALLIZE: 检测到未知体积，使用默认值: {default_volume}mL")
+        return default_volume
+    
+    # 如果是纯数字，使用默认单位
+    try:
+        value = float(volume_str)
+        if default_unit.lower() in ["ml", "milliliter"]:
+            result = value
+        elif default_unit.lower() in ["l", "liter"]:
+            result = value * 1000.0
+        elif default_unit.lower() in ["μl", "ul", "microliter"]:
+            result = value / 1000.0
+        else:
+            result = value  # 默认mL
+        print(f"RECRYSTALLIZE: 纯数字输入: {volume_str} → {result}mL（单位: {default_unit}）")
+        return result
+    except ValueError:
+        pass
+    
+    # 移除空格并提取数字和单位
+    volume_clean = re.sub(r'\s+', '', volume_str)
+    
+    # 匹配数字和单位的正则表达式
+    match = re.match(r'([0-9]*\.?[0-9]+)\s*(ml|l|μl|ul|microliter|milliliter|liter)?', volume_clean)
+    
+    if not match:
+        print(f"RECRYSTALLIZE: ⚠️ 无法解析体积: '{volume_str}'，使用默认值: 50mL")
+        return 50.0
+    
+    value = float(match.group(1))
+    unit = match.group(2) or default_unit.lower()
+    
+    # 转换为毫升
+    if unit in ['l', 'liter']:
+        volume = value * 1000.0  # L -> mL
+    elif unit in ['μl', 'ul', 'microliter']:
+        volume = value / 1000.0  # μL -> mL
+    else:  # ml, milliliter 或默认
+        volume = value  # 已经是mL
+    
+    print(f"RECRYSTALLIZE: 体积解析: '{volume_str}' → {value} {unit} → {volume}mL")
+    return volume
 
 
 def parse_ratio(ratio_str: str) -> Tuple[float, float]:
@@ -111,11 +183,11 @@ def generate_recrystallize_protocol(
     solvent1: str,
     solvent2: str,
     vessel: str,
-    volume: float,
-    **kwargs  # 接收其他可能的参数但不使用
+    volume: Union[str, float],  # 🔧 修改：支持字符串和数值
+    **kwargs
 ) -> List[Dict[str, Any]]:
     """
-    生成重结晶协议序列
+    生成重结晶协议序列 - 支持单位
     
     Args:
         G: 有向图，节点为容器和设备
@@ -123,38 +195,42 @@ def generate_recrystallize_protocol(
         solvent1: 第一种溶剂名称
         solvent2: 第二种溶剂名称
         vessel: 目标容器
-        volume: 总体积 (mL)
-        **kwargs: 其他可选参数，但不使用
+        volume: 总体积（支持 "100 mL", "50", "2.5 L" 等）
+        **kwargs: 其他可选参数
     
     Returns:
         List[Dict[str, Any]]: 动作序列
     """
     action_sequence = []
     
-    print(f"RECRYSTALLIZE: 开始生成重结晶协议")
+    print(f"RECRYSTALLIZE: 开始生成重结晶协议（支持单位）")
     print(f"  - 比例: {ratio}")
     print(f"  - 溶剂1: {solvent1}")
     print(f"  - 溶剂2: {solvent2}")
     print(f"  - 容器: {vessel}")
-    print(f"  - 总体积: {volume} mL")
+    print(f"  - 总体积: {volume} (类型: {type(volume)})")
     
     # 1. 验证目标容器存在
     if vessel not in G.nodes():
         raise ValueError(f"目标容器 '{vessel}' 不存在于系统中")
     
-    # 2. 解析比例
+    # 2. 🔧 新增：解析体积（支持单位）
+    final_volume = parse_volume_with_units(volume, "mL")
+    print(f"RECRYSTALLIZE: 解析体积: {volume} → {final_volume}mL")
+    
+    # 3. 解析比例
     ratio1, ratio2 = parse_ratio(ratio)
     total_ratio = ratio1 + ratio2
     
-    # 3. 计算各溶剂体积
-    volume1 = volume * (ratio1 / total_ratio)
-    volume2 = volume * (ratio2 / total_ratio)
+    # 4. 计算各溶剂体积
+    volume1 = final_volume * (ratio1 / total_ratio)
+    volume2 = final_volume * (ratio2 / total_ratio)
     
     print(f"RECRYSTALLIZE: 解析比例: {ratio1}:{ratio2}")
     print(f"RECRYSTALLIZE: {solvent1} 体积: {volume1:.2f} mL")
     print(f"RECRYSTALLIZE: {solvent2} 体积: {volume2:.2f} mL")
     
-    # 4. 查找溶剂容器
+    # 5. 查找溶剂容器
     try:
         solvent1_vessel = find_solvent_vessel(G, solvent1)
         print(f"RECRYSTALLIZE: 找到溶剂1容器: {solvent1_vessel}")
@@ -167,7 +243,7 @@ def generate_recrystallize_protocol(
     except ValueError as e:
         raise ValueError(f"无法找到溶剂2 '{solvent2}': {str(e)}")
     
-    # 5. 验证路径存在
+    # 6. 验证路径存在
     try:
         path1 = nx.shortest_path(G, source=solvent1_vessel, target=vessel)
         print(f"RECRYSTALLIZE: 溶剂1路径: {' → '.join(path1)}")
@@ -180,7 +256,7 @@ def generate_recrystallize_protocol(
     except nx.NetworkXNoPath:
         raise ValueError(f"从溶剂2容器 '{solvent2_vessel}' 到目标容器 '{vessel}' 没有可用路径")
     
-    # 6. 添加第一种溶剂
+    # 7. 添加第一种溶剂
     print(f"RECRYSTALLIZE: 开始添加溶剂1 {volume1:.2f} mL")
     
     try:
@@ -188,7 +264,7 @@ def generate_recrystallize_protocol(
             G=G,
             from_vessel=solvent1_vessel,
             to_vessel=vessel,
-            volume=volume1,
+            volume=volume1,             # 使用解析后的体积
             amount="",
             time=0.0,
             viscous=False,
@@ -205,7 +281,7 @@ def generate_recrystallize_protocol(
     except Exception as e:
         raise ValueError(f"生成溶剂1泵协议时出错: {str(e)}")
     
-    # 7. 等待溶剂1稳定
+    # 8. 等待溶剂1稳定
     action_sequence.append({
         "action_name": "wait",
         "action_kwargs": {
@@ -214,7 +290,7 @@ def generate_recrystallize_protocol(
         }
     })
     
-    # 8. 添加第二种溶剂
+    # 9. 添加第二种溶剂
     print(f"RECRYSTALLIZE: 开始添加溶剂2 {volume2:.2f} mL")
     
     try:
@@ -222,7 +298,7 @@ def generate_recrystallize_protocol(
             G=G,
             from_vessel=solvent2_vessel,
             to_vessel=vessel,
-            volume=volume2,
+            volume=volume2,             # 使用解析后的体积
             amount="",
             time=0.0,
             viscous=False,
@@ -239,7 +315,7 @@ def generate_recrystallize_protocol(
     except Exception as e:
         raise ValueError(f"生成溶剂2泵协议时出错: {str(e)}")
     
-    # 9. 等待溶剂2稳定
+    # 10. 等待溶剂2稳定
     action_sequence.append({
         "action_name": "wait",
         "action_kwargs": {
@@ -248,17 +324,18 @@ def generate_recrystallize_protocol(
         }
     })
     
-    # 10. 等待重结晶完成
+    # 11. 等待重结晶完成
     action_sequence.append({
         "action_name": "wait",
         "action_kwargs": {
             "time": 600.0,  # 等待10分钟进行重结晶
-            "description": f"等待重结晶完成（{solvent1}:{solvent2} = {ratio}）"
+            "description": f"等待重结晶完成（{solvent1}:{solvent2} = {ratio}，总体积 {final_volume}mL）"
         }
     })
     
     print(f"RECRYSTALLIZE: 协议生成完成，共 {len(action_sequence)} 个动作")
     print(f"RECRYSTALLIZE: 预计总时间: {620/60:.1f} 分钟")
+    print(f"RECRYSTALLIZE: 总体积: {final_volume}mL")
     
     return action_sequence
 

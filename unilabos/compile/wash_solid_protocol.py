@@ -10,6 +10,167 @@ def debug_print(message):
     print(f"[WASH_SOLID] {message}", flush=True)
     logger.info(f"[WASH_SOLID] {message}")
 
+def parse_time_with_units(time_input: Union[str, float, int], default_unit: str = "s") -> float:
+    """
+    解析带单位的时间输入
+    
+    Args:
+        time_input: 时间输入（如 "30 min", "1 h", "300", "?", 60.0）
+        default_unit: 默认单位（默认为秒）
+    
+    Returns:
+        float: 时间（秒）
+    """
+    if not time_input:
+        return 0.0
+    
+    # 处理数值输入
+    if isinstance(time_input, (int, float)):
+        result = float(time_input)
+        debug_print(f"数值时间输入: {time_input} → {result}s（默认单位）")
+        return result
+    
+    # 处理字符串输入
+    time_str = str(time_input).lower().strip()
+    debug_print(f"解析时间字符串: '{time_str}'")
+    
+    # 处理特殊值
+    if time_str in ['?', 'unknown', 'tbd', 'to be determined']:
+        default_time = 300.0  # 5分钟默认值
+        debug_print(f"检测到未知时间，使用默认值: {default_time}s")
+        return default_time
+    
+    # 如果是纯数字，使用默认单位
+    try:
+        value = float(time_str)
+        if default_unit == "s":
+            result = value
+        elif default_unit in ["min", "minute"]:
+            result = value * 60.0
+        elif default_unit in ["h", "hour"]:
+            result = value * 3600.0
+        else:
+            result = value  # 默认秒
+        debug_print(f"纯数字输入: {time_str} → {result}s（单位: {default_unit}）")
+        return result
+    except ValueError:
+        pass
+    
+    # 使用正则表达式匹配数字和单位
+    pattern = r'(\d+\.?\d*)\s*([a-z]*)'
+    match = re.match(pattern, time_str)
+    
+    if not match:
+        debug_print(f"⚠️ 无法解析时间: '{time_str}'，使用默认值: 60s")
+        return 60.0
+    
+    value = float(match.group(1))
+    unit = match.group(2) or default_unit
+    
+    # 单位转换映射
+    unit_multipliers = {
+        # 秒
+        's': 1.0,
+        'sec': 1.0,
+        'second': 1.0,
+        'seconds': 1.0,
+        
+        # 分钟
+        'm': 60.0,
+        'min': 60.0,
+        'mins': 60.0,
+        'minute': 60.0,
+        'minutes': 60.0,
+        
+        # 小时
+        'h': 3600.0,
+        'hr': 3600.0,
+        'hrs': 3600.0,
+        'hour': 3600.0,
+        'hours': 3600.0,
+        
+        # 天
+        'd': 86400.0,
+        'day': 86400.0,
+        'days': 86400.0,
+    }
+    
+    multiplier = unit_multipliers.get(unit, 1.0)
+    result = value * multiplier
+    
+    debug_print(f"时间解析: '{time_str}' → {value} {unit} → {result}s")
+    return result
+
+def parse_volume_with_units(volume_input: Union[str, float, int], default_unit: str = "mL") -> float:
+    """
+    解析带单位的体积输入
+    
+    Args:
+        volume_input: 体积输入（如 "100 mL", "2.5 L", "500", "?", 100.0）
+        default_unit: 默认单位（默认为毫升）
+    
+    Returns:
+        float: 体积（毫升）
+    """
+    if not volume_input:
+        return 0.0
+    
+    # 处理数值输入
+    if isinstance(volume_input, (int, float)):
+        result = float(volume_input)
+        debug_print(f"数值体积输入: {volume_input} → {result}mL（默认单位）")
+        return result
+    
+    # 处理字符串输入
+    volume_str = str(volume_input).lower().strip()
+    debug_print(f"解析体积字符串: '{volume_str}'")
+    
+    # 处理特殊值
+    if volume_str in ['?', 'unknown', 'tbd', 'to be determined']:
+        default_volume = 50.0  # 50mL默认值
+        debug_print(f"检测到未知体积，使用默认值: {default_volume}mL")
+        return default_volume
+    
+    # 如果是纯数字，使用默认单位
+    try:
+        value = float(volume_str)
+        if default_unit.lower() in ["ml", "milliliter"]:
+            result = value
+        elif default_unit.lower() in ["l", "liter"]:
+            result = value * 1000.0
+        elif default_unit.lower() in ["μl", "ul", "microliter"]:
+            result = value / 1000.0
+        else:
+            result = value  # 默认mL
+        debug_print(f"纯数字输入: {volume_str} → {result}mL（单位: {default_unit}）")
+        return result
+    except ValueError:
+        pass
+    
+    # 移除空格并提取数字和单位
+    volume_clean = re.sub(r'\s+', '', volume_str)
+    
+    # 匹配数字和单位的正则表达式
+    match = re.match(r'([0-9]*\.?[0-9]+)\s*(ml|l|μl|ul|microliter|milliliter|liter)?', volume_clean)
+    
+    if not match:
+        debug_print(f"⚠️ 无法解析体积: '{volume_str}'，使用默认值: 50mL")
+        return 50.0
+    
+    value = float(match.group(1))
+    unit = match.group(2) or default_unit.lower()
+    
+    # 转换为毫升
+    if unit in ['l', 'liter']:
+        volume = value * 1000.0  # L -> mL
+    elif unit in ['μl', 'ul', 'microliter']:
+        volume = value / 1000.0  # μL -> mL
+    else:  # ml, milliliter 或默认
+        volume = value  # 已经是mL
+    
+    debug_print(f"体积解析: '{volume_str}' → {value} {unit} → {volume}mL")
+    return volume
+
 def parse_volume_spec(volume_spec: str) -> float:
     """
     解析体积规格字符串为毫升数
@@ -357,46 +518,46 @@ def generate_wash_solid_protocol(
     G: nx.DiGraph,
     vessel: str,
     solvent: str,
-    volume: Union[float, str] = 0.0,  # 🔧 修改：支持字符串输入
+    volume: Union[float, str] = "50",        # 🔧 修改：默认为字符串
     filtrate_vessel: str = "",
     temp: float = 25.0,
     stir: bool = False,
     stir_speed: float = 0.0,
-    time: float = 0.0,
+    time: Union[str, float] = "0",           # 🔧 修改：支持字符串时间
     repeats: int = 1,
-    # === 新增参数 ===
-    volume_spec: str = "",      # 体积规格
-    repeats_spec: str = "",     # 重复次数规格
-    mass: str = "",             # 🔧 新增：固体质量（用于转换体积）
-    event: str = "",            # 事件标识符
+    # === 现有参数保持不变 ===
+    volume_spec: str = "",
+    repeats_spec: str = "",
+    mass: str = "",
+    event: str = "",
     **kwargs
 ) -> List[Dict[str, Any]]:
     """
-    生成固体清洗操作的协议序列 - 增强版
+    生成固体清洗操作的协议序列 - 增强版（支持单位）
     
-    支持多种体积输入方式：
-    1. volume_spec: "small volume", "large volume" 等
-    2. mass: "10 g", "2.5 kg", "500 mg" 等（转换为体积）
-    3. volume: 数值或字符串 "10", "10 mL", "2.5 L" 等
+    支持多种输入方式：
+    1. volume: "100 mL", "50", "2.5 L", "?"
+    2. time: "5 min", "300", "0.5 h", "?"
+    3. volume_spec: "small volume", "large volume" 等
+    4. mass: "10 g", "2.5 kg", "500 mg" 等（转换为体积）
     """
     
     debug_print("=" * 60)
-    debug_print("开始生成固体清洗协议")
+    debug_print("开始生成固体清洗协议（支持单位）")
     debug_print(f"输入参数:")
     debug_print(f"  - vessel: {vessel}")
     debug_print(f"  - solvent: {solvent}")
     debug_print(f"  - volume: {volume} (类型: {type(volume)})")
+    debug_print(f"  - time: {time} (类型: {type(time)})")
     debug_print(f"  - volume_spec: '{volume_spec}'")
-    debug_print(f"  - mass: '{mass}'")  # 🔧 新增日志
+    debug_print(f"  - mass: '{mass}'")
     debug_print(f"  - filtrate_vessel: '{filtrate_vessel}'")
     debug_print(f"  - temp: {temp}°C")
     debug_print(f"  - stir: {stir}")
     debug_print(f"  - stir_speed: {stir_speed} RPM")
-    debug_print(f"  - time: {time}s")
     debug_print(f"  - repeats: {repeats}")
     debug_print(f"  - repeats_spec: '{repeats_spec}'")
     debug_print(f"  - event: '{event}'")
-    debug_print(f"  - 其他参数: {kwargs}")
     debug_print("=" * 60)
     
     action_sequence = []
@@ -416,12 +577,27 @@ def generate_wash_solid_protocol(
     
     debug_print(f"✅ 必需参数验证通过")
     
-    # === 参数处理 ===
-    debug_print("步骤2: 参数处理...")
+    # === 🔧 新增：单位解析处理 ===
+    debug_print("步骤2: 单位解析处理...")
     
-    # 🔧 修改：处理体积参数（支持mass转换和字符串解析）
-    final_volume = parse_volume_input(volume, volume_spec, mass)
-    debug_print(f"最终体积: {final_volume}mL")
+    # 解析体积（优先级：volume_spec > mass > volume）
+    if volume_spec and volume_spec.strip():
+        final_volume = parse_volume_spec(volume_spec)
+        debug_print(f"使用volume_spec: {final_volume}mL")
+    elif mass and mass.strip():
+        final_volume = parse_mass_to_volume(mass)
+        if final_volume > 0:
+            debug_print(f"使用mass转换: {final_volume}mL")
+        else:
+            final_volume = parse_volume_with_units(volume, "mL")
+            debug_print(f"mass转换失败，使用volume: {final_volume}mL")
+    else:
+        final_volume = parse_volume_with_units(volume, "mL")
+        debug_print(f"使用volume: {final_volume}mL")
+    
+    # 解析时间
+    final_time = parse_time_with_units(time, "s")
+    debug_print(f"解析时间: {time} → {final_time}s ({final_time/60:.1f}min)")
     
     # 处理重复次数参数（repeats_spec优先）
     final_repeats = parse_repeats_input(repeats, repeats_spec)
@@ -436,9 +612,9 @@ def generate_wash_solid_protocol(
         debug_print(f"搅拌速度 {stir_speed} RPM 超出范围，修正为 200 RPM")
         stir_speed = 200.0 if stir else 0.0
     
-    if time < 0:
-        debug_print(f"时间 {time}s 无效，修正为 0")
-        time = 0.0
+    if final_time < 0:
+        debug_print(f"时间 {final_time}s 无效，修正为 0")
+        final_time = 0.0
     
     if final_repeats < 1:
         debug_print(f"重复次数 {final_repeats} 无效，修正为 1")
@@ -447,9 +623,9 @@ def generate_wash_solid_protocol(
         debug_print(f"重复次数 {final_repeats} 过多，修正为 10")
         final_repeats = 10
     
-    debug_print(f"✅ 参数处理完成")
+    debug_print(f"✅ 单位解析和参数处理完成")
     
-    # === 查找设备 ===
+    # === 查找设备（保持原有逻辑）===
     debug_print("步骤3: 查找设备...")
     
     try:
@@ -507,17 +683,14 @@ def generate_wash_solid_protocol(
         debug_print(f"❌ 设备查找失败: {str(e)}")
         raise ValueError(f"设备查找失败: {str(e)}")
     
-    # === 执行清洗循环 ===
+    # === 执行清洗循环（保持原有逻辑，使用解析后的参数）===
     debug_print("步骤4: 执行清洗循环...")
     
     for cycle in range(final_repeats):
         debug_print(f"=== 第 {cycle+1}/{final_repeats} 次清洗 ===")
         
-        # 🔧 修复：分解为基础动作序列
-        
         # 1. 加入清洗溶剂
         debug_print(f"  步骤 {cycle+1}.1: 加入清洗溶剂")
-        # 🔧 修复：使用 pump protocol 而不是直接调用 transfer action
         try:
             from .pump_protocol import generate_pump_protocol_with_rinsing
             
@@ -525,7 +698,7 @@ def generate_wash_solid_protocol(
                 G=G,
                 from_vessel=solvent_source,
                 to_vessel=vessel,
-                volume=final_volume,
+                volume=final_volume,      # 使用解析后的体积
                 amount="",
                 time=0.0,
                 viscous=False,
@@ -548,22 +721,21 @@ def generate_wash_solid_protocol(
                 
         except Exception as e:
             debug_print(f"❌ 转移失败: {str(e)}")
-            # 继续执行，可能有其他问题
         
         # 2. 搅拌混合（如果需要）
         if stir and stirrer_device:
             debug_print(f"  步骤 {cycle+1}.2: 搅拌混合")
-            stir_time = max(time, 30.0) if time > 0 else 60.0  # 默认搅拌1分钟
+            stir_time = max(final_time, 30.0) if final_time > 0 else 60.0  # 使用解析后的时间
             
             stir_action = {
                 "device_id": stirrer_device,
                 "action_name": "stir",
                 "action_kwargs": {
                     "vessel": vessel,
-                    "time": str(int(stir_time)),  # 转换为字符串格式
+                    "time": str(time),        # 保持原始字符串格式
                     "event": event,
                     "time_spec": "",
-                    "stir_time": stir_time,
+                    "stir_time": stir_time,   # 解析后的时间（秒）
                     "stir_speed": stir_speed,
                     "settling_time": 30.0
                 }
@@ -582,7 +754,7 @@ def generate_wash_solid_protocol(
                 "stir_speed": 0.0,
                 "temp": temp,
                 "continue_heatchill": False,
-                "volume": final_volume
+                "volume": final_volume    # 使用解析后的体积
             }
         }
         action_sequence.append(filter_action)
@@ -596,11 +768,12 @@ def generate_wash_solid_protocol(
     
     # === 总结 ===
     debug_print("=" * 60)
-    debug_print(f"固体清洗协议生成完成")
+    debug_print(f"固体清洗协议生成完成（支持单位）")
     debug_print(f"总动作数: {len(action_sequence)}")
     debug_print(f"清洗容器: {vessel}")
     debug_print(f"使用溶剂: {solvent}")
     debug_print(f"清洗体积: {final_volume}mL")
+    debug_print(f"清洗时间: {final_time}s ({final_time/60:.1f}min)")
     debug_print(f"重复次数: {final_repeats}")
     debug_print(f"滤液收集: {actual_filtrate_vessel}")
     debug_print(f"事件标识: {event}")

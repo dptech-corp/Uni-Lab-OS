@@ -10,6 +10,97 @@ def debug_print(message):
     print(f"[STIR] {message}", flush=True)
     logger.info(f"[STIR] {message}")
 
+def parse_time_with_units(time_input: Union[str, float, int], default_unit: str = "s") -> float:
+    """
+    解析带单位的时间输入
+    
+    Args:
+        time_input: 时间输入（如 "30 min", "1 h", "300", "?", 60.0）
+        default_unit: 默认单位（默认为秒）
+    
+    Returns:
+        float: 时间（秒）
+    """
+    if not time_input:
+        return 0.0
+    
+    # 处理数值输入
+    if isinstance(time_input, (int, float)):
+        result = float(time_input)
+        debug_print(f"数值时间输入: {time_input} → {result}s（默认单位）")
+        return result
+    
+    # 处理字符串输入
+    time_str = str(time_input).lower().strip()
+    debug_print(f"解析时间字符串: '{time_str}'")
+    
+    # 处理特殊值
+    if time_str in ['?', 'unknown', 'tbd', 'to be determined']:
+        default_time = 300.0  # 5分钟默认值
+        debug_print(f"检测到未知时间，使用默认值: {default_time}s")
+        return default_time
+    
+    # 如果是纯数字，使用默认单位
+    try:
+        value = float(time_str)
+        if default_unit == "s":
+            result = value
+        elif default_unit in ["min", "minute"]:
+            result = value * 60.0
+        elif default_unit in ["h", "hour"]:
+            result = value * 3600.0
+        else:
+            result = value  # 默认秒
+        debug_print(f"纯数字输入: {time_str} → {result}s（单位: {default_unit}）")
+        return result
+    except ValueError:
+        pass
+    
+    # 使用正则表达式匹配数字和单位
+    pattern = r'(\d+\.?\d*)\s*([a-z]*)'
+    match = re.match(pattern, time_str)
+    
+    if not match:
+        debug_print(f"⚠️ 无法解析时间: '{time_str}'，使用默认值: 60s")
+        return 60.0
+    
+    value = float(match.group(1))
+    unit = match.group(2) or default_unit
+    
+    # 单位转换映射
+    unit_multipliers = {
+        # 秒
+        's': 1.0,
+        'sec': 1.0,
+        'second': 1.0,
+        'seconds': 1.0,
+        
+        # 分钟
+        'm': 60.0,
+        'min': 60.0,
+        'mins': 60.0,
+        'minute': 60.0,
+        'minutes': 60.0,
+        
+        # 小时
+        'h': 3600.0,
+        'hr': 3600.0,
+        'hrs': 3600.0,
+        'hour': 3600.0,
+        'hours': 3600.0,
+        
+        # 天
+        'd': 86400.0,
+        'day': 86400.0,
+        'days': 86400.0,
+    }
+    
+    multiplier = unit_multipliers.get(unit, 1.0)
+    result = value * multiplier
+    
+    debug_print(f"时间解析: '{time_str}' → {value} {unit} → {result}s")
+    return result
+
 def parse_time_spec(time_spec: str) -> float:
     """
     解析时间规格字符串为秒数
@@ -211,27 +302,26 @@ def find_connected_stirrer(G: nx.DiGraph, vessel: str = None) -> str:
 def generate_stir_protocol(
     G: nx.DiGraph,
     vessel: str,
-    time: Union[str, float, int] = 300.0,
-    stir_time: Union[str, float, int] = 0.0,
+    time: Union[str, float, int] = "300",        # 🔧 修改：默认为字符串
+    stir_time: Union[str, float, int] = "0",     # 🔧 修改：支持字符串
     time_spec: str = "",
     event: str = "",
     stir_speed: float = 200.0,
-    settling_time: float = 60.0,
+    settling_time: Union[str, float] = "60",     # 🔧 修改：支持字符串
     **kwargs
 ) -> List[Dict[str, Any]]:
     """
-    生成搅拌操作的协议序列 - 定时搅拌 + 沉降
-    支持 time 和 stir_time 参数统一处理
+    生成搅拌操作的协议序列 - 支持单位
     
     Args:
         G: 设备图
         vessel: 搅拌容器名称（必需）
-        time: 搅拌时间（支持多种格式）
-        stir_time: 搅拌时间（与time等效）
+        time: 搅拌时间（支持 "5 min", "300", "0.5 h" 等）
+        stir_time: 搅拌时间（与time等效，支持单位）
         time_spec: 时间规格（优先级最高）
         event: 事件标识
         stir_speed: 搅拌速度 (RPM)，默认200 RPM
-        settling_time: 沉降时间 (秒)，默认60s
+        settling_time: 沉降时间（支持单位，默认60秒）
         **kwargs: 其他参数（兼容性）
     
     Returns:
@@ -239,7 +329,7 @@ def generate_stir_protocol(
     """
     
     debug_print("=" * 50)
-    debug_print("开始生成搅拌协议")
+    debug_print("开始生成搅拌协议（支持单位）")
     debug_print(f"输入参数:")
     debug_print(f"  - vessel: {vessel}")
     debug_print(f"  - time: {time}")
@@ -265,19 +355,29 @@ def generate_stir_protocol(
     
     debug_print(f"✅ 参数验证通过")
     
-    # === 时间处理（统一 time 和 stir_time）===
-    debug_print("步骤2: 时间处理...")
+    # === 🔧 新增：单位解析处理 ===
+    debug_print("步骤2: 单位解析处理...")
     
-    # 确定实际使用的时间值
-    actual_time_input = stir_time if stir_time else time
+    # 确定实际使用的时间值（stir_time优先）
+    actual_time_input = stir_time if stir_time not in ["0", 0, 0.0] else time
     
-    # 解析时间
-    parsed_time = parse_time_input(actual_time_input, time_spec)
+    # 解析时间（time_spec > actual_time_input）
+    if time_spec:
+        parsed_time = parse_time_spec(time_spec)  # 使用现有的time_spec解析
+        debug_print(f"使用time_spec: '{time_spec}' → {parsed_time}s")
+    else:
+        parsed_time = parse_time_with_units(actual_time_input, "s")
+        debug_print(f"解析时间: {actual_time_input} → {parsed_time}s")
+    
+    # 解析沉降时间
+    parsed_settling_time = parse_time_with_units(settling_time, "s")
+    debug_print(f"解析沉降时间: {settling_time} → {parsed_settling_time}s")
     
     debug_print(f"时间解析结果:")
     debug_print(f"  - 原始输入: time={time}, stir_time={stir_time}")
     debug_print(f"  - 时间规格: {time_spec}")
-    debug_print(f"  - 最终时间: {parsed_time}秒 ({parsed_time/60:.1f}分钟)")
+    debug_print(f"  - 最终搅拌时间: {parsed_time}s ({parsed_time/60:.1f}分钟)")
+    debug_print(f"  - 最终沉降时间: {parsed_settling_time}s ({parsed_settling_time/60:.1f}分钟)")
     
     # 修正参数范围
     if parsed_time < 0:
@@ -294,12 +394,12 @@ def generate_stir_protocol(
         debug_print(f"搅拌速度 {stir_speed} RPM 过高，修正为 1000 RPM")
         stir_speed = 1000.0
     
-    if settling_time < 0:
-        debug_print(f"沉降时间 {settling_time}s 无效，修正为 60s")
-        settling_time = 60.0
-    elif settling_time > 1800:
-        debug_print(f"沉降时间 {settling_time}s 过长，修正为 600s")
-        settling_time = 600.0
+    if parsed_settling_time < 0:
+        debug_print(f"沉降时间 {parsed_settling_time}s 无效，修正为 60s")
+        parsed_settling_time = 60.0
+    elif parsed_settling_time > 1800:
+        debug_print(f"沉降时间 {parsed_settling_time}s 过长，修正为 600s")
+        parsed_settling_time = 600.0
     
     # === 查找搅拌设备 ===
     debug_print("步骤3: 查找搅拌设备...")
@@ -318,12 +418,12 @@ def generate_stir_protocol(
     # 构建搅拌动作参数
     stir_kwargs = {
         "vessel": vessel,
-        "time": str(time),           # 保持原始字符串格式
+        "time": str(time),                    # 保持原始字符串格式
         "event": event,
         "time_spec": time_spec,
-        "stir_time": parsed_time,    # 解析后的时间（秒）
+        "stir_time": parsed_time,             # 解析后的时间（秒）
         "stir_speed": stir_speed,
-        "settling_time": settling_time
+        "settling_time": parsed_settling_time # 解析后的沉降时间（秒）
     }
     
     debug_print(f"搅拌参数: {stir_kwargs}")
@@ -338,10 +438,10 @@ def generate_stir_protocol(
     
     # === 总结 ===
     debug_print("=" * 50)
-    debug_print(f"搅拌协议生成完成")
+    debug_print(f"搅拌协议生成完成（支持单位）")
     debug_print(f"总动作数: {len(action_sequence)}")
     debug_print(f"搅拌容器: {vessel}")
-    debug_print(f"搅拌参数: {stir_speed} RPM, {parsed_time}s, 沉降 {settling_time}s")
+    debug_print(f"搅拌参数: {stir_speed} RPM, {parsed_time}s, 沉降 {parsed_settling_time}s")
     debug_print("=" * 50)
     
     return action_sequence

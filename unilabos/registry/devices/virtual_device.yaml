@@ -2321,7 +2321,7 @@ virtual_rotavap:
           pressure: 0.1
           stir_speed: 100.0
           temp: 60.0
-          time: 1800.0
+          time: 180.0
           vessel: null
         handles: []
         result: {}
@@ -2341,7 +2341,7 @@ virtual_rotavap:
                   default: 60.0
                   type: number
                 time:
-                  default: 1800.0
+                  default: 180.0
                   type: number
                 vessel:
                   type: string

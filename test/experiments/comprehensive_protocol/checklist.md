@@ -248,3 +248,11 @@ class HydrogenateProtocol(BaseModel):
     <dissolve>
     <separate>
     <CleanVessel vessel="centrifuge"/>
+
+
+单位修复：
+    evaporate
+    heatchill
+    recrysitallize
+    stir
+    wash solid

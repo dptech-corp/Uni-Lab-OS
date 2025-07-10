@@ -1,4 +1,4 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
 import networkx as nx
 import logging
 import re
@@ -9,6 +9,97 @@ def debug_print(message):
     """调试输出"""
     print(f"[HEATCHILL] {message}", flush=True)
     logger.info(f"[HEATCHILL] {message}")
+
+def parse_time_with_units(time_input: Union[str, float, int], default_unit: str = "s") -> float:
+    """
+    解析带单位的时间输入
+    
+    Args:
+        time_input: 时间输入（如 "30 min", "1 h", "300", "?", 60.0）
+        default_unit: 默认单位（默认为秒）
+    
+    Returns:
+        float: 时间（秒）
+    """
+    if not time_input:
+        return 0.0
+    
+    # 处理数值输入
+    if isinstance(time_input, (int, float)):
+        result = float(time_input)
+        debug_print(f"数值时间输入: {time_input} → {result}s（默认单位）")
+        return result
+    
+    # 处理字符串输入
+    time_str = str(time_input).lower().strip()
+    debug_print(f"解析时间字符串: '{time_str}'")
+    
+    # 处理特殊值
+    if time_str in ['?', 'unknown', 'tbd', 'to be determined']:
+        default_time = 300.0  # 5分钟默认值
+        debug_print(f"检测到未知时间，使用默认值: {default_time}s")
+        return default_time
+    
+    # 如果是纯数字，使用默认单位
+    try:
+        value = float(time_str)
+        if default_unit == "s":
+            result = value
+        elif default_unit in ["min", "minute"]:
+            result = value * 60.0
+        elif default_unit in ["h", "hour"]:
+            result = value * 3600.0
+        else:
+            result = value  # 默认秒
+        debug_print(f"纯数字输入: {time_str} → {result}s（单位: {default_unit}）")
+        return result
+    except ValueError:
+        pass
+    
+    # 使用正则表达式匹配数字和单位
+    pattern = r'(\d+\.?\d*)\s*([a-z]*)'
+    match = re.match(pattern, time_str)
+    
+    if not match:
+        debug_print(f"⚠️ 无法解析时间: '{time_str}'，使用默认值: 60s")
+        return 60.0
+    
+    value = float(match.group(1))
+    unit = match.group(2) or default_unit
+    
+    # 单位转换映射
+    unit_multipliers = {
+        # 秒
+        's': 1.0,
+        'sec': 1.0,
+        'second': 1.0,
+        'seconds': 1.0,
+        
+        # 分钟
+        'm': 60.0,
+        'min': 60.0,
+        'mins': 60.0,
+        'minute': 60.0,
+        'minutes': 60.0,
+        
+        # 小时
+        'h': 3600.0,
+        'hr': 3600.0,
+        'hrs': 3600.0,
+        'hour': 3600.0,
+        'hours': 3600.0,
+        
+        # 天
+        'd': 86400.0,
+        'day': 86400.0,
+        'days': 86400.0,
+    }
+    
+    multiplier = unit_multipliers.get(unit, 1.0)
+    result = value * multiplier
+    
+    debug_print(f"时间解析: '{time_str}' → {value} {unit} → {result}s")
+    return result
 
 def parse_temp_spec(temp_spec: str) -> float:
     """解析温度规格为具体温度"""
@@ -117,7 +208,7 @@ def generate_heat_chill_protocol(
     G: nx.DiGraph,
     vessel: str,
     temp: float = 25.0,
-    time: float = 300.0,
+    time: Union[str, float] = "300",     # 🔧 修改：支持字符串时间
     temp_spec: str = "",
     time_spec: str = "",
     pressure: str = "",
@@ -125,35 +216,18 @@ def generate_heat_chill_protocol(
     stir: bool = False,
     stir_speed: float = 300.0,
     purpose: str = "",
-    **kwargs  # 🔧 接受额外参数，增强兼容性
+    **kwargs
 ) -> List[Dict[str, Any]]:
     """
-    生成加热/冷却操作的协议序列
-    
-    Args:
-        G: 设备图
-        vessel: 加热容器名称（必需）
-        temp: 目标温度 (°C)
-        time: 加热时间 (秒)
-        temp_spec: 温度规格（如 'room temperature', 'reflux'）
-        time_spec: 时间规格（如 'overnight', '2 h'）
-        pressure: 压力规格（如 '1 mbar'），不做特殊处理
-        reflux_solvent: 回流溶剂名称，不做特殊处理
-        stir: 是否搅拌
-        stir_speed: 搅拌速度 (RPM)
-        purpose: 操作目的
-        **kwargs: 其他参数（兼容性）
-    
-    Returns:
-        List[Dict[str, Any]]: 加热操作的动作序列
+    生成加热/冷却操作的协议序列 - 支持单位
     """
     
     debug_print("=" * 50)
-    debug_print("开始生成加热冷却协议")
+    debug_print("开始生成加热冷却协议（支持单位）")
     debug_print(f"输入参数:")
     debug_print(f"  - vessel: {vessel}")
     debug_print(f"  - temp: {temp}°C")
-    debug_print(f"  - time: {time}s ({time/60:.1f}分钟)")
+    debug_print(f"  - time: {time} (类型: {type(time)})")
     debug_print(f"  - temp_spec: {temp_spec}")
     debug_print(f"  - time_spec: {time_spec}")
     debug_print(f"  - pressure: {pressure}")
@@ -176,6 +250,9 @@ def generate_heat_chill_protocol(
     if vessel not in G.nodes():
         raise ValueError(f"容器 '{vessel}' 不存在于系统中")
     
+    # === 🔧 新增：单位解析处理 ===
+    debug_print("步骤2: 单位解析处理...")
+    
     # 温度解析：优先使用 temp_spec，然后是 temp
     final_temp = temp
     if temp_spec:
@@ -183,10 +260,12 @@ def generate_heat_chill_protocol(
         debug_print(f"温度解析: '{temp_spec}' → {final_temp}°C")
     
     # 时间解析：优先使用 time_spec，然后是 time
-    final_time = time
     if time_spec:
-        final_time = parse_time_spec(time_spec)
-        debug_print(f"时间解析: '{time_spec}' → {final_time}s ({final_time/60:.1f}分钟)")
+        final_time = parse_time_spec(time_spec)  # 使用现有的time_spec解析
+        debug_print(f"时间解析: '{time_spec}' → {final_time}s")
+    else:
+        final_time = parse_time_with_units(time, "s")
+        debug_print(f"时间解析: {time} → {final_time}s ({final_time/60:.1f}分钟)")
     
     # 参数范围验证
     if final_temp < -50.0 or final_temp > 300.0:
@@ -201,10 +280,10 @@ def generate_heat_chill_protocol(
         debug_print(f"搅拌速度 {stir_speed} RPM 超出范围，修正为 300 RPM")
         stir_speed = 300.0
     
-    debug_print(f"✅ 参数验证通过")
+    debug_print(f"✅ 单位解析和参数验证通过")
     
     # === 查找加热设备 ===
-    debug_print("步骤2: 查找加热设备...")
+    debug_print("步骤3: 查找加热设备...")
     
     try:
         heatchill_id = find_connected_heatchill(G, vessel)
@@ -215,18 +294,18 @@ def generate_heat_chill_protocol(
         raise ValueError(f"无法找到加热设备: {str(e)}")
     
     # === 执行加热操作 ===
-    debug_print("步骤3: 执行加热操作...")
+    debug_print("步骤4: 执行加热操作...")
     
     heatchill_action = {
         "device_id": heatchill_id,
         "action_name": "heat_chill",
         "action_kwargs": {
             "vessel": vessel,
-            "temp": final_temp,
-            "time": final_time,
-            "stir": stir,
-            "stir_speed": stir_speed,
-            "purpose": purpose or f"加热到 {final_temp}°C"
+            "temp": float(final_temp),      # 🔧 确保是浮点数
+            "time": float(final_time),      # 🔧 确保是浮点数
+            "stir": bool(stir),             # 🔧 确保是布尔值
+            "stir_speed": float(stir_speed), # 🔧 确保是浮点数
+            "purpose": str(purpose or f"加热到 {final_temp}°C")  # 🔧 确保是字符串
         }
     }
     
@@ -234,7 +313,7 @@ def generate_heat_chill_protocol(
     
     # === 总结 ===
     debug_print("=" * 50)
-    debug_print(f"加热冷却协议生成完成")
+    debug_print(f"加热冷却协议生成完成（支持单位）")
     debug_print(f"总动作数: {len(action_sequence)}")
     debug_print(f"加热容器: {vessel}")
     debug_print(f"目标温度: {final_temp}°C")
@@ -247,12 +326,11 @@ def generate_heat_chill_protocol(
     
     return action_sequence
 
-
 def generate_heat_chill_to_temp_protocol(
         G: nx.DiGraph,
         vessel: str,
         temp: float = 25.0,
-        time: float = 300.0,
+        time: Union[str, float] = 300.0,  # 🔧 也支持字符串
         temp_spec: str = "",
         time_spec: str = "",
         pressure: str = "",
@@ -269,7 +347,7 @@ def generate_heat_chill_to_temp_protocol(
         G: 设备图
         vessel: 加热容器名称（必需）
         temp: 目标温度 (°C)
-        time: 加热时间 (秒)
+        time: 加热时间（支持字符串和数字）
         temp_spec: 温度规格（如 'room temperature', 'reflux'）
         time_spec: 时间规格（如 'overnight', '2 h'）
         pressure: 压力规格（如 '1 mbar'），不做特殊处理
@@ -288,7 +366,7 @@ def generate_heat_chill_to_temp_protocol(
     debug_print(f"输入参数:")
     debug_print(f"  - vessel: {vessel}")
     debug_print(f"  - temp: {temp}°C")
-    debug_print(f"  - time: {time}s ({time / 60:.1f}分钟)")
+    debug_print(f"  - time: {time} (类型: {type(time)})")
     debug_print(f"  - temp_spec: {temp_spec}")
     debug_print(f"  - time_spec: {time_spec}")
     debug_print(f"  - pressure: {pressure}")
@@ -317,11 +395,13 @@ def generate_heat_chill_to_temp_protocol(
         final_temp = parse_temp_spec(temp_spec)
         debug_print(f"温度解析: '{temp_spec}' → {final_temp}°C")
 
-    # 时间解析：优先使用 time_spec，然后是 time
-    final_time = time
+    # 🔧 修复：时间解析，支持字符串输入
     if time_spec:
         final_time = parse_time_spec(time_spec)
         debug_print(f"时间解析: '{time_spec}' → {final_time}s ({final_time / 60:.1f}分钟)")
+    else:
+        final_time = parse_time_with_units(time, "s")
+        debug_print(f"时间解析: {time} → {final_time}s ({final_time/60:.1f}分钟)")
 
     # 参数范围验证
     if final_temp < -50.0 or final_temp > 300.0:
@@ -357,11 +437,11 @@ def generate_heat_chill_to_temp_protocol(
         "action_name": "heat_chill",
         "action_kwargs": {
             "vessel": vessel,
-            "temp": final_temp,
-            "time": final_time,
-            "stir": stir,
-            "stir_speed": stir_speed,
-            "purpose": purpose or f"加热到 {final_temp}°C"
+            "temp": float(final_temp),      # 🔧 确保是浮点数
+            "time": float(final_time),      # 🔧 确保是浮点数
+            "stir": bool(stir),             # 🔧 确保是布尔值
+            "stir_speed": float(stir_speed), # 🔧 确保是浮点数
+            "purpose": str(purpose or f"加热到 {final_temp}°C")  # 🔧 确保是字符串
         }
     }
 

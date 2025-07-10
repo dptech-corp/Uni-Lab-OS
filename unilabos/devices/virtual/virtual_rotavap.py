@@ -73,7 +73,7 @@ class VirtualRotavap:
         vessel: str, 
         pressure: float = 0.1, 
         temp: float = 60.0, 
-        time: float = 1800.0,
+        time: float = 180.0,
         stir_speed: float = 100.0,
         solvent: str = "",
         **kwargs
