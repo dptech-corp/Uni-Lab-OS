@@ -1,6 +1,7 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
 import networkx as nx
 import logging
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -8,6 +9,173 @@ def debug_print(message):
     """调试输出"""
     print(f"[STIR] {message}", flush=True)
     logger.info(f"[STIR] {message}")
+
+def parse_time_spec(time_spec: str) -> float:
+    """
+    解析时间规格字符串为秒数
+    
+    Args:
+        time_spec: 时间规格字符串（如 "several minutes", "overnight", "few hours"）
+    
+    Returns:
+        float: 时间（秒）
+    """
+    if not time_spec:
+        return 0.0
+    
+    time_spec = time_spec.lower().strip()
+    
+    # 预定义的时间规格映射
+    time_spec_map = {
+        # 几分钟
+        "several minutes": 5.0 * 60,      # 5分钟
+        "few minutes": 3.0 * 60,          # 3分钟
+        "couple of minutes": 2.0 * 60,    # 2分钟
+        "a few minutes": 3.0 * 60,        # 3分钟
+        "some minutes": 5.0 * 60,         # 5分钟
+        
+        # 几小时
+        "several hours": 3.0 * 3600,      # 3小时
+        "few hours": 2.0 * 3600,          # 2小时
+        "couple of hours": 2.0 * 3600,    # 2小时
+        "a few hours": 3.0 * 3600,        # 3小时
+        "some hours": 4.0 * 3600,         # 4小时
+        
+        # 特殊时间
+        "overnight": 12.0 * 3600,         # 12小时
+        "over night": 12.0 * 3600,        # 12小时
+        "morning": 4.0 * 3600,            # 4小时
+        "afternoon": 6.0 * 3600,          # 6小时
+        "evening": 4.0 * 3600,            # 4小时
+        
+        # 短时间
+        "briefly": 30.0,                  # 30秒
+        "momentarily": 10.0,              # 10秒
+        "quickly": 60.0,                  # 1分钟
+        "slowly": 10.0 * 60,              # 10分钟
+        
+        # 长时间
+        "extended": 6.0 * 3600,           # 6小时
+        "prolonged": 8.0 * 3600,          # 8小时
+        "extensively": 12.0 * 3600,       # 12小时
+    }
+    
+    # 直接匹配
+    if time_spec in time_spec_map:
+        result = time_spec_map[time_spec]
+        debug_print(f"时间规格解析: '{time_spec}' → {result/60:.1f}分钟")
+        return result
+    
+    # 模糊匹配
+    for spec, value in time_spec_map.items():
+        if spec in time_spec or time_spec in spec:
+            result = value
+            debug_print(f"时间规格模糊匹配: '{time_spec}' → '{spec}' → {result/60:.1f}分钟")
+            return result
+    
+    # 如果无法识别，返回默认值
+    default_time = 5.0 * 60  # 5分钟
+    debug_print(f"⚠️ 无法识别时间规格: '{time_spec}'，使用默认值: {default_time/60:.1f}分钟")
+    return default_time
+
+def parse_time_string(time_str: str) -> float:
+    """
+    解析时间字符串为秒数，支持多种单位
+    
+    Args:
+        time_str: 时间字符串（如 "0.5 h", "30 min", "120 s", "2.5"）
+    
+    Returns:
+        float: 时间（秒）
+    """
+    if not time_str:
+        return 0.0
+    
+    # 如果是纯数字，默认单位为秒
+    try:
+        return float(time_str)
+    except ValueError:
+        pass
+    
+    # 清理字符串
+    time_str = time_str.lower().strip()
+    
+    # 使用正则表达式匹配数字和单位
+    pattern = r'(\d+\.?\d*)\s*([a-z]*)'
+    match = re.match(pattern, time_str)
+    
+    if not match:
+        debug_print(f"⚠️ 无法解析时间字符串: '{time_str}'，使用默认值: 60秒")
+        return 60.0
+    
+    value = float(match.group(1))
+    unit = match.group(2)
+    
+    # 单位转换映射
+    unit_map = {
+        # 秒
+        's': 1.0,
+        'sec': 1.0,
+        'second': 1.0,
+        'seconds': 1.0,
+        
+        # 分钟
+        'm': 60.0,
+        'min': 60.0,
+        'mins': 60.0,
+        'minute': 60.0,
+        'minutes': 60.0,
+        
+        # 小时
+        'h': 3600.0,
+        'hr': 3600.0,
+        'hrs': 3600.0,
+        'hour': 3600.0,
+        'hours': 3600.0,
+        
+        # 天
+        'd': 86400.0,
+        'day': 86400.0,
+        'days': 86400.0,
+        
+        # 如果没有单位，默认为秒
+        '': 1.0,
+    }
+    
+    multiplier = unit_map.get(unit, 1.0)
+    result = value * multiplier
+    
+    debug_print(f"时间字符串解析: '{time_str}' → {value} {unit or 'seconds'} → {result}秒")
+    return result
+
+def parse_time_input(time_input: Union[str, float, int], time_spec: str = "") -> float:
+    """
+    统一的时间输入解析函数
+    
+    Args:
+        time_input: 时间输入（可以是字符串、浮点数或整数）
+        time_spec: 时间规格字符串（优先级高于time_input）
+    
+    Returns:
+        float: 时间（秒）
+    """
+    # 优先处理 time_spec
+    if time_spec:
+        return parse_time_spec(time_spec)
+    
+    # 处理 time_input
+    if isinstance(time_input, (int, float)):
+        # 数字默认单位为秒
+        result = float(time_input)
+        debug_print(f"数字时间输入: {time_input} → {result}秒")
+        return result
+    
+    if isinstance(time_input, str):
+        return parse_time_string(time_input)
+    
+    # 默认值
+    debug_print(f"⚠️ 无法处理时间输入: {time_input}，使用默认值: 60秒")
+    return 60.0
 
 def find_connected_stirrer(G: nx.DiGraph, vessel: str = None) -> str:
     """
@@ -43,18 +211,25 @@ def find_connected_stirrer(G: nx.DiGraph, vessel: str = None) -> str:
 def generate_stir_protocol(
     G: nx.DiGraph,
     vessel: str,
-    stir_time: float = 300.0,
+    time: Union[str, float, int] = 300.0,
+    stir_time: Union[str, float, int] = 0.0,
+    time_spec: str = "",
+    event: str = "",
     stir_speed: float = 200.0,
     settling_time: float = 60.0,
-    **kwargs  # 🔧 接受额外参数，增强兼容性
+    **kwargs
 ) -> List[Dict[str, Any]]:
     """
     生成搅拌操作的协议序列 - 定时搅拌 + 沉降
+    支持 time 和 stir_time 参数统一处理
     
     Args:
         G: 设备图
         vessel: 搅拌容器名称（必需）
-        stir_time: 搅拌时间 (秒)，默认300s
+        time: 搅拌时间（支持多种格式）
+        stir_time: 搅拌时间（与time等效）
+        time_spec: 时间规格（优先级最高）
+        event: 事件标识
         stir_speed: 搅拌速度 (RPM)，默认200 RPM
         settling_time: 沉降时间 (秒)，默认60s
         **kwargs: 其他参数（兼容性）
@@ -67,9 +242,12 @@ def generate_stir_protocol(
     debug_print("开始生成搅拌协议")
     debug_print(f"输入参数:")
     debug_print(f"  - vessel: {vessel}")
-    debug_print(f"  - stir_time: {stir_time}s ({stir_time/60:.1f}分钟)")
-    debug_print(f"  - stir_speed: {stir_speed} RPM")
-    debug_print(f"  - settling_time: {settling_time}s ({settling_time/60:.1f}分钟)")
+    debug_print(f"  - time: {time}")
+    debug_print(f"  - stir_time: {stir_time}")
+    debug_print(f"  - time_spec: {time_spec}")
+    debug_print(f"  - event: {event}")
+    debug_print(f"  - stir_speed: {stir_speed}")
+    debug_print(f"  - settling_time: {settling_time}")
     debug_print(f"  - 其他参数: {kwargs}")
     debug_print("=" * 50)
     
@@ -85,13 +263,29 @@ def generate_stir_protocol(
     if vessel not in G.nodes():
         raise ValueError(f"容器 '{vessel}' 不存在于系统中")
     
+    debug_print(f"✅ 参数验证通过")
+    
+    # === 时间处理（统一 time 和 stir_time）===
+    debug_print("步骤2: 时间处理...")
+    
+    # 确定实际使用的时间值
+    actual_time_input = stir_time if stir_time else time
+    
+    # 解析时间
+    parsed_time = parse_time_input(actual_time_input, time_spec)
+    
+    debug_print(f"时间解析结果:")
+    debug_print(f"  - 原始输入: time={time}, stir_time={stir_time}")
+    debug_print(f"  - 时间规格: {time_spec}")
+    debug_print(f"  - 最终时间: {parsed_time}秒 ({parsed_time/60:.1f}分钟)")
+    
     # 修正参数范围
-    if stir_time < 0:
-        debug_print(f"搅拌时间 {stir_time}s 无效，修正为 300s")
-        stir_time = 300.0
-    elif stir_time > 7200:
-        debug_print(f"搅拌时间 {stir_time}s 过长，修正为 3600s")
-        stir_time = 3600.0
+    if parsed_time < 0:
+        debug_print(f"搅拌时间 {parsed_time}s 无效，修正为 300s")
+        parsed_time = 300.0
+    elif parsed_time > 7200:
+        debug_print(f"搅拌时间 {parsed_time}s 过长，修正为 3600s")
+        parsed_time = 3600.0
     
     if stir_speed < 10.0:
         debug_print(f"搅拌速度 {stir_speed} RPM 过低，修正为 100 RPM")
@@ -107,10 +301,8 @@ def generate_stir_protocol(
         debug_print(f"沉降时间 {settling_time}s 过长，修正为 600s")
         settling_time = 600.0
     
-    debug_print(f"✅ 参数验证通过")
-    
     # === 查找搅拌设备 ===
-    debug_print("步骤2: 查找搅拌设备...")
+    debug_print("步骤3: 查找搅拌设备...")
     
     try:
         stirrer_id = find_connected_stirrer(G, vessel)
@@ -121,16 +313,25 @@ def generate_stir_protocol(
         raise ValueError(f"无法找到搅拌设备: {str(e)}")
     
     # === 执行搅拌操作 ===
-    debug_print("步骤3: 执行搅拌操作...")
+    debug_print("步骤4: 执行搅拌操作...")
+    
+    # 构建搅拌动作参数
+    stir_kwargs = {
+        "vessel": vessel,
+        "time": str(time),           # 保持原始字符串格式
+        "event": event,
+        "time_spec": time_spec,
+        "stir_time": parsed_time,    # 解析后的时间（秒）
+        "stir_speed": stir_speed,
+        "settling_time": settling_time
+    }
+    
+    debug_print(f"搅拌参数: {stir_kwargs}")
     
     stir_action = {
         "device_id": stirrer_id,
         "action_name": "stir",
-        "action_kwargs": {
-            "stir_time": stir_time,
-            "stir_speed": stir_speed,
-            "settling_time": settling_time
-        }
+        "action_kwargs": stir_kwargs
     }
     
     action_sequence.append(stir_action)
@@ -140,7 +341,7 @@ def generate_stir_protocol(
     debug_print(f"搅拌协议生成完成")
     debug_print(f"总动作数: {len(action_sequence)}")
     debug_print(f"搅拌容器: {vessel}")
-    debug_print(f"搅拌参数: {stir_speed} RPM, {stir_time}s, 沉降 {settling_time}s")
+    debug_print(f"搅拌参数: {stir_speed} RPM, {parsed_time}s, 沉降 {settling_time}s")
     debug_print("=" * 50)
     
     return action_sequence
@@ -150,7 +351,7 @@ def generate_start_stir_protocol(
     vessel: str,
     stir_speed: float = 200.0,
     purpose: str = "",
-    **kwargs  # 🔧 接受额外参数，增强兼容性
+    **kwargs
 ) -> List[Dict[str, Any]]:
     """
     生成开始搅拌操作的协议序列 - 持续搅拌
@@ -237,7 +438,7 @@ def generate_start_stir_protocol(
 def generate_stop_stir_protocol(
     G: nx.DiGraph,
     vessel: str,
-    **kwargs  # 🔧 接受额外参数，增强兼容性
+    **kwargs
 ) -> List[Dict[str, Any]]:
     """
     生成停止搅拌操作的协议序列
@@ -304,56 +505,3 @@ def generate_stop_stir_protocol(
     debug_print("=" * 50)
     
     return action_sequence
-
-# === 便捷函数 ===
-
-def generate_fast_stir_protocol(
-    G: nx.DiGraph,
-    vessel: str,
-    **kwargs
-) -> List[Dict[str, Any]]:
-    """快速搅拌：高速短时间"""
-    return generate_stir_protocol(
-        G, vessel, 
-        stir_time=300.0, 
-        stir_speed=800.0, 
-        settling_time=60.0,
-        **kwargs
-    )
-
-def generate_gentle_stir_protocol(
-    G: nx.DiGraph,
-    vessel: str,
-    **kwargs
-) -> List[Dict[str, Any]]:
-    """温和搅拌：低速长时间"""
-    return generate_stir_protocol(
-        G, vessel, 
-        stir_time=900.0, 
-        stir_speed=150.0, 
-        settling_time=120.0,
-        **kwargs
-    )
-
-def generate_thorough_stir_protocol(
-    G: nx.DiGraph,
-    vessel: str,
-    **kwargs
-) -> List[Dict[str, Any]]:
-    """彻底搅拌：中速长时间"""
-    return generate_stir_protocol(
-        G, vessel, 
-        stir_time=1800.0, 
-        stir_speed=400.0, 
-        settling_time=300.0,
-        **kwargs
-    )
-
-# 测试函数
-def test_stir_protocol():
-    """测试搅拌协议"""
-    debug_print("=== STIR PROTOCOL 测试 ===")
-    debug_print("✅ 测试完成")
-
-if __name__ == "__main__":
-    test_stir_protocol()

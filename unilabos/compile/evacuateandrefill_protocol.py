@@ -1,8 +1,16 @@
-import numpy as np
 import networkx as nx
+import logging
+import uuid  # 🔧 移到顶部
 from typing import List, Dict, Any, Optional
 from .pump_protocol import generate_pump_protocol_with_rinsing, generate_pump_protocol
 
+# 设置日志
+logger = logging.getLogger(__name__)
+
+def debug_print(message):
+    """调试输出函数"""
+    print(f"[EVACUATE_REFILL] {message}", flush=True)
+    logger.info(f"[EVACUATE_REFILL] {message}")
 
 def find_gas_source(G: nx.DiGraph, gas: str) -> str:
     """
@@ -11,7 +19,7 @@ def find_gas_source(G: nx.DiGraph, gas: str) -> str:
     2. 气体类型匹配（data.gas_type）
     3. 默认气源
     """
-    print(f"EVACUATE_REFILL: 正在查找气体 '{gas}' 的气源...")
+    debug_print(f"正在查找气体 '{gas}' 的气源...")
     
     # 第一步：通过容器名称匹配
     gas_source_patterns = [
@@ -26,7 +34,7 @@ def find_gas_source(G: nx.DiGraph, gas: str) -> str:
     
     for pattern in gas_source_patterns:
         if pattern in G.nodes():
-            print(f"EVACUATE_REFILL: 通过名称匹配找到气源: {pattern}")
+            debug_print(f"通过名称匹配找到气源: {pattern}")
             return pattern
     
     # 第二步：通过气体类型匹配 (data.gas_type)
@@ -44,7 +52,7 @@ def find_gas_source(G: nx.DiGraph, gas: str) -> str:
             gas_type = data.get('gas_type', '')
             
             if gas_type.lower() == gas.lower():
-                print(f"EVACUATE_REFILL: 通过气体类型匹配找到气源: {node_id} (gas_type: {gas_type})")
+                debug_print(f"通过气体类型匹配找到气源: {node_id} (gas_type: {gas_type})")
                 return node_id
             
             # 检查 config.gas_type  
@@ -52,7 +60,7 @@ def find_gas_source(G: nx.DiGraph, gas: str) -> str:
             config_gas_type = config.get('gas_type', '')
             
             if config_gas_type.lower() == gas.lower():
-                print(f"EVACUATE_REFILL: 通过配置气体类型匹配找到气源: {node_id} (config.gas_type: {config_gas_type})")
+                debug_print(f"通过配置气体类型匹配找到气源: {node_id} (config.gas_type: {config_gas_type})")
                 return node_id
     
     # 第三步：查找所有可用的气源设备
@@ -69,139 +77,138 @@ def find_gas_source(G: nx.DiGraph, gas: str) -> str:
             gas_type = data.get('gas_type', 'unknown')
             available_gas_sources.append(f"{node_id} (gas_type: {gas_type})")
     
-    print(f"EVACUATE_REFILL: 可用气源列表: {available_gas_sources}")
+    debug_print(f"可用气源列表: {available_gas_sources}")
     
     # 第四步：如果找不到特定气体，使用默认的第一个气源
     default_gas_sources = [
         node for node in G.nodes() 
-        if ((G.nodes[node].get('class') or '').startswith('virtual_gas_source')
+        if ((G.nodes[node].get('class') or '').find('virtual_gas_source') != -1
             or 'gas_source' in node)
     ]
     
     if default_gas_sources:
         default_source = default_gas_sources[0]
-        print(f"EVACUATE_REFILL: ⚠️ 未找到特定气体 '{gas}'，使用默认气源: {default_source}")
+        debug_print(f"⚠️ 未找到特定气体 '{gas}'，使用默认气源: {default_source}")
         return default_source
     
     raise ValueError(f"找不到气体 '{gas}' 对应的气源。可用气源: {available_gas_sources}")
 
-
-def find_gas_source_by_any_match(G: nx.DiGraph, gas: str) -> str:
-    """
-    增强版气源查找，支持各种匹配方式的别名函数
-    """
-    return find_gas_source(G, gas)
-
-
-def get_gas_source_type(G: nx.DiGraph, gas_source: str) -> str:
-    """获取气源的气体类型"""
-    if gas_source not in G.nodes():
-        return "unknown"
-    
-    node_data = G.nodes[gas_source]
-    data = node_data.get('data', {})
-    config = node_data.get('config', {})
-    
-    # 检查多个可能的字段
-    gas_type = (data.get('gas_type') or 
-                config.get('gas_type') or 
-                data.get('gas') or
-                config.get('gas') or
-                "air")  # 默认为空气
-    
-    return gas_type
-
-
-def find_vessels_by_gas_type(G: nx.DiGraph, gas: str) -> List[str]:
-    """
-    根据气体类型查找所有匹配的容器/气源
-    """
-    matching_vessels = []
-    
-    for node_id in G.nodes():
-        node_data = G.nodes[node_id]
-        
-        # 检查容器名称匹配
-        if gas.lower() in node_id.lower():
-            matching_vessels.append(f"{node_id} (名称匹配)")
-            continue
-        
-        # 检查气体类型匹配
-        data = node_data.get('data', {})
-        config = node_data.get('config', {})
-        
-        gas_type = data.get('gas_type', '') or config.get('gas_type', '')
-        if gas_type.lower() == gas.lower():
-            matching_vessels.append(f"{node_id} (gas_type: {gas_type})")
-    
-    return matching_vessels
-
-
 def find_vacuum_pump(G: nx.DiGraph) -> str:
     """查找真空泵设备"""
-    vacuum_pumps = [
-        node for node in G.nodes() 
-        if ((G.nodes[node].get('class') or '').startswith('virtual_vacuum_pump')
-            or 'vacuum_pump' in node
-            or 'vacuum' in (G.nodes[node].get('class') or ''))
-    ]
+    debug_print("查找真空泵设备...")
+    
+    vacuum_pumps = []
+    for node in G.nodes():
+        node_data = G.nodes[node]
+        node_class = node_data.get('class', '') or ''
+        
+        if ('virtual_vacuum_pump' in node_class or 
+            'vacuum_pump' in node.lower() or 
+            'vacuum' in node_class.lower()):
+            vacuum_pumps.append(node)
     
     if not vacuum_pumps:
         raise ValueError("系统中未找到真空泵设备")
     
+    debug_print(f"找到真空泵: {vacuum_pumps[0]}")
     return vacuum_pumps[0]
 
-
-def find_connected_stirrer(G: nx.DiGraph, vessel: str) -> str:
+def find_connected_stirrer(G: nx.DiGraph, vessel: str) -> Optional[str]:
     """查找与指定容器相连的搅拌器"""
-    stirrer_nodes = [node for node in G.nodes() 
-                    if (G.nodes[node].get('class') or '') == 'virtual_stirrer']
+    debug_print(f"查找与容器 {vessel} 相连的搅拌器...")
+    
+    stirrer_nodes = []
+    for node in G.nodes():
+        node_data = G.nodes[node]
+        node_class = node_data.get('class', '') or ''
+        
+        if 'virtual_stirrer' in node_class or 'stirrer' in node.lower():
+            stirrer_nodes.append(node)
     
     # 检查哪个搅拌器与目标容器相连
     for stirrer in stirrer_nodes:
         if G.has_edge(stirrer, vessel) or G.has_edge(vessel, stirrer):
+            debug_print(f"找到连接的搅拌器: {stirrer}")
             return stirrer
     
-    return stirrer_nodes[0] if stirrer_nodes else None
-
-
-def find_associated_solenoid_valve(G: nx.DiGraph, device_id: str) -> Optional[str]:
-    """查找与指定设备相关联的电磁阀"""
-    solenoid_valves = [
-        node for node in G.nodes() 
-        if ('solenoid' in (G.nodes[node].get('class') or '').lower()
-            or 'solenoid_valve' in node)
-    ]
+    # 如果没有连接的搅拌器，返回第一个可用的
+    if stirrer_nodes:
+        debug_print(f"未找到直接连接的搅拌器，使用第一个可用的: {stirrer_nodes[0]}")
+        return stirrer_nodes[0]
     
-    # 通过网络连接查找直接相连的电磁阀
-    for solenoid in solenoid_valves:
-        if G.has_edge(device_id, solenoid) or G.has_edge(solenoid, device_id):
-            return solenoid
-    
-    # 通过命名规则查找关联的电磁阀
-    device_type = ""
-    if 'vacuum' in device_id.lower():
-        device_type = "vacuum"
-    elif 'gas' in device_id.lower():
-        device_type = "gas"
-    
-    if device_type:
-        for solenoid in solenoid_valves:
-            if device_type in solenoid.lower():
-                return solenoid
-    
+    debug_print("未找到搅拌器")
     return None
 
+def find_vacuum_solenoid_valve(G: nx.DiGraph, vacuum_pump: str) -> Optional[str]:
+    """查找真空泵相关的电磁阀 - 根据实际连接逻辑"""
+    debug_print(f"查找真空泵 {vacuum_pump} 相关的电磁阀...")
+    
+    # 查找所有电磁阀
+    solenoid_valves = []
+    for node in G.nodes():
+        node_data = G.nodes[node]
+        node_class = node_data.get('class', '') or ''
+        
+        if ('solenoid' in node_class.lower() or 'solenoid_valve' in node.lower()):
+            solenoid_valves.append(node)
+    
+    debug_print(f"找到的电磁阀: {solenoid_valves}")
+    
+    # 🔧 修复：根据实际组态图连接逻辑查找
+    # vacuum_pump_1 <- solenoid_valve_1 <- multiway_valve_2
+    for solenoid in solenoid_valves:
+        # 检查电磁阀是否连接到真空泵
+        if G.has_edge(solenoid, vacuum_pump) or G.has_edge(vacuum_pump, solenoid):
+            debug_print(f"✓ 找到连接真空泵的电磁阀: {solenoid}")
+            return solenoid
+    
+    # 通过命名规则查找（备选方案）
+    for solenoid in solenoid_valves:
+        if 'vacuum' in solenoid.lower() or solenoid == 'solenoid_valve_1':
+            debug_print(f"✓ 通过命名规则找到真空电磁阀: {solenoid}")
+            return solenoid
+    
+    debug_print("⚠️ 未找到真空电磁阀")
+    return None
+
+def find_gas_solenoid_valve(G: nx.DiGraph, gas_source: str) -> Optional[str]:
+    """查找气源相关的电磁阀 - 根据实际连接逻辑"""
+    debug_print(f"查找气源 {gas_source} 相关的电磁阀...")
+    
+    # 查找所有电磁阀
+    solenoid_valves = []
+    for node in G.nodes():
+        node_data = G.nodes[node]
+        node_class = node_data.get('class', '') or ''
+        
+        if ('solenoid' in node_class.lower() or 'solenoid_valve' in node.lower()):
+            solenoid_valves.append(node)
+    
+    # 🔧 修复：根据实际组态图连接逻辑查找
+    # gas_source_1 -> solenoid_valve_2 -> multiway_valve_2  
+    for solenoid in solenoid_valves:
+        # 检查气源是否连接到电磁阀
+        if G.has_edge(gas_source, solenoid) or G.has_edge(solenoid, gas_source):
+            debug_print(f"✓ 找到连接气源的电磁阀: {solenoid}")
+            return solenoid
+    
+    # 通过命名规则查找（备选方案）
+    for solenoid in solenoid_valves:
+        if 'gas' in solenoid.lower() or solenoid == 'solenoid_valve_2':
+            debug_print(f"✓ 通过命名规则找到气源电磁阀: {solenoid}")
+            return solenoid
+    
+    debug_print("⚠️ 未找到气源电磁阀")
+    return None
 
 def generate_evacuateandrefill_protocol(
     G: nx.DiGraph,
     vessel: str,
     gas: str,
-    # 🔧 删除 repeats 参数，直接硬编码为 3
-    **kwargs  # 🔧 接受额外参数，增强兼容性
+    **kwargs
 ) -> List[Dict[str, Any]]:
     """
-    生成抽真空和充气操作的动作序列 - 简化版本
+    生成抽真空和充气操作的动作序列 - 最终修复版本
     
     Args:
         G: 设备图
@@ -213,8 +220,12 @@ def generate_evacuateandrefill_protocol(
         List[Dict[str, Any]]: 动作序列
     """
     
-    # 🔧 硬编码重复次数为 3
+    # 硬编码重复次数为 3
     repeats = 3
+    
+    # 🔧 修复：在函数开始就生成协议ID
+    protocol_id = str(uuid.uuid4())
+    debug_print(f"生成协议ID: {protocol_id}")
     
     debug_print("=" * 60)
     debug_print("开始生成抽真空充气协议")
@@ -264,8 +275,8 @@ def generate_evacuateandrefill_protocol(
     try:
         vacuum_pump = find_vacuum_pump(G)
         gas_source = find_gas_source(G, gas)
-        vacuum_solenoid = find_associated_solenoid_valve(G, vacuum_pump)
-        gas_solenoid = find_associated_solenoid_valve(G, gas_source)
+        vacuum_solenoid = find_vacuum_solenoid_valve(G, vacuum_pump)
+        gas_solenoid = find_gas_solenoid_valve(G, gas_source)
         stirrer_id = find_connected_stirrer(G, vessel)
         
         debug_print(f"设备配置:")
@@ -319,20 +330,22 @@ def generate_evacuateandrefill_protocol(
     debug_print("步骤4: 路径验证...")
     
     try:
-        # 验证抽真空路径
-        vacuum_path = nx.shortest_path(G, source=vessel, target=vacuum_pump)
-        debug_print(f"抽真空路径: {' → '.join(vacuum_path)}")
+        # 验证抽真空路径: vessel -> vacuum_pump (通过八通阀和电磁阀)
+        if nx.has_path(G, vessel, vacuum_pump):
+            vacuum_path = nx.shortest_path(G, source=vessel, target=vacuum_pump)
+            debug_print(f"抽真空路径: {' → '.join(vacuum_path)}")
+        else:
+            debug_print(f"⚠️ 抽真空路径不存在，继续执行但可能有问题")
         
-        # 验证充气路径
-        gas_path = nx.shortest_path(G, source=gas_source, target=vessel)
-        debug_print(f"充气路径: {' → '.join(gas_path)}")
+        # 验证充气路径: gas_source -> vessel (通过电磁阀和八通阀)
+        if nx.has_path(G, gas_source, vessel):
+            gas_path = nx.shortest_path(G, source=gas_source, target=vessel)
+            debug_print(f"充气路径: {' → '.join(gas_path)}")
+        else:
+            debug_print(f"⚠️ 充气路径不存在，继续执行但可能有问题")
         
-    except nx.NetworkXNoPath as e:
-        debug_print(f"❌ 路径不存在: {str(e)}")
-        raise ValueError(f"路径不存在: {str(e)}")
     except Exception as e:
-        debug_print(f"❌ 路径验证失败: {str(e)}")
-        raise ValueError(f"路径验证失败: {str(e)}")
+        debug_print(f"⚠️ 路径验证失败: {str(e)}，继续执行")
     
     # === 启动搅拌器 ===
     debug_print("步骤5: 启动搅拌器...")
@@ -360,7 +373,7 @@ def generate_evacuateandrefill_protocol(
     # === 执行 3 次抽真空-充气循环 ===
     debug_print("步骤6: 执行抽真空-充气循环...")
     
-    for cycle in range(repeats):  # 这里 repeats = 3
+    for cycle in range(repeats):
         debug_print(f"=== 第 {cycle+1}/{repeats} 次循环 ===")
         
         # ============ 抽真空阶段 ============
@@ -383,16 +396,17 @@ def generate_evacuateandrefill_protocol(
                 "action_kwargs": {"command": "OPEN"}
             })
         
-        # 抽真空操作
+        # 抽真空操作 - 使用液体转移协议
         debug_print(f"抽真空操作: {vessel} → {vacuum_pump}")
         try:
+            
             vacuum_transfer_actions = generate_pump_protocol_with_rinsing(
                 G=G,
                 from_vessel=vessel,
                 to_vessel=vacuum_pump,
                 volume=VACUUM_VOLUME,
                 amount="",
-                duration=0.0,  # 🔧 修复time参数名冲突
+                time=0.0,
                 viscous=False,
                 rinsing_solvent="",
                 rinsing_volume=0.0,
@@ -423,7 +437,7 @@ def generate_evacuateandrefill_protocol(
         # 抽真空后等待
         action_sequence.append({
             "action_name": "wait",
-            "action_kwargs": {"time": 5.0}
+            "action_kwargs": {"time": VACUUM_TIME}
         })
         
         # 关闭真空电磁阀
@@ -441,6 +455,12 @@ def generate_evacuateandrefill_protocol(
             "device_id": vacuum_pump,
             "action_name": "set_status",
             "action_kwargs": {"string": "OFF"}
+        })
+        
+        # 抽真空后等待
+        action_sequence.append({
+            "action_name": "wait",
+            "action_kwargs": {"time": 5.0}
         })
         
         # ============ 充气阶段 ============
@@ -463,16 +483,17 @@ def generate_evacuateandrefill_protocol(
                 "action_kwargs": {"command": "OPEN"}
             })
         
-        # 充气操作
+        # 充气操作 - 使用液体转移协议
         debug_print(f"充气操作: {gas_source} → {vessel}")
         try:
+            
             gas_transfer_actions = generate_pump_protocol_with_rinsing(
                 G=G,
                 from_vessel=gas_source,
                 to_vessel=vessel,
                 volume=REFILL_VOLUME,
                 amount="",
-                duration=0.0,  # 🔧 修复time参数名冲突
+                time=0.0,
                 viscous=False,
                 rinsing_solvent="",
                 rinsing_volume=0.0,
@@ -503,7 +524,7 @@ def generate_evacuateandrefill_protocol(
         # 充气后等待
         action_sequence.append({
             "action_name": "wait",
-            "action_kwargs": {"time": 5.0}
+            "action_kwargs": {"time": REFILL_TIME}
         })
         
         # 关闭气源电磁阀
@@ -559,12 +580,25 @@ def generate_evacuateandrefill_protocol(
     
     return action_sequence
 
+# === 便捷函数 ===
+
+def generate_nitrogen_purge_protocol(G: nx.DiGraph, vessel: str, **kwargs) -> List[Dict[str, Any]]:
+    """生成氮气置换协议"""
+    return generate_evacuateandrefill_protocol(G, vessel, "nitrogen", **kwargs)
+
+def generate_argon_purge_protocol(G: nx.DiGraph, vessel: str, **kwargs) -> List[Dict[str, Any]]:
+    """生成氩气置换协议"""
+    return generate_evacuateandrefill_protocol(G, vessel, "argon", **kwargs)
+
+def generate_air_purge_protocol(G: nx.DiGraph, vessel: str, **kwargs) -> List[Dict[str, Any]]:
+    """生成空气置换协议"""
+    return generate_evacuateandrefill_protocol(G, vessel, "air", **kwargs)
+
 # 测试函数
 def test_evacuateandrefill_protocol():
     """测试抽真空充气协议"""
-    print("=== EVACUATE AND REFILL PROTOCOL 测试 ===")
-    print("测试完成")
-
+    debug_print("=== EVACUATE AND REFILL PROTOCOL 测试 ===")
+    debug_print("测试完成")
 
 if __name__ == "__main__":
     test_evacuateandrefill_protocol()

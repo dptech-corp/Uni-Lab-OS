@@ -43,9 +43,24 @@ class VirtualSolenoidValve:
     def is_open(self) -> bool:
         return self._is_open
 
-    def get_valve_position(self) -> str:
+    @property
+    def valve_position(self) -> str:
         """获取阀门位置状态"""
         return "OPEN" if self._is_open else "CLOSED"
+
+    @property
+    def state(self) -> dict:
+        """获取阀门完整状态"""
+        return {
+            "device_id": self.device_id,
+            "port": self.port,
+            "voltage": self.voltage,
+            "response_time": self.response_time,
+            "is_open": self._is_open,
+            "valve_state": self._valve_state,
+            "status": self._status,
+            "position": self.valve_position
+        }
 
     async def set_valve_position(self, command: str = None, **kwargs):
         """
@@ -91,7 +106,7 @@ class VirtualSolenoidValve:
         return {
             "success": True, 
             "message": result_msg,
-            "valve_position": self.get_valve_position()
+            "valve_position": self.valve_position
         }
 
     async def open(self, **kwargs):
@@ -102,21 +117,25 @@ class VirtualSolenoidValve:
         """关闭电磁阀 - ROS动作接口"""
         return await self.set_valve_position(command="CLOSED")
 
-    async def set_state(self, command: Union[bool, str], **kwargs):
+    async def set_status(self, string: str = None, **kwargs):
         """
-        设置阀门状态 - 兼容 SendCmd 类型
+        设置阀门状态 - 兼容 StrSingleInput 类型
     
         Args:
-            command: True/False 或 "open"/"close"
+            string: "ON"/"OFF" 或 "OPEN"/"CLOSED"
         """
-        if isinstance(command, bool):
-            cmd_str = "OPEN" if command else "CLOSED"
-        elif isinstance(command, str):
-            cmd_str = command
-        else:
-            return {"success": False, "message": "Invalid command type"}
+        if string is None:
+            return {"success": False, "message": "Missing string parameter"}
         
-        return await self.set_valve_position(command=cmd_str)
+        # 将 string 参数转换为 command 参数
+        if string.upper() in ["ON", "OPEN"]:
+            command = "OPEN"
+        elif string.upper() in ["OFF", "CLOSED"]:
+            command = "CLOSED"
+        else:
+            command = string
+        
+        return await self.set_valve_position(command=command)
 
     def toggle(self):
         """切换阀门状态"""
@@ -128,19 +147,6 @@ class VirtualSolenoidValve:
     def is_closed(self) -> bool:
         """检查阀门是否关闭"""
         return not self._is_open
-
-    def get_state(self) -> dict:
-        """获取阀门完整状态"""
-        return {
-            "device_id": self.device_id,
-            "port": self.port,
-            "voltage": self.voltage,
-            "response_time": self.response_time,
-            "is_open": self._is_open,
-            "valve_state": self._valve_state,
-            "status": self._status,
-            "position": self.get_valve_position()
-        }
 
     async def reset(self):
         """重置阀门到关闭状态"""

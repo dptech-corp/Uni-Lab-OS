@@ -4,7 +4,7 @@ package_name = 'unilabos'
 
 setup(
     name=package_name,
-    version='0.9.9',
+    version='0.9.10',
     packages=find_packages(),
     include_package_data=True,
     install_requires=['setuptools'],

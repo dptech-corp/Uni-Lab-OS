@@ -67,6 +67,16 @@ class VirtualFilter:
         volume: float = 0.0
     ) -> bool:
         """Execute filter action - 完全按照 Filter.action 参数"""
+        
+        # 🔧 新增：温度自动调整
+        original_temp = temp
+        if temp == 0.0:
+            temp = 25.0  # 0度自动设置为室温
+            self.logger.info(f"温度自动调整: {original_temp}°C → {temp}°C (室温)")
+        elif temp < 4.0:
+            temp = 4.0   # 小于4度自动设置为4度
+            self.logger.info(f"温度自动调整: {original_temp}°C → {temp}°C (最低温度)")
+        
         self.logger.info(f"Filter: vessel={vessel}, filtrate_vessel={filtrate_vessel}")
         self.logger.info(f"  stir={stir}, stir_speed={stir_speed}, temp={temp}")
         self.logger.info(f"  continue_heatchill={continue_heatchill}, volume={volume}")

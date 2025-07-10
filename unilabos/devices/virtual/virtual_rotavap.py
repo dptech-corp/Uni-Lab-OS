@@ -3,6 +3,9 @@ import logging
 import time as time_module
 from typing import Dict, Any, Optional
 
+def debug_print(message):
+    """调试输出"""
+    print(f"[ROTAVAP] {message}", flush=True)
 
 class VirtualRotavap:
     """Virtual rotary evaporator device - 简化版，只保留核心功能"""
@@ -70,12 +73,19 @@ class VirtualRotavap:
         vessel: str, 
         pressure: float = 0.1, 
         temp: float = 60.0, 
-        time: float = 1800.0,  # 30分钟默认
+        time: float = 1800.0,
         stir_speed: float = 100.0,
-        solvent: str = "",  # 🔧 新增参数
-        **kwargs  # 🔧 接受额外参数
+        solvent: str = "",
+        **kwargs
     ) -> bool:
-        """Execute evaporate action - 兼容性增强版"""
+        """Execute evaporate action - 简化版"""
+        
+        # 🔧 简化处理：如果vessel就是设备自己，直接操作
+        if vessel == self.device_id:
+            debug_print(f"在设备 {self.device_id} 上直接执行蒸发操作")
+            actual_vessel = self.device_id
+        else:
+            actual_vessel = vessel
         
         # 参数预处理
         if solvent:
@@ -86,8 +96,12 @@ class VirtualRotavap:
                 temp = max(temp, 80.0)
                 pressure = max(pressure, 0.2)
                 self.logger.info("水系溶剂：调整参数")
+            elif any(s in solvent_lower for s in ['ethanol', 'methanol', 'acetone']):
+                temp = min(temp, 50.0)
+                pressure = min(pressure, 0.05)
+                self.logger.info("易挥发溶剂：调整参数")
         
-        self.logger.info(f"Evaporate: vessel={vessel}, pressure={pressure} bar, temp={temp}°C, time={time}s, rotation={stir_speed} RPM, solvent={solvent}")
+        self.logger.info(f"Evaporate: vessel={actual_vessel}, pressure={pressure} bar, temp={temp}°C, time={time}s, rotation={stir_speed} RPM, solvent={solvent}")
         
         # 验证参数
         if temp > self._max_temp or temp < 10.0:
@@ -96,6 +110,9 @@ class VirtualRotavap:
             self.data.update({
                 "status": f"Error: {error_msg}",
                 "rotavap_state": "Error",
+                "current_temp": 25.0,
+                "progress": 0.0,
+                "evaporated_volume": 0.0,
                 "message": error_msg
             })
             return False
@@ -106,6 +123,9 @@ class VirtualRotavap:
             self.data.update({
                 "status": f"Error: {error_msg}",
                 "rotavap_state": "Error",
+                "current_temp": 25.0,
+                "progress": 0.0,
+                "evaporated_volume": 0.0,
                 "message": error_msg
             })
             return False
@@ -116,13 +136,16 @@ class VirtualRotavap:
             self.data.update({
                 "status": f"Error: {error_msg}",
                 "rotavap_state": "Error",
+                "current_temp": 25.0,
+                "progress": 0.0,
+                "evaporated_volume": 0.0,
                 "message": error_msg
             })
             return False
 
         # 开始蒸发
         self.data.update({
-            "status": f"蒸发中: {vessel}",
+            "status": f"蒸发中: {actual_vessel}",
             "rotavap_state": "Evaporating",
             "current_temp": temp,
             "target_temp": temp,
@@ -131,7 +154,7 @@ class VirtualRotavap:
             "remaining_time": time,
             "progress": 0.0,
             "evaporated_volume": 0.0,
-            "message": f"Evaporating {vessel} at {temp}°C, {pressure} bar, {stir_speed} RPM"
+            "message": f"Evaporating {actual_vessel} at {temp}°C, {pressure} bar, {stir_speed} RPM"
         })
 
         try:
@@ -148,12 +171,13 @@ class VirtualRotavap:
                 # 模拟蒸发体积
                 evaporated_vol = progress * 0.8  # 假设最多蒸发80mL
                 
-                # 更新状态
+                # 🔧 更新状态 - 确保包含所有必需字段
                 self.data.update({
                     "remaining_time": remaining,
-                    "progress": progress,
-                    "evaporated_volume": evaporated_vol,
-                    "status": f"蒸发中: {vessel} | {temp}°C | {pressure} bar | {progress:.1f}% | 剩余: {remaining:.0f}s",
+                    "progress": progress,  # 确保这个字段存在
+                    "evaporated_volume": evaporated_vol,  # 确保这个字段存在
+                    "current_temp": temp,  # 确保这个字段存在
+                    "status": f"蒸发中: {actual_vessel} | {temp}°C | {pressure} bar | {progress:.1f}% | 剩余: {remaining:.0f}s",
                     "message": f"Evaporating: {progress:.1f}% complete, {remaining:.0f}s remaining"
                 })
                 
@@ -167,18 +191,18 @@ class VirtualRotavap:
             # 蒸发完成
             final_evaporated = 80.0
             self.data.update({
-                "status": f"蒸发完成: {vessel} | 蒸发量: {final_evaporated:.1f}mL",
+                "status": f"蒸发完成: {actual_vessel} | 蒸发量: {final_evaporated:.1f}mL",
                 "rotavap_state": "Completed",
                 "evaporated_volume": final_evaporated,
                 "progress": 100.0,
+                "current_temp": temp,  # 保持温度信息
                 "remaining_time": 0.0,
-                "current_temp": 25.0,  # 冷却下来
                 "rotation_speed": 0.0,  # 停止旋转
                 "vacuum_pressure": 1.0,  # 恢复大气压
-                "message": f"Evaporation completed: {final_evaporated}mL evaporated from {vessel}"
+                "message": f"Evaporation completed: {final_evaporated}mL evaporated from {actual_vessel}"
             })
 
-            self.logger.info(f"Evaporation completed: {final_evaporated}mL evaporated from {vessel}")
+            self.logger.info(f"Evaporation completed: {final_evaporated}mL evaporated from {actual_vessel}")
             return True
 
         except Exception as e:
@@ -189,6 +213,8 @@ class VirtualRotavap:
                 "status": f"蒸发错误: {str(e)}",
                 "rotavap_state": "Error",
                 "current_temp": 25.0,
+                "progress": 0.0,
+                "evaporated_volume": 0.0,
                 "rotation_speed": 0.0,
                 "vacuum_pressure": 1.0,
                 "message": f"Evaporation failed: {str(e)}"

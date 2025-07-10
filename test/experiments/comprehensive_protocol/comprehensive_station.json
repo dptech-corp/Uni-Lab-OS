@@ -898,7 +898,7 @@
             "type": "fluid",
             "port": {
                 "multiway_valve_2": "3",
-                "solenoid_valve_2": "in"
+                "solenoid_valve_2": "out"
             }
         },
         {
@@ -908,7 +908,7 @@
             "type": "fluid",
             "port": {
                 "gas_source_1": "gassource",
-                "solenoid_valve_2": "out"
+                "solenoid_valve_2": "in"
             }
         },
         {

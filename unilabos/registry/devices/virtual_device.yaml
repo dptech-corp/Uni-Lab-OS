@@ -2376,10 +2376,8 @@ virtual_rotavap:
         type: UniLabJsonCommandAsync
       evaporate:
         feedback:
-          current_temp: current_temp
-          evaporated_volume: evaporated_volume
-          progress: progress
           status: status
+          current_device: current_device
         goal:
           pressure: pressure
           stir_speed: stir_speed
@@ -3180,6 +3178,54 @@ virtual_solenoid_valve:
           title: StrSingleInput
           type: object
         type: StrSingleInput
+      set_valve_position:
+        feedback: {}
+        goal:
+          command: command
+        goal_default:
+          command: ''
+        handles: []
+        result:
+          success: success
+          message: message
+          valve_position: valve_position
+        schema:
+          description: ROS Action SendCmd 的 JSON Schema
+          properties:
+            feedback:
+              description: Action 反馈 - 执行过程中从服务器发送到客户端
+              properties: {}
+              required: []
+              title: SendCmd_Feedback
+              type: object
+            goal:
+              description: Action 目标 - 从客户端发送到服务器
+              properties:
+                command:
+                  type: string
+              required:
+              - command
+              title: SendCmd_Goal
+              type: object
+            result:
+              description: Action 结果 - 完成后从服务器发送到客户端
+              properties:
+                success:
+                  type: boolean
+                message:
+                  type: string
+                valve_position:
+                  type: string
+              required:
+              - success
+              - message
+              title: SendCmd_Result
+              type: object
+          required:
+          - goal
+          title: SendCmd
+          type: object
+        type: SendCmd
     module: unilabos.devices.virtual.virtual_solenoid_valve:VirtualSolenoidValve
     status_types:
       is_open: bool
