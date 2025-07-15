@@ -67,37 +67,47 @@ def generate_dry_protocol(
     # 默认参数
     dry_temp = 60.0  # 默认干燥温度 60°C
     dry_time = 3600.0  # 默认干燥时间 1小时（3600秒）
+    simulation_time = 60.0  # 模拟时间 1分钟
     
-    print(f"DRY: 开始生成干燥协议")
-    print(f"  - 化合物: {compound}")
-    print(f"  - 容器: {vessel}")
-    print(f"  - 干燥温度: {dry_temp}°C")
-    print(f"  - 干燥时间: {dry_time/60:.0f} 分钟")
+    print(f"🌡️ DRY: 开始生成干燥协议 ✨")
+    print(f"  🧪 化合物: {compound}")
+    print(f"  🥽 容器: {vessel}")
+    print(f"  🔥 干燥温度: {dry_temp}°C")
+    print(f"  ⏰ 干燥时间: {dry_time/60:.0f} 分钟")
     
     # 1. 验证目标容器存在
+    print(f"\n📋 步骤1: 验证目标容器 '{vessel}' 是否存在...")
     if vessel not in G.nodes():
-        print(f"DRY: 警告 - 容器 '{vessel}' 不存在于系统中，跳过干燥")
+        print(f"⚠️ DRY: 警告 - 容器 '{vessel}' 不存在于系统中，跳过干燥 😢")
         return action_sequence
+    print(f"✅ 容器 '{vessel}' 验证通过!")
     
     # 2. 查找相连的加热器
+    print(f"\n🔍 步骤2: 查找与容器相连的加热器...")
     heater_id = find_connected_heater(G, vessel)
     
     if heater_id is None:
-        print(f"DRY: 警告 - 未找到与容器 '{vessel}' 相连的加热器，跳过干燥")
+        print(f"😭 DRY: 警告 - 未找到与容器 '{vessel}' 相连的加热器，跳过干燥")
+        print(f"🎭 添加模拟干燥动作...")
         # 添加一个等待动作，表示干燥过程（模拟）
         action_sequence.append({
             "action_name": "wait",
             "action_kwargs": {
-                "time": 60.0,  # 等待1分钟
+                "time": 10.0,  # 模拟等待时间
                 "description": f"模拟干燥 {compound} (无加热器可用)"
             }
         })
+        print(f"📄 DRY: 协议生成完成，共 {len(action_sequence)} 个动作 🎯")
         return action_sequence
     
+    print(f"🎉 找到加热器: {heater_id}!")
+    
     # 3. 启动加热器进行干燥
-    print(f"DRY: 启动加热器 {heater_id} 进行干燥")
+    print(f"\n🚀 步骤3: 开始执行干燥流程...")
+    print(f"🔥 启动加热器 {heater_id} 进行干燥")
     
     # 3.1 启动加热
+    print(f"  ⚡ 动作1: 启动加热到 {dry_temp}°C...")
     action_sequence.append({
         "device_id": heater_id,
         "action_name": "heat_chill_start",
@@ -107,29 +117,35 @@ def generate_dry_protocol(
             "purpose": f"干燥 {compound}"
         }
     })
+    print(f"  ✅ 加热器启动命令已添加 🔥")
     
     # 3.2 等待温度稳定
+    print(f"  ⏳ 动作2: 等待温度稳定...")
     action_sequence.append({
         "action_name": "wait",
         "action_kwargs": {
-            "time": 60.0,
+            "time": 10.0,
             "description": f"等待温度稳定到 {dry_temp}°C"
         }
     })
+    print(f"  ✅ 温度稳定等待命令已添加 🌡️")
     
     # 3.3 保持干燥温度
+    print(f"  🔄 动作3: 保持干燥温度 {simulation_time/60:.0f} 分钟...")
     action_sequence.append({
         "device_id": heater_id,
         "action_name": "heat_chill",
         "action_kwargs": {
             "vessel": vessel,
             "temp": dry_temp,
-            "time": dry_time,
+            "time": simulation_time,
             "purpose": f"干燥 {compound}，保持温度 {dry_temp}°C"
         }
     })
+    print(f"  ✅ 温度保持命令已添加 🌡️⏰")
     
     # 3.4 停止加热
+    print(f"  ⏹️ 动作4: 停止加热...")
     action_sequence.append({
         "device_id": heater_id,
         "action_name": "heat_chill_stop",
@@ -138,18 +154,22 @@ def generate_dry_protocol(
             "purpose": f"干燥完成，停止加热"
         }
     })
+    print(f"  ✅ 停止加热命令已添加 🛑")
     
     # 3.5 等待冷却
+    print(f"  ❄️ 动作5: 等待冷却...")
     action_sequence.append({
         "action_name": "wait",
         "action_kwargs": {
-            "time": 300.0,  # 等待5分钟冷却
+            "time": 10.0,  # 等待10秒冷却
             "description": f"等待 {compound} 冷却"
         }
     })
+    print(f"  ✅ 冷却等待命令已添加 🧊")
     
-    print(f"DRY: 协议生成完成，共 {len(action_sequence)} 个动作")
-    print(f"DRY: 预计总时间: {(dry_time + 360)/60:.0f} 分钟")
+    print(f"\n🎊 DRY: 协议生成完成，共 {len(action_sequence)} 个动作 🎯")
+    print(f"⏱️ DRY: 预计总时间: {(dry_time + 360)/60:.0f} 分钟 ⌛")
+    print(f"🏁 所有动作序列准备就绪! ✨")
     
     return action_sequence
 

@@ -255,10 +255,22 @@ def generate_hydrogenate_protocol(
         action_sequence.append({
             "action_name": "wait",
             "action_kwargs": {
-                "time": 120.0,
+                "time": 20.0,
                 "description": f"等待温度稳定到 {temperature}°C"
             }
         })
+        
+        # 🕐 模拟运行时间优化
+        print("HYDROGENATE: 检查模拟运行时间限制...")
+        original_reaction_time = reaction_time
+        simulation_time_limit = 60.0  # 模拟运行时间限制：60秒
+        
+        if reaction_time > simulation_time_limit:
+            reaction_time = simulation_time_limit
+            print(f"HYDROGENATE: 模拟运行优化: {original_reaction_time}s → {reaction_time}s (限制为{simulation_time_limit}s)")
+            print(f"HYDROGENATE: 时间缩短: {original_reaction_time/3600:.2f}小时 → {reaction_time/60:.1f}分钟")
+        else:
+            print(f"HYDROGENATE: 时间在限制内: {reaction_time}s ({reaction_time/60:.1f}分钟) 保持不变")
         
         # 保持反应温度
         action_sequence.append({
@@ -268,19 +280,41 @@ def generate_hydrogenate_protocol(
                 "vessel": vessel,
                 "temp": temperature,
                 "time": reaction_time,
-                "purpose": f"氢化反应: 保持 {temperature}°C，反应 {reaction_time/3600:.1f} 小时"
+                "purpose": f"氢化反应: 保持 {temperature}°C，反应 {reaction_time/60:.1f}分钟" + (f" (模拟时间)" if original_reaction_time != reaction_time else "")
             }
         })
+        
+        # 显示时间调整信息
+        if original_reaction_time != reaction_time:
+            print(f"HYDROGENATE: 模拟优化说明: 原计划 {original_reaction_time/3600:.2f}小时，实际模拟 {reaction_time/60:.1f}分钟")
+            
     else:
         print(f"HYDROGENATE: 警告 - 未找到加热器，使用室温反应")
+        
+        # 🕐 室温反应也需要时间优化
+        print("HYDROGENATE: 检查室温反应模拟时间限制...")
+        original_reaction_time = reaction_time
+        simulation_time_limit = 60.0  # 模拟运行时间限制：60秒
+        
+        if reaction_time > simulation_time_limit:
+            reaction_time = simulation_time_limit
+            print(f"HYDROGENATE: 室温反应时间优化: {original_reaction_time}s → {reaction_time}s")
+            print(f"HYDROGENATE: 时间缩短: {original_reaction_time/3600:.2f}小时 → {reaction_time/60:.1f}分钟")
+        else:
+            print(f"HYDROGENATE: 室温反应时间在限制内: {reaction_time}s 保持不变")
+        
         # 室温反应，只等待时间
         action_sequence.append({
             "action_name": "wait",
             "action_kwargs": {
                 "time": reaction_time,
-                "description": f"室温氢化反应 {reaction_time/3600:.1f} 小时"
+                "description": f"室温氢化反应 {reaction_time/60:.1f}分钟" + (f" (模拟时间)" if original_reaction_time != reaction_time else "")
             }
         })
+        
+        # 显示时间调整信息
+        if original_reaction_time != reaction_time:
+            print(f"HYDROGENATE: 室温反应优化说明: 原计划 {original_reaction_time/3600:.2f}小时，实际模拟 {reaction_time/60:.1f}分钟")
     
     # 7. 停止加热
     if heater_id:

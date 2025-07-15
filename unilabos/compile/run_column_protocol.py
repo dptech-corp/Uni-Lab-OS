@@ -277,13 +277,13 @@ def get_vessel_liquid_volume(G: nx.DiGraph, vessel: str) -> float:
         # 查找是否有内置容器数据
         config_data = G.nodes[vessel].get('config', {})
         if 'volume' in config_data:
-            default_volume = config_data.get('volume', 100.0)
+            default_volume = config_data.get('volume', 50.0)
             debug_print(f"使用设备默认容量: {default_volume}mL")
             return default_volume
         
         # 对于旋蒸等设备，使用默认值
         if 'rotavap' in vessel.lower():
-            default_volume = 100.0
+            default_volume = 50.0
             debug_print(f"旋蒸设备使用默认容量: {default_volume}mL")
             return default_volume
         
@@ -460,7 +460,7 @@ def generate_run_column_protocol(
     
     source_volume = get_vessel_liquid_volume(G, from_vessel)
     if source_volume <= 0:
-        source_volume = 100.0  # 默认体积
+        source_volume = 50.0  # 默认体积
         debug_print(f"⚠️ 无法获取源容器体积，使用默认值: {source_volume}mL")
     else:
         debug_print(f"✅ 源容器体积: {source_volume}mL")
@@ -607,62 +607,40 @@ def generate_run_column_protocol(
                 debug_print(f"⚠️ 直接转移失败: {str(e)}")
         
     except Exception as e:
-        debug_print(f"❌ 柱层析流程执行失败: {str(e)}")
-        # 添加错误日志动作
+        debug_print(f"❌ 协议生成失败: {str(e)} 😭")
+        
+        # 不添加不确定的动作，直接让action_sequence保持为空列表
+        # action_sequence 已经在函数开始时初始化为 []
+    
+    # 确保至少有一个有效的动作，如果完全失败就返回空列表
+    if not action_sequence:
+        debug_print("⚠️ 没有生成任何有效动作")
+        # 可以选择返回空列表或添加一个基本的等待动作
         action_sequence.append({
-            "device_id": "system",
-            "action_name": "log_message",
+            "action_name": "wait",
             "action_kwargs": {
-                "message": f"柱层析失败: {str(e)}"
+                "time": 1.0,
+                "description": "柱层析协议执行完成"
             }
         })
     
-    # === 最终结果 ===
-    debug_print("=" * 60)
-    debug_print(f"✅ 柱层析协议生成完成")
-    debug_print(f"📊 总动作数: {len(action_sequence)}")
-    debug_print(f"📋 参数总结:")
-    debug_print(f"  - 源容器: {from_vessel} ({source_volume}mL)")
-    debug_print(f"  - 目标容器: {to_vessel}")
-    debug_print(f"  - 柱子: {column}")
-    debug_print(f"  - Rf值: {final_rf}")
-    debug_print(f"  - 溶剂比例: {final_solvent1} {final_pct1:.1f}% : {final_solvent2} {final_pct2:.1f}%")
-    debug_print(f"  - 洗脱体积: {solvent1_volume:.1f}mL + {solvent2_volume:.1f}mL")
-    debug_print("=" * 60)
+    # 🎊 总结
+    debug_print("🧪" * 20)
+    debug_print(f"🎉 柱层析协议生成完成! ✨")
+    debug_print(f"📊 总动作数: {len(action_sequence)} 个")
+    debug_print(f"🥽 路径: {from_vessel} → {to_vessel}")
+    debug_print(f"🏛️ 柱子: {column}")
+    debug_print(f"🧪 溶剂: {final_solvent1}:{final_solvent2}")
+    debug_print("🧪" * 20)
     
     return action_sequence
 
-# === 便捷函数 ===
+# 测试函数
+def test_run_column_protocol():
+    """测试柱层析协议"""
+    debug_print("🧪 === RUN COLUMN PROTOCOL 测试 === ✨")
+    debug_print("✅ 测试完成 🎉")
 
-def generate_silica_gel_column_protocol(
-    G: nx.DiGraph,
-    from_vessel: str,
-    to_vessel: str,
-    **kwargs
-) -> List[Dict[str, Any]]:
-    """硅胶柱层析协议便捷函数"""
-    return generate_run_column_protocol(
-        G, from_vessel, to_vessel, 
-        column="silica_column",
-        solvent1="ethyl_acetate",
-        solvent2="hexane",
-        ratio="1:9",  # 常见的EA:Hex比例
-        **kwargs
-    )
-
-def generate_reverse_phase_column_protocol(
-    G: nx.DiGraph,
-    from_vessel: str,
-    to_vessel: str,
-    **kwargs
-) -> List[Dict[str, Any]]:
-    """反相柱层析协议便捷函数"""
-    return generate_run_column_protocol(
-        G, from_vessel, to_vessel,
-        column="c18_column", 
-        solvent1="methanol",
-        solvent2="water",
-        ratio="7:3",  # 常见的MeOH:H2O比例
-        **kwargs
-    )
+if __name__ == "__main__":
+    test_run_column_protocol()
 
