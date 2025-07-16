@@ -101,7 +101,7 @@ class VirtualMultiwayValve:
             self._target_position = pos
             
             # 模拟阀门切换时间
-            switch_time = abs(self._current_position - pos) * 0.5  # 每个位置0.1秒
+            switch_time = abs(self._current_position - pos) * 0.5  # 每个位置0.5秒
 
             if switch_time > 0:
                 self.logger.info(f"⏱️ 阀门移动中... 预计用时: {switch_time:.1f}秒 🔄")
@@ -172,32 +172,32 @@ class VirtualMultiwayValve:
     def is_at_position(self, position: int) -> bool:
         """检查是否在指定位置 🎯"""
         result = self._current_position == position
-        self.logger.debug(f"🎯 位置检查: 当前={self._current_position}, 目标={position}, 匹配={result}")
+        # 删除debug日志：self.logger.debug(f"🎯 位置检查: 当前={self._current_position}, 目标={position}, 匹配={result}")
         return result
 
     def is_at_pump_position(self) -> bool:
         """检查是否在transfer pump位置 🚰"""
         result = self._current_position == 0
-        pump_status = "是" if result else "否"
-        self.logger.debug(f"🚰 泵位置检查: {pump_status} (当前位置: {self._current_position})")
+        # 删除debug日志：pump_status = "是" if result else "否"
+        # 删除debug日志：self.logger.debug(f"🚰 泵位置检查: {pump_status} (当前位置: {self._current_position})")
         return result
 
     def is_at_port(self, port_number: int) -> bool:
         """检查是否在指定端口位置 🔌"""
         result = self._current_position == port_number
-        port_status = "是" if result else "否"
-        self.logger.debug(f"🔌 端口{port_number}检查: {port_status} (当前位置: {self._current_position})")
+        # 删除debug日志：port_status = "是" if result else "否"
+        # 删除debug日志：self.logger.debug(f"🔌 端口{port_number}检查: {port_status} (当前位置: {self._current_position})")
         return result
 
     def get_available_positions(self) -> list:
         """获取可用位置列表 📋"""
         positions = list(range(0, self.max_positions + 1))
-        self.logger.debug(f"📋 可用位置: {positions}")
+        # 删除debug日志：self.logger.debug(f"📋 可用位置: {positions}")
         return positions
 
     def get_available_ports(self) -> Dict[int, str]:
         """获取可用端口映射 🗺️"""
-        self.logger.debug(f"🗺️ 端口映射: {self.position_map}")
+        # 删除debug日志：self.logger.debug(f"🗺️ 端口映射: {self.position_map}")
         return self.position_map.copy()
 
     def reset(self):
@@ -229,7 +229,7 @@ class VirtualMultiwayValve:
         else:
             flow_path = f"🔌 端口 {self._current_position} 已连接 ({current_port})"
         
-        self.logger.debug(f"🌊 当前流路: {flow_path}")
+        # 删除debug日志：self.logger.debug(f"🌊 当前流路: {flow_path}")
         return flow_path
 
     def get_info(self) -> dict:
@@ -247,7 +247,7 @@ class VirtualMultiwayValve:
             "position_map": self.position_map
         }
         
-        self.logger.debug(f"📊 阀门信息: 位置={self._current_position}, 状态={self._status}, 端口={self.get_current_port()}")
+        # 删除debug日志：self.logger.debug(f"📊 阀门信息: 位置={self._current_position}, 状态={self._status}, 端口={self.get_current_port()}")
         return info
 
     def __str__(self):
@@ -264,7 +264,7 @@ class VirtualMultiwayValve:
         Args:
             command: 目标位置 (0-8) 或位置字符串
         """
-        self.logger.debug(f"🎯 兼容性调用: set_valve_position({command})")
+        # 删除debug日志：self.logger.debug(f"🎯 兼容性调用: set_valve_position({command})")
         return self.set_position(command)
 
 

@@ -211,7 +211,7 @@ class ROS2ProtocolNode(BaseROS2DeviceNode):
                 # 逐步执行工作流
                 step_results = []
                 for i, action in enumerate(protocol_steps):
-                    self.get_logger().info(f"Running step {i + 1}: {action}")
+                    # self.get_logger().info(f"Running step {i + 1}: {action}")
                     if isinstance(action, dict):
                         # 如果是单个动作，直接执行
                         if action["action_name"] == "wait":

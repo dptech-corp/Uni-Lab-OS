@@ -12,7 +12,7 @@ class VirtualPumpMode(Enum):
 
 
 class VirtualTransferPump:
-    """虚拟转移泵类 - 模拟泵的基本功能，无需实际硬件"""
+    """虚拟转移泵类 - 模拟泵的基本功能，无需实际硬件 🚰"""
     
     def __init__(self, device_id: str = None, config: dict = None, **kwargs):
         """
@@ -42,20 +42,31 @@ class VirtualTransferPump:
         self._max_velocity = 5.0  # float 
         self._current_volume = 0.0  # float
 
+        # 🚀 新增：快速模式设置 - 大幅缩短执行时间
+        self._fast_mode = True  # 是否启用快速模式
+        self._fast_move_time = 1.0  # 快速移动时间（秒）
+        self._fast_dispense_time = 1.0  # 快速喷射时间（秒）
+
         self.logger = logging.getLogger(f"VirtualTransferPump.{self.device_id}")
+        
+        print(f"🚰 === 虚拟转移泵 {self.device_id} 已创建 === ✨")
+        print(f"💨 快速模式: {'启用' if self._fast_mode else '禁用'} | 移动时间: {self._fast_move_time}s | 喷射时间: {self._fast_dispense_time}s")
+        print(f"📊 最大容量: {self.max_volume}mL | 端口: {self.port}")
     
     async def initialize(self) -> bool:
-        """初始化虚拟泵"""
-        self.logger.info(f"Initializing virtual pump {self.device_id}")
+        """初始化虚拟泵 🚀"""
+        self.logger.info(f"🔧 初始化虚拟转移泵 {self.device_id} ✨")
         self._status = "Idle"
         self._position = 0.0
         self._current_volume = 0.0
+        self.logger.info(f"✅ 转移泵 {self.device_id} 初始化完成 🚰")
         return True
     
     async def cleanup(self) -> bool:
-        """清理虚拟泵"""
-        self.logger.info(f"Cleaning up virtual pump {self.device_id}")
+        """清理虚拟泵 🧹"""
+        self.logger.info(f"🧹 清理虚拟转移泵 {self.device_id} 🔚")
         self._status = "Idle"
+        self.logger.info(f"✅ 转移泵 {self.device_id} 清理完成 💤")
         return True
     
     # 基本属性
@@ -65,12 +76,12 @@ class VirtualTransferPump:
     
     @property
     def position(self) -> float:
-        """当前柱塞位置 (ml)"""
+        """当前柱塞位置 (ml) 📍"""
         return self._position
     
     @property
     def current_volume(self) -> float:
-        """当前注射器中的体积 (ml)"""
+        """当前注射器中的体积 (ml) 💧"""
         return self._current_volume
     
     @property
@@ -82,22 +93,50 @@ class VirtualTransferPump:
         return self._transfer_rate
 
     def set_max_velocity(self, velocity: float):
-        """设置最大速度 (ml/s)"""
+        """设置最大速度 (ml/s) 🌊"""
         self._max_velocity = max(0.1, min(50.0, velocity))  # 限制在合理范围内
-        self.logger.info(f"Set max velocity to {self._max_velocity} ml/s")
+        self.logger.info(f"🌊 设置最大速度为 {self._max_velocity} mL/s")
     
     def get_status(self) -> str:
-        """获取泵状态"""
+        """获取泵状态 📋"""
         return self._status
     
     async def _simulate_operation(self, duration: float):
-        """模拟操作延时"""
+        """模拟操作延时 ⏱️"""
         self._status = "Busy"
         await asyncio.sleep(duration)
         self._status = "Idle"
     
     def _calculate_duration(self, volume: float, velocity: float = None) -> float:
-        """计算操作持续时间"""
+        """
+        计算操作持续时间 ⏰
+        🚀 快速模式：保留计算逻辑用于日志显示，但实际使用固定的快速时间
+        """
+        if velocity is None:
+            velocity = self._max_velocity
+        
+        # 📊 计算理论时间（用于日志显示）
+        theoretical_duration = abs(volume) / velocity
+        
+        # 🚀 如果启用快速模式，使用固定的快速时间
+        if self._fast_mode:
+            # 根据操作类型选择快速时间
+            if abs(volume) > 0.1:  # 大于0.1mL的操作
+                actual_duration = self._fast_move_time
+            else:  # 很小的操作
+                actual_duration = 0.5
+            
+            self.logger.debug(f"⚡ 快速模式: 理论时间 {theoretical_duration:.2f}s → 实际时间 {actual_duration:.2f}s")
+            return actual_duration
+        else:
+            # 正常模式使用理论时间
+            return theoretical_duration
+    
+    def _calculate_display_duration(self, volume: float, velocity: float = None) -> float:
+        """
+        计算显示用的持续时间（用于日志） 📊
+        这个函数返回理论计算时间，用于日志显示
+        """
         if velocity is None:
             velocity = self._max_velocity
         return abs(volume) / velocity
@@ -105,7 +144,7 @@ class VirtualTransferPump:
     # 新的set_position方法 - 专门用于SetPumpPosition动作
     async def set_position(self, position: float, max_velocity: float = None):
         """
-        移动到绝对位置 - 专门用于SetPumpPosition动作
+        移动到绝对位置 - 专门用于SetPumpPosition动作 🎯
         
         Args:
             position (float): 目标位置 (ml)
@@ -122,56 +161,107 @@ class VirtualTransferPump:
             # 限制位置在有效范围内
             target_position = max(0.0, min(float(self.max_volume), target_position))
             
-            # 计算移动距离和时间
+            # 计算移动距离
             volume_to_move = abs(target_position - self._position)
-            duration = self._calculate_duration(volume_to_move, velocity)
             
-            self.logger.info(f"SET_POSITION: Moving to {target_position} ml (current: {self._position} ml), velocity: {velocity} ml/s")
+            # 📊 计算显示用的时间（用于日志）
+            display_duration = self._calculate_display_duration(volume_to_move, velocity)
             
-            # 模拟移动过程
-            start_position = self._position
-            steps = 10 if duration > 0.1 else 1  # 如果移动距离很小，只用1步
-            step_duration = duration / steps if steps > 1 else duration
+            # ⚡ 计算实际执行时间（快速模式）
+            actual_duration = self._calculate_duration(volume_to_move, velocity)
             
-            for i in range(steps + 1):
-                # 计算当前位置和进度
-                progress = (i / steps) * 100 if steps > 0 else 100
-                current_pos = start_position + (target_position - start_position) * (i / steps) if steps > 0 else target_position
+            # 🎯 确定操作类型和emoji
+            if target_position > self._position:
+                operation_type = "吸液"
+                operation_emoji = "📥"
+            elif target_position < self._position:
+                operation_type = "排液"
+                operation_emoji = "📤"
+            else:
+                operation_type = "保持"
+                operation_emoji = "📍"
+            
+            self.logger.info(f"🎯 SET_POSITION: {operation_type} {operation_emoji}")
+            self.logger.info(f"  📍 位置: {self._position:.2f}mL → {target_position:.2f}mL (移动 {volume_to_move:.2f}mL)")
+            self.logger.info(f"  🌊 速度: {velocity:.2f} mL/s")
+            self.logger.info(f"  ⏰ 预计时间: {display_duration:.2f}s")
+            
+            if self._fast_mode:
+                self.logger.info(f"  ⚡ 快速模式: 实际用时 {actual_duration:.2f}s")
+            
+            # 🚀 模拟移动过程
+            if volume_to_move > 0.01:  # 只有当移动距离足够大时才显示进度
+                start_position = self._position
+                steps = 5 if actual_duration > 0.5 else 2  # 根据实际时间调整步数
+                step_duration = actual_duration / steps
                 
-                # 更新状态
-                self._status = "Moving" if i < steps else "Idle"
-                self._position = current_pos
-                self._current_volume = current_pos
+                self.logger.info(f"🚀 开始{operation_type}... {operation_emoji}")
                 
-                # 等待一小步时间
-                if i < steps and step_duration > 0:
-                    await asyncio.sleep(step_duration)
+                for i in range(steps + 1):
+                    # 计算当前位置和进度
+                    progress = (i / steps) * 100 if steps > 0 else 100
+                    current_pos = start_position + (target_position - start_position) * (i / steps) if steps > 0 else target_position
+                    
+                    # 更新状态
+                    if i < steps:
+                        self._status = f"{operation_type}中"
+                        status_emoji = "🔄"
+                    else:
+                        self._status = "Idle"
+                        status_emoji = "✅"
+                    
+                    self._position = current_pos
+                    self._current_volume = current_pos
+                    
+                    # 显示进度（每25%或最后一步）
+                    if i == 0:
+                        self.logger.debug(f"  🔄 {operation_type}开始: {progress:.0f}%")
+                    elif progress >= 50 and i == steps // 2:
+                        self.logger.debug(f"  🔄 {operation_type}进度: {progress:.0f}%")
+                    elif i == steps:
+                        self.logger.info(f"  ✅ {operation_type}完成: {progress:.0f}% | 当前位置: {current_pos:.2f}mL")
+                    
+                    # 等待一小步时间
+                    if i < steps and step_duration > 0:
+                        await asyncio.sleep(step_duration)
+            else:
+                # 移动距离很小，直接完成
+                self._position = target_position
+                self._current_volume = target_position
+                self.logger.info(f"  📍 微调完成: {target_position:.2f}mL")
         
             # 确保最终位置准确
             self._position = target_position
             self._current_volume = target_position
             self._status = "Idle"
             
-            self.logger.info(f"SET_POSITION: Reached position {self._position} ml, current volume: {self._current_volume} ml")
+            # 📊 最终状态日志
+            if volume_to_move > 0.01:
+                self.logger.info(f"🎉 SET_POSITION 完成! 📍 最终位置: {self._position:.2f}mL | 💧 当前体积: {self._current_volume:.2f}mL")
             
             # 返回符合action定义的结果
             return {
                 "success": True,
-                "message": f"Successfully moved to position {self._position} ml"
+                "message": f"✅ 成功移动到位置 {self._position:.2f}mL ({operation_type})",
+                "final_position": self._position,
+                "final_volume": self._current_volume,
+                "operation_type": operation_type
             }
             
         except Exception as e:
-            error_msg = f"Failed to set position: {str(e)}"
+            error_msg = f"❌ 设置位置失败: {str(e)}"
             self.logger.error(error_msg)
             return {
                 "success": False,
-                "message": error_msg
+                "message": error_msg,
+                "final_position": self._position,
+                "final_volume": self._current_volume
             }
     
     # 其他泵操作方法
     async def pull_plunger(self, volume: float, velocity: float = None):
         """
-        拉取柱塞（吸液）
+        拉取柱塞（吸液） 📥
         
         Args:
             volume (float): 要拉取的体积 (ml)
@@ -181,23 +271,29 @@ class VirtualTransferPump:
         actual_volume = new_position - self._position
         
         if actual_volume <= 0:
-            self.logger.warning("Cannot pull - already at maximum volume")
+            self.logger.warning("⚠️ 无法吸液 - 已达到最大容量")
             return
         
-        duration = self._calculate_duration(actual_volume, velocity)
+        display_duration = self._calculate_display_duration(actual_volume, velocity)
+        actual_duration = self._calculate_duration(actual_volume, velocity)
         
-        self.logger.info(f"Pulling {actual_volume} ml (from {self._position} to {new_position})")
+        self.logger.info(f"📥 开始吸液: {actual_volume:.2f}mL")
+        self.logger.info(f"  📍 位置: {self._position:.2f}mL → {new_position:.2f}mL")
+        self.logger.info(f"  ⏰ 预计时间: {display_duration:.2f}s")
         
-        await self._simulate_operation(duration)
+        if self._fast_mode:
+            self.logger.info(f"  ⚡ 快速模式: 实际用时 {actual_duration:.2f}s")
+        
+        await self._simulate_operation(actual_duration)
         
         self._position = new_position
         self._current_volume = new_position
         
-        self.logger.info(f"Pulled {actual_volume} ml, current volume: {self._current_volume} ml")
+        self.logger.info(f"✅ 吸液完成: {actual_volume:.2f}mL | 💧 当前体积: {self._current_volume:.2f}mL")
 
     async def push_plunger(self, volume: float, velocity: float = None):
         """
-        推出柱塞（排液）
+        推出柱塞（排液） 📤
         
         Args:
             volume (float): 要推出的体积 (ml)
@@ -207,35 +303,44 @@ class VirtualTransferPump:
         actual_volume = self._position - new_position
         
         if actual_volume <= 0:
-            self.logger.warning("Cannot push - already at minimum volume")
+            self.logger.warning("⚠️ 无法排液 - 已达到最小容量")
             return
         
-        duration = self._calculate_duration(actual_volume, velocity)
+        display_duration = self._calculate_display_duration(actual_volume, velocity)
+        actual_duration = self._calculate_duration(actual_volume, velocity)
         
-        self.logger.info(f"Pushing {actual_volume} ml (from {self._position} to {new_position})")
+        self.logger.info(f"📤 开始排液: {actual_volume:.2f}mL")
+        self.logger.info(f"  📍 位置: {self._position:.2f}mL → {new_position:.2f}mL")
+        self.logger.info(f"  ⏰ 预计时间: {display_duration:.2f}s")
         
-        await self._simulate_operation(duration)
+        if self._fast_mode:
+            self.logger.info(f"  ⚡ 快速模式: 实际用时 {actual_duration:.2f}s")
+        
+        await self._simulate_operation(actual_duration)
         
         self._position = new_position
         self._current_volume = new_position
         
-        self.logger.info(f"Pushed {actual_volume} ml, current volume: {self._current_volume} ml")
+        self.logger.info(f"✅ 排液完成: {actual_volume:.2f}mL | 💧 当前体积: {self._current_volume:.2f}mL")
 
     # 便捷操作方法
     async def aspirate(self, volume: float, velocity: float = None):
-        """吸液操作"""
+        """吸液操作 📥"""
         await self.pull_plunger(volume, velocity)
     
     async def dispense(self, volume: float, velocity: float = None):
-        """排液操作"""
+        """排液操作 📤"""
         await self.push_plunger(volume, velocity)
     
     async def transfer(self, volume: float, aspirate_velocity: float = None, dispense_velocity: float = None):
-        """转移操作（先吸后排）"""
+        """转移操作（先吸后排） 🔄"""
+        self.logger.info(f"🔄 开始转移操作: {volume:.2f}mL")
+        
         # 吸液
         await self.aspirate(volume, aspirate_velocity)
         
         # 短暂停顿
+        self.logger.debug("⏸️ 短暂停顿...")
         await asyncio.sleep(0.1)
         
         # 排液
