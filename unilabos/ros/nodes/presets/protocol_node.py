@@ -134,7 +134,7 @@ class ROS2ProtocolNode(BaseROS2DeviceNode):
         if d is not None and hasattr(d, "ros_node_instance"):
             node = d.ros_node_instance
             for action_name, action_mapping in node._action_value_mappings.items():
-                if action_name.startswith("auto-"):
+                if action_name.startswith("auto-") or str(action_mapping.get("type", "")).startswith("UniLabJsonCommand"):
                     continue
                 action_id = f"/devices/{device_id_abs}/{action_name}"
                 if action_id not in self._action_clients:

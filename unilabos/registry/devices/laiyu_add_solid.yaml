@@ -15,16 +15,14 @@ laiyu_add_solid:
         result:
           actual_mass_mg: actual_mass_mg
         schema:
-          description: ROS Action SolidDispenseAddPowderTube 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties: {}
               required: []
               title: SolidDispenseAddPowderTube_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties:
                 compound_mass:
                   type: number
@@ -41,7 +39,6 @@ laiyu_add_solid:
               title: SolidDispenseAddPowderTube_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 actual_mass_mg:
                   type: number
@@ -60,38 +57,6 @@ laiyu_add_solid:
           title: SolidDispenseAddPowderTube
           type: object
         type: SolidDispenseAddPowderTube
-      auto-add_powder_tube:
-        feedback: {}
-        goal: {}
-        goal_default:
-          compound_mass: null
-          powder_tube_number: null
-          target_tube_position: null
-        handles: []
-        result: {}
-        schema:
-          description: add_powder_tube的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                compound_mass:
-                  type: string
-                powder_tube_number:
-                  type: string
-                target_tube_position:
-                  type: string
-              required:
-              - powder_tube_number
-              - target_tube_position
-              - compound_mass
-              type: object
-            result: {}
-          required:
-          - goal
-          title: add_powder_tube参数
-          type: object
-        type: UniLabJsonCommand
       auto-calculate_crc:
         feedback: {}
         goal: {}
@@ -100,7 +65,7 @@ laiyu_add_solid:
         handles: []
         result: {}
         schema:
-          description: calculate_crc的参数schema
+          description: Modbus CRC-16校验码计算函数。计算Modbus RTU通信协议所需的CRC-16校验码，确保数据传输的完整性和可靠性。该函数实现标准的CRC-16算法，用于构造完整的Modbus指令帧。
           properties:
             feedback: {}
             goal:
@@ -116,154 +81,6 @@ laiyu_add_solid:
           title: calculate_crc参数
           type: object
         type: UniLabJsonCommand
-      auto-discharge:
-        feedback: {}
-        goal: {}
-        goal_default:
-          float_in: null
-        handles: []
-        result: {}
-        schema:
-          description: discharge的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                float_in:
-                  type: number
-              required:
-              - float_in
-              type: object
-            result: {}
-          required:
-          - goal
-          title: discharge参数
-          type: object
-        type: UniLabJsonCommand
-      auto-move_to_plate:
-        feedback: {}
-        goal: {}
-        goal_default:
-          string: null
-        handles: []
-        result: {}
-        schema:
-          description: move_to_plate的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                string:
-                  type: string
-              required:
-              - string
-              type: object
-            result: {}
-          required:
-          - goal
-          title: move_to_plate参数
-          type: object
-        type: UniLabJsonCommand
-      auto-move_to_xyz:
-        feedback: {}
-        goal: {}
-        goal_default:
-          x: null
-          y: null
-          z: null
-        handles: []
-        result: {}
-        schema:
-          description: move_to_xyz的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                x:
-                  type: number
-                y:
-                  type: number
-                z:
-                  type: number
-              required:
-              - x
-              - y
-              - z
-              type: object
-            result: {}
-          required:
-          - goal
-          title: move_to_xyz参数
-          type: object
-        type: UniLabJsonCommand
-      auto-pick_powder_tube:
-        feedback: {}
-        goal: {}
-        goal_default:
-          int_input: null
-        handles: []
-        result: {}
-        schema:
-          description: pick_powder_tube的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                int_input:
-                  type: integer
-              required:
-              - int_input
-              type: object
-            result: {}
-          required:
-          - goal
-          title: pick_powder_tube参数
-          type: object
-        type: UniLabJsonCommand
-      auto-put_powder_tube:
-        feedback: {}
-        goal: {}
-        goal_default:
-          int_input: null
-        handles: []
-        result: {}
-        schema:
-          description: put_powder_tube的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                int_input:
-                  type: integer
-              required:
-              - int_input
-              type: object
-            result: {}
-          required:
-          - goal
-          title: put_powder_tube参数
-          type: object
-        type: UniLabJsonCommand
-      auto-reset:
-        feedback: {}
-        goal: {}
-        goal_default: {}
-        handles: []
-        result: {}
-        schema:
-          description: reset的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties: {}
-              required: []
-              type: object
-            result: {}
-          required:
-          - goal
-          title: reset参数
-          type: object
-        type: UniLabJsonCommand
       auto-send_command:
         feedback: {}
         goal: {}
@@ -272,7 +89,7 @@ laiyu_add_solid:
         handles: []
         result: {}
         schema:
-          description: send_command的参数schema
+          description: Modbus指令发送函数。构造完整的Modbus RTU指令帧（包含CRC校验），发送给分装设备并等待响应。该函数处理底层通信协议，确保指令的正确传输和响应接收，支持最长3分钟的响应等待时间。
           properties:
             feedback: {}
             goal:
@@ -297,16 +114,14 @@ laiyu_add_solid:
         handles: []
         result: {}
         schema:
-          description: ROS Action FloatSingleInput 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties: {}
               required: []
               title: FloatSingleInput_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties:
                 float_in:
                   type: number
@@ -315,7 +130,6 @@ laiyu_add_solid:
               title: FloatSingleInput_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -340,16 +154,14 @@ laiyu_add_solid:
         handles: []
         result: {}
         schema:
-          description: ROS Action StrSingleInput 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties: {}
               required: []
               title: StrSingleInput_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties:
                 string:
                   type: string
@@ -358,7 +170,6 @@ laiyu_add_solid:
               title: StrSingleInput_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -387,16 +198,14 @@ laiyu_add_solid:
         handles: []
         result: {}
         schema:
-          description: ROS Action Point3DSeparateInput 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties: {}
               required: []
               title: Point3DSeparateInput_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties:
                 x:
                   type: number
@@ -411,7 +220,6 @@ laiyu_add_solid:
               title: Point3DSeparateInput_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -436,16 +244,14 @@ laiyu_add_solid:
         handles: []
         result: {}
         schema:
-          description: ROS Action IntSingleInput 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties: {}
               required: []
               title: IntSingleInput_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties:
                 int_input:
                   maximum: 2147483647
@@ -456,7 +262,6 @@ laiyu_add_solid:
               title: IntSingleInput_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -481,16 +286,14 @@ laiyu_add_solid:
         handles: []
         result: {}
         schema:
-          description: ROS Action IntSingleInput 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties: {}
               required: []
               title: IntSingleInput_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties:
                 int_input:
                   maximum: 2147483647
@@ -501,7 +304,6 @@ laiyu_add_solid:
               title: IntSingleInput_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -524,22 +326,19 @@ laiyu_add_solid:
         handles: []
         result: {}
         schema:
-          description: ROS Action EmptyIn 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties: {}
               required: []
               title: EmptyIn_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties: {}
               required: []
               title: EmptyIn_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -556,7 +355,7 @@ laiyu_add_solid:
     status_types:
       status: str
     type: python
-  description: Laiyu Add Solid
+  description: 来渝固体粉末自动分装设备，用于实验室化学试剂的精确称量和分装。该设备通过Modbus RTU协议与控制系统通信，集成了精密天平、三轴运动平台、粉筒管理系统等组件。支持多种粉末试剂的自动拿取、精确称量、定点分装和归位操作。具备高精度称量、位置控制和批量处理能力，适用于化学合成、药物研发、材料制备等需要精确固体试剂配制的实验室应用场景。
   handles: []
   icon: ''
   init_param_schema:
@@ -580,3 +379,4 @@ laiyu_add_solid:
       required:
       - status
       type: object
+  version: 0.0.1

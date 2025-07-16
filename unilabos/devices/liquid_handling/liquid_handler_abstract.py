@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import traceback
 from typing import List, Sequence, Optional, Literal, Union, Iterator
 
 import asyncio
@@ -117,7 +118,7 @@ class LiquidHandlerAbstract(LiquidHandler):
                 pass  # This mode is not verified.
             else:
                 if len(asp_vols) != len(targets):
-                    raise ValueError("Length of `vols` must match `targets`.")
+                    raise ValueError(f"Length of `asp_vols` {len(asp_vols)} must match `targets` {len(targets)}.")
                 tip = next(self.current_tip)
                 await self.pick_up_tips(tip)
 
@@ -160,6 +161,7 @@ class LiquidHandlerAbstract(LiquidHandler):
                 await self.discard_tips()
 
         except Exception as e:
+            traceback.print_exc()
             raise RuntimeError(f"Liquid addition failed: {e}") from e
 
     # ---------------------------------------------------------------
@@ -183,7 +185,7 @@ class LiquidHandlerAbstract(LiquidHandler):
         spread: Literal["wide", "tight", "custom"] = "wide",
         is_96_well: bool = False,
         mix_stage: Optional[Literal["none", "before", "after", "both"]] = "none",
-        mix_times: Optional[List(int)] = None,
+        mix_times: Optional[List[int]] = None,
         mix_vol: Optional[int] = None,
         mix_rate: Optional[int] = None,
         mix_liquid_height: Optional[float] = None,

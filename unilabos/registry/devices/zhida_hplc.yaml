@@ -8,22 +8,19 @@ zhida_hplc:
         handles: []
         result: {}
         schema:
-          description: ROS Action EmptyIn 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties: {}
               required: []
               title: EmptyIn_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties: {}
               required: []
               title: EmptyIn_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -36,26 +33,6 @@ zhida_hplc:
           title: EmptyIn
           type: object
         type: EmptyIn
-      auto-abort:
-        feedback: {}
-        goal: {}
-        goal_default: {}
-        handles: []
-        result: {}
-        schema:
-          description: abort的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties: {}
-              required: []
-              type: object
-            result: {}
-          required:
-          - goal
-          title: abort参数
-          type: object
-        type: UniLabJsonCommand
       auto-close:
         feedback: {}
         goal: {}
@@ -63,7 +40,7 @@ zhida_hplc:
         handles: []
         result: {}
         schema:
-          description: close的参数schema
+          description: HPLC设备连接关闭函数。安全地断开与智达HPLC设备的TCP socket连接，释放网络资源。该函数确保连接的正确关闭，避免网络资源泄露。通常在设备使用完毕或系统关闭时调用。
           properties:
             feedback: {}
             goal:
@@ -83,7 +60,7 @@ zhida_hplc:
         handles: []
         result: {}
         schema:
-          description: connect的参数schema
+          description: HPLC设备连接建立函数。与智达HPLC设备建立TCP socket通信连接，配置通信超时参数。该函数是设备使用前的必要步骤，建立成功后可进行状态查询、方法获取、任务启动等操作。连接失败时会抛出异常。
           properties:
             feedback: {}
             goal:
@@ -96,30 +73,6 @@ zhida_hplc:
           title: connect参数
           type: object
         type: UniLabJsonCommand
-      auto-start:
-        feedback: {}
-        goal: {}
-        goal_default:
-          text: null
-        handles: []
-        result: {}
-        schema:
-          description: start的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                text:
-                  type: string
-              required:
-              - text
-              type: object
-            result: {}
-          required:
-          - goal
-          title: start参数
-          type: object
-        type: UniLabJsonCommand
       get_methods:
         feedback: {}
         goal: {}
@@ -127,22 +80,19 @@ zhida_hplc:
         handles: []
         result: {}
         schema:
-          description: ROS Action EmptyIn 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties: {}
               required: []
               title: EmptyIn_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties: {}
               required: []
               title: EmptyIn_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -164,16 +114,14 @@ zhida_hplc:
         handles: []
         result: {}
         schema:
-          description: ROS Action StrSingleInput 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties: {}
               required: []
               title: StrSingleInput_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties:
                 string:
                   type: string
@@ -182,7 +130,6 @@ zhida_hplc:
               title: StrSingleInput_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -203,7 +150,7 @@ zhida_hplc:
       methods: dict
       status: dict
     type: python
-  description: Zhida HPLC
+  description: 智达高效液相色谱（HPLC）分析设备，用于实验室样品的分离、检测和定量分析。该设备通过TCP socket与HPLC控制系统通信，支持远程控制和状态监控。具备自动进样、梯度洗脱、多检测器数据采集等功能，可执行复杂的色谱分析方法。适用于化学分析、药物检测、环境监测、生物样品分析等需要高精度分离分析的实验室应用场景。
   handles: []
   icon: ''
   init_param_schema:
@@ -230,3 +177,4 @@ zhida_hplc:
       - status
       - methods
       type: object
+  version: 0.0.1

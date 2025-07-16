@@ -8,7 +8,7 @@ linear_motion.grbl:
         handles: []
         result: {}
         schema:
-          description: initialize的参数schema
+          description: CNC设备初始化函数。执行Grbl CNC的完整初始化流程，包括归零操作、轴校准和状态复位。该函数将所有轴移动到原点位置(0,0,0)，确保设备处于已知的参考状态。初始化完成后设备进入空闲状态，可接收后续的运动指令。
           properties:
             feedback: {}
             goal:
@@ -21,30 +21,6 @@ linear_motion.grbl:
           title: initialize参数
           type: object
         type: UniLabJsonCommand
-      auto-move_through_points:
-        feedback: {}
-        goal: {}
-        goal_default:
-          positions: null
-        handles: []
-        result: {}
-        schema:
-          description: move_through_points的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                positions:
-                  type: array
-              required:
-              - positions
-              type: object
-            result: {}
-          required:
-          - goal
-          title: move_through_points参数
-          type: object
-        type: UniLabJsonCommand
       auto-set_position:
         feedback: {}
         goal: {}
@@ -53,7 +29,7 @@ linear_motion.grbl:
         handles: []
         result: {}
         schema:
-          description: set_position的参数schema
+          description: CNC绝对位置设定函数。控制CNC设备移动到指定的三维坐标位置(x,y,z)。该函数支持安全限位检查，防止超出设备工作范围。移动过程中会监控设备状态，确保安全到达目标位置。适用于精确定位和轨迹控制操作。
           properties:
             feedback: {}
             goal:
@@ -69,34 +45,6 @@ linear_motion.grbl:
           title: set_position参数
           type: object
         type: UniLabJsonCommand
-      auto-set_spindle_speed:
-        feedback: {}
-        goal: {}
-        goal_default:
-          max_velocity: 500
-          spindle_speed: null
-        handles: []
-        result: {}
-        schema:
-          description: set_spindle_speed的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                max_velocity:
-                  default: 500
-                  type: number
-                spindle_speed:
-                  type: number
-              required:
-              - spindle_speed
-              type: object
-            result: {}
-          required:
-          - goal
-          title: set_spindle_speed参数
-          type: object
-        type: UniLabJsonCommand
       auto-stop_operation:
         feedback: {}
         goal: {}
@@ -104,7 +52,7 @@ linear_motion.grbl:
         handles: []
         result: {}
         schema:
-          description: stop_operation的参数schema
+          description: CNC操作停止函数。立即停止当前正在执行的所有CNC运动，包括轴移动和主轴旋转。该函数用于紧急停止或任务中断，确保设备和工件的安全。停止后设备将保持当前位置，等待新的指令。
           properties:
             feedback: {}
             goal:
@@ -166,10 +114,9 @@ linear_motion.grbl:
         handles: []
         result: {}
         schema:
-          description: ROS Action NavigateThroughPoses 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties:
                 current_pose:
                   properties:
@@ -290,7 +237,6 @@ linear_motion.grbl:
               title: NavigateThroughPoses_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties:
                 behavior_tree:
                   type: string
@@ -371,7 +317,6 @@ linear_motion.grbl:
               title: NavigateThroughPoses_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 result:
                   properties: {}
@@ -401,10 +346,9 @@ linear_motion.grbl:
         handles: []
         result: {}
         schema:
-          description: ROS Action SingleJointPosition 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties:
                 error:
                   type: number
@@ -444,7 +388,6 @@ linear_motion.grbl:
               title: SingleJointPosition_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties:
                 max_velocity:
                   type: number
@@ -472,7 +415,6 @@ linear_motion.grbl:
               title: SingleJointPosition_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties: {}
               required: []
               title: SingleJointPosition_Result
@@ -488,7 +430,7 @@ linear_motion.grbl:
       spindle_speed: float
       status: str
     type: python
-  description: Grbl CNC
+  description: Grbl数控机床（CNC）设备，用于实验室精密加工和三轴定位操作。该设备基于Grbl固件，通过串口通信控制步进电机实现X、Y、Z三轴的精确运动。支持绝对定位、轨迹规划、主轴控制和实时状态监控。具备安全限位保护和运动平滑控制功能。适用于精密钻孔、铣削、雕刻、样品制备等需要高精度定位和加工的实验室应用场景。
   handles: []
   icon: ''
   init_param_schema:
@@ -524,6 +466,7 @@ linear_motion.grbl:
       - position
       - spindle_speed
       type: object
+  version: 0.0.1
 motor.iCL42:
   class:
     action_value_mappings:
@@ -537,7 +480,7 @@ motor.iCL42:
         handles: []
         result: {}
         schema:
-          description: execute_run_motor的参数schema
+          description: 步进电机执行运动函数。直接执行电机运动命令，包括位置设定、速度控制和路径规划。该函数处理底层的电机控制协议，消除警告信息，设置运动参数并启动电机运行。适用于需要直接控制电机运动的应用场景。
           properties:
             feedback: {}
             goal:
@@ -566,7 +509,7 @@ motor.iCL42:
         handles: []
         result: {}
         schema:
-          description: init_device的参数schema
+          description: iCL42电机设备初始化函数。建立与iCL42步进电机驱动器的串口通信连接，配置通信参数包括波特率、数据位、校验位等。该函数是电机使用前的必要步骤，确保驱动器处于可控状态并准备接收运动指令。
           properties:
             feedback: {}
             goal:
@@ -589,7 +532,7 @@ motor.iCL42:
         handles: []
         result: {}
         schema:
-          description: run_motor的参数schema
+          description: 步进电机运动控制函数。根据指定的运动模式、目标位置和速度参数控制电机运动。支持多种运动模式和精确的位置控制，自动处理运动轨迹规划和执行。该函数提供异步执行和状态反馈，确保运动的准确性和可靠性。
           properties:
             feedback: {}
             goal:
@@ -621,10 +564,9 @@ motor.iCL42:
         result:
           success: success
         schema:
-          description: ROS Action SendCmd 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties:
                 status:
                   type: string
@@ -633,7 +575,6 @@ motor.iCL42:
               title: SendCmd_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties:
                 command:
                   type: string
@@ -642,7 +583,6 @@ motor.iCL42:
               title: SendCmd_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -664,7 +604,7 @@ motor.iCL42:
       motor_position: int
       success: bool
     type: python
-  description: iCL42 motor
+  description: iCL42步进电机驱动器，用于实验室设备的精密线性运动控制。该设备通过串口通信控制iCL42型步进电机驱动器，支持多种运动模式和精确的位置、速度控制。具备位置反馈、运行状态监控和故障检测功能。适用于自动进样器、样品传送、精密定位平台等需要准确线性运动控制的实验室自动化设备。
   handles: []
   icon: ''
   init_param_schema:
@@ -691,3 +631,4 @@ motor.iCL42:
       - is_executing_run
       - success
       type: object
+  version: 0.0.1

@@ -8,7 +8,7 @@ hplc.agilent:
         handles: []
         result: {}
         schema:
-          description: check_status的参数schema
+          description: 检查安捷伦HPLC设备状态的函数。用于监控设备的运行状态、连接状态、错误信息等关键指标。该函数定期查询设备状态，确保系统稳定运行，及时发现和报告设备异常。适用于自动化流程中的设备监控、故障诊断、系统维护等场景。
           properties:
             feedback: {}
             goal:
@@ -29,7 +29,7 @@ hplc.agilent:
         handles: []
         result: {}
         schema:
-          description: extract_data_from_txt的参数schema
+          description: 从文本文件中提取分析数据的函数。用于解析安捷伦HPLC生成的结果文件，提取峰面积、保留时间、浓度等关键分析数据。支持多种文件格式的自动识别和数据结构化处理，为后续数据分析和报告生成提供标准化的数据格式。适用于批量数据处理、结果验证、质量控制等分析工作流程。
           properties:
             feedback: {}
             goal:
@@ -55,7 +55,7 @@ hplc.agilent:
         handles: []
         result: {}
         schema:
-          description: start_sequence的参数schema
+          description: 启动安捷伦HPLC分析序列的函数。用于执行预定义的分析方法序列，包括样品进样、色谱分离、检测等完整的分析流程。支持参数配置、资源分配、工作流程管理等功能，实现全自动的样品分析。适用于批量样品处理、标准化分析、质量检测等需要连续自动分析的应用场景。
           properties:
             feedback: {}
             goal:
@@ -83,7 +83,7 @@ hplc.agilent:
         handles: []
         result: {}
         schema:
-          description: try_close_sub_device的参数schema
+          description: 尝试关闭HPLC子设备的函数。用于安全地关闭泵、检测器、进样器等各个子模块，确保设备正常断开连接并保护硬件安全。该函数提供错误处理和状态确认机制，避免强制关闭可能造成的设备损坏。适用于设备维护、系统重启、紧急停机等需要安全关闭设备的场景。
           properties:
             feedback: {}
             goal:
@@ -106,7 +106,7 @@ hplc.agilent:
         handles: []
         result: {}
         schema:
-          description: try_open_sub_device的参数schema
+          description: 尝试打开HPLC子设备的函数。用于初始化和连接泵、检测器、进样器等各个子模块，建立设备通信并进行自检。该函数提供连接验证和错误恢复机制，确保子设备正常启动并准备就绪。适用于设备初始化、系统启动、设备重连等需要建立设备连接的场景。
           properties:
             feedback: {}
             goal:
@@ -131,10 +131,9 @@ hplc.agilent:
         result:
           success: success
         schema:
-          description: ROS Action SendCmd 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties:
                 status:
                   type: string
@@ -143,7 +142,6 @@ hplc.agilent:
               title: SendCmd_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties:
                 command:
                   type: string
@@ -152,7 +150,6 @@ hplc.agilent:
               title: SendCmd_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -179,7 +176,7 @@ hplc.agilent:
       status_text: str
       success: bool
     type: python
-  description: HPLC device
+  description: 安捷伦高效液相色谱（HPLC）分析设备，用于复杂化合物的分离、检测和定量分析。该设备通过UI自动化技术控制安捷伦ChemStation软件，实现全自动的样品分析流程。具备序列启动、设备状态监控、数据文件提取、结果处理等功能。支持多样品批量处理和实时状态反馈，适用于药物分析、环境检测、食品安全、化学研究等需要高精度色谱分析的实验室应用。
   handles: []
   icon: ''
   init_param_schema:
@@ -218,6 +215,7 @@ hplc.agilent:
       - finish_status
       - data_file
       type: object
+  version: 0.0.1
 raman_home_made:
   class:
     action_value_mappings:
@@ -229,7 +227,7 @@ raman_home_made:
         handles: []
         result: {}
         schema:
-          description: ccd_time的参数schema
+          description: 设置CCD检测器积分时间的函数。用于配置拉曼光谱仪的信号采集时间，控制光谱数据的质量和信噪比。较长的积分时间可获得更高的信号强度和更好的光谱质量，但会增加测量时间。该函数允许根据样品特性和测量要求动态调整检测参数，优化测量效果。
           properties:
             feedback: {}
             goal:
@@ -253,7 +251,7 @@ raman_home_made:
         handles: []
         result: {}
         schema:
-          description: laser_on_power的参数schema
+          description: 设置激光器输出功率的函数。用于控制拉曼光谱仪激光器的功率输出，调节激光强度以适应不同样品的测量需求。适当的激光功率能够获得良好的拉曼信号同时避免样品损伤。该函数支持精确的功率控制，确保测量结果的稳定性和重现性。
           properties:
             feedback: {}
             goal:
@@ -269,30 +267,6 @@ raman_home_made:
           title: laser_on_power参数
           type: object
         type: UniLabJsonCommand
-      auto-raman_cmd:
-        feedback: {}
-        goal: {}
-        goal_default:
-          command: null
-        handles: []
-        result: {}
-        schema:
-          description: raman_cmd的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                command:
-                  type: string
-              required:
-              - command
-              type: object
-            result: {}
-          required:
-          - goal
-          title: raman_cmd参数
-          type: object
-        type: UniLabJsonCommand
       auto-raman_without_background:
         feedback: {}
         goal: {}
@@ -302,7 +276,7 @@ raman_home_made:
         handles: []
         result: {}
         schema:
-          description: raman_without_background的参数schema
+          description: 执行无背景扣除的拉曼光谱测量函数。用于直接采集样品的拉曼光谱信号，不进行背景校正处理。该函数配置积分时间和激光功率参数，获取原始光谱数据用于后续的数据处理分析。适用于对光谱数据质量要求较高或需要自定义背景处理流程的测量场景。
           properties:
             feedback: {}
             goal:
@@ -332,7 +306,7 @@ raman_home_made:
         handles: []
         result: {}
         schema:
-          description: raman_without_background_average的参数schema
+          description: 执行多次平均的无背景拉曼光谱测量函数。通过多次测量取平均值来提高光谱数据的信噪比和测量精度，减少随机噪声影响。该函数支持自定义平均次数、积分时间、激光功率等参数，并可为样品指定名称便于数据管理。适用于对测量精度要求较高的定量分析和研究应用。
           properties:
             feedback: {}
             goal:
@@ -367,10 +341,9 @@ raman_home_made:
         result:
           success: success
         schema:
-          description: ROS Action SendCmd 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties:
                 status:
                   type: string
@@ -379,7 +352,6 @@ raman_home_made:
               title: SendCmd_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties:
                 command:
                   type: string
@@ -388,7 +360,6 @@ raman_home_made:
               title: SendCmd_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -407,7 +378,7 @@ raman_home_made:
     module: unilabos.devices.raman_uv.home_made_raman:RamanObj
     status_types: {}
     type: python
-  description: Raman spectroscopy device
+  description: 拉曼光谱分析设备，用于物质的分子结构和化学成分表征。该设备集成激光器和CCD检测器，通过串口通信控制激光功率和光谱采集。具备背景扣除、多次平均、自动数据处理等功能，支持高精度的拉曼光谱测量。适用于材料表征、化学分析、质量控制、研究开发等需要分子指纹识别和结构分析的实验应用。
   handles: []
   icon: ''
   init_param_schema:
@@ -431,3 +402,4 @@ raman_home_made:
       properties: {}
       required: []
       type: object
+  version: 0.0.1

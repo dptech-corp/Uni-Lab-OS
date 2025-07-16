@@ -285,7 +285,7 @@ lh_joint_publisher:
     module: unilabos.devices.ros_dev.liquid_handler_joint_publisher:LiquidHandlerJointPublisher
     status_types: {}
     type: ros2
-  description: ''
+  description: 液体处理器关节发布器，用于ROS2仿真系统中的液体处理设备运动控制。该节点通过发布关节状态驱动仿真模型中的机械臂运动，支持三维坐标到关节空间的逆运动学转换、多关节协调控制、资源跟踪和TF变换。具备精确的位置控制、速度调节、pick-and-place操作等功能。适用于液体处理系统的虚拟仿真、运动规划验证、系统集成测试等应用场景。
   handles: []
   icon: ''
   init_param_schema:
@@ -309,3 +309,4 @@ lh_joint_publisher:
       properties: {}
       required: []
       type: object
+  version: 0.0.1

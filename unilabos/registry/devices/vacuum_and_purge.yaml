@@ -1,26 +1,6 @@
 gas_source.mock:
   class:
     action_value_mappings:
-      auto-close:
-        feedback: {}
-        goal: {}
-        goal_default: {}
-        handles: []
-        result: {}
-        schema:
-          description: close的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties: {}
-              required: []
-              type: object
-            result: {}
-          required:
-          - goal
-          title: close参数
-          type: object
-        type: UniLabJsonCommand
       auto-is_closed:
         feedback: {}
         goal: {}
@@ -61,50 +41,6 @@ gas_source.mock:
           title: is_open参数
           type: object
         type: UniLabJsonCommand
-      auto-open:
-        feedback: {}
-        goal: {}
-        goal_default: {}
-        handles: []
-        result: {}
-        schema:
-          description: open的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties: {}
-              required: []
-              type: object
-            result: {}
-          required:
-          - goal
-          title: open参数
-          type: object
-        type: UniLabJsonCommand
-      auto-set_status:
-        feedback: {}
-        goal: {}
-        goal_default:
-          string: null
-        handles: []
-        result: {}
-        schema:
-          description: set_status的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                string:
-                  type: string
-              required:
-              - string
-              type: object
-            result: {}
-          required:
-          - goal
-          title: set_status参数
-          type: object
-        type: UniLabJsonCommand
       close:
         feedback: {}
         goal: {}
@@ -112,22 +48,19 @@ gas_source.mock:
         handles: []
         result: {}
         schema:
-          description: ROS Action EmptyIn 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties: {}
               required: []
               title: EmptyIn_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties: {}
               required: []
               title: EmptyIn_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -147,22 +80,19 @@ gas_source.mock:
         handles: []
         result: {}
         schema:
-          description: ROS Action EmptyIn 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties: {}
               required: []
               title: EmptyIn_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties: {}
               required: []
               title: EmptyIn_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -184,16 +114,14 @@ gas_source.mock:
         handles: []
         result: {}
         schema:
-          description: ROS Action StrSingleInput 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties: {}
               required: []
               title: StrSingleInput_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties:
                 string:
                   type: string
@@ -202,7 +130,6 @@ gas_source.mock:
               title: StrSingleInput_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -222,7 +149,7 @@ gas_source.mock:
     status_types:
       status: str
     type: python
-  description: Mock gas source
+  description: 模拟气体源设备，用于系统测试和开发调试。该设备模拟真实气体源的开关控制和状态监测功能，支持气体供应的启停操作。提供与真实气体源相同的接口和状态反馈，便于在没有实际硬件的情况下进行系统集成测试和算法验证。适用于气路系统调试、软件开发和实验流程验证等场景。
   handles:
   - data_key: fluid_out
     data_source: executor
@@ -246,29 +173,10 @@ gas_source.mock:
       required:
       - status
       type: object
+  version: 0.0.1
 vacuum_pump.mock:
   class:
     action_value_mappings:
-      auto-close:
-        feedback: {}
-        goal: {}
-        goal_default: {}
-        handles: []
-        result: {}
-        schema:
-          description: close的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties: {}
-              required: []
-              type: object
-            result: {}
-          required:
-          - goal
-          title: close参数
-          type: object
-        type: UniLabJsonCommand
       auto-is_closed:
         feedback: {}
         goal: {}
@@ -309,50 +217,6 @@ vacuum_pump.mock:
           title: is_open参数
           type: object
         type: UniLabJsonCommand
-      auto-open:
-        feedback: {}
-        goal: {}
-        goal_default: {}
-        handles: []
-        result: {}
-        schema:
-          description: open的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties: {}
-              required: []
-              type: object
-            result: {}
-          required:
-          - goal
-          title: open参数
-          type: object
-        type: UniLabJsonCommand
-      auto-set_status:
-        feedback: {}
-        goal: {}
-        goal_default:
-          string: null
-        handles: []
-        result: {}
-        schema:
-          description: set_status的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                string:
-                  type: string
-              required:
-              - string
-              type: object
-            result: {}
-          required:
-          - goal
-          title: set_status参数
-          type: object
-        type: UniLabJsonCommand
       close:
         feedback: {}
         goal: {}
@@ -360,22 +224,19 @@ vacuum_pump.mock:
         handles: []
         result: {}
         schema:
-          description: ROS Action EmptyIn 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties: {}
               required: []
               title: EmptyIn_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties: {}
               required: []
               title: EmptyIn_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -395,22 +256,19 @@ vacuum_pump.mock:
         handles: []
         result: {}
         schema:
-          description: ROS Action EmptyIn 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties: {}
               required: []
               title: EmptyIn_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties: {}
               required: []
               title: EmptyIn_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -432,16 +290,14 @@ vacuum_pump.mock:
         handles: []
         result: {}
         schema:
-          description: ROS Action StrSingleInput 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties: {}
               required: []
               title: StrSingleInput_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties:
                 string:
                   type: string
@@ -450,7 +306,6 @@ vacuum_pump.mock:
               title: StrSingleInput_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -470,7 +325,7 @@ vacuum_pump.mock:
     status_types:
       status: str
     type: python
-  description: Mock vacuum pump
+  description: 模拟真空泵设备，用于系统测试和开发调试。该设备模拟真实真空泵的抽气功能和状态控制，支持真空系统的启停操作和状态监测。提供与真实真空泵相同的接口和控制逻辑，便于在没有实际硬件的情况下进行真空系统的集成测试。适用于真空工艺调试、软件开发和实验流程验证等场景。
   handles:
   - data_key: fluid_in
     data_source: handle
@@ -494,3 +349,4 @@ vacuum_pump.mock:
       required:
       - status
       type: object
+  version: 0.0.1

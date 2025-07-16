@@ -17,7 +17,7 @@ class MoveitInterface:
     tf_buffer: Buffer
     tf_listener: TransformListener
 
-    def __init__(self, moveit_type, joint_poses, rotation=None, device_config=None):
+    def __init__(self, moveit_type, joint_poses, rotation=None, device_config=None, **kwargs):
         self.device_config = device_config
         self.rotation = rotation
         self.data_config = json.load(

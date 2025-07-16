@@ -51,7 +51,7 @@ gripper.misumi_rz:
         handles: []
         result: {}
         schema:
-          description: gripper_move的参数schema
+          description: 夹爪抓取运动控制函数。控制夹爪的开合运动，支持位置、速度、力矩的精确设定。位置参数控制夹爪开合程度，速度参数控制运动快慢，力矩参数控制夹持强度。该函数提供安全的力控制，避免损坏被抓取物体，适用于各种形状和材质的物品抓取。
           properties:
             feedback: {}
             goal:
@@ -80,7 +80,7 @@ gripper.misumi_rz:
         handles: []
         result: {}
         schema:
-          description: init_gripper的参数schema
+          description: 夹爪初始化函数。执行Misumi RZ夹爪的完整初始化流程，包括Modbus通信建立、电机参数配置、传感器校准等。该函数确保夹爪系统从安全状态恢复到可操作状态，是夹爪使用前的必要步骤。初始化完成后夹爪将处于就绪状态，可接收抓取和旋转指令。
           properties:
             feedback: {}
             goal:
@@ -169,7 +169,7 @@ gripper.misumi_rz:
         handles: []
         result: {}
         schema:
-          description: node_gripper_move的参数schema
+          description: 节点夹爪移动任务函数。接收逗号分隔的命令字符串，解析位置、速度、力矩参数并执行夹爪抓取动作。该函数等待运动完成并返回执行结果，提供同步的运动控制接口。适用于需要可靠完成确认的精密抓取操作。
           properties:
             feedback: {}
             goal:
@@ -193,7 +193,7 @@ gripper.misumi_rz:
         handles: []
         result: {}
         schema:
-          description: node_rotate_move的参数schema
+          description: 节点旋转移动任务函数。接收逗号分隔的命令字符串，解析角度、速度、力矩参数并执行夹爪旋转动作。该函数等待旋转完成并返回执行结果，提供同步的旋转控制接口。适用于需要精确角度定位和完成确认的旋转操作。
           properties:
             feedback: {}
             goal:
@@ -251,7 +251,7 @@ gripper.misumi_rz:
         handles: []
         result: {}
         schema:
-          description: rotate_move_abs的参数schema
+          description: 夹爪绝对位置旋转控制函数。控制夹爪主轴旋转到指定的绝对角度位置，支持360度连续旋转。位置参数指定目标角度，速度参数控制旋转速率，力矩参数设定旋转阻力限制。该函数提供高精度的角度定位，适用于需要精确方向控制的操作场景。
           properties:
             feedback: {}
             goal:
@@ -379,10 +379,9 @@ gripper.misumi_rz:
         result:
           success: success
         schema:
-          description: ROS Action SendCmd 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties:
                 status:
                   type: string
@@ -391,7 +390,6 @@ gripper.misumi_rz:
               title: SendCmd_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties:
                 command:
                   type: string
@@ -400,7 +398,6 @@ gripper.misumi_rz:
               title: SendCmd_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -420,7 +417,7 @@ gripper.misumi_rz:
     status_types:
       status: str
     type: python
-  description: Misumi RZ gripper
+  description: Misumi RZ系列电子夹爪设备，集成旋转和抓取双重功能的精密夹爪系统。该设备通过Modbus RTU协议与控制系统通信，支持位置、速度、力矩的精确控制。具备高精度的位置反馈、实时状态监控和故障检测功能。适用于需要精密抓取和旋转操作的实验室自动化场景，如样品管理、精密装配、器件操作等应用。
   handles: []
   icon: ''
   init_param_schema:
@@ -447,6 +444,7 @@ gripper.misumi_rz:
       required:
       - status
       type: object
+  version: 0.0.1
 gripper.mock:
   class:
     action_value_mappings:
@@ -461,7 +459,7 @@ gripper.mock:
         handles: []
         result: {}
         schema:
-          description: edit_id的参数schema
+          description: 模拟夹爪资源ID编辑函数。用于测试和演示资源管理功能，模拟修改夹爪资源的标识信息。该函数接收工作流名称、参数和资源对象，模拟真实的资源更新过程并返回修改后的资源信息。适用于系统测试和开发调试场景。
           properties:
             feedback: {}
             goal:
@@ -484,38 +482,6 @@ gripper.mock:
           title: edit_id参数
           type: object
         type: UniLabJsonCommand
-      auto-push_to:
-        feedback: {}
-        goal: {}
-        goal_default:
-          position: null
-          torque: null
-          velocity: 0.0
-        handles: []
-        result: {}
-        schema:
-          description: push_to的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                position:
-                  type: number
-                torque:
-                  type: number
-                velocity:
-                  default: 0.0
-                  type: number
-              required:
-              - position
-              - torque
-              type: object
-            result: {}
-          required:
-          - goal
-          title: push_to参数
-          type: object
-        type: UniLabJsonCommand
       push_to:
         feedback:
           effort: torque
@@ -532,10 +498,9 @@ gripper.mock:
           effort: torque
           position: position
         schema:
-          description: ROS Action GripperCommand 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties:
                 effort:
                   type: number
@@ -553,7 +518,6 @@ gripper.mock:
               title: GripperCommand_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties:
                 command:
                   properties:
@@ -571,7 +535,6 @@ gripper.mock:
               title: GripperCommand_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 effort:
                   type: number
@@ -600,7 +563,7 @@ gripper.mock:
       torque: float
       velocity: float
     type: python
-  description: Mock gripper
+  description: 模拟夹爪设备，用于系统测试和开发调试。该设备模拟真实夹爪的位置、速度、力矩等物理特性，支持虚拟的抓取和移动操作。提供与真实夹爪相同的接口和状态反馈，便于在没有实际硬件的情况下进行系统集成测试和算法验证。适用于软件开发、系统调试和培训演示等场景。
   handles: []
   icon: ''
   init_param_schema:
@@ -624,3 +587,4 @@ gripper.mock:
       - torque
       - status
       type: object
+  version: 0.0.1

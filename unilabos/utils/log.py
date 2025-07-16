@@ -148,7 +148,7 @@ def configure_logger():
     """配置日志记录器"""
     # 获取根日志记录器
     root_logger = logging.getLogger()
-    root_logger.setLevel(logging.DEBUG)  # 修改为DEBUG以显示所有级别
+    root_logger.setLevel(logging.INFO)  # 修改为DEBUG以显示所有级别
 
     # 移除已存在的处理器
     for handler in root_logger.handlers[:]:
@@ -156,7 +156,7 @@ def configure_logger():
 
     # 创建控制台处理器
     console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.DEBUG)  # 修改为DEBUG以显示所有级别
+    console_handler.setLevel(logging.INFO)  # 修改为DEBUG以显示所有级别
 
     # 使用自定义的颜色格式化器
     color_formatter = ColoredFormatter()

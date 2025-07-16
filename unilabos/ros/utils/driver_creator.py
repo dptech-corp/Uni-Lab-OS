@@ -148,7 +148,7 @@ class PyLabRobotCreator(DeviceClassCreator[T]):
                             contain_model = not issubclass(target_type, Deck)
                             resource, target_type = self._process_resource_mapping(resource, target_type)
                             resource_instance: Resource = resource_ulab_to_plr(resource, contain_model)
-
+                            states[prefix_path] = resource_instance.serialize_all_state()
                             # 使用 prefix_path 作为 key 存储资源状态
                             if to_dict:
                                 serialized = resource_instance.serialize()
@@ -199,7 +199,7 @@ class PyLabRobotCreator(DeviceClassCreator[T]):
             spect = inspect.signature(deserialize_method)
             spec_args = spect.parameters
             for param_name, param_value in data.copy().items():
-                if "_resource_child_name" in param_value and "_resource_type" not in param_value:
+                if isinstance(param_value, dict) and "_resource_child_name" in param_value and "_resource_type" not in param_value:
                     arg_value = spec_args[param_name].annotation
                     data[param_name]["_resource_type"] = self.device_cls.__module__ + ":" + arg_value
                     logger.debug(f"自动补充 _resource_type: {data[param_name]['_resource_type']}")
@@ -230,7 +230,7 @@ class PyLabRobotCreator(DeviceClassCreator[T]):
                 spect = inspect.signature(self.device_cls.__init__)
                 spec_args = spect.parameters
                 for param_name, param_value in data.copy().items():
-                    if "_resource_child_name" in param_value and "_resource_type" not in param_value:
+                    if isinstance(param_value, dict) and "_resource_child_name" in param_value and "_resource_type" not in param_value:
                         arg_value = spec_args[param_name].annotation
                         data[param_name]["_resource_type"] = self.device_cls.__module__ + ":" + arg_value
                         logger.debug(f"自动补充 _resource_type: {data[param_name]['_resource_type']}")

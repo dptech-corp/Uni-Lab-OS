@@ -1,0 +1,217 @@
+{
+    "nodes": [
+        {
+            "id": "PRCXI",
+            "name": "PRCXI",
+            "parent": null,
+            "type": "device",
+            "class": "liquid_handler.prcxi",
+            "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+            },
+            "config": {
+                "deck": {
+                    "_resource_child_name": "deck",
+                    "_resource_type": "unilabos.devices.liquid_handling.prcxi.prcxi:PRCXI9300Deck"
+                },
+                "host": "192.168.3.9",
+                "port": 9999,
+                "timeout": 10.0,
+                "setup": false,
+                "debug": true
+            },
+            "data": {},
+            "children": [
+                "deck"
+            ]
+        },
+        {
+            "id": "deck",
+            "name": "deck",
+            "sample_id": null,
+            "children": [
+                "rackT1",
+                "plateT2",
+                "plateT3",
+                "rackT4",
+                "plateT5",
+                "plateT6"
+            ],
+            "parent": "PRCXI",
+            "type": "device",
+            "class": "",
+            "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+            },
+            "config": {
+                "type": "PRCXI9300Deck"
+            },
+            "data": {}
+        },
+        {
+            "id": "rackT1",
+            "name": "rackT1",
+            "sample_id": null,
+            "children": [],
+            "parent": "deck",
+            "type": "device",
+            "class": "",
+            "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+            },
+            "config": {
+                "type": "PRCXI9300Container",
+                "size_x": 120.98,
+                "size_y": 82.12,
+                "size_z": 50.3
+            },
+            "data": {
+                "Material": {
+                    "uuid": "80652665f6a54402b2408d50b40398df",
+                    "Code": "ZX-001-1000",
+                    "Name": "1000μL Tip头",
+                    "SummaryName": "1000μL Tip头",
+                    "PipetteHeight": 100,
+                    "materialEnum": 1
+                }
+            }
+        },
+        {
+            "id": "plateT2",
+            "name": "plateT2",
+            "sample_id": null,
+            "children": [],
+            "parent": "deck",
+            "type": "device",
+            "class": "",
+            "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+            },
+            "config": {
+                "type": "PRCXI9300Container",
+                "size_x": 120.98,
+                "size_y": 82.12,
+                "size_z": 50.3
+            },
+            "data": {
+                "Material": {
+                    "uuid": "57b1e4711e9e4a32b529f3132fc5931f"
+                }
+            }
+        },
+        {
+            "id": "plateT3",
+            "name": "plateT3",
+            "sample_id": null,
+            "children": [],
+            "parent": "deck",
+            "type": "device",
+            "class": "",
+            "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+            },
+            "config": {
+                "type": "PRCXI9300Container",
+                "size_x": 120.98,
+                "size_y": 82.12,
+                "size_z": 50.3
+            },
+            "data": {
+                "Material": {
+                    "uuid": "57b1e4711e9e4a32b529f3132fc5931f"
+                }
+            }
+        },
+        {
+            "id": "rackT4",
+            "name": "rackT4",
+            "sample_id": null,
+            "children": [],
+            "parent": "deck",
+            "type": "device",
+            "class": "",
+            "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+            },
+            "config": {
+                "type": "PRCXI9300Container",
+                "size_x": 120.98,
+                "size_y": 82.12,
+                "size_z": 50.3
+            },
+            "data": {
+                "Material": {
+                    "uuid": "80652665f6a54402b2408d50b40398df",
+                    "Code": "ZX-001-1000",
+                    "Name": "1000μL Tip头",
+                    "SummaryName": "1000μL Tip头",
+                    "PipetteHeight": 100,
+                    "materialEnum": 1
+                }
+            }
+        },
+        {
+            "id": "plateT5",
+            "name": "plateT5",
+            "sample_id": null,
+            "children": [],
+            "parent": "deck",
+            "type": "device",
+            "class": "",
+            "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+            },
+            "config": {
+                "type": "PRCXI9300Container",
+                "size_x": 120.98,
+                "size_y": 82.12,
+                "size_z": 50.3
+            },
+            "data": {
+                "Material": {
+                    "uuid": "57b1e4711e9e4a32b529f3132fc5931f"
+                }
+            }
+        },
+        {
+            "id": "plateT6",
+            "name": "plateT6",
+            "sample_id": null,
+            "children": [],
+            "parent": "deck",
+            "type": "device",
+            "class": "",
+            "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+            },
+            "config": {
+                "type": "PRCXI9300Container",
+                "size_x": 120.98,
+                "size_y": 82.12,
+                "size_z": 50.3
+            },
+            "data": {
+                "Material": {
+                    "uuid": "57b1e4711e9e4a32b529f3132fc5931f"
+                }
+            }
+        }
+    ],
+    "links": []
+}

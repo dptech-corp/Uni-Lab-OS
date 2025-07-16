@@ -89,30 +89,6 @@ chiller:
           title: modbus_crc参数
           type: object
         type: UniLabJsonCommand
-      auto-set_temperature:
-        feedback: {}
-        goal: {}
-        goal_default:
-          command: null
-        handles: []
-        result: {}
-        schema:
-          description: set_temperature的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                command:
-                  type: string
-              required:
-              - command
-              type: object
-            result: {}
-          required:
-          - goal
-          title: set_temperature参数
-          type: object
-        type: UniLabJsonCommand
       auto-stop:
         feedback: {}
         goal: {}
@@ -143,10 +119,9 @@ chiller:
         result:
           success: success
         schema:
-          description: ROS Action SendCmd 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties:
                 status:
                   type: string
@@ -155,7 +130,6 @@ chiller:
               title: SendCmd_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties:
                 command:
                   type: string
@@ -164,7 +138,6 @@ chiller:
               title: SendCmd_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -183,7 +156,7 @@ chiller:
     module: unilabos.devices.temperature.chiller:Chiller
     status_types: {}
     type: python
-  description: Chiller
+  description: 实验室制冷设备，用于精确的温度控制和冷却操作。该设备通过Modbus RTU协议与控制系统通信，支持精确的温度设定和监控。具备快速降温、恒温控制和温度保持功能，广泛应用于需要低温环境的化学反应、样品保存、结晶操作等实验场景。提供稳定可靠的冷却性能，确保实验过程的温度精度。
   handles: []
   icon: ''
   init_param_schema:
@@ -201,6 +174,7 @@ chiller:
       properties: {}
       required: []
       type: object
+  version: 0.0.1
 heaterstirrer.dalong:
   class:
     action_value_mappings:
@@ -222,50 +196,6 @@ heaterstirrer.dalong:
           required:
           - goal
           title: close参数
-          type: object
-        type: UniLabJsonCommand
-      auto-heatchill:
-        feedback: {}
-        goal: {}
-        goal_default:
-          purpose: reaction
-          stir: true
-          stir_speed: 300
-          temp: null
-          time: 3600
-          vessel: null
-        handles: []
-        result: {}
-        schema:
-          description: heatchill的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                purpose:
-                  default: reaction
-                  type: string
-                stir:
-                  default: true
-                  type: boolean
-                stir_speed:
-                  default: 300
-                  type: number
-                temp:
-                  type: number
-                time:
-                  default: 3600
-                  type: number
-                vessel:
-                  type: string
-              required:
-              - vessel
-              - temp
-              type: object
-            result: {}
-          required:
-          - goal
-          title: heatchill参数
           type: object
         type: UniLabJsonCommand
       auto-set_stir_speed:
@@ -320,54 +250,6 @@ heaterstirrer.dalong:
           title: set_temp_inner参数
           type: object
         type: UniLabJsonCommand
-      auto-set_temp_target:
-        feedback: {}
-        goal: {}
-        goal_default:
-          temp: null
-        handles: []
-        result: {}
-        schema:
-          description: set_temp_target的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                temp:
-                  type: string
-              required:
-              - temp
-              type: object
-            result: {}
-          required:
-          - goal
-          title: set_temp_target参数
-          type: object
-        type: UniLabJsonCommand
-      auto-set_temp_warning:
-        feedback: {}
-        goal: {}
-        goal_default:
-          temp: null
-        handles: []
-        result: {}
-        schema:
-          description: set_temp_warning的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                temp:
-                  type: string
-              required:
-              - temp
-              type: object
-            result: {}
-          required:
-          - goal
-          title: set_temp_warning参数
-          type: object
-        type: UniLabJsonCommand
       heatchill:
         feedback:
           status: status
@@ -391,10 +273,9 @@ heaterstirrer.dalong:
         result:
           success: success
         schema:
-          description: ROS Action HeatChill 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties:
                 status:
                   type: string
@@ -403,7 +284,6 @@ heaterstirrer.dalong:
               title: HeatChill_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties:
                 pressure:
                   type: string
@@ -439,7 +319,6 @@ heaterstirrer.dalong:
               title: HeatChill_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 message:
                   type: string
@@ -468,10 +347,9 @@ heaterstirrer.dalong:
         result:
           success: success
         schema:
-          description: ROS Action SendCmd 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties:
                 status:
                   type: string
@@ -480,7 +358,6 @@ heaterstirrer.dalong:
               title: SendCmd_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties:
                 command:
                   type: string
@@ -489,7 +366,6 @@ heaterstirrer.dalong:
               title: SendCmd_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -515,10 +391,9 @@ heaterstirrer.dalong:
         result:
           success: success
         schema:
-          description: ROS Action SendCmd 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties:
                 status:
                   type: string
@@ -527,7 +402,6 @@ heaterstirrer.dalong:
               title: SendCmd_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties:
                 command:
                   type: string
@@ -536,7 +410,6 @@ heaterstirrer.dalong:
               title: SendCmd_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -560,7 +433,7 @@ heaterstirrer.dalong:
       temp_target: float
       temp_warning: float
     type: python
-  description: DaLong heater stirrer
+  description: 大龙加热搅拌器，集成加热和搅拌双重功能的实验室设备。该设备通过串口通信控制，支持精确的温度调节、搅拌速度控制和安全保护功能。具备实时温度监测、目标温度设定、安全温度报警等特性。适用于化学合成、样品制备、反应控制等需要同时进行加热和搅拌的实验操作，提供稳定均匀的反应环境。
   handles: []
   icon: ''
   init_param_schema:
@@ -596,6 +469,7 @@ heaterstirrer.dalong:
       - temp_warning
       - temp_target
       type: object
+  version: 0.0.1
 tempsensor:
   class:
     action_value_mappings:
@@ -707,30 +581,6 @@ tempsensor:
           title: send_prototype_command参数
           type: object
         type: UniLabJsonCommand
-      auto-set_warning:
-        feedback: {}
-        goal: {}
-        goal_default:
-          command: null
-        handles: []
-        result: {}
-        schema:
-          description: set_warning的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                command:
-                  type: string
-              required:
-              - command
-              type: object
-            result: {}
-          required:
-          - goal
-          title: set_warning参数
-          type: object
-        type: UniLabJsonCommand
       set_warning:
         feedback: {}
         goal:
@@ -741,10 +591,9 @@ tempsensor:
         result:
           success: success
         schema:
-          description: ROS Action SendCmd 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties:
                 status:
                   type: string
@@ -753,7 +602,6 @@ tempsensor:
               title: SendCmd_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties:
                 command:
                   type: string
@@ -762,7 +610,6 @@ tempsensor:
               title: SendCmd_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -782,7 +629,7 @@ tempsensor:
     status_types:
       value: float
     type: python
-  description: Temperature sensor
+  description: 高精度温度传感器设备，用于实验室环境和设备的温度监测。该传感器通过Modbus RTU协议与控制系统通信，提供实时准确的温度数据。具备高精度测量、报警温度设定、数据稳定性好等特点。适用于反应器监控、环境温度监测、设备保护等需要精确温度测量的实验场景，为实验安全和数据可靠性提供保障。
   handles: []
   icon: ''
   init_param_schema:
@@ -809,3 +656,4 @@ tempsensor:
       required:
       - value
       type: object
+  version: 0.0.1

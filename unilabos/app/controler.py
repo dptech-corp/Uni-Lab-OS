@@ -1,8 +1,10 @@
 
 import json
+import traceback
 import uuid
 from unilabos.app.model import JobAddReq, JobData
 from unilabos.ros.nodes.presets.host_node import HostNode
+from unilabos.utils.type_check import serialize_result_info
 
 
 def get_resources() -> tuple:
@@ -33,5 +35,10 @@ def job_add(req: JobAddReq) -> JobData:
         if "command" in action_args:
             action_args = action_args["command"]
     # print(f"job_add:{req.device_id} {action_name} {action_kwargs}")
-    HostNode.get_instance().send_goal(req.device_id, action_type=action_type, action_name=action_name, action_kwargs=action_args, goal_uuid=req.job_id, server_info=req.server_info)
+    try:
+        HostNode.get_instance().send_goal(req.device_id, action_type=action_type, action_name=action_name, action_kwargs=action_args, goal_uuid=req.job_id, server_info=req.server_info)
+    except Exception as e:
+        for bridge in HostNode.get_instance().bridges:
+            if hasattr(bridge, "publish_job_status"):
+                bridge.publish_job_status({}, req.job_id, "failed", serialize_result_info(traceback.format_exc(), False, {}))
     return JobData(jobId=req.job_id)

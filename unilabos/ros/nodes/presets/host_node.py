@@ -459,7 +459,7 @@ class HostNode(BaseROS2DeviceNode):
         self.devices_instances[device_id] = d
         # noinspection PyProtectedMember
         for action_name, action_value_mapping in d._ros_node._action_value_mappings.items():
-            if action_name.startswith("auto-"):
+            if action_name.startswith("auto-") or str(action_value_mapping.get("type", "")).startswith("UniLabJsonCommand"):
                 continue
             action_id = f"/devices/{device_id}/{action_name}"
             if action_id not in self._action_clients:
@@ -603,8 +603,7 @@ class HostNode(BaseROS2DeviceNode):
         if action_name == "test_latency" and server_info is not None:
             self.server_latest_timestamp = server_info.get("send_timestamp", 0.0)
         if action_id not in self._action_clients:
-            self.lab_logger().error(f"[Host Node] ActionClient {action_id} not found.")
-            return
+            raise ValueError(f"ActionClient {action_id} not found.")
 
         action_client: ActionClient = self._action_clients[action_id]
 

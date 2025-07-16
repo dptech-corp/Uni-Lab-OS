@@ -11,7 +11,7 @@ agv.SEER:
         handles: []
         result: {}
         schema:
-          description: send的参数schema
+          description: AGV底层通信命令发送函数。通过TCP socket连接向AGV发送底层控制命令，支持pose（位置）、status（状态）、nav（导航）等命令类型。用于获取AGV当前位置坐标、运行状态或发送导航指令。该函数封装了AGV的通信协议，将命令转换为十六进制数据包并处理响应解析。
           properties:
             feedback: {}
             goal:
@@ -33,30 +33,6 @@ agv.SEER:
           title: send参数
           type: object
         type: UniLabJsonCommand
-      auto-send_nav_task:
-        feedback: {}
-        goal: {}
-        goal_default:
-          command: null
-        handles: []
-        result: {}
-        schema:
-          description: send_nav_task的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                command:
-                  type: string
-              required:
-              - command
-              type: object
-            result: {}
-          required:
-          - goal
-          title: send_nav_task参数
-          type: object
-        type: UniLabJsonCommand
       send_nav_task:
         feedback: {}
         goal:
@@ -67,10 +43,9 @@ agv.SEER:
         result:
           success: success
         schema:
-          description: ROS Action SendCmd 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties:
                 status:
                   type: string
@@ -79,7 +54,6 @@ agv.SEER:
               title: SendCmd_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties:
                 command:
                   type: string
@@ -88,7 +62,6 @@ agv.SEER:
               title: SendCmd_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -109,7 +82,7 @@ agv.SEER:
       pose: list
       status: str
     type: python
-  description: SEER AGV
+  description: SEER AGV自动导引车设备，用于实验室内物料和设备的自主移动运输。该AGV通过TCP socket与导航系统通信，具备精确的定位和路径规划能力。支持实时位置监控、状态查询和导航任务执行，可在预设的实验室环境中自主移动至指定位置。适用于样品运输、设备转移、多工位协作等实验室自动化物流场景。
   handles: []
   icon: ''
   init_param_schema:
@@ -130,3 +103,4 @@ agv.SEER:
       - pose
       - status
       type: object
+  version: 0.0.1

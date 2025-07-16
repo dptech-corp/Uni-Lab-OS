@@ -93,30 +93,6 @@ rotavap.one:
           title: set_rotate_time参数
           type: object
         type: UniLabJsonCommand
-      auto-set_timer:
-        feedback: {}
-        goal: {}
-        goal_default:
-          command: null
-        handles: []
-        result: {}
-        schema:
-          description: set_timer的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                command:
-                  type: string
-              required:
-              - command
-              type: object
-            result: {}
-          required:
-          - goal
-          title: set_timer参数
-          type: object
-        type: UniLabJsonCommand
       set_timer:
         feedback: {}
         goal:
@@ -127,10 +103,9 @@ rotavap.one:
         result:
           success: success
         schema:
-          description: ROS Action SendCmd 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties:
                 status:
                   type: string
@@ -139,7 +114,6 @@ rotavap.one:
               title: SendCmd_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties:
                 command:
                   type: string
@@ -148,7 +122,6 @@ rotavap.one:
               title: SendCmd_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -167,7 +140,7 @@ rotavap.one:
     module: unilabos.devices.rotavap.rotavap_one:RotavapOne
     status_types: {}
     type: python
-  description: Rotavap device
+  description: 旋转蒸发仪设备，用于有机化学实验中的溶剂回收和浓缩操作。该设备通过串口通信控制，集成旋转和真空泵功能，支持定时控制和自动化操作。具备旋转速度调节、真空度控制、温度管理等功能，实现高效的溶剂蒸发和回收。适用于有机合成、天然产物提取、药物制备等需要溶剂去除和浓缩的实验室应用场景。
   handles: []
   icon: ''
   init_param_schema:
@@ -185,6 +158,7 @@ rotavap.one:
       properties: {}
       required: []
       type: object
+  version: 0.0.1
 separator.homemade:
   class:
     action_value_mappings:
@@ -206,38 +180,6 @@ separator.homemade:
           required:
           - goal
           title: read_sensor_loop参数
-          type: object
-        type: UniLabJsonCommand
-      auto-stir:
-        feedback: {}
-        goal: {}
-        goal_default:
-          settling_time: 10
-          stir_speed: 300
-          stir_time: 10
-        handles: []
-        result: {}
-        schema:
-          description: stir的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                settling_time:
-                  default: 10
-                  type: number
-                stir_speed:
-                  default: 300
-                  type: number
-                stir_time:
-                  default: 10
-                  type: number
-              required: []
-              type: object
-            result: {}
-          required:
-          - goal
-          title: stir参数
           type: object
         type: UniLabJsonCommand
       auto-valve_open:
@@ -266,30 +208,6 @@ separator.homemade:
           required:
           - goal
           title: valve_open参数
-          type: object
-        type: UniLabJsonCommand
-      auto-valve_open_cmd:
-        feedback: {}
-        goal: {}
-        goal_default:
-          command: null
-        handles: []
-        result: {}
-        schema:
-          description: valve_open_cmd的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                command:
-                  type: string
-              required:
-              - command
-              type: object
-            result: {}
-          required:
-          - goal
-          title: valve_open_cmd参数
           type: object
         type: UniLabJsonCommand
       auto-write:
@@ -335,10 +253,9 @@ separator.homemade:
         result:
           success: success
         schema:
-          description: ROS Action Stir 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties:
                 status:
                   type: string
@@ -347,7 +264,6 @@ separator.homemade:
               title: Stir_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties:
                 event:
                   type: string
@@ -374,7 +290,6 @@ separator.homemade:
               title: Stir_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 message:
                   type: string
@@ -401,13 +316,12 @@ separator.homemade:
         goal_default:
           command: ''
         handles: []
-        result":
+        result:
           success: success
         schema:
-          description: ROS Action SendCmd 的 JSON Schema
+          description: ''
           properties:
             feedback:
-              description: Action 反馈 - 执行过程中从服务器发送到客户端
               properties:
                 status:
                   type: string
@@ -416,7 +330,6 @@ separator.homemade:
               title: SendCmd_Feedback
               type: object
             goal:
-              description: Action 目标 - 从客户端发送到服务器
               properties:
                 command:
                   type: string
@@ -425,7 +338,6 @@ separator.homemade:
               title: SendCmd_Goal
               type: object
             result:
-              description: Action 结果 - 完成后从服务器发送到客户端
               properties:
                 return_info:
                   type: string
@@ -444,7 +356,7 @@ separator.homemade:
     module: unilabos.devices.separator.homemade_grbl_conductivity:SeparatorController
     status_types: {}
     type: python
-  description: Separator device with homemade grbl controller
+  description: 液-液分离器设备，基于自制Grbl控制器的自动化分离系统。该设备集成搅拌、沉降、阀门控制和电导率传感器，通过串口通信实现精确的分离操作控制。支持自动搅拌、分层沉降、基于传感器反馈的智能分液等功能。适用于有机化学中的萃取分离、相分离、液-液提取等需要精确分离控制的实验应用。
   handles: []
   icon: ''
   init_param_schema:
@@ -468,3 +380,4 @@ separator.homemade:
       properties: {}
       required: []
       type: object
+  version: 0.0.1
