@@ -1,5 +1,5 @@
 # Organic Synthesis Station Evaporate Action
-string vessel                    # 目标容器
+Resource vessel                    # 目标容器
 float64 pressure                 # 真空度
 float64 temp                     # 温度
 string time                      # 🔧 蒸发时间（支持带单位，如"3 min","180"，默认秒）

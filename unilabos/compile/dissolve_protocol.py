@@ -408,7 +408,7 @@ def find_solid_dispenser(G: nx.DiGraph) -> str:
 
 def generate_dissolve_protocol(
     G: nx.DiGraph,
-    vessel: str,
+    vessel: dict,  # 🔧 修改：从字符串改为字典类型
     # 🔧 修复：按照checklist.md的DissolveProtocol参数
     solvent: str = "",
     volume: Union[str, float] = 0.0,
@@ -427,10 +427,11 @@ def generate_dissolve_protocol(
     生成溶解操作的协议序列 - 增强版
     
     🔧 修复要点：
-    1. 添加action文件中的所有参数（mass, mol, reagent, event）
-    2. 使用 **kwargs 接受所有额外参数，防止 unexpected keyword argument 错误
-    3. 支持固体溶解和液体溶解两种模式
-    4. 添加详细的emoji日志系统
+    1. 修改vessel参数类型为dict，并提取vessel_id
+    2. 添加action文件中的所有参数（mass, mol, reagent, event）
+    3. 使用 **kwargs 接受所有额外参数，防止 unexpected keyword argument 错误
+    4. 支持固体溶解和液体溶解两种模式
+    5. 添加详细的体积运算逻辑
     
     支持两种溶解模式：
     1. 液体溶解：指定 solvent + volume，使用pump protocol转移溶剂
@@ -444,10 +445,13 @@ def generate_dissolve_protocol(
     - mol: "0.12 mol", "16.2 mmol"
     """
     
+    # 🔧 核心修改：从字典中提取容器ID
+    vessel_id = vessel["id"]
+    
     debug_print("=" * 60)
     debug_print("🧪 开始生成溶解协议")
     debug_print(f"📋 原始参数:")
-    debug_print(f"  🥼 vessel: '{vessel}'")
+    debug_print(f"  🥼 vessel: {vessel} (ID: {vessel_id})")
     debug_print(f"  💧 solvent: '{solvent}'")
     debug_print(f"  📏 volume: {volume} (类型: {type(volume)})")
     debug_print(f"  ⚖️ mass: {mass} (类型: {type(mass)})")
@@ -463,18 +467,29 @@ def generate_dissolve_protocol(
     
     # === 参数验证 ===
     debug_print("🔍 步骤1: 参数验证...")
-    action_sequence.append(create_action_log(f"开始溶解操作 - 容器: {vessel}", "🎬"))
+    action_sequence.append(create_action_log(f"开始溶解操作 - 容器: {vessel_id}", "🎬"))
     
-    if not vessel:
+    if not vessel_id:
         debug_print("❌ vessel 参数不能为空")
         raise ValueError("vessel 参数不能为空")
     
-    if vessel not in G.nodes():
-        debug_print(f"❌ 容器 '{vessel}' 不存在于系统中")
-        raise ValueError(f"容器 '{vessel}' 不存在于系统中")
+    if vessel_id not in G.nodes():
+        debug_print(f"❌ 容器 '{vessel_id}' 不存在于系统中")
+        raise ValueError(f"容器 '{vessel_id}' 不存在于系统中")
     
     debug_print("✅ 基本参数验证通过")
     action_sequence.append(create_action_log("参数验证通过", "✅"))
+    
+    # 🔧 新增：记录溶解前的容器状态
+    debug_print("🔍 记录溶解前容器状态...")
+    original_liquid_volume = 0.0
+    if "data" in vessel and "liquid_volume" in vessel["data"]:
+        current_volume = vessel["data"]["liquid_volume"]
+        if isinstance(current_volume, list) and len(current_volume) > 0:
+            original_liquid_volume = current_volume[0]
+        elif isinstance(current_volume, (int, float)):
+            original_liquid_volume = current_volume
+    debug_print(f"📊 溶解前液体体积: {original_liquid_volume:.2f}mL")
     
     # === 🔧 关键修复：参数解析 ===
     debug_print("🔍 步骤2: 参数解析...")
@@ -522,8 +537,8 @@ def generate_dissolve_protocol(
     action_sequence.append(create_action_log("正在查找相关设备...", "🔍"))
     
     # 查找加热搅拌器
-    heatchill_id = find_connected_heatchill(G, vessel)
-    stirrer_id = find_connected_stirrer(G, vessel)
+    heatchill_id = find_connected_heatchill(G, vessel_id)
+    stirrer_id = find_connected_stirrer(G, vessel_id)
     
     # 优先使用加热搅拌器，否则使用独立搅拌器
     stir_device_id = heatchill_id or stirrer_id
@@ -557,7 +572,7 @@ def generate_dissolve_protocol(
                     "device_id": heatchill_id,
                     "action_name": "heat_chill_start",
                     "action_kwargs": {
-                        "vessel": vessel,
+                        "vessel": vessel_id,
                         "temp": final_temp,
                         "purpose": f"溶解准备 - {event}" if event else "溶解准备"
                     }
@@ -581,7 +596,7 @@ def generate_dissolve_protocol(
                     "device_id": stirrer_id,
                     "action_name": "start_stir",
                     "action_kwargs": {
-                        "vessel": vessel,
+                        "vessel": vessel_id,
                         "stir_speed": stir_speed,
                         "purpose": f"溶解搅拌 - {event}" if event else "溶解搅拌"
                     }
@@ -606,7 +621,7 @@ def generate_dissolve_protocol(
                 
                 # 固体加样
                 add_kwargs = {
-                    "vessel": vessel,
+                    "vessel": vessel_id,
                     "reagent": reagent or amount or "solid reagent",
                     "purpose": f"溶解固体试剂 - {event}" if event else "溶解固体试剂",
                     "event": event
@@ -628,6 +643,12 @@ def generate_dissolve_protocol(
                 
                 debug_print(f"✅ 固体加样完成")
                 action_sequence.append(create_action_log("固体加样完成", "✅"))
+                
+                # 🔧 新增：固体溶解体积运算 - 固体本身不会显著增加体积，但可能有少量变化
+                debug_print(f"🔧 固体溶解 - 体积变化很小，主要是质量变化")
+                # 固体通常不会显著改变液体体积，这里只记录日志
+                action_sequence.append(create_action_log(f"固体已添加: {final_mass}g", "📊"))
+                
             else:
                 debug_print("⚠️ 未找到固体加样器，跳过固体添加")
                 action_sequence.append(create_action_log("未找到固体加样器，无法添加固体", "❌"))
@@ -659,7 +680,7 @@ def generate_dissolve_protocol(
                 pump_actions = generate_pump_protocol_with_rinsing(
                     G=G,
                     from_vessel=solvent_vessel,
-                    to_vessel=vessel,
+                    to_vessel=vessel_id,
                     volume=final_volume,
                     amount=amount,
                     time=0.0,  # 不在pump level控制时间
@@ -678,6 +699,52 @@ def generate_dissolve_protocol(
                 action_sequence.extend(pump_actions)
                 debug_print(f"✅ 溶剂转移完成，添加了 {len(pump_actions)} 个动作")
                 action_sequence.append(create_action_log(f"溶剂转移完成 ({len(pump_actions)} 个操作)", "✅"))
+                
+                # 🔧 新增：液体溶解体积运算 - 添加溶剂后更新容器体积
+                debug_print(f"🔧 更新容器液体体积 - 添加溶剂 {final_volume:.2f}mL")
+                
+                # 确保vessel有data字段
+                if "data" not in vessel:
+                    vessel["data"] = {}
+                
+                if "liquid_volume" in vessel["data"]:
+                    current_volume = vessel["data"]["liquid_volume"]
+                    if isinstance(current_volume, list):
+                        if len(current_volume) > 0:
+                            vessel["data"]["liquid_volume"][0] += final_volume
+                            debug_print(f"📊 添加溶剂后体积: {vessel['data']['liquid_volume'][0]:.2f}mL (+{final_volume:.2f}mL)")
+                        else:
+                            vessel["data"]["liquid_volume"] = [final_volume]
+                            debug_print(f"📊 初始化溶解体积: {final_volume:.2f}mL")
+                    elif isinstance(current_volume, (int, float)):
+                        vessel["data"]["liquid_volume"] += final_volume
+                        debug_print(f"📊 添加溶剂后体积: {vessel['data']['liquid_volume']:.2f}mL (+{final_volume:.2f}mL)")
+                    else:
+                        vessel["data"]["liquid_volume"] = final_volume
+                        debug_print(f"📊 重置体积为: {final_volume:.2f}mL")
+                else:
+                    vessel["data"]["liquid_volume"] = final_volume
+                    debug_print(f"📊 创建新体积记录: {final_volume:.2f}mL")
+                
+                # 🔧 同时更新图中的容器数据
+                if vessel_id in G.nodes():
+                    if 'data' not in G.nodes[vessel_id]:
+                        G.nodes[vessel_id]['data'] = {}
+                    
+                    vessel_node_data = G.nodes[vessel_id]['data']
+                    current_node_volume = vessel_node_data.get('liquid_volume', 0.0)
+                    
+                    if isinstance(current_node_volume, list):
+                        if len(current_node_volume) > 0:
+                            G.nodes[vessel_id]['data']['liquid_volume'][0] += final_volume
+                        else:
+                            G.nodes[vessel_id]['data']['liquid_volume'] = [final_volume]
+                    else:
+                        G.nodes[vessel_id]['data']['liquid_volume'] = current_node_volume + final_volume
+                    
+                    debug_print(f"✅ 图节点体积数据已更新")
+                
+                action_sequence.append(create_action_log(f"容器体积已更新 (+{final_volume:.2f}mL)", "📊"))
                 
                 # 溶剂添加后等待
                 action_sequence.append(create_action_log("溶剂添加后短暂等待...", "⏳"))
@@ -700,7 +767,7 @@ def generate_dissolve_protocol(
                     "device_id": heatchill_id,
                     "action_name": "heat_chill",
                     "action_kwargs": {
-                        "vessel": vessel,
+                        "vessel": vessel_id,
                         "temp": final_temp,
                         "time": final_time,
                         "stir": True,
@@ -718,7 +785,7 @@ def generate_dissolve_protocol(
                     "device_id": stirrer_id,
                     "action_name": "stir",
                     "action_kwargs": {
-                        "vessel": vessel,
+                        "vessel": vessel_id,
                         "stir_time": final_time,
                         "stir_speed": stir_speed,
                         "settling_time": 0,
@@ -744,7 +811,7 @@ def generate_dissolve_protocol(
                 "device_id": heatchill_id,
                 "action_name": "heat_chill_stop",
                 "action_kwargs": {
-                    "vessel": vessel
+                    "vessel": vessel_id
                 }
             }
             action_sequence.append(stop_action)
@@ -761,12 +828,21 @@ def generate_dissolve_protocol(
             }
         })
     
+    # 🔧 新增：溶解完成后的状态报告
+    final_liquid_volume = 0.0
+    if "data" in vessel and "liquid_volume" in vessel["data"]:
+        current_volume = vessel["data"]["liquid_volume"]
+        if isinstance(current_volume, list) and len(current_volume) > 0:
+            final_liquid_volume = current_volume[0]
+        elif isinstance(current_volume, (int, float)):
+            final_liquid_volume = current_volume
+    
     # === 最终结果 ===
     debug_print("=" * 60)
     debug_print(f"🎉 溶解协议生成完成")
     debug_print(f"📊 协议统计:")
     debug_print(f"  📋 总动作数: {len(action_sequence)}")
-    debug_print(f"  🥼 容器: {vessel}")
+    debug_print(f"  🥼 容器: {vessel_id}")
     debug_print(f"  {dissolve_emoji} 溶解类型: {dissolve_type}")
     if is_liquid_dissolve:
         debug_print(f"  💧 溶剂: {solvent} ({final_volume}mL)")
@@ -776,10 +852,12 @@ def generate_dissolve_protocol(
         debug_print(f"  🧬 摩尔: {mol}")
     debug_print(f"  🌡️ 温度: {final_temp}°C")
     debug_print(f"  ⏱️ 时间: {final_time}s")
+    debug_print(f"  📊 溶解前体积: {original_liquid_volume:.2f}mL")
+    debug_print(f"  📊 溶解后体积: {final_liquid_volume:.2f}mL")
     debug_print("=" * 60)
     
     # 添加完成日志
-    summary_msg = f"溶解协议完成: {vessel}"
+    summary_msg = f"溶解协议完成: {vessel_id}"
     if is_liquid_dissolve:
         summary_msg += f" (使用 {final_volume}mL {solvent})"
     if is_solid_dissolve:
@@ -789,12 +867,15 @@ def generate_dissolve_protocol(
     
     return action_sequence
 
-# === 便捷函数 ===
 
-def dissolve_solid_by_mass(G: nx.DiGraph, vessel: str, reagent: str, mass: Union[str, float], 
+# === 便捷函数 ===
+# 🔧 修改便捷函数的参数类型
+
+def dissolve_solid_by_mass(G: nx.DiGraph, vessel: dict, reagent: str, mass: Union[str, float], 
                           temp: Union[str, float] = 25.0, time: Union[str, float] = "10 min") -> List[Dict[str, Any]]:
     """按质量溶解固体"""
-    debug_print(f"🧂 快速固体溶解: {reagent} ({mass}) → {vessel}")
+    vessel_id = vessel["id"]
+    debug_print(f"🧂 快速固体溶解: {reagent} ({mass}) → {vessel_id}")
     return generate_dissolve_protocol(
         G, vessel, 
         mass=mass, 
@@ -803,10 +884,11 @@ def dissolve_solid_by_mass(G: nx.DiGraph, vessel: str, reagent: str, mass: Union
         time=time
     )
 
-def dissolve_solid_by_moles(G: nx.DiGraph, vessel: str, reagent: str, mol: str, 
+def dissolve_solid_by_moles(G: nx.DiGraph, vessel: dict, reagent: str, mol: str, 
                            temp: Union[str, float] = 25.0, time: Union[str, float] = "10 min") -> List[Dict[str, Any]]:
     """按摩尔数溶解固体"""
-    debug_print(f"🧬 按摩尔数溶解固体: {reagent} ({mol}) → {vessel}")
+    vessel_id = vessel["id"]
+    debug_print(f"🧬 按摩尔数溶解固体: {reagent} ({mol}) → {vessel_id}")
     return generate_dissolve_protocol(
         G, vessel, 
         mol=mol, 
@@ -815,10 +897,11 @@ def dissolve_solid_by_moles(G: nx.DiGraph, vessel: str, reagent: str, mol: str,
         time=time
     )
 
-def dissolve_with_solvent(G: nx.DiGraph, vessel: str, solvent: str, volume: Union[str, float], 
+def dissolve_with_solvent(G: nx.DiGraph, vessel: dict, solvent: str, volume: Union[str, float], 
                          temp: Union[str, float] = 25.0, time: Union[str, float] = "5 min") -> List[Dict[str, Any]]:
     """用溶剂溶解"""
-    debug_print(f"💧 溶剂溶解: {solvent} ({volume}) → {vessel}")
+    vessel_id = vessel["id"]
+    debug_print(f"💧 溶剂溶解: {solvent} ({volume}) → {vessel_id}")
     return generate_dissolve_protocol(
         G, vessel, 
         solvent=solvent, 
@@ -827,9 +910,10 @@ def dissolve_with_solvent(G: nx.DiGraph, vessel: str, solvent: str, volume: Unio
         time=time
     )
 
-def dissolve_at_room_temp(G: nx.DiGraph, vessel: str, solvent: str, volume: Union[str, float]) -> List[Dict[str, Any]]:
+def dissolve_at_room_temp(G: nx.DiGraph, vessel: dict, solvent: str, volume: Union[str, float]) -> List[Dict[str, Any]]:
     """室温溶解"""
-    debug_print(f"🌡️ 室温溶解: {solvent} ({volume}) → {vessel}")
+    vessel_id = vessel["id"]
+    debug_print(f"🌡️ 室温溶解: {solvent} ({volume}) → {vessel_id}")
     return generate_dissolve_protocol(
         G, vessel, 
         solvent=solvent, 
@@ -838,10 +922,11 @@ def dissolve_at_room_temp(G: nx.DiGraph, vessel: str, solvent: str, volume: Unio
         time="5 min"
     )
 
-def dissolve_with_heating(G: nx.DiGraph, vessel: str, solvent: str, volume: Union[str, float], 
+def dissolve_with_heating(G: nx.DiGraph, vessel: dict, solvent: str, volume: Union[str, float], 
                          temp: Union[str, float] = "60 °C", time: Union[str, float] = "15 min") -> List[Dict[str, Any]]:
     """加热溶解"""
-    debug_print(f"🔥 加热溶解: {solvent} ({volume}) → {vessel} @ {temp}")
+    vessel_id = vessel["id"]
+    debug_print(f"🔥 加热溶解: {solvent} ({volume}) → {vessel_id} @ {temp}")
     return generate_dissolve_protocol(
         G, vessel, 
         solvent=solvent, 

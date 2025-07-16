@@ -145,7 +145,7 @@ def find_connected_heatchill(G: nx.DiGraph, vessel: str) -> str:
 
 def generate_clean_vessel_protocol(
     G: nx.DiGraph,
-    vessel: str,
+    vessel: dict,  # 🔧 修改：从字符串改为字典类型
     solvent: str,
     volume: float,
     temp: float,
@@ -165,7 +165,7 @@ def generate_clean_vessel_protocol(
     
     Args:
         G: 有向图，节点为设备和容器，边为流体管道
-        vessel: 要清洗的容器名称
+        vessel: 要清洗的容器字典（包含id字段）
         solvent: 用于清洗的溶剂名称  
         volume: 每次清洗使用的溶剂体积
         temp: 清洗时的温度
@@ -178,20 +178,23 @@ def generate_clean_vessel_protocol(
         ValueError: 当找不到必要的容器或设备时抛出异常
     
     Examples:
-        clean_protocol = generate_clean_vessel_protocol(G, "main_reactor", "water", 100.0, 60.0, 2)
+        clean_protocol = generate_clean_vessel_protocol(G, {"id": "main_reactor"}, "water", 100.0, 60.0, 2)
     """
+    # 🔧 核心修改：从字典中提取容器ID
+    vessel_id = vessel["id"]
+    
     action_sequence = []
     
     print(f"CLEAN_VESSEL: 开始生成容器清洗协议")
-    print(f"  - 目标容器: {vessel}")
+    print(f"  - 目标容器: {vessel} (ID: {vessel_id})")
     print(f"  - 清洗溶剂: {solvent}")
     print(f"  - 清洗体积: {volume} mL")
     print(f"  - 清洗温度: {temp}°C")
     print(f"  - 重复次数: {repeats}")
     
     # 验证目标容器存在
-    if vessel not in G.nodes():
-        raise ValueError(f"目标容器 '{vessel}' 不存在于系统中")
+    if vessel_id not in G.nodes():
+        raise ValueError(f"目标容器 '{vessel_id}' 不存在于系统中")
     
     # 查找溶剂容器
     try:
@@ -208,11 +211,22 @@ def generate_clean_vessel_protocol(
         raise ValueError(f"无法找到废液容器: {str(e)}")
     
     # 查找加热设备（可选）
-    heatchill_id = find_connected_heatchill(G, vessel)
+    heatchill_id = find_connected_heatchill(G, vessel_id)  # 🔧 使用 vessel_id
     if heatchill_id:
         print(f"CLEAN_VESSEL: 找到加热设备: {heatchill_id}")
     else:
         print(f"CLEAN_VESSEL: 未找到加热设备，将在室温下清洗")
+    
+    # 🔧 新增：记录清洗前的容器状态
+    print(f"CLEAN_VESSEL: 记录清洗前容器状态...")
+    original_liquid_volume = 0.0
+    if "data" in vessel and "liquid_volume" in vessel["data"]:
+        current_volume = vessel["data"]["liquid_volume"]
+        if isinstance(current_volume, list) and len(current_volume) > 0:
+            original_liquid_volume = current_volume[0]
+        elif isinstance(current_volume, (int, float)):
+            original_liquid_volume = current_volume
+    print(f"CLEAN_VESSEL: 清洗前液体体积: {original_liquid_volume:.2f}mL")
     
     # 第一步：如果需要加热且有加热设备，启动加热
     if temp > 25.0 and heatchill_id:
@@ -221,7 +235,7 @@ def generate_clean_vessel_protocol(
             "device_id": heatchill_id,
             "action_name": "heat_chill_start",
             "action_kwargs": {
-                "vessel": vessel,
+                "vessel": vessel_id,  # 🔧 使用 vessel_id
                 "temp": temp,
                 "purpose": f"cleaning with {solvent}"
             }
@@ -240,18 +254,61 @@ def generate_clean_vessel_protocol(
         print(f"CLEAN_VESSEL: 执行第 {repeat + 1} 次清洗")
         
         # 2a. 使用 pump_protocol 将溶剂转移到目标容器
-        print(f"CLEAN_VESSEL: 将 {volume} mL {solvent} 转移到 {vessel}")
+        print(f"CLEAN_VESSEL: 将 {volume} mL {solvent} 转移到 {vessel_id}")
         try:
             # 调用成熟的 pump_protocol 算法
             add_solvent_actions = generate_pump_protocol(
                 G=G,
                 from_vessel=solvent_vessel,
-                to_vessel=vessel,
+                to_vessel=vessel_id,  # 🔧 使用 vessel_id
                 volume=volume,
                 flowrate=2.5,  # 适中的流速，避免飞溅
                 transfer_flowrate=2.5
             )
             action_sequence.extend(add_solvent_actions)
+            
+            # 🔧 新增：更新容器体积（添加清洗溶剂）
+            print(f"CLEAN_VESSEL: 更新容器体积 - 添加清洗溶剂 {volume:.2f}mL")
+            if "data" not in vessel:
+                vessel["data"] = {}
+            
+            if "liquid_volume" in vessel["data"]:
+                current_volume = vessel["data"]["liquid_volume"]
+                if isinstance(current_volume, list):
+                    if len(current_volume) > 0:
+                        vessel["data"]["liquid_volume"][0] += volume
+                        print(f"CLEAN_VESSEL: 添加溶剂后体积: {vessel['data']['liquid_volume'][0]:.2f}mL (+{volume:.2f}mL)")
+                    else:
+                        vessel["data"]["liquid_volume"] = [volume]
+                        print(f"CLEAN_VESSEL: 初始化清洗体积: {volume:.2f}mL")
+                elif isinstance(current_volume, (int, float)):
+                    vessel["data"]["liquid_volume"] += volume
+                    print(f"CLEAN_VESSEL: 添加溶剂后体积: {vessel['data']['liquid_volume']:.2f}mL (+{volume:.2f}mL)")
+                else:
+                    vessel["data"]["liquid_volume"] = volume
+                    print(f"CLEAN_VESSEL: 重置体积为: {volume:.2f}mL")
+            else:
+                vessel["data"]["liquid_volume"] = volume
+                print(f"CLEAN_VESSEL: 创建新体积记录: {volume:.2f}mL")
+            
+            # 🔧 同时更新图中的容器数据
+            if vessel_id in G.nodes():
+                if 'data' not in G.nodes[vessel_id]:
+                    G.nodes[vessel_id]['data'] = {}
+                
+                vessel_node_data = G.nodes[vessel_id]['data']
+                current_node_volume = vessel_node_data.get('liquid_volume', 0.0)
+                
+                if isinstance(current_node_volume, list):
+                    if len(current_node_volume) > 0:
+                        G.nodes[vessel_id]['data']['liquid_volume'][0] += volume
+                    else:
+                        G.nodes[vessel_id]['data']['liquid_volume'] = [volume]
+                else:
+                    G.nodes[vessel_id]['data']['liquid_volume'] = current_node_volume + volume
+                
+                print(f"CLEAN_VESSEL: 图节点体积数据已更新")
+            
         except Exception as e:
             raise ValueError(f"无法将溶剂转移到容器: {str(e)}")
         
@@ -265,18 +322,52 @@ def generate_clean_vessel_protocol(
         action_sequence.append(wait_action)
         
         # 2c. 使用 pump_protocol 将清洗液转移到废液容器
-        print(f"CLEAN_VESSEL: 将清洗液从 {vessel} 转移到废液容器")
+        print(f"CLEAN_VESSEL: 将清洗液从 {vessel_id} 转移到废液容器")
         try:
             # 调用成熟的 pump_protocol 算法
             remove_waste_actions = generate_pump_protocol(
                 G=G,
-                from_vessel=vessel,
+                from_vessel=vessel_id,  # 🔧 使用 vessel_id
                 to_vessel=waste_vessel,
                 volume=volume,
                 flowrate=2.5,  # 适中的流速
                 transfer_flowrate=2.5
             )
             action_sequence.extend(remove_waste_actions)
+            
+            # 🔧 新增：更新容器体积（移除清洗液）
+            print(f"CLEAN_VESSEL: 更新容器体积 - 移除清洗液 {volume:.2f}mL")
+            if "data" in vessel and "liquid_volume" in vessel["data"]:
+                current_volume = vessel["data"]["liquid_volume"]
+                if isinstance(current_volume, list):
+                    if len(current_volume) > 0:
+                        vessel["data"]["liquid_volume"][0] = max(0.0, vessel["data"]["liquid_volume"][0] - volume)
+                        print(f"CLEAN_VESSEL: 移除清洗液后体积: {vessel['data']['liquid_volume'][0]:.2f}mL (-{volume:.2f}mL)")
+                    else:
+                        vessel["data"]["liquid_volume"] = [0.0]
+                        print(f"CLEAN_VESSEL: 重置体积为0mL")
+                elif isinstance(current_volume, (int, float)):
+                    vessel["data"]["liquid_volume"] = max(0.0, current_volume - volume)
+                    print(f"CLEAN_VESSEL: 移除清洗液后体积: {vessel['data']['liquid_volume']:.2f}mL (-{volume:.2f}mL)")
+                else:
+                    vessel["data"]["liquid_volume"] = 0.0
+                    print(f"CLEAN_VESSEL: 重置体积为0mL")
+            
+            # 🔧 同时更新图中的容器数据
+            if vessel_id in G.nodes():
+                vessel_node_data = G.nodes[vessel_id].get('data', {})
+                current_node_volume = vessel_node_data.get('liquid_volume', 0.0)
+                
+                if isinstance(current_node_volume, list):
+                    if len(current_node_volume) > 0:
+                        G.nodes[vessel_id]['data']['liquid_volume'][0] = max(0.0, current_node_volume[0] - volume)
+                    else:
+                        G.nodes[vessel_id]['data']['liquid_volume'] = [0.0]
+                else:
+                    G.nodes[vessel_id]['data']['liquid_volume'] = max(0.0, current_node_volume - volume)
+                
+                print(f"CLEAN_VESSEL: 图节点体积数据已更新")
+            
         except Exception as e:
             raise ValueError(f"无法将清洗液转移到废液容器: {str(e)}")
         
@@ -296,13 +387,24 @@ def generate_clean_vessel_protocol(
             "device_id": heatchill_id,
             "action_name": "heat_chill_stop",
             "action_kwargs": {
-                "vessel": vessel
+                "vessel": vessel_id  # 🔧 使用 vessel_id
             }
         }
         action_sequence.append(heatchill_stop_action)
     
-    print(f"CLEAN_VESSEL: 生成了 {len(action_sequence)} 个动作")
-    print(f"CLEAN_VESSEL: 清洗协议生成完成")
+    # 🔧 新增：清洗完成后的状态报告
+    final_liquid_volume = 0.0
+    if "data" in vessel and "liquid_volume" in vessel["data"]:
+        current_volume = vessel["data"]["liquid_volume"]
+        if isinstance(current_volume, list) and len(current_volume) > 0:
+            final_liquid_volume = current_volume[0]
+        elif isinstance(current_volume, (int, float)):
+            final_liquid_volume = current_volume
+    
+    print(f"CLEAN_VESSEL: 清洗完成")
+    print(f"  - 清洗前体积: {original_liquid_volume:.2f}mL")
+    print(f"  - 清洗后体积: {final_liquid_volume:.2f}mL")
+    print(f"  - 生成了 {len(action_sequence)} 个动作")
     
     return action_sequence
 
@@ -310,7 +412,7 @@ def generate_clean_vessel_protocol(
 # 便捷函数：常用清洗方案
 def generate_quick_clean_protocol(
     G: nx.DiGraph, 
-    vessel: str, 
+    vessel: dict,  # 🔧 修改：从字符串改为字典类型
     solvent: str = "water", 
     volume: float = 100.0
 ) -> List[Dict[str, Any]]:
@@ -320,7 +422,7 @@ def generate_quick_clean_protocol(
 
 def generate_thorough_clean_protocol(
     G: nx.DiGraph, 
-    vessel: str, 
+    vessel: dict,  # 🔧 修改：从字符串改为字典类型
     solvent: str = "water", 
     volume: float = 150.0,
     temp: float = 60.0
@@ -331,7 +433,7 @@ def generate_thorough_clean_protocol(
 
 def generate_organic_clean_protocol(
     G: nx.DiGraph, 
-    vessel: str, 
+    vessel: dict,  # 🔧 修改：从字符串改为字典类型
     volume: float = 100.0
 ) -> List[Dict[str, Any]]:
     """有机清洗：先用有机溶剂，再用水清洗"""

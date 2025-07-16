@@ -216,7 +216,7 @@ def calculate_reagent_volume(target_ph_value: float, reagent: str, vessel_volume
 
 def generate_adjust_ph_protocol(
     G: nx.DiGraph,
-    vessel: str,
+    vessel: dict,  # 🔧 修改：从字符串改为字典类型
     ph_value: float,
     reagent: str,
     **kwargs
@@ -226,7 +226,7 @@ def generate_adjust_ph_protocol(
     
     Args:
         G: 有向图，节点为容器和设备
-        vessel: 目标容器（需要调节pH的容器）
+        vessel: 目标容器字典（需要调节pH的容器）
         ph_value: 目标pH值（从XDL传入）
         reagent: 酸碱试剂名称（从XDL传入）
         **kwargs: 其他可选参数，使用默认值
@@ -235,10 +235,13 @@ def generate_adjust_ph_protocol(
         List[Dict[str, Any]]: 动作序列
     """
     
+    # 🔧 核心修改：从字典中提取容器ID
+    vessel_id = vessel["id"]
+    
     debug_print("=" * 60)
     debug_print("🧪 开始生成pH调节协议")
     debug_print(f"📋 原始参数:")
-    debug_print(f"  🥼 vessel: '{vessel}'")
+    debug_print(f"  🥼 vessel: {vessel} (ID: {vessel_id})")
     debug_print(f"  📊 ph_value: {ph_value}")
     debug_print(f"  🧪 reagent: '{reagent}'")
     debug_print(f"  📦 kwargs: {kwargs}")
@@ -262,14 +265,14 @@ def generate_adjust_ph_protocol(
     
     # 开始处理
     action_sequence.append(create_action_log(f"开始调节pH至 {ph_value}", "🧪"))
-    action_sequence.append(create_action_log(f"目标容器: {vessel}", "🥼"))
+    action_sequence.append(create_action_log(f"目标容器: {vessel_id}", "🥼"))
     action_sequence.append(create_action_log(f"使用试剂: {reagent}", "⚗️"))
     
     # 1. 验证目标容器存在
     debug_print(f"🔍 步骤1: 验证目标容器...")
-    if vessel not in G.nodes():
-        debug_print(f"❌ 目标容器 '{vessel}' 不存在于系统中")
-        raise ValueError(f"目标容器 '{vessel}' 不存在于系统中")
+    if vessel_id not in G.nodes():
+        debug_print(f"❌ 目标容器 '{vessel_id}' 不存在于系统中")
+        raise ValueError(f"目标容器 '{vessel_id}' 不存在于系统中")
     
     debug_print(f"✅ 目标容器验证通过")
     action_sequence.append(create_action_log("目标容器验证通过", "✅"))
@@ -293,7 +296,7 @@ def generate_adjust_ph_protocol(
         action_sequence.append(create_action_log("开始自动估算试剂体积", "🧮"))
         
         # 获取目标容器的体积信息
-        vessel_data = G.nodes[vessel].get('data', {})
+        vessel_data = G.nodes[vessel_id].get('data', {})
         vessel_volume = vessel_data.get('max_volume', 100.0)  # 默认100mL
         debug_print(f"📏 容器最大体积: {vessel_volume}mL")
         
@@ -310,13 +313,13 @@ def generate_adjust_ph_protocol(
     action_sequence.append(create_action_log("验证转移路径...", "🛤️"))
     
     try:
-        path = nx.shortest_path(G, source=reagent_vessel, target=vessel)
+        path = nx.shortest_path(G, source=reagent_vessel, target=vessel_id)
         debug_print(f"✅ 找到路径: {' → '.join(path)}")
         action_sequence.append(create_action_log(f"找到转移路径: {' → '.join(path)}", "🛤️"))
     except nx.NetworkXNoPath:
         debug_print(f"❌ 无法找到转移路径")
         action_sequence.append(create_action_log("转移路径不存在", "❌"))
-        raise ValueError(f"从试剂容器 '{reagent_vessel}' 到目标容器 '{vessel}' 没有可用路径")
+        raise ValueError(f"从试剂容器 '{reagent_vessel}' 到目标容器 '{vessel_id}' 没有可用路径")
     
     # 5. 搅拌器设置
     debug_print(f"🔍 步骤5: 搅拌器设置...")
@@ -325,7 +328,7 @@ def generate_adjust_ph_protocol(
         action_sequence.append(create_action_log("准备启动搅拌器", "🌪️"))
         
         try:
-            stirrer_id = find_connected_stirrer(G, vessel)
+            stirrer_id = find_connected_stirrer(G, vessel_id)
             
             if stirrer_id:
                 debug_print(f"✅ 找到搅拌器 {stirrer_id}，启动搅拌")
@@ -335,7 +338,7 @@ def generate_adjust_ph_protocol(
                     "device_id": stirrer_id,
                     "action_name": "start_stir",
                     "action_kwargs": {
-                        "vessel": vessel,
+                        "vessel": vessel_id,
                         "stir_speed": stir_speed,
                         "purpose": f"pH调节: 启动搅拌，准备添加 {reagent}"
                     }
@@ -373,7 +376,7 @@ def generate_adjust_ph_protocol(
         pump_actions = generate_pump_protocol_with_rinsing(
             G=G,
             from_vessel=reagent_vessel,
-            to_vessel=vessel,
+            to_vessel=vessel_id,
             volume=volume,
             amount="",
             time=addition_time,
@@ -389,6 +392,54 @@ def generate_adjust_ph_protocol(
         action_sequence.extend(pump_actions)
         debug_print(f"✅ 泵协议生成完成，添加了 {len(pump_actions)} 个动作")
         action_sequence.append(create_action_log(f"试剂转移完成 ({len(pump_actions)} 个操作)", "✅"))
+        
+        # 🔧 修复体积运算 - 试剂添加成功后更新容器液体体积
+        debug_print(f"🔧 更新容器液体体积...")
+        if "data" in vessel and "liquid_volume" in vessel["data"]:
+            current_volume = vessel["data"]["liquid_volume"]
+            debug_print(f"📊 添加前容器体积: {current_volume}")
+            
+            # 处理不同的体积数据格式
+            if isinstance(current_volume, list):
+                if len(current_volume) > 0:
+                    # 增加体积（添加试剂）
+                    vessel["data"]["liquid_volume"][0] += volume
+                    debug_print(f"📊 添加后容器体积: {vessel['data']['liquid_volume'][0]:.2f}mL (+{volume:.2f}mL)")
+                else:
+                    # 如果列表为空，创建新的体积记录
+                    vessel["data"]["liquid_volume"] = [volume]
+                    debug_print(f"📊 初始化容器体积: {volume:.2f}mL")
+            elif isinstance(current_volume, (int, float)):
+                # 直接数值类型
+                vessel["data"]["liquid_volume"] += volume
+                debug_print(f"📊 添加后容器体积: {vessel['data']['liquid_volume']:.2f}mL (+{volume:.2f}mL)")
+            else:
+                debug_print(f"⚠️ 未知的体积数据格式: {type(current_volume)}")
+                # 创建新的体积记录
+                vessel["data"]["liquid_volume"] = volume
+        else:
+            debug_print(f"📊 容器无液体体积数据，创建新记录: {volume:.2f}mL")
+            # 确保vessel有data字段
+            if "data" not in vessel:
+                vessel["data"] = {}
+            vessel["data"]["liquid_volume"] = volume
+            
+        # 🔧 同时更新图中的容器数据
+        if vessel_id in G.nodes():
+            vessel_node_data = G.nodes[vessel_id].get('data', {})
+            current_node_volume = vessel_node_data.get('liquid_volume', 0.0)
+            
+            if isinstance(current_node_volume, list):
+                if len(current_node_volume) > 0:
+                    G.nodes[vessel_id]['data']['liquid_volume'][0] += volume
+                else:
+                    G.nodes[vessel_id]['data']['liquid_volume'] = [volume]
+            else:
+                G.nodes[vessel_id]['data']['liquid_volume'] = current_node_volume + volume
+                
+            debug_print(f"✅ 图节点体积数据已更新")
+        
+        action_sequence.append(create_action_log(f"容器体积已更新 (+{volume:.2f}mL)", "📊"))
         
     except Exception as e:
         debug_print(f"❌ 生成泵协议时出错: {str(e)}")
@@ -439,18 +490,18 @@ def generate_adjust_ph_protocol(
     debug_print(f"  🧪 试剂: {reagent}")
     debug_print(f"  📏 体积: {volume:.2f}mL")
     debug_print(f"  📊 目标pH: {ph_value}")
-    debug_print(f"  🥼 目标容器: {vessel}")
+    debug_print(f"  🥼 目标容器: {vessel_id}")
     debug_print("=" * 60)
     
     # 添加完成日志
-    summary_msg = f"pH调节协议完成: {vessel} → pH {ph_value} (使用 {volume:.2f}mL {reagent})"
+    summary_msg = f"pH调节协议完成: {vessel_id} → pH {ph_value} (使用 {volume:.2f}mL {reagent})"
     action_sequence.append(create_action_log(summary_msg, "🎉"))
     
     return action_sequence
 
 def generate_adjust_ph_protocol_stepwise(
     G: nx.DiGraph,
-    vessel: str,
+    vessel: dict,  # 🔧 修改：从字符串改为字典类型
     ph_value: float,
     reagent: str,
     max_volume: float = 10.0,
@@ -461,7 +512,7 @@ def generate_adjust_ph_protocol_stepwise(
     
     Args:
         G: 网络图
-        vessel: 目标容器
+        vessel: 目标容器字典
         ph_value: 目标pH值
         reagent: 酸碱试剂
         max_volume: 最大试剂体积
@@ -470,10 +521,13 @@ def generate_adjust_ph_protocol_stepwise(
     Returns:
         List[Dict[str, Any]]: 动作序列
     """
+    # 🔧 核心修改：从字典中提取容器ID
+    vessel_id = vessel["id"]
+    
     debug_print("=" * 60)
     debug_print(f"🔄 开始分步pH调节")
     debug_print(f"📋 分步参数:")
-    debug_print(f"  🥼 vessel: {vessel}")
+    debug_print(f"  🥼 vessel: {vessel} (ID: {vessel_id})")
     debug_print(f"  📊 ph_value: {ph_value}")
     debug_print(f"  🧪 reagent: {reagent}")
     debug_print(f"  📏 max_volume: {max_volume}mL")
@@ -496,7 +550,7 @@ def generate_adjust_ph_protocol_stepwise(
         # 生成单步协议
         step_actions = generate_adjust_ph_protocol(
             G=G,
-            vessel=vessel,
+            vessel=vessel,  # 🔧 直接传递vessel字典
             ph_value=ph_value,
             reagent=reagent,
             volume=step_volume,
@@ -530,35 +584,38 @@ def generate_adjust_ph_protocol_stepwise(
 # 便捷函数：常用pH调节
 def generate_acidify_protocol(
     G: nx.DiGraph,
-    vessel: str,
+    vessel: dict,  # 🔧 修改：从字符串改为字典类型
     target_ph: float = 2.0,
     acid: str = "hydrochloric acid"
 ) -> List[Dict[str, Any]]:
     """酸化协议"""
-    debug_print(f"🍋 生成酸化协议: {vessel} → pH {target_ph} (使用 {acid})")
+    vessel_id = vessel["id"]
+    debug_print(f"🍋 生成酸化协议: {vessel_id} → pH {target_ph} (使用 {acid})")
     return generate_adjust_ph_protocol(
         G, vessel, target_ph, acid
     )
 
 def generate_basify_protocol(
     G: nx.DiGraph,
-    vessel: str,
+    vessel: dict,  # 🔧 修改：从字符串改为字典类型
     target_ph: float = 12.0,
     base: str = "sodium hydroxide"
 ) -> List[Dict[str, Any]]:
     """碱化协议"""
-    debug_print(f"🧂 生成碱化协议: {vessel} → pH {target_ph} (使用 {base})")
+    vessel_id = vessel["id"]
+    debug_print(f"🧂 生成碱化协议: {vessel_id} → pH {target_ph} (使用 {base})")
     return generate_adjust_ph_protocol(
         G, vessel, target_ph, base
     )
 
 def generate_neutralize_protocol(
     G: nx.DiGraph,
-    vessel: str,
+    vessel: dict,  # 🔧 修改：从字符串改为字典类型
     reagent: str = "sodium hydroxide"
 ) -> List[Dict[str, Any]]:
     """中和协议（pH=7）"""
-    debug_print(f"⚖️ 生成中和协议: {vessel} → pH 7.0 (使用 {reagent})")
+    vessel_id = vessel["id"]
+    debug_print(f"⚖️ 生成中和协议: {vessel_id} → pH 7.0 (使用 {reagent})")
     return generate_adjust_ph_protocol(
         G, vessel, 7.0, reagent
     )

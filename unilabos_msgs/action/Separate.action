@@ -1,13 +1,13 @@
 # Goal - 分离操作的目标参数
-string vessel                   # 分离容器名称（XDL参数，必需）
+Resource vessel                   # 分离容器名称（XDL参数，必需）
 string purpose                  # 分离目的 ('wash', 'extract', 'separate'，可选）
 string product_phase            # 产物相 ('top', 'bottom'，可选）
-string from_vessel              # 源容器（可选）
-string separation_vessel        # 分离容器（与vessel同义，可选）
-string to_vessel                # 目标容器（可选）
-string waste_phase_to_vessel    # 废相目标容器（可选）
-string product_vessel           # 产物收集容器（XDL参数，可选）
-string waste_vessel             # 废液收集容器（XDL参数，可选）
+Resource from_vessel              # 源容器（可选）
+Resource separation_vessel        # 分离容器（与vessel同义，可选）
+Resource to_vessel                # 目标容器（可选）
+Resource waste_phase_to_vessel    # 废相目标容器（可选）
+Resource product_vessel           # 产物收集容器（XDL参数，可选）
+Resource waste_vessel             # 废液收集容器（XDL参数，可选）
 string solvent                  # 溶剂名称（可选）
 string solvent_volume           # 溶剂体积（如 "200 mL"，可选）
 string volume                   # 体积规格（XDL参数，如 "?"，可选）

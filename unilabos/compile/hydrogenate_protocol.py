@@ -150,75 +150,103 @@ def find_connected_device(G: nx.DiGraph, vessel: str, device_type: str) -> str:
 
 def generate_hydrogenate_protocol(
     G: nx.DiGraph,
+    vessel: dict,  # 🔧 修改：从字符串改为字典类型
     temp: str,
     time: str,
-    vessel: str,
     **kwargs  # 接收其他可能的参数但不使用
 ) -> List[Dict[str, Any]]:
     """
-    生成氢化反应协议序列
+    生成氢化反应协议序列 - 支持vessel字典
     
     Args:
         G: 有向图，节点为容器和设备
+        vessel: 反应容器字典（从XDL传入）
         temp: 反应温度（如 "45 °C"）
         time: 反应时间（如 "2 h"）
-        vessel: 反应容器
         **kwargs: 其他可选参数，但不使用
     
     Returns:
         List[Dict[str, Any]]: 动作序列
     """
+    
+    # 🔧 核心修改：从字典中提取容器ID
+    vessel_id = vessel["id"]
+    
     action_sequence = []
     
     # 解析参数
     temperature = parse_temperature(temp)
     reaction_time = parse_time(time)
     
-    print(f"HYDROGENATE: 开始生成氢化反应协议")
-    print(f"  - 反应温度: {temperature}°C")
-    print(f"  - 反应时间: {reaction_time/3600:.1f} 小时")
-    print(f"  - 反应容器: {vessel}")
+    print("🧪" * 20)
+    print(f"HYDROGENATE: 开始生成氢化反应协议（支持vessel字典）✨")
+    print(f"📝 输入参数:")
+    print(f"  🥽 vessel: {vessel} (ID: {vessel_id})")
+    print(f"  🌡️ 反应温度: {temperature}°C")
+    print(f"  ⏰ 反应时间: {reaction_time/3600:.1f} 小时")
+    print("🧪" * 20)
+    
+    # 🔧 新增：记录氢化前的容器状态（可选，氢化反应通常不改变体积）
+    original_liquid_volume = 0.0
+    if "data" in vessel and "liquid_volume" in vessel["data"]:
+        current_volume = vessel["data"]["liquid_volume"]
+        if isinstance(current_volume, list) and len(current_volume) > 0:
+            original_liquid_volume = current_volume[0]
+        elif isinstance(current_volume, (int, float)):
+            original_liquid_volume = current_volume
+    print(f"📊 氢化前液体体积: {original_liquid_volume:.2f}mL")
     
     # 1. 验证目标容器存在
-    if vessel not in G.nodes():
-        print(f"HYDROGENATE: 警告 - 容器 '{vessel}' 不存在于系统中，跳过氢化反应")
+    print("📍 步骤1: 验证目标容器...")
+    if vessel_id not in G.nodes():  # 🔧 使用 vessel_id
+        print(f"⚠️ HYDROGENATE: 警告 - 容器 '{vessel_id}' 不存在于系统中，跳过氢化反应")
         return action_sequence
+    print(f"✅ 容器 '{vessel_id}' 验证通过")
     
     # 2. 查找相连的设备
-    heater_id = find_connected_device(G, vessel, 'heater')
-    stirrer_id = find_connected_device(G, vessel, 'stirrer')
-    gas_source_id = find_connected_device(G, vessel, 'gas_source')
+    print("📍 步骤2: 查找相连设备...")
+    heater_id = find_connected_device(G, vessel_id, 'heater')  # 🔧 使用 vessel_id
+    stirrer_id = find_connected_device(G, vessel_id, 'stirrer')  # 🔧 使用 vessel_id
+    gas_source_id = find_connected_device(G, vessel_id, 'gas_source')  # 🔧 使用 vessel_id
+    
+    print(f"🔧 设备配置:")
+    print(f"  🔥 加热器: {heater_id or '未找到'}")
+    print(f"  🌪️ 搅拌器: {stirrer_id or '未找到'}")
+    print(f"  💨 气源: {gas_source_id or '未找到'}")
     
     # 3. 启动搅拌器
+    print("📍 步骤3: 启动搅拌器...")
     if stirrer_id:
-        print(f"HYDROGENATE: 启动搅拌器 {stirrer_id}")
+        print(f"🌪️ 启动搅拌器 {stirrer_id}")
         action_sequence.append({
             "device_id": stirrer_id,
             "action_name": "start_stir",
             "action_kwargs": {
-                "vessel": vessel,
+                "vessel": vessel_id,  # 🔧 使用 vessel_id
                 "stir_speed": 300.0,
                 "purpose": "氢化反应: 开始搅拌"
             }
         })
+        print("✅ 搅拌器启动动作已添加")
     else:
-        print(f"HYDROGENATE: 警告 - 未找到搅拌器，继续执行")
+        print(f"⚠️ HYDROGENATE: 警告 - 未找到搅拌器，继续执行")
     
-    # 4. 启动气源（氢气）- 修复版本
+    # 4. 启动气源（氢气）
+    print("📍 步骤4: 启动氢气源...")
     if gas_source_id:
-        print(f"HYDROGENATE: 启动气源 {gas_source_id} (氢气)")
+        print(f"💨 启动气源 {gas_source_id} (氢气)")
         action_sequence.append({
             "device_id": gas_source_id,
-            "action_name": "set_status",  # 修改为 set_status
+            "action_name": "set_status",
             "action_kwargs": {
-                "string": "ON"  # 修改参数格式
+                "string": "ON"
             }
         })
         
         # 查找相关的电磁阀
         gas_solenoid = find_associated_solenoid_valve(G, gas_source_id)
         if gas_solenoid:
-            print(f"HYDROGENATE: 开启气源电磁阀 {gas_solenoid}")
+            print(f"🚪 开启气源电磁阀 {gas_solenoid}")
             action_sequence.append({
                 "device_id": gas_solenoid,
                 "action_name": "set_valve_position",
@@ -226,10 +254,12 @@ def generate_hydrogenate_protocol(
                     "command": "OPEN"
                 }
             })
+        print("✅ 氢气源启动动作已添加")
     else:
-        print(f"HYDROGENATE: 警告 - 未找到气源，继续执行")
+        print(f"⚠️ HYDROGENATE: 警告 - 未找到气源，继续执行")
     
     # 5. 等待气体稳定
+    print("📍 步骤5: 等待气体环境稳定...")
     action_sequence.append({
         "action_name": "wait",
         "action_kwargs": {
@@ -237,15 +267,17 @@ def generate_hydrogenate_protocol(
             "description": "等待氢气环境稳定"
         }
     })
+    print("✅ 气体稳定等待动作已添加")
     
     # 6. 启动加热器
+    print("📍 步骤6: 启动加热反应...")
     if heater_id:
-        print(f"HYDROGENATE: 启动加热器 {heater_id} 到 {temperature}°C")
+        print(f"🔥 启动加热器 {heater_id} 到 {temperature}°C")
         action_sequence.append({
             "device_id": heater_id,
             "action_name": "heat_chill_start",
             "action_kwargs": {
-                "vessel": vessel,
+                "vessel": vessel_id,  # 🔧 使用 vessel_id
                 "temp": temperature,
                 "purpose": f"氢化反应: 加热到 {temperature}°C"
             }
@@ -261,23 +293,23 @@ def generate_hydrogenate_protocol(
         })
         
         # 🕐 模拟运行时间优化
-        print("HYDROGENATE: 检查模拟运行时间限制...")
+        print("  ⏰ 检查模拟运行时间限制...")
         original_reaction_time = reaction_time
         simulation_time_limit = 60.0  # 模拟运行时间限制：60秒
         
         if reaction_time > simulation_time_limit:
             reaction_time = simulation_time_limit
-            print(f"HYDROGENATE: 模拟运行优化: {original_reaction_time}s → {reaction_time}s (限制为{simulation_time_limit}s)")
-            print(f"HYDROGENATE: 时间缩短: {original_reaction_time/3600:.2f}小时 → {reaction_time/60:.1f}分钟")
+            print(f"  🎮 模拟运行优化: {original_reaction_time}s → {reaction_time}s (限制为{simulation_time_limit}s)")
+            print(f"  📊 时间缩短: {original_reaction_time/3600:.2f}小时 → {reaction_time/60:.1f}分钟")
         else:
-            print(f"HYDROGENATE: 时间在限制内: {reaction_time}s ({reaction_time/60:.1f}分钟) 保持不变")
+            print(f"  ✅ 时间在限制内: {reaction_time}s ({reaction_time/60:.1f}分钟) 保持不变")
         
         # 保持反应温度
         action_sequence.append({
             "device_id": heater_id,
             "action_name": "heat_chill",
             "action_kwargs": {
-                "vessel": vessel,
+                "vessel": vessel_id,  # 🔧 使用 vessel_id
                 "temp": temperature,
                 "time": reaction_time,
                 "purpose": f"氢化反应: 保持 {temperature}°C，反应 {reaction_time/60:.1f}分钟" + (f" (模拟时间)" if original_reaction_time != reaction_time else "")
@@ -286,22 +318,24 @@ def generate_hydrogenate_protocol(
         
         # 显示时间调整信息
         if original_reaction_time != reaction_time:
-            print(f"HYDROGENATE: 模拟优化说明: 原计划 {original_reaction_time/3600:.2f}小时，实际模拟 {reaction_time/60:.1f}分钟")
+            print(f"  🎭 模拟优化说明: 原计划 {original_reaction_time/3600:.2f}小时，实际模拟 {reaction_time/60:.1f}分钟")
+        
+        print("✅ 加热反应动作已添加")
             
     else:
-        print(f"HYDROGENATE: 警告 - 未找到加热器，使用室温反应")
+        print(f"⚠️ HYDROGENATE: 警告 - 未找到加热器，使用室温反应")
         
         # 🕐 室温反应也需要时间优化
-        print("HYDROGENATE: 检查室温反应模拟时间限制...")
+        print("  ⏰ 检查室温反应模拟时间限制...")
         original_reaction_time = reaction_time
         simulation_time_limit = 60.0  # 模拟运行时间限制：60秒
         
         if reaction_time > simulation_time_limit:
             reaction_time = simulation_time_limit
-            print(f"HYDROGENATE: 室温反应时间优化: {original_reaction_time}s → {reaction_time}s")
-            print(f"HYDROGENATE: 时间缩短: {original_reaction_time/3600:.2f}小时 → {reaction_time/60:.1f}分钟")
+            print(f"  🎮 室温反应时间优化: {original_reaction_time}s → {reaction_time}s")
+            print(f"  📊 时间缩短: {original_reaction_time/3600:.2f}小时 → {reaction_time/60:.1f}分钟")
         else:
-            print(f"HYDROGENATE: 室温反应时间在限制内: {reaction_time}s 保持不变")
+            print(f"  ✅ 室温反应时间在限制内: {reaction_time}s 保持不变")
         
         # 室温反应，只等待时间
         action_sequence.append({
@@ -314,20 +348,25 @@ def generate_hydrogenate_protocol(
         
         # 显示时间调整信息
         if original_reaction_time != reaction_time:
-            print(f"HYDROGENATE: 室温反应优化说明: 原计划 {original_reaction_time/3600:.2f}小时，实际模拟 {reaction_time/60:.1f}分钟")
+            print(f"  🎭 室温反应优化说明: 原计划 {original_reaction_time/3600:.2f}小时，实际模拟 {reaction_time/60:.1f}分钟")
+        
+        print("✅ 室温反应等待动作已添加")
     
     # 7. 停止加热
+    print("📍 步骤7: 停止加热...")
     if heater_id:
         action_sequence.append({
             "device_id": heater_id,
             "action_name": "heat_chill_stop",
             "action_kwargs": {
-                "vessel": vessel,
+                "vessel": vessel_id,  # 🔧 使用 vessel_id
                 "purpose": "氢化反应完成，停止加热"
             }
         })
+        print("✅ 停止加热动作已添加")
     
     # 8. 等待冷却
+    print("📍 步骤8: 等待冷却...")
     action_sequence.append({
         "action_name": "wait",
         "action_kwargs": {
@@ -335,13 +374,15 @@ def generate_hydrogenate_protocol(
             "description": "等待反应混合物冷却"
         }
     })
+    print("✅ 冷却等待动作已添加")
     
-    # 9. 停止气源 - 修复版本
+    # 9. 停止气源
+    print("📍 步骤9: 停止氢气源...")
     if gas_source_id:
         # 先关闭电磁阀
         gas_solenoid = find_associated_solenoid_valve(G, gas_source_id)
         if gas_solenoid:
-            print(f"HYDROGENATE: 关闭气源电磁阀 {gas_solenoid}")
+            print(f"🚪 关闭气源电磁阀 {gas_solenoid}")
             action_sequence.append({
                 "device_id": gas_solenoid,
                 "action_name": "set_valve_position",
@@ -353,25 +394,41 @@ def generate_hydrogenate_protocol(
         # 再关闭气源
         action_sequence.append({
             "device_id": gas_source_id,
-            "action_name": "set_status",  # 修改为 set_status
+            "action_name": "set_status",
             "action_kwargs": {
-                "string": "OFF"  # 修改参数格式
+                "string": "OFF"
             }
         })
+        print("✅ 氢气源停止动作已添加")
     
     # 10. 停止搅拌
+    print("📍 步骤10: 停止搅拌...")
     if stirrer_id:
         action_sequence.append({
             "device_id": stirrer_id,
             "action_name": "stop_stir",
             "action_kwargs": {
-                "vessel": vessel,
+                "vessel": vessel_id,  # 🔧 使用 vessel_id
                 "purpose": "氢化反应完成，停止搅拌"
             }
         })
+        print("✅ 停止搅拌动作已添加")
     
-    print(f"HYDROGENATE: 协议生成完成，共 {len(action_sequence)} 个动作")
-    print(f"HYDROGENATE: 预计总时间: {(reaction_time + 450)/3600:.1f} 小时")
+    # 🔧 新增：氢化完成后的状态（氢化反应通常不改变体积）
+    final_liquid_volume = original_liquid_volume  # 氢化反应体积基本不变
+    
+    # 总结
+    print("🎊" * 20)
+    print(f"🎉 氢化反应协议生成完成! ✨")
+    print(f"📊 总动作数: {len(action_sequence)} 个")
+    print(f"🥽 反应容器: {vessel_id}")
+    print(f"🌡️ 反应温度: {temperature}°C")
+    print(f"⏰ 反应时间: {reaction_time/60:.1f}分钟")
+    print(f"⏱️ 预计总时间: {(reaction_time + 450)/3600:.1f} 小时")
+    print(f"📊 体积状态:")
+    print(f"  - 反应前体积: {original_liquid_volume:.2f}mL")
+    print(f"  - 反应后体积: {final_liquid_volume:.2f}mL (氢化反应体积基本不变)")
+    print("🎊" * 20)
     
     return action_sequence
 
@@ -379,7 +436,7 @@ def generate_hydrogenate_protocol(
 # 测试函数
 def test_hydrogenate_protocol():
     """测试氢化反应协议"""
-    print("=== HYDROGENATE PROTOCOL 测试 ===")
+    print("🧪 === HYDROGENATE PROTOCOL 测试 === ✨")
     
     # 测试温度解析
     test_temps = ["45 °C", "45°C", "45", "25 C", "invalid"]
@@ -393,7 +450,7 @@ def test_hydrogenate_protocol():
         parsed = parse_time(time)
         print(f"时间 '{time}' -> {parsed/3600:.1f} 小时")
     
-    print("测试完成")
+    print("✅ 测试完成 🎉")
 
 
 if __name__ == "__main__":

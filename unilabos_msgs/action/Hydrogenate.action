@@ -1,7 +1,7 @@
 # Request
 string temp
 string time
-string vessel
+Resource vessel
 ---
 # Result
 bool success

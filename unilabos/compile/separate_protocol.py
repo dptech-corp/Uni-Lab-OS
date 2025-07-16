@@ -20,18 +20,18 @@ def debug_print(message):
     try:
         # 确保消息是字符串格式
         safe_message = str(message)
-        print(f"[分离协议] {safe_message}", flush=True)
-        logger.info(f"[分离协议] {safe_message}")
+        print(f"🌀 [SEPARATE] {safe_message}", flush=True)
+        logger.info(f"[SEPARATE] {safe_message}")
     except UnicodeEncodeError:
         # 如果编码失败，尝试替换不支持的字符
         safe_message = str(message).encode('utf-8', errors='replace').decode('utf-8')
-        print(f"[分离协议] {safe_message}", flush=True)
-        logger.info(f"[分离协议] {safe_message}")
+        print(f"🌀 [SEPARATE] {safe_message}", flush=True)
+        logger.info(f"[SEPARATE] {safe_message}")
     except Exception as e:
         # 最后的安全措施
         fallback_message = f"日志输出错误: {repr(message)}"
-        print(f"[分离协议] {fallback_message}", flush=True)
-        logger.info(f"[分离协议] {fallback_message}")
+        print(f"🌀 [SEPARATE] {fallback_message}", flush=True)
+        logger.info(f"[SEPARATE] {fallback_message}")
 
 def create_action_log(message: str, emoji: str = "📝") -> Dict[str, Any]:
     """创建一个动作日志 - 支持中文和emoji"""
@@ -264,19 +264,119 @@ def find_connected_stirrer(G: nx.DiGraph, vessel: str) -> str:
     debug_print("❌ 未找到搅拌器")
     return ""
 
+def get_vessel_liquid_volume(vessel: dict) -> float:
+    """
+    获取容器中的液体体积 - 支持vessel字典
+    
+    Args:
+        vessel: 容器字典
+        
+    Returns:
+        float: 液体体积（mL）
+    """
+    if not vessel or "data" not in vessel:
+        debug_print(f"⚠️ 容器数据为空，返回 0.0mL")
+        return 0.0
+    
+    vessel_data = vessel["data"]
+    vessel_id = vessel.get("id", "unknown")
+    
+    debug_print(f"🔍 读取容器 '{vessel_id}' 体积数据: {vessel_data}")
+    
+    # 检查liquid_volume字段
+    if "liquid_volume" in vessel_data:
+        liquid_volume = vessel_data["liquid_volume"]
+        
+        # 处理列表格式
+        if isinstance(liquid_volume, list):
+            if len(liquid_volume) > 0:
+                volume = liquid_volume[0]
+                if isinstance(volume, (int, float)):
+                    debug_print(f"✅ 容器 '{vessel_id}' 体积: {volume}mL (列表格式)")
+                    return float(volume)
+        
+        # 处理直接数值格式
+        elif isinstance(liquid_volume, (int, float)):
+            debug_print(f"✅ 容器 '{vessel_id}' 体积: {liquid_volume}mL (数值格式)")
+            return float(liquid_volume)
+    
+    # 检查其他可能的体积字段
+    volume_keys = ['current_volume', 'total_volume', 'volume']
+    for key in volume_keys:
+        if key in vessel_data:
+            try:
+                volume = float(vessel_data[key])
+                if volume > 0:
+                    debug_print(f"✅ 容器 '{vessel_id}' 体积: {volume}mL (字段: {key})")
+                    return volume
+            except (ValueError, TypeError):
+                continue
+    
+    debug_print(f"⚠️ 无法获取容器 '{vessel_id}' 的体积，返回默认值 50.0mL")
+    return 50.0
+
+def update_vessel_volume(vessel: dict, G: nx.DiGraph, new_volume: float, description: str = "") -> None:
+    """
+    更新容器体积（同时更新vessel字典和图节点）
+    
+    Args:
+        vessel: 容器字典
+        G: 网络图
+        new_volume: 新体积
+        description: 更新描述
+    """
+    vessel_id = vessel.get("id", "unknown")
+    
+    if description:
+        debug_print(f"🔧 更新容器体积 - {description}")
+    
+    # 更新vessel字典中的体积
+    if "data" in vessel:
+        if "liquid_volume" in vessel["data"]:
+            current_volume = vessel["data"]["liquid_volume"]
+            if isinstance(current_volume, list):
+                if len(current_volume) > 0:
+                    vessel["data"]["liquid_volume"][0] = new_volume
+                else:
+                    vessel["data"]["liquid_volume"] = [new_volume]
+            else:
+                vessel["data"]["liquid_volume"] = new_volume
+        else:
+            vessel["data"]["liquid_volume"] = new_volume
+    else:
+        vessel["data"] = {"liquid_volume": new_volume}
+    
+    # 同时更新图中的容器数据
+    if vessel_id in G.nodes():
+        if 'data' not in G.nodes[vessel_id]:
+            G.nodes[vessel_id]['data'] = {}
+        
+        vessel_node_data = G.nodes[vessel_id]['data']
+        current_node_volume = vessel_node_data.get('liquid_volume', 0.0)
+        
+        if isinstance(current_node_volume, list):
+            if len(current_node_volume) > 0:
+                G.nodes[vessel_id]['data']['liquid_volume'][0] = new_volume
+            else:
+                G.nodes[vessel_id]['data']['liquid_volume'] = [new_volume]
+        else:
+            G.nodes[vessel_id]['data']['liquid_volume'] = new_volume
+    
+    debug_print(f"📊 容器 '{vessel_id}' 体积已更新为: {new_volume:.2f}mL")
+
 def generate_separate_protocol(
     G: nx.DiGraph,
     # 🔧 基础参数，支持XDL的vessel参数
-    vessel: str = "",                    # XDL: 分离容器
-    purpose: str = "separate",           # 分离目的
-    product_phase: str = "top",          # 产物相
+    vessel: dict = None,             # 🔧 修改：从字符串改为字典类型
+    purpose: str = "separate",       # 分离目的
+    product_phase: str = "top",      # 产物相
     # 🔧 可选的详细参数
-    from_vessel: str = "",               # 源容器（通常在separate前已经transfer了）
-    separation_vessel: str = "",         # 分离容器（与vessel同义）
-    to_vessel: str = "",                 # 目标容器（可选）
-    waste_phase_to_vessel: str = "",     # 废相目标容器
-    product_vessel: str = "",            # XDL: 产物容器（与to_vessel同义）
-    waste_vessel: str = "",              # XDL: 废液容器（与waste_phase_to_vessel同义）
+    from_vessel: Union[str, dict] = "",   # 源容器（通常在separate前已经transfer了）
+    separation_vessel: Union[str, dict] = "",  # 分离容器（与vessel同义）
+    to_vessel: Union[str, dict] = "",         # 目标容器（可选）
+    waste_phase_to_vessel: Union[str, dict] = "",  # 废相目标容器
+    product_vessel: Union[str, dict] = "",    # XDL: 产物容器（与to_vessel同义）
+    waste_vessel: Union[str, dict] = "",      # XDL: 废液容器（与waste_phase_to_vessel同义）
     # 🔧 溶剂相关参数
     solvent: str = "",                   # 溶剂名称
     solvent_volume: Union[str, float] = 0.0,  # 溶剂体积
@@ -290,10 +390,10 @@ def generate_separate_protocol(
     **kwargs
 ) -> List[Dict[str, Any]]:
     """
-    生成分离操作的协议序列 - 增强中文版
+    生成分离操作的协议序列 - 支持vessel字典和体积运算
     
     支持XDL参数格式：
-    - vessel: 分离容器（必需）
+    - vessel: 分离容器字典（必需）
     - purpose: "wash", "extract", "separate"
     - product_phase: "top", "bottom"
     - product_vessel: 产物收集容器
@@ -310,10 +410,20 @@ def generate_separate_protocol(
     5. 重复指定次数
     """
     
-    debug_print("=" * 60)
-    debug_print("🧪 开始生成分离协议 - 增强中文版")
-    debug_print(f"📋 原始参数:")
-    debug_print(f"  🥼 容器: '{vessel}'")
+    # 🔧 核心修改：vessel参数兼容处理
+    if vessel is None:
+        if isinstance(separation_vessel, dict):
+            vessel = separation_vessel
+        else:
+            raise ValueError("必须提供vessel字典参数")
+    
+    # 🔧 核心修改：从字典中提取容器ID
+    vessel_id = vessel["id"]
+    
+    debug_print("🌀" * 20)
+    debug_print("🚀 开始生成分离协议（支持vessel字典和体积运算）✨")
+    debug_print(f"📝 输入参数:")
+    debug_print(f"  🥽 vessel: {vessel} (ID: {vessel_id})")
     debug_print(f"  🎯 分离目的: '{purpose}'")
     debug_print(f"  📊 产物相: '{product_phase}'")
     debug_print(f"  💧 溶剂: '{solvent}'")
@@ -322,24 +432,33 @@ def generate_separate_protocol(
     debug_print(f"  🎯 产物容器: '{product_vessel}'")
     debug_print(f"  🗑️ 废液容器: '{waste_vessel}'")
     debug_print(f"  📦 其他参数: {kwargs}")
-    debug_print("=" * 60)
+    debug_print("🌀" * 20)
     
     action_sequence = []
     
+    # 🔧 新增：记录分离前的容器状态
+    debug_print("🔍 记录分离前容器状态...")
+    original_liquid_volume = get_vessel_liquid_volume(vessel)
+    debug_print(f"📊 分离前液体体积: {original_liquid_volume:.2f}mL")
+    
     # === 参数验证和标准化 ===
     debug_print("🔍 步骤1: 参数验证和标准化...")
-    action_sequence.append(create_action_log(f"开始分离操作 - 容器: {vessel}", "🎬"))
+    action_sequence.append(create_action_log(f"开始分离操作 - 容器: {vessel_id}", "🎬"))
     action_sequence.append(create_action_log(f"分离目的: {purpose}", "🧪"))
     action_sequence.append(create_action_log(f"产物相: {product_phase}", "📊"))
     
-    # 统一容器参数
-    final_vessel = vessel or separation_vessel
-    if not final_vessel:
-        debug_print("❌ 必须指定分离容器")
-        raise ValueError("必须指定分离容器 (vessel 或 separation_vessel)")
+    # 统一容器参数 - 支持字典和字符串
+    def extract_vessel_id(vessel_param):
+        if isinstance(vessel_param, dict):
+            return vessel_param.get("id", "")
+        elif isinstance(vessel_param, str):
+            return vessel_param
+        else:
+            return ""
     
-    final_to_vessel = to_vessel or product_vessel
-    final_waste_vessel = waste_phase_to_vessel or waste_vessel
+    final_vessel_id = vessel_id
+    final_to_vessel_id = extract_vessel_id(to_vessel) or extract_vessel_id(product_vessel)
+    final_waste_vessel_id = extract_vessel_id(waste_phase_to_vessel) or extract_vessel_id(waste_vessel)
     
     # 统一体积参数
     final_volume = parse_volume_input(volume or solvent_volume)
@@ -350,13 +469,13 @@ def generate_separate_protocol(
         debug_print(f"⚠️ 重复次数参数 <= 0，自动设置为 1")
     
     debug_print(f"🔧 标准化后的参数:")
-    debug_print(f"  🥼 分离容器: '{final_vessel}'")
-    debug_print(f"  🎯 产物容器: '{final_to_vessel}'")
-    debug_print(f"  🗑️ 废液容器: '{final_waste_vessel}'")
+    debug_print(f"  🥼 分离容器: '{final_vessel_id}'")
+    debug_print(f"  🎯 产物容器: '{final_to_vessel_id}'")
+    debug_print(f"  🗑️ 废液容器: '{final_waste_vessel_id}'")
     debug_print(f"  📏 溶剂体积: {final_volume}mL")
     debug_print(f"  🔄 重复次数: {repeats}")
     
-    action_sequence.append(create_action_log(f"分离容器: {final_vessel}", "🧪"))
+    action_sequence.append(create_action_log(f"分离容器: {final_vessel_id}", "🧪"))
     action_sequence.append(create_action_log(f"溶剂体积: {final_volume}mL", "📏"))
     action_sequence.append(create_action_log(f"重复次数: {repeats}", "🔄"))
     
@@ -382,7 +501,7 @@ def generate_separate_protocol(
     action_sequence.append(create_action_log("正在查找相关设备...", "🔍"))
     
     # 查找分离器设备
-    separator_device = find_separator_device(G, final_vessel)
+    separator_device = find_separator_device(G, final_vessel_id)  # 🔧 使用 final_vessel_id
     if separator_device:
         action_sequence.append(create_action_log(f"找到分离器设备: {separator_device}", "🧪"))
     else:
@@ -390,7 +509,7 @@ def generate_separate_protocol(
         action_sequence.append(create_action_log("未找到分离器设备", "⚠️"))
     
     # 查找搅拌器
-    stirrer_device = find_connected_stirrer(G, final_vessel)
+    stirrer_device = find_connected_stirrer(G, final_vessel_id)  # 🔧 使用 final_vessel_id
     if stirrer_device:
         action_sequence.append(create_action_log(f"找到搅拌器: {stirrer_device}", "🌪️"))
     else:
@@ -414,6 +533,9 @@ def generate_separate_protocol(
     debug_print("🔍 步骤3: 执行分离流程...")
     action_sequence.append(create_action_log("开始分离工作流程", "🎯"))
     
+    # 🔧 新增：体积变化跟踪变量
+    current_volume = original_liquid_volume
+    
     try:
         for repeat_idx in range(repeats):
             cycle_num = repeat_idx + 1
@@ -430,7 +552,7 @@ def generate_separate_protocol(
                     pump_actions = generate_pump_protocol_with_rinsing(
                         G=G,
                         from_vessel=solvent_vessel,
-                        to_vessel=final_vessel,
+                        to_vessel=final_vessel_id,  # 🔧 使用 final_vessel_id
                         volume=final_volume,
                         amount="",
                         time=0.0,
@@ -450,6 +572,10 @@ def generate_separate_protocol(
                     debug_print(f"✅ 溶剂添加完成，添加了 {len(pump_actions)} 个动作")
                     action_sequence.append(create_action_log(f"溶剂转移完成 ({len(pump_actions)} 个操作)", "✅"))
                     
+                    # 🔧 新增：更新体积 - 添加溶剂后
+                    current_volume += final_volume
+                    update_vessel_volume(vessel, G, current_volume, f"添加{final_volume}mL {solvent}后")
+                    
                 except Exception as e:
                     debug_print(f"❌ 溶剂添加失败: {str(e)}")
                     action_sequence.append(create_action_log(f"溶剂添加失败: {str(e)}", "❌"))
@@ -466,7 +592,7 @@ def generate_separate_protocol(
                     "device_id": stirrer_device,
                     "action_name": "start_stir",
                     "action_kwargs": {
-                        "vessel": final_vessel,
+                        "vessel": final_vessel_id,  # 🔧 使用 final_vessel_id
                         "stir_speed": stir_speed,
                         "purpose": f"分离混合 - {purpose}"
                     }
@@ -485,7 +611,7 @@ def generate_separate_protocol(
                 action_sequence.append({
                     "device_id": stirrer_device,
                     "action_name": "stop_stir",
-                    "action_kwargs": {"vessel": final_vessel}
+                    "action_kwargs": {"vessel": final_vessel_id}  # 🔧 使用 final_vessel_id
                 })
                 
             else:
@@ -517,10 +643,10 @@ def generate_separate_protocol(
                     "action_kwargs": {
                         "purpose": purpose,
                         "product_phase": product_phase,
-                        "from_vessel": from_vessel or final_vessel,
-                        "separation_vessel": final_vessel,
-                        "to_vessel": final_to_vessel or final_vessel,
-                        "waste_phase_to_vessel": final_waste_vessel or final_vessel,
+                        "from_vessel": extract_vessel_id(from_vessel) or final_vessel_id,  # 🔧 使用vessel_id
+                        "separation_vessel": final_vessel_id,   # 🔧 使用 final_vessel_id
+                        "to_vessel": final_to_vessel_id or final_vessel_id,       # 🔧 使用vessel_id
+                        "waste_phase_to_vessel": final_waste_vessel_id or final_vessel_id,  # 🔧 使用vessel_id
                         "solvent": solvent,
                         "solvent_volume": final_volume,
                         "through": through,
@@ -534,11 +660,17 @@ def generate_separate_protocol(
                 debug_print(f"✅ 分离操作已添加")
                 action_sequence.append(create_action_log("分离操作完成", "✅"))
                 
+                # 🔧 新增：分离后体积估算（分离通常不改变总体积，但会重新分配）
+                # 假设分离后保持体积（实际情况可能有少量损失）
+                separated_volume = current_volume * 0.95  # 假设5%损失
+                update_vessel_volume(vessel, G, separated_volume, f"分离操作后（第{cycle_num}轮）")
+                current_volume = separated_volume
+                
                 # 收集结果
-                if final_to_vessel:
-                    action_sequence.append(create_action_log(f"产物 ({product_phase}相) 收集到: {final_to_vessel}", "📦"))
-                if final_waste_vessel:
-                    action_sequence.append(create_action_log(f"废相收集到: {final_waste_vessel}", "🗑️"))
+                if final_to_vessel_id:
+                    action_sequence.append(create_action_log(f"产物 ({product_phase}相) 收集到: {final_to_vessel_id}", "📦"))
+                if final_waste_vessel_id:
+                    action_sequence.append(create_action_log(f"废相收集到: {final_waste_vessel_id}", "🗑️"))
             
             else:
                 debug_print(f"🔄 第{cycle_num}轮 步骤4: 无分离器设备，跳过分离")
@@ -572,99 +704,37 @@ def generate_separate_protocol(
             }
         })
     
+    # 🔧 新增：分离完成后的最终状态报告
+    final_liquid_volume = get_vessel_liquid_volume(vessel)
+    
     # === 最终结果 ===
     total_time = (stir_time + settling_time + 15) * repeats  # 估算总时间
     
-    debug_print("=" * 60)
+    debug_print("🌀" * 20)
     debug_print(f"🎉 分离协议生成完成")
     debug_print(f"📊 协议统计:")
     debug_print(f"  📋 总动作数: {len(action_sequence)}")
     debug_print(f"  ⏱️ 预计总时间: {total_time:.0f}s ({total_time/60:.1f} 分钟)")
-    debug_print(f"  🥼 分离容器: {final_vessel}")
+    debug_print(f"  🥼 分离容器: {final_vessel_id}")
     debug_print(f"  🎯 分离目的: {purpose}")
     debug_print(f"  📊 产物相: {product_phase}")
     debug_print(f"  🔄 重复次数: {repeats}")
+    debug_print(f"💧 体积变化统计:")
+    debug_print(f"  - 分离前体积: {original_liquid_volume:.2f}mL")
+    debug_print(f"  - 分离后体积: {final_liquid_volume:.2f}mL")
     if solvent:
-        debug_print(f"  💧 溶剂: {solvent} ({final_volume}mL)")
-    if final_to_vessel:
-        debug_print(f"  🎯 产物容器: {final_to_vessel}")
-    if final_waste_vessel:
-        debug_print(f"  🗑️ 废液容器: {final_waste_vessel}")
-    debug_print("=" * 60)
+        debug_print(f"  💧 溶剂: {solvent} ({final_volume}mL × {repeats}轮 = {final_volume * repeats:.2f}mL)")
+    if final_to_vessel_id:
+        debug_print(f"  🎯 产物容器: {final_to_vessel_id}")
+    if final_waste_vessel_id:
+        debug_print(f"  🗑️ 废液容器: {final_waste_vessel_id}")
+    debug_print("🌀" * 20)
     
     # 添加完成日志
-    summary_msg = f"分离协议完成: {final_vessel} ({purpose}，{repeats} 次循环)"
+    summary_msg = f"分离协议完成: {final_vessel_id} ({purpose}，{repeats} 次循环)"
     if solvent:
-        summary_msg += f"，使用 {final_volume}mL {solvent}"
+        summary_msg += f"，使用 {final_volume * repeats:.2f}mL {solvent}"
     action_sequence.append(create_action_log(summary_msg, "🎉"))
     
     return action_sequence
 
-# === 便捷函数 ===
-
-def separate_phases_only(G: nx.DiGraph, vessel: str, product_phase: str = "top", 
-                        product_vessel: str = "", waste_vessel: str = "") -> List[Dict[str, Any]]:
-    """仅进行相分离（不添加溶剂）"""
-    debug_print(f"⚡ 快速相分离: {vessel} ({product_phase}相)")
-    return generate_separate_protocol(
-        G, vessel=vessel, 
-        purpose="separate", 
-        product_phase=product_phase,
-        product_vessel=product_vessel,
-        waste_vessel=waste_vessel
-    )
-
-def wash_with_solvent(G: nx.DiGraph, vessel: str, solvent: str, volume: Union[str, float],
-                     product_phase: str = "top", repeats: int = 1) -> List[Dict[str, Any]]:
-    """用溶剂洗涤"""
-    debug_print(f"🧽 用{solvent}洗涤: {vessel} ({repeats} 次)")
-    return generate_separate_protocol(
-        G, vessel=vessel,
-        purpose="wash",
-        product_phase=product_phase,
-        solvent=solvent,
-        volume=volume,
-        repeats=repeats
-    )
-
-def extract_with_solvent(G: nx.DiGraph, vessel: str, solvent: str, volume: Union[str, float],
-                        product_phase: str = "bottom", repeats: int = 3) -> List[Dict[str, Any]]:
-    """用溶剂萃取"""
-    debug_print(f"🧪 用{solvent}萃取: {vessel} ({repeats} 次)")
-    return generate_separate_protocol(
-        G, vessel=vessel,
-        purpose="extract",
-        product_phase=product_phase,
-        solvent=solvent,
-        volume=volume,
-        repeats=repeats
-    )
-
-def separate_aqueous_organic(G: nx.DiGraph, vessel: str, organic_phase: str = "top",
-                            product_vessel: str = "", waste_vessel: str = "") -> List[Dict[str, Any]]:
-    """水-有机相分离"""
-    debug_print(f"💧 水-有机相分离: {vessel} (有机相: {organic_phase})")
-    return generate_separate_protocol(
-        G, vessel=vessel,
-        purpose="separate",
-        product_phase=organic_phase,
-        product_vessel=product_vessel,
-        waste_vessel=waste_vessel
-    )
-
-# 测试函数
-def test_separate_protocol():
-    """测试分离协议的各种参数解析"""
-    debug_print("=== 分离协议增强中文版测试 ===")
-    
-    # 测试体积解析
-    debug_print("🧪 测试体积解析...")
-    volumes = ["200 mL", "?", 100.0, "1 L", "500 μL", "未知", "50毫升"]
-    for vol in volumes:
-        result = parse_volume_input(vol)
-        debug_print(f"📊 体积解析结果: {vol} -> {result}mL")
-    
-    debug_print("✅ 测试完成")
-
-if __name__ == "__main__":
-    test_separate_protocol()

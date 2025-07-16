@@ -1,6 +1,6 @@
 # Organic
-string from_vessel
-string to_vessel
+Resource from_vessel
+Resource to_vessel
 float64 volume
 string amount
 float64 time

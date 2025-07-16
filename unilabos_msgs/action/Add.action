@@ -1,5 +1,5 @@
 # Goal - 添加试剂的目标参数  
-string vessel                    # 目标容器（必需）
+Resource vessel                    # 目标容器（必需）
 string reagent                   # 试剂名称（必需）
 string volume                    # 体积（如 "2.7 mL"，可选）
 string mass                      # 质量（如 "19.3 g"，可选）

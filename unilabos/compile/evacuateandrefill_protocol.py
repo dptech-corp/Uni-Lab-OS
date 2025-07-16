@@ -270,7 +270,7 @@ def find_gas_solenoid_valve(G: nx.DiGraph, gas_source: str) -> Optional[str]:
 
 def generate_evacuateandrefill_protocol(
     G: nx.DiGraph,
-    vessel: str,
+    vessel: dict,  # 🔧 修改：从字符串改为字典类型
     gas: str,
     **kwargs
 ) -> List[Dict[str, Any]]:
@@ -279,13 +279,16 @@ def generate_evacuateandrefill_protocol(
     
     Args:
         G: 设备图
-        vessel: 目标容器名称（必需）
+        vessel: 目标容器字典（必需）
         gas: 气体名称（必需）  
         **kwargs: 其他参数（兼容性）
     
     Returns:
         List[Dict[str, Any]]: 动作序列
     """
+    
+    # 🔧 核心修改：从字典中提取容器ID
+    vessel_id = vessel["id"]
     
     # 硬编码重复次数为 3
     repeats = 3
@@ -297,7 +300,7 @@ def generate_evacuateandrefill_protocol(
     debug_print("=" * 60)
     debug_print("🧪 开始生成抽真空充气协议")
     debug_print(f"📋 原始参数:")
-    debug_print(f"  🥼 容器: '{vessel}'")
+    debug_print(f"  🥼 vessel: {vessel} (ID: {vessel_id})")
     debug_print(f"  💨 气体: '{gas}'")
     debug_print(f"  🔄 循环次数: {repeats} (硬编码)")
     debug_print(f"  📦 其他参数: {kwargs}")
@@ -307,12 +310,12 @@ def generate_evacuateandrefill_protocol(
     
     # === 参数验证和修正 ===
     debug_print("🔍 步骤1: 参数验证和修正...")
-    action_sequence.append(create_action_log(f"开始抽真空充气操作 - 容器: {vessel}", "🎬"))
+    action_sequence.append(create_action_log(f"开始抽真空充气操作 - 容器: {vessel_id}", "🎬"))
     action_sequence.append(create_action_log(f"目标气体: {gas}", "💨"))
     action_sequence.append(create_action_log(f"循环次数: {repeats}", "🔄"))
     
     # 验证必需参数
-    if not vessel:
+    if not vessel_id:
         debug_print("❌ 容器参数不能为空")
         raise ValueError("容器参数不能为空")
     
@@ -320,9 +323,9 @@ def generate_evacuateandrefill_protocol(
         debug_print("❌ 气体参数不能为空")
         raise ValueError("气体参数不能为空")
     
-    if vessel not in G.nodes():
-        debug_print(f"❌ 容器 '{vessel}' 在系统中不存在")
-        raise ValueError(f"容器 '{vessel}' 在系统中不存在")
+    if vessel_id not in G.nodes():  # 🔧 使用 vessel_id
+        debug_print(f"❌ 容器 '{vessel_id}' 在系统中不存在")
+        raise ValueError(f"容器 '{vessel_id}' 在系统中不存在")
     
     debug_print("✅ 基本参数验证通过")
     action_sequence.append(create_action_log("参数验证通过", "✅"))
@@ -351,7 +354,7 @@ def generate_evacuateandrefill_protocol(
         debug_print(f"🔄 标准化气体名称: {original_gas} -> {gas}")
         action_sequence.append(create_action_log(f"气体名称标准化: {original_gas} -> {gas}", "🔄"))
     
-    debug_print(f"📋 最终参数: 容器={vessel}, 气体={gas}, 重复={repeats}")
+    debug_print(f"📋 最终参数: 容器={vessel_id}, 气体={gas}, 重复={repeats}")
     
     # === 查找设备 ===
     debug_print("🔍 步骤2: 查找设备...")
@@ -376,7 +379,7 @@ def generate_evacuateandrefill_protocol(
         else:
             action_sequence.append(create_action_log("未找到气源电磁阀", "⚠️"))
         
-        stirrer_id = find_connected_stirrer(G, vessel)
+        stirrer_id = find_connected_stirrer(G, vessel_id)  # 🔧 使用 vessel_id
         if stirrer_id:
             action_sequence.append(create_action_log(f"找到搅拌器: {stirrer_id}", "🌪️"))
         else:
@@ -444,8 +447,8 @@ def generate_evacuateandrefill_protocol(
     
     try:
         # 验证抽真空路径
-        if nx.has_path(G, vessel, vacuum_pump):
-            vacuum_path = nx.shortest_path(G, source=vessel, target=vacuum_pump)
+        if nx.has_path(G, vessel_id, vacuum_pump):  # 🔧 使用 vessel_id
+            vacuum_path = nx.shortest_path(G, source=vessel_id, target=vacuum_pump)
             debug_print(f"✅ 真空路径: {' -> '.join(vacuum_path)}")
             action_sequence.append(create_action_log(f"真空路径: {' -> '.join(vacuum_path)}", "🛤️"))
         else:
@@ -453,8 +456,8 @@ def generate_evacuateandrefill_protocol(
             action_sequence.append(create_action_log("真空路径检查: 路径不存在", "⚠️"))
         
         # 验证充气路径
-        if nx.has_path(G, gas_source, vessel):
-            gas_path = nx.shortest_path(G, source=gas_source, target=vessel)
+        if nx.has_path(G, gas_source, vessel_id):  # 🔧 使用 vessel_id
+            gas_path = nx.shortest_path(G, source=gas_source, target=vessel_id)
             debug_print(f"✅ 气体路径: {' -> '.join(gas_path)}")
             action_sequence.append(create_action_log(f"气体路径: {' -> '.join(gas_path)}", "🛤️"))
         else:
@@ -476,7 +479,7 @@ def generate_evacuateandrefill_protocol(
             "device_id": stirrer_id,
             "action_name": "start_stir",
             "action_kwargs": {
-                "vessel": vessel,
+                "vessel": vessel_id,  # 🔧 使用 vessel_id
                 "stir_speed": STIR_SPEED,
                 "purpose": "抽真空充气前预搅拌"
             }
@@ -524,13 +527,13 @@ def generate_evacuateandrefill_protocol(
             })
         
         # 抽真空操作
-        debug_print(f"🌪️ 抽真空操作: {vessel} -> {vacuum_pump}")
-        action_sequence.append(create_action_log(f"开始抽真空: {vessel} -> {vacuum_pump}", "🌪️"))
+        debug_print(f"🌪️ 抽真空操作: {vessel_id} -> {vacuum_pump}")
+        action_sequence.append(create_action_log(f"开始抽真空: {vessel_id} -> {vacuum_pump}", "🌪️"))
         
         try:
             vacuum_transfer_actions = generate_pump_protocol_with_rinsing(
                 G=G,
-                from_vessel=vessel,
+                from_vessel=vessel_id,  # 🔧 使用 vessel_id
                 to_vessel=vacuum_pump,
                 volume=VACUUM_VOLUME,
                 amount="",
@@ -622,14 +625,14 @@ def generate_evacuateandrefill_protocol(
             })
         
         # 充气操作
-        debug_print(f"💨 充气操作: {gas_source} -> {vessel}")
-        action_sequence.append(create_action_log(f"开始气体充气: {gas_source} -> {vessel}", "💨"))
+        debug_print(f"💨 充气操作: {gas_source} -> {vessel_id}")
+        action_sequence.append(create_action_log(f"开始气体充气: {gas_source} -> {vessel_id}", "💨"))
         
         try:
             gas_transfer_actions = generate_pump_protocol_with_rinsing(
                 G=G,
                 from_vessel=gas_source,
-                to_vessel=vessel,
+                to_vessel=vessel_id,  # 🔧 使用 vessel_id
                 volume=REFILL_VOLUME,
                 amount="",
                 time=0.0,
@@ -709,7 +712,7 @@ def generate_evacuateandrefill_protocol(
         action_sequence.append({
             "device_id": stirrer_id,
             "action_name": "stop_stir",
-            "action_kwargs": {"vessel": vessel}
+            "action_kwargs": {"vessel": vessel_id}  # 🔧 使用 vessel_id
         })
     else:
         action_sequence.append(create_action_log("跳过搅拌器停止", "⏭️"))
@@ -729,37 +732,41 @@ def generate_evacuateandrefill_protocol(
     debug_print(f"📊 协议统计:")
     debug_print(f"  📋 总动作数: {len(action_sequence)}")
     debug_print(f"  ⏱️ 预计总时间: {total_time:.0f}s ({total_time/60:.1f} 分钟)")
-    debug_print(f"  🥼 处理容器: {vessel}")
+    debug_print(f"  🥼 处理容器: {vessel_id}")
     debug_print(f"  💨 使用气体: {gas}")
     debug_print(f"  🔄 重复次数: {repeats}")
     debug_print("=" * 60)
     
     # 添加完成日志
-    summary_msg = f"抽真空充气协议完成: {vessel} (使用 {gas}，{repeats} 次循环)"
+    summary_msg = f"抽真空充气协议完成: {vessel_id} (使用 {gas}，{repeats} 次循环)"
     action_sequence.append(create_action_log(summary_msg, "🎉"))
     
     return action_sequence
 
 # === 便捷函数 ===
 
-def generate_nitrogen_purge_protocol(G: nx.DiGraph, vessel: str, **kwargs) -> List[Dict[str, Any]]:
+def generate_nitrogen_purge_protocol(G: nx.DiGraph, vessel: dict, **kwargs) -> List[Dict[str, Any]]:  # 🔧 修改参数类型
     """生成氮气置换协议"""
-    debug_print(f"💨 生成氮气置换协议: {vessel}")
+    vessel_id = vessel["id"]
+    debug_print(f"💨 生成氮气置换协议: {vessel_id}")
     return generate_evacuateandrefill_protocol(G, vessel, "nitrogen", **kwargs)
 
-def generate_argon_purge_protocol(G: nx.DiGraph, vessel: str, **kwargs) -> List[Dict[str, Any]]:
+def generate_argon_purge_protocol(G: nx.DiGraph, vessel: dict, **kwargs) -> List[Dict[str, Any]]:  # 🔧 修改参数类型
     """生成氩气置换协议"""
-    debug_print(f"💨 生成氩气置换协议: {vessel}")
+    vessel_id = vessel["id"]
+    debug_print(f"💨 生成氩气置换协议: {vessel_id}")
     return generate_evacuateandrefill_protocol(G, vessel, "argon", **kwargs)
 
-def generate_air_purge_protocol(G: nx.DiGraph, vessel: str, **kwargs) -> List[Dict[str, Any]]:
+def generate_air_purge_protocol(G: nx.DiGraph, vessel: dict, **kwargs) -> List[Dict[str, Any]]:  # 🔧 修改参数类型
     """生成空气置换协议"""
-    debug_print(f"💨 生成空气置换协议: {vessel}")
+    vessel_id = vessel["id"]
+    debug_print(f"💨 生成空气置换协议: {vessel_id}")
     return generate_evacuateandrefill_protocol(G, vessel, "air", **kwargs)
 
-def generate_inert_atmosphere_protocol(G: nx.DiGraph, vessel: str, gas: str = "nitrogen", **kwargs) -> List[Dict[str, Any]]:
+def generate_inert_atmosphere_protocol(G: nx.DiGraph, vessel: dict, gas: str = "nitrogen", **kwargs) -> List[Dict[str, Any]]:  # 🔧 修改参数类型
     """生成惰性气氛协议"""
-    debug_print(f"🛡️ 生成惰性气氛协议: {vessel} (使用 {gas})")
+    vessel_id = vessel["id"]
+    debug_print(f"🛡️ 生成惰性气氛协议: {vessel_id} (使用 {gas})")
     return generate_evacuateandrefill_protocol(G, vessel, gas, **kwargs)
 
 # 测试函数

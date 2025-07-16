@@ -1,6 +1,6 @@
 # Request
 string compound                    # 化合物
-string vessel                      # 干燥容器
+Resource vessel                      # 干燥容器
 ---
 # Result
 bool success                     # 操作是否成功  

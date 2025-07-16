@@ -1,5 +1,5 @@
 # Organic Synthesis Station EvacuateAndRefill Action
-string vessel
+Resource vessel
 string gas
 ---
 string return_info

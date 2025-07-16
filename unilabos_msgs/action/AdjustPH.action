@@ -1,5 +1,5 @@
 # Request - 与您的 AdjustPHProtocol 类匹配
-string vessel
+Resource vessel
 float64 ph_value
 string reagent
 ---

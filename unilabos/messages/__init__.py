@@ -11,8 +11,8 @@ class Point3D(BaseModel):
 
 class PumpTransferProtocol(BaseModel):
     # === 核心参数（保持必需） ===
-    from_vessel: str
-    to_vessel: str
+    from_vessel: dict
+    to_vessel: dict
     
     # === 所有其他参数都改为可选，添加默认值 ===
     volume: float = 0.0  # 🔧 改为-1，表示转移全部体积
@@ -95,7 +95,7 @@ class PumpTransferProtocol(BaseModel):
 
 
 class CleanProtocol(BaseModel):
-    vessel: str
+    vessel: dict
     solvent: str
     volume: float
     temp: float
@@ -105,10 +105,10 @@ class CleanProtocol(BaseModel):
 class SeparateProtocol(BaseModel):
     purpose: str
     product_phase: str
-    from_vessel: str
-    separation_vessel: str
-    to_vessel: str
-    waste_phase_to_vessel: str
+    from_vessel: dict
+    separation_vessel: dict
+    to_vessel: dict
+    waste_phase_to_vessel: dict
     solvent: str
     solvent_volume: float
     through: str
@@ -120,7 +120,7 @@ class SeparateProtocol(BaseModel):
 
 class EvaporateProtocol(BaseModel):
     # === 核心参数（必需） ===
-    vessel: str = Field(..., description="蒸发容器名称")
+    vessel: dict = Field(..., description="蒸发容器名称")
     
     # === 所有其他参数都改为可选，添加默认值 ===
     pressure: float = Field(0.1, description="真空度 (bar)，默认0.1 bar")
@@ -183,7 +183,7 @@ class EvaporateProtocol(BaseModel):
 
 class EvacuateAndRefillProtocol(BaseModel):
     # === 必需参数 ===
-    vessel: str = Field(..., description="目标容器名称")
+    vessel: dict = Field(..., description="目标容器名称")
     gas: str = Field(..., description="气体名称")
     
     # 🔧 删除 repeats 参数，直接在代码中硬编码为 3 次
@@ -219,7 +219,7 @@ class AGVTransferProtocol(BaseModel):
 
 #=============新添加的新的协议================
 class AddProtocol(BaseModel):
-    vessel: str
+    vessel: dict
     reagent: str
     volume: float
     mass: float
@@ -231,17 +231,17 @@ class AddProtocol(BaseModel):
     purpose: str
 
 class CentrifugeProtocol(BaseModel):
-    vessel: str
+    vessel: dict
     speed: float
     time: float
     temp: float
 
 class FilterProtocol(BaseModel):
     # === 必需参数 ===
-    vessel: str = Field(..., description="过滤容器名称")
+    vessel: dict = Field(..., description="过滤容器名称")
     
     # === 可选参数 ===
-    filtrate_vessel: str = Field("", description="滤液容器名称（可选，自动查找）")
+    filtrate_vessel: dict = Field("", description="滤液容器名称（可选，自动查找）")
     
     def model_post_init(self, __context):
         """后处理：参数验证"""
@@ -251,7 +251,7 @@ class FilterProtocol(BaseModel):
 
 class HeatChillProtocol(BaseModel):
     # === 必需参数 ===
-    vessel: str = Field(..., description="加热容器名称")
+    vessel: dict = Field(..., description="加热容器名称")
     
     # === 可选参数 - 温度相关 ===
     temp: float = Field(25.0, description="目标温度 (°C)")
@@ -375,7 +375,7 @@ class HeatChillProtocol(BaseModel):
 
 class HeatChillStartProtocol(BaseModel):
     # === 必需参数 ===
-    vessel: str = Field(..., description="加热容器名称")
+    vessel: dict = Field(..., description="加热容器名称")
 
     # === 可选参数 - 温度相关 ===
     temp: float = Field(25.0, description="目标温度 (°C)")
@@ -393,12 +393,12 @@ class HeatChillStartProtocol(BaseModel):
 
 class HeatChillStopProtocol(BaseModel):
     # === 必需参数 ===
-    vessel: str = Field(..., description="加热容器名称")
+    vessel: dict = Field(..., description="加热容器名称")
 
 
 class StirProtocol(BaseModel):
     # === 必需参数 ===
-    vessel: str = Field(..., description="搅拌容器名称")
+    vessel: dict = Field(..., description="搅拌容器名称")
     
     # === 可选参数 ===
     time: str = Field("5 min", description="搅拌时间（如 '0.5 h', '30 min'）")
@@ -482,7 +482,7 @@ class StirProtocol(BaseModel):
 
 class StartStirProtocol(BaseModel):
     # === 必需参数 ===
-    vessel: str = Field(..., description="搅拌容器名称")
+    vessel: dict = Field(..., description="搅拌容器名称")
     
     # === 可选参数，添加默认值 ===
     stir_speed: float = Field(200.0, description="搅拌速度 (RPM)，默认200 RPM")
@@ -505,7 +505,7 @@ class StartStirProtocol(BaseModel):
 
 class StopStirProtocol(BaseModel):
     # === 必需参数 ===
-    vessel: str = Field(..., description="搅拌容器名称")
+    vessel: dict = Field(..., description="搅拌容器名称")
     
     def model_post_init(self, __context):
         """后处理：参数验证"""
@@ -515,8 +515,8 @@ class StopStirProtocol(BaseModel):
             raise ValueError("vessel 参数不能为空")
 
 class TransferProtocol(BaseModel):
-    from_vessel: str
-    to_vessel: str
+    from_vessel: dict
+    to_vessel: dict
     volume: float
     amount: str = ""
     time: float = 0
@@ -527,14 +527,14 @@ class TransferProtocol(BaseModel):
     solid: bool = False
 
 class CleanVesselProtocol(BaseModel):
-    vessel: str
+    vessel: dict
     solvent: str
     volume: float
     temp: float
     repeats: int = 1
 
 class DissolveProtocol(BaseModel):
-    vessel: str
+    vessel: dict
     solvent: str
     volume: float
     amount: str = ""
@@ -543,8 +543,8 @@ class DissolveProtocol(BaseModel):
     stir_speed: float = 0.0
 
 class FilterThroughProtocol(BaseModel):
-    from_vessel: str
-    to_vessel: str
+    from_vessel: dict
+    to_vessel: dict
     filter_through: str
     eluting_solvent: str = ""
     eluting_volume: float = 0.0
@@ -552,18 +552,18 @@ class FilterThroughProtocol(BaseModel):
     residence_time: float = 0.0
 
 class RunColumnProtocol(BaseModel):
-    from_vessel: str
-    to_vessel: str
+    from_vessel: dict
+    to_vessel: dict
     column: str
 
 class WashSolidProtocol(BaseModel):
     # === 必需参数 ===
-    vessel: str = Field(..., description="装有固体的容器名称")
+    vessel: dict = Field(..., description="装有固体的容器名称")
     solvent: str = Field(..., description="清洗溶剂名称")
     volume: float = Field(..., description="清洗溶剂体积 (mL)")
     
     # === 可选参数，添加默认值 ===
-    filtrate_vessel: str = Field("", description="滤液收集容器（可选，自动查找）")
+    filtrate_vessel: dict = Field("", description="滤液收集容器（可选，自动查找）")
     temp: float = Field(25.0, description="清洗温度 (°C)，默认25°C")
     stir: bool = Field(False, description="是否搅拌，默认False")
     stir_speed: float = Field(0.0, description="搅拌速度 (RPM)，默认0")
@@ -604,7 +604,7 @@ class WashSolidProtocol(BaseModel):
             self.repeats = 10
             
 class AdjustPHProtocol(BaseModel):
-    vessel: str = Field(..., description="目标容器")
+    vessel: dict = Field(..., description="目标容器")
     ph_value: float = Field(..., description="目标pH值")  # 改为 ph_value
     reagent: str = Field(..., description="酸碱试剂名称")
     # 移除其他可选参数，使用默认值
@@ -614,19 +614,19 @@ class ResetHandlingProtocol(BaseModel):
 
 class DryProtocol(BaseModel):
     compound: str = Field(..., description="化合物名称")
-    vessel: str = Field(..., description="目标容器")
+    vessel: dict = Field(..., description="目标容器")
 
 class RecrystallizeProtocol(BaseModel):
     ratio: str = Field(..., description="溶剂比例（如 '1:1', '3:7'）")
     solvent1: str = Field(..., description="第一种溶剂名称")
     solvent2: str = Field(..., description="第二种溶剂名称")
-    vessel: str = Field(..., description="目标容器")
+    vessel: dict = Field(..., description="目标容器")
     volume: float = Field(..., description="总体积 (mL)")
 
 class HydrogenateProtocol(BaseModel):
     temp: str = Field(..., description="反应温度（如 '45 °C'）")
     time: str = Field(..., description="反应时间（如 '2 h'）")
-    vessel: str = Field(..., description="反应容器")
+    vessel: dict = Field(..., description="反应容器")
 
 __all__ = [
     "Point3D", "PumpTransferProtocol", "CleanProtocol", "SeparateProtocol", 

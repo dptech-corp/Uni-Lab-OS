@@ -175,7 +175,7 @@ def find_connected_vessel(G: nx.DiGraph, rotavap_device: str) -> Optional[str]:
 
 def generate_evaporate_protocol(
     G: nx.DiGraph,
-    vessel: str,
+    vessel: dict,  # 🔧 修改：从字符串改为字典类型
     pressure: float = 0.1,
     temp: float = 60.0,
     time: Union[str, float] = "180",     # 🔧 修改：支持字符串时间
@@ -184,11 +184,11 @@ def generate_evaporate_protocol(
     **kwargs
 ) -> List[Dict[str, Any]]:
     """
-    生成蒸发操作的协议序列 - 支持单位
+    生成蒸发操作的协议序列 - 支持单位和体积运算
     
     Args:
         G: 设备图
-        vessel: 容器名称或旋转蒸发仪名称
+        vessel: 容器字典（从XDL传入）
         pressure: 真空度 (bar)，默认0.1
         temp: 加热温度 (°C)，默认60
         time: 蒸发时间（支持 "3 min", "180", "0.5 h" 等）
@@ -200,10 +200,13 @@ def generate_evaporate_protocol(
         List[Dict[str, Any]]: 动作序列
     """
     
+    # 🔧 核心修改：从字典中提取容器ID
+    vessel_id = vessel["id"]
+    
     debug_print("🌟" * 20)
-    debug_print("🌪️ 开始生成蒸发协议（支持单位）✨")
+    debug_print("🌪️ 开始生成蒸发协议（支持单位和体积运算）✨")
     debug_print(f"📝 输入参数:")
-    debug_print(f"  🥽 vessel: {vessel}")
+    debug_print(f"  🥽 vessel: {vessel} (ID: {vessel_id})")
     debug_print(f"  💨 pressure: {pressure} bar")
     debug_print(f"  🌡️ temp: {temp}°C")
     debug_print(f"  ⏰ time: {time} (类型: {type(time)})")
@@ -211,16 +214,27 @@ def generate_evaporate_protocol(
     debug_print(f"  🧪 solvent: '{solvent}'")
     debug_print("🌟" * 20)
     
+    # 🔧 新增：记录蒸发前的容器状态
+    debug_print("🔍 记录蒸发前容器状态...")
+    original_liquid_volume = 0.0
+    if "data" in vessel and "liquid_volume" in vessel["data"]:
+        current_volume = vessel["data"]["liquid_volume"]
+        if isinstance(current_volume, list) and len(current_volume) > 0:
+            original_liquid_volume = current_volume[0]
+        elif isinstance(current_volume, (int, float)):
+            original_liquid_volume = current_volume
+    debug_print(f"📊 蒸发前液体体积: {original_liquid_volume:.2f}mL")
+    
     # === 步骤1: 查找旋转蒸发仪设备 ===
     debug_print("📍 步骤1: 查找旋转蒸发仪设备... 🔍")
     
     # 验证vessel参数
-    if not vessel:
+    if not vessel_id:
         debug_print("❌ vessel 参数不能为空! 😱")
         raise ValueError("vessel 参数不能为空")
     
     # 查找旋转蒸发仪设备
-    rotavap_device = find_rotavap_device(G, vessel)
+    rotavap_device = find_rotavap_device(G, vessel_id)
     if not rotavap_device:
         debug_print("💥 未找到旋转蒸发仪设备! 😭")
         raise ValueError(f"未找到旋转蒸发仪设备。请检查组态图中是否包含 class 包含 'rotavap'、'rotary' 或 'evaporat' 的设备")
@@ -230,10 +244,10 @@ def generate_evaporate_protocol(
     # === 步骤2: 确定目标容器 ===
     debug_print("📍 步骤2: 确定目标容器... 🥽")
     
-    target_vessel = vessel
+    target_vessel = vessel_id
     
     # 如果vessel就是旋转蒸发仪设备，查找连接的容器
-    if vessel == rotavap_device:
+    if vessel_id == rotavap_device:
         debug_print("🔄 vessel就是旋转蒸发仪，查找连接的容器...")
         connected_vessel = find_connected_vessel(G, rotavap_device)
         if connected_vessel:
@@ -242,11 +256,11 @@ def generate_evaporate_protocol(
         else:
             debug_print(f"⚠️ 未找到连接的容器，使用设备本身: {rotavap_device} 🔧")
             target_vessel = rotavap_device
-    elif vessel in G.nodes() and G.nodes[vessel].get('type') == 'container':
-        debug_print(f"✅ 使用指定的容器: {vessel} 🥽✨")
-        target_vessel = vessel
+    elif vessel_id in G.nodes() and G.nodes[vessel_id].get('type') == 'container':
+        debug_print(f"✅ 使用指定的容器: {vessel_id} 🥽✨")
+        target_vessel = vessel_id
     else:
-        debug_print(f"⚠️ 容器 '{vessel}' 不存在或类型不正确，使用旋转蒸发仪设备: {rotavap_device} 🔧")
+        debug_print(f"⚠️ 容器 '{vessel_id}' 不存在或类型不正确，使用旋转蒸发仪设备: {rotavap_device} 🔧")
         target_vessel = rotavap_device
     
     # === 🔧 新增：步骤3：单位解析处理 ===
@@ -308,8 +322,49 @@ def generate_evaporate_protocol(
     
     debug_print(f"🎯 最终参数: pressure={pressure} bar 💨, temp={temp}°C 🌡️, time={final_time}s ⏰, stir_speed={stir_speed} RPM 🌪️")
     
-    # === 步骤5: 生成动作序列 ===
-    debug_print("📍 步骤5: 生成动作序列... 🎬")
+    # === 🔧 新增：步骤5：蒸发体积计算 ===
+    debug_print("📍 步骤5: 蒸发体积计算... 📊")
+    
+    # 根据温度、真空度、时间和溶剂类型估算蒸发量
+    evaporation_volume = 0.0
+    if original_liquid_volume > 0:
+        # 基础蒸发速率（mL/min）
+        base_evap_rate = 0.5  # 基础速率
+        
+        # 温度系数（高温蒸发更快）
+        temp_factor = 1.0 + (temp - 25.0) / 100.0
+        
+        # 真空系数（真空度越高蒸发越快）
+        vacuum_factor = 1.0 + (1.0 - pressure) * 2.0
+        
+        # 溶剂系数
+        solvent_factor = 1.0
+        if solvent:
+            solvent_lower = solvent.lower()
+            if any(s in solvent_lower for s in ['water', 'h2o']):
+                solvent_factor = 0.8  # 水蒸发较慢
+            elif any(s in solvent_lower for s in ['ethanol', 'methanol', 'acetone']):
+                solvent_factor = 1.5  # 易挥发溶剂蒸发快
+            elif any(s in solvent_lower for s in ['dmso', 'dmi']):
+                solvent_factor = 0.3  # 高沸点溶剂蒸发慢
+        
+        # 计算总蒸发量
+        total_evap_rate = base_evap_rate * temp_factor * vacuum_factor * solvent_factor
+        evaporation_volume = min(
+            original_liquid_volume * 0.95,  # 最多蒸发95%
+            total_evap_rate * (final_time / 60.0)  # 时间相关的蒸发量
+        )
+        
+        debug_print(f"📊 蒸发量计算:")
+        debug_print(f"  - 基础蒸发速率: {base_evap_rate} mL/min")
+        debug_print(f"  - 温度系数: {temp_factor:.2f} (基于 {temp}°C)")
+        debug_print(f"  - 真空系数: {vacuum_factor:.2f} (基于 {pressure} bar)")
+        debug_print(f"  - 溶剂系数: {solvent_factor:.2f} ({solvent or '通用'})")
+        debug_print(f"  - 总蒸发速率: {total_evap_rate:.2f} mL/min")
+        debug_print(f"  - 预计蒸发量: {evaporation_volume:.2f}mL ({evaporation_volume/original_liquid_volume*100:.1f}%)")
+    
+    # === 步骤6: 生成动作序列 ===
+    debug_print("📍 步骤6: 生成动作序列... 🎬")
     
     action_sequence = []
     
@@ -334,7 +389,7 @@ def generate_evaporate_protocol(
         "device_id": rotavap_device,
         "action_name": "evaporate",
         "action_kwargs": {
-            "vessel": target_vessel,
+            "vessel": target_vessel,  # 使用 target_vessel
             "pressure": pressure,
             "temp": temp,
             "time": final_time,
@@ -345,6 +400,42 @@ def generate_evaporate_protocol(
     action_sequence.append(evaporate_action)
     debug_print("  ✅ 蒸发动作已添加 🌪️✨")
     
+    # 🔧 新增：蒸发过程中的体积变化
+    debug_print("  🔧 更新容器体积 - 蒸发过程...")
+    if evaporation_volume > 0:
+        new_volume = max(0.0, original_liquid_volume - evaporation_volume)
+        
+        # 更新vessel字典中的体积
+        if "data" in vessel and "liquid_volume" in vessel["data"]:
+            current_volume = vessel["data"]["liquid_volume"]
+            if isinstance(current_volume, list):
+                if len(current_volume) > 0:
+                    vessel["data"]["liquid_volume"][0] = new_volume
+                else:
+                    vessel["data"]["liquid_volume"] = [new_volume]
+            elif isinstance(current_volume, (int, float)):
+                vessel["data"]["liquid_volume"] = new_volume
+            else:
+                vessel["data"]["liquid_volume"] = new_volume
+        
+        # 🔧 同时更新图中的容器数据
+        if vessel_id in G.nodes():
+            if 'data' not in G.nodes[vessel_id]:
+                G.nodes[vessel_id]['data'] = {}
+            
+            vessel_node_data = G.nodes[vessel_id]['data']
+            current_node_volume = vessel_node_data.get('liquid_volume', 0.0)
+            
+            if isinstance(current_node_volume, list):
+                if len(current_node_volume) > 0:
+                    G.nodes[vessel_id]['data']['liquid_volume'][0] = new_volume
+                else:
+                    G.nodes[vessel_id]['data']['liquid_volume'] = [new_volume]
+            else:
+                G.nodes[vessel_id]['data']['liquid_volume'] = new_volume
+        
+        debug_print(f"  📊 蒸发体积变化: {original_liquid_volume:.2f}mL → {new_volume:.2f}mL (-{evaporation_volume:.2f}mL)")
+    
     # 3. 蒸发后等待
     debug_print("  🔄 动作3: 添加蒸发后等待... ⏳")
     action_sequence.append({
@@ -352,6 +443,15 @@ def generate_evaporate_protocol(
         "action_kwargs": {"time": 10}
     })
     debug_print("  ✅ 蒸发后等待动作已添加 ⏳✨")
+    
+    # 🔧 新增：蒸发完成后的状态报告
+    final_liquid_volume = 0.0
+    if "data" in vessel and "liquid_volume" in vessel["data"]:
+        current_volume = vessel["data"]["liquid_volume"]
+        if isinstance(current_volume, list) and len(current_volume) > 0:
+            final_liquid_volume = current_volume[0]
+        elif isinstance(current_volume, (int, float)):
+            final_liquid_volume = current_volume
     
     # === 总结 ===
     debug_print("🎊" * 20)
@@ -361,6 +461,10 @@ def generate_evaporate_protocol(
     debug_print(f"🥽 目标容器: {target_vessel} 🧪")
     debug_print(f"⚙️ 蒸发参数: {pressure} bar 💨, {temp}°C 🌡️, {final_time}s ⏰, {stir_speed} RPM 🌪️")
     debug_print(f"⏱️ 预计总时间: {(final_time + 20)/60:.1f} 分钟 ⌛")
+    debug_print(f"📊 体积变化:")
+    debug_print(f"  - 蒸发前: {original_liquid_volume:.2f}mL")
+    debug_print(f"  - 蒸发后: {final_liquid_volume:.2f}mL") 
+    debug_print(f"  - 蒸发量: {evaporation_volume:.2f}mL ({evaporation_volume/max(original_liquid_volume, 0.01)*100:.1f}%)")
     debug_print("🎊" * 20)
     
     return action_sequence

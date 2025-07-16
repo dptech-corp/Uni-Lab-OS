@@ -1,5 +1,5 @@
 # Goal - 启动搅拌操作的目标参数  
-string vessel                    # 搅拌容器  
+Resource vessel                    # 搅拌容器  
 float64 stir_speed              # 搅拌速度 (可选，rpm)  
 string purpose                   # 搅拌目的 (可选)  
 ---

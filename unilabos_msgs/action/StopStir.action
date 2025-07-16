@@ -1,5 +1,5 @@
 # Goal - 停止搅拌操作的目标参数  
-string vessel                    # 搅拌容器  
+Resource vessel                    # 搅拌容器  
 ---
 # Result - 操作结果  
 bool success                     # 操作是否成功  

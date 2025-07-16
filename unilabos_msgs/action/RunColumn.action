@@ -1,6 +1,6 @@
 # Goal - 柱层析操作的目标参数
-string from_vessel              # 源容器的名称，即样品起始所在的容器（必需）
-string to_vessel                # 目标容器的名称，分离后的样品要到达的容器（必需）
+Resource from_vessel              # 源容器的名称，即样品起始所在的容器（必需）
+Resource to_vessel                # 目标容器的名称，分离后的样品要到达的容器（必需）
 string column                   # 所使用的柱子的名称（必需）
 string rf                       # Rf值（可选）
 string pct1                     # 第一种溶剂百分比（如 "40 %"，可选）

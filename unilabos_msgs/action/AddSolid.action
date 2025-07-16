@@ -1,5 +1,5 @@
 # Goal - 固体加样操作的目标参数
-string vessel                    # 目标容器（必需）
+Resource vessel                    # 目标容器（必需）
 string reagent                   # 试剂名称（必需）
 string mass                      # 质量字符串（如 "2.9 g"，可选）
 string mol                       # 摩尔数字符串（如 "0.12 mol"，可选）

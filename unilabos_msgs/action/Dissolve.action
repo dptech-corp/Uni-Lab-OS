@@ -1,5 +1,5 @@
 # Goal - 溶解操作的目标参数
-string vessel                   # 装有要溶解物质的容器名称（必需）
+Resource vessel                   # 装有要溶解物质的容器名称（必需）
 string solvent                  # 用于溶解物质的溶剂名称（可选）
 string volume                   # 溶剂的体积（如 "10 mL"，可选）
 string amount                   # 要溶解物质的量描述（可选）
