@@ -183,25 +183,25 @@ class ROS2ProtocolNode(BaseROS2DeviceNode):
                 goal = goal_handle.request
                 protocol_kwargs = convert_from_ros_msg_with_mapping(goal, action_value_mapping["goal"])
                 
-                # 🔧 添加调试信息
-                print(f"🔍 转换后的 protocol_kwargs: {protocol_kwargs}")
-                print(f"🔍 vessel 在转换后: {protocol_kwargs.get('vessel', 'NOT_FOUND')}")
+                # # 🔧 添加调试信息
+                # print(f"🔍 转换后的 protocol_kwargs: {protocol_kwargs}")
+                # print(f"🔍 vessel 在转换后: {protocol_kwargs.get('vessel', 'NOT_FOUND')}")
 
-                # 🔧 完全禁用Host查询，直接使用转换后的数据
-                print(f"🔧 跳过Host查询，直接使用转换后的数据")
+                # # 🔧 完全禁用Host查询，直接使用转换后的数据
+                # print(f"🔧 跳过Host查询，直接使用转换后的数据")
                 
                 # 🔧 额外验证：确保vessel数据完整
                 if 'vessel' in protocol_kwargs:
                     vessel_data = protocol_kwargs['vessel']
-                    print(f"🔍 验证vessel数据: {vessel_data}")
+                    #print(f"🔍 验证vessel数据: {vessel_data}")
                     
                     # 如果vessel是空字典，尝试重新构建
                     if not vessel_data or (isinstance(vessel_data, dict) and not vessel_data):
-                        print(f"⚠️ vessel数据为空，尝试从原始goal重新提取...")
+                    #    print(f"⚠️ vessel数据为空，尝试从原始goal重新提取...")
                         
                         # 直接从原始goal提取vessel
                         if hasattr(goal, 'vessel') and goal.vessel:
-                            print(f"🔍 原始goal.vessel: {goal.vessel}")
+                    #        print(f"🔍 原始goal.vessel: {goal.vessel}")
                             # 手动转换vessel
                             vessel_data = {
                                 'id': goal.vessel.id,
@@ -212,16 +212,16 @@ class ROS2ProtocolNode(BaseROS2DeviceNode):
                                 'data': goal.vessel.data
                             }
                             protocol_kwargs['vessel'] = vessel_data
-                            print(f"✅ 手动重建vessel数据: {vessel_data}")
+                    #        print(f"✅ 手动重建vessel数据: {vessel_data}")
                         else:
-                            print(f"❌ 无法从原始goal提取vessel数据")
+                    #        print(f"❌ 无法从原始goal提取vessel数据")
                             # 创建一个基本的vessel
                             vessel_data = {'id': 'default_vessel'}
                             protocol_kwargs['vessel'] = vessel_data
-                            print(f"🔧 创建默认vessel: {vessel_data}")
+                    #        print(f"🔧 创建默认vessel: {vessel_data}")
 
-                print(f"🔍 最终传递给协议的 protocol_kwargs: {protocol_kwargs}")
-                print(f"🔍 最终的 vessel: {protocol_kwargs.get('vessel', 'NOT_FOUND')}")
+                #print(f"🔍 最终传递给协议的 protocol_kwargs: {protocol_kwargs}")
+                #print(f"🔍 最终的 vessel: {protocol_kwargs.get('vessel', 'NOT_FOUND')}")
 
                 from unilabos.resources.graphio import physical_setup_graph
 
@@ -315,7 +315,7 @@ class ROS2ProtocolNode(BaseROS2DeviceNode):
                         serialize_result_info(execution_error, execution_success, protocol_return_value),
                     )
 
-            self.lab_logger().info(f"协议 {protocol_name} 完成并返回结果")
+            self.lab_logger().info(f"🤩🤩🤩🤩🤩🤩协议 {protocol_name} 完成并返回结果😎😎😎😎😎😎")
             return result
 
         return execute_protocol
@@ -337,7 +337,7 @@ class ROS2ProtocolNode(BaseROS2DeviceNode):
         action_client = self._action_clients[action_id]
         goal_msg = convert_to_ros_msg(action_client._action_type.Goal(), action_kwargs)
 
-        self.lab_logger().info(f"发送动作请求到: {action_id}")
+        ##### self.lab_logger().info(f"发送动作请求到: {action_id}")
         action_client.wait_for_server()
 
         # 等待动作完成
@@ -349,7 +349,7 @@ class ROS2ProtocolNode(BaseROS2DeviceNode):
             return None
 
         result_future = await handle.get_result_async()
-        self.lab_logger().info(f"动作完成: {action_name}")
+        ##### self.lab_logger().info(f"动作完成: {action_name}")
 
         return result_future.result
 

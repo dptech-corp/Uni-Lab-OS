@@ -509,68 +509,68 @@ def convert_from_ros_msg_with_mapping(ros_msg: Any, value_mapping: Dict[str, str
     """
     data: Dict[str, Any] = {}
     
-    # 🔧 添加调试信息
-    print(f"🔍 convert_from_ros_msg_with_mapping 开始")
-    print(f"🔍 ros_msg 类型: {type(ros_msg)}")
-    print(f"🔍 ros_msg 内容: {ros_msg}")
-    print(f"🔍 value_mapping: {value_mapping}")
-    print("-" * 60)
+    # # 🔧 添加调试信息
+    # print(f"🔍 convert_from_ros_msg_with_mapping 开始")
+    # print(f"🔍 ros_msg 类型: {type(ros_msg)}")
+    # print(f"🔍 ros_msg 内容: {ros_msg}")
+    # print(f"🔍 value_mapping: {value_mapping}")
+    # print("-" * 60)
 
     for msg_name, attr_name in value_mapping.items():
-        print(f"🔍 处理映射: {msg_name} -> {attr_name}")
+    #    print(f"🔍 处理映射: {msg_name} -> {attr_name}")
         
         msg_path = msg_name.split(".")
         current = ros_msg
         
-        print(f"🔍 msg_path: {msg_path}")
-        print(f"🔍 current 初始值: {current} (类型: {type(current)})")
+        # print(f"🔍 msg_path: {msg_path}")
+        # print(f"🔍 current 初始值: {current} (类型: {type(current)})")
         
         try:
             if not attr_name.endswith("[]"):
                 # 处理单值映射
-                print(f"🔍 处理单值映射")
+                # print(f"🔍 处理单值映射")
                 for i, name in enumerate(msg_path):
-                    print(f"🔍 步骤 {i}: 获取属性 '{name}' 从 {type(current)}")
+                    # print(f"🔍 步骤 {i}: 获取属性 '{name}' 从 {type(current)}")
                     if hasattr(current, name):
                         current = getattr(current, name)
-                        print(f"🔍 获取到: {current} (类型: {type(current)})")
+                        # print(f"🔍 获取到: {current} (类型: {type(current)})")
                     else:
-                        print(f"❌ 属性 '{name}' 不存在于 {type(current)}")
+                        # print(f"❌ 属性 '{name}' 不存在于 {type(current)}")
                         break
                 
                 converted_value = convert_from_ros_msg(current)
-                print(f"🔍 转换后的值: {converted_value} (类型: {type(converted_value)})")
+                # print(f"🔍 转换后的值: {converted_value} (类型: {type(converted_value)})")
                 data[attr_name] = converted_value
-                print(f"✅ 设置 data['{attr_name}'] = {converted_value}")
+                # print(f"✅ 设置 data['{attr_name}'] = {converted_value}")
             else:
                 # 处理列表值映射
-                print(f"🔍 处理列表值映射")
+                # print(f"🔍 处理列表值映射")
                 for i, name in enumerate(msg_path):
-                    print(f"🔍 列表步骤 {i}: 处理 '{name}' 从 {type(current)}")
+                    # print(f"🔍 列表步骤 {i}: 处理 '{name}' 从 {type(current)}")
                     if name.endswith("[]"):
                         base_name = name[:-2]
-                        print(f"🔍 数组字段 base_name: '{base_name}'")
+                        # print(f"🔍 数组字段 base_name: '{base_name}'")
                         if hasattr(current, base_name):
                             current = list(getattr(current, base_name))
-                            print(f"🔍 获取数组: {current} (长度: {len(current)})")
+                            # print(f"🔍 获取数组: {current} (长度: {len(current)})")
                         else:
-                            print(f"❌ 数组字段 '{base_name}' 不存在")
+                            # print(f"❌ 数组字段 '{base_name}' 不存在")
                             current = []
                             break
                     else:
                         if isinstance(current, list):
-                            print(f"🔍 从列表中获取属性 '{name}'")
+                            # print(f"🔍 从列表中获取属性 '{name}'")
                             next_level = []
                             for item in current:
                                 if hasattr(item, name):
                                     next_level.append(getattr(item, name))
                             current = next_level
-                            print(f"🔍 列表处理结果: {current} (长度: {len(current)})")
+                            # print(f"🔍 列表处理结果: {current} (长度: {len(current)})")
                         elif hasattr(current, name):
                             current = getattr(current, name)
-                            print(f"🔍 获取到属性: {current} (类型: {type(current)})")
+                            # print(f"🔍 获取到属性: {current} (类型: {type(current)})")
                         else:
-                            print(f"❌ 属性 '{name}' 不存在")
+                            # print(f"❌ 属性 '{name}' 不存在")
                             current = []
                             break
 
@@ -578,20 +578,20 @@ def convert_from_ros_msg_with_mapping(ros_msg: Any, value_mapping: Dict[str, str
                 if current:
                     converted_list = [convert_from_ros_msg(item) for item in current]
                     data[attr_key] = converted_list
-                    print(f"✅ 设置 data['{attr_key}'] = {converted_list}")
+                    # print(f"✅ 设置 data['{attr_key}'] = {converted_list}")
                 else:
                     print(f"⚠️ 列表为空，跳过 '{attr_key}'")
         except (AttributeError, TypeError) as e:
-            print(f"❌ 映射转换错误 {msg_name} -> {attr_name}: {e}")
+            # print(f"❌ 映射转换错误 {msg_name} -> {attr_name}: {e}")
             logger.debug(f"Mapping conversion error for {msg_name} -> {attr_name}")
             continue
         
-        print(f"🔍 当前 data 状态: {data}")
-        print("-" * 40)
+    #    print(f"🔍 当前 data 状态: {data}")
+    #    print("-" * 40)
 
-    print(f"🔍 convert_from_ros_msg_with_mapping 结束")
-    print(f"🔍 最终 data: {data}")
-    print("=" * 60)
+    #print(f"🔍 convert_from_ros_msg_with_mapping 结束")
+    #print(f"🔍 最终 data: {data}")
+    #print("=" * 60)
     return data
 
 

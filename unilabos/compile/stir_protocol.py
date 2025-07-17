@@ -181,7 +181,7 @@ def get_vessel_display_info(vessel: Union[str, dict]) -> str:
 
 def generate_stir_protocol(
     G: nx.DiGraph,
-    vessel: Union[str, dict],  # 🔧 修改：支持vessel字典
+    vessel: Union[str, dict],  # 支持vessel字典或字符串
     time: Union[str, float, int] = "300",
     stir_time: Union[str, float, int] = "0",
     time_spec: str = "",
@@ -190,27 +190,34 @@ def generate_stir_protocol(
     settling_time: Union[str, float] = "60",
     **kwargs
 ) -> List[Dict[str, Any]]:
-    """
-    生成搅拌操作的协议序列 - 支持vessel字典
+    """生成搅拌操作的协议序列 - 修复vessel参数传递"""
     
-    Args:
-        G: 有向图，节点为设备和容器，边为流体管道
-        vessel: 搅拌容器字典（从XDL传入）或容器ID字符串
-        time: 搅拌时间（支持 "300", "5 min", "1 h" 等格式）
-        stir_time: 指定搅拌时间（优先级比time低）
-        time_spec: 时间规格（优先级最高）
-        event: 事件描述
-        stir_speed: 搅拌速度（RPM）
-        settling_time: 沉降时间
-        **kwargs: 其他可选参数
-    
-    Returns:
-        List[Dict[str, Any]]: 搅拌操作的动作序列
-    """
-    
-    # 🔧 核心修改：从vessel参数中提取vessel_id
+    # 🔧 核心修改：正确处理vessel参数
     vessel_id = extract_vessel_id(vessel)
     vessel_display = get_vessel_display_info(vessel)
+    
+    # 🔧 关键修复：确保vessel_resource是完整的Resource对象
+    if isinstance(vessel, dict):
+        vessel_resource = vessel  # 已经是完整的Resource字典
+        debug_print(f"✅ 使用传入的vessel Resource对象")
+    else:
+        # 如果只是字符串，构建一个基本的Resource对象
+        vessel_resource = {
+            "id": vessel,
+            "name": "",
+            "category": "",
+            "children": [],
+            "config": "",
+            "data": "",
+            "parent": "",
+            "pose": {
+                "orientation": {"w": 1.0, "x": 0.0, "y": 0.0, "z": 0.0},
+                "position": {"x": 0.0, "y": 0.0, "z": 0.0}
+            },
+            "sample_id": "",
+            "type": ""
+        }
+        debug_print(f"🔧 构建了基本的vessel Resource对象: {vessel}")
     
     debug_print("🌪️" * 20)
     debug_print("🚀 开始生成搅拌协议（支持vessel字典）✨")
@@ -293,13 +300,14 @@ def generate_stir_protocol(
         "device_id": stirrer_id,
         "action_name": "stir",
         "action_kwargs": {
-            "vessel": vessel_id,  # 🔧 使用 vessel_id
-            "time": str(time),  # 保持原始格式
+            # 🔧 关键修复：传递vessel_id字符串，而不是完整的Resource对象
+            "vessel": vessel_id,  # 传递字符串ID，不是Resource对象
+            "time": str(time),
             "event": event,
             "time_spec": time_spec,
-            "stir_time": float(parsed_time),  # 确保是数字
-            "stir_speed": float(stir_speed),  # 确保是数字
-            "settling_time": float(parsed_settling_time)  # 确保是数字
+            "stir_time": float(parsed_time),
+            "stir_speed": float(stir_speed),
+            "settling_time": float(parsed_settling_time)
         }
     }
     action_sequence.append(stir_action)
@@ -324,36 +332,47 @@ def generate_stir_protocol(
 
 def generate_start_stir_protocol(
     G: nx.DiGraph,
-    vessel: Union[str, dict],  # 🔧 修改：支持vessel字典
+    vessel: Union[str, dict],
     stir_speed: float = 300.0,
     purpose: str = "",
     **kwargs
 ) -> List[Dict[str, Any]]:
-    """
-    生成开始搅拌操作的协议序列 - 支持vessel字典
+    """生成开始搅拌操作的协议序列 - 修复vessel参数传递"""
     
-    Args:
-        G: 有向图
-        vessel: 搅拌容器字典或容器ID字符串
-        stir_speed: 搅拌速度（RPM）
-        purpose: 搅拌目的描述
-        **kwargs: 其他可选参数
-    
-    Returns:
-        List[Dict[str, Any]]: 开始搅拌操作的动作序列
-    """
-    
-    # 🔧 核心修改：从vessel参数中提取vessel_id
+    # 🔧 核心修改：正确处理vessel参数
     vessel_id = extract_vessel_id(vessel)
     vessel_display = get_vessel_display_info(vessel)
     
-    debug_print("🔄 开始生成启动搅拌协议（支持vessel字典）✨")
+    # 🔧 关键修复：确保vessel_resource是完整的Resource对象
+    if isinstance(vessel, dict):
+        vessel_resource = vessel  # 已经是完整的Resource字典
+        debug_print(f"✅ 使用传入的vessel Resource对象")
+    else:
+        # 如果只是字符串，构建一个基本的Resource对象
+        vessel_resource = {
+            "id": vessel,
+            "name": "",
+            "category": "",
+            "children": [],
+            "config": "",
+            "data": "",
+            "parent": "",
+            "pose": {
+                "orientation": {"w": 1.0, "x": 0.0, "y": 0.0, "z": 0.0},
+                "position": {"x": 0.0, "y": 0.0, "z": 0.0}
+            },
+            "sample_id": "",
+            "type": ""
+        }
+        debug_print(f"🔧 构建了基本的vessel Resource对象: {vessel}")
+    
+    debug_print("🔄 开始生成启动搅拌协议（修复vessel参数）✨")
     debug_print(f"🥽 vessel: {vessel_display} (ID: {vessel_id})")
     debug_print(f"🌪️ speed: {stir_speed} RPM")
     debug_print(f"🎯 purpose: {purpose}")
     
     # 基础验证
-    if not vessel_id or vessel_id not in G.nodes():  # 🔧 使用 vessel_id
+    if not vessel_id or vessel_id not in G.nodes():
         debug_print("❌ 容器验证失败!")
         raise ValueError("vessel 参数无效")
     
@@ -363,14 +382,15 @@ def generate_start_stir_protocol(
         stir_speed = 300.0
     
     # 查找设备
-    stirrer_id = find_connected_stirrer(G, vessel_id)  # 🔧 使用 vessel_id
+    stirrer_id = find_connected_stirrer(G, vessel_id)
     
-    # 生成动作
+    # 🔧 关键修复：传递vessel_id字符串
     action_sequence = [{
         "device_id": stirrer_id,
         "action_name": "start_stir",
         "action_kwargs": {
-            "vessel": vessel_id,  # 🔧 使用 vessel_id
+            # 🔧 关键修复：传递vessel_id字符串，而不是完整的Resource对象
+            "vessel": vessel_id,  # 传递字符串ID，不是Resource对象
             "stir_speed": stir_speed,
             "purpose": purpose or f"启动搅拌 {stir_speed} RPM"
         }
@@ -381,42 +401,56 @@ def generate_start_stir_protocol(
 
 def generate_stop_stir_protocol(
     G: nx.DiGraph,
-    vessel: Union[str, dict],  # 🔧 修改：支持vessel字典
+    vessel: Union[str, dict],
     **kwargs
 ) -> List[Dict[str, Any]]:
-    """
-    生成停止搅拌操作的协议序列 - 支持vessel字典
+    """生成停止搅拌操作的协议序列 - 修复vessel参数传递"""
     
-    Args:
-        G: 有向图
-        vessel: 搅拌容器字典或容器ID字符串
-        **kwargs: 其他可选参数
-    
-    Returns:
-        List[Dict[str, Any]]: 停止搅拌操作的动作序列
-    """
-    
-    # 🔧 核心修改：从vessel参数中提取vessel_id
+    # 🔧 核心修改：正确处理vessel参数
     vessel_id = extract_vessel_id(vessel)
     vessel_display = get_vessel_display_info(vessel)
     
-    debug_print("🛑 开始生成停止搅拌协议（支持vessel字典）✨")
+    # 🔧 关键修复：确保vessel_resource是完整的Resource对象
+    if isinstance(vessel, dict):
+        vessel_resource = vessel  # 已经是完整的Resource字典
+        debug_print(f"✅ 使用传入的vessel Resource对象")
+    else:
+        # 如果只是字符串，构建一个基本的Resource对象
+        vessel_resource = {
+            "id": vessel,
+            "name": "",
+            "category": "",
+            "children": [],
+            "config": "",
+            "data": "",
+            "parent": "",
+            "pose": {
+                "orientation": {"w": 1.0, "x": 0.0, "y": 0.0, "z": 0.0},
+                "position": {"x": 0.0, "y": 0.0, "z": 0.0}
+            },
+            "sample_id": "",
+            "type": ""
+        }
+        debug_print(f"🔧 构建了基本的vessel Resource对象: {vessel}")
+    
+    debug_print("🛑 开始生成停止搅拌协议（修复vessel参数）✨")
     debug_print(f"🥽 vessel: {vessel_display} (ID: {vessel_id})")
     
     # 基础验证
-    if not vessel_id or vessel_id not in G.nodes():  # 🔧 使用 vessel_id
+    if not vessel_id or vessel_id not in G.nodes():
         debug_print("❌ 容器验证失败!")
         raise ValueError("vessel 参数无效")
     
     # 查找设备
-    stirrer_id = find_connected_stirrer(G, vessel_id)  # 🔧 使用 vessel_id
+    stirrer_id = find_connected_stirrer(G, vessel_id)
     
-    # 生成动作
+    # 🔧 关键修复：传递vessel_id字符串
     action_sequence = [{
         "device_id": stirrer_id,
         "action_name": "stop_stir",
         "action_kwargs": {
-            "vessel": vessel_id  # 🔧 使用 vessel_id
+            # 🔧 关键修复：传递vessel_id字符串，而不是完整的Resource对象
+            "vessel": vessel_id  # 传递字符串ID，不是Resource对象
         }
     }]
     

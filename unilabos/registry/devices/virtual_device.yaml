@@ -3650,3 +3650,176 @@ virtual_vacuum_pump:
       - status
       type: object
   version: 0.0.1
+virtual_solid_dispenser:
+  class:
+    action_value_mappings:
+      auto-cleanup:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result: {}
+        schema:
+          description: cleanup的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              type: object
+            result: {}
+          required:
+          - goal
+          title: cleanup参数
+          type: object
+        type: UniLabJsonCommandAsync
+      auto-initialize:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result: {}
+        schema:
+          description: initialize的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              type: object
+            result: {}
+          required:
+          - goal
+          title: initialize参数
+          type: object
+        type: UniLabJsonCommandAsync
+      add_solid:
+        feedback:
+          current_status: status
+          progress: progress
+        goal:
+          vessel: vessel
+          reagent: reagent
+          mass: mass
+          mol: mol
+          purpose: purpose
+          event: event
+          rate_spec: rate_spec
+          equiv: equiv
+          ratio: ratio
+        goal_default:
+          vessel: ''
+          reagent: ''
+          mass: ''
+          mol: ''
+          purpose: ''
+          event: ''
+          rate_spec: ''
+          equiv: ''
+          ratio: ''
+        handles: []
+        result:
+          success: success
+          message: message
+          return_info: return_info
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties:
+                current_status:
+                  type: string
+                progress:
+                  type: number
+              type: object
+            goal:
+              properties:
+                vessel:
+                  type: string
+                reagent:
+                  type: string
+                mass:
+                  type: string
+                mol:
+                  type: string
+                purpose:
+                  type: string
+                event:
+                  type: string
+                rate_spec:
+                  type: string
+                equiv:
+                  type: string
+                ratio:
+                  type: string
+              type: object
+            result:
+              properties:
+                success:
+                  type: boolean
+                message:
+                  type: string
+                return_info:
+                  type: string
+              type: object
+          required:
+          - goal
+          title: AddSolid
+          type: object
+        type: Add  # 🔧 使用 Add action type
+    module: unilabos.devices.virtual.virtual_solid_dispenser:VirtualSolidDispenser
+    status_types:
+      status: str
+      current_reagent: str
+      dispensed_amount: float
+      total_operations: int
+    type: python
+  description: Virtual Solid Dispenser for Add Protocol Testing - supports mass and molar additions
+  handles:
+  - data_key: solid_out
+    data_source: executor
+    data_type: resource
+    description: 固体试剂输出口
+    handler_key: SolidOut
+    io_type: source
+    label: SolidOut
+    side: SOUTH
+  - data_key: solid_in
+    data_source: handle
+    data_type: resource
+    description: 固体试剂输入口（连接试剂瓶）
+    handler_key: SolidIn
+    io_type: target
+    label: SolidIn
+    side: NORTH
+  icon: ''
+  init_param_schema:
+    config:
+      properties:
+        max_capacity:
+          default: 100.0
+          type: number
+        precision:
+          default: 0.001
+          type: number
+        config:
+          type: object
+        device_id:
+          type: string
+      required: []
+      type: object
+    data:
+      properties:
+        status:
+          type: string
+        current_reagent:
+          type: string
+        dispensed_amount:
+          type: number
+        total_operations:
+          type: integer
+      required:
+      - status
+      - current_reagent
+      - dispensed_amount
+      - total_operations
+      type: object
+  version: 0.0.1
