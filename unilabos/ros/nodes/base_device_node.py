@@ -656,6 +656,8 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                     if v in ["unilabos_msgs/Resource", "sequence<unilabos_msgs/Resource>"]:
                         self.lab_logger().info(f"查询资源状态: Key: {k} Type: {v}")
                         current_resources = []
+                        # TODO: resource后面需要分组
+                        only_one_resource = False
                         try:
                             if len(action_kwargs[k]) > 1:
                                 for i in action_kwargs[k]:
@@ -665,6 +667,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                                     response = await self._resource_clients["resource_get"].call_async(r)
                                     current_resources.extend(response.resources)
                             else:
+                                only_one_resource = True
                                 r = ResourceGet.Request()
                                 r.id = (
                                     action_kwargs[k]["id"]
@@ -682,7 +685,10 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                         type_hint = action_paramtypes[k]
                         final_type = get_type_class(type_hint)
                         # 判断 ACTION 是否需要特殊的物料类型如 pylabrobot.resources.Resource，并做转换
-                        final_resource = [convert_resources_to_type([i], final_type)[0] for i in resources_list]
+                        if only_one_resource:
+                            final_resource = convert_resources_to_type(resources_list, final_type)
+                        else:
+                            final_resource = [convert_resources_to_type([i], final_type)[0] for i in resources_list]
                         action_kwargs[k] = self.resource_tracker.figure_resource(final_resource)
 
             ##### self.lab_logger().info(f"准备执行: {action_kwargs}, 函数: {ACTION.__name__}")
