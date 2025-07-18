@@ -1,8 +1,17 @@
 OTDeck:
-  description: Opentrons deck
-  class: 
+  category:
+  - deck
+  class:
     module: pylabrobot.resources.opentrons.deck:OTDeck
     type: pylabrobot
+  config_info: []
+  description: Opentrons deck
+  file_path: C:/Users/10230/PycharmProjects/Uni-Lab-OS/unilabos/registry/resources/opentrons/deck.yaml
+  handles: []
+  icon: ''
+  init_param_schema: {}
   model:
-    type: device
     mesh: opentrons_liquid_handler
+    type: device
+  registry_type: resource
+  version: 1.0.0

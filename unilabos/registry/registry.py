@@ -9,6 +9,7 @@ from typing import Any, Dict, List
 
 import yaml
 
+from unilabos.resources.graphio import resource_plr_to_ulab, tree_to_list
 from unilabos.ros.msgs.message_converter import msg_converter_manager, ros_action_to_json_schema, String
 from unilabos.utils import logger
 from unilabos.utils.decorator import singleton
@@ -65,7 +66,9 @@ class Registry:
                                 },
                                 "feedback": {},
                                 "result": {"success": "success"},
-                                "schema": ros_action_to_json_schema(self.ResourceCreateFromOuter, '用于创建或更新物料资源，每次传入多个物料信息。'),
+                                "schema": ros_action_to_json_schema(
+                                    self.ResourceCreateFromOuter, "用于创建或更新物料资源，每次传入多个物料信息。"
+                                ),
                                 "goal_default": yaml.safe_load(
                                     io.StringIO(get_yaml_from_goal_type(self.ResourceCreateFromOuter.Goal))
                                 ),
@@ -86,7 +89,9 @@ class Registry:
                                 },
                                 "feedback": {},
                                 "result": {"success": "success"},
-                                "schema": ros_action_to_json_schema(self.ResourceCreateFromOuterEasy, '用于创建或更新物料资源，每次传入一个物料信息。'),
+                                "schema": ros_action_to_json_schema(
+                                    self.ResourceCreateFromOuterEasy, "用于创建或更新物料资源，每次传入一个物料信息。"
+                                ),
                                 "goal_default": yaml.safe_load(
                                     io.StringIO(get_yaml_from_goal_type(self.ResourceCreateFromOuterEasy.Goal))
                                 ),
@@ -113,7 +118,9 @@ class Registry:
                                 "goal": {},
                                 "feedback": {},
                                 "result": {"latency_ms": "latency_ms", "time_diff_ms": "time_diff_ms"},
-                                "schema": ros_action_to_json_schema(self.EmptyIn, '用于测试延迟的动作，返回延迟时间和时间差。'),
+                                "schema": ros_action_to_json_schema(
+                                    self.EmptyIn, "用于测试延迟的动作，返回延迟时间和时间差。"
+                                ),
                                 "goal_default": {},
                                 "handles": {},
                             },
@@ -149,6 +156,7 @@ class Registry:
         for i, file in enumerate(files):
             with open(file, encoding="utf-8", mode="r") as f:
                 data = yaml.safe_load(io.StringIO(f.read()))
+            complete_data = {}
             if data:
                 # 为每个资源添加文件路径信息
                 for resource_id, resource_info in data.items():
@@ -172,11 +180,21 @@ class Registry:
                         if len(class_info) and "module" in class_info:
                             if class_info.get("type") == "pylabrobot":
                                 res_class = get_class(class_info["module"])
-                                if callable(res_class) and not isinstance(res_class, type):  # 有的是类，有的是函数，这里暂时只登记函数类的
+                                if callable(res_class) and not isinstance(
+                                    res_class, type
+                                ):  # 有的是类，有的是函数，这里暂时只登记函数类的
                                     res_instance = res_class(res_class.__name__)
-
-                                    print(res_instance)
+                                    res_ulr = tree_to_list([resource_plr_to_ulab(res_instance)])
+                                    resource_info["config_info"] = res_ulr
                     resource_info["registry_type"] = "resource"
+                    complete_data[resource_id] = copy.deepcopy(dict(sorted(resource_info.items())))  # 稍后dump到文件
+
+                complete_data = dict(sorted(complete_data.items()))
+                complete_data = copy.deepcopy(complete_data)
+                if complete_registry:
+                    with open(file, "w", encoding="utf-8") as f:
+                        yaml.dump(complete_data, f, allow_unicode=True, default_flow_style=False, Dumper=NoAliasDumper)
+
                 self.resource_type_registry.update(data)
                 logger.debug(
                     f"[UniLab Registry] Resource-{current_resource_number} File-{i+1}/{len(files)} "
@@ -462,7 +480,9 @@ class Registry:
                             # 恢复原有的description信息（auto开头的不修改）
                             for action_name, description in old_descriptions.items():
                                 if action_name in device_config["class"]["action_value_mappings"]:  # 有一些会被删除
-                                    device_config["class"]["action_value_mappings"][action_name]["schema"]["description"] = description
+                                    device_config["class"]["action_value_mappings"][action_name]["schema"][
+                                        "description"
+                                    ] = description
                             device_config["init_param_schema"] = {}
                             device_config["init_param_schema"]["config"] = self._generate_unilab_json_command_schema(
                                 enhanced_info["init_params"], "__init__"

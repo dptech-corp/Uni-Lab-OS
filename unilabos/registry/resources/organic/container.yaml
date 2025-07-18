@@ -1,28 +1,35 @@
 container:
-  description: regular organic container
-  icon: Flask.webp
-  class: 
+  category:
+  - container
+  class:
     module: unilabos.resources.container:RegularContainer
     type: unilabos
+  config_info: []
+  description: regular organic container
+  file_path: C:/Users/10230/PycharmProjects/Uni-Lab-OS/unilabos/registry/resources/organic/container.yaml
   handles:
-    - handler_key: top
-      label: top
-      io_type: target
-      data_type: fluid
-      side: NORTH
-      data_source: handle
-      data_key: fluid_in
-    - handler_key: bottom
-      label: bottom
-      io_type: source
-      data_type: fluid
-      side: SOUTH
-      data_source: handle
-      data_key: fluid_out
-    - handler_key: bind
-      label: bind
-      io_type: target
-      data_type: mechanical
-      side: SOUTH
-      data_source: handle
-      data_key: mechanical_port
+  - data_key: fluid_in
+    data_source: handle
+    data_type: fluid
+    handler_key: top
+    io_type: target
+    label: top
+    side: NORTH
+  - data_key: fluid_out
+    data_source: handle
+    data_type: fluid
+    handler_key: bottom
+    io_type: source
+    label: bottom
+    side: SOUTH
+  - data_key: mechanical_port
+    data_source: handle
+    data_type: mechanical
+    handler_key: bind
+    io_type: target
+    label: bind
+    side: SOUTH
+  icon: Flask.webp
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
