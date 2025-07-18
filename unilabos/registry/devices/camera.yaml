@@ -47,6 +47,8 @@ camera:
   description: VideoPublisher摄像头设备节点，用于实时视频采集和流媒体发布。该设备通过OpenCV连接本地摄像头（如USB摄像头、内置摄像头等），定时采集视频帧并将其转换为ROS2的sensor_msgs/Image消息格式发布到视频话题。主要用于实验室自动化系统中的视觉监控、图像分析、实时观察等应用场景。支持可配置的摄像头索引、发布频率等参数。
   handles: []
   icon: ''
+  category:
+    - camera
   init_param_schema:
     config:
       properties:

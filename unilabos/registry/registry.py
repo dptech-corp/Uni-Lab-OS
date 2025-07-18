@@ -147,7 +147,8 @@ class Registry:
         logger.debug(f"[UniLab Registry] resources: {resource_path.exists()}, total: {len(files)}")
         current_resource_number = len(self.resource_type_registry) + 1
         for i, file in enumerate(files):
-            data = yaml.safe_load(open(file, encoding="utf-8"))
+            with open(file, encoding="utf-8", mode="r") as f:
+                data = yaml.safe_load(io.StringIO(f.read()))
             if data:
                 # 为每个资源添加文件路径信息
                 for resource_id, resource_info in data.items():
@@ -344,6 +345,7 @@ class Registry:
         }
 
     def load_device_types(self, path: os.PathLike, complete_registry: bool):
+        return
         abs_path = Path(path).absolute()
         devices_path = abs_path / "devices"
         device_comms_path = abs_path / "device_comms"
