@@ -240,8 +240,6 @@ workstation:
           type: object
         type: AGVTransfer
       AddProtocol:
-        placeholder_keys:
-          vessel: unilabos_resources
         feedback: {}
         goal:
           amount: amount
@@ -307,6 +305,8 @@ workstation:
             data_type: resource
             handler_key: VesselOut
             label: Vessel
+        placeholder_keys:
+          vessel: unilabos_resources
         result: {}
         schema:
           description: ''

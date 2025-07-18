@@ -240,3 +240,5 @@ unilabos/device_mesh/view_robot.rviz
 
 # Certs
 **/.certs
+local_test2.py
+ros-humble-unilabos-msgs-0.9.12-h6403a04_5.tar.bz2

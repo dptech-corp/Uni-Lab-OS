@@ -464,6 +464,7 @@ class PRCXI9300Backend(LiquidHandlerBackend):
 
         # 检查trash # 
         if ops[0].resource.name == "trash":
+            
             PlateNo = ops[0].resource.parent.children.index(ops[0].resource) + 1
 
             step = self.api_client.UnLoad(
@@ -1140,7 +1141,7 @@ if __name__ == "__main__":
         tip_racks.update({k: v for k, v in tip_rack_serialized.items() if k not in ["children"]})
         new_tip_rack: PRCXI9300Container = PRCXI9300Container.deserialize(tip_racks)
         return new_tip_rack
-
+    
     plate1 = get_well_container("HPLCPlateT1")
     plate1.load_state({
         "Material": {
@@ -1223,24 +1224,28 @@ if __name__ == "__main__":
             "uuid": "04211a2dc93547fe9bf6121eac533650"
         }
     })
+
+    container_for_nothing = PRCXI9300Container(name="container_for_nothing", size_x=50, size_y=50, size_z=10, category="plate", ordering=collections.OrderedDict())
+
     deck.assign_child_resource(plate1, location=Coordinate(0, 0, 0))
-    # deck.assign_child_resource(plate2, location=Coordinate(0, 0, 0))
-    # deck.assign_child_resource(plate3, location=Coordinate(0, 0, 0))
+    deck.assign_child_resource(container_for_nothing, location=Coordinate(0, 0, 0))
+    deck.assign_child_resource(container_for_nothing, location=Coordinate(0, 0, 0))
     deck.assign_child_resource(trash, location=Coordinate(0, 0, 0))
-    # deck.assign_child_resource(plate5, location=Coordinate(0, 0, 0))
-    # deck.assign_child_resource(plate6, location=Coordinate(0, 0, 0))
-    # deck.assign_child_resource(plate7, location=Coordinate(0, 0, 0))
+    deck.assign_child_resource(container_for_nothing, location=Coordinate(0, 0, 0))
+    deck.assign_child_resource(container_for_nothing, location=Coordinate(0, 0, 0))
+    deck.assign_child_resource(container_for_nothing, location=Coordinate(0, 0, 0))
     deck.assign_child_resource(plate8, location=Coordinate(0, 0, 0))
-    # deck.assign_child_resource(plate9, location=Coordinate(0, 0, 0))
-    # deck.assign_child_resource(plate10, location=Coordinate(0, 0, 0))
+    deck.assign_child_resource(container_for_nothing, location=Coordinate(0, 0, 0))
+    deck.assign_child_resource(container_for_nothing, location=Coordinate(0, 0, 0))
     deck.assign_child_resource(plate11, location=Coordinate(0, 0, 0))
-    # deck.assign_child_resource(plate12, location=Coordinate(0, 0, 0))
-    # deck.assign_child_resource(plate13, location=Coordinate(0, 0, 0))
+    deck.assign_child_resource(container_for_nothing, location=Coordinate(0, 0, 0))
+    deck.assign_child_resource(container_for_nothing, location=Coordinate(0, 0, 0))
 
     handler = PRCXI9300Handler(deck=deck, host="10.181.102.13", port=9999, 
                                timeout=10.0, setup=False, debug=True, 
                                matrix_id="fd383e6d-2d0e-40b5-9c01-1b2870b1f1b1",
                                channel_num=1)
+    
     handler.set_tiprack([plate8])  # Set the tip rack for the handler
     asyncio.run(handler.setup())  # Initialize the handler and setup the connection
     from pylabrobot.resources import set_volume_tracking
