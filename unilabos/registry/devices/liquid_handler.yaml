@@ -6178,6 +6178,8 @@ liquid_handler.prcxi:
           vols:
           - 0.0
         handles: []
+        placeholder_keys:
+          resources: unilabos_resources
         result: {}
         schema:
           description: ''
@@ -6535,6 +6537,8 @@ liquid_handler.prcxi:
             sample_id: ''
             type: ''
         handles: []
+        placeholder_keys:
+          targets: unilabos_resources
         result: {}
         schema:
           description: ''
