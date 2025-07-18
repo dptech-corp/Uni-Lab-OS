@@ -6847,7 +6847,10 @@ liquid_handler.prcxi:
         type: LiquidHandlerPickUpTips
       set_liquid:
         feedback: {}
-        goal: {}
+        goal:
+          liquid_names: liquid_names
+          volumes: volumes
+          wells: wells
         goal_default:
           liquid_names:
           - ''

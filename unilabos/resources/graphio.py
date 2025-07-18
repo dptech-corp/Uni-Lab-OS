@@ -461,7 +461,6 @@ def resource_plr_to_ulab(resource_plr: "ResourcePLR", parent_name: str = None):
             "data": all_states[d["name"]],
         }
         return r
-
     d = resource_plr.serialize()
     all_states = resource_plr.serialize_all_state()
     r = resource_plr_to_ulab_inner(d, all_states)
