@@ -88,6 +88,20 @@ class VirtualRotavap:
     ) -> bool:
         """Execute evaporate action - 简化版 🌪️"""
         
+        # 🔧 新增：确保time参数是数值类型
+        if isinstance(time, str):
+            try:
+                time = float(time)
+            except ValueError:
+                self.logger.error(f"❌ 无法转换时间参数 '{time}' 为数值，使用默认值180.0秒")
+                time = 180.0
+        elif not isinstance(time, (int, float)):
+            self.logger.error(f"❌ 时间参数类型无效: {type(time)}，使用默认值180.0秒")
+            time = 180.0
+        
+        # 确保time是float类型
+        time = float(time)
+        
         # 🔧 简化处理：如果vessel就是设备自己，直接操作
         if vessel == self.device_id:
             debug_print(f"🎯 在设备 {self.device_id} 上直接执行蒸发操作")
@@ -158,7 +172,7 @@ class VirtualRotavap:
             })
             return False
 
-        # 开始蒸发
+        # 开始蒸发 - 🔧 现在time已经确保是float类型
         self.logger.info(f"🚀 启动蒸发程序! 预计用时 {time/60:.1f}分钟 ⏱️")
         
         self.data.update({

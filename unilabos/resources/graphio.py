@@ -248,7 +248,7 @@ def dict_to_nested_dict(nodes: dict, devices_only: bool = False) -> dict:
     root_nodes = {
         node["id"]: node
         for node in nodes_list
-        if node.get("parent", node.get("parent_name")) in [None, "", "None", np.nan]
+        if node.get("parent", node.get("parent_name")) in [None, "", "None", np.nan] or len(nodes_list) == 1
     }
 
     # 如果存在多个根节点，返回所有根节点

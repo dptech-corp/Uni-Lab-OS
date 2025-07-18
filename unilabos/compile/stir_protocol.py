@@ -149,7 +149,7 @@ def extract_vessel_id(vessel: Union[str, dict]) -> str:
         str: vessel_id
     """
     if isinstance(vessel, dict):
-        vessel_id = vessel.get("id", "")
+        vessel_id = list(vessel.values())[0].get("id", "")
         debug_print(f"🔧 从vessel字典提取ID: {vessel_id}")
         return vessel_id
     elif isinstance(vessel, str):

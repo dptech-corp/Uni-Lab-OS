@@ -189,45 +189,26 @@ class ROS2ProtocolNode(BaseROS2DeviceNode):
 
                 # # 🔧 完全禁用Host查询，直接使用转换后的数据
                 # print(f"🔧 跳过Host查询，直接使用转换后的数据")
-                
-                # 🔧 额外验证：确保vessel数据完整
-                if 'vessel' in protocol_kwargs:
-                    vessel_data = protocol_kwargs['vessel']
-                    #print(f"🔍 验证vessel数据: {vessel_data}")
-                    
-                    # 如果vessel是空字典，尝试重新构建
-                    if not vessel_data or (isinstance(vessel_data, dict) and not vessel_data):
-                    #    print(f"⚠️ vessel数据为空，尝试从原始goal重新提取...")
-                        
-                        # 直接从原始goal提取vessel
-                        if hasattr(goal, 'vessel') and goal.vessel:
-                    #        print(f"🔍 原始goal.vessel: {goal.vessel}")
-                            # 手动转换vessel
-                            vessel_data = {
-                                'id': goal.vessel.id,
-                                'name': goal.vessel.name,
-                                'type': goal.vessel.type,
-                                'category': goal.vessel.category,
-                                'config': goal.vessel.config,
-                                'data': goal.vessel.data
-                            }
-                            protocol_kwargs['vessel'] = vessel_data
-                    #        print(f"✅ 手动重建vessel数据: {vessel_data}")
-                        else:
-                    #        print(f"❌ 无法从原始goal提取vessel数据")
-                            # 创建一个基本的vessel
-                            vessel_data = {'id': 'default_vessel'}
-                            protocol_kwargs['vessel'] = vessel_data
-                    #        print(f"🔧 创建默认vessel: {vessel_data}")
+                # 向Host查询物料当前状态
+                for k, v in goal.get_fields_and_field_types().items():
+                    if v in ["unilabos_msgs/Resource", "sequence<unilabos_msgs/Resource>"]:
+                        r = ResourceGet.Request()
+                        resource_id = (
+                            protocol_kwargs[k]["id"] if v == "unilabos_msgs/Resource" else protocol_kwargs[k][0]["id"]
+                        )
+                        r.id = resource_id
+                        r.with_children = True
+                        response = await self._resource_clients["resource_get"].call_async(r)
+                        protocol_kwargs[k] = list_to_nested_dict(
+                            [convert_from_ros_msg(rs) for rs in response.resources]
+                        )
 
-                #print(f"🔍 最终传递给协议的 protocol_kwargs: {protocol_kwargs}")
-                #print(f"🔍 最终的 vessel: {protocol_kwargs.get('vessel', 'NOT_FOUND')}")
+                self.lab_logger().info(f"🔍 最终传递给协议的 protocol_kwargs: {protocol_kwargs}")
+                self.lab_logger().info(f"🔍 最终的 vessel: {protocol_kwargs.get('vessel', 'NOT_FOUND')}")
 
                 from unilabos.resources.graphio import physical_setup_graph
 
                 self.lab_logger().info(f"Working on physical setup: {physical_setup_graph}")
-                self.lab_logger().info(f"Protocol kwargs: {goal}")
-                self.lab_logger().info(f"Protocol kwargs: {action_value_mapping}")
                 protocol_steps = protocol_steps_generator(G=physical_setup_graph, **protocol_kwargs)
                 
                 self.lab_logger().info(f"Goal received: {protocol_kwargs}, running steps: \n{protocol_steps}")
@@ -263,14 +244,14 @@ class ROS2ProtocolNode(BaseROS2DeviceNode):
                             }
                         )
 
-                # # 向Host更新物料当前状态
-                # for k, v in goal.get_fields_and_field_types().items():
-                #     if v in ["unilabos_msgs/Resource", "sequence<unilabos_msgs/Resource>"]:
-                #         r = ResourceUpdate.Request()
-                #         r.resources = [
-                #             convert_to_ros_msg(Resource, rs) for rs in nested_dict_to_list(protocol_kwargs[k])
-                #         ]
-                #         response = await self._resource_clients["resource_update"].call_async(r)
+                # 向Host更新物料当前状态
+                for k, v in goal.get_fields_and_field_types().items():
+                    if v in ["unilabos_msgs/Resource", "sequence<unilabos_msgs/Resource>"]:
+                        r = ResourceUpdate.Request()
+                        r.resources = [
+                            convert_to_ros_msg(Resource, rs) for rs in nested_dict_to_list(protocol_kwargs[k])
+                        ]
+                        response = await self._resource_clients["resource_update"].call_async(r)
 
                 # 设置成功状态和返回值
                 execution_success = True
