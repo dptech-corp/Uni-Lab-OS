@@ -462,6 +462,26 @@ class PRCXI9300Backend(LiquidHandlerBackend):
     async def drop_tips(self, ops: List[Drop], use_channels: List[int] = None):
         """Pick up tips from the specified resource."""
 
+        # 检查trash # 
+        if ops[0].resource.name == "trash":
+            PlateNo = ops[0].resource.parent.children.index(ops[0].resource) + 1
+
+            step = self.api_client.UnLoad(
+                dosage=0,
+                plate_no=PlateNo,
+                is_whole_plate=False,
+                hole_row=3,
+                hole_col=3,
+                blending_times=0,
+                balance_height=0,
+                plate_or_hole=f"H{1}-8,T{PlateNo}",
+                hole_numbers="1,2,3,4,5,6,7,8",
+        )
+            self.steps_todo_list.append(step)
+            return
+        #print(ops[0].resource.parent.children.index(ops[0].resource))
+
+        
         plate_indexes = []
         for op in ops:
             plate = op.resource.parent.parent
@@ -481,21 +501,6 @@ class PRCXI9300Backend(LiquidHandlerBackend):
         
         PlateNo = plate_indexes[0] + 1
         hole_col = tip_columns[0] + 1
-
-        if deck.children[plate_index].name == "trash":
-            step = self.api_client.UnLoad(
-                dosage=0,
-                plate_no=PlateNo,
-                is_whole_plate=False,
-                hole_row=3,
-                hole_col=3,
-                blending_times=0,
-                balance_height=0,
-                plate_or_hole=f"H{hole_col}-8,T{PlateNo}",
-                hole_numbers="1,2,3,4,5,6,7,8",
-        )
-            self.steps_todo_list.append(step)
-            return
 
         if self.channel_num == 1:
             hole_row = tipspot_index % 8 + 1
@@ -1256,8 +1261,6 @@ if __name__ == "__main__":
     asyncio.run(handler.aspirate([plate11.children[0]],[10], [0]))
     asyncio.run(handler.dispense([plate1.children[3]],[10],[0]))
     asyncio.run(handler.mix([plate1.children[3]], mix_time=3, mix_vol=5, height_to_bottom=0.5, offsets=Coordinate(0, 0, 0), mix_rate=100))
-
-
     asyncio.run(handler.discard_tips())
 
     # asyncio.run(handler.discard_tips())
