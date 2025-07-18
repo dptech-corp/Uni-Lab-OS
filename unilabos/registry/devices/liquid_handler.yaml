@@ -86,6 +86,9 @@ liquid_handler:
           use_channels:
           - 0
         handles: []
+        placeholder_keys:
+          reagent_sources: unilabos_resources
+          targets: unilabos_resources
         result: {}
         schema:
           description: ''
@@ -3197,6 +3200,9 @@ liquid_handler:
             sample_id: ''
             type: ''
         handles: []
+        placeholder_keys:
+          sources: unilabos_resources
+          waste_liquid: unilabos_resources
         result: {}
         schema:
           description: ''
@@ -4991,6 +4997,10 @@ liquid_handler.biomek:
             handler_key: liquid-output
             io_type: source
             label: Liquid Output
+        placeholder_keys:
+          sources: unilabos_resources
+          targets: unilabos_resources
+          tip_racks: unilabos_resources
         result: {}
         schema:
           description: ''
@@ -6946,6 +6956,9 @@ liquid_handler.prcxi:
             sample_id: ''
             type: ''
         handles: []
+        placeholder_keys:
+          sources: unilabos_resources
+          waste_liquid: unilabos_resources
         result: {}
         schema:
           description: ''
