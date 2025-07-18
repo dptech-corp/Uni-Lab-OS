@@ -464,7 +464,7 @@ class PRCXI9300Backend(LiquidHandlerBackend):
 
         # 检查trash # 
         if ops[0].resource.name == "trash":
-            
+
             PlateNo = ops[0].resource.parent.children.index(ops[0].resource) + 1
 
             step = self.api_client.UnLoad(
@@ -1225,24 +1225,24 @@ if __name__ == "__main__":
         }
     })
 
-    container_for_nothing = PRCXI9300Container(name="container_for_nothing", size_x=50, size_y=50, size_z=10, category="plate", ordering=collections.OrderedDict())
+    # container_for_nothing = PRCXI9300Container(name="container_for_nothing", size_x=50, size_y=50, size_z=10, category="plate", ordering=collections.OrderedDict())
 
     deck.assign_child_resource(plate1, location=Coordinate(0, 0, 0))
-    deck.assign_child_resource(container_for_nothing, location=Coordinate(0, 0, 0))
-    deck.assign_child_resource(container_for_nothing, location=Coordinate(0, 0, 0))
+    deck.assign_child_resource(PRCXI9300Container(name="container_for_nothing1", size_x=50, size_y=50, size_z=10, category="plate", ordering=collections.OrderedDict()), location=Coordinate(0, 0, 0))
+    deck.assign_child_resource(PRCXI9300Container(name="container_for_nothing2", size_x=50, size_y=50, size_z=10, category="plate", ordering=collections.OrderedDict()), location=Coordinate(0, 0, 0))
     deck.assign_child_resource(trash, location=Coordinate(0, 0, 0))
-    deck.assign_child_resource(container_for_nothing, location=Coordinate(0, 0, 0))
-    deck.assign_child_resource(container_for_nothing, location=Coordinate(0, 0, 0))
-    deck.assign_child_resource(container_for_nothing, location=Coordinate(0, 0, 0))
+    deck.assign_child_resource(PRCXI9300Container(name="container_for_nothing3", size_x=50, size_y=50, size_z=10, category="plate", ordering=collections.OrderedDict()), location=Coordinate(0, 0, 0))
+    deck.assign_child_resource(PRCXI9300Container(name="container_for_nothing", size_x=50, size_y=50, size_z=10, category="plate", ordering=collections.OrderedDict()), location=Coordinate(0, 0, 0))
+    deck.assign_child_resource(PRCXI9300Container(name="container_for_nothing4", size_x=50, size_y=50, size_z=10, category="plate", ordering=collections.OrderedDict()), location=Coordinate(0, 0, 0))
     deck.assign_child_resource(plate8, location=Coordinate(0, 0, 0))
-    deck.assign_child_resource(container_for_nothing, location=Coordinate(0, 0, 0))
-    deck.assign_child_resource(container_for_nothing, location=Coordinate(0, 0, 0))
+    deck.assign_child_resource(PRCXI9300Container(name="container_for_nothing5", size_x=50, size_y=50, size_z=10, category="plate", ordering=collections.OrderedDict()), location=Coordinate(0, 0, 0))
+    deck.assign_child_resource(PRCXI9300Container(name="container_for_nothing6", size_x=50, size_y=50, size_z=10, category="plate", ordering=collections.OrderedDict()), location=Coordinate(0, 0, 0))
     deck.assign_child_resource(plate11, location=Coordinate(0, 0, 0))
-    deck.assign_child_resource(container_for_nothing, location=Coordinate(0, 0, 0))
-    deck.assign_child_resource(container_for_nothing, location=Coordinate(0, 0, 0))
+    deck.assign_child_resource(PRCXI9300Container(name="container_for_nothing7", size_x=50, size_y=50, size_z=10, category="plate", ordering=collections.OrderedDict()), location=Coordinate(0, 0, 0))
+    deck.assign_child_resource(PRCXI9300Container(name="container_for_nothing8", size_x=50, size_y=50, size_z=10, category="plate", ordering=collections.OrderedDict()), location=Coordinate(0, 0, 0))
 
     handler = PRCXI9300Handler(deck=deck, host="10.181.102.13", port=9999, 
-                               timeout=10.0, setup=False, debug=True, 
+                               timeout=10.0, setup=False, debug=False, 
                                matrix_id="fd383e6d-2d0e-40b5-9c01-1b2870b1f1b1",
                                channel_num=1)
     
@@ -1262,6 +1262,7 @@ if __name__ == "__main__":
 
     print(plate11.get_well(0).tracker.get_used_volume())
     asyncio.run(handler.create_protocol(protocol_name="Test Protocol"))  # Initialize the backend and setup the connection
+    print(plate8.children[3])
     asyncio.run(handler.pick_up_tips([plate8.children[3]],[0]))
     asyncio.run(handler.aspirate([plate11.children[0]],[10], [0]))
     asyncio.run(handler.dispense([plate1.children[3]],[10],[0]))
