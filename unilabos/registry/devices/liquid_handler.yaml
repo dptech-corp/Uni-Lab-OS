@@ -647,70 +647,6 @@ liquid_handler:
           title: iter_tips参数
           type: object
         type: UniLabJsonCommand
-      auto-remove_liquid:
-        feedback: {}
-        goal: {}
-        goal_default:
-          blow_out_air_volume: null
-          delays: null
-          flow_rates: null
-          is_96_well: false
-          liquid_height: null
-          none_keys: []
-          offsets: null
-          sources: null
-          spread: wide
-          top: null
-          use_channels: null
-          vols: null
-          waste_liquid: null
-        handles: []
-        result: {}
-        schema:
-          description: 液体移除操作函数。从指定容器位置移除液体并转移到废液容器中。支持多源位置批量操作、流速控制、液面高度检测、96孔板模式等功能。可配置延时、吹气体积、位置偏移等参数，确保液体完全移除和容器清洁。适用于样品清洗、废液处理、容器清空等实验清理操作。
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                blow_out_air_volume:
-                  type: string
-                delays:
-                  type: string
-                flow_rates:
-                  type: string
-                is_96_well:
-                  default: false
-                  type: string
-                liquid_height:
-                  type: string
-                none_keys:
-                  default: []
-                  type: string
-                offsets:
-                  type: string
-                sources:
-                  type: string
-                spread:
-                  default: wide
-                  type: string
-                top:
-                  type: string
-                use_channels:
-                  type: string
-                vols:
-                  type: string
-                waste_liquid:
-                  type: string
-              required:
-              - vols
-              - sources
-              type: object
-            result: {}
-          required:
-          - goal
-          title: remove_liquid参数
-          type: object
-        type: UniLabJsonCommandAsync
       auto-set_tiprack:
         feedback: {}
         goal: {}
@@ -3181,6 +3117,333 @@ liquid_handler:
           title: LiquidHandlerRemove
           type: object
         type: LiquidHandlerRemove
+      remove_liquid:
+        feedback: {}
+        goal:
+          blow_out_air_volume: blow_out_air_volume
+          delays: delays
+          flow_rates: flow_rates
+          is_96_well: is_96_well
+          liquid_height: liquid_height
+          none_keys: none_keys
+          offsets: offsets
+          sources: sources
+          spread: spread
+          top: top
+          use_channels: use_channels
+          vols: vols
+          waste_liquid: waste_liquid
+        goal_default:
+          blow_out_air_volume:
+          - 0.0
+          delays:
+          - 0
+          flow_rates:
+          - 0.0
+          is_96_well: false
+          liquid_height:
+          - 0.0
+          none_keys:
+          - ''
+          offsets:
+          - x: 0.0
+            y: 0.0
+            z: 0.0
+          sources:
+          - category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+          spread: ''
+          top:
+          - 0.0
+          use_channels:
+          - 0
+          vols:
+          - 0.0
+          waste_liquid:
+            category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+        handles: []
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: LiquidHandlerRemove_Feedback
+              type: object
+            goal:
+              properties:
+                blow_out_air_volume:
+                  items:
+                    type: number
+                  type: array
+                delays:
+                  items:
+                    maximum: 2147483647
+                    minimum: -2147483648
+                    type: integer
+                  type: array
+                flow_rates:
+                  items:
+                    type: number
+                  type: array
+                is_96_well:
+                  type: boolean
+                liquid_height:
+                  items:
+                    type: number
+                  type: array
+                none_keys:
+                  items:
+                    type: string
+                  type: array
+                offsets:
+                  items:
+                    properties:
+                      x:
+                        type: number
+                      y:
+                        type: number
+                      z:
+                        type: number
+                    required:
+                    - x
+                    - y
+                    - z
+                    title: Point
+                    type: object
+                  type: array
+                sources:
+                  items:
+                    properties:
+                      category:
+                        type: string
+                      children:
+                        items:
+                          type: string
+                        type: array
+                      config:
+                        type: string
+                      data:
+                        type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      parent:
+                        type: string
+                      pose:
+                        properties:
+                          orientation:
+                            properties:
+                              w:
+                                type: number
+                              x:
+                                type: number
+                              y:
+                                type: number
+                              z:
+                                type: number
+                            required:
+                            - x
+                            - y
+                            - z
+                            - w
+                            title: Quaternion
+                            type: object
+                          position:
+                            properties:
+                              x:
+                                type: number
+                              y:
+                                type: number
+                              z:
+                                type: number
+                            required:
+                            - x
+                            - y
+                            - z
+                            title: Point
+                            type: object
+                        required:
+                        - position
+                        - orientation
+                        title: Pose
+                        type: object
+                      sample_id:
+                        type: string
+                      type:
+                        type: string
+                    required:
+                    - id
+                    - name
+                    - sample_id
+                    - children
+                    - parent
+                    - type
+                    - category
+                    - pose
+                    - config
+                    - data
+                    title: Resource
+                    type: object
+                  type: array
+                spread:
+                  type: string
+                top:
+                  items:
+                    type: number
+                  type: array
+                use_channels:
+                  items:
+                    maximum: 2147483647
+                    minimum: -2147483648
+                    type: integer
+                  type: array
+                vols:
+                  items:
+                    type: number
+                  type: array
+                waste_liquid:
+                  properties:
+                    category:
+                      type: string
+                    children:
+                      items:
+                        type: string
+                      type: array
+                    config:
+                      type: string
+                    data:
+                      type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    parent:
+                      type: string
+                    pose:
+                      properties:
+                        orientation:
+                          properties:
+                            w:
+                              type: number
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          - w
+                          title: Quaternion
+                          type: object
+                        position:
+                          properties:
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          title: Point
+                          type: object
+                      required:
+                      - position
+                      - orientation
+                      title: Pose
+                      type: object
+                    sample_id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - id
+                  - name
+                  - sample_id
+                  - children
+                  - parent
+                  - type
+                  - category
+                  - pose
+                  - config
+                  - data
+                  title: Resource
+                  type: object
+              required:
+              - vols
+              - sources
+              - waste_liquid
+              - use_channels
+              - flow_rates
+              - offsets
+              - liquid_height
+              - blow_out_air_volume
+              - spread
+              - delays
+              - is_96_well
+              - top
+              - none_keys
+              title: LiquidHandlerRemove_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: LiquidHandlerRemove_Result
+              type: object
+          required:
+          - goal
+          title: LiquidHandlerRemove
+          type: object
+        type: LiquidHandlerRemove
       return_tips:
         feedback: {}
         goal:
@@ -3524,453 +3787,90 @@ liquid_handler:
           target_vols: target_vols
           targets: targets
         goal_default:
-          asp_flow_rates:
-          - 0.0
-          asp_vols:
-          - 0.0
-          blow_out_air_volume:
-          - 0.0
-          delays:
-          - 0
-          dis_flow_rates:
-          - 0.0
-          dis_vols:
-          - 0.0
-          is_96_well: false
-          liquid_height:
-          - 0.0
-          mix_liquid_height: 0.0
-          mix_rate: 0
-          mix_stage: ''
-          mix_times:
-          - 0
-          mix_vol: 0
-          none_keys:
-          - ''
-          offsets:
-          - x: 0.0
-            y: 0.0
-            z: 0.0
-          sources:
-          - category: ''
-            children: []
-            config: ''
-            data: ''
-            id: ''
-            name: ''
-            parent: ''
-            pose:
-              orientation:
-                w: 1.0
-                x: 0.0
-                y: 0.0
-                z: 0.0
-              position:
-                x: 0.0
-                y: 0.0
-                z: 0.0
-            sample_id: ''
-            type: ''
-          spread: ''
-          targets:
-          - category: ''
-            children: []
-            config: ''
-            data: ''
-            id: ''
-            name: ''
-            parent: ''
-            pose:
-              orientation:
-                w: 1.0
-                x: 0.0
-                y: 0.0
-                z: 0.0
-              position:
-                x: 0.0
-                y: 0.0
-                z: 0.0
-            sample_id: ''
-            type: ''
-          tip_racks:
-          - category: ''
-            children: []
-            config: ''
-            data: ''
-            id: ''
-            name: ''
-            parent: ''
-            pose:
-              orientation:
-                w: 1.0
-                x: 0.0
-                y: 0.0
-                z: 0.0
-              position:
-                x: 0.0
-                y: 0.0
-                z: 0.0
-            sample_id: ''
-            type: ''
-          touch_tip: false
-          use_channels:
-          - 0
+          amount: ''
+          from_vessel: ''
+          rinsing_repeats: 0
+          rinsing_solvent: ''
+          rinsing_volume: 0.0
+          solid: false
+          time: 0.0
+          to_vessel: ''
+          viscous: false
+          volume: 0.0
         handles: []
         schema:
           description: ''
           properties:
             feedback:
-              properties: {}
-              required: []
-              title: LiquidHandlerTransfer_Feedback
+              properties:
+                current_status:
+                  type: string
+                progress:
+                  type: number
+                transferred_volume:
+                  type: number
+              required:
+              - progress
+              - transferred_volume
+              - current_status
+              title: Transfer_Feedback
               type: object
             goal:
               properties:
-                asp_flow_rates:
-                  items:
-                    type: number
-                  type: array
-                asp_vols:
-                  items:
-                    type: number
-                  type: array
-                blow_out_air_volume:
-                  items:
-                    type: number
-                  type: array
-                delays:
-                  items:
-                    maximum: 2147483647
-                    minimum: -2147483648
-                    type: integer
-                  type: array
-                dis_flow_rates:
-                  items:
-                    type: number
-                  type: array
-                dis_vols:
-                  items:
-                    type: number
-                  type: array
-                is_96_well:
-                  type: boolean
-                liquid_height:
-                  items:
-                    type: number
-                  type: array
-                mix_liquid_height:
+                amount:
+                  type: string
+                from_vessel:
+                  type: string
+                rinsing_repeats:
+                  maximum: 2147483647
+                  minimum: -2147483648
+                  type: integer
+                rinsing_solvent:
+                  type: string
+                rinsing_volume:
                   type: number
-                mix_rate:
-                  maximum: 2147483647
-                  minimum: -2147483648
-                  type: integer
-                mix_stage:
-                  type: string
-                mix_times:
-                  items:
-                    maximum: 2147483647
-                    minimum: -2147483648
-                    type: integer
-                  type: array
-                mix_vol:
-                  maximum: 2147483647
-                  minimum: -2147483648
-                  type: integer
-                none_keys:
-                  items:
-                    type: string
-                  type: array
-                offsets:
-                  items:
-                    properties:
-                      x:
-                        type: number
-                      y:
-                        type: number
-                      z:
-                        type: number
-                    required:
-                    - x
-                    - y
-                    - z
-                    title: Point
-                    type: object
-                  type: array
-                sources:
-                  items:
-                    properties:
-                      category:
-                        type: string
-                      children:
-                        items:
-                          type: string
-                        type: array
-                      config:
-                        type: string
-                      data:
-                        type: string
-                      id:
-                        type: string
-                      name:
-                        type: string
-                      parent:
-                        type: string
-                      pose:
-                        properties:
-                          orientation:
-                            properties:
-                              w:
-                                type: number
-                              x:
-                                type: number
-                              y:
-                                type: number
-                              z:
-                                type: number
-                            required:
-                            - x
-                            - y
-                            - z
-                            - w
-                            title: Quaternion
-                            type: object
-                          position:
-                            properties:
-                              x:
-                                type: number
-                              y:
-                                type: number
-                              z:
-                                type: number
-                            required:
-                            - x
-                            - y
-                            - z
-                            title: Point
-                            type: object
-                        required:
-                        - position
-                        - orientation
-                        title: Pose
-                        type: object
-                      sample_id:
-                        type: string
-                      type:
-                        type: string
-                    required:
-                    - id
-                    - name
-                    - sample_id
-                    - children
-                    - parent
-                    - type
-                    - category
-                    - pose
-                    - config
-                    - data
-                    title: Resource
-                    type: object
-                  type: array
-                spread:
-                  type: string
-                targets:
-                  items:
-                    properties:
-                      category:
-                        type: string
-                      children:
-                        items:
-                          type: string
-                        type: array
-                      config:
-                        type: string
-                      data:
-                        type: string
-                      id:
-                        type: string
-                      name:
-                        type: string
-                      parent:
-                        type: string
-                      pose:
-                        properties:
-                          orientation:
-                            properties:
-                              w:
-                                type: number
-                              x:
-                                type: number
-                              y:
-                                type: number
-                              z:
-                                type: number
-                            required:
-                            - x
-                            - y
-                            - z
-                            - w
-                            title: Quaternion
-                            type: object
-                          position:
-                            properties:
-                              x:
-                                type: number
-                              y:
-                                type: number
-                              z:
-                                type: number
-                            required:
-                            - x
-                            - y
-                            - z
-                            title: Point
-                            type: object
-                        required:
-                        - position
-                        - orientation
-                        title: Pose
-                        type: object
-                      sample_id:
-                        type: string
-                      type:
-                        type: string
-                    required:
-                    - id
-                    - name
-                    - sample_id
-                    - children
-                    - parent
-                    - type
-                    - category
-                    - pose
-                    - config
-                    - data
-                    title: Resource
-                    type: object
-                  type: array
-                tip_racks:
-                  items:
-                    properties:
-                      category:
-                        type: string
-                      children:
-                        items:
-                          type: string
-                        type: array
-                      config:
-                        type: string
-                      data:
-                        type: string
-                      id:
-                        type: string
-                      name:
-                        type: string
-                      parent:
-                        type: string
-                      pose:
-                        properties:
-                          orientation:
-                            properties:
-                              w:
-                                type: number
-                              x:
-                                type: number
-                              y:
-                                type: number
-                              z:
-                                type: number
-                            required:
-                            - x
-                            - y
-                            - z
-                            - w
-                            title: Quaternion
-                            type: object
-                          position:
-                            properties:
-                              x:
-                                type: number
-                              y:
-                                type: number
-                              z:
-                                type: number
-                            required:
-                            - x
-                            - y
-                            - z
-                            title: Point
-                            type: object
-                        required:
-                        - position
-                        - orientation
-                        title: Pose
-                        type: object
-                      sample_id:
-                        type: string
-                      type:
-                        type: string
-                    required:
-                    - id
-                    - name
-                    - sample_id
-                    - children
-                    - parent
-                    - type
-                    - category
-                    - pose
-                    - config
-                    - data
-                    title: Resource
-                    type: object
-                  type: array
-                touch_tip:
+                solid:
                   type: boolean
-                use_channels:
-                  items:
-                    maximum: 2147483647
-                    minimum: -2147483648
-                    type: integer
-                  type: array
+                time:
+                  type: number
+                to_vessel:
+                  type: string
+                viscous:
+                  type: boolean
+                volume:
+                  type: number
               required:
-              - asp_vols
-              - dis_vols
-              - sources
-              - targets
-              - tip_racks
-              - use_channels
-              - asp_flow_rates
-              - dis_flow_rates
-              - offsets
-              - touch_tip
-              - liquid_height
-              - blow_out_air_volume
-              - spread
-              - is_96_well
-              - mix_stage
-              - mix_times
-              - mix_vol
-              - mix_rate
-              - mix_liquid_height
-              - delays
-              - none_keys
-              title: LiquidHandlerTransfer_Goal
+              - from_vessel
+              - to_vessel
+              - volume
+              - amount
+              - time
+              - viscous
+              - rinsing_solvent
+              - rinsing_volume
+              - rinsing_repeats
+              - solid
+              title: Transfer_Goal
               type: object
             result:
               properties:
+                message:
+                  type: string
                 return_info:
                   type: string
                 success:
                   type: boolean
               required:
-              - return_info
               - success
-              title: LiquidHandlerTransfer_Result
+              - message
+              - return_info
+              title: Transfer_Result
               type: object
           required:
           - goal
-          title: LiquidHandlerTransfer
+          title: Transfer
           type: object
-        type: LiquidHandlerTransfer
+        type: Transfer
       transfer_liquid:
         feedback: {}
         goal:
@@ -4088,6 +3988,10 @@ liquid_handler:
           use_channels:
           - 0
         handles: []
+        placeholder_keys:
+          sources: unilabos_resources
+          targets: unilabos_resources
+          tip_racks: unilabos_resources
         result: {}
         schema:
           description: ''
@@ -6178,70 +6082,6 @@ liquid_handler.prcxi:
           title: move_to参数
           type: object
         type: UniLabJsonCommandAsync
-      auto-remove_liquid:
-        feedback: {}
-        goal: {}
-        goal_default:
-          blow_out_air_volume: null
-          delays: null
-          flow_rates: null
-          is_96_well: false
-          liquid_height: null
-          none_keys: []
-          offsets: null
-          sources: null
-          spread: wide
-          top: null
-          use_channels: null
-          vols: null
-          waste_liquid: null
-        handles: []
-        result: {}
-        schema:
-          description: remove_liquid的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                blow_out_air_volume:
-                  type: string
-                delays:
-                  type: string
-                flow_rates:
-                  type: string
-                is_96_well:
-                  default: false
-                  type: string
-                liquid_height:
-                  type: string
-                none_keys:
-                  default: []
-                  type: array
-                offsets:
-                  type: string
-                sources:
-                  type: string
-                spread:
-                  default: wide
-                  type: string
-                top:
-                  type: string
-                use_channels:
-                  type: string
-                vols:
-                  type: array
-                waste_liquid:
-                  type: string
-              required:
-              - vols
-              - sources
-              type: object
-            result: {}
-          required:
-          - goal
-          title: remove_liquid参数
-          type: object
-        type: UniLabJsonCommandAsync
       auto-run_protocol:
         feedback: {}
         goal: {}
@@ -6308,99 +6148,6 @@ liquid_handler.prcxi:
           required:
           - goal
           title: touch_tip参数
-          type: object
-        type: UniLabJsonCommandAsync
-      auto-transfer_liquid:
-        feedback: {}
-        goal: {}
-        goal_default:
-          asp_flow_rates: null
-          asp_vols: null
-          blow_out_air_volume: null
-          delays: null
-          dis_flow_rates: null
-          dis_vols: null
-          is_96_well: false
-          liquid_height: null
-          mix_liquid_height: null
-          mix_rate: null
-          mix_stage: none
-          mix_times: null
-          mix_vol: null
-          none_keys: []
-          offsets: null
-          sources: null
-          spread: wide
-          targets: null
-          tip_racks: null
-          touch_tip: false
-          use_channels: null
-        handles: []
-        result: {}
-        schema:
-          description: transfer_liquid的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                asp_flow_rates:
-                  type: string
-                asp_vols:
-                  type: string
-                blow_out_air_volume:
-                  type: string
-                delays:
-                  type: string
-                dis_flow_rates:
-                  type: string
-                dis_vols:
-                  type: string
-                is_96_well:
-                  default: false
-                  type: boolean
-                liquid_height:
-                  type: string
-                mix_liquid_height:
-                  type: string
-                mix_rate:
-                  type: string
-                mix_stage:
-                  default: none
-                  type: string
-                mix_times:
-                  type: string
-                mix_vol:
-                  type: string
-                none_keys:
-                  default: []
-                  type: array
-                offsets:
-                  type: string
-                sources:
-                  type: string
-                spread:
-                  default: wide
-                  type: string
-                targets:
-                  type: string
-                tip_racks:
-                  type: string
-                touch_tip:
-                  default: false
-                  type: boolean
-                use_channels:
-                  type: string
-              required:
-              - sources
-              - targets
-              - tip_racks
-              - asp_vols
-              - dis_vols
-              type: object
-            result: {}
-          required:
-          - goal
-          title: transfer_liquid参数
           type: object
         type: UniLabJsonCommandAsync
       dispense:
@@ -7119,6 +6866,333 @@ liquid_handler.prcxi:
           title: LiquidHandlerPickUpTips
           type: object
         type: LiquidHandlerPickUpTips
+      remove_liquid:
+        feedback: {}
+        goal:
+          blow_out_air_volume: blow_out_air_volume
+          delays: delays
+          flow_rates: flow_rates
+          is_96_well: is_96_well
+          liquid_height: liquid_height
+          none_keys: none_keys
+          offsets: offsets
+          sources: sources
+          spread: spread
+          top: top
+          use_channels: use_channels
+          vols: vols
+          waste_liquid: waste_liquid
+        goal_default:
+          blow_out_air_volume:
+          - 0.0
+          delays:
+          - 0
+          flow_rates:
+          - 0.0
+          is_96_well: false
+          liquid_height:
+          - 0.0
+          none_keys:
+          - ''
+          offsets:
+          - x: 0.0
+            y: 0.0
+            z: 0.0
+          sources:
+          - category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+          spread: ''
+          top:
+          - 0.0
+          use_channels:
+          - 0
+          vols:
+          - 0.0
+          waste_liquid:
+            category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+        handles: []
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: LiquidHandlerRemove_Feedback
+              type: object
+            goal:
+              properties:
+                blow_out_air_volume:
+                  items:
+                    type: number
+                  type: array
+                delays:
+                  items:
+                    maximum: 2147483647
+                    minimum: -2147483648
+                    type: integer
+                  type: array
+                flow_rates:
+                  items:
+                    type: number
+                  type: array
+                is_96_well:
+                  type: boolean
+                liquid_height:
+                  items:
+                    type: number
+                  type: array
+                none_keys:
+                  items:
+                    type: string
+                  type: array
+                offsets:
+                  items:
+                    properties:
+                      x:
+                        type: number
+                      y:
+                        type: number
+                      z:
+                        type: number
+                    required:
+                    - x
+                    - y
+                    - z
+                    title: Point
+                    type: object
+                  type: array
+                sources:
+                  items:
+                    properties:
+                      category:
+                        type: string
+                      children:
+                        items:
+                          type: string
+                        type: array
+                      config:
+                        type: string
+                      data:
+                        type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      parent:
+                        type: string
+                      pose:
+                        properties:
+                          orientation:
+                            properties:
+                              w:
+                                type: number
+                              x:
+                                type: number
+                              y:
+                                type: number
+                              z:
+                                type: number
+                            required:
+                            - x
+                            - y
+                            - z
+                            - w
+                            title: Quaternion
+                            type: object
+                          position:
+                            properties:
+                              x:
+                                type: number
+                              y:
+                                type: number
+                              z:
+                                type: number
+                            required:
+                            - x
+                            - y
+                            - z
+                            title: Point
+                            type: object
+                        required:
+                        - position
+                        - orientation
+                        title: Pose
+                        type: object
+                      sample_id:
+                        type: string
+                      type:
+                        type: string
+                    required:
+                    - id
+                    - name
+                    - sample_id
+                    - children
+                    - parent
+                    - type
+                    - category
+                    - pose
+                    - config
+                    - data
+                    title: Resource
+                    type: object
+                  type: array
+                spread:
+                  type: string
+                top:
+                  items:
+                    type: number
+                  type: array
+                use_channels:
+                  items:
+                    maximum: 2147483647
+                    minimum: -2147483648
+                    type: integer
+                  type: array
+                vols:
+                  items:
+                    type: number
+                  type: array
+                waste_liquid:
+                  properties:
+                    category:
+                      type: string
+                    children:
+                      items:
+                        type: string
+                      type: array
+                    config:
+                      type: string
+                    data:
+                      type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    parent:
+                      type: string
+                    pose:
+                      properties:
+                        orientation:
+                          properties:
+                            w:
+                              type: number
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          - w
+                          title: Quaternion
+                          type: object
+                        position:
+                          properties:
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          title: Point
+                          type: object
+                      required:
+                      - position
+                      - orientation
+                      title: Pose
+                      type: object
+                    sample_id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - id
+                  - name
+                  - sample_id
+                  - children
+                  - parent
+                  - type
+                  - category
+                  - pose
+                  - config
+                  - data
+                  title: Resource
+                  type: object
+              required:
+              - vols
+              - sources
+              - waste_liquid
+              - use_channels
+              - flow_rates
+              - offsets
+              - liquid_height
+              - blow_out_air_volume
+              - spread
+              - delays
+              - is_96_well
+              - top
+              - none_keys
+              title: LiquidHandlerRemove_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: LiquidHandlerRemove_Result
+              type: object
+          required:
+          - goal
+          title: LiquidHandlerRemove
+          type: object
+        type: LiquidHandlerRemove
       set_liquid:
         feedback: {}
         goal:
@@ -7266,6 +7340,577 @@ liquid_handler.prcxi:
           title: LiquidHandlerSetLiquid
           type: object
         type: LiquidHandlerSetLiquid
+      transfer:
+        goal:
+          aspiration_flow_rate: aspiration_flow_rate
+          dispense_flow_rates: dispense_flow_rates
+          ratios: ratios
+          source: source
+          source_vol: source_vol
+          target_vols: target_vols
+          targets: targets
+        goal_default:
+          amount: ''
+          from_vessel: ''
+          rinsing_repeats: 0
+          rinsing_solvent: ''
+          rinsing_volume: 0.0
+          solid: false
+          time: 0.0
+          to_vessel: ''
+          viscous: false
+          volume: 0.0
+        handles: []
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties:
+                current_status:
+                  type: string
+                progress:
+                  type: number
+                transferred_volume:
+                  type: number
+              required:
+              - progress
+              - transferred_volume
+              - current_status
+              title: Transfer_Feedback
+              type: object
+            goal:
+              properties:
+                amount:
+                  type: string
+                from_vessel:
+                  type: string
+                rinsing_repeats:
+                  maximum: 2147483647
+                  minimum: -2147483648
+                  type: integer
+                rinsing_solvent:
+                  type: string
+                rinsing_volume:
+                  type: number
+                solid:
+                  type: boolean
+                time:
+                  type: number
+                to_vessel:
+                  type: string
+                viscous:
+                  type: boolean
+                volume:
+                  type: number
+              required:
+              - from_vessel
+              - to_vessel
+              - volume
+              - amount
+              - time
+              - viscous
+              - rinsing_solvent
+              - rinsing_volume
+              - rinsing_repeats
+              - solid
+              title: Transfer_Goal
+              type: object
+            result:
+              properties:
+                message:
+                  type: string
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - success
+              - message
+              - return_info
+              title: Transfer_Result
+              type: object
+          required:
+          - goal
+          title: Transfer
+          type: object
+        type: Transfer
+      transfer_liquid:
+        feedback: {}
+        goal:
+          asp_flow_rates: asp_flow_rates
+          asp_vols: asp_vols
+          blow_out_air_volume: blow_out_air_volume
+          delays: delays
+          dis_flow_rates: dis_flow_rates
+          dis_vols: dis_vols
+          is_96_well: is_96_well
+          liquid_height: liquid_height
+          mix_liquid_height: mix_liquid_height
+          mix_rate: mix_rate
+          mix_stage: mix_stage
+          mix_times: mix_times
+          mix_vol: mix_vol
+          none_keys: none_keys
+          offsets: offsets
+          sources: sources
+          spread: spread
+          targets: targets
+          tip_racks: tip_racks
+          touch_tip: touch_tip
+          use_channels: use_channels
+        goal_default:
+          asp_flow_rates:
+          - 0.0
+          asp_vols:
+          - 0.0
+          blow_out_air_volume:
+          - 0.0
+          delays:
+          - 0
+          dis_flow_rates:
+          - 0.0
+          dis_vols:
+          - 0.0
+          is_96_well: false
+          liquid_height:
+          - 0.0
+          mix_liquid_height: 0.0
+          mix_rate: 0
+          mix_stage: ''
+          mix_times:
+          - 0
+          mix_vol: 0
+          none_keys:
+          - ''
+          offsets:
+          - x: 0.0
+            y: 0.0
+            z: 0.0
+          sources:
+          - category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+          spread: ''
+          targets:
+          - category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+          tip_racks:
+          - category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+          touch_tip: false
+          use_channels:
+          - 0
+        handles: []
+        placeholder_keys:
+          sources: unilabos_resources
+          targets: unilabos_resources
+          tip_racks: unilabos_resources
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: LiquidHandlerTransfer_Feedback
+              type: object
+            goal:
+              properties:
+                asp_flow_rates:
+                  items:
+                    type: number
+                  type: array
+                asp_vols:
+                  items:
+                    type: number
+                  type: array
+                blow_out_air_volume:
+                  items:
+                    type: number
+                  type: array
+                delays:
+                  items:
+                    maximum: 2147483647
+                    minimum: -2147483648
+                    type: integer
+                  type: array
+                dis_flow_rates:
+                  items:
+                    type: number
+                  type: array
+                dis_vols:
+                  items:
+                    type: number
+                  type: array
+                is_96_well:
+                  type: boolean
+                liquid_height:
+                  items:
+                    type: number
+                  type: array
+                mix_liquid_height:
+                  type: number
+                mix_rate:
+                  maximum: 2147483647
+                  minimum: -2147483648
+                  type: integer
+                mix_stage:
+                  type: string
+                mix_times:
+                  items:
+                    maximum: 2147483647
+                    minimum: -2147483648
+                    type: integer
+                  type: array
+                mix_vol:
+                  maximum: 2147483647
+                  minimum: -2147483648
+                  type: integer
+                none_keys:
+                  items:
+                    type: string
+                  type: array
+                offsets:
+                  items:
+                    properties:
+                      x:
+                        type: number
+                      y:
+                        type: number
+                      z:
+                        type: number
+                    required:
+                    - x
+                    - y
+                    - z
+                    title: Point
+                    type: object
+                  type: array
+                sources:
+                  items:
+                    properties:
+                      category:
+                        type: string
+                      children:
+                        items:
+                          type: string
+                        type: array
+                      config:
+                        type: string
+                      data:
+                        type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      parent:
+                        type: string
+                      pose:
+                        properties:
+                          orientation:
+                            properties:
+                              w:
+                                type: number
+                              x:
+                                type: number
+                              y:
+                                type: number
+                              z:
+                                type: number
+                            required:
+                            - x
+                            - y
+                            - z
+                            - w
+                            title: Quaternion
+                            type: object
+                          position:
+                            properties:
+                              x:
+                                type: number
+                              y:
+                                type: number
+                              z:
+                                type: number
+                            required:
+                            - x
+                            - y
+                            - z
+                            title: Point
+                            type: object
+                        required:
+                        - position
+                        - orientation
+                        title: Pose
+                        type: object
+                      sample_id:
+                        type: string
+                      type:
+                        type: string
+                    required:
+                    - id
+                    - name
+                    - sample_id
+                    - children
+                    - parent
+                    - type
+                    - category
+                    - pose
+                    - config
+                    - data
+                    title: Resource
+                    type: object
+                  type: array
+                spread:
+                  type: string
+                targets:
+                  items:
+                    properties:
+                      category:
+                        type: string
+                      children:
+                        items:
+                          type: string
+                        type: array
+                      config:
+                        type: string
+                      data:
+                        type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      parent:
+                        type: string
+                      pose:
+                        properties:
+                          orientation:
+                            properties:
+                              w:
+                                type: number
+                              x:
+                                type: number
+                              y:
+                                type: number
+                              z:
+                                type: number
+                            required:
+                            - x
+                            - y
+                            - z
+                            - w
+                            title: Quaternion
+                            type: object
+                          position:
+                            properties:
+                              x:
+                                type: number
+                              y:
+                                type: number
+                              z:
+                                type: number
+                            required:
+                            - x
+                            - y
+                            - z
+                            title: Point
+                            type: object
+                        required:
+                        - position
+                        - orientation
+                        title: Pose
+                        type: object
+                      sample_id:
+                        type: string
+                      type:
+                        type: string
+                    required:
+                    - id
+                    - name
+                    - sample_id
+                    - children
+                    - parent
+                    - type
+                    - category
+                    - pose
+                    - config
+                    - data
+                    title: Resource
+                    type: object
+                  type: array
+                tip_racks:
+                  items:
+                    properties:
+                      category:
+                        type: string
+                      children:
+                        items:
+                          type: string
+                        type: array
+                      config:
+                        type: string
+                      data:
+                        type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      parent:
+                        type: string
+                      pose:
+                        properties:
+                          orientation:
+                            properties:
+                              w:
+                                type: number
+                              x:
+                                type: number
+                              y:
+                                type: number
+                              z:
+                                type: number
+                            required:
+                            - x
+                            - y
+                            - z
+                            - w
+                            title: Quaternion
+                            type: object
+                          position:
+                            properties:
+                              x:
+                                type: number
+                              y:
+                                type: number
+                              z:
+                                type: number
+                            required:
+                            - x
+                            - y
+                            - z
+                            title: Point
+                            type: object
+                        required:
+                        - position
+                        - orientation
+                        title: Pose
+                        type: object
+                      sample_id:
+                        type: string
+                      type:
+                        type: string
+                    required:
+                    - id
+                    - name
+                    - sample_id
+                    - children
+                    - parent
+                    - type
+                    - category
+                    - pose
+                    - config
+                    - data
+                    title: Resource
+                    type: object
+                  type: array
+                touch_tip:
+                  type: boolean
+                use_channels:
+                  items:
+                    maximum: 2147483647
+                    minimum: -2147483648
+                    type: integer
+                  type: array
+              required:
+              - asp_vols
+              - dis_vols
+              - sources
+              - targets
+              - tip_racks
+              - use_channels
+              - asp_flow_rates
+              - dis_flow_rates
+              - offsets
+              - touch_tip
+              - liquid_height
+              - blow_out_air_volume
+              - spread
+              - is_96_well
+              - mix_stage
+              - mix_times
+              - mix_vol
+              - mix_rate
+              - mix_liquid_height
+              - delays
+              - none_keys
+              title: LiquidHandlerTransfer_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: LiquidHandlerTransfer_Result
+              type: object
+          required:
+          - goal
+          title: LiquidHandlerTransfer
+          type: object
+        type: LiquidHandlerTransfer
     module: unilabos.devices.liquid_handling.prcxi.prcxi:PRCXI9300Handler
     status_types:
       reset_ok: bool
