@@ -5466,6 +5466,354 @@ liquid_handler.biomek:
 liquid_handler.prcxi:
   class:
     action_value_mappings:
+      add_liquid:
+        feedback: {}
+        goal:
+          asp_vols: asp_vols
+          blow_out_air_volume: blow_out_air_volume
+          dis_vols: dis_vols
+          flow_rates: flow_rates
+          is_96_well: is_96_well
+          liquid_height: liquid_height
+          mix_liquid_height: mix_liquid_height
+          mix_rate: mix_rate
+          mix_time: mix_time
+          mix_vol: mix_vol
+          none_keys: none_keys
+          offsets: offsets
+          reagent_sources: reagent_sources
+          spread: spread
+          targets: targets
+          use_channels: use_channels
+        goal_default:
+          asp_vols:
+          - 0.0
+          blow_out_air_volume:
+          - 0.0
+          dis_vols:
+          - 0.0
+          flow_rates:
+          - 0.0
+          is_96_well: false
+          liquid_height:
+          - 0.0
+          mix_liquid_height: 0.0
+          mix_rate: 0
+          mix_time: 0
+          mix_vol: 0
+          none_keys:
+          - ''
+          offsets:
+          - x: 0.0
+            y: 0.0
+            z: 0.0
+          reagent_sources:
+          - category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+          spread: ''
+          targets:
+          - category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+          use_channels:
+          - 0
+        handles: []
+        placeholder_keys:
+          reagent_sources: unilabos_resources
+          targets: unilabos_resources
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: LiquidHandlerAdd_Feedback
+              type: object
+            goal:
+              properties:
+                asp_vols:
+                  items:
+                    type: number
+                  type: array
+                blow_out_air_volume:
+                  items:
+                    type: number
+                  type: array
+                dis_vols:
+                  items:
+                    type: number
+                  type: array
+                flow_rates:
+                  items:
+                    type: number
+                  type: array
+                is_96_well:
+                  type: boolean
+                liquid_height:
+                  items:
+                    type: number
+                  type: array
+                mix_liquid_height:
+                  type: number
+                mix_rate:
+                  maximum: 2147483647
+                  minimum: -2147483648
+                  type: integer
+                mix_time:
+                  maximum: 2147483647
+                  minimum: -2147483648
+                  type: integer
+                mix_vol:
+                  maximum: 2147483647
+                  minimum: -2147483648
+                  type: integer
+                none_keys:
+                  items:
+                    type: string
+                  type: array
+                offsets:
+                  items:
+                    properties:
+                      x:
+                        type: number
+                      y:
+                        type: number
+                      z:
+                        type: number
+                    required:
+                    - x
+                    - y
+                    - z
+                    title: Point
+                    type: object
+                  type: array
+                reagent_sources:
+                  items:
+                    properties:
+                      category:
+                        type: string
+                      children:
+                        items:
+                          type: string
+                        type: array
+                      config:
+                        type: string
+                      data:
+                        type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      parent:
+                        type: string
+                      pose:
+                        properties:
+                          orientation:
+                            properties:
+                              w:
+                                type: number
+                              x:
+                                type: number
+                              y:
+                                type: number
+                              z:
+                                type: number
+                            required:
+                            - x
+                            - y
+                            - z
+                            - w
+                            title: Quaternion
+                            type: object
+                          position:
+                            properties:
+                              x:
+                                type: number
+                              y:
+                                type: number
+                              z:
+                                type: number
+                            required:
+                            - x
+                            - y
+                            - z
+                            title: Point
+                            type: object
+                        required:
+                        - position
+                        - orientation
+                        title: Pose
+                        type: object
+                      sample_id:
+                        type: string
+                      type:
+                        type: string
+                    required:
+                    - id
+                    - name
+                    - sample_id
+                    - children
+                    - parent
+                    - type
+                    - category
+                    - pose
+                    - config
+                    - data
+                    title: Resource
+                    type: object
+                  type: array
+                spread:
+                  type: string
+                targets:
+                  items:
+                    properties:
+                      category:
+                        type: string
+                      children:
+                        items:
+                          type: string
+                        type: array
+                      config:
+                        type: string
+                      data:
+                        type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      parent:
+                        type: string
+                      pose:
+                        properties:
+                          orientation:
+                            properties:
+                              w:
+                                type: number
+                              x:
+                                type: number
+                              y:
+                                type: number
+                              z:
+                                type: number
+                            required:
+                            - x
+                            - y
+                            - z
+                            - w
+                            title: Quaternion
+                            type: object
+                          position:
+                            properties:
+                              x:
+                                type: number
+                              y:
+                                type: number
+                              z:
+                                type: number
+                            required:
+                            - x
+                            - y
+                            - z
+                            title: Point
+                            type: object
+                        required:
+                        - position
+                        - orientation
+                        title: Pose
+                        type: object
+                      sample_id:
+                        type: string
+                      type:
+                        type: string
+                    required:
+                    - id
+                    - name
+                    - sample_id
+                    - children
+                    - parent
+                    - type
+                    - category
+                    - pose
+                    - config
+                    - data
+                    title: Resource
+                    type: object
+                  type: array
+                use_channels:
+                  items:
+                    maximum: 2147483647
+                    minimum: -2147483648
+                    type: integer
+                  type: array
+              required:
+              - asp_vols
+              - dis_vols
+              - reagent_sources
+              - targets
+              - use_channels
+              - flow_rates
+              - offsets
+              - liquid_height
+              - blow_out_air_volume
+              - spread
+              - is_96_well
+              - mix_time
+              - mix_vol
+              - mix_rate
+              - mix_liquid_height
+              - none_keys
+              title: LiquidHandlerAdd_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: LiquidHandlerAdd_Result
+              type: object
+          required:
+          - goal
+          title: LiquidHandlerAdd
+          type: object
+        type: LiquidHandlerAdd
       aspirate:
         feedback: {}
         goal:
@@ -5669,84 +6017,6 @@ liquid_handler.prcxi:
           title: LiquidHandlerAspirate
           type: object
         type: LiquidHandlerAspirate
-      auto-add_liquid:
-        feedback: {}
-        goal: {}
-        goal_default:
-          asp_vols: null
-          blow_out_air_volume: null
-          delays: null
-          dis_vols: null
-          flow_rates: null
-          is_96_well: false
-          liquid_height: null
-          mix_liquid_height: null
-          mix_rate: null
-          mix_time: null
-          mix_vol: null
-          none_keys: []
-          offsets: null
-          reagent_sources: null
-          spread: wide
-          targets: null
-          use_channels: null
-        handles: []
-        result: {}
-        schema:
-          description: add_liquid的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                asp_vols:
-                  type: string
-                blow_out_air_volume:
-                  type: string
-                delays:
-                  type: string
-                dis_vols:
-                  type: string
-                flow_rates:
-                  type: string
-                is_96_well:
-                  default: false
-                  type: boolean
-                liquid_height:
-                  type: string
-                mix_liquid_height:
-                  type: string
-                mix_rate:
-                  type: string
-                mix_time:
-                  type: string
-                mix_vol:
-                  type: string
-                none_keys:
-                  default: []
-                  type: array
-                offsets:
-                  type: string
-                reagent_sources:
-                  type: string
-                spread:
-                  default: wide
-                  type: string
-                targets:
-                  type: string
-                use_channels:
-                  type: string
-              required:
-              - asp_vols
-              - dis_vols
-              - reagent_sources
-              - targets
-              type: object
-            result: {}
-          required:
-          - goal
-          title: add_liquid参数
-          type: object
-        type: UniLabJsonCommandAsync
       auto-create_protocol:
         feedback: {}
         goal: {}
