@@ -433,10 +433,14 @@ class PRCXI9300Backend(LiquidHandlerBackend):
     
         plate_indexes = []
         for op in ops:
-            plate = op.resource.parent.parent
+            plate = op.resource.parent
             deck = plate.parent
             plate_index = deck.children.index(plate)
+            print(f"Plate index: {plate_index}, Plate name: {plate.name}")
+            print(f"Number of children in deck: {len(deck.children)}")
+
             plate_indexes.append(plate_index)
+
         if len(set(plate_indexes)) != 1:
             raise ValueError("All pickups must be from the same plate. Found different plates: " + str(plate_indexes)) 
 
@@ -447,7 +451,8 @@ class PRCXI9300Backend(LiquidHandlerBackend):
             tip_columns.append(tipspot_index // 8)
         if len(set(tip_columns)) != 1:
             raise ValueError("All pickups must be from the same tip column. Found different columns: " + str(tip_columns))
-        
+        # print('111'*99)
+        # print(plate_indexes[0])
         PlateNo = plate_indexes[0] + 1
         hole_col = tip_columns[0] + 1
 
@@ -485,7 +490,7 @@ class PRCXI9300Backend(LiquidHandlerBackend):
         
         plate_indexes = []
         for op in ops:
-            plate = op.resource.parent.parent
+            plate = op.resource.parent
             deck = plate.parent
             plate_index = deck.children.index(plate)
             plate_indexes.append(plate_index)
@@ -532,11 +537,10 @@ class PRCXI9300Backend(LiquidHandlerBackend):
         
         """Mix liquid in the specified resources."""
    
-
         plate_indexes = []
         for op in targets:
-            deck = op.parent.parent.parent
-            plate = op.parent.parent
+            deck = op.parent.parent
+            plate = op.parent
             plate_index = deck.children.index(plate)
             plate_indexes.append(plate_index)
 
@@ -577,7 +581,7 @@ class PRCXI9300Backend(LiquidHandlerBackend):
 
         plate_indexes = []
         for op in ops:
-            plate = op.resource.parent.parent
+            plate = op.resource.parent
             deck = plate.parent
             plate_index = deck.children.index(plate)
             plate_indexes.append(plate_index)
@@ -617,7 +621,7 @@ class PRCXI9300Backend(LiquidHandlerBackend):
 
         plate_indexes = []
         for op in ops:
-            plate = op.resource.parent.parent
+            plate = op.resource.parent
             deck = plate.parent
             plate_index = deck.children.index(plate)
             plate_indexes.append(plate_index)
@@ -1244,7 +1248,7 @@ if __name__ == "__main__":
     handler = PRCXI9300Handler(deck=deck, host="10.181.102.13", port=9999, 
                                timeout=10.0, setup=False, debug=False, 
                                matrix_id="fd383e6d-2d0e-40b5-9c01-1b2870b1f1b1",
-                               channel_num=1)
+                               channel_num=1, axis="Right")  # Initialize the handler with the deck and host settings
     
     handler.set_tiprack([plate8])  # Set the tip rack for the handler
     asyncio.run(handler.setup())  # Initialize the handler and setup the connection
@@ -1262,32 +1266,79 @@ if __name__ == "__main__":
 
     print(plate11.get_well(0).tracker.get_used_volume())
     asyncio.run(handler.create_protocol(protocol_name="Test Protocol"))  # Initialize the backend and setup the connection
-    print(plate8.children[3])
-    asyncio.run(handler.pick_up_tips([plate8.children[3]],[0]))
-    asyncio.run(handler.aspirate([plate11.children[0]],[10], [0]))
-    asyncio.run(handler.dispense([plate1.children[3]],[10],[0]))
-    asyncio.run(handler.mix([plate1.children[3]], mix_time=3, mix_vol=5, height_to_bottom=0.5, offsets=Coordinate(0, 0, 0), mix_rate=100))
-    asyncio.run(handler.discard_tips())
+
+    # asyncio.run(handler.pick_up_tips([plate8.children[8]],[0]))
+    # print(plate8.children[8])
+    # # asyncio.run(handler.run_protocol())
+    # asyncio.run(handler.aspirate([plate11.children[0]],[10], [0]))
+    # print(plate11.children[0])
+    # # asyncio.run(handler.run_protocol())
+    # asyncio.run(handler.dispense([plate1.children[0]],[10],[0]))
+    # print(plate1.children[0])
+    # # asyncio.run(handler.run_protocol())
+    # asyncio.run(handler.mix([plate1.children[0]], mix_time=3, mix_vol=5, height_to_bottom=0.5, offsets=Coordinate(0, 0, 0), mix_rate=100))
+    # print(plate1.children[0])
+    # asyncio.run(handler.discard_tips())
+
+#     asyncio.run(handler.add_liquid(
+#     asp_vols=[10]*2,
+#     dis_vols=[10]*2,
+#     reagent_sources=[plate11.children[0]],
+#     targets=plate11.children[-2:],
+#     use_channels=[0],
+#     flow_rates=[None] * 4,
+#     offsets=[Coordinate(0, 0, 0)] * 4,
+#     liquid_height=[None] * 2,
+#     blow_out_air_volume=[None] * 2,
+#     delays=None,
+#     mix_time=3,
+#     mix_vol=5,
+#     spread="wide",
+# ))
+
+#     asyncio.run(handler.transfer_liquid(
+#     asp_vols=[10]*2,
+#     dis_vols=[10]*2,
+#     sources=plate11.children[:2],
+#     targets=plate11.children[-2:],
+#     use_channels=[0],
+#     offsets=[Coordinate(0, 0, 0)] * 4,
+#     liquid_height=[None] * 2,
+#     blow_out_air_volume=[None] * 2,
+#     delays=None,
+#     mix_times=3,
+#     mix_vol=5,
+#     spread="wide",
+#     tip_racks=[plate8]
+# ))
+
+    asyncio.run(handler.remove_liquid(
+    vols=[10]*2,
+    sources=plate11.children[:2],
+    waste_liquid=plate11.children[43],
+    use_channels=[0],
+    offsets=[Coordinate(0, 0, 0)] * 4,
+    liquid_height=[None] * 2,
+    blow_out_air_volume=[None] * 2,
+    delays=None,
+    spread="wide"
+
+))
+
+
+
+
+
+
+
+
+    asyncio.run(handler.run_protocol())
 
     # asyncio.run(handler.discard_tips())
     # asyncio.run(handler.mix(well_containers.children[:8
     # ], mix_time=3, mix_vol=50, height_to_bottom=0.5, offsets=Coordinate(0, 0, 0), mix_rate=100))
     #print(json.dumps(handler._unilabos_backend.steps_todo_list, indent=2))  # Print matrix info
-    # asyncio.run(handler.add_liquid(
-    #     asp_vols=[100]*16,
-    #     dis_vols=[100]*16,
-    #     reagent_sources=final_plate_2.children[-16:],
-    #     targets=final_plate_2.children[:16],
-    #     use_channels=[0, 1, 2, 3, 4, 5, 6, 7],
-    #     flow_rates=[None] * 32,
-    #     offsets=[Coordinate(0, 0, 0)] * 32,
-    #     liquid_height=[None] * 16,
-    #     blow_out_air_volume=[None] * 16,
-    #     delays=None,
-    #     mix_time=3,
-    #     mix_vol=50,
-    #     spread="wide",
-    # ))
+
 
     # asyncio.run(handler.remove_liquid(
     #     vols=[100]*16,

@@ -590,14 +590,14 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
             else:
                 # 首先应该对任务分组，然后每次1个/8个进行操作处理
                 if len(use_channels) == 1 and self.backend.num_channels == 1:
-                    tip = []
-                    for _ in range(len(use_channels)):
-                        tip.extend(next(self.current_tip))
-                    await self.pick_up_tips(tip)
 
-                    for _ in range(len(waste_liquid)):
+                    for _ in range(len(sources)):
+                        tip = []
+                        for __ in range(len(use_channels)):
+                            tip.extend(next(self.current_tip))
+                        await self.pick_up_tips(tip)
                         await self.aspirate(
-                            resources=sources,
+                            resources=[sources[_]],
                             vols=[vols[_]],
                             use_channels=use_channels,
                             flow_rates=[flow_rates[0]] if flow_rates else None,
@@ -608,8 +608,9 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
                         )
                         if delays is not None:
                             await self.custom_delay(seconds=delays[0])
+
                         await self.dispense(
-                            resources=[waste_liquid[_]],
+                            resources=[waste_liquid],
                             vols=[vols[_]],
                             use_channels=use_channels,
                             flow_rates=[flow_rates[1]] if flow_rates else None,
@@ -618,7 +619,7 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
                             liquid_height=[liquid_height[1]] if liquid_height else None,
                             spread=spread,
                         )
-                    await self.discard_tips()
+                        await self.discard_tips()
                 elif len(use_channels) == 8 and self.backend.num_channels == 8:
                     tip = []
                     for _ in range(len(use_channels)):
@@ -706,9 +707,9 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
         mix_liquid_height: Optional[float] = None,
         none_keys: List[str] = [],
     ):
-        """A complete *add* (aspirate reagent → dispense into targets) operation."""
+        # """A complete *add* (aspirate reagent → dispense into targets) operation."""
 
-        try:
+        # # try:
             if is_96_well:
                 pass  # This mode is not verified.
             else:
@@ -720,9 +721,9 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
                     tip = []
                     for _ in range(len(use_channels)):
                         tip.extend(next(self.current_tip))
-
-                    await self.pick_up_tips(tip)
+                    await self.pick_up_tips(tip)             
                     for _ in range(len(targets)):
+                        print(use_channels, reagent_sources)
                         await self.aspirate(
                             resources=reagent_sources,
                             vols=[asp_vols[_]],
@@ -733,6 +734,7 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
                             blow_out_air_volume=[blow_out_air_volume[0]] if blow_out_air_volume else None,
                             spread=spread,
                         )
+                        
                         if delays is not None:
                             await self.custom_delay(seconds=delays[0])
                         await self.dispense(
@@ -749,7 +751,7 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
                         if delays is not None:
                             await self.custom_delay(seconds=delays[1])
                         await self.mix(
-                            targets=targets[_],
+                            targets=[targets[_]],
                             mix_time=mix_time,
                             mix_vol=mix_vol,
                             offsets=offsets if offsets else None,
@@ -759,7 +761,7 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
                         if delays is not None:
                             await self.custom_delay(seconds=delays[1])
                         await self.touch_tip(targets[_])
-
+                    await self.discard_tips()
                 elif len(use_channels) == 8:
 
                     # 对于8个的情况，需要判断此时任务是不是能被8通道移液站来成功处理
@@ -825,9 +827,9 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
                         await self.discard_tips()
 
 
-        except Exception as e:
-            traceback.print_exc()
-            raise RuntimeError(f"Liquid addition failed: {e}") from e
+        # except Exception as e:
+        #     traceback.print_exc()
+        #     raise RuntimeError(f"Liquid addition failed: {e}") from e
 
     # ---------------------------------------------------------------
     # TRANSFER LIQUID ------------------------------------------------
@@ -872,126 +874,126 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
             Set *True* to use the 96‑channel head.
         """
 
-        try:
-            if is_96_well:
-                pass  # This mode is not verified.
-            else:
-                if len(asp_vols) != len(targets):
-                    raise ValueError(f"Length of `asp_vols` {len(asp_vols)} must match `targets` {len(targets)}.")
 
-                # 首先应该对任务分组，然后每次1个/8个进行操作处理
-                if len(use_channels) == 1:
+        if is_96_well:
+            pass  # This mode is not verified.
+        else:
+            if len(asp_vols) != len(targets):
+                raise ValueError(f"Length of `asp_vols` {len(asp_vols)} must match `targets` {len(targets)}.")
+
+            # 首先应该对任务分组，然后每次1个/8个进行操作处理
+            if len(use_channels) == 1:
+                for _ in range(len(targets)):
+                    tip = []
+                    for ___ in range(len(use_channels)):
+                        tip.extend(next(self.current_tip))
+                    await self.pick_up_tips(tip)
+
+                    await self.aspirate(
+                        resources=[sources[_]],
+                        vols=[asp_vols[_]],
+                        use_channels=use_channels,
+                        flow_rates=[asp_flow_rates[0]] if asp_flow_rates else None,
+                        offsets=[offsets[0]] if offsets else None,
+                        liquid_height=[liquid_height[0]] if liquid_height else None,
+                        blow_out_air_volume=[blow_out_air_volume[0]] if blow_out_air_volume else None,
+                        spread=spread,
+                    )
+                    if delays is not None:
+                        await self.custom_delay(seconds=delays[0])
+                    await self.dispense(
+                        resources=[targets[_]],
+                        vols=[dis_vols[_]],
+                        use_channels=use_channels,
+                        flow_rates=[dis_flow_rates[1]] if dis_flow_rates else None,
+                        offsets=[offsets[1]] if offsets else None,
+                        blow_out_air_volume=[blow_out_air_volume[1]] if blow_out_air_volume else None,
+                        liquid_height=[liquid_height[1]] if liquid_height else None,
+                        spread=spread,
+                    )
+                    if delays is not None:
+                        await self.custom_delay(seconds=delays[1])
+                    await self.mix(
+                        targets=[targets[_]],
+                        mix_time=mix_times,
+                        mix_vol=mix_vol,
+                        offsets=offsets if offsets else None,
+                        height_to_bottom=mix_liquid_height if mix_liquid_height else None,
+                        mix_rate=mix_rate if mix_rate else None,
+                    )
+                    if delays is not None:
+                        await self.custom_delay(seconds=delays[1])
+                    await self.touch_tip(targets[_])
+                    await self.discard_tips()
+
+            elif len(use_channels) == 8:
+                # 对于8个的情况，需要判断此时任务是不是能被8通道移液站来成功处理
+                if len(targets) % 8 != 0:
+                    raise ValueError(f"Length of `targets` {len(targets)} must be a multiple of 8 for 8-channel mode.")
+
+                # 8个8个来取任务序列
+
+                for i in range(0, len(targets), 8):
+                    # 取出8个任务
                     tip = []
                     for _ in range(len(use_channels)):
                         tip.extend(next(self.current_tip))
                     await self.pick_up_tips(tip)
+                    current_targets = targets[i:i + 8]
+                    current_reagent_sources = sources[i:i + 8]
+                    current_asp_vols = asp_vols[i:i + 8]
+                    current_dis_vols = dis_vols[i:i + 8]
+                    current_asp_flow_rates = asp_flow_rates[i:i + 8]
+                    current_asp_offset = offsets[i:i + 8] if offsets else [None] * 8
+                    current_dis_offset = offsets[-i*8-8:len(offsets)-i*8] if offsets else [None] * 8
+                    current_asp_liquid_height = liquid_height[i:i + 8] if liquid_height else [None] * 8
+                    current_dis_liquid_height = liquid_height[-i*8-8:len(liquid_height)-i*8] if liquid_height else [None] * 8
+                    current_asp_blow_out_air_volume = blow_out_air_volume[i:i + 8] if blow_out_air_volume else [None] * 8
+                    current_dis_blow_out_air_volume = blow_out_air_volume[-i*8-8:len(blow_out_air_volume)-i*8] if blow_out_air_volume else [None] * 8
+                    current_dis_flow_rates = dis_flow_rates[i:i + 8] if dis_flow_rates else [None] * 8
 
-                    for _ in range(len(targets)):
-                        await self.aspirate(
-                            resources=sources,
-                            vols=[asp_vols[_]],
-                            use_channels=use_channels,
-                            flow_rates=[asp_flow_rates[0]] if asp_flow_rates else None,
-                            offsets=[offsets[0]] if offsets else None,
-                            liquid_height=[liquid_height[0]] if liquid_height else None,
-                            blow_out_air_volume=[blow_out_air_volume[0]] if blow_out_air_volume else None,
-                            spread=spread,
-                        )
-                        if delays is not None:
-                            await self.custom_delay(seconds=delays[0])
-                        await self.dispense(
-                            resources=[targets[_]],
-                            vols=[dis_vols[_]],
-                            use_channels=use_channels,
-                            flow_rates=[dis_flow_rates[1]] if dis_flow_rates else None,
-                            offsets=[offsets[1]] if offsets else None,
-                            blow_out_air_volume=[blow_out_air_volume[1]] if blow_out_air_volume else None,
-                            liquid_height=[liquid_height[1]] if liquid_height else None,
-                            spread=spread,
-                        )
-                        if delays is not None:
-                            await self.custom_delay(seconds=delays[1])
-                        await self.mix(
-                            targets=targets[_],
-                            mix_time=mix_times,
-                            mix_vol=mix_vol,
-                            offsets=offsets if offsets else None,
-                            height_to_bottom=mix_liquid_height if mix_liquid_height else None,
-                            mix_rate=mix_rate if mix_rate else None,
-                        )
-                        if delays is not None:
-                            await self.custom_delay(seconds=delays[1])
-                        await self.touch_tip(targets[_])
+                    await self.aspirate(
+                        resources=current_reagent_sources,
+                        vols=current_asp_vols,
+                        use_channels=use_channels,
+                        flow_rates=current_asp_flow_rates,
+                        offsets=current_asp_offset,
+                        blow_out_air_volume=current_asp_blow_out_air_volume,
+                        liquid_height=current_asp_liquid_height,
+                        spread=spread,
+                    )
+
+                    if delays is not None:
+                        await self.custom_delay(seconds=delays[0])
+                    await self.dispense(
+                        resources=current_targets,
+                        vols=current_dis_vols,
+                        use_channels=use_channels,
+                        flow_rates=current_dis_flow_rates,
+                        offsets=current_dis_offset,
+                        blow_out_air_volume=current_dis_blow_out_air_volume,
+                        liquid_height=current_dis_liquid_height,
+                        spread=spread,
+                    )
+                    if delays is not None:
+                        await self.custom_delay(seconds=delays[1])
+
+                    await self.mix(
+                        targets=current_targets,
+                        mix_time=mix_times,
+                        mix_vol=mix_vol,
+                        offsets=offsets if offsets else None,
+                        height_to_bottom=mix_liquid_height if mix_liquid_height else None,
+                        mix_rate=mix_rate if mix_rate else None,
+                    )
+                    if delays is not None:
+                        await self.custom_delay(seconds=delays[1])
+                    await self.touch_tip(current_targets)
                     await self.discard_tips()
-
-                elif len(use_channels) == 8:
-                    # 对于8个的情况，需要判断此时任务是不是能被8通道移液站来成功处理
-                    if len(targets) % 8 != 0:
-                        raise ValueError(f"Length of `targets` {len(targets)} must be a multiple of 8 for 8-channel mode.")
-
-                    # 8个8个来取任务序列
-
-                    for i in range(0, len(targets), 8):
-                        # 取出8个任务
-                        tip = []
-                        for _ in range(len(use_channels)):
-                            tip.extend(next(self.current_tip))
-                        await self.pick_up_tips(tip)
-                        current_targets = targets[i:i + 8]
-                        current_reagent_sources = sources[i:i + 8]
-                        current_asp_vols = asp_vols[i:i + 8]
-                        current_dis_vols = dis_vols[i:i + 8]
-                        current_asp_flow_rates = asp_flow_rates[i:i + 8]
-                        current_asp_offset = offsets[i:i + 8] if offsets else [None] * 8
-                        current_dis_offset = offsets[-i*8-8:len(offsets)-i*8] if offsets else [None] * 8
-                        current_asp_liquid_height = liquid_height[i:i + 8] if liquid_height else [None] * 8
-                        current_dis_liquid_height = liquid_height[-i*8-8:len(liquid_height)-i*8] if liquid_height else [None] * 8
-                        current_asp_blow_out_air_volume = blow_out_air_volume[i:i + 8] if blow_out_air_volume else [None] * 8
-                        current_dis_blow_out_air_volume = blow_out_air_volume[-i*8-8:len(blow_out_air_volume)-i*8] if blow_out_air_volume else [None] * 8
-                        current_dis_flow_rates = dis_flow_rates[i:i + 8] if dis_flow_rates else [None] * 8
-
-                        await self.aspirate(
-                            resources=current_reagent_sources,
-                            vols=current_asp_vols,
-                            use_channels=use_channels,
-                            flow_rates=current_asp_flow_rates,
-                            offsets=current_asp_offset,
-                            blow_out_air_volume=current_asp_blow_out_air_volume,
-                            liquid_height=current_asp_liquid_height,
-                            spread=spread,
-                        )
-
-                        if delays is not None:
-                            await self.custom_delay(seconds=delays[0])
-                        await self.dispense(
-                            resources=current_targets,
-                            vols=current_dis_vols,
-                            use_channels=use_channels,
-                            flow_rates=current_dis_flow_rates,
-                            offsets=current_dis_offset,
-                            blow_out_air_volume=current_dis_blow_out_air_volume,
-                            liquid_height=current_dis_liquid_height,
-                            spread=spread,
-                        )
-                        if delays is not None:
-                            await self.custom_delay(seconds=delays[1])
-
-                        await self.mix(
-                            targets=current_targets,
-                            mix_time=mix_times,
-                            mix_vol=mix_vol,
-                            offsets=offsets if offsets else None,
-                            height_to_bottom=mix_liquid_height if mix_liquid_height else None,
-                            mix_rate=mix_rate if mix_rate else None,
-                        )
-                        if delays is not None:
-                            await self.custom_delay(seconds=delays[1])
-                        await self.touch_tip(current_targets)
-                        await self.discard_tips()
-                        
-        except Exception as e:
-            traceback.print_exc()
-            raise RuntimeError(f"Liquid addition failed: {e}") from e
+                    
+    # except Exception as e:
+    #     traceback.print_exc()
+    #     raise RuntimeError(f"Liquid addition failed: {e}") from e
 
 
     # ---------------------------------------------------------------
