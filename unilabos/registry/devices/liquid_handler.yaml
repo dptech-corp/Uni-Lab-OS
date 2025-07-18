@@ -7364,7 +7364,7 @@ liquid_handler.prcxi:
             type: ''
         handles: []
         placeholder_keys:
-          tip_racks: unilabos_devices
+          tip_racks: unilabos_resources
         result: {}
         schema:
           description: ''
