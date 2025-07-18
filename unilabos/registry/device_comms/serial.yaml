@@ -1,4 +1,6 @@
 serial:
+  category:
+  - serial
   class:
     action_value_mappings:
       auto-handle_serial_request:
@@ -76,6 +78,7 @@ serial:
     module: unilabos.ros.nodes.presets.serial_node:ROS2SerialNode
     status_types: {}
     type: ros2
+  config_info: []
   description: Serial communication interface, used when sharing same serial port
     for multiple devices
   handles: []
@@ -100,4 +103,4 @@ serial:
       properties: {}
       required: []
       type: object
-  version: 0.0.1
+  version: 1.0.0

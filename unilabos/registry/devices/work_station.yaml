@@ -1,4 +1,6 @@
 workstation:
+  category:
+  - work_station
   class:
     action_value_mappings:
       AGVTransferProtocol:
@@ -6033,6 +6035,7 @@ workstation:
     module: unilabos.ros.nodes.presets.protocol_node:ROS2ProtocolNode
     status_types: {}
     type: ros2
+  config_info: []
   description: Workstation
   handles: []
   icon: ''
@@ -6057,4 +6060,4 @@ workstation:
       properties: {}
       required: []
       type: object
-  version: 0.0.1
+  version: 1.0.0

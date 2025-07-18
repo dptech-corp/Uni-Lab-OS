@@ -12,7 +12,7 @@ import yaml
 from unilabos.ros.msgs.message_converter import msg_converter_manager, ros_action_to_json_schema, String
 from unilabos.utils import logger
 from unilabos.utils.decorator import singleton
-from unilabos.utils.import_manager import get_enhanced_class_info
+from unilabos.utils.import_manager import get_enhanced_class_info, get_class
 from unilabos.utils.type_check import NoAliasDumper
 
 DEFAULT_PATHS = [Path(__file__).absolute().parent]
@@ -119,7 +119,7 @@ class Registry:
                             },
                         },
                     },
-                    "version": "0.0.1",
+                    "version": "1.0.0",
                     "icon": "icon_device.webp",
                     "registry_type": "device",
                     "handles": [],
@@ -153,14 +153,29 @@ class Registry:
                 # 为每个资源添加文件路径信息
                 for resource_id, resource_info in data.items():
                     resource_info["file_path"] = str(file.absolute()).replace("\\", "/")
-                    if "description" not in resource_info:
-                        resource_info["description"] = ""
+                    if "version" not in resource_info:
+                        resource_info["version"] = "1.0.0"
+                    if "category" not in resource_info:
+                        resource_info["category"] = [file.stem]
+                    elif file.stem not in resource_info["category"]:
+                        resource_info["category"].append(file.stem)
+                    if "config_info" not in resource_info:
+                        resource_info["config_info"] = []
                     if "icon" not in resource_info:
                         resource_info["icon"] = ""
                     if "handles" not in resource_info:
                         resource_info["handles"] = []
                     if "init_param_schema" not in resource_info:
                         resource_info["init_param_schema"] = {}
+                    if complete_registry:
+                        class_info = resource_info.get("class", {})
+                        if len(class_info) and "module" in class_info:
+                            if class_info.get("type") == "pylabrobot":
+                                res_class = get_class(class_info["module"])
+                                if callable(res_class) and not isinstance(res_class, type):  # 有的是类，有的是函数，这里暂时只登记函数类的
+                                    res_instance = res_class(res_class.__name__)
+
+                                    print(res_instance)
                     resource_info["registry_type"] = "resource"
                 self.resource_type_registry.update(data)
                 logger.debug(
@@ -345,7 +360,7 @@ class Registry:
         }
 
     def load_device_types(self, path: os.PathLike, complete_registry: bool):
-        return
+        # return
         abs_path = Path(path).absolute()
         devices_path = abs_path / "devices"
         device_comms_path = abs_path / "device_comms"
@@ -371,7 +386,13 @@ class Registry:
                 for device_id, device_config in data.items():
                     # 添加文件路径信息 - 使用规范化的完整文件路径
                     if "version" not in device_config:
-                        device_config["version"] = "0.0.1"
+                        device_config["version"] = "1.0.0"
+                    if "category" not in device_config:
+                        device_config["category"] = [file.stem]
+                    elif file.stem not in device_config["category"]:
+                        device_config["category"].append(file.stem)
+                    if "config_info" not in device_config:
+                        device_config["config_info"] = []
                     if "description" not in device_config:
                         device_config["description"] = ""
                     if "icon" not in device_config:

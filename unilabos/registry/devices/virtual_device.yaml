@@ -1,4 +1,6 @@
 virtual_centrifuge:
+  category:
+  - virtual_device
   class:
     action_value_mappings:
       auto-cleanup:
@@ -222,6 +224,7 @@ virtual_centrifuge:
       target_temp: float
       time_remaining: float
     type: python
+  config_info: []
   description: Virtual Centrifuge for CentrifugeProtocol Testing
   handles:
   - data_key: vessel
@@ -282,8 +285,10 @@ virtual_centrifuge:
       - progress
       - message
       type: object
-  version: 0.0.1
+  version: 1.0.0
 virtual_column:
+  category:
+  - virtual_device
   class:
     action_value_mappings:
       auto-cleanup:
@@ -609,6 +614,7 @@ virtual_column:
       progress: float
       status: str
     type: python
+  config_info: []
   description: Virtual Column Chromatography Device for RunColumn Protocol Testing
   handles:
   - data_key: from_vessel
@@ -674,8 +680,10 @@ virtual_column:
       - current_phase
       - final_volume
       type: object
-  version: 0.0.1
+  version: 1.0.0
 virtual_filter:
+  category:
+  - virtual_device
   class:
     action_value_mappings:
       auto-cleanup:
@@ -1002,6 +1010,7 @@ virtual_filter:
       progress: float
       status: str
     type: python
+  config_info: []
   description: Virtual Filter for FilterProtocol Testing
   handles:
   - data_key: vessel_in
@@ -1069,8 +1078,10 @@ virtual_filter:
       - max_stir_speed
       - max_volume
       type: object
-  version: 0.0.1
+  version: 1.0.0
 virtual_gas_source:
+  category:
+  - virtual_device
   class:
     action_value_mappings:
       auto-cleanup:
@@ -1261,6 +1272,7 @@ virtual_gas_source:
     status_types:
       status: str
     type: python
+  config_info: []
   description: Virtual gas source
   handles:
   - data_key: fluid_out
@@ -1288,8 +1300,10 @@ virtual_gas_source:
       required:
       - status
       type: object
-  version: 0.0.1
+  version: 1.0.0
 virtual_heatchill:
+  category:
+  - virtual_device
   class:
     action_value_mappings:
       auto-cleanup:
@@ -1803,6 +1817,7 @@ virtual_heatchill:
       status: str
       stir_speed: float
     type: python
+  config_info: []
   description: Virtual HeatChill for HeatChillProtocol Testing
   handles:
   - data_key: vessel
@@ -1854,8 +1869,10 @@ virtual_heatchill:
       - min_temp
       - max_stir_speed
       type: object
-  version: 0.0.1
+  version: 1.0.0
 virtual_multiway_valve:
+  category:
+  - virtual_device
   class:
     action_value_mappings:
       auto-close:
@@ -2155,6 +2172,7 @@ virtual_multiway_valve:
       valve_position: int
       valve_state: str
     type: python
+  config_info: []
   description: Virtual 8-Way Valve for flow direction control
   handles:
   - data_key: fluid_in
@@ -2275,8 +2293,10 @@ virtual_multiway_valve:
       - flow_path
       - info
       type: object
-  version: 0.0.1
+  version: 1.0.0
 virtual_pump:
+  category:
+  - virtual_device
   class:
     action_value_mappings:
       auto-clean_vessel:
@@ -2741,6 +2761,7 @@ virtual_pump:
       transferred_volume: float
       valve_position: int
     type: python
+  config_info: []
   description: Virtual Pump for PumpTransferProtocol Testing
   handles:
   - data_key: fluid_in
@@ -2794,8 +2815,10 @@ virtual_pump:
       - transferred_volume
       - current_status
       type: object
-  version: 0.0.1
+  version: 1.0.0
 virtual_rotavap:
+  category:
+  - virtual_device
   class:
     action_value_mappings:
       auto-cleanup:
@@ -3048,6 +3071,7 @@ virtual_rotavap:
       status: str
       vacuum_pressure: float
     type: python
+  config_info: []
   description: Virtual Rotary Evaporator for EvaporateProtocol Testing
   handles:
   - data_key: vessel_in
@@ -3121,8 +3145,10 @@ virtual_rotavap:
       - max_rotation_speed
       - remaining_time
       type: object
-  version: 0.0.1
+  version: 1.0.0
 virtual_separator:
+  category:
+  - virtual_device
   class:
     action_value_mappings:
       auto-cleanup:
@@ -3938,6 +3964,7 @@ virtual_separator:
       stir_speed: float
       volume: float
     type: python
+  config_info: []
   description: Virtual Separator for SeparateProtocol Testing
   handles:
   - data_key: from_vessel
@@ -4013,8 +4040,10 @@ virtual_separator:
       - progress
       - message
       type: object
-  version: 0.0.1
+  version: 1.0.0
 virtual_solenoid_valve:
+  category:
+  - virtual_device
   class:
     action_value_mappings:
       auto-cleanup:
@@ -4277,6 +4306,7 @@ virtual_solenoid_valve:
       valve_position: str
       valve_state: str
     type: python
+  config_info: []
   description: Virtual Solenoid Valve for simple on/off flow control
   handles:
   - data_key: fluid_port_in
@@ -4324,8 +4354,10 @@ virtual_solenoid_valve:
       - valve_position
       - state
       type: object
-  version: 0.0.1
+  version: 1.0.0
 virtual_solid_dispenser:
+  category:
+  - virtual_device
   class:
     action_value_mappings:
       add_solid:
@@ -4656,6 +4688,7 @@ virtual_solid_dispenser:
       status: str
       total_operations: int
     type: python
+  config_info: []
   description: Virtual Solid Dispenser for Add Protocol Testing - supports mass and
     molar additions
   handles:
@@ -4704,8 +4737,10 @@ virtual_solid_dispenser:
       - total_operations
       - device_info
       type: object
-  version: 0.0.1
+  version: 1.0.0
 virtual_stirrer:
+  category:
+  - virtual_device
   class:
     action_value_mappings:
       auto-cleanup:
@@ -5219,6 +5254,7 @@ virtual_stirrer:
       remaining_time: float
       status: str
     type: python
+  config_info: []
   description: Virtual Stirrer for StirProtocol Testing
   handles:
   - data_key: vessel
@@ -5270,8 +5306,10 @@ virtual_stirrer:
       - min_speed
       - device_info
       type: object
-  version: 0.0.1
+  version: 1.0.0
 virtual_transfer_pump:
+  category:
+  - virtual_device
   class:
     action_value_mappings:
       auto-aspirate:
@@ -5728,6 +5766,7 @@ virtual_transfer_pump:
       status: str
       transfer_rate: float
     type: python
+  config_info: []
   description: Virtual Transfer Pump for TransferProtocol Testing (Syringe-style)
   handles:
   - data_key: fluid_port
@@ -5773,8 +5812,10 @@ virtual_transfer_pump:
       - remaining_capacity
       - pump_info
       type: object
-  version: 0.0.1
+  version: 1.0.0
 virtual_vacuum_pump:
+  category:
+  - virtual_device
   class:
     action_value_mappings:
       auto-cleanup:
@@ -5965,6 +6006,7 @@ virtual_vacuum_pump:
     status_types:
       status: str
     type: python
+  config_info: []
   description: Virtual vacuum pump
   handles:
   - data_key: fluid_in
@@ -5992,4 +6034,4 @@ virtual_vacuum_pump:
       required:
       - status
       type: object
-  version: 0.0.1
+  version: 1.0.0

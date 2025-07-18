@@ -1,4 +1,6 @@
 liquid_handler:
+  category:
+  - liquid_handler
   class:
     action_value_mappings:
       add_liquid:
@@ -4357,6 +4359,7 @@ liquid_handler:
     module: unilabos.devices.liquid_handling.liquid_handler_abstract:LiquidHandlerAbstract
     status_types: {}
     type: python
+  config_info: []
   description: Liquid handler device controlled by pylabrobot
   handles:
     input:
@@ -4395,8 +4398,10 @@ liquid_handler:
       properties: {}
       required: []
       type: object
-  version: 0.0.1
+  version: 1.0.0
 liquid_handler.biomek:
+  category:
+  - liquid_handler
   class:
     action_value_mappings:
       auto-create_resource:
@@ -5361,6 +5366,7 @@ liquid_handler.biomek:
     status_types:
       success: String
     type: python
+  config_info: []
   description: Biomek液体处理器设备，基于pylabrobot控制
   handles: []
   icon: icon_yiyezhan.webp
@@ -5376,8 +5382,10 @@ liquid_handler.biomek:
       required:
       - success
       type: object
-  version: 0.0.1
+  version: 1.0.0
 liquid_handler.prcxi:
+  category:
+  - liquid_handler
   class:
     action_value_mappings:
       add_liquid:
@@ -7928,6 +7936,7 @@ liquid_handler.prcxi:
     status_types:
       reset_ok: bool
     type: python
+  config_info: []
   description: prcxi液体处理器设备，基于pylabrobot控制
   handles: []
   icon: icon_yiyezhan.webp
@@ -7973,8 +7982,10 @@ liquid_handler.prcxi:
       required:
       - reset_ok
       type: object
-  version: 0.0.1
+  version: 1.0.0
 liquid_handler.revvity:
+  category:
+  - liquid_handler
   class:
     action_value_mappings:
       run:
@@ -8130,6 +8141,7 @@ liquid_handler.revvity:
       status: str
       success: bool
     type: python
+  config_info: []
   description: ''
   handles: []
   icon: ''
@@ -8148,4 +8160,4 @@ liquid_handler.revvity:
       - success
       - status
       type: object
-  version: 0.0.1
+  version: 1.0.0

@@ -1,4 +1,6 @@
 zhida_hplc:
+  category:
+  - zhida_hplc
   class:
     action_value_mappings:
       abort:
@@ -150,6 +152,7 @@ zhida_hplc:
       methods: dict
       status: dict
     type: python
+  config_info: []
   description: 智达高效液相色谱（HPLC）分析设备，用于实验室样品的分离、检测和定量分析。该设备通过TCP socket与HPLC控制系统通信，支持远程控制和状态监控。具备自动进样、梯度洗脱、多检测器数据采集等功能，可执行复杂的色谱分析方法。适用于化学分析、药物检测、环境监测、生物样品分析等需要高精度分离分析的实验室应用场景。
   handles: []
   icon: ''
@@ -177,4 +180,4 @@ zhida_hplc:
       - status
       - methods
       type: object
-  version: 0.0.1
+  version: 1.0.0

@@ -1,4 +1,6 @@
 robotic_arm.UR:
+  category:
+  - robot_arm
   class:
     action_value_mappings:
       auto-arm_init:
@@ -140,6 +142,7 @@ robotic_arm.UR:
       gripper_pose: float
       gripper_status: str
     type: python
+  config_info: []
   description: Universal Robots机械臂设备，用于实验室精密操作和自动化作业。该设备集成了UR机械臂本体、Robotiq夹爪和RTDE通信接口，支持六自由度精确运动控制和力觉反馈。具备实时位置监控、状态反馈、轨迹规划等功能，可执行复杂的多点位运动任务。适用于样品抓取、精密装配、实验器具操作等需要高精度和高重复性的实验室自动化场景。
   handles: []
   icon: ''
@@ -170,4 +173,4 @@ robotic_arm.UR:
       - arm_status
       - gripper_status
       type: object
-  version: 0.0.1
+  version: 1.0.0

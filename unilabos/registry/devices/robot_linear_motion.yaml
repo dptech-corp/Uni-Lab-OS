@@ -1,4 +1,6 @@
 linear_motion.grbl:
+  category:
+  - robot_linear_motion
   class:
     action_value_mappings:
       auto-initialize:
@@ -430,6 +432,7 @@ linear_motion.grbl:
       spindle_speed: float
       status: str
     type: python
+  config_info: []
   description: Grbl数控机床（CNC）设备，用于实验室精密加工和三轴定位操作。该设备基于Grbl固件，通过串口通信控制步进电机实现X、Y、Z三轴的精确运动。支持绝对定位、轨迹规划、主轴控制和实时状态监控。具备安全限位保护和运动平滑控制功能。适用于精密钻孔、铣削、雕刻、样品制备等需要高精度定位和加工的实验室应用场景。
   handles: []
   icon: ''
@@ -466,8 +469,10 @@ linear_motion.grbl:
       - position
       - spindle_speed
       type: object
-  version: 0.0.1
+  version: 1.0.0
 motor.iCL42:
+  category:
+  - robot_linear_motion
   class:
     action_value_mappings:
       auto-execute_run_motor:
@@ -604,6 +609,7 @@ motor.iCL42:
       motor_position: int
       success: bool
     type: python
+  config_info: []
   description: iCL42步进电机驱动器，用于实验室设备的精密线性运动控制。该设备通过串口通信控制iCL42型步进电机驱动器，支持多种运动模式和精确的位置、速度控制。具备位置反馈、运行状态监控和故障检测功能。适用于自动进样器、样品传送、精密定位平台等需要准确线性运动控制的实验室自动化设备。
   handles: []
   icon: ''
@@ -631,4 +637,4 @@ motor.iCL42:
       - is_executing_run
       - success
       type: object
-  version: 0.0.1
+  version: 1.0.0

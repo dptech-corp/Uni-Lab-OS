@@ -1,4 +1,6 @@
 mock_chiller:
+  category:
+  - mock_devices
   class:
     action_value_mappings:
       emergency_stop:
@@ -325,6 +327,7 @@ mock_chiller:
       target_temperature: float
       vessel: str
     type: python
+  config_info: []
   description: Mock Chiller Device
   handles: []
   icon: ''
@@ -364,8 +367,10 @@ mock_chiller:
       - purpose
       - status_info
       type: object
-  version: 0.0.1
+  version: 1.0.0
 mock_filter:
+  category:
+  - mock_devices
   class:
     action_value_mappings:
       auto-emergency_stop:
@@ -743,6 +748,7 @@ mock_filter:
       temperature: float
       vessel: str
     type: python
+  config_info: []
   description: Mock Filter Device
   handles: []
   icon: ''
@@ -803,8 +809,10 @@ mock_filter:
       - target_volume
       - status_info
       type: object
-  version: 0.0.1
+  version: 1.0.0
 mock_heater:
+  category:
+  - mock_devices
   class:
     action_value_mappings:
       auto-set_heating_power:
@@ -1361,6 +1369,7 @@ mock_heater:
       target_temperature: float
       vessel: str
     type: python
+  config_info: []
   description: Mock Heater Device
   handles: []
   icon: ''
@@ -1409,8 +1418,10 @@ mock_heater:
       - stir_speed
       - status_info
       type: object
-  version: 0.0.1
+  version: 1.0.0
 mock_pump:
+  category:
+  - mock_devices
   class:
     action_value_mappings:
       auto-emergency_stop:
@@ -1887,6 +1898,7 @@ mock_pump:
       transfer_time: float
       transfer_volume: float
     type: python
+  config_info: []
   description: Mock Pump Device
   handles: []
   icon: ''
@@ -1968,8 +1980,10 @@ mock_pump:
       - time_remaining
       - status_info
       type: object
-  version: 0.0.1
+  version: 1.0.0
 mock_rotavap:
+  category:
+  - mock_devices
   class:
     action_value_mappings:
       auto-emergency_stop:
@@ -2296,6 +2310,7 @@ mock_rotavap:
       temperature: float
       vacuum_level: float
     type: python
+  config_info: []
   description: Mock Rotavap Device
   handles: []
   icon: ''
@@ -2341,8 +2356,10 @@ mock_rotavap:
       - target_temperature
       - status_info
       type: object
-  version: 0.0.1
+  version: 1.0.0
 mock_separator:
+  category:
+  - mock_devices
   class:
     action_value_mappings:
       separate:
@@ -3247,6 +3264,7 @@ mock_separator:
       valve_state: str
       waste_phase_to_vessel: str
     type: python
+  config_info: []
   description: Simplified Mock Separator Device
   handles: []
   icon: ''
@@ -3325,8 +3343,10 @@ mock_separator:
       - time_remaining
       - status_info
       type: object
-  version: 0.0.1
+  version: 1.0.0
 mock_solenoid_valve:
+  category:
+  - mock_devices
   class:
     action_value_mappings:
       auto-is_closed:
@@ -3481,6 +3501,7 @@ mock_solenoid_valve:
       status: str
       valve_status: str
     type: python
+  config_info: []
   description: Mock Solenoid Valve Device
   handles: []
   icon: ''
@@ -3502,8 +3523,10 @@ mock_solenoid_valve:
       - status
       - valve_status
       type: object
-  version: 0.0.1
+  version: 1.0.0
 mock_stirrer:
+  category:
+  - mock_devices
   class:
     action_value_mappings:
       auto-emergency_stop:
@@ -3749,6 +3772,7 @@ mock_stirrer:
       target_temperature: float
       temperature: float
     type: python
+  config_info: []
   description: Mock Stirrer Device
   handles: []
   icon: ''
@@ -3797,8 +3821,10 @@ mock_stirrer:
       - max_temperature
       - status_info
       type: object
-  version: 0.0.1
+  version: 1.0.0
 mock_stirrer_new:
+  category:
+  - mock_devices
   class:
     action_value_mappings:
       start_stir:
@@ -4279,6 +4305,7 @@ mock_stirrer_new:
       target_stir_speed: float
       vessel: str
     type: python
+  config_info: []
   description: Mock Stirrer Device (Copy Version)
   handles: []
   icon: ''
@@ -4327,8 +4354,10 @@ mock_stirrer_new:
       - progress
       - status_info
       type: object
-  version: 0.0.1
+  version: 1.0.0
 mock_vacuum:
+  category:
+  - mock_devices
   class:
     action_value_mappings:
       auto-emergency_stop:
@@ -4610,6 +4639,7 @@ mock_vacuum:
       target_vacuum: float
       vacuum_level: float
     type: python
+  config_info: []
   description: Mock Vacuum Pump Device
   handles: []
   icon: ''
@@ -4652,4 +4682,4 @@ mock_vacuum:
       - max_pump_speed
       - status_info
       type: object
-  version: 0.0.1
+  version: 1.0.0
