@@ -6120,30 +6120,6 @@ liquid_handler.prcxi:
           title: run_protocol参数
           type: object
         type: UniLabJsonCommandAsync
-      auto-set_tiprack:
-        feedback: {}
-        goal: {}
-        goal_default:
-          tip_racks: null
-        handles: []
-        result: {}
-        schema:
-          description: set_tiprack的参数schema
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                tip_racks:
-                  type: string
-              required:
-              - tip_racks
-              type: object
-            result: {}
-          required:
-          - goal
-          title: set_tiprack参数
-          type: object
-        type: UniLabJsonCommand
       auto-touch_tip:
         feedback: {}
         goal: {}
@@ -7361,6 +7337,140 @@ liquid_handler.prcxi:
           title: LiquidHandlerSetLiquid
           type: object
         type: LiquidHandlerSetLiquid
+      set_tiprack:
+        feedback: {}
+        goal:
+          tip_racks: tip_racks
+        goal_default:
+          tip_racks:
+          - category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+        handles: []
+        placeholder_keys:
+          tip_racks: unilabos_devices
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: LiquidHandlerSetTipRack_Feedback
+              type: object
+            goal:
+              properties:
+                tip_racks:
+                  items:
+                    properties:
+                      category:
+                        type: string
+                      children:
+                        items:
+                          type: string
+                        type: array
+                      config:
+                        type: string
+                      data:
+                        type: string
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      parent:
+                        type: string
+                      pose:
+                        properties:
+                          orientation:
+                            properties:
+                              w:
+                                type: number
+                              x:
+                                type: number
+                              y:
+                                type: number
+                              z:
+                                type: number
+                            required:
+                            - x
+                            - y
+                            - z
+                            - w
+                            title: Quaternion
+                            type: object
+                          position:
+                            properties:
+                              x:
+                                type: number
+                              y:
+                                type: number
+                              z:
+                                type: number
+                            required:
+                            - x
+                            - y
+                            - z
+                            title: Point
+                            type: object
+                        required:
+                        - position
+                        - orientation
+                        title: Pose
+                        type: object
+                      sample_id:
+                        type: string
+                      type:
+                        type: string
+                    required:
+                    - id
+                    - name
+                    - sample_id
+                    - children
+                    - parent
+                    - type
+                    - category
+                    - pose
+                    - config
+                    - data
+                    title: Resource
+                    type: object
+                  type: array
+              required:
+              - tip_racks
+              title: LiquidHandlerSetTipRack_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: LiquidHandlerSetTipRack_Result
+              type: object
+          required:
+          - goal
+          title: LiquidHandlerSetTipRack
+          type: object
+        type: LiquidHandlerSetTipRack
       transfer:
         goal:
           aspiration_flow_rate: aspiration_flow_rate
