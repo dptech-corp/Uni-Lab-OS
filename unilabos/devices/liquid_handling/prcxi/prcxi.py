@@ -1096,22 +1096,22 @@ if __name__ == "__main__":
     # asyncio.run(handler.mix(well_containers.children[:8
     # ], mix_time=3, mix_vol=50, height_to_bottom=0.5, offsets=Coordinate(0, 0, 0), mix_rate=100))
     # #print(json.dumps(handler._unilabos_backend.steps_todo_list, indent=2))  # Print matrix info
-    asyncio.run(handler.add_liquid(
-        asp_vols=[100]*16,
-        dis_vols=[100]*16,
-        reagent_sources=plate2.children[:16],
-        targets=plate5.children[:16],
-        use_channels=[0, 1, 2, 3, 4, 5, 6, 7],
-        flow_rates=[None] * 32,
-        offsets=[Coordinate(0, 0, 0)] * 32,
-        liquid_height=[None] * 16,
-        blow_out_air_volume=[None] * 16,
-        delays=None,
-        mix_time=3,
-        mix_vol=50,
-        spread="wide",
-    ))
-    asyncio.run(handler.run_protocol())  # Run the protocol
+    # asyncio.run(handler.add_liquid(
+    #     asp_vols=[100]*16,
+    #     dis_vols=[100]*16,
+    #     reagent_sources=plate2.children[:16],
+    #     targets=plate5.children[:16],
+    #     use_channels=[0, 1, 2, 3, 4, 5, 6, 7],
+    #     flow_rates=[None] * 32,
+    #     offsets=[Coordinate(0, 0, 0)] * 32,
+    #     liquid_height=[None] * 16,
+    #     blow_out_air_volume=[None] * 16,
+    #     delays=None,
+    #     mix_time=3,
+    #     mix_vol=50,
+    #     spread="wide",
+    # ))
+    # asyncio.run(handler.run_protocol())  # Run the protocol
     # asyncio.run(handler.remove_liquid(
     #     vols=[100]*16,
     #     sources=plate2.children[-16:],
@@ -1124,27 +1124,25 @@ if __name__ == "__main__":
     #     spread="wide",
     # ))
 
-    # acid = [20]*8+[40]*8+[60]*8+[80]*8+[100]*8+[120]*8+[140]*8+[160]*8+[180]*8+[200]*8+[220]*8+[240]*8
-    # alkaline = acid[::-1]  # Reverse the acid list for alkaline
-    # asyncio.run(handler.transfer_liquid(
-    #     asp_vols=acid,
-    #     dis_vols=acid,
-    #     tip_racks=[plate1],
-    #     sources=plate2.children[:],
-    #     targets=plate5.children[:],
-    #     use_channels=[0, 1, 2, 3, 4, 5, 6, 7],
-    #     offsets=[Coordinate(0, 0, 0)] * 32,
-    #     asp_flow_rates=[None] * 16,
-    #     dis_flow_rates=[None] * 16,
-    #     liquid_height=[None] * 32,
-    #     blow_out_air_volume=[None] * 32,
-    #     mix_times=3,
-    #     mix_vol=50,
-    #     spread="wide",
-    # ))
-    # print(json.dumps(handler._unilabos_backend.steps_todo_list, indent=2))  # Print matrix info
-    # # # input("pick_up_tips add step")
-    # asyncio.run(handler.run_protocol())  # Run the protocol
+    acid = [20]*8+[40]*8+[60]*8+[80]*8+[100]*8+[120]*8+[140]*8+[160]*8+[180]*8+[200]*8+[220]*8+[240]*8
+    alkaline = acid[::-1]  # Reverse the acid list for alkaline
+    asyncio.run(handler.transfer_liquid(
+        asp_vols=acid,
+        dis_vols=acid,
+        tip_racks=[plate1],
+        sources=plate2.children[:],
+        targets=plate5.children[:],
+        use_channels=[0, 1, 2, 3, 4, 5, 6, 7],
+        offsets=[Coordinate(0, 0, 0)] * 32,
+        asp_flow_rates=[None] * 16,
+        dis_flow_rates=[None] * 16,
+        liquid_height=[None] * 32,
+        blow_out_air_volume=[None] * 32,
+        mix_times=3,
+        mix_vol=50,
+        spread="wide",
+    ))
+    asyncio.run(handler.run_protocol())  # Run the protocol
     # # input("Running protocol...")
     # # input("Press Enter to continue...")  # Wait for user input before proceeding
     # # print("PRCXI9300Handler initialized with deck and host settings.")
