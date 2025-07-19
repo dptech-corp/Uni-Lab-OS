@@ -1,0 +1,70 @@
+{
+    "nodes": [
+        {
+            "id": "OrganicSynthesisStation",
+            "name": "有机化学流程综合测试工作站",
+            "children": [
+                "heater_1"
+            ],
+            "parent": null,
+            "type": "device",
+            "class": "workstation",
+            "position": {
+                "x": 600,
+                "y": 400,
+                "z": 0
+            },
+            "config": {
+                "protocol_type": [
+                    "AddProtocol",
+                    "TransferProtocol",
+                    "StartStirProtocol",
+                    "StopStirProtocol",
+                    "StirProtocol",
+                    "RunColumnProtocol",
+                    "CentrifugeProtocol",
+                    "FilterProtocol",
+                    "CleanVesselProtocol",
+                    "DissolveProtocol",
+                    "FilterThroughProtocol",
+                    "WashSolidProtocol",
+                    "SeparateProtocol",
+                    "EvaporateProtocol",
+                    "HeatChillProtocol",
+                    "HeatChillStartProtocol",
+                    "HeatChillStopProtocol",
+                    "EvacuateAndRefillProtocol",
+                    "PumpTransferProtocol",
+                    "AdjustPHProtocol",
+                    "ResetHandlingProtocol",
+                    "DryProtocol",
+                    "HydrogenateProtocol",
+                    "RecrystallizeProtocol"
+                ]
+            },
+            "data": {}
+        },
+        {
+            "id": "heater_1",
+            "name": "加热器",
+            "children": [],
+            "parent": "OrganicSynthesisStation",
+            "type": "device",
+            "class": "virtual_heatchill",
+            "position": {
+                "x": 450,
+                "y": 450,
+                "z": 0
+            },
+            "config": {
+                "max_temp": 200.0,
+                "min_temp": -20.0
+            },
+            "data": {
+                "status": "Idle",
+                "current_temp": 25.0
+            }
+        }
+    ],
+    "links": []
+}
