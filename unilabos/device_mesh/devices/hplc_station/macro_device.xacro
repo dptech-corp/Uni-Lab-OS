@@ -149,5 +149,61 @@
       <axis xyz="0 0 -1"/>
       <limit effort="0" lower="0" upper="0.5" velocity="0"/>
     </joint>
+
+
+    <link
+      name="${station_name}${device_name}mt_base">
+      <inertial>
+        <origin
+          xyz="0.351023411986924 0.445375400882133 0.128876815206488"
+          rpy="0 0 0" />
+        <mass
+          value="11.1062879385751" />
+        <inertia
+          ixx="0.143866977287068"
+          ixy="0.0137782180671174"
+          ixz="-0.000140346559252494"
+          iyy="0.14345824300898"
+          iyz="-0.000123577300295821"
+          izz="0.279834203406604" />
+      </inertial>
+      <visual>
+        <origin
+          xyz="0 0 0"
+          rpy="0 0 0" />
+        <geometry>
+          <mesh
+            filename="file://${mesh_path}/devices/hplc_station/meshes/mt_base.STL" />
+        </geometry>
+        <material
+          name="">
+          <color
+            rgba="1 1 1 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin
+          xyz="0 0 0"
+          rpy="0 0 0" />
+        <geometry>
+          <mesh
+            filename="file://${mesh_path}/devices/hplc_station/meshes/mt_base.STL" />
+        </geometry>
+      </collision>
+    </link>
+    <joint
+      name="${station_name}${device_name}mt_joint"
+      type="fixed">
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <parent
+        link="${station_name}${device_name}ws_base" />
+      <child
+        link="${station_name}${device_name}mt_base" />
+      <axis
+        xyz="0 0 0" />
+    </joint>
+
   </xacro:macro>
 </robot>

@@ -147,6 +147,7 @@ robotic_arm.UR:
   handles: []
   icon: ''
   init_param_schema:
+    additionalProperties: false
     config:
       properties:
         host:
@@ -172,5 +173,66 @@ robotic_arm.UR:
       - gripper_pose
       - arm_status
       - gripper_status
-    additionalProperties: false
     type: object
+  version: 1.0.0
+robotic_arm.elite:
+  category:
+  - robot_arm
+  class:
+    action_value_mappings:
+      modbus_task_cmd:
+        feedback: {}
+        goal:
+          command: command
+        goal_default:
+          command: ''
+        handles: []
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties:
+                status:
+                  type: string
+              required:
+              - status
+              title: SendCmd_Feedback
+              type: object
+            goal:
+              properties:
+                command:
+                  type: string
+              required:
+              - command
+              title: SendCmd_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: SendCmd_Result
+              type: object
+          required:
+          - goal
+          title: SendCmd
+          type: object
+        type: SendCmd
+    module: unilabos.devices.arm.elite_robot:EliteRobot
+    status_types:
+      arm_pose: Float64MultiArray
+    type: python
+  config_info: []
+  description: Elite robot arm
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  model:
+    mesh: elite_robot
+    type: device
+  version: 1.0.0

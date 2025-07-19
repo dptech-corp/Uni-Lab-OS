@@ -145,7 +145,7 @@
     type="fixed">
     <origin
       xyz="0 0 -0.003"
-      rpy="0 0 -2.356" />
+      rpy="0 0 -1.570796326589793" />
     <parent
       link="${station_name}${device_name}tool0" />
     <child
