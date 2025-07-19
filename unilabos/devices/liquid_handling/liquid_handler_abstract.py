@@ -714,15 +714,14 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
             else:
                 if len(asp_vols) != len(targets):
                     raise ValueError(f"Length of `asp_vols` {len(asp_vols)} must match `targets` {len(targets)}.")
-
                 # 首先应该对任务分组，然后每次1个/8个进行操作处理
                 if len(use_channels) == 1:
                     tip = []
-                    for _ in range(len(use_channels)):
+                    for x in range(len(use_channels)):
                         tip.extend(next(self.current_tip))
-                    await self.pick_up_tips(tip)             
+                    await self.pick_up_tips(tip)
+
                     for _ in range(len(targets)):
-                        print(use_channels, reagent_sources)
                         await self.aspirate(
                             resources=reagent_sources,
                             vols=[asp_vols[_]],
