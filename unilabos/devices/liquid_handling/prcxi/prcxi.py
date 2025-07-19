@@ -400,6 +400,7 @@ class PRCXI9300Backend(LiquidHandlerBackend):
             )
         print(f"PRCXI9300Backend created solution with ID: {solution_id}")
         self.api_client.load_solution(solution_id)
+        print(json.dumps(self.steps_todo_list, indent=2))
         return self.api_client.start()
 
     @classmethod
@@ -1390,7 +1391,7 @@ if __name__ == "__main__":
 #     #     mix_vol=50,
 #     #     spread="wide",
 #     # ))
-#     print(json.dumps(handler._unilabos_backend.steps_todo_list, indent=2))  # Print matrix info
+    print(json.dumps(handler._unilabos_backend.steps_todo_list, indent=2))  # Print matrix info
 #     # input("pick_up_tips add step")
 #     #asyncio.run(handler.run_protocol())  # Run the protocol
 #     # input("Running protocol...")
