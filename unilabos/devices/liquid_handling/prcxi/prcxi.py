@@ -430,7 +430,7 @@ class PRCXI9300Backend(LiquidHandlerBackend):
 
     async def pick_up_tips(self, ops: List[Pickup], use_channels: List[int] = None):
         """Pick up tips from the specified resource."""
-    
+        print('where?'*200)
         plate_indexes = []
         for op in ops:
             plate = op.resource.parent
@@ -1075,14 +1075,20 @@ if __name__ == "__main__":
     # from pylabrobot.resources import set_tip_tracking
     set_volume_tracking(enabled=True)
     from unilabos.resources.graphio import *
-
+    A = tree_to_list([resource_plr_to_ulab(deck)])
+    with open("deck.json", "w", encoding="utf-8") as f:
+        json.dump(A, f, indent=4, ensure_ascii=False)
     asyncio.run(handler.create_protocol(protocol_name="Test Protocol"))  # Initialize the backend and setup the connection
-    # asyncio.run(handler.pick_up_tips(plate1.children[:8],[0,1,2,3,4,5,6,7]))
 
-    # asyncio.run(handler.aspirate(plate2.children[:8],[50]*8, [0,1,2,3,4,5,6,7]))
-    # asyncio.run(handler.dispense(plate5.children[:8],[50]*8,[0,1,2,3,4,5,6,7]))
+    asyncio.run(handler.pick_up_tips(plate1.children[:8],[0,1,2,3,4,5,6,7]))
+    print(plate1.children[:8])
+    asyncio.run(handler.aspirate(plate2.children[:8],[50]*8, [0,1,2,3,4,5,6,7]))
+    print(plate2.children[:8])
+    asyncio.run(handler.dispense(plate5.children[:8],[50]*8,[0,1,2,3,4,5,6,7]))
+    print(plate5.children[:8])
+
     # # # asyncio.run(handler.drop_tips(tip_rack.children[8:16],[0,1,2,3,4,5,6,7]))
-    # asyncio.run(handler.discard_tips())
+    asyncio.run(handler.discard_tips())
 
     # asyncio.run(handler.mix(well_containers.children[:8
     # ], mix_time=3, mix_vol=50, height_to_bottom=0.5, offsets=Coordinate(0, 0, 0), mix_rate=100))
