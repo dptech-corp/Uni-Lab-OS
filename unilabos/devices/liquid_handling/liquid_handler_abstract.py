@@ -104,6 +104,8 @@ class LiquidHandlerMiddleware(LiquidHandler):
         offsets: Optional[List[Coordinate]] = None,
         **backend_kwargs,
     ):
+        print('222'*200)
+        print(tip_spots)
         if self._simulator:
             return await self._simulate_handler.pick_up_tips(tip_spots, use_channels, offsets, **backend_kwargs)
         return await super().pick_up_tips(tip_spots, use_channels, offsets, **backend_kwargs)
