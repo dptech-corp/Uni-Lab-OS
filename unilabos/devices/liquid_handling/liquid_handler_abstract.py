@@ -535,7 +535,7 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
     """Extended LiquidHandler with additional operations."""
     support_touch_tip = True
 
-    def __init__(self, backend: LiquidHandlerBackend, deck: Deck, simulator: bool, channel_num:int = 8):
+    def __init__(self, backend: LiquidHandlerBackend, deck: Deck, simulator: bool=False, channel_num:int = 8):
         """Initialize a LiquidHandler.
 
         Args:
