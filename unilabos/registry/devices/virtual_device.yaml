@@ -4580,6 +4580,7 @@ virtual_solid_dispenser:
             feedback: {}
             goal:
               properties: {}
+              required: []
               type: object
             result: {}
           required:
@@ -4587,6 +4588,30 @@ virtual_solid_dispenser:
           title: cleanup参数
           type: object
         type: UniLabJsonCommandAsync
+      auto-find_solid_reagent_bottle:
+        feedback: {}
+        goal: {}
+        goal_default:
+          reagent_name: null
+        handles: []
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                reagent_name:
+                  type: string
+              required:
+              - reagent_name
+              type: object
+            result: {}
+          required:
+          - goal
+          title: find_solid_reagent_bottle参数
+          type: object
+        type: UniLabJsonCommand
       auto-initialize:
         feedback: {}
         goal: {}
@@ -4599,6 +4624,7 @@ virtual_solid_dispenser:
             feedback: {}
             goal:
               properties: {}
+              required: []
               type: object
             result: {}
           required:
@@ -4606,9 +4632,58 @@ virtual_solid_dispenser:
           title: initialize参数
           type: object
         type: UniLabJsonCommandAsync
+      auto-parse_mass_string:
+        feedback: {}
+        goal: {}
+        goal_default:
+          mass_str: null
+        handles: []
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                mass_str:
+                  type: string
+              required:
+              - mass_str
+              type: object
+            result: {}
+          required:
+          - goal
+          title: parse_mass_string参数
+          type: object
+        type: UniLabJsonCommand
+      auto-parse_mol_string:
+        feedback: {}
+        goal: {}
+        goal_default:
+          mol_str: null
+        handles: []
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                mol_str:
+                  type: string
+              required:
+              - mol_str
+              type: object
+            result: {}
+          required:
+          - goal
+          title: parse_mol_string参数
+          type: object
+        type: UniLabJsonCommand
     module: unilabos.devices.virtual.virtual_solid_dispenser:VirtualSolidDispenser
     status_types:
       current_reagent: str
+      device_info: dict
       dispensed_amount: float
       status: str
       total_operations: int
@@ -4641,18 +4716,14 @@ virtual_solid_dispenser:
           type: object
         device_id:
           type: string
-        max_capacity:
-          default: 100.0
-          type: number
-        precision:
-          default: 0.001
-          type: number
       required: []
       type: object
     data:
       properties:
         current_reagent:
           type: string
+        device_info:
+          type: object
         dispensed_amount:
           type: number
         status:
@@ -4664,6 +4735,7 @@ virtual_solid_dispenser:
       - current_reagent
       - dispensed_amount
       - total_operations
+      - device_info
       type: object
   version: 1.0.0
 virtual_stirrer:

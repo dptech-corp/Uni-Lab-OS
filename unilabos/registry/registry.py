@@ -127,6 +127,8 @@ class Registry:
                         },
                     },
                     "version": "1.0.0",
+                    "category": [],
+                    "config_info": [],
                     "icon": "icon_device.webp",
                     "registry_type": "device",
                     "handles": [],
