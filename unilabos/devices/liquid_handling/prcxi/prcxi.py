@@ -1279,22 +1279,23 @@ if __name__ == "__main__":
     # asyncio.run(handler.mix([plate1.children[0]], mix_time=3, mix_vol=5, height_to_bottom=0.5, offsets=Coordinate(0, 0, 0), mix_rate=100))
     # print(plate1.children[0])
     # asyncio.run(handler.discard_tips())
-
-#     asyncio.run(handler.add_liquid(
-#     asp_vols=[10]*2,
-#     dis_vols=[10]*2,
-#     reagent_sources=[plate11.children[0]],
-#     targets=plate11.children[-2:],
-#     use_channels=[0],
-#     flow_rates=[None] * 4,
-#     offsets=[Coordinate(0, 0, 0)] * 4,
-#     liquid_height=[None] * 2,
-#     blow_out_air_volume=[None] * 2,
-#     delays=None,
-#     mix_time=3,
-#     mix_vol=5,
-#     spread="wide",
-# ))
+    print('1111'*500)
+    print(plate11.children[-2:])
+    asyncio.run(handler.add_liquid(
+    asp_vols=[10]*2,
+    dis_vols=[10]*2,
+    reagent_sources=[plate11.children[0]],
+    targets=plate11.children[-2:],
+    use_channels=[0],
+    flow_rates=[None] * 4,
+    offsets=[Coordinate(0, 0, 0)] * 4,
+    liquid_height=[None] * 2,
+    blow_out_air_volume=[None] * 2,
+    delays=None,
+    mix_time=3,
+    mix_vol=5,
+    spread="wide",
+))
 
 #     asyncio.run(handler.transfer_liquid(
 #     asp_vols=[10]*2,
@@ -1312,17 +1313,17 @@ if __name__ == "__main__":
 #     tip_racks=[plate8]
 # ))
 
-    asyncio.run(handler.remove_liquid(
-    vols=[10]*2,
-    sources=plate11.children[:2],
-    waste_liquid=plate11.children[43],
-    use_channels=[0],
-    offsets=[Coordinate(0, 0, 0)] * 4,
-    liquid_height=[None] * 2,
-    blow_out_air_volume=[None] * 2,
-    delays=None,
-    spread="wide"
-))
+#     asyncio.run(handler.remove_liquid(
+#     vols=[10]*2,
+#     sources=plate11.children[:2],
+#     waste_liquid=plate11.children[43],
+#     use_channels=[0],
+#     offsets=[Coordinate(0, 0, 0)] * 4,
+#     liquid_height=[None] * 2,
+#     blow_out_air_volume=[None] * 2,
+#     delays=None,
+#     spread="wide"
+# ))
 
 
 
