@@ -35,3 +35,21 @@ robotic_arm.UR:
       - gripper_status
     additionalProperties: false
     type: object
+
+robotic_arm.elite:
+  description: Elite robot arm
+  class:
+    module: unilabos.devices.arm.elite_robot:EliteRobot
+    type: python
+    status_types:
+      arm_pose: Float64MultiArray
+    action_value_mappings:
+      modbus_task_cmd:
+        type: SendCmd
+        goal:
+          command: command
+        feedback: {}
+        result: {}
+  model:
+    type: device
+    mesh: elite_robot

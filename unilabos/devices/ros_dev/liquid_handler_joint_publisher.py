@@ -68,9 +68,7 @@ class LiquidHandlerJointPublisher(BaseROS2DeviceNode):
                 }
                 self.deck_list.append(deck_id)
 
-        print('='*20)
-        print(self.lh_devices)
-        print('='*20)
+
         self.j_action       = ActionServer(
             self,
             SendCmd,
