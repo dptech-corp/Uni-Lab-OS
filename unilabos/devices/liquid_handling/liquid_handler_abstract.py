@@ -622,12 +622,10 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
                             spread=spread,
                         )
                         await self.discard_tips()
-                elif len(use_channels) == 8 and self.backend.num_channels == 8:
-                    tip = []
-                    for _ in range(len(use_channels)):
-                        tip.extend(next(self.current_tip))
-                    await self.pick_up_tips(tip)
 
+                elif len(use_channels) == 8 and self.backend.num_channels == 8:
+               
+                  
                     # 对于8个的情况，需要判断此时任务是不是能被8通道移液站来成功处理
                     if len(sources) % 8 != 0:
                         raise ValueError(f"Length of `sources` {len(sources)} must be a multiple of 8 for 8-channel mode.")
@@ -635,7 +633,6 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
                     # 8个8个来取任务序列
 
                     for i in range(0, len(sources), 8):
-                        # 取出8个任务
                         tip = []
                         for _ in range(len(use_channels)):
                             tip.extend(next(self.current_tip))
@@ -764,19 +761,16 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
                             await self.custom_delay(seconds=delays[1])
                         await self.touch_tip(targets[_])
                     await self.discard_tips()
-                elif len(use_channels) == 8:
 
+                elif len(use_channels) == 8:
                     # 对于8个的情况，需要判断此时任务是不是能被8通道移液站来成功处理
                     if len(targets) % 8 != 0:
                         raise ValueError(f"Length of `targets` {len(targets)} must be a multiple of 8 for 8-channel mode.")
-
-                    # 8个8个来取任务序列
-
+                    tip = []
+                    for _ in range(len(use_channels)):
+                        tip.extend(next(self.current_tip))
+                    await self.pick_up_tips(tip)
                     for i in range(0, len(targets), 8):
-                        tip = []
-                        for _ in range(len(use_channels)):
-                            tip.extend(next(self.current_tip))
-                        await self.pick_up_tips(tip)
                         current_targets = targets[i:i + 8]
                         current_reagent_sources = reagent_sources[i:i + 8]
                         current_asp_vols = asp_vols[i:i + 8]
@@ -826,7 +820,7 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
                         if delays is not None:
                             await self.custom_delay(seconds=delays[1])
                         await self.touch_tip(current_targets)
-                        await self.discard_tips()
+                    await self.discard_tips()
 
 
         # except Exception as e:
