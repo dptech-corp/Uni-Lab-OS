@@ -1,6 +1,6 @@
 import networkx as nx
 import logging
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Union
 from .pump_protocol import generate_pump_protocol_with_rinsing
 
 logger = logging.getLogger(__name__)
@@ -216,7 +216,7 @@ def calculate_reagent_volume(target_ph_value: float, reagent: str, vessel_volume
 
 def generate_adjust_ph_protocol(
     G: nx.DiGraph,
-    vessel: dict,  # 🔧 修改：从字符串改为字典类型
+    vessel:Union[dict,str],  # 🔧 修改：从字符串改为字典类型
     ph_value: float,
     reagent: str,
     **kwargs
@@ -235,8 +235,17 @@ def generate_adjust_ph_protocol(
         List[Dict[str, Any]]: 动作序列
     """
     
-    # 🔧 核心修改：从字典中提取容器ID
-    vessel_id = vessel["id"]
+    # 统一处理vessel参数
+    if isinstance(vessel, dict):
+        vessel_id = list(vessel.values())[0].get("id", "")
+        vessel_data = vessel.get("data", {})
+    else:
+        vessel_id = str(vessel)
+        vessel_data = G.nodes[vessel_id].get("data", {}) if vessel_id in G.nodes() else {}
+    
+    if not vessel_id:
+        debug_print(f"❌ vessel 参数无效，必须包含id字段或直接提供容器ID. vessel: {vessel}")
+        raise ValueError("vessel 参数无效，必须包含id字段或直接提供容器ID")
     
     debug_print("=" * 60)
     debug_print("🧪 开始生成pH调节协议")

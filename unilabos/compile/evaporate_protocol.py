@@ -22,7 +22,7 @@ def parse_time_input(time_input: Union[str, float]) -> float:
     """
     if isinstance(time_input, (int, float)):
         debug_print(f"⏱️ 时间输入为数字: {time_input}s ✨")
-        return float(time_input)
+        return float(time_input)  # 🔧 确保返回float
     
     if not time_input or not str(time_input).strip():
         debug_print(f"⚠️ 时间输入为空，使用默认值: 180s (3分钟) 🕐")
@@ -48,7 +48,7 @@ def parse_time_input(time_input: Union[str, float]) -> float:
         try:
             value = float(time_str)
             debug_print(f"✅ 时间解析成功: {time_str} → {value}s（无单位，默认秒）⏰")
-            return value
+            return float(value)  # 🔧 确保返回float
         except ValueError:
             debug_print(f"❌ 无法解析时间: '{time_str}'，使用默认值180s (3分钟) 😅")
             return 180.0
@@ -70,7 +70,7 @@ def parse_time_input(time_input: Union[str, float]) -> float:
         time_sec = value  # 已经是s
         debug_print(f"🕐 时间转换: {value}s → {time_sec}s (已是秒) ⏰")
     
-    return time_sec
+    return float(time_sec)  # 🔧 确保返回float
 
 def find_rotavap_device(G: nx.DiGraph, vessel: str = None) -> Optional[str]:
     """
@@ -389,12 +389,12 @@ def generate_evaporate_protocol(
         "device_id": rotavap_device,
         "action_name": "evaporate",
         "action_kwargs": {
-            "vessel": target_vessel,  # 使用 target_vessel
-            "pressure": pressure,
-            "temp": temp,
-            "time": final_time,
-            "stir_speed": stir_speed,
-            "solvent": solvent
+            "vessel": target_vessel,
+            "pressure": float(pressure),
+            "temp": float(temp),
+            "time": float(final_time),  # 🔧 强制转换为float类型
+            "stir_speed": float(stir_speed),
+            "solvent": str(solvent)
         }
     }
     action_sequence.append(evaporate_action)

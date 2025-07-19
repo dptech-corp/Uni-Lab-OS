@@ -70,11 +70,32 @@ class VirtualMultiwayValve:
             command: 目标位置 (0-8) 或位置字符串
                     0: transfer pump位置
                     1-8: 其他设备位置
+                    'default': 默认位置（0号位）
         """
         try:
-            # 如果是字符串形式的位置，先转换为数字
+            # 🔧 处理特殊字符串命令
             if isinstance(command, str):
-                pos = int(command)
+                command_lower = command.lower().strip()
+                
+                # 处理特殊命令
+                if command_lower in ['default', 'pump', 'transfer_pump', 'home']:
+                    pos = 0  # 默认位置为0号位（transfer pump）
+                    self.logger.info(f"🔧 特殊命令 '{command}' 映射到位置 {pos}")
+                elif command_lower in ['open']:
+                    pos = 0  # open命令也映射到0号位
+                    self.logger.info(f"🔧 OPEN命令映射到位置 {pos}")
+                elif command_lower in ['close', 'closed']:
+                    # 关闭命令保持当前位置
+                    pos = self._current_position
+                    self.logger.info(f"🔧 CLOSE命令保持当前位置 {pos}")
+                else:
+                    # 尝试转换为数字
+                    try:
+                        pos = int(command)
+                    except ValueError:
+                        error_msg = f"无法识别的命令: '{command}'"
+                        self.logger.error(f"❌ {error_msg}")
+                        raise ValueError(error_msg)
             else:
                 pos = int(command)
                 
