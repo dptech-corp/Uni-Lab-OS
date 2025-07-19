@@ -55,7 +55,7 @@ def ros2_device_node(
             "read": "read_data",
             "extra_info": [],
         }
-
+    # FIXME 后面要删除
     for k, v in cls.__dict__.items():
         if not k.startswith("_") and isinstance(v, property):
             # noinspection PyUnresolvedReferences

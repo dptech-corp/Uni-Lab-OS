@@ -10,6 +10,15 @@ class DeviceNodeResourceTracker(object):
         self.resource2parent_resource = {}
         pass
 
+    def prefix_path(self, resource):
+        resource_prefix_path = "/"
+        resource_parent = getattr(resource, "parent", None)
+        while resource_parent is not None:
+            resource_prefix_path = f"/{resource_parent.name}" + resource_prefix_path
+            resource_parent = resource_parent.parent
+
+        return resource_prefix_path
+
     def parent_resource(self, resource):
         if id(resource) in self.resource2parent_resource:
             return self.resource2parent_resource[id(resource)]

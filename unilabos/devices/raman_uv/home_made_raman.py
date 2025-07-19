@@ -9,7 +9,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import time
 
 class RamanObj:
-    def __init__(self, port_laser,port_ccd, baudrate_laser=9600, baudrate_ccd=921600):
+    def __init__(self, port_laser, port_ccd, baudrate_laser=9600, baudrate_ccd=921600):
         self.port_laser = port_laser
         self.port_ccd = port_ccd
 

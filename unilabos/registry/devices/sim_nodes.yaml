@@ -1,5 +1,315 @@
 lh_joint_publisher:
+  category:
+  - sim_nodes
   class:
+    action_value_mappings:
+      auto-check_tf_update_actions:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result: {}
+        schema:
+          description: check_tf_update_actions的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: check_tf_update_actions参数
+          type: object
+        type: UniLabJsonCommand
+      auto-find_resource_parent:
+        feedback: {}
+        goal: {}
+        goal_default:
+          resource_id: null
+        handles: []
+        result: {}
+        schema:
+          description: find_resource_parent的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                resource_id:
+                  type: string
+              required:
+              - resource_id
+              type: object
+            result: {}
+          required:
+          - goal
+          title: find_resource_parent参数
+          type: object
+        type: UniLabJsonCommand
+      auto-inverse_kinematics:
+        feedback: {}
+        goal: {}
+        goal_default:
+          parent_id: null
+          x: null
+          x_joint: null
+          y: null
+          y_joint: null
+          z: null
+          z_joint: null
+        handles: []
+        result: {}
+        schema:
+          description: inverse_kinematics的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                parent_id:
+                  type: string
+                x:
+                  type: string
+                x_joint:
+                  type: object
+                y:
+                  type: string
+                y_joint:
+                  type: object
+                z:
+                  type: string
+                z_joint:
+                  type: object
+              required:
+              - x
+              - y
+              - z
+              - parent_id
+              - x_joint
+              - y_joint
+              - z_joint
+              type: object
+            result: {}
+          required:
+          - goal
+          title: inverse_kinematics参数
+          type: object
+        type: UniLabJsonCommand
+      auto-lh_joint_action_callback:
+        feedback: {}
+        goal: {}
+        goal_default:
+          goal_handle: null
+        handles: []
+        result: {}
+        schema:
+          description: lh_joint_action_callback的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                goal_handle:
+                  type: string
+              required:
+              - goal_handle
+              type: object
+            result: {}
+          required:
+          - goal
+          title: lh_joint_action_callback参数
+          type: object
+        type: UniLabJsonCommand
+      auto-lh_joint_pub_callback:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result: {}
+        schema:
+          description: lh_joint_pub_callback的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: lh_joint_pub_callback参数
+          type: object
+        type: UniLabJsonCommand
+      auto-move_joints:
+        feedback: {}
+        goal: {}
+        goal_default:
+          option: null
+          resource_names: null
+          speed: 0.1
+          x: null
+          x_joint: null
+          y: null
+          y_joint: null
+          z: null
+          z_joint: null
+        handles: []
+        result: {}
+        schema:
+          description: move_joints的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                option:
+                  type: string
+                resource_names:
+                  type: string
+                speed:
+                  default: 0.1
+                  type: string
+                x:
+                  type: string
+                x_joint:
+                  type: string
+                y:
+                  type: string
+                y_joint:
+                  type: string
+                z:
+                  type: string
+                z_joint:
+                  type: string
+              required:
+              - resource_names
+              - x
+              - y
+              - z
+              - option
+              type: object
+            result: {}
+          required:
+          - goal
+          title: move_joints参数
+          type: object
+        type: UniLabJsonCommand
+      auto-move_to:
+        feedback: {}
+        goal: {}
+        goal_default:
+          joint_positions: null
+          parent_id: null
+          speed: null
+        handles: []
+        result: {}
+        schema:
+          description: move_to的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                joint_positions:
+                  type: string
+                parent_id:
+                  type: string
+                speed:
+                  type: string
+              required:
+              - joint_positions
+              - speed
+              - parent_id
+              type: object
+            result: {}
+          required:
+          - goal
+          title: move_to参数
+          type: object
+        type: UniLabJsonCommand
+      auto-resource_move:
+        feedback: {}
+        goal: {}
+        goal_default:
+          channels: null
+          link_name: null
+          resource_id: null
+        handles: []
+        result: {}
+        schema:
+          description: resource_move的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                channels:
+                  type: array
+                link_name:
+                  type: string
+                resource_id:
+                  type: string
+              required:
+              - resource_id
+              - link_name
+              - channels
+              type: object
+            result: {}
+          required:
+          - goal
+          title: resource_move参数
+          type: object
+        type: UniLabJsonCommand
+      auto-send_resource_action:
+        feedback: {}
+        goal: {}
+        goal_default:
+          link_name: null
+          resource_id_list: null
+        handles: []
+        result: {}
+        schema:
+          description: send_resource_action的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                link_name:
+                  type: string
+                resource_id_list:
+                  type: array
+              required:
+              - resource_id_list
+              - link_name
+              type: object
+            result: {}
+          required:
+          - goal
+          title: send_resource_action参数
+          type: object
+        type: UniLabJsonCommand
     module: unilabos.devices.ros_dev.liquid_handler_joint_publisher:LiquidHandlerJointPublisher
+    status_types: {}
     type: ros2
-
+  config_info: []
+  description: 液体处理器关节发布器，用于ROS2仿真系统中的液体处理设备运动控制。该节点通过发布关节状态驱动仿真模型中的机械臂运动，支持三维坐标到关节空间的逆运动学转换、多关节协调控制、资源跟踪和TF变换。具备精确的位置控制、速度调节、pick-and-place操作等功能。适用于液体处理系统的虚拟仿真、运动规划验证、系统集成测试等应用场景。
+  handles: []
+  icon: ''
+  init_param_schema:
+    config:
+      properties:
+        device_id:
+          default: lh_joint_publisher
+          type: string
+        rate:
+          default: 50
+          type: string
+        resource_tracker:
+          type: string
+        resources_config:
+          type: array
+      required:
+      - resources_config
+      - resource_tracker
+      type: object
+    data:
+      properties: {}
+      required: []
+      type: object
+  version: 1.0.0

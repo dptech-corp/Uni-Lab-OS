@@ -1,627 +1,717 @@
 import networkx as nx
-from typing import List, Dict, Any
+import re
+import logging
+from typing import List, Dict, Any, Union
 from .pump_protocol import generate_pump_protocol_with_rinsing
 
+logger = logging.getLogger(__name__)
 
-def find_reagent_vessel(G: nx.DiGraph, reagent: str) -> str:
+def debug_print(message):
+    """调试输出"""
+    print(f"[ADD] {message}", flush=True)
+    logger.info(f"[ADD] {message}")
+
+def parse_volume_input(volume_input: Union[str, float]) -> float:
     """
-    根据试剂名称查找对应的试剂瓶，支持多种匹配模式：
-    1. 容器名称匹配（如 flask_DMF, reagent_bottle_1-DMF）
-    2. 容器内液体类型匹配（如 liquid_type: "DMF", name: "ethanol"）
-    3. 试剂名称匹配（如 reagent_name: "DMF", config.reagent: "ethyl_acetate"）
+    解析体积输入，支持带单位的字符串
     
     Args:
-        G: 网络图
-        reagent: 试剂名称
+        volume_input: 体积输入（如 "2.7 mL", "2.67 mL", "?", 10.0）
     
     Returns:
-        str: 试剂瓶的vessel ID
-    
-    Raises:
-        ValueError: 如果找不到对应的试剂瓶
+        float: 体积（毫升）
     """
-    print(f"ADD_PROTOCOL: 正在查找试剂 '{reagent}' 的容器...")
+    if isinstance(volume_input, (int, float)):
+        debug_print(f"📏 体积输入为数值: {volume_input}")
+        return float(volume_input)
     
-    # 第一步：通过容器名称匹配
-    possible_names = [
-        f"flask_{reagent}",           # flask_DMF, flask_ethanol
-        f"bottle_{reagent}",          # bottle_DMF, bottle_ethanol  
-        f"vessel_{reagent}",          # vessel_DMF, vessel_ethanol
-        f"{reagent}_flask",           # DMF_flask, ethanol_flask
-        f"{reagent}_bottle",          # DMF_bottle, ethanol_bottle
-        f"{reagent}",                 # 直接用试剂名
-        f"reagent_{reagent}",         # reagent_DMF, reagent_ethanol
-        f"reagent_bottle_{reagent}",  # reagent_bottle_DMF
-    ]
-    
-    # 尝试名称匹配
-    for vessel_name in possible_names:
-        if vessel_name in G.nodes():
-            print(f"ADD_PROTOCOL: 通过名称匹配找到容器: {vessel_name}")
-            return vessel_name
-    
-    # 第二步：通过模糊名称匹配（名称中包含试剂名）
-    for node_id in G.nodes():
-        if G.nodes[node_id].get('type') == 'container':
-            # 检查节点ID或名称中是否包含试剂名
-            node_name = G.nodes[node_id].get('name', '').lower()
-            if (reagent.lower() in node_id.lower() or 
-                reagent.lower() in node_name):
-                print(f"ADD_PROTOCOL: 通过模糊名称匹配找到容器: {node_id} (名称: {node_name})")
-                return node_id
-    
-    # 第三步：通过液体类型匹配
-    for node_id in G.nodes():
-        if G.nodes[node_id].get('type') == 'container':
-            vessel_data = G.nodes[node_id].get('data', {})
-            liquids = vessel_data.get('liquid', [])
-            
-            for liquid in liquids:
-                if isinstance(liquid, dict):
-                    # 支持两种格式的液体类型字段
-                    liquid_type = liquid.get('liquid_type') or liquid.get('name', '')
-                    reagent_name = vessel_data.get('reagent_name', '')
-                    config_reagent = G.nodes[node_id].get('config', {}).get('reagent', '')
-                    
-                    # 检查多个可能的字段
-                    if (liquid_type.lower() == reagent.lower() or 
-                        reagent_name.lower() == reagent.lower() or
-                        config_reagent.lower() == reagent.lower()):
-                        print(f"ADD_PROTOCOL: 通过液体类型匹配找到容器: {node_id}")
-                        print(f"  - liquid_type: {liquid_type}")
-                        print(f"  - reagent_name: {reagent_name}")
-                        print(f"  - config.reagent: {config_reagent}")
-                        return node_id
-    
-    # 第四步：列出所有可用的容器信息帮助调试
-    available_containers = []
-    for node_id in G.nodes():
-        if G.nodes[node_id].get('type') == 'container':
-            vessel_data = G.nodes[node_id].get('data', {})
-            config_data = G.nodes[node_id].get('config', {})
-            liquids = vessel_data.get('liquid', [])
-            
-            container_info = {
-                'id': node_id,
-                'name': G.nodes[node_id].get('name', ''),
-                'liquid_types': [],
-                'reagent_name': vessel_data.get('reagent_name', ''),
-                'config_reagent': config_data.get('reagent', '')
-            }
-            
-            for liquid in liquids:
-                if isinstance(liquid, dict):
-                    liquid_type = liquid.get('liquid_type') or liquid.get('name', '')
-                    if liquid_type:
-                        container_info['liquid_types'].append(liquid_type)
-            
-            available_containers.append(container_info)
-    
-    print(f"ADD_PROTOCOL: 可用容器列表:")
-    for container in available_containers:
-        print(f"  - {container['id']}: {container['name']}")
-        print(f"    液体类型: {container['liquid_types']}")
-        print(f"    试剂名称: {container['reagent_name']}")
-        print(f"    配置试剂: {container['config_reagent']}")
-    
-    raise ValueError(f"找不到试剂 '{reagent}' 对应的试剂瓶。尝试了名称匹配: {possible_names}")
-
-
-def find_reagent_vessel_by_any_match(G: nx.DiGraph, reagent: str) -> str:
-    """
-    增强版试剂容器查找，支持各种匹配方式的别名函数
-    """
-    return find_reagent_vessel(G, reagent)
-
-
-def get_vessel_reagent_volume(G: nx.DiGraph, vessel: str) -> float:
-    """获取容器中的试剂体积"""
-    if vessel not in G.nodes():
+    if not volume_input or not str(volume_input).strip():
+        debug_print(f"⚠️ 体积输入为空，返回0.0mL")
         return 0.0
     
-    vessel_data = G.nodes[vessel].get('data', {})
-    liquids = vessel_data.get('liquid', [])
+    volume_str = str(volume_input).lower().strip()
+    debug_print(f"🔍 解析体积输入: '{volume_str}'")
     
-    total_volume = 0.0
-    for liquid in liquids:
-        if isinstance(liquid, dict):
-            # 支持两种格式：新格式 (name, volume) 和旧格式 (liquid_type, liquid_volume)
-            volume = liquid.get('volume') or liquid.get('liquid_volume', 0.0)
-            total_volume += volume
+    # 处理未知体积
+    if volume_str in ['?', 'unknown', 'tbd', 'to be determined']:
+        default_volume = 10.0  # 默认10mL
+        debug_print(f"❓ 检测到未知体积，使用默认值: {default_volume}mL 🎯")
+        return default_volume
     
-    return total_volume
+    # 移除空格并提取数字和单位
+    volume_clean = re.sub(r'\s+', '', volume_str)
+    
+    # 匹配数字和单位的正则表达式
+    match = re.match(r'([0-9]*\.?[0-9]+)\s*(ml|l|μl|ul|microliter|milliliter|liter)?', volume_clean)
+    
+    if not match:
+        debug_print(f"❌ 无法解析体积: '{volume_str}'，使用默认值10mL")
+        return 10.0
+    
+    value = float(match.group(1))
+    unit = match.group(2) or 'ml'  # 默认单位为毫升
+    
+    # 转换为毫升
+    if unit in ['l', 'liter']:
+        volume = value * 1000.0  # L -> mL
+        debug_print(f"🔄 体积转换: {value}L → {volume}mL")
+    elif unit in ['μl', 'ul', 'microliter']:
+        volume = value / 1000.0  # μL -> mL
+        debug_print(f"🔄 体积转换: {value}μL → {volume}mL")
+    else:  # ml, milliliter 或默认
+        volume = value  # 已经是mL
+        debug_print(f"✅ 体积已为mL: {volume}mL")
+    
+    return volume
 
-
-def get_vessel_reagent_types(G: nx.DiGraph, vessel: str) -> List[str]:
-    """获取容器中所有试剂的类型"""
-    if vessel not in G.nodes():
-        return []
-    
-    vessel_data = G.nodes[vessel].get('data', {})
-    liquids = vessel_data.get('liquid', [])
-    
-    reagent_types = []
-    for liquid in liquids:
-        if isinstance(liquid, dict):
-            # 支持两种格式的试剂类型字段
-            reagent_type = liquid.get('liquid_type') or liquid.get('name', '')
-            if reagent_type:
-                reagent_types.append(reagent_type)
-    
-    # 同时检查配置中的试剂信息
-    config_reagent = G.nodes[vessel].get('config', {}).get('reagent', '')
-    reagent_name = vessel_data.get('reagent_name', '')
-    
-    if config_reagent and config_reagent not in reagent_types:
-        reagent_types.append(config_reagent)
-    if reagent_name and reagent_name not in reagent_types:
-        reagent_types.append(reagent_name)
-    
-    return reagent_types
-
-
-def find_vessels_by_reagent(G: nx.DiGraph, reagent: str) -> List[str]:
+def parse_mass_input(mass_input: Union[str, float]) -> float:
     """
-    根据试剂类型查找所有匹配的容器
-    返回匹配容器的ID列表
-    """
-    matching_vessels = []
+    解析质量输入，支持带单位的字符串
     
-    for node_id in G.nodes():
-        if G.nodes[node_id].get('type') == 'container':
-            # 检查容器名称匹配
-            node_name = G.nodes[node_id].get('name', '').lower()
-            if reagent.lower() in node_id.lower() or reagent.lower() in node_name:
-                matching_vessels.append(node_id)
-                continue
-            
-            # 检查试剂类型匹配
-            vessel_data = G.nodes[node_id].get('data', {})
-            liquids = vessel_data.get('liquid', [])
-            config_data = G.nodes[node_id].get('config', {})
-            
-            # 检查 reagent_name 和 config.reagent
-            reagent_name = vessel_data.get('reagent_name', '').lower()
+    Args:
+        mass_input: 质量输入（如 "19.3 g", "4.5 g", 2.5）
+    
+    Returns:
+        float: 质量（克）
+    """
+    if isinstance(mass_input, (int, float)):
+        debug_print(f"⚖️ 质量输入为数值: {mass_input}g")
+        return float(mass_input)
+    
+    if not mass_input or not str(mass_input).strip():
+        debug_print(f"⚠️ 质量输入为空，返回0.0g")
+        return 0.0
+    
+    mass_str = str(mass_input).lower().strip()
+    debug_print(f"🔍 解析质量输入: '{mass_str}'")
+    
+    # 移除空格并提取数字和单位
+    mass_clean = re.sub(r'\s+', '', mass_str)
+    
+    # 匹配数字和单位的正则表达式
+    match = re.match(r'([0-9]*\.?[0-9]+)\s*(g|mg|kg|gram|milligram|kilogram)?', mass_clean)
+    
+    if not match:
+        debug_print(f"❌ 无法解析质量: '{mass_str}'，返回0.0g")
+        return 0.0
+    
+    value = float(match.group(1))
+    unit = match.group(2) or 'g'  # 默认单位为克
+    
+    # 转换为克
+    if unit in ['mg', 'milligram']:
+        mass = value / 1000.0  # mg -> g
+        debug_print(f"🔄 质量转换: {value}mg → {mass}g")
+    elif unit in ['kg', 'kilogram']:
+        mass = value * 1000.0  # kg -> g
+        debug_print(f"🔄 质量转换: {value}kg → {mass}g")
+    else:  # g, gram 或默认
+        mass = value  # 已经是g
+        debug_print(f"✅ 质量已为g: {mass}g")
+    
+    return mass
+
+def parse_time_input(time_input: Union[str, float]) -> float:
+    """
+    解析时间输入，支持带单位的字符串
+    
+    Args:
+        time_input: 时间输入（如 "1 h", "20 min", "30 s", 60.0）
+    
+    Returns:
+        float: 时间（秒）
+    """
+    if isinstance(time_input, (int, float)):
+        debug_print(f"⏱️ 时间输入为数值: {time_input}秒")
+        return float(time_input)
+    
+    if not time_input or not str(time_input).strip():
+        debug_print(f"⚠️ 时间输入为空，返回0秒")
+        return 0.0
+    
+    time_str = str(time_input).lower().strip()
+    debug_print(f"🔍 解析时间输入: '{time_str}'")
+    
+    # 处理未知时间
+    if time_str in ['?', 'unknown', 'tbd']:
+        default_time = 60.0  # 默认1分钟
+        debug_print(f"❓ 检测到未知时间，使用默认值: {default_time}s (1分钟) ⏰")
+        return default_time
+    
+    # 移除空格并提取数字和单位
+    time_clean = re.sub(r'\s+', '', time_str)
+    
+    # 匹配数字和单位的正则表达式
+    match = re.match(r'([0-9]*\.?[0-9]+)\s*(s|sec|second|min|minute|h|hr|hour|d|day)?', time_clean)
+    
+    if not match:
+        debug_print(f"❌ 无法解析时间: '{time_str}'，返回0s")
+        return 0.0
+    
+    value = float(match.group(1))
+    unit = match.group(2) or 's'  # 默认单位为秒
+    
+    # 转换为秒
+    if unit in ['min', 'minute']:
+        time_sec = value * 60.0  # min -> s
+        debug_print(f"🔄 时间转换: {value}分钟 → {time_sec}秒")
+    elif unit in ['h', 'hr', 'hour']:
+        time_sec = value * 3600.0  # h -> s
+        debug_print(f"🔄 时间转换: {value}小时 → {time_sec}秒")
+    elif unit in ['d', 'day']:
+        time_sec = value * 86400.0  # d -> s
+        debug_print(f"🔄 时间转换: {value}天 → {time_sec}秒")
+    else:  # s, sec, second 或默认
+        time_sec = value  # 已经是s
+        debug_print(f"✅ 时间已为秒: {time_sec}秒")
+    
+    return time_sec
+
+def find_reagent_vessel(G: nx.DiGraph, reagent: str) -> str:
+    """增强版试剂容器查找，支持固体和液体"""
+    debug_print(f"🔍 开始查找试剂 '{reagent}' 的容器...")
+    
+    # 🔧 方法1：直接搜索 data.reagent_name 和 config.reagent
+    debug_print(f"📋 方法1: 搜索reagent字段...")
+    for node in G.nodes():
+        node_data = G.nodes[node].get('data', {})
+        node_type = G.nodes[node].get('type', '')
+        config_data = G.nodes[node].get('config', {})
+        
+        # 只搜索容器类型的节点
+        if node_type == 'container':
+            reagent_name = node_data.get('reagent_name', '').lower()
             config_reagent = config_data.get('reagent', '').lower()
             
-            if (reagent.lower() == reagent_name or 
-                reagent.lower() == config_reagent):
-                matching_vessels.append(node_id)
-                continue
+            # 精确匹配
+            if reagent_name == reagent.lower() or config_reagent == reagent.lower():
+                debug_print(f"✅ 通过reagent字段精确匹配到容器: {node} 🎯")
+                return node
             
-            # 检查液体列表
+            # 模糊匹配
+            if (reagent.lower() in reagent_name and reagent_name) or \
+               (reagent.lower() in config_reagent and config_reagent):
+                debug_print(f"✅ 通过reagent字段模糊匹配到容器: {node} 🔍")
+                return node
+    
+    # 🔧 方法2：常见的容器命名规则
+    debug_print(f"📋 方法2: 使用命名规则查找...")
+    reagent_clean = reagent.lower().replace(' ', '_').replace('-', '_')
+    possible_names = [
+        reagent_clean,
+        f"flask_{reagent_clean}",
+        f"bottle_{reagent_clean}",
+        f"vessel_{reagent_clean}", 
+        f"{reagent_clean}_flask",
+        f"{reagent_clean}_bottle",
+        f"reagent_{reagent_clean}",
+        f"reagent_bottle_{reagent_clean}",
+        f"solid_reagent_bottle_{reagent_clean}",
+        f"reagent_bottle_1",  # 通用试剂瓶
+        f"reagent_bottle_2",
+        f"reagent_bottle_3"
+    ]
+    
+    debug_print(f"🔍 尝试的容器名称: {possible_names[:5]}... (共{len(possible_names)}个)")
+    
+    for name in possible_names:
+        if name in G.nodes():
+            node_type = G.nodes[name].get('type', '')
+            if node_type == 'container':
+                debug_print(f"✅ 通过命名规则找到容器: {name} 📝")
+                return name
+    
+    # 🔧 方法3：节点名称模糊匹配
+    debug_print(f"📋 方法3: 节点名称模糊匹配...")
+    for node_id in G.nodes():
+        node_data = G.nodes[node_id]
+        if node_data.get('type') == 'container':
+            # 检查节点名称是否包含试剂名称
+            if reagent_clean in node_id.lower():
+                debug_print(f"✅ 通过节点名称模糊匹配到容器: {node_id} 🔍")
+                return node_id
+            
+            # 检查液体类型匹配
+            vessel_data = node_data.get('data', {})
+            liquids = vessel_data.get('liquid', [])
             for liquid in liquids:
                 if isinstance(liquid, dict):
                     liquid_type = liquid.get('liquid_type') or liquid.get('name', '')
                     if liquid_type.lower() == reagent.lower():
-                        matching_vessels.append(node_id)
-                        break
+                        debug_print(f"✅ 通过液体类型匹配到容器: {node_id} 💧")
+                        return node_id
     
-    return matching_vessels
-
+    # 🔧 方法4：使用第一个试剂瓶作为备选
+    debug_print(f"📋 方法4: 查找备选试剂瓶...")
+    for node_id in G.nodes():
+        node_data = G.nodes[node_id]
+        if (node_data.get('type') == 'container' and 
+            ('reagent' in node_id.lower() or 'bottle' in node_id.lower())):
+            debug_print(f"⚠️ 未找到专用容器，使用备选试剂瓶: {node_id} 🔄")
+            return node_id
+    
+    debug_print(f"❌ 所有方法都失败了，无法找到容器!")
+    raise ValueError(f"找不到试剂 '{reagent}' 对应的容器")
 
 def find_connected_stirrer(G: nx.DiGraph, vessel: str) -> str:
-    """
-    查找与指定容器相连的搅拌器
+    """查找连接到指定容器的搅拌器"""
+    debug_print(f"🔍 查找连接到容器 '{vessel}' 的搅拌器...")
     
-    Args:
-        G: 网络图
-        vessel: 容器ID
+    stirrer_nodes = []
+    for node in G.nodes():
+        node_class = G.nodes[node].get('class', '').lower()
+        if 'stirrer' in node_class:
+            stirrer_nodes.append(node)
+            debug_print(f"📋 发现搅拌器: {node}")
     
-    Returns:
-        str: 搅拌器ID，如果找不到则返回None
-    """
-    # 查找所有搅拌器节点
-    stirrer_nodes = [node for node in G.nodes() 
-                    if (G.nodes[node].get('class') or '') == 'virtual_stirrer']
+    debug_print(f"📊 共找到 {len(stirrer_nodes)} 个搅拌器")
     
-    # 检查哪个搅拌器与目标容器相连
+    # 查找连接到容器的搅拌器
     for stirrer in stirrer_nodes:
         if G.has_edge(stirrer, vessel) or G.has_edge(vessel, stirrer):
+            debug_print(f"✅ 找到连接的搅拌器: {stirrer} 🔗")
             return stirrer
     
-    # 如果没有直接连接，返回第一个可用的搅拌器
-    return stirrer_nodes[0] if stirrer_nodes else None
+    # 返回第一个搅拌器
+    if stirrer_nodes:
+        debug_print(f"⚠️ 未找到直接连接的搅拌器，使用第一个: {stirrer_nodes[0]} 🔄")
+        return stirrer_nodes[0]
+    
+    debug_print(f"❌ 未找到任何搅拌器")
+    return ""
 
+def find_solid_dispenser(G: nx.DiGraph) -> str:
+    """查找固体加样器"""
+    debug_print(f"🔍 查找固体加样器...")
+    
+    for node in G.nodes():
+        node_class = G.nodes[node].get('class', '').lower()
+        if 'solid_dispenser' in node_class or 'dispenser' in node_class:
+            debug_print(f"✅ 找到固体加样器: {node} 🥄")
+            return node
+    
+    debug_print(f"❌ 未找到固体加样器")
+    return ""
+
+# 🆕 创建进度日志动作
+def create_action_log(message: str, emoji: str = "📝") -> Dict[str, Any]:
+    """创建一个动作日志"""
+    full_message = f"{emoji} {message}"
+    debug_print(full_message)
+    logger.info(full_message)
+    print(f"[ACTION] {full_message}", flush=True)
+    
+    return {
+        "action_name": "wait",
+        "action_kwargs": {
+            "time": 0.1,
+            "log_message": full_message
+        }
+    }
 
 def generate_add_protocol(
     G: nx.DiGraph,
-    vessel: str,
+    vessel: dict,  # 🔧 修改：现在接收字典类型的 vessel
     reagent: str,
-    volume: float,
-    mass: float = 0.0,
+    # 🔧 修复：所有参数都用 Union 类型，支持字符串和数值
+    volume: Union[str, float] = 0.0,
+    mass: Union[str, float] = 0.0,
     amount: str = "",
-    time: float = 0.0,
-    stir: bool = False,
-    stir_speed: float = 300.0,
-    viscous: bool = False,
-    purpose: str = "添加试剂"
-) -> List[Dict[str, Any]]:
-    """
-    生成添加试剂的协议序列，支持智能试剂匹配
-    
-    基于pump_protocol的成熟算法，实现试剂添加功能：
-    1. 智能查找试剂瓶（支持名称匹配、液体类型匹配、试剂配置匹配）
-    2. **先启动搅拌，再进行转移** - 确保试剂添加更均匀
-    3. 使用pump_protocol实现液体转移
-    
-    Args:
-        G: 有向图，节点为容器和设备，边为连接关系
-        vessel: 目标容器（要添加试剂的容器）
-        reagent: 试剂名称（用于查找对应的试剂瓶）
-        volume: 要添加的体积 (mL)
-        mass: 要添加的质量 (g) - 暂时未使用，预留接口
-        amount: 其他数量描述
-        time: 添加时间 (s)，如果指定则计算流速
-        stir: 是否启用搅拌
-        stir_speed: 搅拌速度 (RPM)
-        viscous: 是否为粘稠液体
-        purpose: 添加目的描述
-    
-    Returns:
-        List[Dict[str, Any]]: 动作序列
-    
-    Raises:
-        ValueError: 当找不到必要的设备或容器时
-    """
-    action_sequence = []
-    
-    print(f"ADD_PROTOCOL: 开始生成添加试剂协议")
-    print(f"  - 目标容器: {vessel}")
-    print(f"  - 试剂: {reagent}")
-    print(f"  - 体积: {volume} mL")
-    print(f"  - 质量: {mass} g")
-    print(f"  - 搅拌: {stir} (速度: {stir_speed} RPM)")
-    print(f"  - 粘稠: {viscous}")
-    print(f"  - 目的: {purpose}")
-    
-    # 1. 验证目标容器存在
-    if vessel not in G.nodes():
-        raise ValueError(f"目标容器 '{vessel}' 不存在于系统中")
-    
-    # 2. 智能查找试剂瓶
-    try:
-        reagent_vessel = find_reagent_vessel(G, reagent)
-        print(f"ADD_PROTOCOL: 找到试剂容器: {reagent_vessel}")
-    except ValueError as e:
-        raise ValueError(f"无法找到试剂 '{reagent}': {str(e)}")
-    
-    # 3. 验证试剂容器中的试剂体积
-    available_volume = get_vessel_reagent_volume(G, reagent_vessel)
-    print(f"ADD_PROTOCOL: 试剂容器 {reagent_vessel} 中有 {available_volume} mL 试剂")
-    
-    if available_volume < volume:
-        print(f"ADD_PROTOCOL: 警告 - 试剂容器中的试剂不足！需要 {volume} mL，可用 {available_volume} mL")
-    
-    # 4. 验证是否存在从试剂瓶到目标容器的路径
-    try:
-        path = nx.shortest_path(G, source=reagent_vessel, target=vessel)
-        print(f"ADD_PROTOCOL: 找到路径 {reagent_vessel} -> {vessel}: {path}")
-    except nx.NetworkXNoPath:
-        raise ValueError(f"从试剂瓶 '{reagent_vessel}' 到目标容器 '{vessel}' 没有可用路径")
-    
-    # 5. **先启动搅拌** - 关键改进！
-    if stir:
-        try:
-            stirrer_id = find_connected_stirrer(G, vessel)
-            
-            if stirrer_id:
-                print(f"ADD_PROTOCOL: 找到搅拌器 {stirrer_id}，将在添加前启动搅拌")
-                
-                # 先启动搅拌
-                stir_action = {
-                    "device_id": stirrer_id,
-                    "action_name": "start_stir",
-                    "action_kwargs": {
-                        "vessel": vessel,
-                        "stir_speed": stir_speed,
-                        "purpose": f"{purpose}: 启动搅拌，准备添加 {reagent}"
-                    }
-                }
-                
-                action_sequence.append(stir_action)
-                print(f"ADD_PROTOCOL: 已添加搅拌动作，速度 {stir_speed} RPM")
-                
-                # 等待搅拌稳定
-                action_sequence.append({
-                    "action_name": "wait",
-                    "action_kwargs": {"time": 5}
-                })
-            else:
-                print(f"ADD_PROTOCOL: 警告 - 需要搅拌但未找到与容器 {vessel} 相连的搅拌器")
-        
-        except Exception as e:
-            print(f"ADD_PROTOCOL: 搅拌器配置出错: {str(e)}")
-    
-    # 6. 如果指定了体积，执行液体转移
-    if volume > 0:
-        # 6.1 计算流速参数
-        if time > 0:
-            # 根据时间计算流速
-            transfer_flowrate = volume / time
-            flowrate = transfer_flowrate
-        else:
-            # 使用默认流速
-            if viscous:
-                transfer_flowrate = 0.3  # 粘稠液体用较慢速度
-                flowrate = 1.0
-            else:
-                transfer_flowrate = 0.5  # 普通液体默认速度
-                flowrate = 2.5
-        
-        print(f"ADD_PROTOCOL: 准备转移 {volume} mL 从 {reagent_vessel} 到 {vessel}")
-        print(f"ADD_PROTOCOL: 转移流速={transfer_flowrate} mL/s, 注入流速={flowrate} mL/s")
-        
-        # 6.2 使用pump_protocol的核心算法实现液体转移
-        try:
-            pump_actions = generate_pump_protocol_with_rinsing(
-                G=G,
-                from_vessel=reagent_vessel,
-                to_vessel=vessel,
-                volume=volume,
-                amount=amount,
-                time=time,
-                viscous=viscous,
-                rinsing_solvent="",  # 添加试剂通常不需要清洗
-                rinsing_volume=0.0,
-                rinsing_repeats=0,
-                solid=False,
-                flowrate=flowrate,
-                transfer_flowrate=transfer_flowrate
-            )
-            
-            # 添加pump actions到序列中
-            action_sequence.extend(pump_actions)
-            
-        except Exception as e:
-            raise ValueError(f"生成泵协议时出错: {str(e)}")
-    
-    print(f"ADD_PROTOCOL: 生成了 {len(action_sequence)} 个动作")
-    print(f"ADD_PROTOCOL: 添加试剂协议生成完成")
-    
-    return action_sequence
-
-
-def generate_add_protocol_with_cleaning(
-    G: nx.DiGraph,
-    vessel: str,
-    reagent: str,
-    volume: float,
-    mass: float = 0.0,
-    amount: str = "",
-    time: float = 0.0,
+    time: Union[str, float] = 0.0,
     stir: bool = False,
     stir_speed: float = 300.0,
     viscous: bool = False,
     purpose: str = "添加试剂",
-    cleaning_solvent: str = "air",
-    cleaning_volume: float = 5.0,
-    cleaning_repeats: int = 1
+    # XDL扩展参数
+    mol: str = "",
+    event: str = "",
+    rate_spec: str = "",
+    equiv: str = "",
+    ratio: str = "",
+    **kwargs
 ) -> List[Dict[str, Any]]:
     """
-    生成带清洗的添加试剂协议，支持智能试剂匹配
+    生成添加试剂协议 - 修复版
     
-    与普通添加协议的区别是会在添加后进行管道清洗
-    
-    Args:
-        G: 有向图
-        vessel: 目标容器
-        reagent: 试剂名称
-        volume: 添加体积
-        mass: 添加质量（预留）
-        amount: 其他数量描述
-        time: 添加时间
-        stir: 是否搅拌
-        stir_speed: 搅拌速度
-        viscous: 是否粘稠
-        purpose: 添加目的
-        cleaning_solvent: 清洗溶剂（"air"表示空气清洗）
-        cleaning_volume: 清洗体积
-        cleaning_repeats: 清洗重复次数
-    
-    Returns:
-        List[Dict[str, Any]]: 动作序列
+    支持所有XDL参数和单位：
+    - vessel: Resource类型字典，包含id字段
+    - volume: "2.7 mL", "2.67 mL", "?" 或数值
+    - mass: "19.3 g", "4.5 g" 或数值
+    - time: "1 h", "20 min" 或数值（秒）
+    - mol: "0.28 mol", "16.2 mmol", "25.2 mmol"
+    - rate_spec: "portionwise", "dropwise"
+    - event: "A", "B"
+    - equiv: "1.1"
+    - ratio: "?", "1:1"
     """
+
+    # 🔧 核心修改：从字典中提取容器ID
+    vessel_id = vessel["id"]
+    
+    # 🔧 修改：更新容器的液体体积（假设有 liquid_volume 字段）
+    if "data" in vessel and "liquid_volume" in vessel["data"]:
+        if isinstance(vessel["data"]["liquid_volume"], list) and len(vessel["data"]["liquid_volume"]) > 0:
+            vessel["data"]["liquid_volume"][0] -= parse_volume_input(volume)
+    
+    debug_print("=" * 60)
+    debug_print("🚀 开始生成添加试剂协议")
+    debug_print(f"📋 原始参数:")
+    debug_print(f"  🥼 vessel: {vessel} (ID: {vessel_id})")
+    debug_print(f"  🧪 reagent: '{reagent}'")
+    debug_print(f"  📏 volume: {volume} (类型: {type(volume)})")
+    debug_print(f"  ⚖️ mass: {mass} (类型: {type(mass)})")
+    debug_print(f"  ⏱️ time: {time} (类型: {type(time)})")
+    debug_print(f"  🧬 mol: '{mol}'")
+    debug_print(f"  🎯 event: '{event}'")
+    debug_print(f"  ⚡ rate_spec: '{rate_spec}'")
+    debug_print(f"  🌪️ stir: {stir}")
+    debug_print(f"  🔄 stir_speed: {stir_speed} rpm")
+    debug_print("=" * 60)
+    
     action_sequence = []
     
-    # 1. 智能查找试剂瓶
-    reagent_vessel = find_reagent_vessel(G, reagent)
+    # === 参数验证 ===
+    debug_print("🔍 步骤1: 参数验证...")
+    action_sequence.append(create_action_log(f"开始添加试剂 '{reagent}' 到容器 '{vessel_id}'", "🎬"))
     
-    # 2. **先启动搅拌**
-    if stir:
-        stirrer_id = find_connected_stirrer(G, vessel)
-        if stirrer_id:
-            action_sequence.append({
-                "device_id": stirrer_id,
-                "action_name": "start_stir",
-                "action_kwargs": {
-                    "vessel": vessel,
-                    "stir_speed": stir_speed,
-                    "purpose": f"{purpose}: 启动搅拌，准备添加 {reagent}"
-                }
-            })
+    if not vessel or not vessel_id:
+        debug_print("❌ vessel 参数不能为空")
+        raise ValueError("vessel 参数不能为空")
+    if not reagent:
+        debug_print("❌ reagent 参数不能为空")
+        raise ValueError("reagent 参数不能为空")
+    
+    if vessel_id not in G.nodes():
+        debug_print(f"❌ 容器 '{vessel_id}' 不存在于系统中")
+        raise ValueError(f"容器 '{vessel_id}' 不存在于系统中")
+    
+    debug_print("✅ 基本参数验证通过")
+    
+    # === 🔧 关键修复：参数解析 ===
+    debug_print("🔍 步骤2: 参数解析...")
+    action_sequence.append(create_action_log("正在解析添加参数...", "🔍"))
+    
+    # 解析各种参数为数值
+    final_volume = parse_volume_input(volume)
+    final_mass = parse_mass_input(mass)
+    final_time = parse_time_input(time)
+    
+    debug_print(f"📊 解析结果:")
+    debug_print(f"  📏 体积: {final_volume}mL")
+    debug_print(f"  ⚖️ 质量: {final_mass}g")
+    debug_print(f"  ⏱️ 时间: {final_time}s")
+    debug_print(f"  🧬 摩尔: '{mol}'")
+    debug_print(f"  🎯 事件: '{event}'")
+    debug_print(f"  ⚡ 速率: '{rate_spec}'")
+    
+    # === 判断添加类型 ===
+    debug_print("🔍 步骤3: 判断添加类型...")
+    
+    # 🔧 修复：现在使用解析后的数值进行比较
+    is_solid = (final_mass > 0 or (mol and mol.strip() != ""))
+    is_liquid = (final_volume > 0)
+    
+    if not is_solid and not is_liquid:
+        # 默认为液体，10mL
+        is_liquid = True
+        final_volume = 10.0
+        debug_print("⚠️ 未指定体积或质量，默认为10mL液体")
+    
+    add_type = "固体" if is_solid else "液体"
+    add_emoji = "🧂" if is_solid else "💧"
+    debug_print(f"📋 添加类型: {add_type} {add_emoji}")
+    
+    action_sequence.append(create_action_log(f"确定添加类型: {add_type} {add_emoji}", "📋"))
+    
+    # === 执行添加流程 ===
+    debug_print("🔍 步骤4: 执行添加流程...")
+    
+    try:
+        if is_solid:
+            # === 固体添加路径 ===
+            debug_print(f"🧂 使用固体添加路径")
+            action_sequence.append(create_action_log("开始固体试剂添加流程", "🧂"))
             
-            # 等待搅拌稳定
-            action_sequence.append({
-                "action_name": "wait",
-                "action_kwargs": {"time": 5}
-            })
-    
-    # 3. 计算流速
-    if time > 0:
-        transfer_flowrate = volume / time
-        flowrate = transfer_flowrate
-    else:
-        if viscous:
-            transfer_flowrate = 0.3
-            flowrate = 1.0
-        else:
-            transfer_flowrate = 0.5
-            flowrate = 2.5
-    
-    # 4. 使用带清洗的pump_protocol
-    pump_actions = generate_pump_protocol_with_rinsing(
-        G=G,
-        from_vessel=reagent_vessel,
-        to_vessel=vessel,
-        volume=volume,
-        amount=amount,
-        time=time,
-        viscous=viscous,
-        rinsing_solvent=cleaning_solvent,
-        rinsing_volume=cleaning_volume,
-        rinsing_repeats=cleaning_repeats,
-        solid=False,
-        flowrate=flowrate,
-        transfer_flowrate=transfer_flowrate
-    )
-    
-    action_sequence.extend(pump_actions)
-    
-    return action_sequence
-
-
-def generate_sequential_add_protocol(
-    G: nx.DiGraph,
-    vessel: str,
-    reagents: List[Dict[str, Any]],
-    stir_between_additions: bool = True,
-    final_stir: bool = True,
-    final_stir_speed: float = 400.0,
-    final_stir_time: float = 300.0
-) -> List[Dict[str, Any]]:
-    """
-    生成连续添加多种试剂的协议，支持智能试剂匹配
-    
-    Args:
-        G: 网络图
-        vessel: 目标容器
-        reagents: 试剂列表，每个元素包含试剂添加参数
-        stir_between_additions: 是否在每次添加之间搅拌
-        final_stir: 是否在所有添加完成后进行最终搅拌
-        final_stir_speed: 最终搅拌速度
-        final_stir_time: 最终搅拌时间
-    
-    Returns:
-        List[Dict[str, Any]]: 完整的动作序列
-    
-    Example:
-        reagents = [
-            {
-                "reagent": "DMF",           # 会匹配 reagent_bottle_1 (reagent_name: "DMF")
-                "volume": 10.0,
-                "viscous": False,
-                "stir_speed": 300.0
-            },
-            {
-                "reagent": "ethyl_acetate", # 会匹配 reagent_bottle_2 (reagent_name: "ethyl_acetate")
-                "volume": 5.0,
-                "viscous": False,
-                "stir_speed": 350.0
-            }
-        ]
-    """
-    action_sequence = []
-    
-    print(f"ADD_PROTOCOL: 开始连续添加 {len(reagents)} 种试剂到容器 {vessel}")
-    
-    for i, reagent_params in enumerate(reagents):
-        reagent_name = reagent_params.get('reagent')
-        print(f"ADD_PROTOCOL: 处理第 {i+1}/{len(reagents)} 个试剂: {reagent_name}")
-        
-        # 生成单个试剂的添加协议
-        add_actions = generate_add_protocol(
-            G=G,
-            vessel=vessel,
-            reagent=reagent_name,
-            volume=reagent_params.get('volume', 0.0),
-            mass=reagent_params.get('mass', 0.0),
-            amount=reagent_params.get('amount', ''),
-            time=reagent_params.get('time', 0.0),
-            stir=stir_between_additions,
-            stir_speed=reagent_params.get('stir_speed', 300.0),
-            viscous=reagent_params.get('viscous', False),
-            purpose=reagent_params.get('purpose', f'添加试剂 {reagent_name} ({i+1}/{len(reagents)})')
-        )
-        
-        action_sequence.extend(add_actions)
-        
-        # 在添加之间加入等待时间
-        if i < len(reagents) - 1:  # 不是最后一个试剂
-            action_sequence.append({
-                "action_name": "wait",
-                "action_kwargs": {"time": 10}  # 试剂混合时间
-            })
-    
-    # 最终搅拌
-    if final_stir:
-        stirrer_id = find_connected_stirrer(G, vessel)
-        if stirrer_id:
-            print(f"ADD_PROTOCOL: 添加最终搅拌动作，速度 {final_stir_speed} RPM，时间 {final_stir_time} 秒")
-            action_sequence.extend([
-                {
-                    "device_id": stirrer_id,
-                    "action_name": "stir",
-                    "action_kwargs": {
-                        "stir_time": final_stir_time,
-                        "stir_speed": final_stir_speed,
-                        "settling_time": 30.0
-                    }
+            solid_dispenser = find_solid_dispenser(G)
+            if solid_dispenser:
+                action_sequence.append(create_action_log(f"找到固体加样器: {solid_dispenser}", "🥄"))
+                
+                # 启动搅拌
+                if stir:
+                    debug_print("🌪️ 准备启动搅拌...")
+                    action_sequence.append(create_action_log("准备启动搅拌器", "🌪️"))
+                    
+                    stirrer_id = find_connected_stirrer(G, vessel_id)  # 🔧 使用 vessel_id
+                    if stirrer_id:
+                        action_sequence.append(create_action_log(f"启动搅拌器 {stirrer_id} (速度: {stir_speed} rpm)", "🔄"))
+                        
+                        action_sequence.append({
+                            "device_id": stirrer_id,
+                            "action_name": "start_stir",
+                            "action_kwargs": {
+                                "vessel": vessel_id,  # 🔧 使用 vessel_id
+                                "stir_speed": stir_speed,
+                                "purpose": f"准备添加固体 {reagent}"
+                            }
+                        })
+                        # 等待搅拌稳定
+                        action_sequence.append(create_action_log("等待搅拌稳定...", "⏳"))
+                        action_sequence.append({
+                            "action_name": "wait",
+                            "action_kwargs": {"time": 3}
+                        })
+                
+                # 固体加样
+                add_kwargs = {
+                    "vessel": vessel_id,  # 🔧 使用 vessel_id
+                    "reagent": reagent,
+                    "purpose": purpose,
+                    "event": event,
+                    "rate_spec": rate_spec
                 }
-            ])
+                
+                if final_mass > 0:
+                    add_kwargs["mass"] = str(final_mass)
+                    action_sequence.append(create_action_log(f"准备添加固体: {final_mass}g", "⚖️"))
+                if mol and mol.strip():
+                    add_kwargs["mol"] = mol
+                    action_sequence.append(create_action_log(f"按摩尔数添加: {mol}", "🧬"))
+                if equiv and equiv.strip():
+                    add_kwargs["equiv"] = equiv
+                    action_sequence.append(create_action_log(f"当量: {equiv}", "🔢"))
+                
+                action_sequence.append(create_action_log("开始固体加样操作", "🥄"))
+                action_sequence.append({
+                    "device_id": solid_dispenser,
+                    "action_name": "add_solid",
+                    "action_kwargs": add_kwargs
+                })
+                
+                action_sequence.append(create_action_log("固体加样完成", "✅"))
+                
+                # 添加后等待
+                if final_time > 0:
+                    wait_minutes = final_time / 60
+                    action_sequence.append(create_action_log(f"等待反应进行 ({wait_minutes:.1f}分钟)", "⏰"))
+                    action_sequence.append({
+                        "action_name": "wait",
+                        "action_kwargs": {"time": final_time}
+                    })
+                    
+                debug_print(f"✅ 固体添加完成")
+            else:
+                debug_print("❌ 未找到固体加样器，跳过固体添加")
+                action_sequence.append(create_action_log("未找到固体加样器，无法添加固体", "❌"))
+        
+        else:
+            # === 液体添加路径 ===
+            debug_print(f"💧 使用液体添加路径")
+            action_sequence.append(create_action_log("开始液体试剂添加流程", "💧"))
+            
+            # 查找试剂容器
+            action_sequence.append(create_action_log("正在查找试剂容器...", "🔍"))
+            reagent_vessel = find_reagent_vessel(G, reagent)
+            action_sequence.append(create_action_log(f"找到试剂容器: {reagent_vessel}", "🧪"))
+            
+            # 启动搅拌
+            if stir:
+                debug_print("🌪️ 准备启动搅拌...")
+                action_sequence.append(create_action_log("准备启动搅拌器", "🌪️"))
+                
+                stirrer_id = find_connected_stirrer(G, vessel_id)  # 🔧 使用 vessel_id
+                if stirrer_id:
+                    action_sequence.append(create_action_log(f"启动搅拌器 {stirrer_id} (速度: {stir_speed} rpm)", "🔄"))
+                    
+                    action_sequence.append({
+                        "device_id": stirrer_id,
+                        "action_name": "start_stir",
+                        "action_kwargs": {
+                            "vessel": vessel_id,  # 🔧 使用 vessel_id
+                            "stir_speed": stir_speed,
+                            "purpose": f"准备添加液体 {reagent}"
+                        }
+                    })
+                    # 等待搅拌稳定
+                    action_sequence.append(create_action_log("等待搅拌稳定...", "⏳"))
+                    action_sequence.append({
+                        "action_name": "wait",
+                        "action_kwargs": {"time": 5}
+                    })
+            
+            # 计算流速
+            if final_time > 0:
+                flowrate = final_volume / final_time * 60  # mL/min
+                transfer_flowrate = flowrate
+                debug_print(f"⚡ 根据时间计算流速: {flowrate:.2f} mL/min")
+            else:
+                if rate_spec == "dropwise":
+                    flowrate = 0.5  # 滴加，很慢
+                    transfer_flowrate = 0.2
+                    debug_print(f"💧 滴加模式，流速: {flowrate} mL/min")
+                elif viscous:
+                    flowrate = 1.0  # 粘性液体
+                    transfer_flowrate = 0.3
+                    debug_print(f"🍯 粘性液体，流速: {flowrate} mL/min")
+                else:
+                    flowrate = 2.5  # 正常流速
+                    transfer_flowrate = 0.5
+                    debug_print(f"⚡ 正常流速: {flowrate} mL/min")
+            
+            action_sequence.append(create_action_log(f"设置流速: {flowrate:.2f} mL/min", "⚡"))
+            action_sequence.append(create_action_log(f"开始转移 {final_volume}mL 液体", "🚰"))
+            
+            # 调用pump protocol
+            pump_actions = generate_pump_protocol_with_rinsing(
+                G=G,
+                from_vessel=reagent_vessel,
+                to_vessel=vessel_id,  # 🔧 使用 vessel_id
+                volume=final_volume,
+                amount=amount,
+                time=final_time,
+                viscous=viscous,
+                rinsing_solvent="",
+                rinsing_volume=0.0,
+                rinsing_repeats=0,
+                solid=False,
+                flowrate=flowrate,
+                transfer_flowrate=transfer_flowrate,
+                rate_spec=rate_spec,
+                event=event,
+                through="",
+                **kwargs
+            )
+            action_sequence.extend(pump_actions)
+            debug_print(f"✅ 液体转移完成，添加了 {len(pump_actions)} 个动作")
+            action_sequence.append(create_action_log(f"液体转移完成 ({len(pump_actions)} 个操作)", "✅"))
+            
+    except Exception as e:
+        debug_print(f"❌ 试剂添加失败: {str(e)}")
+        action_sequence.append(create_action_log(f"试剂添加失败: {str(e)}", "❌"))
+        # 添加错误日志
+        action_sequence.append({
+            "device_id": "system",
+            "action_name": "log_message",
+            "action_kwargs": {
+                "message": f"试剂 '{reagent}' 添加失败: {str(e)}"
+            }
+        })
     
-    print(f"ADD_PROTOCOL: 连续添加协议生成完成，共 {len(action_sequence)} 个动作")
+    # === 最终结果 ===
+    debug_print("=" * 60)
+    debug_print(f"🎉 添加试剂协议生成完成")
+    debug_print(f"📊 总动作数: {len(action_sequence)}")
+    debug_print(f"📋 处理总结:")
+    debug_print(f"  🧪 试剂: {reagent}")
+    debug_print(f"  {add_emoji} 添加类型: {add_type}")
+    debug_print(f"  🥼 目标容器: {vessel_id}")
+    if is_liquid:
+        debug_print(f"  📏 体积: {final_volume}mL")
+    if is_solid:
+        debug_print(f"  ⚖️ 质量: {final_mass}g")
+        debug_print(f"  🧬 摩尔: {mol}")
+    debug_print("=" * 60)
+    
+    # 添加完成日志
+    summary_msg = f"试剂添加协议完成: {reagent} → {vessel_id}"
+    if is_liquid:
+        summary_msg += f" ({final_volume}mL)"
+    if is_solid:
+        summary_msg += f" ({final_mass}g)"
+    
+    action_sequence.append(create_action_log(summary_msg, "🎉"))
+    
     return action_sequence
 
+# === 便捷函数 ===
+# 🔧 修改便捷函数的参数类型
 
-# 便捷函数：常用添加方案
-def generate_organic_add_protocol(
-    G: nx.DiGraph,
-    vessel: str,
-    organic_reagent: str,
-    volume: float,
-    stir_speed: float = 400.0
-) -> List[Dict[str, Any]]:
-    """有机试剂添加：慢速、搅拌"""
+def add_liquid_volume(G: nx.DiGraph, vessel: dict, reagent: str, volume: Union[str, float], 
+                     time: Union[str, float] = 0.0, rate_spec: str = "") -> List[Dict[str, Any]]:
+    """添加指定体积的液体试剂"""
+    vessel_id = vessel["id"]
+    debug_print(f"💧 快速添加液体: {reagent} ({volume}) → {vessel_id}")
     return generate_add_protocol(
-        G, vessel, organic_reagent, volume, 0.0, "", 0.0, 
-        True, stir_speed, False, f"添加有机试剂 {organic_reagent}"
+        G, vessel, reagent, 
+        volume=volume, 
+        time=time, 
+        rate_spec=rate_spec
     )
 
-
-def generate_viscous_add_protocol(
-    G: nx.DiGraph,
-    vessel: str,
-    viscous_reagent: str,
-    volume: float,
-    addition_time: float = 120.0
-) -> List[Dict[str, Any]]:
-    """粘稠试剂添加：慢速、长时间"""
+def add_solid_mass(G: nx.DiGraph, vessel: dict, reagent: str, mass: Union[str, float], 
+                   event: str = "") -> List[Dict[str, Any]]:
+    """添加指定质量的固体试剂"""
+    vessel_id = vessel["id"]
+    debug_print(f"🧂 快速添加固体: {reagent} ({mass}) → {vessel_id}")
     return generate_add_protocol(
-        G, vessel, viscous_reagent, volume, 0.0, "", addition_time, 
-        True, 250.0, True, f"缓慢添加粘稠试剂 {viscous_reagent}"
+        G, vessel, reagent, 
+        mass=mass, 
+        event=event
     )
 
-
-def generate_solvent_add_protocol(
-    G: nx.DiGraph,
-    vessel: str,
-    solvent: str,
-    volume: float
-) -> List[Dict[str, Any]]:
-    """溶剂添加：快速、无需特殊处理"""
+def add_solid_moles(G: nx.DiGraph, vessel: dict, reagent: str, mol: str, 
+                    event: str = "") -> List[Dict[str, Any]]:
+    """按摩尔数添加固体试剂"""
+    vessel_id = vessel["id"]
+    debug_print(f"🧬 按摩尔数添加固体: {reagent} ({mol}) → {vessel_id}")
     return generate_add_protocol(
-        G, vessel, solvent, volume, 0.0, "", 0.0, 
-        False, 300.0, False, f"添加溶剂 {solvent}"
+        G, vessel, reagent, 
+        mol=mol, 
+        event=event
     )
 
+def add_dropwise_liquid(G: nx.DiGraph, vessel: dict, reagent: str, volume: Union[str, float], 
+                        time: Union[str, float] = "20 min", event: str = "") -> List[Dict[str, Any]]:
+    """滴加液体试剂"""
+    vessel_id = vessel["id"]
+    debug_print(f"💧 滴加液体: {reagent} ({volume}) → {vessel_id} (用时: {time})")
+    return generate_add_protocol(
+        G, vessel, reagent, 
+        volume=volume, 
+        time=time, 
+        rate_spec="dropwise", 
+        event=event
+    )
 
-# 使用示例和测试函数
+def add_portionwise_solid(G: nx.DiGraph, vessel: dict, reagent: str, mass: Union[str, float], 
+                          time: Union[str, float] = "1 h", event: str = "") -> List[Dict[str, Any]]:
+    """分批添加固体试剂"""
+    vessel_id = vessel["id"]
+    debug_print(f"🧂 分批添加固体: {reagent} ({mass}) → {vessel_id} (用时: {time})")
+    return generate_add_protocol(
+        G, vessel, reagent, 
+        mass=mass, 
+        time=time, 
+        rate_spec="portionwise", 
+        event=event
+    )
+
+# 测试函数
 def test_add_protocol():
-    """测试添加协议的示例"""
-    print("=== ADD PROTOCOL 智能匹配测试 ===")
-    print("测试完成")
-
+    """测试添加协议的各种参数解析"""
+    print("=== ADD PROTOCOL 增强版测试 ===")
+    
+    # 测试体积解析
+    debug_print("🧪 测试体积解析...")
+    volumes = ["2.7 mL", "2.67 mL", "?", 10.0, "1 L", "500 μL"]
+    for vol in volumes:
+        result = parse_volume_input(vol)
+        print(f"📏 体积解析: {vol} → {result}mL")
+    
+    # 测试质量解析
+    debug_print("⚖️ 测试质量解析...")
+    masses = ["19.3 g", "4.5 g", 2.5, "500 mg", "1 kg"]
+    for mass in masses:
+        result = parse_mass_input(mass)
+        print(f"⚖️ 质量解析: {mass} → {result}g")
+    
+    # 测试时间解析
+    debug_print("⏱️ 测试时间解析...")
+    times = ["1 h", "20 min", "30 s", 60.0, "?"]
+    for time in times:
+        result = parse_time_input(time)
+        print(f"⏱️ 时间解析: {time} → {result}s")
+    
+    print("✅ 测试完成")
 
 if __name__ == "__main__":
     test_add_protocol()

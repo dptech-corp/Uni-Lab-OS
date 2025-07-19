@@ -63,3 +63,4 @@ dependencies:
 #  - ros-humble-unilabos-msgs
   - pip:
       - paho-mqtt
+      - opentrons_shared_data

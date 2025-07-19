@@ -234,71 +234,71 @@ class Laiyu:
         resp_reset = self.reset()
         return actual_mass_mg
 
+if __name__ == "__main__":
+
+    '''
+    样例：对单个粉筒进行称量
+    '''
+
+    modbus = Laiyu(port="COM25")
+
+    mass_test = modbus.add_powder_tube(1, 'h12', 6.0)
+    print(f"实际出料质量：{mass_test}mg")
 
 
-'''
-样例：对单个粉筒进行称量
-'''
+    '''
+    样例: 对一份excel文件记录的化合物进行称量
+    '''
 
-modbus = Laiyu(port="COM25") 
+    excel_file = r"C:\auto\laiyu\test1.xlsx"
+    # 定义输出文件路径，用于记录实际加样多少
+    output_file = r"C:\auto\laiyu\test_output.xlsx"
 
-mass_test = modbus.add_powder_tube(1, 'h12', 6.0)
-print(f"实际出料质量：{mass_test}mg")
+    # 定义物料名称和料筒位置关系
+    compound_positions = {
+        'XPhos': '1',
+        'Cu(OTf)2': '2',
+        'CuSO4': '3',
+        'PPh3': '4',
+    }
 
+    # read excel file
+    # excel_file = r"C:\auto\laiyu\test.xlsx"
+    df = pd.read_excel(excel_file, sheet_name='Sheet1')
+    # 读取Excel文件中的数据
+    # 遍历每一行数据
+    for index, row in df.iterrows():
+        # 获取物料名称和质量
+        copper_name = row['copper']
+        copper_mass = row['copper_mass']
+        ligand_name = row['ligand']
+        ligand_mass = row['ligand_mass']
+        target_tube_position = row['position']
+        # 获取物料位置 from compound_positions
+        copper_position = compound_positions.get(copper_name)
+        ligand_position = compound_positions.get(ligand_name)
+        # 判断物料位置是否存在
+        if copper_position is None:
+            print(f"物料位置不存在：{copper_name}")
+            continue
+        if ligand_position is None:
+            print(f"物料位置不存在：{ligand_name}")
+            continue
+        # 加铜
+        copper_actual_mass = modbus.add_powder_tube(int(copper_position), target_tube_position, copper_mass)
+        time.sleep(1)
+        # 加配体
+        ligand_actual_mass = modbus.add_powder_tube(int(ligand_position), target_tube_position, ligand_mass)
+        time.sleep(1)
+        # 保存至df
+        df.at[index, 'copper_actual_mass'] = copper_actual_mass
+        df.at[index, 'ligand_actual_mass'] = ligand_actual_mass
 
-'''
-样例: 对一份excel文件记录的化合物进行称量
-'''
+    # 保存修改后的数据到新的Excel文件
+    df.to_excel(output_file, index=False)
+    print(f"已保存到文件：{output_file}")
 
-excel_file = r"C:\auto\laiyu\test1.xlsx"
-# 定义输出文件路径，用于记录实际加样多少
-output_file = r"C:\auto\laiyu\test_output.xlsx"
-
-# 定义物料名称和料筒位置关系
-compound_positions = {
-    'XPhos': '1',
-    'Cu(OTf)2': '2',
-    'CuSO4': '3',
-    'PPh3': '4',
-}
-
-# read excel file
-# excel_file = r"C:\auto\laiyu\test.xlsx"
-df = pd.read_excel(excel_file, sheet_name='Sheet1')
-# 读取Excel文件中的数据
-# 遍历每一行数据
-for index, row in df.iterrows():
-    # 获取物料名称和质量
-    copper_name = row['copper']
-    copper_mass = row['copper_mass']
-    ligand_name = row['ligand']
-    ligand_mass = row['ligand_mass']
-    target_tube_position = row['position']
-    # 获取物料位置 from compound_positions
-    copper_position = compound_positions.get(copper_name)
-    ligand_position = compound_positions.get(ligand_name)
-    # 判断物料位置是否存在
-    if copper_position is None:
-        print(f"物料位置不存在：{copper_name}")
-        continue
-    if ligand_position is None:
-        print(f"物料位置不存在：{ligand_name}")
-        continue
-    # 加铜
-    copper_actual_mass = modbus.add_powder_tube(int(copper_position), target_tube_position, copper_mass)
-    time.sleep(1)
-    # 加配体
-    ligand_actual_mass = modbus.add_powder_tube(int(ligand_position), target_tube_position, ligand_mass)
-    time.sleep(1)
-    # 保存至df
-    df.at[index, 'copper_actual_mass'] = copper_actual_mass
-    df.at[index, 'ligand_actual_mass'] = ligand_actual_mass
-
-# 保存修改后的数据到新的Excel文件
-df.to_excel(output_file, index=False)
-print(f"已保存到文件：{output_file}")
-
-# 关闭串口
-modbus.ser.close()
-print("串口已关闭")
+    # 关闭串口
+    modbus.ser.close()
+    print("串口已关闭")
 

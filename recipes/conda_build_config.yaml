@@ -1,3 +1,6 @@
+channel_sources:
+  - robostack,robostack-staging,conda-forge,defaults
+  
 gazebo:
   - '11'
 libpqxx:

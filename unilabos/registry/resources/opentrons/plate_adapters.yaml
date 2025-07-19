@@ -1,5 +1,39 @@
 Opentrons_96_adapter_Vb:
-  description: Opentrons 96 adapter Vb
-  class: 
+  category:
+  - plate_adapters
+  class:
     module: pylabrobot.resources.opentrons.plate_adapters:Opentrons_96_adapter_Vb
     type: pylabrobot
+  config_info:
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      category: plate_adapter
+      model: Opentrons_96_adapter_Vb
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 127.76
+      size_y: 85.48
+      size_z: 18.55
+      type: PlateAdapter
+    data: {}
+    id: Opentrons_96_adapter_Vb
+    name: Opentrons_96_adapter_Vb
+    parent: null
+    position:
+      x: 0
+      y: 0
+      z: 0
+    sample_id: null
+    type: container
+  description: Opentrons 96 adapter Vb
+  file_path: C:/Users/10230/PycharmProjects/Uni-Lab-OS/unilabos/registry/resources/opentrons/plate_adapters.yaml
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0

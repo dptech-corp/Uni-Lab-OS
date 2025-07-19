@@ -6,12 +6,12 @@ channels:
 dependencies:
   # Basics
   - python=3.11.11
-  - compilers
-  - cmake
-  - make
-  - ninja
-  - sphinx
-  - sphinx_rtd_theme
+  # - compilers
+  # - cmake
+  # - make
+  # - ninja
+  # - sphinx
+  # - sphinx_rtd_theme
   # Data Visualization
   - numpy
   - scipy
@@ -23,7 +23,7 @@ dependencies:
   - pyserial
   - pyusb
   - pylibftdi
-  - pymodbus
+  - pymodbus==3.6.9
   - python-can
   - pyvisa
   - opencv
@@ -48,8 +48,9 @@ dependencies:
   - ros-humble-ros2-control
   - ros-humble-robot-state-publisher
   - ros-humble-joint-state-publisher
-  # web
+  # web and visualization
   - ros-humble-rosbridge-server
+  - ros-humble-cv-bridge
   # geometry & motion planning
   - ros-humble-tf2
   - ros-humble-moveit
@@ -61,5 +62,13 @@ dependencies:
   # ros-humble-gazebo-ros // ignored because of the conflict with ign-gazebo
   # ilab equipments
   # ros-humble-unilabos-msgs
+  # driver
+  #- crcmod
   - pip:
       - paho-mqtt
+      - opentrons_shared_data
+      # driver
+      #- ur-rtde  # set PYTHONUTF8=1
+      #- pyautogui
+      #- pywinauto
+      #- pywinauto_recorder

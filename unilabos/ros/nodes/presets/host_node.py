@@ -459,6 +459,8 @@ class HostNode(BaseROS2DeviceNode):
         self.devices_instances[device_id] = d
         # noinspection PyProtectedMember
         for action_name, action_value_mapping in d._ros_node._action_value_mappings.items():
+            if action_name.startswith("auto-") or str(action_value_mapping.get("type", "")).startswith("UniLabJsonCommand"):
+                continue
             action_id = f"/devices/{device_id}/{action_name}"
             if action_id not in self._action_clients:
                 action_type = action_value_mapping["type"]
@@ -561,12 +563,13 @@ class HostNode(BaseROS2DeviceNode):
                     if hasattr(bridge, "publish_device_status"):
                         bridge.publish_device_status(self.device_status, device_id, property_name)
                         self.lab_logger().debug(
-                            f"[Host Node] Status updated: {device_id}.{property_name} = {msg.data}"
+                           f"[Host Node] Status updated: {device_id}.{property_name} = {msg.data}"
                         )
 
     def send_goal(
         self,
         device_id: str,
+        action_type: str,
         action_name: str,
         action_kwargs: Dict[str, Any],
         goal_uuid: Optional[str] = None,
@@ -577,16 +580,30 @@ class HostNode(BaseROS2DeviceNode):
 
         Args:
             device_id: 设备ID
+            action_type: 动作类型
             action_name: 动作名称
             action_kwargs: 动作参数
             goal_uuid: 目标UUID，如果为None则自动生成
+            server_info: 服务器发送信息，包含发送时间戳等
         """
-        action_id = f"/devices/{device_id}/{action_name}"
+        if action_type.startswith("UniLabJsonCommand"):
+            if action_name.startswith("auto-"):
+                action_name = action_name[5:]
+            action_id = f"/devices/{device_id}/_execute_driver_command"
+            action_kwargs = {
+                "string": json.dumps({
+                    "function_name": action_name,
+                    "function_args": action_kwargs,
+                })
+            }
+            if action_type.startswith("UniLabJsonCommandAsync"):
+                action_id = f"/devices/{device_id}/_execute_driver_command_async"
+        else:
+            action_id = f"/devices/{device_id}/{action_name}"
         if action_name == "test_latency" and server_info is not None:
             self.server_latest_timestamp = server_info.get("send_timestamp", 0.0)
         if action_id not in self._action_clients:
-            self.lab_logger().error(f"[Host Node] ActionClient {action_id} not found.")
-            return
+            raise ValueError(f"ActionClient {action_id} not found.")
 
         action_client: ActionClient = self._action_clients[action_id]
 

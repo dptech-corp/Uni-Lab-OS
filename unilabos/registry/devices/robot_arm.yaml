@@ -1,55 +1,176 @@
 robotic_arm.UR:
-  description: UR robotic arm
+  category:
+  - robot_arm
   class:
-    module: unilabos.devices.agv.ur_arm_task:UrArmTask
-    type: python
-    status_types:
-      arm_pose: Float64MultiArray
-      gripper_pose: Float64
-      arm_status: String
-      gripper_status: String
     action_value_mappings:
+      auto-arm_init:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result: {}
+        schema:
+          description: 机械臂初始化函数。执行UR机械臂的完整初始化流程，包括上电、释放制动器、解除保护停止状态等。该函数确保机械臂从安全停止状态恢复到可操作状态，是机械臂使用前的必要步骤。初始化完成后机械臂将处于就绪状态，可以接收后续的运动指令。
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: arm_init参数
+          type: object
+        type: UniLabJsonCommand
+      auto-load_pose_data:
+        feedback: {}
+        goal: {}
+        goal_default:
+          data: null
+        handles: []
+        result: {}
+        schema:
+          description: 从JSON字符串加载位置数据函数。接收包含机械臂位置信息的JSON格式字符串，解析并存储位置数据供后续运动任务使用。位置数据通常包含多个预定义的工作位置坐标，用于实现精确的多点运动控制。适用于动态配置机械臂工作位置的场景。
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                data:
+                  type: string
+              required:
+              - data
+              type: object
+            result: {}
+          required:
+          - goal
+          title: load_pose_data参数
+          type: object
+        type: UniLabJsonCommand
+      auto-load_pose_file:
+        feedback: {}
+        goal: {}
+        goal_default:
+          file: null
+        handles: []
+        result: {}
+        schema:
+          description: 从文件加载位置数据函数。读取指定的JSON文件并加载其中的机械臂位置信息。该函数支持从外部配置文件中获取预设的工作位置，便于位置数据的管理和重用。适用于需要从固定配置文件中读取复杂位置序列的应用场景。
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                file:
+                  type: string
+              required:
+              - file
+              type: object
+            result: {}
+          required:
+          - goal
+          title: load_pose_file参数
+          type: object
+        type: UniLabJsonCommand
+      auto-reload_pose:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result: {}
+        schema:
+          description: 重新加载位置数据函数。重新读取并解析之前设置的位置文件，更新内存中的位置数据。该函数用于在位置文件被修改后刷新机械臂的位置配置，无需重新初始化整个系统。适用于动态更新机械臂工作位置的场景。
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: reload_pose参数
+          type: object
+        type: UniLabJsonCommand
       move_pos_task:
-        type: SendCmd
+        feedback: {}
         goal:
           command: command
-        feedback: {}
+        goal_default:
+          command: ''
+        handles: []
         result:
           success: success
-  schema:
-    properties:
-      arm_pose:
-        type: array
-        items:
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties:
+                status:
+                  type: string
+              required:
+              - status
+              title: SendCmd_Feedback
+              type: object
+            goal:
+              properties:
+                command:
+                  type: string
+              required:
+              - command
+              title: SendCmd_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: SendCmd_Result
+              type: object
+          required:
+          - goal
+          title: SendCmd
+          type: object
+        type: SendCmd
+    module: unilabos.devices.agv.ur_arm_task:UrArmTask
+    status_types:
+      arm_pose: list
+      arm_status: str
+      gripper_pose: float
+      gripper_status: str
+    type: python
+  config_info: []
+  description: Universal Robots机械臂设备，用于实验室精密操作和自动化作业。该设备集成了UR机械臂本体、Robotiq夹爪和RTDE通信接口，支持六自由度精确运动控制和力觉反馈。具备实时位置监控、状态反馈、轨迹规划等功能，可执行复杂的多点位运动任务。适用于样品抓取、精密装配、实验器具操作等需要高精度和高重复性的实验室自动化场景。
+  handles: []
+  icon: ''
+  init_param_schema:
+    config:
+      properties:
+        host:
+          type: string
+        retry:
+          default: 30
+          type: string
+      required:
+      - host
+      type: object
+    data:
+      properties:
+        arm_pose:
+          type: array
+        arm_status:
+          type: string
+        gripper_pose:
           type: number
-      gripper_pose:
-        type: number
-      arm_status:
-        type: string
-        description: 机械臂设备状态
-      gripper_status:
-        type: string
-        description: 机械爪设备状态
-    required:
+        gripper_status:
+          type: string
+      required:
+      - arm_pose
+      - gripper_pose
       - arm_status
       - gripper_status
     additionalProperties: false
     type: object
-
-robotic_arm.elite:
-  description: Elite robot arm
-  class:
-    module: unilabos.devices.arm.elite_robot:EliteRobot
-    type: python
-    status_types:
-      arm_pose: Float64MultiArray
-    action_value_mappings:
-      modbus_task_cmd:
-        type: SendCmd
-        goal:
-          command: command
-        feedback: {}
-        result: {}
-  model:
-    type: device
-    mesh: elite_robot

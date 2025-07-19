@@ -21,7 +21,7 @@ except Exception as e:
     sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
     from unilabos.utils.pywinauto_util import connect_application, get_process_pid_by_name, get_ui_path_with_window_specification, print_wrapper_identifiers
     from unilabos.device_comms.universal_driver import UniversalDriver, SingleRunningExecutor
-    from unilabos.devices.template_driver import universal_driver as ud
+    from unilabos.device_comms import universal_driver as ud
     print(f"使用文件DEBUG运行: {e}")
 
 

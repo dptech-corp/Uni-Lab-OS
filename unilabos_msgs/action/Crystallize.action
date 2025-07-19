@@ -1,5 +1,5 @@
 # Goal - 结晶操作的目标参数  
-string vessel                    # 结晶容器  
+Resource vessel                    # 结晶容器  
 float64 ramp_time               # 升温/降温时间 (可选，秒)  
 float64 ramp_temp               # 目标温度 (可选，摄氏度)   
 ---

@@ -48,8 +48,9 @@ dependencies:
   - ros-humble-ros2-control
   - ros-humble-robot-state-publisher
   - ros-humble-joint-state-publisher
-  # web
+  # web and visualization
   - ros-humble-rosbridge-server
+  - ros-humble-cv-bridge
   # geometry & motion planning
   - ros-humble-tf2
   - ros-humble-moveit
@@ -63,3 +64,4 @@ dependencies:
 #  - ros-humble-unilabos-msgs
   - pip:
       - paho-mqtt
+      - opentrons_shared_data

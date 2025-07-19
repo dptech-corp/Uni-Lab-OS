@@ -1,892 +1,4685 @@
 mock_chiller:
-  description: Mock Chiller Device
+  category:
+  - mock_devices
   class:
-    module: unilabos.devices.mock.mock_chiller:MockChiller
-    type: python
-    status_types:
-      current_temperature: Float64
-      target_temperature: Float64
-      status: String
-      is_cooling: Bool
-      is_heating: Bool
-      vessel: String         # 新增
-      purpose: String        # 新增
     action_value_mappings:
       emergency_stop:
-        type: EmptyIn
+        feedback: {}
         goal: {}
-        feedback: {}
+        goal_default: {}
+        handles: []
         result:
           success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: EmptyIn_Feedback
+              type: object
+            goal:
+              properties: {}
+              required: []
+              title: EmptyIn_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+              required:
+              - return_info
+              title: EmptyIn_Result
+              type: object
+          required:
+          - goal
+          title: EmptyIn
+          type: object
+        type: EmptyIn
       heat_chill_start:
-        type: HeatChillStart
+        feedback: {}
         goal:
-          vessel: vessel
-          temp: temp
           purpose: purpose
-        feedback: {}
+          temp: temp
+          vessel: vessel
+        goal_default:
+          purpose: ''
+          temp: 0.0
+          vessel:
+            category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+        handles: []
         result:
-          success: success
           status: status
+          success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties:
+                status:
+                  type: string
+              required:
+              - status
+              title: HeatChillStart_Feedback
+              type: object
+            goal:
+              properties:
+                purpose:
+                  type: string
+                temp:
+                  type: number
+                vessel:
+                  properties:
+                    category:
+                      type: string
+                    children:
+                      items:
+                        type: string
+                      type: array
+                    config:
+                      type: string
+                    data:
+                      type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    parent:
+                      type: string
+                    pose:
+                      properties:
+                        orientation:
+                          properties:
+                            w:
+                              type: number
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          - w
+                          title: Quaternion
+                          type: object
+                        position:
+                          properties:
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          title: Point
+                          type: object
+                      required:
+                      - position
+                      - orientation
+                      title: Pose
+                      type: object
+                    sample_id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - id
+                  - name
+                  - sample_id
+                  - children
+                  - parent
+                  - type
+                  - category
+                  - pose
+                  - config
+                  - data
+                  title: Resource
+                  type: object
+              required:
+              - vessel
+              - temp
+              - purpose
+              title: HeatChillStart_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: HeatChillStart_Result
+              type: object
+          required:
+          - goal
+          title: HeatChillStart
+          type: object
+        type: HeatChillStart
       heat_chill_stop:
-        type: HeatChillStop
-        goal:
-          vessel: vessel
         feedback: {}
-        result:
-          success: success
-          status: status
-  schema:
-    type: object
-    properties:
-      current_temperature:
-        type: number
-        description: Current temperature of the chiller in °C
-      target_temperature:
-        type: number
-        description: Target temperature setting in °C
-      status:
-        type: string
-        description: Current status of the device
-      is_cooling:
-        type: boolean
-        description: Whether the device is actively cooling
-      is_heating:
-        type: boolean
-        description: Whether the device is actively heating
-      vessel:                # 新增
-        type: string
-        description: Current vessel being processed
-      purpose:               # 新增
-        type: string
-        description: Purpose of the current operation
-    required:
-    - current_temperature
-    - target_temperature
-    - status
-    - vessel
-    - purpose
-    additionalProperties: false
-mock_filter:
-  description: Mock Filter Device
-  class:
-    module: unilabos.devices.mock.mock_filter:MockFilter
-    type: python
-    status_types:
-      status: String
-      is_filtering: Bool
-      flow_rate: Float64
-      pressure_drop: Float64
-      filter_life: Float64
-      vessel: String
-      filtrate_vessel: String
-      filtered_volume: Float64
-      progress: Float64
-      stir: Bool
-      stir_speed: Float64
-      temperature: Float64
-      continue_heatchill: Bool
-      target_volume: Float64
-    action_value_mappings:
-      filter:
-        type: Filter
         goal:
           vessel: vessel
+        goal_default:
+          vessel:
+            category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+        handles: []
+        result:
+          status: status
+          success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties:
+                status:
+                  type: string
+              required:
+              - status
+              title: HeatChillStop_Feedback
+              type: object
+            goal:
+              properties:
+                vessel:
+                  properties:
+                    category:
+                      type: string
+                    children:
+                      items:
+                        type: string
+                      type: array
+                    config:
+                      type: string
+                    data:
+                      type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    parent:
+                      type: string
+                    pose:
+                      properties:
+                        orientation:
+                          properties:
+                            w:
+                              type: number
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          - w
+                          title: Quaternion
+                          type: object
+                        position:
+                          properties:
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          title: Point
+                          type: object
+                      required:
+                      - position
+                      - orientation
+                      title: Pose
+                      type: object
+                    sample_id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - id
+                  - name
+                  - sample_id
+                  - children
+                  - parent
+                  - type
+                  - category
+                  - pose
+                  - config
+                  - data
+                  title: Resource
+                  type: object
+              required:
+              - vessel
+              title: HeatChillStop_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: HeatChillStop_Result
+              type: object
+          required:
+          - goal
+          title: HeatChillStop
+          type: object
+        type: HeatChillStop
+    module: unilabos.devices.mock.mock_chiller:MockChiller
+    status_types:
+      current_temperature: float
+      is_cooling: bool
+      is_heating: bool
+      purpose: str
+      status: str
+      status_info: dict
+      target_temperature: float
+      vessel: str
+    type: python
+  config_info: []
+  description: Mock Chiller Device
+  handles: []
+  icon: ''
+  init_param_schema:
+    config:
+      properties:
+        port:
+          default: MOCK
+          type: string
+      required: []
+      type: object
+    data:
+      properties:
+        current_temperature:
+          type: number
+        is_cooling:
+          type: boolean
+        is_heating:
+          type: boolean
+        purpose:
+          type: string
+        status:
+          type: string
+        status_info:
+          type: object
+        target_temperature:
+          type: number
+        vessel:
+          type: string
+      required:
+      - current_temperature
+      - target_temperature
+      - status
+      - is_cooling
+      - is_heating
+      - vessel
+      - purpose
+      - status_info
+      type: object
+  version: 1.0.0
+mock_filter:
+  category:
+  - mock_devices
+  class:
+    action_value_mappings:
+      auto-emergency_stop:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result: {}
+        schema:
+          description: emergency_stop的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: emergency_stop参数
+          type: object
+        type: UniLabJsonCommand
+      filter:
+        feedback:
+          current_status: current_status
+          current_temp: current_temp
+          filtered_volume: filtered_volume
+          progress: progress
+        goal:
+          continue_heatchill: continue_heatchill
           filtrate_vessel: filtrate_vessel
           stir: stir
           stir_speed: stir_speed
           temp: temp
-          continue_heatchill: continue_heatchill
+          vessel: vessel
           volume: volume
-        feedback:
-          progress: progress
-          current_temp: current_temp
-          filtered_volume: filtered_volume
-          current_status: current_status
+        goal_default:
+          continue_heatchill: false
+          filtrate_vessel:
+            category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+          stir: false
+          stir_speed: 0.0
+          temp: 0.0
+          vessel:
+            category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+          volume: 0.0
+        handles: []
         result:
-          success: success
           message: message
-      stop_filtering:
-        type: EmptyIn
-        goal: {}
-        feedback: {}
-        result:
           success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties:
+                current_status:
+                  type: string
+                current_temp:
+                  type: number
+                filtered_volume:
+                  type: number
+                progress:
+                  type: number
+              required:
+              - progress
+              - current_temp
+              - filtered_volume
+              - current_status
+              title: Filter_Feedback
+              type: object
+            goal:
+              properties:
+                continue_heatchill:
+                  type: boolean
+                filtrate_vessel:
+                  properties:
+                    category:
+                      type: string
+                    children:
+                      items:
+                        type: string
+                      type: array
+                    config:
+                      type: string
+                    data:
+                      type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    parent:
+                      type: string
+                    pose:
+                      properties:
+                        orientation:
+                          properties:
+                            w:
+                              type: number
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          - w
+                          title: Quaternion
+                          type: object
+                        position:
+                          properties:
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          title: Point
+                          type: object
+                      required:
+                      - position
+                      - orientation
+                      title: Pose
+                      type: object
+                    sample_id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - id
+                  - name
+                  - sample_id
+                  - children
+                  - parent
+                  - type
+                  - category
+                  - pose
+                  - config
+                  - data
+                  title: Resource
+                  type: object
+                stir:
+                  type: boolean
+                stir_speed:
+                  type: number
+                temp:
+                  type: number
+                vessel:
+                  properties:
+                    category:
+                      type: string
+                    children:
+                      items:
+                        type: string
+                      type: array
+                    config:
+                      type: string
+                    data:
+                      type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    parent:
+                      type: string
+                    pose:
+                      properties:
+                        orientation:
+                          properties:
+                            w:
+                              type: number
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          - w
+                          title: Quaternion
+                          type: object
+                        position:
+                          properties:
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          title: Point
+                          type: object
+                      required:
+                      - position
+                      - orientation
+                      title: Pose
+                      type: object
+                    sample_id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - id
+                  - name
+                  - sample_id
+                  - children
+                  - parent
+                  - type
+                  - category
+                  - pose
+                  - config
+                  - data
+                  title: Resource
+                  type: object
+                volume:
+                  type: number
+              required:
+              - vessel
+              - filtrate_vessel
+              - stir
+              - stir_speed
+              - temp
+              - continue_heatchill
+              - volume
+              title: Filter_Goal
+              type: object
+            result:
+              properties:
+                message:
+                  type: string
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - success
+              - message
+              - return_info
+              title: Filter_Result
+              type: object
+          required:
+          - goal
+          title: Filter
+          type: object
+        type: Filter
       replace_filter:
-        type: EmptyIn
-        goal: {}
         feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
         result:
           success: success
-  schema:
-    type: object
-    properties:
-      status:
-        type: string
-        description: Current status of the filter
-      is_filtering:
-        type: boolean
-        description: Whether the filter is actively filtering
-      flow_rate:
-        type: number
-        description: Current flow rate in L/min
-      pressure_drop:
-        type: number
-        description: Pressure drop across the filter in Pa
-      filter_life:
-        type: number
-        description: Remaining filter life percentage
-      power_on:
-        type: boolean
-        description: Power state of the device
-    required:
-    - status
-    - is_filtering
-    - flow_rate
-    - filter_life
-    - vessel
-    - filtrate_vessel
-    - filtered_volume
-    - progress
-    additionalProperties: false
-mock_heater:
-  description: Mock Heater Device
-  class:
-    module: unilabos.devices.mock.mock_heater:MockHeater
-    type: python
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: EmptyIn_Feedback
+              type: object
+            goal:
+              properties: {}
+              required: []
+              title: EmptyIn_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+              required:
+              - return_info
+              title: EmptyIn_Result
+              type: object
+          required:
+          - goal
+          title: EmptyIn
+          type: object
+        type: EmptyIn
+      stop_filtering:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result:
+          success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: EmptyIn_Feedback
+              type: object
+            goal:
+              properties: {}
+              required: []
+              title: EmptyIn_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+              required:
+              - return_info
+              title: EmptyIn_Result
+              type: object
+          required:
+          - goal
+          title: EmptyIn
+          type: object
+        type: EmptyIn
+    module: unilabos.devices.mock.mock_filter:MockFilter
     status_types:
-      current_temperature: Float64
-      target_temperature: Float64
-      status: String
-      is_heating: Bool
-      heating_power: Float64
-      max_temperature: Float64
-      vessel: String
-      purpose: String
-      stir: Bool
-      stir_speed: Float64
+      continue_heatchill: bool
+      filter_life: float
+      filtered_volume: float
+      filtrate_vessel: str
+      flow_rate: float
+      is_filtering: bool
+      pressure_drop: float
+      progress: float
+      status: str
+      status_info: dict
+      stir: bool
+      stir_speed: float
+      target_volume: float
+      temperature: float
+      vessel: str
+    type: python
+  config_info: []
+  description: Mock Filter Device
+  handles: []
+  icon: ''
+  init_param_schema:
+    config:
+      properties:
+        port:
+          default: MOCK
+          type: string
+      required: []
+      type: object
+    data:
+      properties:
+        continue_heatchill:
+          type: boolean
+        filter_life:
+          type: number
+        filtered_volume:
+          type: number
+        filtrate_vessel:
+          type: string
+        flow_rate:
+          type: number
+        is_filtering:
+          type: boolean
+        pressure_drop:
+          type: number
+        progress:
+          type: number
+        status:
+          type: string
+        status_info:
+          type: object
+        stir:
+          type: boolean
+        stir_speed:
+          type: number
+        target_volume:
+          type: number
+        temperature:
+          type: number
+        vessel:
+          type: string
+      required:
+      - status
+      - is_filtering
+      - flow_rate
+      - pressure_drop
+      - filter_life
+      - vessel
+      - filtrate_vessel
+      - filtered_volume
+      - progress
+      - stir
+      - stir_speed
+      - temperature
+      - continue_heatchill
+      - target_volume
+      - status_info
+      type: object
+  version: 1.0.0
+mock_heater:
+  category:
+  - mock_devices
+  class:
     action_value_mappings:
-      heat_chill_start:
-        type: HeatChillStart
-        goal:
-          vessel: vessel
-          temp: temp
-          purpose: purpose
-        feedback:
-          status: status
+      auto-set_heating_power:
+        feedback: {}
+        goal: {}
+        goal_default:
+          power: null
+        handles: []
+        result: {}
+        schema:
+          description: set_heating_power的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                power:
+                  type: number
+              required:
+              - power
+              type: object
+            result: {}
+          required:
+          - goal
+          title: set_heating_power参数
+          type: object
+        type: UniLabJsonCommand
+      auto-set_temperature:
+        feedback: {}
+        goal: {}
+        goal_default:
+          temperature: null
+        handles: []
+        result: {}
+        schema:
+          description: set_temperature的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                temperature:
+                  type: number
+              required:
+              - temperature
+              type: object
+            result: {}
+          required:
+          - goal
+          title: set_temperature参数
+          type: object
+        type: UniLabJsonCommand
+      emergency_stop:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
         result:
           success: success
-      heat_chill_stop:
-        type: HeatChillStop
-        goal:
-          vessel: vessel
-        feedback:
-          status: status
-        result:
-          success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: EmptyIn_Feedback
+              type: object
+            goal:
+              properties: {}
+              required: []
+              title: EmptyIn_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+              required:
+              - return_info
+              title: EmptyIn_Result
+              type: object
+          required:
+          - goal
+          title: EmptyIn
+          type: object
+        type: EmptyIn
       heat_chill:
-        type: HeatChill
+        feedback:
+          status: status
         goal:
-          vessel: vessel
-          temp: temp
-          time: time
+          purpose: purpose
           stir: stir
           stir_speed: stir_speed
-          purpose: purpose
+          temp: temp
+          time: time
+          vessel: vessel
+        goal_default:
+          pressure: ''
+          purpose: ''
+          reflux_solvent: ''
+          stir: false
+          stir_speed: 0.0
+          temp: 0.0
+          temp_spec: ''
+          time: ''
+          time_spec: ''
+          vessel:
+            category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+        handles: []
+        result:
+          success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties:
+                status:
+                  type: string
+              required:
+              - status
+              title: HeatChill_Feedback
+              type: object
+            goal:
+              properties:
+                pressure:
+                  type: string
+                purpose:
+                  type: string
+                reflux_solvent:
+                  type: string
+                stir:
+                  type: boolean
+                stir_speed:
+                  type: number
+                temp:
+                  type: number
+                temp_spec:
+                  type: string
+                time:
+                  type: string
+                time_spec:
+                  type: string
+                vessel:
+                  properties:
+                    category:
+                      type: string
+                    children:
+                      items:
+                        type: string
+                      type: array
+                    config:
+                      type: string
+                    data:
+                      type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    parent:
+                      type: string
+                    pose:
+                      properties:
+                        orientation:
+                          properties:
+                            w:
+                              type: number
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          - w
+                          title: Quaternion
+                          type: object
+                        position:
+                          properties:
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          title: Point
+                          type: object
+                      required:
+                      - position
+                      - orientation
+                      title: Pose
+                      type: object
+                    sample_id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - id
+                  - name
+                  - sample_id
+                  - children
+                  - parent
+                  - type
+                  - category
+                  - pose
+                  - config
+                  - data
+                  title: Resource
+                  type: object
+              required:
+              - vessel
+              - temp
+              - time
+              - temp_spec
+              - time_spec
+              - pressure
+              - reflux_solvent
+              - stir
+              - stir_speed
+              - purpose
+              title: HeatChill_Goal
+              type: object
+            result:
+              properties:
+                message:
+                  type: string
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - success
+              - message
+              - return_info
+              title: HeatChill_Result
+              type: object
+          required:
+          - goal
+          title: HeatChill
+          type: object
+        type: HeatChill
+      heat_chill_start:
         feedback:
           status: status
+        goal:
+          purpose: purpose
+          temp: temp
+          vessel: vessel
+        goal_default:
+          purpose: ''
+          temp: 0.0
+          vessel:
+            category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+        handles: []
         result:
           success: success
-      emergency_stop:
-        type: EmptyIn
-        goal: {}
-        feedback: {}
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties:
+                status:
+                  type: string
+              required:
+              - status
+              title: HeatChillStart_Feedback
+              type: object
+            goal:
+              properties:
+                purpose:
+                  type: string
+                temp:
+                  type: number
+                vessel:
+                  properties:
+                    category:
+                      type: string
+                    children:
+                      items:
+                        type: string
+                      type: array
+                    config:
+                      type: string
+                    data:
+                      type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    parent:
+                      type: string
+                    pose:
+                      properties:
+                        orientation:
+                          properties:
+                            w:
+                              type: number
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          - w
+                          title: Quaternion
+                          type: object
+                        position:
+                          properties:
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          title: Point
+                          type: object
+                      required:
+                      - position
+                      - orientation
+                      title: Pose
+                      type: object
+                    sample_id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - id
+                  - name
+                  - sample_id
+                  - children
+                  - parent
+                  - type
+                  - category
+                  - pose
+                  - config
+                  - data
+                  title: Resource
+                  type: object
+              required:
+              - vessel
+              - temp
+              - purpose
+              title: HeatChillStart_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: HeatChillStart_Result
+              type: object
+          required:
+          - goal
+          title: HeatChillStart
+          type: object
+        type: HeatChillStart
+      heat_chill_stop:
+        feedback:
+          status: status
+        goal:
+          vessel: vessel
+        goal_default:
+          vessel:
+            category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+        handles: []
         result:
           success: success
-  schema:
-    type: object
-    properties:
-      current_temperature:
-        type: number
-        description: Current temperature of the heater in °C
-      target_temperature:
-        type: number
-        description: Target temperature setting in °C
-      status:
-        type: string
-        description: Current status of the device
-      is_heating:
-        type: boolean
-        description: Whether the device is actively heating
-      heating_power:
-        type: number
-        description: Current heating power percentage
-      max_temperature:
-        type: number
-        description: Maximum temperature limit
-      vessel:
-        type: string
-        description: Current vessel being heated
-      purpose:
-        type: string
-        description: Purpose of the heating operation
-      stir:
-        type: boolean
-        description: Whether stirring is enabled
-      stir_speed:
-        type: number
-        description: Current stirring speed
-    required:
-    - current_temperature
-    - target_temperature
-    - status
-    - vessel
-    - purpose
-    additionalProperties: false
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties:
+                status:
+                  type: string
+              required:
+              - status
+              title: HeatChillStop_Feedback
+              type: object
+            goal:
+              properties:
+                vessel:
+                  properties:
+                    category:
+                      type: string
+                    children:
+                      items:
+                        type: string
+                      type: array
+                    config:
+                      type: string
+                    data:
+                      type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    parent:
+                      type: string
+                    pose:
+                      properties:
+                        orientation:
+                          properties:
+                            w:
+                              type: number
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          - w
+                          title: Quaternion
+                          type: object
+                        position:
+                          properties:
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          title: Point
+                          type: object
+                      required:
+                      - position
+                      - orientation
+                      title: Pose
+                      type: object
+                    sample_id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - id
+                  - name
+                  - sample_id
+                  - children
+                  - parent
+                  - type
+                  - category
+                  - pose
+                  - config
+                  - data
+                  title: Resource
+                  type: object
+              required:
+              - vessel
+              title: HeatChillStop_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: HeatChillStop_Result
+              type: object
+          required:
+          - goal
+          title: HeatChillStop
+          type: object
+        type: HeatChillStop
+    module: unilabos.devices.mock.mock_heater:MockHeater
+    status_types:
+      current_temperature: float
+      heating_power: float
+      is_heating: bool
+      max_temperature: float
+      purpose: str
+      status: str
+      status_info: dict
+      stir: bool
+      stir_speed: float
+      target_temperature: float
+      vessel: str
+    type: python
+  config_info: []
+  description: Mock Heater Device
+  handles: []
+  icon: ''
+  init_param_schema:
+    config:
+      properties:
+        port:
+          default: MOCK
+          type: string
+      required: []
+      type: object
+    data:
+      properties:
+        current_temperature:
+          type: number
+        heating_power:
+          type: number
+        is_heating:
+          type: boolean
+        max_temperature:
+          type: number
+        purpose:
+          type: string
+        status:
+          type: string
+        status_info:
+          type: object
+        stir:
+          type: boolean
+        stir_speed:
+          type: number
+        target_temperature:
+          type: number
+        vessel:
+          type: string
+      required:
+      - current_temperature
+      - target_temperature
+      - status
+      - is_heating
+      - heating_power
+      - max_temperature
+      - vessel
+      - purpose
+      - stir
+      - stir_speed
+      - status_info
+      type: object
+  version: 1.0.0
 mock_pump:
-  description: Mock Pump Device
+  category:
+  - mock_devices
   class:
-    module: unilabos.devices.mock.mock_pump:MockPump
-    type: python
-    status_types:
-      status: String
-      pump_state: String
-      flow_rate: Float64
-      target_flow_rate: Float64
-      pressure: Float64
-      total_volume: Float64
-      max_flow_rate: Float64
-      max_pressure: Float64
-      from_vessel: String
-      to_vessel: String
-      transfer_volume: Float64
-      amount: String
-      transfer_time: Float64
-      is_viscous: Bool
-      rinsing_solvent: String
-      rinsing_volume: Float64
-      rinsing_repeats: Int32
-      is_solid: Bool
-      time_spent: Float64
-      time_remaining: Float64
-      current_device: String
     action_value_mappings:
-      pump_transfer:
-          type: PumpTransfer
-          goal:
-            from_vessel: from_vessel
-            to_vessel: to_vessel
-            volume: volume
-            amount: amount
-            time: time
-            viscous: viscous
-            rinsing_solvent: rinsing_solvent
-            rinsing_volume: rinsing_volume
-            rinsing_repeats: rinsing_repeats
-            solid: solid
-          feedback:
-            status: status
-            current_device: current_device
-            time_spent: time_spent
-            time_remaining: time_remaining
-          result:
-            success: success
+      auto-emergency_stop:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result: {}
+        schema:
+          description: emergency_stop的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: emergency_stop参数
+          type: object
+        type: UniLabJsonCommand
       pause_pump:
-        type: EmptyIn
-        goal: {}
         feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
         result:
           success: success
-      resume_pump:
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: EmptyIn_Feedback
+              type: object
+            goal:
+              properties: {}
+              required: []
+              title: EmptyIn_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+              required:
+              - return_info
+              title: EmptyIn_Result
+              type: object
+          required:
+          - goal
+          title: EmptyIn
+          type: object
         type: EmptyIn
-        goal: {}
-        feedback: {}
+      pump_transfer:
+        feedback:
+          current_device: current_device
+          status: status
+          time_remaining: time_remaining
+          time_spent: time_spent
+        goal:
+          amount: amount
+          from_vessel: from_vessel
+          rinsing_repeats: rinsing_repeats
+          rinsing_solvent: rinsing_solvent
+          rinsing_volume: rinsing_volume
+          solid: solid
+          time: time
+          to_vessel: to_vessel
+          viscous: viscous
+          volume: volume
+        goal_default:
+          amount: ''
+          event: ''
+          flowrate: 0.0
+          from_vessel:
+            category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+          rate_spec: ''
+          rinsing_repeats: 0
+          rinsing_solvent: ''
+          rinsing_volume: 0.0
+          solid: false
+          through: ''
+          time: 0.0
+          to_vessel:
+            category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+          transfer_flowrate: 0.0
+          viscous: false
+          volume: 0.0
+        handles: []
         result:
           success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties:
+                current_device:
+                  type: string
+                status:
+                  type: string
+                time_remaining:
+                  properties:
+                    nanosec:
+                      maximum: 4294967295
+                      minimum: 0
+                      type: integer
+                    sec:
+                      maximum: 2147483647
+                      minimum: -2147483648
+                      type: integer
+                  required:
+                  - sec
+                  - nanosec
+                  title: Duration
+                  type: object
+                time_spent:
+                  properties:
+                    nanosec:
+                      maximum: 4294967295
+                      minimum: 0
+                      type: integer
+                    sec:
+                      maximum: 2147483647
+                      minimum: -2147483648
+                      type: integer
+                  required:
+                  - sec
+                  - nanosec
+                  title: Duration
+                  type: object
+              required:
+              - status
+              - current_device
+              - time_spent
+              - time_remaining
+              title: PumpTransfer_Feedback
+              type: object
+            goal:
+              properties:
+                amount:
+                  type: string
+                event:
+                  type: string
+                flowrate:
+                  type: number
+                from_vessel:
+                  properties:
+                    category:
+                      type: string
+                    children:
+                      items:
+                        type: string
+                      type: array
+                    config:
+                      type: string
+                    data:
+                      type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    parent:
+                      type: string
+                    pose:
+                      properties:
+                        orientation:
+                          properties:
+                            w:
+                              type: number
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          - w
+                          title: Quaternion
+                          type: object
+                        position:
+                          properties:
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          title: Point
+                          type: object
+                      required:
+                      - position
+                      - orientation
+                      title: Pose
+                      type: object
+                    sample_id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - id
+                  - name
+                  - sample_id
+                  - children
+                  - parent
+                  - type
+                  - category
+                  - pose
+                  - config
+                  - data
+                  title: Resource
+                  type: object
+                rate_spec:
+                  type: string
+                rinsing_repeats:
+                  maximum: 2147483647
+                  minimum: -2147483648
+                  type: integer
+                rinsing_solvent:
+                  type: string
+                rinsing_volume:
+                  type: number
+                solid:
+                  type: boolean
+                through:
+                  type: string
+                time:
+                  type: number
+                to_vessel:
+                  properties:
+                    category:
+                      type: string
+                    children:
+                      items:
+                        type: string
+                      type: array
+                    config:
+                      type: string
+                    data:
+                      type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    parent:
+                      type: string
+                    pose:
+                      properties:
+                        orientation:
+                          properties:
+                            w:
+                              type: number
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          - w
+                          title: Quaternion
+                          type: object
+                        position:
+                          properties:
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          title: Point
+                          type: object
+                      required:
+                      - position
+                      - orientation
+                      title: Pose
+                      type: object
+                    sample_id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - id
+                  - name
+                  - sample_id
+                  - children
+                  - parent
+                  - type
+                  - category
+                  - pose
+                  - config
+                  - data
+                  title: Resource
+                  type: object
+                transfer_flowrate:
+                  type: number
+                viscous:
+                  type: boolean
+                volume:
+                  type: number
+              required:
+              - from_vessel
+              - to_vessel
+              - volume
+              - amount
+              - time
+              - viscous
+              - rinsing_solvent
+              - rinsing_volume
+              - rinsing_repeats
+              - solid
+              - flowrate
+              - transfer_flowrate
+              - rate_spec
+              - event
+              - through
+              title: PumpTransfer_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: PumpTransfer_Result
+              type: object
+          required:
+          - goal
+          title: PumpTransfer
+          type: object
+        type: PumpTransfer
       reset_volume_counter:
-        type: EmptyIn
+        feedback: {}
         goal: {}
-        feedback: {}
+        goal_default: {}
+        handles: []
         result:
           success: success
-  schema:
-    type: object
-    properties:
-      status:
-        type: string
-        description: Current status of the pump
-      pump_state:
-        type: string
-        description: Pump operation state (Running/Stopped/Paused)
-      flow_rate:
-        type: number
-        description: Current flow rate in mL/min
-      target_flow_rate:
-        type: number
-        description: Target flow rate in mL/min
-      pressure:
-        type: number
-        description: Current pressure in bar
-      total_volume:
-        type: number
-        description: Total accumulated volume in mL
-      max_flow_rate:
-        type: number
-        description: Maximum flow rate in mL/min
-      max_pressure:
-        type: number
-        description: Maximum pressure in bar
-      from_vessel:
-        type: string
-        description: Source vessel for transfer
-      to_vessel:
-        type: string
-        description: Target vessel for transfer
-      transfer_volume:
-        type: number
-        description: Volume to transfer in mL
-      amount:
-        type: string
-        description: Amount description
-      transfer_time:
-        type: number
-        description: Transfer time in seconds
-      is_viscous:
-        type: boolean
-        description: Whether the liquid is viscous
-      rinsing_solvent:
-        type: string
-        description: Solvent used for rinsing
-      rinsing_volume:
-        type: number
-        description: Volume used for rinsing
-      rinsing_repeats:
-        type: integer
-        description: Number of rinsing cycles
-      is_solid:
-        type: boolean
-        description: Whether transferring solid material
-      current_device:
-        type: string
-        description: Current device identifier
-    required:
-    - status
-    - pump_state
-    - flow_rate
-    - from_vessel
-    - to_vessel
-    additionalProperties: false
-mock_rotavap:
-  description: Mock Rotavap Device
-  class:
-    module: unilabos.devices.mock.mock_rotavap:MockRotavap
-    type: python
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: EmptyIn_Feedback
+              type: object
+            goal:
+              properties: {}
+              required: []
+              title: EmptyIn_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+              required:
+              - return_info
+              title: EmptyIn_Result
+              type: object
+          required:
+          - goal
+          title: EmptyIn
+          type: object
+        type: EmptyIn
+      resume_pump:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result:
+          success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: EmptyIn_Feedback
+              type: object
+            goal:
+              properties: {}
+              required: []
+              title: EmptyIn_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+              required:
+              - return_info
+              title: EmptyIn_Result
+              type: object
+          required:
+          - goal
+          title: EmptyIn
+          type: object
+        type: EmptyIn
+    module: unilabos.devices.mock.mock_pump:MockPump
     status_types:
-      status: String
-      rotate_state: String
-      rotate_time: Float64
-      rotate_speed: Float64
-      pump_state: String
-      pump_time: Float64
-      vacuum_level: Float64
-      temperature: Float64
-      target_temperature: Float64
-      success: String
+      amount: str
+      current_device: str
+      flow_rate: float
+      from_vessel: str
+      is_solid: bool
+      is_viscous: bool
+      max_flow_rate: float
+      max_pressure: float
+      pressure: float
+      pump_state: str
+      rinsing_repeats: int
+      rinsing_solvent: str
+      rinsing_volume: float
+      status: str
+      status_info: dict
+      target_flow_rate: float
+      time_remaining: float
+      time_spent: float
+      to_vessel: str
+      total_volume: float
+      transfer_time: float
+      transfer_volume: float
+    type: python
+  config_info: []
+  description: Mock Pump Device
+  handles: []
+  icon: ''
+  init_param_schema:
+    config:
+      properties:
+        port:
+          default: MOCK
+          type: string
+      required: []
+      type: object
+    data:
+      properties:
+        amount:
+          type: string
+        current_device:
+          type: string
+        flow_rate:
+          type: number
+        from_vessel:
+          type: string
+        is_solid:
+          type: boolean
+        is_viscous:
+          type: boolean
+        max_flow_rate:
+          type: number
+        max_pressure:
+          type: number
+        pressure:
+          type: number
+        pump_state:
+          type: string
+        rinsing_repeats:
+          type: integer
+        rinsing_solvent:
+          type: string
+        rinsing_volume:
+          type: number
+        status:
+          type: string
+        status_info:
+          type: object
+        target_flow_rate:
+          type: number
+        time_remaining:
+          type: number
+        time_spent:
+          type: number
+        to_vessel:
+          type: string
+        total_volume:
+          type: number
+        transfer_time:
+          type: number
+        transfer_volume:
+          type: number
+      required:
+      - status
+      - current_device
+      - pump_state
+      - flow_rate
+      - target_flow_rate
+      - pressure
+      - total_volume
+      - max_flow_rate
+      - max_pressure
+      - from_vessel
+      - to_vessel
+      - transfer_volume
+      - amount
+      - transfer_time
+      - is_viscous
+      - rinsing_solvent
+      - rinsing_volume
+      - rinsing_repeats
+      - is_solid
+      - time_spent
+      - time_remaining
+      - status_info
+      type: object
+  version: 1.0.0
+mock_rotavap:
+  category:
+  - mock_devices
+  class:
     action_value_mappings:
-      set_timer:
-        type: StrSingleInput
-        goal:
-          string: command
+      auto-emergency_stop:
         feedback: {}
-        result:
-          success: success
-      set_rotate_time:
-        type: FloatSingleInput
-        goal:
-          float_in: time_seconds
+        goal: {}
+        goal_default: {}
+        handles: []
+        result: {}
+        schema:
+          description: emergency_stop的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: emergency_stop参数
+          type: object
+        type: UniLabJsonCommand
+      auto-stop_all_operations:
         feedback: {}
-        result:
-          success: success
+        goal: {}
+        goal_default: {}
+        handles: []
+        result: {}
+        schema:
+          description: stop_all_operations的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: stop_all_operations参数
+          type: object
+        type: UniLabJsonCommand
       set_pump_time:
-        type: FloatSingleInput
+        feedback: {}
         goal:
           float_in: time_seconds
-        feedback: {}
+        goal_default:
+          float_in: 0.0
+        handles: []
         result:
           success: success
-      set_rotate_speed:
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: FloatSingleInput_Feedback
+              type: object
+            goal:
+              properties:
+                float_in:
+                  type: number
+              required:
+              - float_in
+              title: FloatSingleInput_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: FloatSingleInput_Result
+              type: object
+          required:
+          - goal
+          title: FloatSingleInput
+          type: object
         type: FloatSingleInput
+      set_rotate_speed:
+        feedback: {}
         goal:
           float_in: speed
-        feedback: {}
+        goal_default:
+          float_in: 0.0
+        handles: []
         result:
           success: success
-      set_temperature:
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: FloatSingleInput_Feedback
+              type: object
+            goal:
+              properties:
+                float_in:
+                  type: number
+              required:
+              - float_in
+              title: FloatSingleInput_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: FloatSingleInput_Result
+              type: object
+          required:
+          - goal
+          title: FloatSingleInput
+          type: object
         type: FloatSingleInput
+      set_rotate_time:
+        feedback: {}
+        goal:
+          float_in: time_seconds
+        goal_default:
+          float_in: 0.0
+        handles: []
+        result:
+          success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: FloatSingleInput_Feedback
+              type: object
+            goal:
+              properties:
+                float_in:
+                  type: number
+              required:
+              - float_in
+              title: FloatSingleInput_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: FloatSingleInput_Result
+              type: object
+          required:
+          - goal
+          title: FloatSingleInput
+          type: object
+        type: FloatSingleInput
+      set_temperature:
+        feedback: {}
         goal:
           float_in: temperature
-        feedback: {}
+        goal_default:
+          float_in: 0.0
+        handles: []
         result:
           success: success
-      start_rotation:
-        type: EmptyIn
-        goal: {}
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: FloatSingleInput_Feedback
+              type: object
+            goal:
+              properties:
+                float_in:
+                  type: number
+              required:
+              - float_in
+              title: FloatSingleInput_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: FloatSingleInput_Result
+              type: object
+          required:
+          - goal
+          title: FloatSingleInput
+          type: object
+        type: FloatSingleInput
+      set_timer:
         feedback: {}
+        goal:
+          string: command
+        goal_default:
+          string: ''
+        handles: []
         result:
           success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: StrSingleInput_Feedback
+              type: object
+            goal:
+              properties:
+                string:
+                  type: string
+              required:
+              - string
+              title: StrSingleInput_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: StrSingleInput_Result
+              type: object
+          required:
+          - goal
+          title: StrSingleInput
+          type: object
+        type: StrSingleInput
       start_pump:
-        type: EmptyIn
-        goal: {}
         feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
         result:
           success: success
-  schema:
-    type: object
-    properties:
-      status:
-        type: string
-        description: Current status of the rotavap
-      rotate_state:
-        type: string
-        description: Rotation state (Running/Stopped)
-      rotate_time:
-        type: number
-        description: Remaining rotation time in seconds
-      rotate_speed:
-        type: number
-        description: Rotation speed in rpm
-      pump_state:
-        type: string
-        description: Pump state (Running/Stopped)
-      pump_time:
-        type: number
-        description: Remaining pump time in seconds
-      vacuum_level:
-        type: number
-        description: Current vacuum level in mbar
-      temperature:
-        type: number
-        description: Current water bath temperature
-      target_temperature:
-        type: number
-        description: Target water bath temperature
-      success:
-        type: string
-        description: Operation success status
-    required:
-    - status
-    - rotate_time
-    - pump_time
-    - temperature
-    additionalProperties: false
-mock_separator:
-  description: Simplified Mock Separator Device
-  class:
-    module: unilabos.devices.mock.mock_separator:MockSeparator
-    type: python
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: EmptyIn_Feedback
+              type: object
+            goal:
+              properties: {}
+              required: []
+              title: EmptyIn_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+              required:
+              - return_info
+              title: EmptyIn_Result
+              type: object
+          required:
+          - goal
+          title: EmptyIn
+          type: object
+        type: EmptyIn
+      start_rotation:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result:
+          success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: EmptyIn_Feedback
+              type: object
+            goal:
+              properties: {}
+              required: []
+              title: EmptyIn_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+              required:
+              - return_info
+              title: EmptyIn_Result
+              type: object
+          required:
+          - goal
+          title: EmptyIn
+          type: object
+        type: EmptyIn
+    module: unilabos.devices.mock.mock_rotavap:MockRotavap
     status_types:
-      status: String
-      settling_time: Float64
-      valve_state: String
-      shake_time: Float64
-      shake_status: String
-      current_device: String
-      purpose: String
-      product_phase: String
-      from_vessel: String
-      separation_vessel: String
-      to_vessel: String
-      waste_phase_to_vessel: String
-      solvent: String
-      solvent_volume: Float64
-      through: String
-      repeats: Int32
-      stir_time: Float64
-      stir_speed: Float64
-      time_spent: Float64
-      time_remaining: Float64
+      pump_state: str
+      pump_time: float
+      rotate_speed: float
+      rotate_state: str
+      rotate_time: float
+      status: str
+      status_info: dict
+      target_temperature: float
+      temperature: float
+      vacuum_level: float
+    type: python
+  config_info: []
+  description: Mock Rotavap Device
+  handles: []
+  icon: ''
+  init_param_schema:
+    config:
+      properties:
+        port:
+          default: MOCK
+          type: string
+      required: []
+      type: object
+    data:
+      properties:
+        pump_state:
+          type: string
+        pump_time:
+          type: number
+        rotate_speed:
+          type: number
+        rotate_state:
+          type: string
+        rotate_time:
+          type: number
+        status:
+          type: string
+        status_info:
+          type: object
+        target_temperature:
+          type: number
+        temperature:
+          type: number
+        vacuum_level:
+          type: number
+      required:
+      - status
+      - rotate_state
+      - rotate_time
+      - rotate_speed
+      - pump_state
+      - pump_time
+      - vacuum_level
+      - temperature
+      - target_temperature
+      - status_info
+      type: object
+  version: 1.0.0
+mock_separator:
+  category:
+  - mock_devices
+  class:
     action_value_mappings:
       separate:
-        type: Separate
+        feedback:
+          current_device: current_device
+          status: status
+          time_remaining: time_remaining
+          time_spent: time_spent
         goal:
-          purpose: purpose
-          product_phase: product_phase
           from_vessel: from_vessel
+          product_phase: product_phase
+          purpose: purpose
+          repeats: repeats
           separation_vessel: separation_vessel
-          to_vessel: to_vessel
-          waste_phase_to_vessel: waste_phase_to_vessel
+          settling_time: settling_time
           solvent: solvent
           solvent_volume: solvent_volume
-          through: through
-          repeats: repeats
-          stir_time: stir_time
           stir_speed: stir_speed
-          settling_time: settling_time
-        feedback:
-          status: status
-          current_device: current_device
-          time_spent: time_spent
-          time_remaining: time_remaining
+          stir_time: stir_time
+          through: through
+          to_vessel: to_vessel
+          waste_phase_to_vessel: waste_phase_to_vessel
+        goal_default:
+          from_vessel:
+            category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+          product_phase: ''
+          product_vessel:
+            category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+          purpose: ''
+          repeats: 0
+          separation_vessel:
+            category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+          settling_time: 0.0
+          solvent: ''
+          solvent_volume: ''
+          stir_speed: 0.0
+          stir_time: 0.0
+          through: ''
+          to_vessel:
+            category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+          vessel:
+            category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+          volume: ''
+          waste_phase_to_vessel:
+            category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+          waste_vessel:
+            category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+        handles: []
         result:
           success: success
-      shake:
-        type: FloatSingleInput
-        goal:
-          float_in: shake_time
-        feedback:
-          status: status
-        result:
-          success: success
-      stop_operations:
-        type: EmptyIn
-        goal: {}
-        feedback: {}
-        result:
-          success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties:
+                progress:
+                  type: number
+                status:
+                  type: string
+              required:
+              - status
+              - progress
+              title: Separate_Feedback
+              type: object
+            goal:
+              properties:
+                from_vessel:
+                  properties:
+                    category:
+                      type: string
+                    children:
+                      items:
+                        type: string
+                      type: array
+                    config:
+                      type: string
+                    data:
+                      type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    parent:
+                      type: string
+                    pose:
+                      properties:
+                        orientation:
+                          properties:
+                            w:
+                              type: number
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          - w
+                          title: Quaternion
+                          type: object
+                        position:
+                          properties:
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          title: Point
+                          type: object
+                      required:
+                      - position
+                      - orientation
+                      title: Pose
+                      type: object
+                    sample_id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - id
+                  - name
+                  - sample_id
+                  - children
+                  - parent
+                  - type
+                  - category
+                  - pose
+                  - config
+                  - data
+                  title: Resource
+                  type: object
+                product_phase:
+                  type: string
+                product_vessel:
+                  properties:
+                    category:
+                      type: string
+                    children:
+                      items:
+                        type: string
+                      type: array
+                    config:
+                      type: string
+                    data:
+                      type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    parent:
+                      type: string
+                    pose:
+                      properties:
+                        orientation:
+                          properties:
+                            w:
+                              type: number
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          - w
+                          title: Quaternion
+                          type: object
+                        position:
+                          properties:
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          title: Point
+                          type: object
+                      required:
+                      - position
+                      - orientation
+                      title: Pose
+                      type: object
+                    sample_id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - id
+                  - name
+                  - sample_id
+                  - children
+                  - parent
+                  - type
+                  - category
+                  - pose
+                  - config
+                  - data
+                  title: Resource
+                  type: object
+                purpose:
+                  type: string
+                repeats:
+                  maximum: 2147483647
+                  minimum: -2147483648
+                  type: integer
+                separation_vessel:
+                  properties:
+                    category:
+                      type: string
+                    children:
+                      items:
+                        type: string
+                      type: array
+                    config:
+                      type: string
+                    data:
+                      type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    parent:
+                      type: string
+                    pose:
+                      properties:
+                        orientation:
+                          properties:
+                            w:
+                              type: number
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          - w
+                          title: Quaternion
+                          type: object
+                        position:
+                          properties:
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          title: Point
+                          type: object
+                      required:
+                      - position
+                      - orientation
+                      title: Pose
+                      type: object
+                    sample_id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - id
+                  - name
+                  - sample_id
+                  - children
+                  - parent
+                  - type
+                  - category
+                  - pose
+                  - config
+                  - data
+                  title: Resource
+                  type: object
+                settling_time:
+                  type: number
+                solvent:
+                  type: string
+                solvent_volume:
+                  type: string
+                stir_speed:
+                  type: number
+                stir_time:
+                  type: number
+                through:
+                  type: string
+                to_vessel:
+                  properties:
+                    category:
+                      type: string
+                    children:
+                      items:
+                        type: string
+                      type: array
+                    config:
+                      type: string
+                    data:
+                      type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    parent:
+                      type: string
+                    pose:
+                      properties:
+                        orientation:
+                          properties:
+                            w:
+                              type: number
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          - w
+                          title: Quaternion
+                          type: object
+                        position:
+                          properties:
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          title: Point
+                          type: object
+                      required:
+                      - position
+                      - orientation
+                      title: Pose
+                      type: object
+                    sample_id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - id
+                  - name
+                  - sample_id
+                  - children
+                  - parent
+                  - type
+                  - category
+                  - pose
+                  - config
+                  - data
+                  title: Resource
+                  type: object
+                vessel:
+                  properties:
+                    category:
+                      type: string
+                    children:
+                      items:
+                        type: string
+                      type: array
+                    config:
+                      type: string
+                    data:
+                      type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    parent:
+                      type: string
+                    pose:
+                      properties:
+                        orientation:
+                          properties:
+                            w:
+                              type: number
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          - w
+                          title: Quaternion
+                          type: object
+                        position:
+                          properties:
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          title: Point
+                          type: object
+                      required:
+                      - position
+                      - orientation
+                      title: Pose
+                      type: object
+                    sample_id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - id
+                  - name
+                  - sample_id
+                  - children
+                  - parent
+                  - type
+                  - category
+                  - pose
+                  - config
+                  - data
+                  title: Resource
+                  type: object
+                volume:
+                  type: string
+                waste_phase_to_vessel:
+                  properties:
+                    category:
+                      type: string
+                    children:
+                      items:
+                        type: string
+                      type: array
+                    config:
+                      type: string
+                    data:
+                      type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    parent:
+                      type: string
+                    pose:
+                      properties:
+                        orientation:
+                          properties:
+                            w:
+                              type: number
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          - w
+                          title: Quaternion
+                          type: object
+                        position:
+                          properties:
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          title: Point
+                          type: object
+                      required:
+                      - position
+                      - orientation
+                      title: Pose
+                      type: object
+                    sample_id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - id
+                  - name
+                  - sample_id
+                  - children
+                  - parent
+                  - type
+                  - category
+                  - pose
+                  - config
+                  - data
+                  title: Resource
+                  type: object
+                waste_vessel:
+                  properties:
+                    category:
+                      type: string
+                    children:
+                      items:
+                        type: string
+                      type: array
+                    config:
+                      type: string
+                    data:
+                      type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    parent:
+                      type: string
+                    pose:
+                      properties:
+                        orientation:
+                          properties:
+                            w:
+                              type: number
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          - w
+                          title: Quaternion
+                          type: object
+                        position:
+                          properties:
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          title: Point
+                          type: object
+                      required:
+                      - position
+                      - orientation
+                      title: Pose
+                      type: object
+                    sample_id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - id
+                  - name
+                  - sample_id
+                  - children
+                  - parent
+                  - type
+                  - category
+                  - pose
+                  - config
+                  - data
+                  title: Resource
+                  type: object
+              required:
+              - vessel
+              - purpose
+              - product_phase
+              - from_vessel
+              - separation_vessel
+              - to_vessel
+              - waste_phase_to_vessel
+              - product_vessel
+              - waste_vessel
+              - solvent
+              - solvent_volume
+              - volume
+              - through
+              - repeats
+              - stir_time
+              - stir_speed
+              - settling_time
+              title: Separate_Goal
+              type: object
+            result:
+              properties:
+                message:
+                  type: string
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - success
+              - message
+              - return_info
+              title: Separate_Result
+              type: object
+          required:
+          - goal
+          title: Separate
+          type: object
+        type: Separate
       set_valve:
-        type: StrSingleInput
+        feedback: {}
         goal:
           string: command
-        feedback: {}
+        goal_default:
+          string: ''
+        handles: []
         result:
           success: success
-  schema:
-    type: object
-    properties:
-      status:
-        type: string
-        description: Current status of the separator
-      settling_time:
-        type: number
-        description: Settling time in seconds
-      valve_state:
-        type: string
-        description: Valve state (Open/Closed)
-      shake_time:
-        type: number
-        description: Remaining shake time in seconds
-      shake_status:
-        type: string
-        description: Current shake state
-      purpose:
-        type: string
-        description: Separation purpose (wash/extract)
-      product_phase:
-        type: string
-        description: Product phase (top/bottom)
-      from_vessel:
-        type: string
-        description: Source vessel
-      separation_vessel:
-        type: string
-        description: Vessel for separation
-      to_vessel:
-        type: string
-        description: Target vessel
-    required:
-    - status
-    - valve_state
-    - shake_status
-    - current_device
-    additionalProperties: false
-mock_solenoid_valve:
-  description: Mock Solenoid Valve Device
-  class:
-    module: unilabos.devices.mock.mock_solenoid_valve:MockSolenoidValve
-    type: python
-    status_types:
-      status: String
-      valve_status: String
-    action_value_mappings:
-      set_valve_status:
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: StrSingleInput_Feedback
+              type: object
+            goal:
+              properties:
+                string:
+                  type: string
+              required:
+              - string
+              title: StrSingleInput_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: StrSingleInput_Result
+              type: object
+          required:
+          - goal
+          title: StrSingleInput
+          type: object
         type: StrSingleInput
-        goal:
-          string: status
-        feedback: {}
-        result:
-          success: success
-      open_valve:
-        type: EmptyIn
-        goal: {}
-        feedback: {}
-        result:
-          success: success
-      close_valve:
-        type: EmptyIn
-        goal: {}
-        feedback: {}
-        result:
-          success: success
-  schema:
-    type: object
-    properties:
-      status:
-        type: string
-        description: Current status of the valve
-      valve_status:
-        type: string
-        description: Valve status (Open/Closed)
-    required:
-    - status
-    - valve_status
-    additionalProperties: false
-mock_stirrer:
-  description: Mock Stirrer Device
-  class:
-    module: unilabos.devices.mock.mock_stirrer:MockStirrer
-    type: python
-    status_types:
-      status: String
-      stir_speed: Float64
-      target_stir_speed: Float64
-      stir_state: String
-      temperature: Float64
-      target_temperature: Float64
-      heating_state: String
-      heating_power: Float64
-      max_stir_speed: Float64
-      max_temperature: Float64
-    action_value_mappings:
-      set_stir_speed:
-        type: FloatSingleInput
-        goal:
-          float_in: speed
-        feedback: {}
-        result:
-          success: success
-      set_temperature:
-        type: FloatSingleInput
-        goal:
-          float_in: temperature
-        feedback: {}
-        result:
-          success: success
-      start_stirring:
-        type: EmptyIn
-        goal: {}
-        feedback: {}
-        result:
-          success: success
-      stop_stirring:
-        type: EmptyIn
-        goal: {}
-        feedback: {}
-        result:
-          success: success
-      heating_control:
-        type: StrSingleInput
-        goal:
-          string: heating_state
-        feedback: {}
-        result:
-          success: success
-  schema:
-    type: object
-    properties:
-      status:
-        type: string
-        description: Current status of the stirrer
-      stir_speed:
-        type: number
-        description: Current stirring speed in rpm
-      target_stir_speed:
-        type: number
-        description: Target stirring speed in rpm
-      stir_state:
-        type: string
-        description: Stirring state (Running/Stopped)
-      temperature:
-        type: number
-        description: Current temperature in °C
-      target_temperature:
-        type: number
-        description: Target temperature in °C
-      heating_state:
-        type: string
-        description: Heating state (On/Off)
-      heating_power:
-        type: number
-        description: Current heating power percentage
-      max_stir_speed:
-        type: number
-        description: Maximum stirring speed in rpm
-      max_temperature:
-        type: number
-        description: Maximum temperature in °C
-    required:
-    - status
-    - stir_speed
-    - temperature
-    - power_state
-    additionalProperties: false
-mock_stirrer_new:
-  description: Mock Stirrer Device (Copy Version)
-  class:
-    module: unilabos.devices.mock.mock_stirrer_new:MockStirrer_new
-    type: python
-    status_types:
-      status: String
-      vessel: String
-      purpose: String
-      stir_speed: Float64
-      target_stir_speed: Float64
-      stir_state: String
-      stir_time: Float64
-      settling_time: Float64
-      progress: Float64
-      max_stir_speed: Float64
-    action_value_mappings:
-      start_stir:
-        type: StartStir
-        goal:
-          vessel: vessel
-          stir_speed: stir_speed
-          purpose: purpose
-        feedback:
-          progress: progress
-          current_speed: stir_speed
-          current_status: status
-        result:
-          success: success
-          message: message
-      stir:
-        type: Stir
-        goal:
-          stir_time: stir_time
-          stir_speed: stir_speed
-          settling_time: settling_time
+      shake:
         feedback:
           status: status
+        goal:
+          float_in: shake_time
+        goal_default:
+          float_in: 0.0
+        handles: []
         result:
           success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: FloatSingleInput_Feedback
+              type: object
+            goal:
+              properties:
+                float_in:
+                  type: number
+              required:
+              - float_in
+              title: FloatSingleInput_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: FloatSingleInput_Result
+              type: object
+          required:
+          - goal
+          title: FloatSingleInput
+          type: object
+        type: FloatSingleInput
+      stop_operations:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result:
+          success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: EmptyIn_Feedback
+              type: object
+            goal:
+              properties: {}
+              required: []
+              title: EmptyIn_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+              required:
+              - return_info
+              title: EmptyIn_Result
+              type: object
+          required:
+          - goal
+          title: EmptyIn
+          type: object
+        type: EmptyIn
+    module: unilabos.devices.mock.mock_separator:MockSeparator
+    status_types:
+      current_device: str
+      from_vessel: str
+      product_phase: str
+      purpose: str
+      repeats: int
+      separation_vessel: str
+      settling_time: float
+      shake_status: str
+      shake_time: float
+      solvent: str
+      solvent_volume: float
+      status: str
+      status_info: dict
+      stir_speed: float
+      stir_time: float
+      through: str
+      time_remaining: float
+      time_spent: float
+      to_vessel: str
+      valve_state: str
+      waste_phase_to_vessel: str
+    type: python
+  config_info: []
+  description: Simplified Mock Separator Device
+  handles: []
+  icon: ''
+  init_param_schema:
+    config:
+      properties:
+        port:
+          default: MOCK
+          type: string
+      required: []
+      type: object
+    data:
+      properties:
+        current_device:
+          type: string
+        from_vessel:
+          type: string
+        product_phase:
+          type: string
+        purpose:
+          type: string
+        repeats:
+          type: integer
+        separation_vessel:
+          type: string
+        settling_time:
+          type: number
+        shake_status:
+          type: string
+        shake_time:
+          type: number
+        solvent:
+          type: string
+        solvent_volume:
+          type: number
+        status:
+          type: string
+        status_info:
+          type: object
+        stir_speed:
+          type: number
+        stir_time:
+          type: number
+        through:
+          type: string
+        time_remaining:
+          type: number
+        time_spent:
+          type: number
+        to_vessel:
+          type: string
+        valve_state:
+          type: string
+        waste_phase_to_vessel:
+          type: string
+      required:
+      - current_device
+      - purpose
+      - valve_state
+      - settling_time
+      - status
+      - shake_time
+      - shake_status
+      - product_phase
+      - from_vessel
+      - separation_vessel
+      - to_vessel
+      - waste_phase_to_vessel
+      - solvent
+      - solvent_volume
+      - through
+      - repeats
+      - stir_time
+      - stir_speed
+      - time_spent
+      - time_remaining
+      - status_info
+      type: object
+  version: 1.0.0
+mock_solenoid_valve:
+  category:
+  - mock_devices
+  class:
+    action_value_mappings:
+      auto-is_closed:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result: {}
+        schema:
+          description: is_closed的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: is_closed参数
+          type: object
+        type: UniLabJsonCommand
+      auto-is_open:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result: {}
+        schema:
+          description: is_open的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: is_open参数
+          type: object
+        type: UniLabJsonCommand
+      close_valve:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result:
+          success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: EmptyIn_Feedback
+              type: object
+            goal:
+              properties: {}
+              required: []
+              title: EmptyIn_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+              required:
+              - return_info
+              title: EmptyIn_Result
+              type: object
+          required:
+          - goal
+          title: EmptyIn
+          type: object
+        type: EmptyIn
+      open_valve:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result:
+          success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: EmptyIn_Feedback
+              type: object
+            goal:
+              properties: {}
+              required: []
+              title: EmptyIn_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+              required:
+              - return_info
+              title: EmptyIn_Result
+              type: object
+          required:
+          - goal
+          title: EmptyIn
+          type: object
+        type: EmptyIn
+      set_valve_status:
+        feedback: {}
+        goal:
+          string: status
+        goal_default:
+          string: ''
+        handles: []
+        result:
+          success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: StrSingleInput_Feedback
+              type: object
+            goal:
+              properties:
+                string:
+                  type: string
+              required:
+              - string
+              title: StrSingleInput_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: StrSingleInput_Result
+              type: object
+          required:
+          - goal
+          title: StrSingleInput
+          type: object
+        type: StrSingleInput
+    module: unilabos.devices.mock.mock_solenoid_valve:MockSolenoidValve
+    status_types:
+      status: str
+      valve_status: str
+    type: python
+  config_info: []
+  description: Mock Solenoid Valve Device
+  handles: []
+  icon: ''
+  init_param_schema:
+    config:
+      properties:
+        port:
+          default: MOCK
+          type: string
+      required: []
+      type: object
+    data:
+      properties:
+        status:
+          type: string
+        valve_status:
+          type: string
+      required:
+      - status
+      - valve_status
+      type: object
+  version: 1.0.0
+mock_stirrer:
+  category:
+  - mock_devices
+  class:
+    action_value_mappings:
+      auto-emergency_stop:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result: {}
+        schema:
+          description: emergency_stop的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: emergency_stop参数
+          type: object
+        type: UniLabJsonCommand
+      auto-stop_all_operations:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result: {}
+        schema:
+          description: stop_all_operations的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: stop_all_operations参数
+          type: object
+        type: UniLabJsonCommand
+      heating_control:
+        feedback: {}
+        goal:
+          string: heating_state
+        goal_default:
+          string: ''
+        handles: []
+        result:
+          success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: StrSingleInput_Feedback
+              type: object
+            goal:
+              properties:
+                string:
+                  type: string
+              required:
+              - string
+              title: StrSingleInput_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: StrSingleInput_Result
+              type: object
+          required:
+          - goal
+          title: StrSingleInput
+          type: object
+        type: StrSingleInput
+      set_stir_speed:
+        feedback: {}
+        goal:
+          float_in: speed
+        goal_default:
+          float_in: 0.0
+        handles: []
+        result:
+          success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: FloatSingleInput_Feedback
+              type: object
+            goal:
+              properties:
+                float_in:
+                  type: number
+              required:
+              - float_in
+              title: FloatSingleInput_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: FloatSingleInput_Result
+              type: object
+          required:
+          - goal
+          title: FloatSingleInput
+          type: object
+        type: FloatSingleInput
+      set_temperature:
+        feedback: {}
+        goal:
+          float_in: temperature
+        goal_default:
+          float_in: 0.0
+        handles: []
+        result:
+          success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: FloatSingleInput_Feedback
+              type: object
+            goal:
+              properties:
+                float_in:
+                  type: number
+              required:
+              - float_in
+              title: FloatSingleInput_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: FloatSingleInput_Result
+              type: object
+          required:
+          - goal
+          title: FloatSingleInput
+          type: object
+        type: FloatSingleInput
+      start_stirring:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result:
+          success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: EmptyIn_Feedback
+              type: object
+            goal:
+              properties: {}
+              required: []
+              title: EmptyIn_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+              required:
+              - return_info
+              title: EmptyIn_Result
+              type: object
+          required:
+          - goal
+          title: EmptyIn
+          type: object
+        type: EmptyIn
+      stop_stirring:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result:
+          success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: EmptyIn_Feedback
+              type: object
+            goal:
+              properties: {}
+              required: []
+              title: EmptyIn_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+              required:
+              - return_info
+              title: EmptyIn_Result
+              type: object
+          required:
+          - goal
+          title: EmptyIn
+          type: object
+        type: EmptyIn
+    module: unilabos.devices.mock.mock_stirrer:MockStirrer
+    status_types:
+      heating_power: float
+      heating_state: str
+      max_stir_speed: float
+      max_temperature: float
+      status: str
+      status_info: dict
+      stir_speed: float
+      stir_state: str
+      target_stir_speed: float
+      target_temperature: float
+      temperature: float
+    type: python
+  config_info: []
+  description: Mock Stirrer Device
+  handles: []
+  icon: ''
+  init_param_schema:
+    config:
+      properties:
+        port:
+          default: MOCK
+          type: string
+      required: []
+      type: object
+    data:
+      properties:
+        heating_power:
+          type: number
+        heating_state:
+          type: string
+        max_stir_speed:
+          type: number
+        max_temperature:
+          type: number
+        status:
+          type: string
+        status_info:
+          type: object
+        stir_speed:
+          type: number
+        stir_state:
+          type: string
+        target_stir_speed:
+          type: number
+        target_temperature:
+          type: number
+        temperature:
+          type: number
+      required:
+      - status
+      - stir_speed
+      - target_stir_speed
+      - stir_state
+      - temperature
+      - target_temperature
+      - heating_state
+      - heating_power
+      - max_stir_speed
+      - max_temperature
+      - status_info
+      type: object
+  version: 1.0.0
+mock_stirrer_new:
+  category:
+  - mock_devices
+  class:
+    action_value_mappings:
+      start_stir:
+        feedback:
+          current_speed: stir_speed
+          current_status: status
+          progress: progress
+        goal:
+          purpose: purpose
+          stir_speed: stir_speed
+          vessel: vessel
+        goal_default:
+          purpose: ''
+          stir_speed: 0.0
+          vessel:
+            category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+        handles: []
+        result:
+          message: message
+          success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties:
+                current_speed:
+                  type: number
+                current_status:
+                  type: string
+                progress:
+                  type: number
+              required:
+              - progress
+              - current_speed
+              - current_status
+              title: StartStir_Feedback
+              type: object
+            goal:
+              properties:
+                purpose:
+                  type: string
+                stir_speed:
+                  type: number
+                vessel:
+                  properties:
+                    category:
+                      type: string
+                    children:
+                      items:
+                        type: string
+                      type: array
+                    config:
+                      type: string
+                    data:
+                      type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    parent:
+                      type: string
+                    pose:
+                      properties:
+                        orientation:
+                          properties:
+                            w:
+                              type: number
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          - w
+                          title: Quaternion
+                          type: object
+                        position:
+                          properties:
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          title: Point
+                          type: object
+                      required:
+                      - position
+                      - orientation
+                      title: Pose
+                      type: object
+                    sample_id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - id
+                  - name
+                  - sample_id
+                  - children
+                  - parent
+                  - type
+                  - category
+                  - pose
+                  - config
+                  - data
+                  title: Resource
+                  type: object
+              required:
+              - vessel
+              - stir_speed
+              - purpose
+              title: StartStir_Goal
+              type: object
+            result:
+              properties:
+                message:
+                  type: string
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - success
+              - message
+              - return_info
+              title: StartStir_Result
+              type: object
+          required:
+          - goal
+          title: StartStir
+          type: object
+        type: StartStir
+      stir:
+        feedback:
+          status: status
+        goal:
+          settling_time: settling_time
+          stir_speed: stir_speed
+          stir_time: stir_time
+        goal_default:
+          event: ''
+          settling_time: ''
+          stir_speed: 0.0
+          stir_time: 0.0
+          time: ''
+          time_spec: ''
+          vessel:
+            category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+        handles: []
+        result:
+          success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties:
+                status:
+                  type: string
+              required:
+              - status
+              title: Stir_Feedback
+              type: object
+            goal:
+              properties:
+                event:
+                  type: string
+                settling_time:
+                  type: string
+                stir_speed:
+                  type: number
+                stir_time:
+                  type: number
+                time:
+                  type: string
+                time_spec:
+                  type: string
+                vessel:
+                  properties:
+                    category:
+                      type: string
+                    children:
+                      items:
+                        type: string
+                      type: array
+                    config:
+                      type: string
+                    data:
+                      type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    parent:
+                      type: string
+                    pose:
+                      properties:
+                        orientation:
+                          properties:
+                            w:
+                              type: number
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          - w
+                          title: Quaternion
+                          type: object
+                        position:
+                          properties:
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          title: Point
+                          type: object
+                      required:
+                      - position
+                      - orientation
+                      title: Pose
+                      type: object
+                    sample_id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - id
+                  - name
+                  - sample_id
+                  - children
+                  - parent
+                  - type
+                  - category
+                  - pose
+                  - config
+                  - data
+                  title: Resource
+                  type: object
+              required:
+              - vessel
+              - time
+              - event
+              - time_spec
+              - stir_time
+              - stir_speed
+              - settling_time
+              title: Stir_Goal
+              type: object
+            result:
+              properties:
+                message:
+                  type: string
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - success
+              - message
+              - return_info
+              title: Stir_Result
+              type: object
+          required:
+          - goal
+          title: Stir
+          type: object
+        type: Stir
       stop_stir:
-        type: StopStir
+        feedback:
+          current_status: status
+          progress: progress
         goal:
           vessel: vessel
-        feedback:
-          progress: progress
-          current_status: status
+        goal_default:
+          vessel:
+            category: ''
+            children: []
+            config: ''
+            data: ''
+            id: ''
+            name: ''
+            parent: ''
+            pose:
+              orientation:
+                w: 1.0
+                x: 0.0
+                y: 0.0
+                z: 0.0
+              position:
+                x: 0.0
+                y: 0.0
+                z: 0.0
+            sample_id: ''
+            type: ''
+        handles: []
+        result:
+          message: message
+          success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties:
+                current_status:
+                  type: string
+                progress:
+                  type: number
+              required:
+              - progress
+              - current_status
+              title: StopStir_Feedback
+              type: object
+            goal:
+              properties:
+                vessel:
+                  properties:
+                    category:
+                      type: string
+                    children:
+                      items:
+                        type: string
+                      type: array
+                    config:
+                      type: string
+                    data:
+                      type: string
+                    id:
+                      type: string
+                    name:
+                      type: string
+                    parent:
+                      type: string
+                    pose:
+                      properties:
+                        orientation:
+                          properties:
+                            w:
+                              type: number
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          - w
+                          title: Quaternion
+                          type: object
+                        position:
+                          properties:
+                            x:
+                              type: number
+                            y:
+                              type: number
+                            z:
+                              type: number
+                          required:
+                          - x
+                          - y
+                          - z
+                          title: Point
+                          type: object
+                      required:
+                      - position
+                      - orientation
+                      title: Pose
+                      type: object
+                    sample_id:
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - id
+                  - name
+                  - sample_id
+                  - children
+                  - parent
+                  - type
+                  - category
+                  - pose
+                  - config
+                  - data
+                  title: Resource
+                  type: object
+              required:
+              - vessel
+              title: StopStir_Goal
+              type: object
+            result:
+              properties:
+                message:
+                  type: string
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - success
+              - message
+              - return_info
+              title: StopStir_Result
+              type: object
+          required:
+          - goal
+          title: StopStir
+          type: object
+        type: StopStir
+    module: unilabos.devices.mock.mock_stirrer_new:MockStirrer_new
+    status_types:
+      max_stir_speed: float
+      progress: float
+      purpose: str
+      settling_time: float
+      status: str
+      status_info: dict
+      stir_speed: float
+      stir_state: str
+      stir_time: float
+      target_stir_speed: float
+      vessel: str
+    type: python
+  config_info: []
+  description: Mock Stirrer Device (Copy Version)
+  handles: []
+  icon: ''
+  init_param_schema:
+    config:
+      properties:
+        port:
+          default: MOCK
+          type: string
+      required: []
+      type: object
+    data:
+      properties:
+        max_stir_speed:
+          type: number
+        progress:
+          type: number
+        purpose:
+          type: string
+        settling_time:
+          type: number
+        status:
+          type: string
+        status_info:
+          type: object
+        stir_speed:
+          type: number
+        stir_state:
+          type: string
+        stir_time:
+          type: number
+        target_stir_speed:
+          type: number
+        vessel:
+          type: string
+      required:
+      - status
+      - stir_speed
+      - target_stir_speed
+      - stir_state
+      - vessel
+      - purpose
+      - stir_time
+      - settling_time
+      - max_stir_speed
+      - progress
+      - status_info
+      type: object
+  version: 1.0.0
+mock_vacuum:
+  category:
+  - mock_devices
+  class:
+    action_value_mappings:
+      auto-emergency_stop:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result: {}
+        schema:
+          description: emergency_stop的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: emergency_stop参数
+          type: object
+        type: UniLabJsonCommand
+      pause_vacuum:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
         result:
           success: success
-          message: message
-  schema:
-    type: object
-    properties:
-      status:
-        type: string
-      vessel:
-        type: string
-      purpose:
-        type: string
-      stir_speed:
-        type: number
-      target_stir_speed:
-        type: number
-      stir_state:
-        type: string
-      stir_time:
-        type: number
-      settling_time:
-        type: number
-      progress:
-        type: number
-      max_stir_speed:
-        type: number
-    required:
-    - status
-    - stir_speed
-    - stir_state
-    - vessel
-    additionalProperties: false
-mock_vacuum:
-  description: Mock Vacuum Pump Device
-  class:
-    module: unilabos.devices.mock.mock_vacuum:MockVacuum
-    type: python
-    status_types:
-      status: String
-      power_state: String
-      pump_state: String
-      vacuum_level: Float64
-      target_vacuum: Float64
-      pump_speed: Float64
-      pump_efficiency: Float64
-      max_pump_speed: Float64
-    action_value_mappings:
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: EmptyIn_Feedback
+              type: object
+            goal:
+              properties: {}
+              required: []
+              title: EmptyIn_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+              required:
+              - return_info
+              title: EmptyIn_Result
+              type: object
+          required:
+          - goal
+          title: EmptyIn
+          type: object
+        type: EmptyIn
       power_control:
-        type: StrSingleInput
+        feedback: {}
         goal:
           string: power_state
-        feedback: {}
+        goal_default:
+          string: ''
+        handles: []
         result:
           success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: StrSingleInput_Feedback
+              type: object
+            goal:
+              properties:
+                string:
+                  type: string
+              required:
+              - string
+              title: StrSingleInput_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: StrSingleInput_Result
+              type: object
+          required:
+          - goal
+          title: StrSingleInput
+          type: object
+        type: StrSingleInput
+      resume_vacuum:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result:
+          success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: EmptyIn_Feedback
+              type: object
+            goal:
+              properties: {}
+              required: []
+              title: EmptyIn_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+              required:
+              - return_info
+              title: EmptyIn_Result
+              type: object
+          required:
+          - goal
+          title: EmptyIn
+          type: object
+        type: EmptyIn
       set_vacuum_level:
-        type: FloatSingleInput
+        feedback: {}
         goal:
           float_in: vacuum_level
-        feedback: {}
+        goal_default:
+          float_in: 0.0
+        handles: []
         result:
           success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: FloatSingleInput_Feedback
+              type: object
+            goal:
+              properties:
+                float_in:
+                  type: number
+              required:
+              - float_in
+              title: FloatSingleInput_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: FloatSingleInput_Result
+              type: object
+          required:
+          - goal
+          title: FloatSingleInput
+          type: object
+        type: FloatSingleInput
       start_vacuum:
-        type: EmptyIn
-        goal: {}
         feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
         result:
           success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: EmptyIn_Feedback
+              type: object
+            goal:
+              properties: {}
+              required: []
+              title: EmptyIn_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+              required:
+              - return_info
+              title: EmptyIn_Result
+              type: object
+          required:
+          - goal
+          title: EmptyIn
+          type: object
+        type: EmptyIn
       stop_vacuum:
-        type: EmptyIn
-        goal: {}
         feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
         result:
           success: success
-      pause_vacuum:
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: EmptyIn_Feedback
+              type: object
+            goal:
+              properties: {}
+              required: []
+              title: EmptyIn_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+              required:
+              - return_info
+              title: EmptyIn_Result
+              type: object
+          required:
+          - goal
+          title: EmptyIn
+          type: object
         type: EmptyIn
-        goal: {}
-        feedback: {}
-        result:
-          success: success
-      resume_vacuum:
-        type: EmptyIn
-        goal: {}
-        feedback: {}
-        result:
-          success: success
       vent_to_atmosphere:
-        type: EmptyIn
-        goal: {}
         feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
         result:
           success: success
-  schema:
-    type: object
-    properties:
-      status:
-        type: string
-        description: Current status of the vacuum pump
-      power_state:
-        type: string
-        description: Power state (On/Off)
-      pump_state:
-        type: string
-        description: Pump operation state (Running/Stopped/Paused)
-      vacuum_level:
-        type: number
-        description: Current vacuum level in mbar
-      target_vacuum:
-        type: number
-        description: Target vacuum level in mbar
-      pump_speed:
-        type: number
-        description: Current pump speed in L/s
-      pump_efficiency:
-        type: number
-        description: Pump efficiency percentage
-      max_pump_speed:
-        type: number
-        description: Maximum pump speed in L/s
-    required:
-    - status
-    - power_state
-    - pump_state
-    - vacuum_level
-    additionalProperties: false
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: EmptyIn_Feedback
+              type: object
+            goal:
+              properties: {}
+              required: []
+              title: EmptyIn_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+              required:
+              - return_info
+              title: EmptyIn_Result
+              type: object
+          required:
+          - goal
+          title: EmptyIn
+          type: object
+        type: EmptyIn
+    module: unilabos.devices.mock.mock_vacuum:MockVacuum
+    status_types:
+      max_pump_speed: float
+      power_state: str
+      pump_efficiency: float
+      pump_speed: float
+      pump_state: str
+      status: str
+      status_info: dict
+      target_vacuum: float
+      vacuum_level: float
+    type: python
+  config_info: []
+  description: Mock Vacuum Pump Device
+  handles: []
+  icon: ''
+  init_param_schema:
+    config:
+      properties:
+        port:
+          default: MOCK
+          type: string
+      required: []
+      type: object
+    data:
+      properties:
+        max_pump_speed:
+          type: number
+        power_state:
+          type: string
+        pump_efficiency:
+          type: number
+        pump_speed:
+          type: number
+        pump_state:
+          type: string
+        status:
+          type: string
+        status_info:
+          type: object
+        target_vacuum:
+          type: number
+        vacuum_level:
+          type: number
+      required:
+      - status
+      - power_state
+      - pump_state
+      - vacuum_level
+      - target_vacuum
+      - pump_speed
+      - pump_efficiency
+      - max_pump_speed
+      - status_info
+      type: object
+  version: 1.0.0

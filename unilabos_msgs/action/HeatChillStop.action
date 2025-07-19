@@ -1,5 +1,5 @@
 # Organic
-string vessel
+Resource vessel
 ---
 string return_info
 bool success

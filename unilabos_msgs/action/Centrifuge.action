@@ -1,5 +1,5 @@
 # Goal - 离心操作的目标参数  
-string vessel                    # 离心容器  
+Resource vessel                    # 离心容器  
 float64 speed                    # 离心速度 (rpm)  
 float64 time                     # 离心时间 (秒)  
 float64 temp                     # 温度 (可选，摄氏度)  

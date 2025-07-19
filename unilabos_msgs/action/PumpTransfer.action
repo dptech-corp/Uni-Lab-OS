@@ -1,6 +1,6 @@
 # Organic
-string from_vessel
-string to_vessel
+Resource from_vessel
+Resource to_vessel
 float64 volume
 string amount
 float64 time
@@ -9,6 +9,11 @@ string rinsing_solvent
 float64 rinsing_volume
 int32 rinsing_repeats
 bool solid
+float64 flowrate
+float64 transfer_flowrate
+string rate_spec
+string event
+string through
 ---
 string return_info
 bool success

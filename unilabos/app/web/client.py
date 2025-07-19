@@ -40,8 +40,9 @@ class HTTPClient:
         Returns:
             Response: API响应对象
         """
+        database_param = 1 if database_process_later else 0
         response = requests.post(
-            f"{self.remote_addr}/lab/resource/edge/batch_create/?database_process_later={1 if database_process_later else 0}",
+            f"{self.remote_addr}/lab/resource/edge/batch_create/?database_process_later={database_param}",
             json=resources,
             headers={"Authorization": f"lab {self.auth}"},
             timeout=100,
@@ -147,6 +148,26 @@ class HTTPClient:
                 headers={"Authorization": f"lab {self.auth}"},
                 timeout=30,  # 上传文件可能需要更长的超时时间
             )
+        return response
+
+    def resource_registry(self, registry_data: Dict[str, Any]) -> requests.Response:
+        """
+        注册资源到服务器
+
+        Args:
+            registry_data: 注册表数据，格式为 {resource_id: resource_info}
+
+        Returns:
+            Response: API响应对象
+        """
+        response = requests.post(
+            f"{self.remote_addr}/lab/registry/",
+            json=registry_data,
+            headers={"Authorization": f"lab {self.auth}"},
+            timeout=30,
+        )
+        if response.status_code not in [200, 201]:
+            logger.error(f"注册资源失败: {response.status_code}, {response.text}")
         return response
 
 

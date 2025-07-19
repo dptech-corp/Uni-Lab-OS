@@ -1,12 +1,19 @@
-# Organic
-string vessel
-float64 temp
-float64 time
-bool stir
-float64 stir_speed
-string purpose
+# Goal - 加热冷却操作的目标参数
+Resource vessel                    # 加热容器名称（必需）
+float64 temp                     # 目标温度（可选，默认25.0）
+string time                      # 🔧 加热时间（支持带单位，如"5 min","300"，默认秒）
+string temp_spec                 # 温度规格（可选）
+string time_spec                 # 时间规格（可选）
+string pressure                  # 压力规格（可选，不做特殊处理）
+string reflux_solvent           # 回流溶剂名称（可选，不做特殊处理）
+bool stir                        # 是否搅拌（可选，默认false）
+float64 stir_speed              # 搅拌速度（可选，默认300.0）
+string purpose                   # 操作目的（可选）
 ---
+# Result - 操作结果
+bool success                     # 操作是否成功
+string message                   # 结果消息
 string return_info
-bool success
 ---
-string status
+# Feedback - 实时反馈
+string status                    # 当前状态描述

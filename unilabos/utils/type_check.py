@@ -1,6 +1,9 @@
 import collections.abc
 import json
+from collections import OrderedDict
 from typing import get_origin, get_args
+
+import yaml
 
 
 def get_type_class(type_hint):
@@ -20,6 +23,20 @@ class TypeEncoder(json.JSONEncoder):
         if isinstance(obj, type):
             return str(obj)[8:-2]
         return super().default(obj)
+
+
+class NoAliasDumper(yaml.SafeDumper):
+    def ignore_aliases(self, data):
+        return True
+
+
+# 为NoAliasDumper添加OrderedDict的representation方法
+def represent_ordereddict(dumper, data):
+    return dumper.represent_mapping("tag:yaml.org,2002:map", data.items())
+
+
+# 注册OrderedDict的representer
+NoAliasDumper.add_representer(OrderedDict, represent_ordereddict)
 
 
 class ResultInfoEncoder(json.JSONEncoder):

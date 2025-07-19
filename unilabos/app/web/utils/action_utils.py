@@ -65,6 +65,8 @@ def get_yaml_from_goal_type(goal_type) -> str:
     Returns:
         str: 默认Goal参数的YAML格式字符串
     """
+    if isinstance(goal_type, str):
+        return "{}"
     if not goal_type:
         return "{}"
 

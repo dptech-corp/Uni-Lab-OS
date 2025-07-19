@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import socket
-import json
 import base64
-import argparse
-import sys
+import json
+import socket
 import time
 
 
@@ -96,17 +94,20 @@ class ZhidaClient:
     def abort(self) -> dict:
         return self._send_command({"command": "abort"})
 
-"""
-a,b,c
-1,2,4
-2,4,5
-"""
 
-client = ZhidaClient()
-# 连接
-client.connect()
-# 获取状态
-print(client.status)
+if __name__ == "__main__":
+
+    """
+    a,b,c
+    1,2,4
+    2,4,5
+    """
+
+    client = ZhidaClient()
+    # 连接
+    client.connect()
+    # 获取状态
+    print(client.status)
 
 
-# 命令格式：python zhida.py <subcommand> [options]
+    # 命令格式：python zhida.py <subcommand> [options]

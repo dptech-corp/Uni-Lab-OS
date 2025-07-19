@@ -56,6 +56,10 @@ class MQTTClient:
                     payload_json["data"] = {}
                 if "action" in payload_json:
                     payload_json["data"]["action"] = payload_json.pop("action")
+                if "action_type" in payload_json:
+                    payload_json["data"]["action_type"] = payload_json.pop("action_type")
+                if "action_args" in payload_json:
+                    payload_json["data"]["action_args"] = payload_json.pop("action_args")
                 if "action_kwargs" in payload_json:
                     payload_json["data"]["action_kwargs"] = payload_json.pop("action_kwargs")
                 job_req = JobAddReq.model_validate(payload_json)

@@ -1,9 +1,12 @@
-import rtde_control
-import dashboard_client
+try:
+    import rtde_control
+    import dashboard_client
+    import rtde_receive
+except ImportError as ex:
+    print("Import Error, Please Install Packages in ur_arm_task.py First!", ex)
 import time
 import json
 from unilabos.devices.agv.robotiq_gripper import RobotiqGripper
-import rtde_receive
 from std_msgs.msg import Float64MultiArray
 from pydantic import BaseModel
 

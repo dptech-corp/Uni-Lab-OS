@@ -3,7 +3,11 @@ import sys
 import io
 # sys.path.insert(0, r'C:\kui\winprep_cli\winprep_c_Uni-lab\x64\Debug')
 
-import winprep_c
+try:
+    import winprep_c
+except ImportError as e:
+    print("Error importing winprep_c:", e)
+    print("Please ensure that the winprep_c module is correctly installed and accessible.")
 from queue import Queue
 
 

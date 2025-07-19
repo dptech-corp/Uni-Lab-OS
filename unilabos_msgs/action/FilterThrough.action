@@ -1,6 +1,6 @@
-string from_vessel              # 源容器的名称，即物质起始所在的容器
-string to_vessel                # 目标容器的名称，物质过滤后要到达的容器
-string filter_through           # 过滤时所通过的介质，如滤纸、柱子等
+Resource from_vessel              # 源容器的名称，即物质起始所在的容器
+Resource to_vessel                # 目标容器的名称，物质过滤后要到达的容器
+Resource filter_through           # 过滤时所通过的介质，如滤纸、柱子等
 string eluting_solvent         # 洗脱溶剂的名称，可选参数
 float64 eluting_volume         # 洗脱溶剂的体积，可选参数
 int32 eluting_repeats          # 洗脱操作的重复次数，默认为 0

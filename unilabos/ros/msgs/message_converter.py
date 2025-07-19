@@ -132,7 +132,11 @@ _msg_converter: Dict[Type, Any] = {
     Bool: lambda x: Bool(data=bool(x)),
     str: str,
     String: lambda x: String(data=str(x)),
-    Point: lambda x: Point(x=x.x, y=x.y, z=x.z) if not isinstance(x, dict) else Point(x=x.get("x", 0.0), y=x.get("y", 0.0), z=x.get("z", 0.0)),
+    Point: lambda x: (
+        Point(x=x.x, y=x.y, z=x.z)
+        if not isinstance(x, dict)
+        else Point(x=float(x.get("x", 0.0)), y=float(x.get("y", 0.0)), z=float(x.get("z", 0.0)))
+    ),
     Resource: lambda x: Resource(
         id=x.get("id", ""),
         name=x.get("name", ""),
@@ -142,7 +146,13 @@ _msg_converter: Dict[Type, Any] = {
         type=x.get("type", ""),
         category=x.get("class", "") or x.get("type", ""),
         pose=(
-            Pose(position=Point(x=float(x.get("position", {}).get("x", 0.0)), y=float(x.get("position", {}).get("y", 0.0)), z=float(x.get("position", {}).get("z", 0.0))))
+            Pose(
+                position=Point(
+                    x=float(x.get("position", {}).get("x", 0.0)),
+                    y=float(x.get("position", {}).get("y", 0.0)),
+                    z=float(x.get("position", {}).get("z", 0.0)),
+                )
+            )
             if x.get("position", None) is not None
             else Pose()
         ),
@@ -150,6 +160,7 @@ _msg_converter: Dict[Type, Any] = {
         data=json.dumps(x.get("data", {})),
     ),
 }
+
 
 def json_or_yaml_loads(data: str) -> Any:
     try:
@@ -160,6 +171,7 @@ def json_or_yaml_loads(data: str) -> Any:
         except:
             pass
         raise e
+
 
 # ROS消息到Python转换器
 _msg_converter_back: Dict[Type, Any] = {
@@ -343,7 +355,7 @@ def convert_to_ros_msg(ros_msg_type: Union[Type, Any], obj: Any) -> Any:
         if hasattr(ros_msg, key):
             attr = getattr(ros_msg, key)
             if isinstance(attr, (float, int, str, bool)):
-                setattr(ros_msg, key, value)
+                setattr(ros_msg, key, type(attr)(value))
             elif isinstance(attr, (list, tuple)) and isinstance(value, Iterable):
                 td = ros_msg.SLOT_TYPES[ind].value_type
                 if isinstance(td, NamespacedType):
@@ -355,7 +367,7 @@ def convert_to_ros_msg(ros_msg_type: Union[Type, Any], obj: Any) -> Any:
                     logger.warning(f"Not Supported type: {td}")
                     setattr(ros_msg, key, [])  # FIXME
             elif "array.array" in str(type(attr)):
-                if attr.typecode == "f":
+                if attr.typecode == "f" or attr.typecode == "d":
                     setattr(ros_msg, key, [float(i) for i in value])
                 else:
                     setattr(ros_msg, key, value)
@@ -496,47 +508,90 @@ def convert_from_ros_msg_with_mapping(ros_msg: Any, value_mapping: Dict[str, str
         Python字典
     """
     data: Dict[str, Any] = {}
+    
+    # # 🔧 添加调试信息
+    # print(f"🔍 convert_from_ros_msg_with_mapping 开始")
+    # print(f"🔍 ros_msg 类型: {type(ros_msg)}")
+    # print(f"🔍 ros_msg 内容: {ros_msg}")
+    # print(f"🔍 value_mapping: {value_mapping}")
+    # print("-" * 60)
 
     for msg_name, attr_name in value_mapping.items():
+    #    print(f"🔍 处理映射: {msg_name} -> {attr_name}")
+        
         msg_path = msg_name.split(".")
         current = ros_msg
-
+        
+        # print(f"🔍 msg_path: {msg_path}")
+        # print(f"🔍 current 初始值: {current} (类型: {type(current)})")
+        
         try:
             if not attr_name.endswith("[]"):
                 # 处理单值映射
-                for name in msg_path:
-                    current = getattr(current, name)
-                data[attr_name] = convert_from_ros_msg(current)
+                # print(f"🔍 处理单值映射")
+                for i, name in enumerate(msg_path):
+                    # print(f"🔍 步骤 {i}: 获取属性 '{name}' 从 {type(current)}")
+                    if hasattr(current, name):
+                        current = getattr(current, name)
+                        # print(f"🔍 获取到: {current} (类型: {type(current)})")
+                    else:
+                        # print(f"❌ 属性 '{name}' 不存在于 {type(current)}")
+                        break
+                
+                converted_value = convert_from_ros_msg(current)
+                # print(f"🔍 转换后的值: {converted_value} (类型: {type(converted_value)})")
+                data[attr_name] = converted_value
+                # print(f"✅ 设置 data['{attr_name}'] = {converted_value}")
             else:
                 # 处理列表值映射
-                for name in msg_path:
+                # print(f"🔍 处理列表值映射")
+                for i, name in enumerate(msg_path):
+                    # print(f"🔍 列表步骤 {i}: 处理 '{name}' 从 {type(current)}")
                     if name.endswith("[]"):
                         base_name = name[:-2]
+                        # print(f"🔍 数组字段 base_name: '{base_name}'")
                         if hasattr(current, base_name):
                             current = list(getattr(current, base_name))
+                            # print(f"🔍 获取数组: {current} (长度: {len(current)})")
                         else:
+                            # print(f"❌ 数组字段 '{base_name}' 不存在")
                             current = []
                             break
                     else:
                         if isinstance(current, list):
+                            # print(f"🔍 从列表中获取属性 '{name}'")
                             next_level = []
                             for item in current:
                                 if hasattr(item, name):
                                     next_level.append(getattr(item, name))
                             current = next_level
+                            # print(f"🔍 列表处理结果: {current} (长度: {len(current)})")
                         elif hasattr(current, name):
                             current = getattr(current, name)
+                            # print(f"🔍 获取到属性: {current} (类型: {type(current)})")
                         else:
+                            # print(f"❌ 属性 '{name}' 不存在")
                             current = []
                             break
 
                 attr_key = attr_name[:-2]
                 if current:
-                    data[attr_key] = [convert_from_ros_msg(item) for item in current]
-        except (AttributeError, TypeError):
+                    converted_list = [convert_from_ros_msg(item) for item in current]
+                    data[attr_key] = converted_list
+                    # print(f"✅ 设置 data['{attr_key}'] = {converted_list}")
+                else:
+                    print(f"⚠️ 列表为空，跳过 '{attr_key}'")
+        except (AttributeError, TypeError) as e:
+            # print(f"❌ 映射转换错误 {msg_name} -> {attr_name}: {e}")
             logger.debug(f"Mapping conversion error for {msg_name} -> {attr_name}")
             continue
+        
+    #    print(f"🔍 当前 data 状态: {data}")
+    #    print("-" * 40)
 
+    #print(f"🔍 convert_from_ros_msg_with_mapping 结束")
+    #print(f"🔍 最终 data: {data}")
+    #print("=" * 60)
     return data
 
 
@@ -571,30 +626,30 @@ from unilabos.utils.import_manager import ImportManager
 from unilabos.config.config import ROSConfig
 
 basic_type_map = {
-    'bool': {'type': 'boolean'},
-    'int8': {'type': 'integer', 'minimum': -128, 'maximum': 127},
-    'uint8': {'type': 'integer', 'minimum': 0, 'maximum': 255},
-    'int16': {'type': 'integer', 'minimum': -32768, 'maximum': 32767},
-    'uint16': {'type': 'integer', 'minimum': 0, 'maximum': 65535},
-    'int32': {'type': 'integer', 'minimum': -2147483648, 'maximum': 2147483647},
-    'uint32': {'type': 'integer', 'minimum': 0, 'maximum': 4294967295},
-    'int64': {'type': 'integer'},
-    'uint64': {'type': 'integer', 'minimum': 0},
-    'double': {'type': 'number'},
-    'float': {'type': 'number'},
-    'float32': {'type': 'number'},
-    'float64': {'type': 'number'},
-    'string': {'type': 'string'},
-    'boolean': {'type': 'boolean'},
-    'char': {'type': 'string', 'maxLength': 1},
-    'byte': {'type': 'integer', 'minimum': 0, 'maximum': 255},
+    "bool": {"type": "boolean"},
+    "int8": {"type": "integer", "minimum": -128, "maximum": 127},
+    "uint8": {"type": "integer", "minimum": 0, "maximum": 255},
+    "int16": {"type": "integer", "minimum": -32768, "maximum": 32767},
+    "uint16": {"type": "integer", "minimum": 0, "maximum": 65535},
+    "int32": {"type": "integer", "minimum": -2147483648, "maximum": 2147483647},
+    "uint32": {"type": "integer", "minimum": 0, "maximum": 4294967295},
+    "int64": {"type": "integer"},
+    "uint64": {"type": "integer", "minimum": 0},
+    "double": {"type": "number"},
+    "float": {"type": "number"},
+    "float32": {"type": "number"},
+    "float64": {"type": "number"},
+    "string": {"type": "string"},
+    "boolean": {"type": "boolean"},
+    "char": {"type": "string", "maxLength": 1},
+    "byte": {"type": "integer", "minimum": 0, "maximum": 255},
 }
 
 
-def ros_field_type_to_json_schema(type_info: Type | str, slot_type: str=None) -> Dict[str, Any]:
+def ros_field_type_to_json_schema(type_info: Type | str, slot_type: str = None) -> Dict[str, Any]:
     """
     将 ROS 字段类型转换为 JSON Schema 类型定义
-    
+
     Args:
         type_info: ROS 类型
         slot_type: ROS 类型
@@ -603,10 +658,7 @@ def ros_field_type_to_json_schema(type_info: Type | str, slot_type: str=None) ->
         对应的 JSON Schema 类型定义
     """
     if isinstance(type_info, UnboundedSequence):
-        return {
-            'type': 'array',
-            'items': ros_field_type_to_json_schema(type_info.value_type)
-        }
+        return {"type": "array", "items": ros_field_type_to_json_schema(type_info.value_type)}
     if isinstance(type_info, NamespacedType):
         cls_name = ".".join(type_info.namespaces) + ":" + type_info.name
         type_class = msg_converter_manager.get_class(cls_name)
@@ -614,20 +666,20 @@ def ros_field_type_to_json_schema(type_info: Type | str, slot_type: str=None) ->
     elif isinstance(type_info, BasicType):
         return ros_field_type_to_json_schema(type_info.typename)
     elif isinstance(type_info, UnboundedString):
-        return basic_type_map['string']
+        return basic_type_map["string"]
     elif isinstance(type_info, str):
         if type_info in basic_type_map:
             return basic_type_map[type_info]
 
         # 处理时间和持续时间类型
-        if type_info in ('time', 'duration', 'builtin_interfaces/Time', 'builtin_interfaces/Duration'):
+        if type_info in ("time", "duration", "builtin_interfaces/Time", "builtin_interfaces/Duration"):
             return {
-                'type': 'object',
-                'properties': {
-                    'sec': {'type': 'integer', 'description': '秒'},
-                    'nanosec': {'type': 'integer', 'description': '纳秒'}
+                "type": "object",
+                "properties": {
+                    "sec": {"type": "integer", "description": "秒"},
+                    "nanosec": {"type": "integer", "description": "纳秒"},
                 },
-                'required': ['sec', 'nanosec']
+                "required": ["sec", "nanosec"],
             }
     else:
         return ros_message_to_json_schema(type_info)
@@ -638,9 +690,7 @@ def ros_field_type_to_json_schema(type_info: Type | str, slot_type: str=None) ->
     #         'type': 'array',
     #         'items': ros_field_type_to_json_schema(item_type)
     #     }
-    
 
-    
     # # 处理复杂类型（尝试加载并处理）
     # try:
     #     # 如果它是一个完整的消息类型规范 (包名/msg/类型名)
@@ -655,34 +705,31 @@ def ros_field_type_to_json_schema(type_info: Type | str, slot_type: str=None) ->
     #     logger.debug(f"无法解析类型 {field_type}: {str(e)}")
     # return {'type': 'object', 'description': f'未知类型: {field_type}'}
 
+
 def ros_message_to_json_schema(msg_class: Any) -> Dict[str, Any]:
     """
     将 ROS 消息类转换为 JSON Schema
-    
+
     Args:
         msg_class: ROS 消息类
-        
+
     Returns:
         对应的 JSON Schema 定义
     """
-    schema = {
-        'type': 'object',
-        'properties': {},
-        'required': []
-    }
-    
+    schema = {"type": "object", "properties": {}, "required": []}
+
     # 获取类名作为标题
-    if hasattr(msg_class, '__name__'):
-        schema['title'] = msg_class.__name__
-    
+    if hasattr(msg_class, "__name__"):
+        schema["title"] = msg_class.__name__
+
     # 获取消息的字段和字段类型
     try:
         for ind, slot_info in enumerate(msg_class._fields_and_field_types.items()):
             slot_name, slot_type = slot_info
             type_info = msg_class.SLOT_TYPES[ind]
             field_schema = ros_field_type_to_json_schema(type_info, slot_type)
-            schema['properties'][slot_name] = field_schema
-            schema['required'].append(slot_name)
+            schema["properties"][slot_name] = field_schema
+            schema["required"].append(slot_name)
         # if hasattr(msg_class, 'get_fields_and_field_types'):
         #     fields_and_types = msg_class.get_fields_and_field_types()
         #
@@ -707,62 +754,66 @@ def ros_message_to_json_schema(msg_class: Any) -> Dict[str, Any]:
         #             schema['required'].append(clean_name)
     except Exception as e:
         # 如果获取字段类型失败，添加错误信息
-        schema['description'] = f"解析消息字段时出错: {str(e)}"
+        schema["description"] = f"解析消息字段时出错: {str(e)}"
         logger.error(f"解析 {msg_class.__name__} 消息字段失败: {str(e)}")
-    
+
     return schema
 
-def ros_action_to_json_schema(action_class: Any) -> Dict[str, Any]:
+
+def ros_action_to_json_schema(action_class: Any, description="") -> Dict[str, Any]:
     """
     将 ROS Action 类转换为 JSON Schema
-    
+
     Args:
         action_class: ROS Action 类
-        
+        description: 描述
+
     Returns:
         完整的 JSON Schema 定义
     """
-    if not hasattr(action_class, 'Goal') or not hasattr(action_class, 'Feedback') or not hasattr(action_class, 'Result'):
+    if (
+        not hasattr(action_class, "Goal")
+        or not hasattr(action_class, "Feedback")
+        or not hasattr(action_class, "Result")
+    ):
         raise ValueError(f"{action_class.__name__} 不是有效的 ROS Action 类")
-    
+
     # 创建基础 schema
     schema = {
-        '$schema': 'http://json-schema.org/draft-07/schema#',
-        'title': action_class.__name__,
-        'description': f"ROS Action {action_class.__name__} 的 JSON Schema",
-        'type': 'object',
-        'properties': {
-            'goal': {
-                'description': 'Action 目标 - 从客户端发送到服务器',
+        "title": action_class.__name__,
+        "description": description,
+        "type": "object",
+        "properties": {
+            "goal": {
+                # 'description': 'Action 目标 - 从客户端发送到服务器',
                 **ros_message_to_json_schema(action_class.Goal)
             },
-            'feedback': {
-                'description': 'Action 反馈 - 执行过程中从服务器发送到客户端',
+            "feedback": {
+                # 'description': 'Action 反馈 - 执行过程中从服务器发送到客户端',
                 **ros_message_to_json_schema(action_class.Feedback)
             },
-            'result': {
-                'description': 'Action 结果 - 完成后从服务器发送到客户端',
+            "result": {
+                # 'description': 'Action 结果 - 完成后从服务器发送到客户端',
                 **ros_message_to_json_schema(action_class.Result)
-            }
+            },
         },
-        'required': ['goal']
+        "required": ["goal"],
     }
-    
+
     return schema
 
+
 def convert_ros_action_to_jsonschema(
-    action_name_or_type: Union[str, Type],
-    output_file: Optional[str] = None,
-    format: str = 'json'
+    action_name_or_type: Union[str, Type], output_file: Optional[str] = None, format: str = "json"
 ) -> Dict[str, Any]:
     """
     将 ROS Action 类型转换为 JSON Schema，并可选地保存到文件
-    
+
     Args:
         action_name_or_type: ROS Action 类型名称或类
         output_file: 可选，输出 JSON Schema 的文件路径
         format: 输出格式，'json' 或 'yaml'
-        
+
     Returns:
         JSON Schema 定义（字典）
     """
@@ -772,21 +823,21 @@ def convert_ros_action_to_jsonschema(
         action_type = get_ros_type_by_msgname(action_name_or_type)
     else:
         action_type = action_name_or_type
-    
+
     # 生成 JSON Schema
     schema = ros_action_to_json_schema(action_type)
-    
+
     # 如果指定了输出文件，将 Schema 保存到文件
     if output_file:
-        if format.lower() == 'json':
-            with open(output_file, 'w', encoding='utf-8') as f:
+        if format.lower() == "json":
+            with open(output_file, "w", encoding="utf-8") as f:
                 json.dump(schema, f, indent=2, ensure_ascii=False)
-        elif format.lower() == 'yaml':
-            with open(output_file, 'w', encoding='utf-8') as f:
+        elif format.lower() == "yaml":
+            with open(output_file, "w", encoding="utf-8") as f:
                 yaml.safe_dump(schema, f, default_flow_style=False, allow_unicode=True)
         else:
             raise ValueError(f"不支持的格式: {format}，请使用 'json' 或 'yaml'")
-    
+
     return schema
 
 
@@ -795,14 +846,14 @@ if __name__ == "__main__":
     # 示例：转换 NavigateToPose action
     try:
         from nav2_msgs.action import NavigateToPose
-        
+
         # 转换为 JSON Schema 并打印
         schema = convert_ros_action_to_jsonschema(NavigateToPose)
         print(json.dumps(schema, indent=2, ensure_ascii=False))
-        
+
         # 保存到文件
         # convert_ros_action_to_jsonschema(NavigateToPose, "navigate_to_pose_schema.json")
-        
+
         # 或者使用字符串形式的 action 名称
         # schema = convert_ros_action_to_jsonschema("nav2_msgs/action/NavigateToPose")
     except ImportError:

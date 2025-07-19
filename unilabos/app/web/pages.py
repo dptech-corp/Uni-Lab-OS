@@ -7,6 +7,7 @@ Web页面模块
 import json
 import os
 import sys
+import traceback
 from pathlib import Path
 from typing import Dict
 
@@ -17,7 +18,7 @@ from jinja2 import Environment, FileSystemLoader
 from unilabos.config.config import BasicConfig
 from unilabos.registry.registry import lab_registry
 from unilabos.ros.msgs.message_converter import msg_converter_manager
-from unilabos.utils.log import error
+from unilabos.utils.log import error, debug
 from unilabos.utils.type_check import TypeEncoder
 from unilabos.app.web.utils.device_utils import get_registry_info
 from unilabos.app.web.utils.host_utils import get_host_node_info
@@ -123,6 +124,7 @@ def setup_web_pages(router: APIRouter) -> None:
 
             return html
         except Exception as e:
+            debug(traceback.format_exc())
             error(f"生成状态页面时出错: {str(e)}")
             raise HTTPException(status_code=500, detail=f"Error generating status page: {str(e)}")
 

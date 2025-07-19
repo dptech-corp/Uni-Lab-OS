@@ -21,16 +21,23 @@ from .dissolve_protocol import generate_dissolve_protocol
 from .filter_through_protocol import generate_filter_through_protocol
 from .run_column_protocol import generate_run_column_protocol
 from .wash_solid_protocol import generate_wash_solid_protocol
+from .adjustph_protocol import generate_adjust_ph_protocol
+from .reset_handling_protocol import generate_reset_handling_protocol
+from .dry_protocol import generate_dry_protocol
+from .recrystallize_protocol import generate_recrystallize_protocol
+from .hydrogenate_protocol import generate_hydrogenate_protocol
 
 
 # Define a dictionary of protocol generators.
 action_protocol_generators = {
     AddProtocol: generate_add_protocol,
     AGVTransferProtocol: generate_agv_transfer_protocol,
+    AdjustPHProtocol: generate_adjust_ph_protocol,
     CentrifugeProtocol: generate_centrifuge_protocol,
     CleanProtocol: generate_clean_protocol,
     CleanVesselProtocol: generate_clean_vessel_protocol,
     DissolveProtocol: generate_dissolve_protocol,
+    DryProtocol: generate_dry_protocol,
     EvacuateAndRefillProtocol: generate_evacuateandrefill_protocol,
     EvaporateProtocol: generate_evaporate_protocol,
     FilterProtocol: generate_filter_protocol,
@@ -38,7 +45,10 @@ action_protocol_generators = {
     HeatChillProtocol: generate_heat_chill_protocol,
     HeatChillStartProtocol: generate_heat_chill_start_protocol,
     HeatChillStopProtocol: generate_heat_chill_stop_protocol,
+    HydrogenateProtocol: generate_hydrogenate_protocol,
     PumpTransferProtocol: generate_pump_protocol_with_rinsing,
+    RecrystallizeProtocol: generate_recrystallize_protocol,
+    ResetHandlingProtocol: generate_reset_handling_protocol,
     RunColumnProtocol: generate_run_column_protocol,
     SeparateProtocol: generate_separate_protocol,
     StartStirProtocol: generate_start_stir_protocol,

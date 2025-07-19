@@ -1,4 +1,4 @@
-string vessel                   # 要清洗的容器名称
+Resource vessel                   # 要清洗的容器名称
 string solvent                  # 用于清洗容器的溶剂名称
 float64 volume                  # 清洗溶剂的体积，可选参数
 float64 temp                    # 清洗时的温度，可选参数

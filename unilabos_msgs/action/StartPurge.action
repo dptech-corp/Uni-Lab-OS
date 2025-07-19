@@ -1,5 +1,5 @@
 # Goal - 启动清洗/吹扫操作的目标参数  
-string vessel                    # 清洗容器  
+Resource vessel                    # 清洗容器  
 string gas                       # 清洗气体 (可选)  
 float64 pressure                 # 压力 (可选，Pa)  
 float64 flow_rate               # 流速 (可选，mL/min)  

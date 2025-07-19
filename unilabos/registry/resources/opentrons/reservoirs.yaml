@@ -1,35 +1,1248 @@
 agilent_1_reservoir_290ml:
-  description: Agilent 1 reservoir 290ml
-  class: 
+  category:
+  - reservoirs
+  class:
     module: pylabrobot.resources.opentrons.reservoirs:agilent_1_reservoir_290ml
     type: pylabrobot
-
+  config_info:
+  - children:
+    - agilent_1_reservoir_290ml_A1
+    class: ''
+    config:
+      barcode: null
+      category: plate
+      model: Agilent 1 Well Reservoir 290 mL
+      ordering:
+        A1: agilent_1_reservoir_290ml_A1
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 127.76
+      size_y: 85.57
+      size_z: 44.04
+      type: Plate
+    data: {}
+    id: agilent_1_reservoir_290ml
+    name: agilent_1_reservoir_290ml
+    parent: null
+    position:
+      x: 0
+      y: 0
+      z: 0
+    sample_id: null
+    type: plate
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 290000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 108
+      size_y: 72
+      size_z: 39.22
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: agilent_1_reservoir_290ml_A1
+    name: agilent_1_reservoir_290ml_A1
+    parent: agilent_1_reservoir_290ml
+    position:
+      x: 9.88
+      y: 6.785
+      z: 4.82
+    sample_id: null
+    type: well
+  description: Agilent 1 reservoir 290ml
+  file_path: C:/Users/10230/PycharmProjects/Uni-Lab-OS/unilabos/registry/resources/opentrons/reservoirs.yaml
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
 axygen_1_reservoir_90ml:
-  description: Axygen 1 reservoir 90ml
-  class: 
+  category:
+  - reservoirs
+  class:
     module: pylabrobot.resources.opentrons.reservoirs:axygen_1_reservoir_90ml
     type: pylabrobot
-
+  config_info:
+  - children:
+    - axygen_1_reservoir_90ml_A1
+    class: ''
+    config:
+      barcode: null
+      category: plate
+      model: Axygen 1 Well Reservoir 90 mL
+      ordering:
+        A1: axygen_1_reservoir_90ml_A1
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 127.76
+      size_y: 85.47
+      size_z: 19.05
+      type: Plate
+    data: {}
+    id: axygen_1_reservoir_90ml
+    name: axygen_1_reservoir_90ml
+    parent: null
+    position:
+      x: 0
+      y: 0
+      z: 0
+    sample_id: null
+    type: plate
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 90000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 106.76
+      size_y: 70.52
+      size_z: 12.42
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: axygen_1_reservoir_90ml_A1
+    name: axygen_1_reservoir_90ml_A1
+    parent: axygen_1_reservoir_90ml
+    position:
+      x: 10.5
+      y: 7.475
+      z: 6.63
+    sample_id: null
+    type: well
+  description: Axygen 1 reservoir 90ml
+  file_path: C:/Users/10230/PycharmProjects/Uni-Lab-OS/unilabos/registry/resources/opentrons/reservoirs.yaml
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
 nest_12_reservoir_15ml:
-  description: Nest 12 reservoir 15ml
-  class: 
+  category:
+  - reservoirs
+  class:
     module: pylabrobot.resources.opentrons.reservoirs:nest_12_reservoir_15ml
     type: pylabrobot
-
+  config_info:
+  - children:
+    - nest_12_reservoir_15ml_A1
+    - nest_12_reservoir_15ml_A2
+    - nest_12_reservoir_15ml_A3
+    - nest_12_reservoir_15ml_A4
+    - nest_12_reservoir_15ml_A5
+    - nest_12_reservoir_15ml_A6
+    - nest_12_reservoir_15ml_A7
+    - nest_12_reservoir_15ml_A8
+    - nest_12_reservoir_15ml_A9
+    - nest_12_reservoir_15ml_A10
+    - nest_12_reservoir_15ml_A11
+    - nest_12_reservoir_15ml_A12
+    class: ''
+    config:
+      barcode: null
+      category: plate
+      model: NEST 12 Well Reservoir 15 mL
+      ordering:
+        A1: nest_12_reservoir_15ml_A1
+        A2: nest_12_reservoir_15ml_A2
+        A3: nest_12_reservoir_15ml_A3
+        A4: nest_12_reservoir_15ml_A4
+        A5: nest_12_reservoir_15ml_A5
+        A6: nest_12_reservoir_15ml_A6
+        A7: nest_12_reservoir_15ml_A7
+        A8: nest_12_reservoir_15ml_A8
+        A9: nest_12_reservoir_15ml_A9
+        A10: nest_12_reservoir_15ml_A10
+        A11: nest_12_reservoir_15ml_A11
+        A12: nest_12_reservoir_15ml_A12
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 127.76
+      size_y: 85.48
+      size_z: 31.4
+      type: Plate
+    data: {}
+    id: nest_12_reservoir_15ml
+    name: nest_12_reservoir_15ml
+    parent: null
+    position:
+      x: 0
+      y: 0
+      z: 0
+    sample_id: null
+    type: plate
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 15000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 8.2
+      size_y: 71.2
+      size_z: 26.85
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: nest_12_reservoir_15ml_A1
+    name: nest_12_reservoir_15ml_A1
+    parent: nest_12_reservoir_15ml
+    position:
+      x: 10.28
+      y: 7.18
+      z: 4.55
+    sample_id: null
+    type: well
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 15000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 8.2
+      size_y: 71.2
+      size_z: 26.85
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: nest_12_reservoir_15ml_A2
+    name: nest_12_reservoir_15ml_A2
+    parent: nest_12_reservoir_15ml
+    position:
+      x: 19.28
+      y: 7.18
+      z: 4.55
+    sample_id: null
+    type: well
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 15000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 8.2
+      size_y: 71.2
+      size_z: 26.85
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: nest_12_reservoir_15ml_A3
+    name: nest_12_reservoir_15ml_A3
+    parent: nest_12_reservoir_15ml
+    position:
+      x: 28.28
+      y: 7.18
+      z: 4.55
+    sample_id: null
+    type: well
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 15000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 8.2
+      size_y: 71.2
+      size_z: 26.85
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: nest_12_reservoir_15ml_A4
+    name: nest_12_reservoir_15ml_A4
+    parent: nest_12_reservoir_15ml
+    position:
+      x: 37.28
+      y: 7.18
+      z: 4.55
+    sample_id: null
+    type: well
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 15000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 8.2
+      size_y: 71.2
+      size_z: 26.85
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: nest_12_reservoir_15ml_A5
+    name: nest_12_reservoir_15ml_A5
+    parent: nest_12_reservoir_15ml
+    position:
+      x: 46.28
+      y: 7.18
+      z: 4.55
+    sample_id: null
+    type: well
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 15000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 8.2
+      size_y: 71.2
+      size_z: 26.85
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: nest_12_reservoir_15ml_A6
+    name: nest_12_reservoir_15ml_A6
+    parent: nest_12_reservoir_15ml
+    position:
+      x: 55.28
+      y: 7.18
+      z: 4.55
+    sample_id: null
+    type: well
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 15000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 8.2
+      size_y: 71.2
+      size_z: 26.85
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: nest_12_reservoir_15ml_A7
+    name: nest_12_reservoir_15ml_A7
+    parent: nest_12_reservoir_15ml
+    position:
+      x: 64.28
+      y: 7.18
+      z: 4.55
+    sample_id: null
+    type: well
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 15000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 8.2
+      size_y: 71.2
+      size_z: 26.85
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: nest_12_reservoir_15ml_A8
+    name: nest_12_reservoir_15ml_A8
+    parent: nest_12_reservoir_15ml
+    position:
+      x: 73.28
+      y: 7.18
+      z: 4.55
+    sample_id: null
+    type: well
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 15000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 8.2
+      size_y: 71.2
+      size_z: 26.85
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: nest_12_reservoir_15ml_A9
+    name: nest_12_reservoir_15ml_A9
+    parent: nest_12_reservoir_15ml
+    position:
+      x: 82.28
+      y: 7.18
+      z: 4.55
+    sample_id: null
+    type: well
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 15000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 8.2
+      size_y: 71.2
+      size_z: 26.85
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: nest_12_reservoir_15ml_A10
+    name: nest_12_reservoir_15ml_A10
+    parent: nest_12_reservoir_15ml
+    position:
+      x: 91.28
+      y: 7.18
+      z: 4.55
+    sample_id: null
+    type: well
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 15000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 8.2
+      size_y: 71.2
+      size_z: 26.85
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: nest_12_reservoir_15ml_A11
+    name: nest_12_reservoir_15ml_A11
+    parent: nest_12_reservoir_15ml
+    position:
+      x: 100.28
+      y: 7.18
+      z: 4.55
+    sample_id: null
+    type: well
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 15000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 8.2
+      size_y: 71.2
+      size_z: 26.85
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: nest_12_reservoir_15ml_A12
+    name: nest_12_reservoir_15ml_A12
+    parent: nest_12_reservoir_15ml
+    position:
+      x: 109.28
+      y: 7.18
+      z: 4.55
+    sample_id: null
+    type: well
+  description: Nest 12 reservoir 15ml
+  file_path: C:/Users/10230/PycharmProjects/Uni-Lab-OS/unilabos/registry/resources/opentrons/reservoirs.yaml
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
 nest_1_reservoir_195ml:
-  description: Nest 1 reservoir 195ml
-  class: 
+  category:
+  - reservoirs
+  class:
     module: pylabrobot.resources.opentrons.reservoirs:nest_1_reservoir_195ml
     type: pylabrobot
-
+  config_info:
+  - children:
+    - nest_1_reservoir_195ml_A1
+    class: ''
+    config:
+      barcode: null
+      category: plate
+      model: NEST 1 Well Reservoir 195 mL
+      ordering:
+        A1: nest_1_reservoir_195ml_A1
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 127.76
+      size_y: 85.48
+      size_z: 31.4
+      type: Plate
+    data: {}
+    id: nest_1_reservoir_195ml
+    name: nest_1_reservoir_195ml
+    parent: null
+    position:
+      x: 0
+      y: 0
+      z: 0
+    sample_id: null
+    type: plate
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 195000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 106.8
+      size_y: 71.2
+      size_z: 25
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: nest_1_reservoir_195ml_A1
+    name: nest_1_reservoir_195ml_A1
+    parent: nest_1_reservoir_195ml
+    position:
+      x: 10.48
+      y: 7.14
+      z: 4.55
+    sample_id: null
+    type: well
+  description: Nest 1 reservoir 195ml
+  file_path: C:/Users/10230/PycharmProjects/Uni-Lab-OS/unilabos/registry/resources/opentrons/reservoirs.yaml
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
 nest_1_reservoir_290ml:
-  description: Nest 1 reservoir 290ml
-  class: 
+  category:
+  - reservoirs
+  class:
     module: pylabrobot.resources.opentrons.reservoirs:nest_1_reservoir_290ml
     type: pylabrobot
-
+  config_info:
+  - children:
+    - nest_1_reservoir_290ml_A1
+    class: ''
+    config:
+      barcode: null
+      category: plate
+      model: NEST 1 Well Reservoir 290 mL
+      ordering:
+        A1: nest_1_reservoir_290ml_A1
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 127.76
+      size_y: 85.47
+      size_z: 44.4
+      type: Plate
+    data: {}
+    id: nest_1_reservoir_290ml
+    name: nest_1_reservoir_290ml
+    parent: null
+    position:
+      x: 0
+      y: 0
+      z: 0
+    sample_id: null
+    type: plate
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 290000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 106.8
+      size_y: 71.2
+      size_z: 39.55
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: nest_1_reservoir_290ml_A1
+    name: nest_1_reservoir_290ml_A1
+    parent: nest_1_reservoir_290ml
+    position:
+      x: 10.48
+      y: 7.14
+      z: 4.85
+    sample_id: null
+    type: well
+  description: Nest 1 reservoir 290ml
+  file_path: C:/Users/10230/PycharmProjects/Uni-Lab-OS/unilabos/registry/resources/opentrons/reservoirs.yaml
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
 usascientific_12_reservoir_22ml:
-  description: USAScientific 12 reservoir 22ml
-  class: 
+  category:
+  - reservoirs
+  class:
     module: pylabrobot.resources.opentrons.reservoirs:usascientific_12_reservoir_22ml
     type: pylabrobot
+  config_info:
+  - children:
+    - usascientific_12_reservoir_22ml_A1
+    - usascientific_12_reservoir_22ml_A2
+    - usascientific_12_reservoir_22ml_A3
+    - usascientific_12_reservoir_22ml_A4
+    - usascientific_12_reservoir_22ml_A5
+    - usascientific_12_reservoir_22ml_A6
+    - usascientific_12_reservoir_22ml_A7
+    - usascientific_12_reservoir_22ml_A8
+    - usascientific_12_reservoir_22ml_A9
+    - usascientific_12_reservoir_22ml_A10
+    - usascientific_12_reservoir_22ml_A11
+    - usascientific_12_reservoir_22ml_A12
+    class: ''
+    config:
+      barcode: null
+      category: plate
+      model: USA Scientific 12 Well Reservoir 22 mL
+      ordering:
+        A1: usascientific_12_reservoir_22ml_A1
+        A2: usascientific_12_reservoir_22ml_A2
+        A3: usascientific_12_reservoir_22ml_A3
+        A4: usascientific_12_reservoir_22ml_A4
+        A5: usascientific_12_reservoir_22ml_A5
+        A6: usascientific_12_reservoir_22ml_A6
+        A7: usascientific_12_reservoir_22ml_A7
+        A8: usascientific_12_reservoir_22ml_A8
+        A9: usascientific_12_reservoir_22ml_A9
+        A10: usascientific_12_reservoir_22ml_A10
+        A11: usascientific_12_reservoir_22ml_A11
+        A12: usascientific_12_reservoir_22ml_A12
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 127.76
+      size_y: 85.8
+      size_z: 44.45
+      type: Plate
+    data: {}
+    id: usascientific_12_reservoir_22ml
+    name: usascientific_12_reservoir_22ml
+    parent: null
+    position:
+      x: 0
+      y: 0
+      z: 0
+    sample_id: null
+    type: plate
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 22000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 8.33
+      size_y: 71.88
+      size_z: 42.16
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: usascientific_12_reservoir_22ml_A1
+    name: usascientific_12_reservoir_22ml_A1
+    parent: usascientific_12_reservoir_22ml
+    position:
+      x: 9.775
+      y: 6.96
+      z: 2.29
+    sample_id: null
+    type: well
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 22000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 8.33
+      size_y: 71.88
+      size_z: 42.16
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: usascientific_12_reservoir_22ml_A2
+    name: usascientific_12_reservoir_22ml_A2
+    parent: usascientific_12_reservoir_22ml
+    position:
+      x: 18.865
+      y: 6.96
+      z: 2.29
+    sample_id: null
+    type: well
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 22000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 8.33
+      size_y: 71.88
+      size_z: 42.16
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: usascientific_12_reservoir_22ml_A3
+    name: usascientific_12_reservoir_22ml_A3
+    parent: usascientific_12_reservoir_22ml
+    position:
+      x: 27.955
+      y: 6.96
+      z: 2.29
+    sample_id: null
+    type: well
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 22000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 8.33
+      size_y: 71.88
+      size_z: 42.16
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: usascientific_12_reservoir_22ml_A4
+    name: usascientific_12_reservoir_22ml_A4
+    parent: usascientific_12_reservoir_22ml
+    position:
+      x: 37.045
+      y: 6.96
+      z: 2.29
+    sample_id: null
+    type: well
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 22000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 8.33
+      size_y: 71.88
+      size_z: 42.16
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: usascientific_12_reservoir_22ml_A5
+    name: usascientific_12_reservoir_22ml_A5
+    parent: usascientific_12_reservoir_22ml
+    position:
+      x: 46.135
+      y: 6.96
+      z: 2.29
+    sample_id: null
+    type: well
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 22000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 8.33
+      size_y: 71.88
+      size_z: 42.16
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: usascientific_12_reservoir_22ml_A6
+    name: usascientific_12_reservoir_22ml_A6
+    parent: usascientific_12_reservoir_22ml
+    position:
+      x: 55.225
+      y: 6.96
+      z: 2.29
+    sample_id: null
+    type: well
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 22000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 8.33
+      size_y: 71.88
+      size_z: 42.16
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: usascientific_12_reservoir_22ml_A7
+    name: usascientific_12_reservoir_22ml_A7
+    parent: usascientific_12_reservoir_22ml
+    position:
+      x: 64.315
+      y: 6.96
+      z: 2.29
+    sample_id: null
+    type: well
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 22000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 8.33
+      size_y: 71.88
+      size_z: 42.16
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: usascientific_12_reservoir_22ml_A8
+    name: usascientific_12_reservoir_22ml_A8
+    parent: usascientific_12_reservoir_22ml
+    position:
+      x: 73.405
+      y: 6.96
+      z: 2.29
+    sample_id: null
+    type: well
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 22000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 8.33
+      size_y: 71.88
+      size_z: 42.16
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: usascientific_12_reservoir_22ml_A9
+    name: usascientific_12_reservoir_22ml_A9
+    parent: usascientific_12_reservoir_22ml
+    position:
+      x: 82.495
+      y: 6.96
+      z: 2.29
+    sample_id: null
+    type: well
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 22000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 8.33
+      size_y: 71.88
+      size_z: 42.16
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: usascientific_12_reservoir_22ml_A10
+    name: usascientific_12_reservoir_22ml_A10
+    parent: usascientific_12_reservoir_22ml
+    position:
+      x: 91.585
+      y: 6.96
+      z: 2.29
+    sample_id: null
+    type: well
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 22000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 8.33
+      size_y: 71.88
+      size_z: 42.16
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: usascientific_12_reservoir_22ml_A11
+    name: usascientific_12_reservoir_22ml_A11
+    parent: usascientific_12_reservoir_22ml
+    position:
+      x: 100.675
+      y: 6.96
+      z: 2.29
+    sample_id: null
+    type: well
+  - children: []
+    class: ''
+    config:
+      barcode: null
+      bottom_type: unknown
+      category: well
+      compute_height_from_volume: null
+      compute_volume_from_height: null
+      cross_section_type: rectangle
+      material_z_thickness: null
+      max_volume: 22000
+      model: null
+      rotation:
+        type: Rotation
+        x: 0
+        y: 0
+        z: 0
+      size_x: 8.33
+      size_y: 71.88
+      size_z: 42.16
+      type: Well
+    data:
+      liquid_history: []
+      liquids: []
+      pending_liquids: []
+    id: usascientific_12_reservoir_22ml_A12
+    name: usascientific_12_reservoir_22ml_A12
+    parent: usascientific_12_reservoir_22ml
+    position:
+      x: 109.765
+      y: 6.96
+      z: 2.29
+    sample_id: null
+    type: well
+  description: USAScientific 12 reservoir 22ml
+  file_path: C:/Users/10230/PycharmProjects/Uni-Lab-OS/unilabos/registry/resources/opentrons/reservoirs.yaml
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
