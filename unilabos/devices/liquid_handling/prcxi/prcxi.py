@@ -976,7 +976,7 @@ if __name__ == "__main__":
     # 4.
 
     
-    deck = PRCXI9300Deck(name="PRCXI_Deck", size_x=100, size_y=100, size_z=100)
+    deck = PRCXI9300Deck(name="PRCXI_Deck_9300", size_x=100, size_y=100, size_z=100)
 
     from pylabrobot.resources.opentrons.tip_racks import opentrons_96_tiprack_300ul,opentrons_96_tiprack_10ul
     from pylabrobot.resources.opentrons.plates import corning_96_wellplate_360ul_flat, nest_96_wellplate_2ml_deep
@@ -1027,12 +1027,12 @@ if __name__ == "__main__":
         }
     })
 
-    plate4 = get_tip_rack("RackT4")
+    plate4 = get_well_container("PlateT4")
     plate4.load_state({
         "Material": {
-            "uuid": "076250742950465b9d6ea29a225dfb00",
-            "Code": "ZX-001-300",
-            "Name": "300μL Tip头"
+            "uuid": "57b1e4711e9e4a32b529f3132fc5931f",
+            "Code": "ZX-019-2.2",
+            "Name": "96深孔板"
         }
     })
 
@@ -1079,39 +1079,39 @@ if __name__ == "__main__":
     set_volume_tracking(enabled=True)
     from unilabos.resources.graphio import *
     A = tree_to_list([resource_plr_to_ulab(deck)])
-    with open("deck.json", "w", encoding="utf-8") as f:
+    with open("deck_9300_new.json", "w", encoding="utf-8") as f:
         json.dump(A, f, indent=4, ensure_ascii=False)
     asyncio.run(handler.create_protocol(protocol_name="Test Protocol"))  # Initialize the backend and setup the connection
 
-    asyncio.run(handler.pick_up_tips(plate1.children[:8],[0,1,2,3,4,5,6,7]))
-    print(plate1.children[:8])
-    asyncio.run(handler.aspirate(plate2.children[:8],[50]*8, [0,1,2,3,4,5,6,7]))
-    print(plate2.children[:8])
-    asyncio.run(handler.dispense(plate5.children[:8],[50]*8,[0,1,2,3,4,5,6,7]))
-    print(plate5.children[:8])
+    # asyncio.run(handler.pick_up_tips(plate1.children[:8],[0,1,2,3,4,5,6,7]))
+    # print(plate1.children[:8])
+    # asyncio.run(handler.aspirate(plate2.children[:8],[50]*8, [0,1,2,3,4,5,6,7]))
+    # print(plate2.children[:8])
+    # asyncio.run(handler.dispense(plate5.children[:8],[50]*8,[0,1,2,3,4,5,6,7]))
+    # print(plate5.children[:8])
 
-    # # # asyncio.run(handler.drop_tips(tip_rack.children[8:16],[0,1,2,3,4,5,6,7]))
-    asyncio.run(handler.discard_tips())
+    # # # # asyncio.run(handler.drop_tips(tip_rack.children[8:16],[0,1,2,3,4,5,6,7]))
+    # asyncio.run(handler.discard_tips())
 
     # asyncio.run(handler.mix(well_containers.children[:8
     # ], mix_time=3, mix_vol=50, height_to_bottom=0.5, offsets=Coordinate(0, 0, 0), mix_rate=100))
     # #print(json.dumps(handler._unilabos_backend.steps_todo_list, indent=2))  # Print matrix info
-    # asyncio.run(handler.add_liquid(
-    #     asp_vols=[100]*16,
-    #     dis_vols=[100]*16,
-    #     reagent_sources=plate2.children[:16],
-    #     targets=plate5.children[:16],
-    #     use_channels=[0, 1, 2, 3, 4, 5, 6, 7],
-    #     flow_rates=[None] * 32,
-    #     offsets=[Coordinate(0, 0, 0)] * 32,
-    #     liquid_height=[None] * 16,
-    #     blow_out_air_volume=[None] * 16,
-    #     delays=None,
-    #     mix_time=3,
-    #     mix_vol=50,
-    #     spread="wide",
-    # ))
-
+    asyncio.run(handler.add_liquid(
+        asp_vols=[100]*16,
+        dis_vols=[100]*16,
+        reagent_sources=plate2.children[:16],
+        targets=plate5.children[:16],
+        use_channels=[0, 1, 2, 3, 4, 5, 6, 7],
+        flow_rates=[None] * 32,
+        offsets=[Coordinate(0, 0, 0)] * 32,
+        liquid_height=[None] * 16,
+        blow_out_air_volume=[None] * 16,
+        delays=None,
+        mix_time=3,
+        mix_vol=50,
+        spread="wide",
+    ))
+    asyncio.run(handler.run_protocol())  # Run the protocol
     # asyncio.run(handler.remove_liquid(
     #     vols=[100]*16,
     #     sources=plate2.children[-16:],
@@ -1124,27 +1124,27 @@ if __name__ == "__main__":
     #     spread="wide",
     # ))
 
-    acid = [20]*8+[40]*8+[60]*8+[80]*8+[100]*8+[120]*8+[140]*8+[160]*8+[180]*8+[200]*8+[220]*8+[240]*8
-    alkaline = acid[::-1]  # Reverse the acid list for alkaline
-    asyncio.run(handler.transfer_liquid(
-        asp_vols=acid,
-        dis_vols=acid,
-        tip_racks=[plate1],
-        sources=plate2.children[:],
-        targets=plate5.children[:],
-        use_channels=[0, 1, 2, 3, 4, 5, 6, 7],
-        offsets=[Coordinate(0, 0, 0)] * 32,
-        asp_flow_rates=[None] * 16,
-        dis_flow_rates=[None] * 16,
-        liquid_height=[None] * 32,
-        blow_out_air_volume=[None] * 32,
-        mix_times=3,
-        mix_vol=50,
-        spread="wide",
-    ))
-    print(json.dumps(handler._unilabos_backend.steps_todo_list, indent=2))  # Print matrix info
-    # # input("pick_up_tips add step")
-    asyncio.run(handler.run_protocol())  # Run the protocol
+    # acid = [20]*8+[40]*8+[60]*8+[80]*8+[100]*8+[120]*8+[140]*8+[160]*8+[180]*8+[200]*8+[220]*8+[240]*8
+    # alkaline = acid[::-1]  # Reverse the acid list for alkaline
+    # asyncio.run(handler.transfer_liquid(
+    #     asp_vols=acid,
+    #     dis_vols=acid,
+    #     tip_racks=[plate1],
+    #     sources=plate2.children[:],
+    #     targets=plate5.children[:],
+    #     use_channels=[0, 1, 2, 3, 4, 5, 6, 7],
+    #     offsets=[Coordinate(0, 0, 0)] * 32,
+    #     asp_flow_rates=[None] * 16,
+    #     dis_flow_rates=[None] * 16,
+    #     liquid_height=[None] * 32,
+    #     blow_out_air_volume=[None] * 32,
+    #     mix_times=3,
+    #     mix_vol=50,
+    #     spread="wide",
+    # ))
+    # print(json.dumps(handler._unilabos_backend.steps_todo_list, indent=2))  # Print matrix info
+    # # # input("pick_up_tips add step")
+    # asyncio.run(handler.run_protocol())  # Run the protocol
     # # input("Running protocol...")
     # # input("Press Enter to continue...")  # Wait for user input before proceeding
     # # print("PRCXI9300Handler initialized with deck and host settings.")
