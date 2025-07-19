@@ -1,17 +1,17 @@
 [
     {
-        "id": "PRCXI_Deck",
-        "name": "PRCXI_Deck",
+        "id": "PRCXI_Deck_9300",
+        "name": "PRCXI_Deck_9300",
         "sample_id": null,
         "children": [
             "RackT1",
             "PlateT2",
             "trash",
-            "RackT4",
+            "PlateT4",
             "PlateT5",
             "PlateT6"
         ],
-        "parent": "lh_PRCXI_Deck",
+        "parent": "lh_PRCXI_Deck_9300",
         "type": "deck",
         "class": "",
         "position": {
@@ -137,7 +137,7 @@
             "name_G12",
             "name_H12"
         ],
-        "parent": "PRCXI_Deck",
+        "parent": "PRCXI_Deck_9300",
         "type": "container",
         "class": "",
         "position": {
@@ -4207,7 +4207,7 @@
             "PlateT2_G12",
             "PlateT2_H12"
         ],
-        "parent": "PRCXI_Deck",
+        "parent": "PRCXI_Deck_9300",
         "type": "plate",
         "class": "",
         "position": {
@@ -9236,7 +9236,7 @@
         "name": "trash",
         "sample_id": null,
         "children": [],
-        "parent": "PRCXI_Deck",
+        "parent": "PRCXI_Deck_9300",
         "type": "container",
         "class": "",
         "position": {
@@ -9273,109 +9273,109 @@
         }
     },
     {
-        "id": "RackT4",
-        "name": "RackT4",
+        "id": "PlateT4",
+        "name": "PlateT4",
         "sample_id": null,
         "children": [
-            "name_A1",
-            "name_B1",
-            "name_C1",
-            "name_D1",
-            "name_E1",
-            "name_F1",
-            "name_G1",
-            "name_H1",
-            "name_A2",
-            "name_B2",
-            "name_C2",
-            "name_D2",
-            "name_E2",
-            "name_F2",
-            "name_G2",
-            "name_H2",
-            "name_A3",
-            "name_B3",
-            "name_C3",
-            "name_D3",
-            "name_E3",
-            "name_F3",
-            "name_G3",
-            "name_H3",
-            "name_A4",
-            "name_B4",
-            "name_C4",
-            "name_D4",
-            "name_E4",
-            "name_F4",
-            "name_G4",
-            "name_H4",
-            "name_A5",
-            "name_B5",
-            "name_C5",
-            "name_D5",
-            "name_E5",
-            "name_F5",
-            "name_G5",
-            "name_H5",
-            "name_A6",
-            "name_B6",
-            "name_C6",
-            "name_D6",
-            "name_E6",
-            "name_F6",
-            "name_G6",
-            "name_H6",
-            "name_A7",
-            "name_B7",
-            "name_C7",
-            "name_D7",
-            "name_E7",
-            "name_F7",
-            "name_G7",
-            "name_H7",
-            "name_A8",
-            "name_B8",
-            "name_C8",
-            "name_D8",
-            "name_E8",
-            "name_F8",
-            "name_G8",
-            "name_H8",
-            "name_A9",
-            "name_B9",
-            "name_C9",
-            "name_D9",
-            "name_E9",
-            "name_F9",
-            "name_G9",
-            "name_H9",
-            "name_A10",
-            "name_B10",
-            "name_C10",
-            "name_D10",
-            "name_E10",
-            "name_F10",
-            "name_G10",
-            "name_H10",
-            "name_A11",
-            "name_B11",
-            "name_C11",
-            "name_D11",
-            "name_E11",
-            "name_F11",
-            "name_G11",
-            "name_H11",
-            "name_A12",
-            "name_B12",
-            "name_C12",
-            "name_D12",
-            "name_E12",
-            "name_F12",
-            "name_G12",
-            "name_H12"
+            "PlateT4_A1",
+            "PlateT4_B1",
+            "PlateT4_C1",
+            "PlateT4_D1",
+            "PlateT4_E1",
+            "PlateT4_F1",
+            "PlateT4_G1",
+            "PlateT4_H1",
+            "PlateT4_A2",
+            "PlateT4_B2",
+            "PlateT4_C2",
+            "PlateT4_D2",
+            "PlateT4_E2",
+            "PlateT4_F2",
+            "PlateT4_G2",
+            "PlateT4_H2",
+            "PlateT4_A3",
+            "PlateT4_B3",
+            "PlateT4_C3",
+            "PlateT4_D3",
+            "PlateT4_E3",
+            "PlateT4_F3",
+            "PlateT4_G3",
+            "PlateT4_H3",
+            "PlateT4_A4",
+            "PlateT4_B4",
+            "PlateT4_C4",
+            "PlateT4_D4",
+            "PlateT4_E4",
+            "PlateT4_F4",
+            "PlateT4_G4",
+            "PlateT4_H4",
+            "PlateT4_A5",
+            "PlateT4_B5",
+            "PlateT4_C5",
+            "PlateT4_D5",
+            "PlateT4_E5",
+            "PlateT4_F5",
+            "PlateT4_G5",
+            "PlateT4_H5",
+            "PlateT4_A6",
+            "PlateT4_B6",
+            "PlateT4_C6",
+            "PlateT4_D6",
+            "PlateT4_E6",
+            "PlateT4_F6",
+            "PlateT4_G6",
+            "PlateT4_H6",
+            "PlateT4_A7",
+            "PlateT4_B7",
+            "PlateT4_C7",
+            "PlateT4_D7",
+            "PlateT4_E7",
+            "PlateT4_F7",
+            "PlateT4_G7",
+            "PlateT4_H7",
+            "PlateT4_A8",
+            "PlateT4_B8",
+            "PlateT4_C8",
+            "PlateT4_D8",
+            "PlateT4_E8",
+            "PlateT4_F8",
+            "PlateT4_G8",
+            "PlateT4_H8",
+            "PlateT4_A9",
+            "PlateT4_B9",
+            "PlateT4_C9",
+            "PlateT4_D9",
+            "PlateT4_E9",
+            "PlateT4_F9",
+            "PlateT4_G9",
+            "PlateT4_H9",
+            "PlateT4_A10",
+            "PlateT4_B10",
+            "PlateT4_C10",
+            "PlateT4_D10",
+            "PlateT4_E10",
+            "PlateT4_F10",
+            "PlateT4_G10",
+            "PlateT4_H10",
+            "PlateT4_A11",
+            "PlateT4_B11",
+            "PlateT4_C11",
+            "PlateT4_D11",
+            "PlateT4_E11",
+            "PlateT4_F11",
+            "PlateT4_G11",
+            "PlateT4_H11",
+            "PlateT4_A12",
+            "PlateT4_B12",
+            "PlateT4_C12",
+            "PlateT4_D12",
+            "PlateT4_E12",
+            "PlateT4_F12",
+            "PlateT4_G12",
+            "PlateT4_H12"
         ],
-        "parent": "PRCXI_Deck",
-        "type": "container",
+        "parent": "PRCXI_Deck_9300",
+        "type": "plate",
         "class": "",
         "position": {
             "x": 0,
@@ -9393,3953 +9393,3857 @@
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_rack",
+            "category": "plate",
             "model": null,
             "barcode": null,
             "ordering": {}
         },
         "data": {
             "Material": {
-                "uuid": "076250742950465b9d6ea29a225dfb00",
-                "Code": "ZX-001-300",
-                "Name": "300μL Tip头"
+                "uuid": "57b1e4711e9e4a32b529f3132fc5931f",
+                "Code": "ZX-019-2.2",
+                "Name": "96深孔板"
             }
         }
     },
     {
-        "id": "name_A1",
-        "name": "name_A1",
+        "id": "PlateT4_A1",
+        "name": "PlateT4_A1",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 12.531,
-            "y": 72.391,
-            "z": 5.39
+            "x": 11.9545,
+            "y": 71.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_B1",
-        "name": "name_B1",
+        "id": "PlateT4_B1",
+        "name": "PlateT4_B1",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 12.531,
-            "y": 63.391,
-            "z": 5.39
+            "x": 11.9545,
+            "y": 62.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_C1",
-        "name": "name_C1",
+        "id": "PlateT4_C1",
+        "name": "PlateT4_C1",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 12.531,
-            "y": 54.391,
-            "z": 5.39
+            "x": 11.9545,
+            "y": 53.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_D1",
-        "name": "name_D1",
+        "id": "PlateT4_D1",
+        "name": "PlateT4_D1",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 12.531,
-            "y": 45.391,
-            "z": 5.39
+            "x": 11.9545,
+            "y": 44.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_E1",
-        "name": "name_E1",
+        "id": "PlateT4_E1",
+        "name": "PlateT4_E1",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 12.531,
-            "y": 36.391,
-            "z": 5.39
+            "x": 11.9545,
+            "y": 35.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_F1",
-        "name": "name_F1",
+        "id": "PlateT4_F1",
+        "name": "PlateT4_F1",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 12.531,
-            "y": 27.391,
-            "z": 5.39
+            "x": 11.9545,
+            "y": 26.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_G1",
-        "name": "name_G1",
+        "id": "PlateT4_G1",
+        "name": "PlateT4_G1",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 12.531,
-            "y": 18.391,
-            "z": 5.39
+            "x": 11.9545,
+            "y": 17.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_H1",
-        "name": "name_H1",
+        "id": "PlateT4_H1",
+        "name": "PlateT4_H1",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 12.531,
-            "y": 9.391,
-            "z": 5.39
+            "x": 11.9545,
+            "y": 8.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_A2",
-        "name": "name_A2",
+        "id": "PlateT4_A2",
+        "name": "PlateT4_A2",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 21.531,
-            "y": 72.391,
-            "z": 5.39
+            "x": 20.9545,
+            "y": 71.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_B2",
-        "name": "name_B2",
+        "id": "PlateT4_B2",
+        "name": "PlateT4_B2",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 21.531,
-            "y": 63.391,
-            "z": 5.39
+            "x": 20.9545,
+            "y": 62.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_C2",
-        "name": "name_C2",
+        "id": "PlateT4_C2",
+        "name": "PlateT4_C2",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 21.531,
-            "y": 54.391,
-            "z": 5.39
+            "x": 20.9545,
+            "y": 53.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_D2",
-        "name": "name_D2",
+        "id": "PlateT4_D2",
+        "name": "PlateT4_D2",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 21.531,
-            "y": 45.391,
-            "z": 5.39
+            "x": 20.9545,
+            "y": 44.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_E2",
-        "name": "name_E2",
+        "id": "PlateT4_E2",
+        "name": "PlateT4_E2",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 21.531,
-            "y": 36.391,
-            "z": 5.39
+            "x": 20.9545,
+            "y": 35.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_F2",
-        "name": "name_F2",
+        "id": "PlateT4_F2",
+        "name": "PlateT4_F2",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 21.531,
-            "y": 27.391,
-            "z": 5.39
+            "x": 20.9545,
+            "y": 26.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_G2",
-        "name": "name_G2",
+        "id": "PlateT4_G2",
+        "name": "PlateT4_G2",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 21.531,
-            "y": 18.391,
-            "z": 5.39
+            "x": 20.9545,
+            "y": 17.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_H2",
-        "name": "name_H2",
+        "id": "PlateT4_H2",
+        "name": "PlateT4_H2",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 21.531,
-            "y": 9.391,
-            "z": 5.39
+            "x": 20.9545,
+            "y": 8.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_A3",
-        "name": "name_A3",
+        "id": "PlateT4_A3",
+        "name": "PlateT4_A3",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 30.531,
-            "y": 72.391,
-            "z": 5.39
+            "x": 29.9545,
+            "y": 71.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_B3",
-        "name": "name_B3",
+        "id": "PlateT4_B3",
+        "name": "PlateT4_B3",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 30.531,
-            "y": 63.391,
-            "z": 5.39
+            "x": 29.9545,
+            "y": 62.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_C3",
-        "name": "name_C3",
+        "id": "PlateT4_C3",
+        "name": "PlateT4_C3",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 30.531,
-            "y": 54.391,
-            "z": 5.39
+            "x": 29.9545,
+            "y": 53.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_D3",
-        "name": "name_D3",
+        "id": "PlateT4_D3",
+        "name": "PlateT4_D3",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 30.531,
-            "y": 45.391,
-            "z": 5.39
+            "x": 29.9545,
+            "y": 44.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_E3",
-        "name": "name_E3",
+        "id": "PlateT4_E3",
+        "name": "PlateT4_E3",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 30.531,
-            "y": 36.391,
-            "z": 5.39
+            "x": 29.9545,
+            "y": 35.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_F3",
-        "name": "name_F3",
+        "id": "PlateT4_F3",
+        "name": "PlateT4_F3",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 30.531,
-            "y": 27.391,
-            "z": 5.39
+            "x": 29.9545,
+            "y": 26.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_G3",
-        "name": "name_G3",
+        "id": "PlateT4_G3",
+        "name": "PlateT4_G3",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 30.531,
-            "y": 18.391,
-            "z": 5.39
+            "x": 29.9545,
+            "y": 17.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_H3",
-        "name": "name_H3",
+        "id": "PlateT4_H3",
+        "name": "PlateT4_H3",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 30.531,
-            "y": 9.391,
-            "z": 5.39
+            "x": 29.9545,
+            "y": 8.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_A4",
-        "name": "name_A4",
+        "id": "PlateT4_A4",
+        "name": "PlateT4_A4",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 39.531,
-            "y": 72.391,
-            "z": 5.39
+            "x": 38.9545,
+            "y": 71.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_B4",
-        "name": "name_B4",
+        "id": "PlateT4_B4",
+        "name": "PlateT4_B4",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 39.531,
-            "y": 63.391,
-            "z": 5.39
+            "x": 38.9545,
+            "y": 62.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_C4",
-        "name": "name_C4",
+        "id": "PlateT4_C4",
+        "name": "PlateT4_C4",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 39.531,
-            "y": 54.391,
-            "z": 5.39
+            "x": 38.9545,
+            "y": 53.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_D4",
-        "name": "name_D4",
+        "id": "PlateT4_D4",
+        "name": "PlateT4_D4",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 39.531,
-            "y": 45.391,
-            "z": 5.39
+            "x": 38.9545,
+            "y": 44.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_E4",
-        "name": "name_E4",
+        "id": "PlateT4_E4",
+        "name": "PlateT4_E4",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 39.531,
-            "y": 36.391,
-            "z": 5.39
+            "x": 38.9545,
+            "y": 35.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_F4",
-        "name": "name_F4",
+        "id": "PlateT4_F4",
+        "name": "PlateT4_F4",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 39.531,
-            "y": 27.391,
-            "z": 5.39
+            "x": 38.9545,
+            "y": 26.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_G4",
-        "name": "name_G4",
+        "id": "PlateT4_G4",
+        "name": "PlateT4_G4",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 39.531,
-            "y": 18.391,
-            "z": 5.39
+            "x": 38.9545,
+            "y": 17.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_H4",
-        "name": "name_H4",
+        "id": "PlateT4_H4",
+        "name": "PlateT4_H4",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 39.531,
-            "y": 9.391,
-            "z": 5.39
+            "x": 38.9545,
+            "y": 8.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_A5",
-        "name": "name_A5",
+        "id": "PlateT4_A5",
+        "name": "PlateT4_A5",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 48.531,
-            "y": 72.391,
-            "z": 5.39
+            "x": 47.9545,
+            "y": 71.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_B5",
-        "name": "name_B5",
+        "id": "PlateT4_B5",
+        "name": "PlateT4_B5",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 48.531,
-            "y": 63.391,
-            "z": 5.39
+            "x": 47.9545,
+            "y": 62.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_C5",
-        "name": "name_C5",
+        "id": "PlateT4_C5",
+        "name": "PlateT4_C5",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 48.531,
-            "y": 54.391,
-            "z": 5.39
+            "x": 47.9545,
+            "y": 53.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_D5",
-        "name": "name_D5",
+        "id": "PlateT4_D5",
+        "name": "PlateT4_D5",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 48.531,
-            "y": 45.391,
-            "z": 5.39
+            "x": 47.9545,
+            "y": 44.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_E5",
-        "name": "name_E5",
+        "id": "PlateT4_E5",
+        "name": "PlateT4_E5",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 48.531,
-            "y": 36.391,
-            "z": 5.39
+            "x": 47.9545,
+            "y": 35.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_F5",
-        "name": "name_F5",
+        "id": "PlateT4_F5",
+        "name": "PlateT4_F5",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 48.531,
-            "y": 27.391,
-            "z": 5.39
+            "x": 47.9545,
+            "y": 26.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_G5",
-        "name": "name_G5",
+        "id": "PlateT4_G5",
+        "name": "PlateT4_G5",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 48.531,
-            "y": 18.391,
-            "z": 5.39
+            "x": 47.9545,
+            "y": 17.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_H5",
-        "name": "name_H5",
+        "id": "PlateT4_H5",
+        "name": "PlateT4_H5",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 48.531,
-            "y": 9.391,
-            "z": 5.39
+            "x": 47.9545,
+            "y": 8.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_A6",
-        "name": "name_A6",
+        "id": "PlateT4_A6",
+        "name": "PlateT4_A6",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 57.531,
-            "y": 72.391,
-            "z": 5.39
+            "x": 56.9545,
+            "y": 71.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_B6",
-        "name": "name_B6",
+        "id": "PlateT4_B6",
+        "name": "PlateT4_B6",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 57.531,
-            "y": 63.391,
-            "z": 5.39
+            "x": 56.9545,
+            "y": 62.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_C6",
-        "name": "name_C6",
+        "id": "PlateT4_C6",
+        "name": "PlateT4_C6",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 57.531,
-            "y": 54.391,
-            "z": 5.39
+            "x": 56.9545,
+            "y": 53.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_D6",
-        "name": "name_D6",
+        "id": "PlateT4_D6",
+        "name": "PlateT4_D6",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 57.531,
-            "y": 45.391,
-            "z": 5.39
+            "x": 56.9545,
+            "y": 44.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_E6",
-        "name": "name_E6",
+        "id": "PlateT4_E6",
+        "name": "PlateT4_E6",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 57.531,
-            "y": 36.391,
-            "z": 5.39
+            "x": 56.9545,
+            "y": 35.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_F6",
-        "name": "name_F6",
+        "id": "PlateT4_F6",
+        "name": "PlateT4_F6",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 57.531,
-            "y": 27.391,
-            "z": 5.39
+            "x": 56.9545,
+            "y": 26.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_G6",
-        "name": "name_G6",
+        "id": "PlateT4_G6",
+        "name": "PlateT4_G6",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 57.531,
-            "y": 18.391,
-            "z": 5.39
+            "x": 56.9545,
+            "y": 17.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_H6",
-        "name": "name_H6",
+        "id": "PlateT4_H6",
+        "name": "PlateT4_H6",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 57.531,
-            "y": 9.391,
-            "z": 5.39
+            "x": 56.9545,
+            "y": 8.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_A7",
-        "name": "name_A7",
+        "id": "PlateT4_A7",
+        "name": "PlateT4_A7",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 66.531,
-            "y": 72.391,
-            "z": 5.39
+            "x": 65.9545,
+            "y": 71.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_B7",
-        "name": "name_B7",
+        "id": "PlateT4_B7",
+        "name": "PlateT4_B7",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 66.531,
-            "y": 63.391,
-            "z": 5.39
+            "x": 65.9545,
+            "y": 62.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_C7",
-        "name": "name_C7",
+        "id": "PlateT4_C7",
+        "name": "PlateT4_C7",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 66.531,
-            "y": 54.391,
-            "z": 5.39
+            "x": 65.9545,
+            "y": 53.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_D7",
-        "name": "name_D7",
+        "id": "PlateT4_D7",
+        "name": "PlateT4_D7",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 66.531,
-            "y": 45.391,
-            "z": 5.39
+            "x": 65.9545,
+            "y": 44.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_E7",
-        "name": "name_E7",
+        "id": "PlateT4_E7",
+        "name": "PlateT4_E7",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 66.531,
-            "y": 36.391,
-            "z": 5.39
+            "x": 65.9545,
+            "y": 35.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_F7",
-        "name": "name_F7",
+        "id": "PlateT4_F7",
+        "name": "PlateT4_F7",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 66.531,
-            "y": 27.391,
-            "z": 5.39
+            "x": 65.9545,
+            "y": 26.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_G7",
-        "name": "name_G7",
+        "id": "PlateT4_G7",
+        "name": "PlateT4_G7",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 66.531,
-            "y": 18.391,
-            "z": 5.39
+            "x": 65.9545,
+            "y": 17.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_H7",
-        "name": "name_H7",
+        "id": "PlateT4_H7",
+        "name": "PlateT4_H7",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 66.531,
-            "y": 9.391,
-            "z": 5.39
+            "x": 65.9545,
+            "y": 8.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_A8",
-        "name": "name_A8",
+        "id": "PlateT4_A8",
+        "name": "PlateT4_A8",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 75.531,
-            "y": 72.391,
-            "z": 5.39
+            "x": 74.9545,
+            "y": 71.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_B8",
-        "name": "name_B8",
+        "id": "PlateT4_B8",
+        "name": "PlateT4_B8",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 75.531,
-            "y": 63.391,
-            "z": 5.39
+            "x": 74.9545,
+            "y": 62.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_C8",
-        "name": "name_C8",
+        "id": "PlateT4_C8",
+        "name": "PlateT4_C8",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 75.531,
-            "y": 54.391,
-            "z": 5.39
+            "x": 74.9545,
+            "y": 53.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_D8",
-        "name": "name_D8",
+        "id": "PlateT4_D8",
+        "name": "PlateT4_D8",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 75.531,
-            "y": 45.391,
-            "z": 5.39
+            "x": 74.9545,
+            "y": 44.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_E8",
-        "name": "name_E8",
+        "id": "PlateT4_E8",
+        "name": "PlateT4_E8",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 75.531,
-            "y": 36.391,
-            "z": 5.39
+            "x": 74.9545,
+            "y": 35.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_F8",
-        "name": "name_F8",
+        "id": "PlateT4_F8",
+        "name": "PlateT4_F8",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 75.531,
-            "y": 27.391,
-            "z": 5.39
+            "x": 74.9545,
+            "y": 26.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_G8",
-        "name": "name_G8",
+        "id": "PlateT4_G8",
+        "name": "PlateT4_G8",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 75.531,
-            "y": 18.391,
-            "z": 5.39
+            "x": 74.9545,
+            "y": 17.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_H8",
-        "name": "name_H8",
+        "id": "PlateT4_H8",
+        "name": "PlateT4_H8",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 75.531,
-            "y": 9.391,
-            "z": 5.39
+            "x": 74.9545,
+            "y": 8.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_A9",
-        "name": "name_A9",
+        "id": "PlateT4_A9",
+        "name": "PlateT4_A9",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 84.531,
-            "y": 72.391,
-            "z": 5.39
+            "x": 83.9545,
+            "y": 71.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_B9",
-        "name": "name_B9",
+        "id": "PlateT4_B9",
+        "name": "PlateT4_B9",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 84.531,
-            "y": 63.391,
-            "z": 5.39
+            "x": 83.9545,
+            "y": 62.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_C9",
-        "name": "name_C9",
+        "id": "PlateT4_C9",
+        "name": "PlateT4_C9",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 84.531,
-            "y": 54.391,
-            "z": 5.39
+            "x": 83.9545,
+            "y": 53.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_D9",
-        "name": "name_D9",
+        "id": "PlateT4_D9",
+        "name": "PlateT4_D9",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 84.531,
-            "y": 45.391,
-            "z": 5.39
+            "x": 83.9545,
+            "y": 44.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_E9",
-        "name": "name_E9",
+        "id": "PlateT4_E9",
+        "name": "PlateT4_E9",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 84.531,
-            "y": 36.391,
-            "z": 5.39
+            "x": 83.9545,
+            "y": 35.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_F9",
-        "name": "name_F9",
+        "id": "PlateT4_F9",
+        "name": "PlateT4_F9",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 84.531,
-            "y": 27.391,
-            "z": 5.39
+            "x": 83.9545,
+            "y": 26.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_G9",
-        "name": "name_G9",
+        "id": "PlateT4_G9",
+        "name": "PlateT4_G9",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 84.531,
-            "y": 18.391,
-            "z": 5.39
+            "x": 83.9545,
+            "y": 17.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_H9",
-        "name": "name_H9",
+        "id": "PlateT4_H9",
+        "name": "PlateT4_H9",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 84.531,
-            "y": 9.391,
-            "z": 5.39
+            "x": 83.9545,
+            "y": 8.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_A10",
-        "name": "name_A10",
+        "id": "PlateT4_A10",
+        "name": "PlateT4_A10",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 93.531,
-            "y": 72.391,
-            "z": 5.39
+            "x": 92.9545,
+            "y": 71.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_B10",
-        "name": "name_B10",
+        "id": "PlateT4_B10",
+        "name": "PlateT4_B10",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 93.531,
-            "y": 63.391,
-            "z": 5.39
+            "x": 92.9545,
+            "y": 62.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_C10",
-        "name": "name_C10",
+        "id": "PlateT4_C10",
+        "name": "PlateT4_C10",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 93.531,
-            "y": 54.391,
-            "z": 5.39
+            "x": 92.9545,
+            "y": 53.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_D10",
-        "name": "name_D10",
+        "id": "PlateT4_D10",
+        "name": "PlateT4_D10",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 93.531,
-            "y": 45.391,
-            "z": 5.39
+            "x": 92.9545,
+            "y": 44.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_E10",
-        "name": "name_E10",
+        "id": "PlateT4_E10",
+        "name": "PlateT4_E10",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 93.531,
-            "y": 36.391,
-            "z": 5.39
+            "x": 92.9545,
+            "y": 35.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_F10",
-        "name": "name_F10",
+        "id": "PlateT4_F10",
+        "name": "PlateT4_F10",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 93.531,
-            "y": 27.391,
-            "z": 5.39
+            "x": 92.9545,
+            "y": 26.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_G10",
-        "name": "name_G10",
+        "id": "PlateT4_G10",
+        "name": "PlateT4_G10",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 93.531,
-            "y": 18.391,
-            "z": 5.39
+            "x": 92.9545,
+            "y": 17.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_H10",
-        "name": "name_H10",
+        "id": "PlateT4_H10",
+        "name": "PlateT4_H10",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 93.531,
-            "y": 9.391,
-            "z": 5.39
+            "x": 92.9545,
+            "y": 8.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_A11",
-        "name": "name_A11",
+        "id": "PlateT4_A11",
+        "name": "PlateT4_A11",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 102.531,
-            "y": 72.391,
-            "z": 5.39
+            "x": 101.9545,
+            "y": 71.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_B11",
-        "name": "name_B11",
+        "id": "PlateT4_B11",
+        "name": "PlateT4_B11",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 102.531,
-            "y": 63.391,
-            "z": 5.39
+            "x": 101.9545,
+            "y": 62.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_C11",
-        "name": "name_C11",
+        "id": "PlateT4_C11",
+        "name": "PlateT4_C11",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 102.531,
-            "y": 54.391,
-            "z": 5.39
+            "x": 101.9545,
+            "y": 53.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_D11",
-        "name": "name_D11",
+        "id": "PlateT4_D11",
+        "name": "PlateT4_D11",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 102.531,
-            "y": 45.391,
-            "z": 5.39
+            "x": 101.9545,
+            "y": 44.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_E11",
-        "name": "name_E11",
+        "id": "PlateT4_E11",
+        "name": "PlateT4_E11",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 102.531,
-            "y": 36.391,
-            "z": 5.39
+            "x": 101.9545,
+            "y": 35.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_F11",
-        "name": "name_F11",
+        "id": "PlateT4_F11",
+        "name": "PlateT4_F11",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 102.531,
-            "y": 27.391,
-            "z": 5.39
+            "x": 101.9545,
+            "y": 26.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_G11",
-        "name": "name_G11",
+        "id": "PlateT4_G11",
+        "name": "PlateT4_G11",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 102.531,
-            "y": 18.391,
-            "z": 5.39
+            "x": 101.9545,
+            "y": 17.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_H11",
-        "name": "name_H11",
+        "id": "PlateT4_H11",
+        "name": "PlateT4_H11",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 102.531,
-            "y": 9.391,
-            "z": 5.39
+            "x": 101.9545,
+            "y": 8.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_A12",
-        "name": "name_A12",
+        "id": "PlateT4_A12",
+        "name": "PlateT4_A12",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 111.531,
-            "y": 72.391,
-            "z": 5.39
+            "x": 110.9545,
+            "y": 71.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_B12",
-        "name": "name_B12",
+        "id": "PlateT4_B12",
+        "name": "PlateT4_B12",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 111.531,
-            "y": 63.391,
-            "z": 5.39
+            "x": 110.9545,
+            "y": 62.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_C12",
-        "name": "name_C12",
+        "id": "PlateT4_C12",
+        "name": "PlateT4_C12",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 111.531,
-            "y": 54.391,
-            "z": 5.39
+            "x": 110.9545,
+            "y": 53.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_D12",
-        "name": "name_D12",
+        "id": "PlateT4_D12",
+        "name": "PlateT4_D12",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 111.531,
-            "y": 45.391,
-            "z": 5.39
+            "x": 110.9545,
+            "y": 44.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_E12",
-        "name": "name_E12",
+        "id": "PlateT4_E12",
+        "name": "PlateT4_E12",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 111.531,
-            "y": 36.391,
-            "z": 5.39
+            "x": 110.9545,
+            "y": 35.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_F12",
-        "name": "name_F12",
+        "id": "PlateT4_F12",
+        "name": "PlateT4_F12",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 111.531,
-            "y": 27.391,
-            "z": 5.39
+            "x": 110.9545,
+            "y": 26.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_G12",
-        "name": "name_G12",
+        "id": "PlateT4_G12",
+        "name": "PlateT4_G12",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 111.531,
-            "y": 18.391,
-            "z": 5.39
+            "x": 110.9545,
+            "y": 17.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
-        "id": "name_H12",
-        "name": "name_H12",
+        "id": "PlateT4_H12",
+        "name": "PlateT4_H12",
         "sample_id": null,
         "children": [],
-        "parent": "RackT4",
-        "type": "container",
+        "parent": "PlateT4",
+        "type": "well",
         "class": "",
         "position": {
-            "x": 111.531,
-            "y": 9.391,
-            "z": 5.39
+            "x": 110.9545,
+            "y": 8.8145,
+            "z": 3.55
         },
         "config": {
-            "type": "TipSpot",
-            "size_x": 3.698,
-            "size_y": 3.698,
-            "size_z": 0,
+            "type": "Well",
+            "size_x": 4.851,
+            "size_y": 4.851,
+            "size_z": 10.67,
             "rotation": {
                 "x": 0,
                 "y": 0,
                 "z": 0,
                 "type": "Rotation"
             },
-            "category": "tip_spot",
+            "category": "well",
             "model": null,
             "barcode": null,
-            "prototype_tip": {
-                "type": "Tip",
-                "total_tip_length": 59.3,
-                "has_filter": false,
-                "maximal_volume": 300.0,
-                "fitting_depth": 7.47
-            }
+            "max_volume": 360,
+            "material_z_thickness": null,
+            "compute_volume_from_height": null,
+            "compute_height_from_volume": null,
+            "bottom_type": "unknown",
+            "cross_section_type": "circle"
         },
         "data": {
-            "tip": null,
-            "tip_state": null,
-            "pending_tip": null
+            "liquids": [],
+            "pending_liquids": [],
+            "liquid_history": []
         }
     },
     {
@@ -13444,7 +13348,7 @@
             "PlateT5_G12",
             "PlateT5_H12"
         ],
-        "parent": "PRCXI_Deck",
+        "parent": "PRCXI_Deck_9300",
         "type": "plate",
         "class": "",
         "position": {
@@ -17418,7 +17322,7 @@
             "PlateT6_G12",
             "PlateT6_H12"
         ],
-        "parent": "PRCXI_Deck",
+        "parent": "PRCXI_Deck_9300",
         "type": "plate",
         "class": "",
         "position": {
