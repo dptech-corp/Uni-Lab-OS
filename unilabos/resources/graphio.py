@@ -84,7 +84,7 @@ def canonicalize_links_ports(data: dict) -> dict:
     # 第一遍处理：将字符串类型的port转换为字典格式
     for link in data.get("links", []):
         port = link.get("port")
-        if link["type"] == "physical":
+        if link.get("type", "physical") == "physical":
             link["type"] = "fluid"
         if isinstance(port, int):
             port = str(port)

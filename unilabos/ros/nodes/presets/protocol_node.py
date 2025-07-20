@@ -84,7 +84,11 @@ class ROS2ProtocolNode(BaseROS2DeviceNode):
                 self.communication_node_id_to_instance[device_id] = d
                 continue
 
+        for device_id, device_config in self.children.items():
+            if device_config.get("type", "device") != "device":
+                continue
             # 设置硬件接口代理
+            d = self.sub_devices[device_id]
             if d:
                 hardware_interface = d.ros_node_instance._hardware_interface
                 if (
