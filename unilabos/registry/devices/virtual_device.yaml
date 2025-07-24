@@ -2187,65 +2187,65 @@ virtual_multiway_valve:
     data_source: executor
     data_type: fluid
     description: 八通阀门端口1
-    handler_key: 1
+    handler_key: "1"
     io_type: source
-    label: 1
+    label: "1"
     side: NORTH
   - data_key: fluid_port_2
     data_source: executor
     data_type: fluid
     description: 八通阀门端口2
-    handler_key: 2
+    handler_key: "2"
     io_type: source
-    label: 2
+    label: "2"
     side: EAST
   - data_key: fluid_port_3
     data_source: executor
     data_type: fluid
     description: 八通阀门端口3
-    handler_key: 3
+    handler_key: "3"
     io_type: source
-    label: 3
+    label: "3"
     side: EAST
   - data_key: fluid_port_4
     data_source: executor
     data_type: fluid
     description: 八通阀门端口4
-    handler_key: 4
+    handler_key: "4"
     io_type: source
-    label: 4
+    label: "4"
     side: SOUTH
   - data_key: fluid_port_5
     data_source: executor
     data_type: fluid
     description: 八通阀门端口5
-    handler_key: 5
+    handler_key: "5"
     io_type: source
-    label: 5
+    label: "5"
     side: SOUTH
   - data_key: fluid_port_6
     data_source: executor
     data_type: fluid
     description: 八通阀门端口6
-    handler_key: 6
+    handler_key: "6"
     io_type: source
-    label: 6
+    label: "6"
     side: WEST
   - data_key: fluid_port_7
     data_source: executor
     data_type: fluid
     description: 八通阀门端口7
-    handler_key: 7
+    handler_key: "7"
     io_type: source
-    label: 7
+    label: "7"
     side: WEST
   - data_key: fluid_port_8
     data_source: executor
     data_type: fluid
     description: 八通阀门端口8
-    handler_key: 8
+    handler_key: "8"
     io_type: source
-    label: 8
+    label: "8"
     side: NORTH
   icon: EightPipeline.webp
   init_param_schema:

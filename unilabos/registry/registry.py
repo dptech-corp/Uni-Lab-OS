@@ -110,7 +110,7 @@ class Registry:
                                 "placeholder_keys": {
                                     "res_id": "unilabos_resources",  # 将当前实验室的全部物料id作为下拉框可选择
                                     "device_id": "unilabos_devices",  # 将当前实验室的全部设备id作为下拉框可选择
-                                    "parent": "unilabos_resources",  # 将当前实验室的全部物料id作为下拉框可选择
+                                    "parent": "unilabos_nodes",  # 将当前实验室的设备/物料作为下拉框可选择
                                 },
                             },
                             "test_latency": {
@@ -131,7 +131,7 @@ class Registry:
                     "config_info": [],
                     "icon": "icon_device.webp",
                     "registry_type": "device",
-                    "handles": [],
+                    "handles": [],  # virtue采用了不同的handle
                     "init_param_schema": {},
                     "file_path": "/",
                 }
@@ -499,7 +499,7 @@ class Registry:
                         )
                         for action_name, action_config in device_config["class"]["action_value_mappings"].items():
                             if "handles" not in action_config:
-                                action_config["handles"] = []
+                                action_config["handles"] = {}
                             if "type" in action_config:
                                 action_type_str: str = action_config["type"]
                                 # 通过Json发放指令，而不是通过特殊的ros action进行处理
@@ -544,7 +544,7 @@ class Registry:
                                         )
                                     )
                                 ),
-                                "handles": [],
+                                "handles": {},
                             }
                     if "registry_type" not in device_config:
                         device_config["registry_type"] = "device"

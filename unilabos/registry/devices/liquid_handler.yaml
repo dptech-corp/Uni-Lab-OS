@@ -4388,11 +4388,11 @@ liquid_handler:
         deck:
           type: string
         simulator:
+          default: false
           type: boolean
       required:
       - backend
       - deck
-      - simulator
       type: object
     data:
       properties: {}

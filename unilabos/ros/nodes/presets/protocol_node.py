@@ -84,7 +84,11 @@ class ROS2ProtocolNode(BaseROS2DeviceNode):
                 self.communication_node_id_to_instance[device_id] = d
                 continue
 
+        for device_id, device_config in self.children.items():
+            if device_config.get("type", "device") != "device":
+                continue
             # 设置硬件接口代理
+            d = self.sub_devices[device_id]
             if d:
                 hardware_interface = d.ros_node_instance._hardware_interface
                 if (
@@ -107,6 +111,8 @@ class ROS2ProtocolNode(BaseROS2DeviceNode):
                             f"添加了{read}方法(来源：{name} {communicate_hardware_info['write']}) \n    "
                             f"添加了{write}方法(来源：{name} {communicate_hardware_info['read']})"
                         )
+
+        self.lab_logger().info(f"ROS2ProtocolNode {device_id} initialized with protocols: {self.protocol_names}")
 
     def _setup_protocol_names(self, protocol_type):
         # 处理协议类型
