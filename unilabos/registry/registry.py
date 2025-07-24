@@ -131,7 +131,7 @@ class Registry:
                     "config_info": [],
                     "icon": "icon_device.webp",
                     "registry_type": "device",
-                    "handles": [],
+                    "handles": {},
                     "init_param_schema": {},
                     "file_path": "/",
                 }
@@ -144,7 +144,7 @@ class Registry:
             logger.debug(f"[UniLab Registry] Path {i+1}/{len(self.registry_paths)}: {sys_path}")
             sys.path.append(str(sys_path))
             self.load_device_types(path, complete_registry)
-            self.load_resource_types(path, complete_registry)
+            # self.load_resource_types(path, complete_registry)
         logger.info("[UniLab Registry] 注册表设置完成")
         # 标记setup已被调用
         self._setup_called = True
@@ -174,7 +174,7 @@ class Registry:
                     if "icon" not in resource_info:
                         resource_info["icon"] = ""
                     if "handles" not in resource_info:
-                        resource_info["handles"] = []
+                        resource_info["handles"] = {}
                     if "init_param_schema" not in resource_info:
                         resource_info["init_param_schema"] = {}
                     if complete_registry:
@@ -418,7 +418,7 @@ class Registry:
                     if "icon" not in device_config:
                         device_config["icon"] = ""
                     if "handles" not in device_config:
-                        device_config["handles"] = []
+                        device_config["handles"] = {}
                     if "init_param_schema" not in device_config:
                         device_config["init_param_schema"] = {}
                     if "class" in device_config:
@@ -499,7 +499,7 @@ class Registry:
                         )
                         for action_name, action_config in device_config["class"]["action_value_mappings"].items():
                             if "handles" not in action_config:
-                                action_config["handles"] = []
+                                action_config["handles"] = {}
                             if "type" in action_config:
                                 action_type_str: str = action_config["type"]
                                 # 通过Json发放指令，而不是通过特殊的ros action进行处理
@@ -544,7 +544,7 @@ class Registry:
                                         )
                                     )
                                 ),
-                                "handles": [],
+                                "handles": {},
                             }
                     if "registry_type" not in device_config:
                         device_config["registry_type"] = "device"
