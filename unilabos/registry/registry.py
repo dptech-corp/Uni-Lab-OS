@@ -131,7 +131,7 @@ class Registry:
                     "config_info": [],
                     "icon": "icon_device.webp",
                     "registry_type": "device",
-                    "handles": {},
+                    "handles": [],  # virtue采用了不同的handle
                     "init_param_schema": {},
                     "file_path": "/",
                 }
@@ -144,7 +144,7 @@ class Registry:
             logger.debug(f"[UniLab Registry] Path {i+1}/{len(self.registry_paths)}: {sys_path}")
             sys.path.append(str(sys_path))
             self.load_device_types(path, complete_registry)
-            # self.load_resource_types(path, complete_registry)
+            self.load_resource_types(path, complete_registry)
         logger.info("[UniLab Registry] 注册表设置完成")
         # 标记setup已被调用
         self._setup_called = True
@@ -174,7 +174,7 @@ class Registry:
                     if "icon" not in resource_info:
                         resource_info["icon"] = ""
                     if "handles" not in resource_info:
-                        resource_info["handles"] = {}
+                        resource_info["handles"] = []
                     if "init_param_schema" not in resource_info:
                         resource_info["init_param_schema"] = {}
                     if complete_registry:
@@ -418,7 +418,7 @@ class Registry:
                     if "icon" not in device_config:
                         device_config["icon"] = ""
                     if "handles" not in device_config:
-                        device_config["handles"] = {}
+                        device_config["handles"] = []
                     if "init_param_schema" not in device_config:
                         device_config["init_param_schema"] = {}
                     if "class" in device_config:
