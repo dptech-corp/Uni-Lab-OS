@@ -364,7 +364,16 @@ class HostNode(BaseROS2DeviceNode):
             resources, device_ids, bind_parent_ids, bind_locations, other_calling_params
         ):
             # 这里要求device_id传入必须是edge_device_id
-            namespace = "/devices/" + device_id
+            if device_id not in self.devices_names:
+                self.lab_logger().error(f"[Host Node] Device {device_id} not found in devices_names. Create resource failed.")
+                raise ValueError(f"[Host Node] Device {device_id} not found in devices_names. Create resource failed.")
+
+            device_key = f"{self.devices_names[device_id]}/{device_id}"
+            if device_key not in self._online_devices:
+                self.lab_logger().error(f"[Host Node] Device {device_key} is offline. Create resource failed.")
+                raise ValueError(f"[Host Node] Device {device_key} is offline. Create resource failed.")
+
+            namespace = self.devices_names[device_id]
             srv_address = f"/srv{namespace}/append_resource"
             sclient = self.create_client(SerialCommand, srv_address)
             sclient.wait_for_service()
