@@ -63,7 +63,7 @@ class ROSConfig:
     ]
 
 
-def _update_config_from_module(module):
+def _update_config_from_module(module, override_labid: str):
     for name, obj in globals().items():
         if isinstance(obj, type) and name.endswith("Config"):
             if hasattr(module, name) and isinstance(getattr(module, name), type):
@@ -74,6 +74,9 @@ def _update_config_from_module(module):
     if len(OSSUploadConfig.authorization) == 0:
         OSSUploadConfig.authorization = f"lab {MQConfig.lab_id}"
     # 对 ca_file cert_file key_file 进行初始化
+    if override_labid:
+        MQConfig.lab_id = override_labid
+        logger.warning(f"[ENV] 当前实验室启动的ID被设置为：{override_labid}")
     if len(MQConfig.ca_content) == 0:
         # 需要先判断是否为相对路径
         if MQConfig.ca_file.startswith("."):
@@ -155,7 +158,7 @@ def _update_config_from_env():
 
 
 
-def load_config(config_path=None):
+def load_config(config_path=None, override_labid=None):
     # 如果提供了配置文件路径，从该文件导入配置
     if config_path:
         _update_config_from_env()  # 允许config_path被env设定后读取
@@ -172,7 +175,7 @@ def load_config(config_path=None):
                 return
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)  # type: ignore
-            _update_config_from_module(module)
+            _update_config_from_module(module, override_labid)
             logger.info(f"[ENV] 配置文件 {config_path} 加载成功")
         except Exception as e:
             logger.error(f"[ENV] 加载配置文件 {config_path} 失败")
@@ -180,4 +183,4 @@ def load_config(config_path=None):
             exit(1)
     else:
         config_path = os.path.join(os.path.dirname(__file__), "local_config.py")
-        load_config(config_path)
+        load_config(config_path, override_labid)

@@ -22,7 +22,7 @@ from unilabos.config.config import load_config, BasicConfig, _update_config_from
 from unilabos.utils.banner_print import print_status, print_unilab_banner
 
 
-def load_config_from_file(config_path):
+def load_config_from_file(config_path, override_labid=None):
     if config_path is None:
         config_path = os.environ.get("UNILABOS.BASICCONFIG.CONFIG_PATH", None)
     if config_path:
@@ -31,10 +31,10 @@ def load_config_from_file(config_path):
         elif not config_path.endswith(".py"):
             print_status(f"配置文件 {config_path} 不是Python文件，必须以.py结尾", "error")
         else:
-            load_config(config_path)
+            load_config(config_path, override_labid)
     else:
         print_status(f"启动 UniLab-OS时，配置文件参数未正确传入 --config '{config_path}' 尝试本地配置...", "warning")
-        load_config(config_path)
+        load_config(config_path, override_labid)
 
 
 def parse_args():
@@ -106,6 +106,12 @@ def parse_args():
         default="disable",
         help="选择可视化工具: rviz, web",
     )
+    parser.add_argument(
+        "--labid",
+        type=str,
+        default="",
+        help="实验室唯一ID，也可通过环境变量 UNILABOS.MQCONFIG.LABID 设置或传入--config设置",
+    )
     return parser.parse_args()
 
 
@@ -117,7 +123,7 @@ def main():
 
     # 加载配置文件，优先加载config，然后从env读取
     config_path = args_dict.get("config")
-    load_config_from_file(config_path)
+    load_config_from_file(config_path, args_dict["labid"])
 
     # 设置BasicConfig参数
     BasicConfig.is_host_mode = not args_dict.get("without_host", False)
