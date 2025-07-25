@@ -16,12 +16,11 @@ OTDeck:
   registry_type: resource
   version: 1.0.0
 
-
 hplc_station:
-  description: Opentrons deck
+  description: hplc_station deck
   class: 
-    module: pylabrobot.resources.opentrons.deck:OTDeck
-    type: pylabrobot
+    module: unilabos.devices.resource_container.container:DeckContainer
+    type: python
   model:
     type: device
     mesh: hplc_station

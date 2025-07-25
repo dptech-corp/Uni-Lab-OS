@@ -92,18 +92,18 @@ class ResourceVisualization:
 
         # 遍历设备节点
         for node in device.values():
-            if node['type'] in self.resource_type or (node['type'] == 'device' and node['class'] != ''):
+            if (node['type'] in self.resource_type and node['class'] != '') or (node['type'] == 'device' and node['class'] != ''):
                 model_config = {}
                 if node['type'] in self.resource_type:
                     resource_class = node['class']
                     if resource_class not in registry.resource_type_registry.keys():
-                        raise ValueError(f"资源类型 {resource_class} 未在注册表中注册")
+                        raise ValueError(f"{node['id']}资源类型 {resource_class} 未在注册表中注册")
                     elif "model" in registry.resource_type_registry[resource_class].keys():
                         model_config = registry.resource_type_registry[resource_class]['model']
                 elif node['type'] == 'device' and node['class'] != '':
                     device_class = node['class']
                     if device_class not in registry.device_type_registry.keys():
-                        raise ValueError(f"设备类型 {device_class} 未在注册表中注册")
+                        raise ValueError(f"{node['id']}设备类型 {device_class} 未在注册表中注册")
                     elif "model" in registry.device_type_registry[device_class].keys():
                         model_config = registry.device_type_registry[device_class]['model']
                 if model_config:
