@@ -1,32 +1,48 @@
 {
     "nodes": [
 
+
         {
-            "id": "benyao",
-            "name": "benyao",
-            "children": [
-            ],
+            "id": "arm_slider",
+            "name": "arm_slider",
+            "children": [],
             "parent": null,
             "type": "device",
             "class": "moveit.arm_slider",
             "position": {
-                "x": 0,
-                "y": 0,
-                "z": 0
+                "x": -500,
+                "y": 1000,
+                "z": -100
             },
             "config": {
                 "moveit_type": "arm_slider",
                 "joint_poses": {
                     "arm": {
-                        "home": [0.0, 0.2, 0.0, 0.0, 0.0],
-                        "pick": [1.2, 0.0, 0.0, 0.0, 0.0]
+                        "hotel_1": [
+                            1.05,
+                            0.568,
+                            -1.0821,
+                            0.0,
+                            1.0821
+                        ],
+                        "home": [
+                            0.865,
+                            0.09,
+                            0.8727,
+                            0.0,
+                            -0.8727
+                        ]
                     }
                 },
-                "device_config": {
-                }
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": -1.5708,
+                    "type": "Rotation"
+                },
+                "device_config": {}
             },
-            "data": {
-            }
+            "data": {}
         }
     ],
     "links": [

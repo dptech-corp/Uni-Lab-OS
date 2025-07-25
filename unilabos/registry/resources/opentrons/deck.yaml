@@ -15,3 +15,12 @@ OTDeck:
     type: device
   registry_type: resource
   version: 1.0.0
+
+hplc_station:
+  description: hplc_station deck
+  class: 
+    module: unilabos.devices.resource_container.container:DeckContainer
+    type: python
+  model:
+    type: device
+    mesh: hplc_station

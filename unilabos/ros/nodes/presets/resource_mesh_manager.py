@@ -58,6 +58,8 @@ class ResourceMeshManager(BaseROS2DeviceNode):
         self.__old_planning_scene   = None
         self.__old_allowed_collision_matrix = None
         self.mesh_path = Path(__file__).parent.parent.parent.parent.absolute()
+        self.msg_type = 'resource_status'
+        self.resource_status_dict = {}
         
         callback_group = ReentrantCallbackGroup()
         self._get_planning_scene_service = self.create_client(
@@ -194,7 +196,6 @@ class ResourceMeshManager(BaseROS2DeviceNode):
                 parent_link = f"{parent}_device_link".replace("None_","")
 
             else:
-
                 continue
             # 提取位置信息并转换单位
             position = {
@@ -293,48 +294,64 @@ class ResourceMeshManager(BaseROS2DeviceNode):
             return
         changed_poses = {}
         resource_tf_dict = copy.deepcopy(self.resource_tf_dict)
-        for resource_id in resource_tf_dict.keys():
-            try:
-                # 获取从resource_id到world的转换
+        if self.msg_type == 'resource_pose':
+            for resource_id in resource_tf_dict.keys():
+                try:
+                    # 获取从resource_id到world的转换
 
-                transform = self.tf_buffer.lookup_transform(
-                    "world",
-                    resource_id,
-                    rclpy.time.Time(seconds=0),
-                    # rclpy.duration.Duration(seconds=5)
-                )
-                
-                # 提取当前位姿信息
-                current_pose = {
-                    "position": {
-                        "x": transform.transform.translation.x,
-                        "y": transform.transform.translation.y,
-                        "z": transform.transform.translation.z
-                    },
-                    "rotation": {
-                        "x": transform.transform.rotation.x,
-                        "y": transform.transform.rotation.y,
-                        "z": transform.transform.rotation.z,
-                        "w": transform.transform.rotation.w
+                    transform = self.tf_buffer.lookup_transform(
+                        "world",
+                        resource_id,
+                        rclpy.time.Time(seconds=0),
+                        # rclpy.duration.Duration(seconds=5)
+                    )
+                    
+                    # 提取当前位姿信息
+                    current_pose = {
+                        "position": {
+                            "x": transform.transform.translation.x,
+                            "y": transform.transform.translation.y,
+                            "z": transform.transform.translation.z
+                        },
+                        "rotation": {
+                            "x": transform.transform.rotation.x,
+                            "y": transform.transform.rotation.y,
+                            "z": transform.transform.rotation.z,
+                            "w": transform.transform.rotation.w
+                        }
                     }
-                }
-                
-                # 检查是否存在旧位姿记录
+                    
+                    # 检查是否存在旧位姿记录
+                    if resource_id not in self.old_resource_pose:
+                        # 如果没有旧记录，则认为是新资源，记录变化
+                        changed_poses[resource_id] = current_pose
+                        self.old_resource_pose[resource_id] = current_pose
+                    else:
+                        # 比较当前位姿与旧位姿
+                        old_pose = self.old_resource_pose[resource_id]
+                        if (not self._is_pose_equal(current_pose, old_pose)):
+                            # 如果位姿发生变化，记录新位姿
+                            changed_poses[resource_id] = current_pose
+                            self.old_resource_pose[resource_id] = current_pose
+                            
+                except Exception as e:
+                    self.get_logger().warning(f"获取资源 {resource_id} 的世界坐标变换失败: {e}")
+                    
+        elif self.msg_type == 'resource_status':
+            for resource_id, resource_status in resource_tf_dict.items():
                 if resource_id not in self.old_resource_pose:
                     # 如果没有旧记录，则认为是新资源，记录变化
-                    changed_poses[resource_id] = current_pose
-                    self.old_resource_pose[resource_id] = current_pose
+                    changed_poses[resource_id] = resource_status['parent']
+                    self.old_resource_pose[resource_id] = resource_status['parent']
                 else:
                     # 比较当前位姿与旧位姿
                     old_pose = self.old_resource_pose[resource_id]
-                    if (not self._is_pose_equal(current_pose, old_pose)):
+                    if resource_status['parent'] != old_pose:
                         # 如果位姿发生变化，记录新位姿
-                        changed_poses[resource_id] = current_pose
-                        self.old_resource_pose[resource_id] = current_pose
-                        
-            except Exception as e:
-                self.get_logger().warning(f"获取资源 {resource_id} 的世界坐标变换失败: {e}")
-        
+                        changed_poses[resource_id] = resource_status['parent']
+                        self.old_resource_pose[resource_id] = resource_status['parent']
+                    
+                    
         if changed_poses != {}:
             self.zero_count = 0
             changed_poses_msg = String()
