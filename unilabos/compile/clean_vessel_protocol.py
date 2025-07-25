@@ -181,7 +181,16 @@ def generate_clean_vessel_protocol(
         clean_protocol = generate_clean_vessel_protocol(G, {"id": "main_reactor"}, "water", 100.0, 60.0, 2)
     """
     # 🔧 核心修改：从字典中提取容器ID
-    vessel_id = vessel["id"]
+    # 统一处理vessel参数
+    if isinstance(vessel, dict):
+        if "id" not in vessel:
+            vessel_id = list(vessel.values())[0].get("id", "")
+        else:
+            vessel_id = vessel.get("id", "")
+        vessel_data = vessel.get("data", {})
+    else:
+        vessel_id = str(vessel)
+        vessel_data = G.nodes[vessel_id].get("data", {}) if vessel_id in G.nodes() else {}
     
     action_sequence = []
     

@@ -237,7 +237,10 @@ def generate_adjust_ph_protocol(
     
     # 统一处理vessel参数
     if isinstance(vessel, dict):
-        vessel_id = list(vessel.values())[0].get("id", "")
+        if "id" not in vessel:
+            vessel_id = list(vessel.values())[0].get("id", "")
+        else:
+            vessel_id = vessel.get("id", "")
         vessel_data = vessel.get("data", {})
     else:
         vessel_id = str(vessel)
