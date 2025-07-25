@@ -22,6 +22,19 @@ DEFAULT_PATHS = [Path(__file__).absolute().parent]
 @singleton
 class Registry:
     def __init__(self, registry_paths=None):
+        import ctypes
+        try:
+            import unilabos_msgs
+        except ImportError:
+            logger.error(
+                "[UniLab Registry] unilabos_msgs模块未找到，请确保已根据官方文档安装unilabos_msgs包。"
+            )
+            sys.exit(1)
+        try:
+            ctypes.CDLL(str(Path(unilabos_msgs.__file__).parent / "unilabos_msgs_s__rosidl_typesupport_c.pyd"))
+        except OSError as e:
+            pass
+
         self.registry_paths = DEFAULT_PATHS.copy()  # 使用copy避免修改默认值
         if registry_paths:
             self.registry_paths.extend(registry_paths)
