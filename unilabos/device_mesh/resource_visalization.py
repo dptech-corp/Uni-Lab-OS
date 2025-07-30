@@ -309,6 +309,7 @@ class ResourceVisualization:
             'allow_trajectory_execution': True,
             'robot_description': robot_description,
             'robot_description_semantic': urdf_str_srdf,
+            'robot_description_kinematics': kinematics_dict,
             'capabilities': '',
             'disable_capabilities': '',
             'monitor_dynamics': False,
