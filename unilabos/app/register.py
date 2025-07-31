@@ -34,9 +34,6 @@ def register_devices_and_resources(mqtt_client, lab_registry):
             logger.info(f"[UniLab Register] 成功通过HTTP注册 {len(resources_to_register)} 个资源 {cost_time}ms")
         else:
             logger.error(f"[UniLab Register] HTTP注册资源失败: {response.status_code}, {response.text} {cost_time}ms")
-
-    time.sleep(10)
-
     logger.info("[UniLab Register] 设备和资源注册完成.")
 
 

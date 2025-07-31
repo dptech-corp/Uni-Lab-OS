@@ -1,5 +1,6 @@
 name: unilab
 channels:
+  - unilab
   - robostack
   - robostack-staging
   - conda-forge
@@ -61,12 +62,13 @@ dependencies:
   - transforms3d
   # ros-humble-gazebo-ros // ignored because of the conflict with ign-gazebo
   # ilab equipments
-  # ros-humble-unilabos-msgs
+  - uni-lab::ros-humble-unilabos-msgs
   # driver
   #- crcmod
   - pip:
       - paho-mqtt
       - opentrons_shared_data
+      - git+https://github.com/Xuwznln/pylabrobot
       # driver
       #- ur-rtde  # set PYTHONUTF8=1
       #- pyautogui

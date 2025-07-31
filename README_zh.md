@@ -40,21 +40,11 @@ Uni-Lab-OS 建议使用 `mamba` 管理环境。根据您的操作系统选择适
 
 ```bash
 # 创建新环境
-mamba env create -f unilabos-[YOUR_OS].yaml
-mamba activate unilab
+mamba create -n unilab unilab -c unilab -c robostack -c robostack-staging -c conda-forge
 
 # 或更新现有环境
 # 其中 `[YOUR_OS]` 可以是 `win64`, `linux-64`, `osx-64`, 或 `osx-arm64`。
 conda env update --file unilabos-[YOUR_OS].yml -n 环境名
-
-# 现阶段，需要安装 `unilabos_msgs` 包
-# 可以前往 Release 页面下载系统对应的包进行安装
-conda install ros-humble-unilabos-msgs-0.10.0-xxxxx.tar.bz2
-
-# 安装PyLabRobot等前置
-git clone https://github.com/PyLabRobot/pylabrobot plr_repo
-cd plr_repo
-pip install .[opentrons]
 ```
 
 2. 安装 Uni-Lab-OS:
