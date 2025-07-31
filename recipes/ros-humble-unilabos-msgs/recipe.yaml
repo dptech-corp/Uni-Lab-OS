@@ -57,5 +57,5 @@ requirements:
     - robostack-staging::ros-humble-rosidl-default-runtime
     - robostack-staging::ros-humble-std-msgs
     - robostack-staging::ros-humble-geometry-msgs
-    - robostack-staging::ros2-distro-mutex=0.6.*
+#    - robostack-staging::ros2-distro-mutex=0.6.*
     - sel(osx and x86_64): __osx >={{ MACOSX_DEPLOYMENT_TARGET|default('10.14') }}
