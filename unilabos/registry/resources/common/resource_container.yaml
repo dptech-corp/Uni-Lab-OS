@@ -1,0 +1,57 @@
+plate_96_high:
+  description: 96孔板
+  class: 
+    module: unilabos.devices.resource_container.container:PlateContainer
+    type: python
+  model:
+    type: resource
+    mesh: plate_96_high/meshes/plate_96_high.stl
+    mesh_tf:
+    - 0
+    - 0.086
+    - 0
+    - 1.5708
+    - 0
+    - 1.5708
+
+
+hplc_plate:
+  description: HPLC板
+  class: 
+    module: unilabos.devices.resource_container.container:PlateContainer
+    type: python
+  model:
+    type: resource
+    mesh: hplc_plate/meshes/hplc_plate.stl
+    mesh_tf:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 3.1416
+
+
+tiprack_96_high:
+  description: 96孔板
+  class: 
+    module: unilabos.devices.resource_container.container:TipRackContainer
+    type: python
+  model:
+    type: resource
+    mesh: tiprack_96_high/meshes/tiprack_96_high.stl
+    mesh_tf:
+    - 0
+    - 0.086
+    - 0
+    - 1.5708
+    - 0
+    - 1.5708
+    children_mesh: generic_labware_tube_10_75/meshes/0_base.stl
+    children_mesh_tf:
+    - 0.0018
+    - 0.0018
+    - -0.03
+    - -1.5708
+    - 0
+    - 0

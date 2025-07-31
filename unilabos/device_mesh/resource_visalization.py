@@ -92,18 +92,18 @@ class ResourceVisualization:
 
         # 遍历设备节点
         for node in device.values():
-            if node['type'] in self.resource_type or (node['type'] == 'device' and node['class'] != ''):
+            if (node['type'] in self.resource_type and node['class'] != '') or (node['type'] == 'device' and node['class'] != ''):
                 model_config = {}
                 if node['type'] in self.resource_type:
                     resource_class = node['class']
                     if resource_class not in registry.resource_type_registry.keys():
-                        raise ValueError(f"资源类型 {resource_class} 未在注册表中注册")
+                        raise ValueError(f"{node['id']}资源类型 {resource_class} 未在注册表中注册")
                     elif "model" in registry.resource_type_registry[resource_class].keys():
                         model_config = registry.resource_type_registry[resource_class]['model']
                 elif node['type'] == 'device' and node['class'] != '':
                     device_class = node['class']
                     if device_class not in registry.device_type_registry.keys():
-                        raise ValueError(f"设备类型 {device_class} 未在注册表中注册")
+                        raise ValueError(f"{node['id']}设备类型 {device_class} 未在注册表中注册")
                     elif "model" in registry.device_type_registry[device_class].keys():
                         model_config = registry.device_type_registry[device_class]['model']
                 if model_config:
@@ -128,10 +128,6 @@ class ResourceVisualization:
                         # if node["parent"] is not None:
                         #     new_dev.set("station_name", node["parent"]+'_')
 
-                        print('o'*20)
-                        node["parent"]
-                        node["id"]
-                        print('o'*20)
                         new_dev.set("x",str(float(node["position"]["x"])/1000))
                         new_dev.set("y",str(float(node["position"]["y"])/1000))
                         new_dev.set("z",str(float(node["position"]["z"])/1000))
@@ -141,7 +137,7 @@ class ResourceVisualization:
                             new_dev.set("r",str(float(node["config"]["rotation"]["z"])))
                         if "device_config" in node["config"]:
                             for key, value in node["config"]["device_config"].items():
-                                new_dev.set(key, str(float(value)))
+                                new_dev.set(key, str(value))
 
                         # 添加ros2_controller
                         if node['class'].startswith('moveit.'):
@@ -164,10 +160,13 @@ class ResourceVisualization:
         xacro.process_doc(doc)
         self.urdf_str = doc.toxml()
 
+
         re_srdf = etree.tostring(self.root_srdf, encoding="unicode")
         doc_srdf = xacro.parse(re_srdf)
         xacro.process_doc(doc_srdf)
         self.urdf_str_srdf = doc_srdf.toxml()
+
+
         if self.moveit_nodes:
             self.moveit_init()
 
@@ -251,7 +250,9 @@ class ResourceVisualization:
 
         kinematics_dict = self.moveit_nodes_kinematics
 
+
         if self.moveit_nodes:
+
             controllers = []
             ros2_controllers = ParameterFile(f"{str(self.mesh_path)}/ros2_controllers.yaml", allow_substs=True)
 
@@ -288,10 +289,6 @@ class ResourceVisualization:
         else:
             ros2_controllers = None
 
-
-
-
-
         # 创建robot_state_publisher节点
         robot_state_publisher = nd(
             package='robot_state_publisher',
@@ -306,33 +303,37 @@ class ResourceVisualization:
             ]
         )
 
+
         # 创建move_group节点
+        moveit_params =[{
+            'allow_trajectory_execution': True,
+            'robot_description': robot_description,
+            'robot_description_semantic': urdf_str_srdf,
+            'robot_description_kinematics': kinematics_dict,
+            'capabilities': '',
+            'disable_capabilities': '',
+            'monitor_dynamics': False,
+            'publish_monitored_planning_scene': True,
+            'publish_robot_description_semantic': True,
+            'publish_planning_scene': True,
+            'publish_geometry_updates': True,
+            'publish_state_updates': True,
+            'publish_transforms_updates': True,
+            # 'robot_description_planning': robot_description_planning,
+            },
+            robot_description_planning,
+            planning_pipelines,
+            ]
+        if self.moveit_controllers_yaml['moveit_simple_controller_manager']['controller_names']:
+            moveit_params.append(self.moveit_controllers_yaml)
+
         move_group = nd(
             package='moveit_ros_move_group',
             executable='move_group',
             output='screen',
-            parameters=[{
-                'allow_trajectory_execution': True,
-                'robot_description': robot_description,
-                'robot_description_semantic': urdf_str_srdf,
-                'robot_description_kinematics': kinematics_dict,
-                'capabilities': '',
-                'disable_capabilities': '',
-                'monitor_dynamics': False,
-                'publish_monitored_planning_scene': True,
-                'publish_robot_description_semantic': True,
-                'publish_planning_scene': True,
-                'publish_geometry_updates': True,
-                'publish_state_updates': True,
-                'publish_transforms_updates': True,
-                # 'robot_description_planning': robot_description_planning,
-            },
-            self.moveit_controllers_yaml,
-            # ompl_planning_pipeline_config,
-            robot_description_planning,
-            planning_pipelines,
-            ]
+            parameters=moveit_params
         )
+
 
         # 将节点添加到launch描述中
         self.launch_description.add_action(robot_state_publisher)

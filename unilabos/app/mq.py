@@ -166,7 +166,7 @@ class MQTTClient:
         status = {"data": device_status.get(device_id, {}), "device_id": device_id, "timestamp": time.time()}
         address = f"labs/{MQConfig.lab_id}/devices/"
         self.client.publish(address, json.dumps(status), qos=2)
-        logger.debug(f"Device status published: address: {address}, {status}")
+        logger.info(f"Device {device_id} status published: address: {address}, {status}")
 
     def publish_job_status(self, feedback_data: dict, job_id: str, status: str, return_info: Optional[str] = None):
         if self.mqtt_disable:
