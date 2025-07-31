@@ -9,6 +9,7 @@ from typing import Any, Dict, List
 
 import yaml
 
+from unilabos.config.config import BasicConfig
 from unilabos.resources.graphio import resource_plr_to_ulab, tree_to_list
 from unilabos.ros.msgs.message_converter import msg_converter_manager, ros_action_to_json_schema, String
 from unilabos.utils import logger
@@ -46,6 +47,7 @@ class Registry:
         )
         self.EmptyIn = self._replace_type_with_class("EmptyIn", "host_node", f"")
         self.device_type_registry = {}
+        self.device_module_to_registry = {}
         self.resource_type_registry = {}
         self._setup_called = False  # 跟踪setup是否已调用
         # 其他状态变量
@@ -157,7 +159,10 @@ class Registry:
             logger.debug(f"[UniLab Registry] Path {i+1}/{len(self.registry_paths)}: {sys_path}")
             sys.path.append(str(sys_path))
             self.load_device_types(path, complete_registry)
-            self.load_resource_types(path, complete_registry)
+            if BasicConfig.enable_resource_load:
+                self.load_resource_types(path, complete_registry)
+            else:
+                logger.warning("跳过了资源注册表加载！")
         logger.info("[UniLab Registry] 注册表设置完成")
         # 标记setup已被调用
         self._setup_called = True

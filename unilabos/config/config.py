@@ -15,6 +15,7 @@ class BasicConfig:
     upload_registry = False
     machine_name = "undefined"
     vis_2d_enable = False
+    enable_resource_load = True
 
 
 # MQTT配置

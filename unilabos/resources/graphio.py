@@ -1,7 +1,7 @@
 import importlib
 import inspect
 import json
-from typing import Union, Any
+from typing import Union, Any, Dict
 import numpy as np
 import networkx as nx
 from unilabos_msgs.msg import Resource
@@ -150,10 +150,12 @@ def handle_communications(G: nx.Graph):
             G.nodes[device]["config"]["io_device_port"] = int(edata["port"][device_comm])
 
 
-def read_node_link_json(json_file):
+def read_node_link_json(json_info: Union[str, Dict[str, Any]]) -> tuple[nx.Graph, dict]:
     global physical_setup_graph
-
-    data = json.load(open(json_file, encoding="utf-8"))
+    if isinstance(json_info, str):
+        data = json.load(open(json_info, encoding="utf-8"))
+    else:
+        data = json_info
     data = canonicalize_nodes_data(data)
     data = canonicalize_links_ports(data)
 

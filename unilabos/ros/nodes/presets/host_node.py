@@ -36,6 +36,7 @@ from unilabos.ros.msgs.message_converter import (
 )
 from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode, ROS2DeviceNode, DeviceNodeResourceTracker
 from unilabos.ros.nodes.presets.controller_node import ControllerNode
+from unilabos.utils.exception import DeviceClassInvalid
 
 
 class HostNode(BaseROS2DeviceNode):
@@ -459,7 +460,11 @@ class HostNode(BaseROS2DeviceNode):
         self.lab_logger().info(f"[Host Node] Initializing device: {device_id}")
 
         device_config_copy = copy.deepcopy(device_config)
-        d = initialize_device_from_dict(device_id, device_config_copy)
+        try:
+            d = initialize_device_from_dict(device_id, device_config_copy)
+        except DeviceClassInvalid as e:
+            self.lab_logger().error(f"[Host Node] Device class invalid: {e}")
+            d = None
         if d is None:
             return
         # noinspection PyProtectedMember

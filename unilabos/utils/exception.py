@@ -1,0 +1,3 @@
+
+class DeviceClassInvalid(Exception):
+    pass

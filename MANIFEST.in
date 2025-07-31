@@ -1,5 +1,5 @@
 recursive-include unilabos/registry *.yaml
-recursive-include unilabos/app/web *.html
-recursive-include unilabos/app/web *.css
+recursive-include unilabos/app/static *
+recursive-include unilabos/app/templates *
 recursive-include unilabos/device_mesh/devices *
 recursive-include unilabos/device_mesh/resources *
