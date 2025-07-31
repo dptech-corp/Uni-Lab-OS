@@ -9,6 +9,7 @@ from unilabos.utils import logger
 
 class BasicConfig:
     ENV = "pro"  # 'test'
+    working_dir = ""
     config_path = ""
     is_host_mode = True
     slave_no_host = False  # 是否跳过rclient.wait_for_service()

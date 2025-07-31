@@ -1,6 +1,7 @@
 configs/
 temp/
 output/
+unilabos_data/
 ## Python
 
 # Byte-compiled / optimized / DLL files
