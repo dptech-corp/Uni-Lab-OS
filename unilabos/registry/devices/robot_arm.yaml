@@ -147,7 +147,6 @@ robotic_arm.UR:
   handles: []
   icon: ''
   init_param_schema:
-    additionalProperties: false
     config:
       properties:
         host:
@@ -173,13 +172,189 @@ robotic_arm.UR:
       - gripper_pose
       - arm_status
       - gripper_status
-    type: object
+      type: object
   version: 1.0.0
 robotic_arm.elite:
   category:
   - robot_arm
   class:
     action_value_mappings:
+      auto-close:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: close参数
+          type: object
+        type: UniLabJsonCommand
+      auto-modbus_close:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: modbus_close参数
+          type: object
+        type: UniLabJsonCommand
+      auto-modbus_read_holding_registers:
+        feedback: {}
+        goal: {}
+        goal_default:
+          quantity: null
+          start_addr: null
+          unit_id: null
+        handles: []
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                quantity:
+                  type: string
+                start_addr:
+                  type: string
+                unit_id:
+                  type: string
+              required:
+              - unit_id
+              - start_addr
+              - quantity
+              type: object
+            result: {}
+          required:
+          - goal
+          title: modbus_read_holding_registers参数
+          type: object
+        type: UniLabJsonCommand
+      auto-modbus_task:
+        feedback: {}
+        goal: {}
+        goal_default:
+          job_id: null
+        handles: []
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                job_id:
+                  type: string
+              required:
+              - job_id
+              type: object
+            result: {}
+          required:
+          - goal
+          title: modbus_task参数
+          type: object
+        type: UniLabJsonCommand
+      auto-modbus_write_single_register:
+        feedback: {}
+        goal: {}
+        goal_default:
+          register_addr: null
+          unit_id: null
+          value: null
+        handles: []
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                register_addr:
+                  type: string
+                unit_id:
+                  type: string
+                value:
+                  type: string
+              required:
+              - unit_id
+              - register_addr
+              - value
+              type: object
+            result: {}
+          required:
+          - goal
+          title: modbus_write_single_register参数
+          type: object
+        type: UniLabJsonCommand
+      auto-parse_success_response:
+        feedback: {}
+        goal: {}
+        goal_default:
+          response: null
+        handles: []
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                response:
+                  type: string
+              required:
+              - response
+              type: object
+            result: {}
+          required:
+          - goal
+          title: parse_success_response参数
+          type: object
+        type: UniLabJsonCommand
+      auto-send_command:
+        feedback: {}
+        goal: {}
+        goal_default:
+          command: null
+        handles: []
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                command:
+                  type: string
+              required:
+              - command
+              type: object
+            result: {}
+          required:
+          - goal
+          title: send_command参数
+          type: object
+        type: UniLabJsonCommand
       modbus_task_cmd:
         feedback: {}
         goal:
@@ -225,13 +400,34 @@ robotic_arm.elite:
         type: SendCmd
     module: unilabos.devices.arm.elite_robot:EliteRobot
     status_types:
-      arm_pose: Float64MultiArray
+      actual_joint_positions: String
+      arm_pose: list
     type: python
   config_info: []
   description: Elite robot arm
   handles: []
   icon: ''
-  init_param_schema: {}
+  init_param_schema:
+    config:
+      properties:
+        device_id:
+          type: string
+        host:
+          type: string
+      required:
+      - device_id
+      - host
+      type: object
+    data:
+      properties:
+        actual_joint_positions:
+          type: string
+        arm_pose:
+          type: array
+      required:
+      - arm_pose
+      - actual_joint_positions
+      type: object
   model:
     mesh: elite_robot
     type: device

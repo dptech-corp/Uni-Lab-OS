@@ -15,12 +15,20 @@ OTDeck:
     type: device
   registry_type: resource
   version: 1.0.0
-
 hplc_station:
-  description: hplc_station deck
-  class: 
+  category:
+  - deck
+  class:
     module: unilabos.devices.resource_container.container:DeckContainer
     type: python
+  config_info: []
+  description: hplc_station deck
+  file_path: C:/Users/10230/PycharmProjects/Uni-Lab-OS/unilabos/registry/resources/opentrons/deck.yaml
+  handles: []
+  icon: ''
+  init_param_schema: {}
   model:
-    type: device
     mesh: hplc_station
+    type: device
+  registry_type: resource
+  version: 1.0.0

@@ -1,27 +1,16 @@
-plate_96_high:
-  description: 96孔板
-  class: 
-    module: unilabos.devices.resource_container.container:PlateContainer
-    type: python
-  model:
-    type: resource
-    mesh: plate_96_high/meshes/plate_96_high.stl
-    mesh_tf:
-    - 0
-    - 0.086
-    - 0
-    - 1.5708
-    - 0
-    - 1.5708
-
-
 hplc_plate:
-  description: HPLC板
-  class: 
+  category:
+  - resource_container
+  class:
     module: unilabos.devices.resource_container.container:PlateContainer
     type: python
+  config_info: []
+  description: HPLC板
+  file_path: C:/Users/10230/PycharmProjects/Uni-Lab-OS/unilabos/registry/resources/common/resource_container.yaml
+  handles: []
+  icon: ''
+  init_param_schema: {}
   model:
-    type: resource
     mesh: hplc_plate/meshes/hplc_plate.stl
     mesh_tf:
     - 0
@@ -30,16 +19,23 @@ hplc_plate:
     - 0
     - 0
     - 3.1416
-
-
-tiprack_96_high:
-  description: 96孔板
-  class: 
-    module: unilabos.devices.resource_container.container:TipRackContainer
-    type: python
-  model:
     type: resource
-    mesh: tiprack_96_high/meshes/tiprack_96_high.stl
+  registry_type: resource
+  version: 1.0.0
+plate_96_high:
+  category:
+  - resource_container
+  class:
+    module: unilabos.devices.resource_container.container:PlateContainer
+    type: python
+  config_info: []
+  description: 96孔板
+  file_path: C:/Users/10230/PycharmProjects/Uni-Lab-OS/unilabos/registry/resources/common/resource_container.yaml
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  model:
+    mesh: plate_96_high/meshes/plate_96_high.stl
     mesh_tf:
     - 0
     - 0.086
@@ -47,6 +43,22 @@ tiprack_96_high:
     - 1.5708
     - 0
     - 1.5708
+    type: resource
+  registry_type: resource
+  version: 1.0.0
+tiprack_96_high:
+  category:
+  - resource_container
+  class:
+    module: unilabos.devices.resource_container.container:TipRackContainer
+    type: python
+  config_info: []
+  description: 96孔板
+  file_path: C:/Users/10230/PycharmProjects/Uni-Lab-OS/unilabos/registry/resources/common/resource_container.yaml
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  model:
     children_mesh: generic_labware_tube_10_75/meshes/0_base.stl
     children_mesh_tf:
     - 0.0018
@@ -55,3 +67,14 @@ tiprack_96_high:
     - -1.5708
     - 0
     - 0
+    mesh: tiprack_96_high/meshes/tiprack_96_high.stl
+    mesh_tf:
+    - 0
+    - 0.086
+    - 0
+    - 1.5708
+    - 0
+    - 1.5708
+    type: resource
+  registry_type: resource
+  version: 1.0.0

@@ -180,7 +180,6 @@ class Registry:
             if data:
                 # 为每个资源添加文件路径信息
                 for resource_id, resource_info in data.items():
-                    resource_info["file_path"] = str(file.absolute()).replace("\\", "/")
                     if "version" not in resource_info:
                         resource_info["version"] = "1.0.0"
                     if "category" not in resource_info:
@@ -206,9 +205,9 @@ class Registry:
                                     res_instance = res_class(res_class.__name__)
                                     res_ulr = tree_to_list([resource_plr_to_ulab(res_instance)])
                                     resource_info["config_info"] = res_ulr
-                    resource_info["registry_type"] = "resource"
                     complete_data[resource_id] = copy.deepcopy(dict(sorted(resource_info.items())))  # 稍后dump到文件
-
+                    resource_info["registry_type"] = "resource"
+                    resource_info["file_path"] = str(file.absolute()).replace("\\", "/")
                 complete_data = dict(sorted(complete_data.items()))
                 complete_data = copy.deepcopy(complete_data)
                 if complete_registry:
@@ -564,8 +563,6 @@ class Registry:
                                 ),
                                 "handles": {},
                             }
-                    if "registry_type" not in device_config:
-                        device_config["registry_type"] = "device"
                     device_config["file_path"] = str(file.absolute()).replace("\\", "/")
                     device_config["registry_type"] = "device"
                     logger.debug(
