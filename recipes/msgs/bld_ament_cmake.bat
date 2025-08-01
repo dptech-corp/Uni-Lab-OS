@@ -19,6 +19,7 @@ set "CMAKE_GENERATOR=Visual Studio %VS_MAJOR% %VS_YEAR%"
 set "SP_DIR_FORWARDSLASHES=%SP_DIR:\=/%"
 
 set PYTHON="%PREFIX%\python.exe"
+set PYTHON=%PYTHON:\=\\%
 
 cmake ^
     -G "%CMAKE_GENERATOR%" ^
@@ -35,30 +36,9 @@ cmake ^
     -DPYTHON_INSTALL_DIR=%SP_DIR_FORWARDSLASHES% ^
     --compile-no-warning-as-error ^
     %SRC_DIR%\src
+
 if errorlevel 1 exit 1
 
-set "infile=%SRC_DIR%\build\cmake_install.cmake"
-set "tmpfile=%infile%.tmp"
-
-rem 模式串 - 使用完整的python路径
-set "python_path=%PYTHON%"
-rem 转义引号用于模式匹配
-set "pattern=echo !python_path!"
-
-rem 使用powershell进行更可靠的文本替换
-powershell -Command ^
-  "$content = Get-Content '%infile%' -Raw; " ^
-  "$pythonPath = '%PYTHON%'; " ^
-  "$pattern = 'echo ' + [regex]::Escape($pythonPath); " ^
-  "$replacement = 'echo ' + $pythonPath.Replace('\', '\\'); " ^
-  "$newContent = $content -replace $pattern, $replacement; " ^
-  "Set-Content -Path '%tmpfile%' -Value $newContent -NoNewline"
-
-if exist "%tmpfile%" (
-    move /Y "%tmpfile%" "%infile%" > nul
-) else (
-    echo Warning: Failed to process cmake_install.cmake
-)
-
 cmake --build . --config Release --target install
+
 if errorlevel 1 exit 1
