@@ -73,4 +73,4 @@ requirements:
   - robostack-staging::ros2-distro-mutex=0.6
   - if: osx and x86_64
     then:
-    - __osx >= {{ MACOSX_DEPLOYMENT_TARGET|default('10.14') }}
+    - __osx >=${{ MACOSX_DEPLOYMENT_TARGET|default('10.14') }}
