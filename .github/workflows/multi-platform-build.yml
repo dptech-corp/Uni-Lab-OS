@@ -108,27 +108,27 @@ jobs:
       - name: Prepare artifacts for upload
         if: steps.should_build.outputs.should_build == 'true'
         run: |
-          mkdir -p ${{ runner.temp }}/conda-packages
-          find ./output -name "*.conda" -exec cp {} ${{ runner.temp }}/conda-packages/ \;
+          mkdir -p conda-packages-temp
+          find ./output -name "*.conda" -exec cp {} conda-packages-temp/ \;
           echo "Copied files to temp directory:"
-          ls -la ${{ runner.temp }}/conda-packages/
+          ls -la conda-packages-temp/
 
       - name: Upload conda package artifacts
         if: steps.should_build.outputs.should_build == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: conda-package-${{ matrix.platform }}
-          path: ${{ runner.temp }}/conda-packages
+          path: conda-packages-temp
           if-no-files-found: warn
           retention-days: 30
 
       - name: Login to Anaconda with API token
-        if: steps.should_build.outputs.should_build == 'true' && (github.event.inputs.upload_to_anaconda == 'true' || startsWith(github.ref, 'refs/tags/'))
+        if: steps.should_build.outputs.should_build == 'true' && (github.event.inputs.upload_to_anaconda == 'true' || github.ref == 'refs/heads/main')
         run: |
           anaconda login --token ${{ secrets.ANACONDA_API_TOKEN }}
 
       - name: Upload to Anaconda.org (unilab organization)
-        if: steps.should_build.outputs.should_build == 'true' && (github.event.inputs.upload_to_anaconda == 'true' || startsWith(github.ref, 'refs/tags/'))
+        if: steps.should_build.outputs.should_build == 'true' && (github.event.inputs.upload_to_anaconda == 'true' || github.ref == 'refs/heads/main')
         run: |
           for package in $(find ./output -name "*.conda"); do
             echo "Uploading $package to unilab organization..."
@@ -136,20 +136,6 @@ jobs:
           done
 
       - name: Logout from Anaconda
-        if: always() && steps.should_build.outputs.should_build == 'true' && (github.event.inputs.upload_to_anaconda == 'true' || startsWith(github.ref, 'refs/tags/'))
+        if: always() && steps.should_build.outputs.should_build == 'true' && (github.event.inputs.upload_to_anaconda == 'true' || github.ref == 'refs/heads/main')
         run: |
           anaconda logout || true
-
-      - name: Create release assets (on tags)
-        if: steps.should_build.outputs.should_build == 'true' && startsWith(github.ref, 'refs/tags/')
-        run: |
-          mkdir -p release-assets
-          find ./output -name "*.conda" -exec cp {} release-assets/ \;
-
-      - name: Upload to release
-        if: steps.should_build.outputs.should_build == 'true' && startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v1
-        with:
-          files: release-assets/*
-          draft: false
-          prerelease: false
