@@ -140,10 +140,24 @@ def main():
 
     # 加载配置文件，优先加载config，然后从env读取
     config_path = args_dict.get("config")
-    working_dir = os.path.abspath(os.path.join(os.getcwd(), "unilabos_data"))
-    if not config_path and (not os.path.exists(working_dir) or not os.path.exists(os.path.join(working_dir, "local_config.py"))):
-        print_status(f"当前未指定config路径，非第一次使用请通过 --config 传入 local_config.py 文件路径", "info")
-        print_status(f"您是否为第一次使用？并将当前文件路径 {working_dir} 作为工作目录？ (Y/n)", "info")
+    if os.getcwd().endswith("unilabos_data"):
+        working_dir = os.path.abspath(os.getcwd())
+    else:
+        working_dir = os.path.abspath(os.path.join(os.getcwd(), "unilabos_data"))
+    if args_dict.get("working_dir"):
+        working_dir = args_dict.get("working_dir")
+        if config_path and not os.path.exists(config_path):
+            config_path = os.path.join(working_dir, "local_config.py")
+            if not os.path.exists(config_path):
+                print_status(
+                    f"当前工作目录 {working_dir} 未找到local_config.py，请通过 --config 传入 local_config.py 文件路径",
+                    "error")
+                os._exit(1)
+    elif os.path.exists(working_dir) and os.path.exists(os.path.join(working_dir, "local_config.py")):
+        config_path = os.path.join(working_dir, "local_config.py")
+    elif not config_path and (not os.path.exists(working_dir) or not os.path.exists(os.path.join(working_dir, "local_config.py"))):
+        print_status(f"未指定config路径，可通过 --config 传入 local_config.py 文件路径", "info")
+        print_status(f"您是否为第一次使用？并将当前路径 {working_dir} 作为工作目录？ (Y/n)", "info")
         if input() != "n":
             os.makedirs(working_dir, exist_ok=True)
             config_path = os.path.join(working_dir, "local_config.py")
@@ -153,16 +167,8 @@ def main():
             os._exit(1)
         else:
             os._exit(1)
-    else:
-        working_dir = args_dict.get("working_dir") or os.path.abspath(os.path.join(os.getcwd(), "unilabos_data"))
-        if working_dir:
-            if config_path and not os.path.exists(config_path):
-                config_path = os.path.join(working_dir, "local_config.py")
-                if not os.path.exists(config_path):
-                    print_status(f"当前工作目录 {working_dir} 未找到local_config.py，请通过 --config 传入 local_config.py 文件路径", "error")
-                    os._exit(1)
-            print_status(f"当前工作目录为 {working_dir}", "info")
     # 加载配置文件
+    print_status(f"当前工作目录为 {working_dir}", "info")
     load_config_from_file(config_path, args_dict["labid"])
 
     # 设置BasicConfig参数

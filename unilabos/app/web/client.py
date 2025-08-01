@@ -4,11 +4,12 @@ HTTP客户端模块
 提供与远程服务器通信的客户端功能，只有host需要用
 """
 import json
+import os
 from typing import List, Dict, Any, Optional
 
 import requests
 from unilabos.utils.log import info
-from unilabos.config.config import MQConfig, HTTPConfig
+from unilabos.config.config import MQConfig, HTTPConfig, BasicConfig
 from unilabos.utils import logger
 
 
@@ -189,7 +190,7 @@ class HTTPClient:
             logger.error(f"请求启动配置失败: {response.status_code}, {response.text}")
         else:
             try:
-                with open("startup_config.json", "w", encoding="utf-8") as f:
+                with open(os.path.join(BasicConfig.working_dir, "startup_config.json"), "w", encoding="utf-8") as f:
                     f.write(response.text)
                 target_dict = json.loads(response.text)
                 if "data" in target_dict:

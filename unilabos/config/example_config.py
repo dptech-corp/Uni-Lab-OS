@@ -8,9 +8,9 @@ class MQConfig:
     broker_url = ""
     port = 1883
 
-    ca_file = "CA.crt"
-    cert_file = "lab.crt"
-    key_file = "lab.key"
+    ca_file = "./CA.crt"
+    cert_file = "./lab.crt"
+    key_file = "./lab.key"
 
 # HTTP配置
 class HTTPConfig:
