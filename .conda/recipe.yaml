@@ -13,11 +13,11 @@ build:
 
 requirements:
   host:
-  - python >=3.11
+  - python ==3.11.11
   - pip
   - setuptools
   run:
-  - conda-forge::python =3.11.11
+  - conda-forge::python ==3.11.11
   - compilers
   - cmake
   - make
