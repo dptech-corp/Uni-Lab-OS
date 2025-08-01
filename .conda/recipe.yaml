@@ -2,14 +2,29 @@ package:
   name: unilabos
   version: 0.10.1
 
+source:
+  path: ../unilabos
+  target_directory: unilabos
+
 build:
   noarch: python
-  number: 0
   script:
-  - python -m pip install paho-mqtt
-  - python -m pip install opentrons_shared_data
-  - python -m pip install git+https://github.com/Xuwznln/pylabrobot.git
-  - python -m pip install . --no-deps
+  - set PIP_NO_INDEX=
+#  - python -m pip install paho-mqtt opentrons_shared_data
+#  - python -m pip install git+https://github.com/Xuwznln/pylabrobot.git
+  - if: win
+    then:
+    - copy %RECIPE_DIR%\..\MANIFEST.in %SRC_DIR%
+    - copy %RECIPE_DIR%\..\setup.cfg %SRC_DIR%
+    - copy %RECIPE_DIR%\..\setup.py %SRC_DIR%
+    - python -m pip install %SRC_DIR%
+  - if: unix
+    then:
+    - cp $RECIPE_DIR/../MANIFEST.in $SRC_DIR
+    - cp $RECIPE_DIR/../setup.cfg $SRC_DIR
+    - cp $RECIPE_DIR/../setup.py $SRC_DIR
+    - python -m pip install $SRC_DIR
+
 
 requirements:
   host:
