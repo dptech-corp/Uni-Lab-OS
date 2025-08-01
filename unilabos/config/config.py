@@ -163,12 +163,12 @@ def _update_config_from_env():
 def load_config(config_path=None, override_labid=None):
     # 如果提供了配置文件路径，从该文件导入配置
     if config_path:
-        _update_config_from_env()  # 允许config_path被env设定后读取
+        env_config_path = os.environ.get("UNILABOS.BASICCONFIG.CONFIG_PATH")
+        config_path = env_config_path if env_config_path else config_path
         BasicConfig.config_path = os.path.abspath(os.path.dirname(config_path))
         if not os.path.exists(config_path):
             logger.error(f"[ENV] 配置文件 {config_path} 不存在")
             exit(1)
-
         try:
             module_name = "lab_" + os.path.basename(config_path).replace(".py", "")
             spec = importlib.util.spec_from_file_location(module_name, config_path)
@@ -179,6 +179,7 @@ def load_config(config_path=None, override_labid=None):
             spec.loader.exec_module(module)  # type: ignore
             _update_config_from_module(module, override_labid)
             logger.info(f"[ENV] 配置文件 {config_path} 加载成功")
+            _update_config_from_env()
         except Exception as e:
             logger.error(f"[ENV] 加载配置文件 {config_path} 失败")
             traceback.print_exc()

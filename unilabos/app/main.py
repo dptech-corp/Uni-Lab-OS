@@ -210,10 +210,11 @@ def main():
             print_status("联网获取设备加载文件成功", "info")
         graph, data = read_node_link_json(request_startup_json)
     else:
-        if args_dict["graph"].endswith(".json"):
-            graph, data = read_node_link_json(args_dict["graph"])
+        file_path = args_dict["graph"]
+        if file_path.endswith(".json"):
+            graph, data = read_node_link_json(file_path)
         else:
-            graph, data = read_graphml(args_dict["graph"])
+            graph, data = read_graphml(file_path)
     import unilabos.resources.graphio as graph_res
 
     graph_res.physical_setup_graph = graph
