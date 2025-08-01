@@ -90,9 +90,9 @@ jobs:
         if: steps.should_build.outputs.should_build == 'true'
         run: |
           if [[ "${{ matrix.platform }}" == "osx-arm64" ]]; then
-            rattler-build build -m ./recipes/conda_build_config.yaml -m ./recipes/macos_sdk_config.yaml -r ./recipes/msgs/recipe.yaml
+            rattler-build build -r ./recipes/msgs/recipe.yaml -c robostack -c robostack-staging -c conda-forge
           else
-            rattler-build build -m ./recipes/conda_build_config.yaml -r ./recipes/msgs/recipe.yaml
+            rattler-build build -r ./recipes/msgs/recipe.yaml -c robostack -c robostack-staging -c conda-forge
           fi
 
       - name: List built packages
