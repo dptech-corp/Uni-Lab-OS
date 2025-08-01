@@ -24,7 +24,7 @@ from unilabos.utils.banner_print import print_status, print_unilab_banner
 
 def load_config_from_file(config_path, override_labid=None):
     if config_path is None:
-        config_path = os.environ.get("UNILABOS.BASICCONFIG.CONFIG_PATH", None)
+        config_path = os.environ.get("UNILABOS_BASICCONFIG_CONFIG_PATH", None)
     if config_path:
         if not os.path.exists(config_path):
             print_status(f"配置文件 {config_path} 不存在", "error")
@@ -43,10 +43,9 @@ def convert_argv_dashes_to_underscores(args: argparse.ArgumentParser):
     for i, arg in enumerate(sys.argv):
         for option_string in option_strings:
             if arg.startswith(option_string):
-                new_arg = arg[:2] + arg[2 : len(option_string)].replace("-", "_") + arg[len(option_string) :]
+                new_arg = arg[:2] + arg[2:len(option_string)].replace("-", "_") + arg[len(option_string):]
                 sys.argv[i] = new_arg
                 break
-
 
 def parse_args():
     """解析命令行参数"""
@@ -127,14 +126,7 @@ def parse_args():
         "--labid",
         type=str,
         default="",
-        help="实验室唯一ID，也可通过环境变量 UNILABOS.MQCONFIG.LABID 设置或传入--config设置",
-    )
-    parser.add_argument(
-        "--loglevel",
-        type=str,
-        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-        default="INFO",
-        help="设置日志级别 (DEBUG, INFO, WARNING, ERROR, CRITICAL)，默认为 INFO",
+        help="实验室唯一ID，也可通过环境变量 UNILABOS_MQCONFIG_LABID 设置或传入--config设置",
     )
     return parser
 
@@ -159,22 +151,17 @@ def main():
             if not os.path.exists(config_path):
                 print_status(
                     f"当前工作目录 {working_dir} 未找到local_config.py，请通过 --config 传入 local_config.py 文件路径",
-                    "error",
-                )
+                    "error")
                 os._exit(1)
     elif os.path.exists(working_dir) and os.path.exists(os.path.join(working_dir, "local_config.py")):
         config_path = os.path.join(working_dir, "local_config.py")
-    elif not config_path and (
-        not os.path.exists(working_dir) or not os.path.exists(os.path.join(working_dir, "local_config.py"))
-    ):
+    elif not config_path and (not os.path.exists(working_dir) or not os.path.exists(os.path.join(working_dir, "local_config.py"))):
         print_status(f"未指定config路径，可通过 --config 传入 local_config.py 文件路径", "info")
         print_status(f"您是否为第一次使用？并将当前路径 {working_dir} 作为工作目录？ (Y/n)", "info")
         if input() != "n":
             os.makedirs(working_dir, exist_ok=True)
             config_path = os.path.join(working_dir, "local_config.py")
-            shutil.copy(
-                os.path.join(os.path.dirname(os.path.dirname(__file__)), "config", "example_config.py"), config_path
-            )
+            shutil.copy(os.path.join(os.path.dirname(os.path.dirname(__file__)), "config", "example_config.py"), config_path)
             print_status(f"已创建 local_config.py 路径： {config_path}", "info")
             print_status(f"请在文件夹中配置lab_id，放入下载的CA.crt、lab.crt、lab.key重新启动本程序", "info")
             os._exit(1)

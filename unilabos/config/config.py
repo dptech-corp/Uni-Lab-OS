@@ -109,13 +109,13 @@ def _update_config_from_module(module, override_labid: str):
 
 
 def _update_config_from_env():
-    prefix = "UNILABOS."
+    prefix = "UNILABOS_"
     for env_key, env_value in os.environ.items():
         if not env_key.startswith(prefix):
             continue
         try:
             key_path = env_key[len(prefix):]  # Remove UNILAB_ prefix
-            class_field = key_path.upper().split(".", 1)
+            class_field = key_path.upper().split("_", 1)
             if len(class_field) != 2:
                 logger.warning(f"[ENV] 环境变量格式不正确：{env_key}")
                 continue
@@ -163,7 +163,7 @@ def _update_config_from_env():
 def load_config(config_path=None, override_labid=None):
     # 如果提供了配置文件路径，从该文件导入配置
     if config_path:
-        env_config_path = os.environ.get("UNILABOS.BASICCONFIG.CONFIG_PATH")
+        env_config_path = os.environ.get("UNILABOS_BASICCONFIG_CONFIG_PATH")
         config_path = env_config_path if env_config_path else config_path
         BasicConfig.config_path = os.path.abspath(os.path.dirname(config_path))
         if not os.path.exists(config_path):
