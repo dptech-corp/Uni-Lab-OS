@@ -132,7 +132,7 @@ jobs:
         run: |
           for package in $(find ./output -name "*.conda"); do
             echo "Uploading $package to unilab organization..."
-            anaconda upload --user unilab --force "$package"
+            anaconda upload --user uni-lab --force "$package"
           done
 
       - name: Logout from Anaconda
