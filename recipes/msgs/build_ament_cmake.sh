@@ -24,7 +24,7 @@ echo "USING PKG_CONFIG_EXECUTABLE=${PKG_CONFIG_EXECUTABLE}"
 export ROS_PYTHON_VERSION=`$PYTHON_EXECUTABLE -c "import sys; print('%i.%i' % (sys.version_info[0:2]))"`
 echo "Using Python ${ROS_PYTHON_VERSION}"
 # Fix up SP_DIR which for some reason might contain a path to a wrong Python version
-FIXED_SP_DIR=$(echo $SP_DIR | sed -E "s/python[0-9]+\.[0-9]+/python$ROS_PYTHON_VERSION/")
+FIXED_SP_DIR=$($PYTHON_EXECUTABLE -c "import site; print(site.getsitepackages()[0])")
 echo "Using site-package dir ${FIXED_SP_DIR}"
 
 # see https://github.com/conda-forge/cross-python-feedstock/issues/24
