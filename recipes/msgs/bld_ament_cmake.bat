@@ -34,8 +34,32 @@ cmake ^
     -DCMAKE_OBJECT_PATH_MAX=255 ^
     -DPYTHON_INSTALL_DIR=%SP_DIR_FORWARDSLASHES% ^
     --compile-no-warning-as-error ^
-    %SRC_DIR%\%PKG_NAME%\src\work
+    %SRC_DIR%\src
 if errorlevel 1 exit 1
+
+set "infile=%SRC_DIR%\build\cmake_install.cmake"
+set "tmpfile=%infile%.tmp"
+
+rem 模式串
+set "pattern=echo %PYTHON%"
+
+> "%tmpfile%" (
+    for /f "usebackq delims=" %%L in ("%infile%") do (
+        set "line=%%L"
+        rem 把 pattern 从 line 里“删除”，看看结果是否变化
+        set "test=!line:%pattern%=!"
+        if "!test!" neq "!line!" (
+            rem 含有 echo %PYTHON%，对整行做 \→\\ 全局替换
+            echo !line:\=\\!
+        ) else (
+            rem 不含，原样输出
+            echo !line!
+        )
+    )
+)
+
+rem 用 tmp 覆盖原文件
+move /Y "%tmpfile%" "%infile%" > nul
 
 cmake --build . --config Release --target install
 if errorlevel 1 exit 1

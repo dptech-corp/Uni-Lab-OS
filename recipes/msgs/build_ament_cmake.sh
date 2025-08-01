@@ -66,6 +66,6 @@ cmake \
     -DBUILD_TESTING=OFF \
     -DCMAKE_OSX_DEPLOYMENT_TARGET=$OSX_DEPLOYMENT_TARGET \
     --compile-no-warning-as-error \
-    $SRC_DIR/$PKG_NAME/src/work
+    $SRC_DIR/src
 
 cmake --build . --config Release --target install

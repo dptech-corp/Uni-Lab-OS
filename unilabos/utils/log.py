@@ -144,11 +144,29 @@ class ColoredFormatter(logging.Formatter):
 
 
 # 配置日志处理器
-def configure_logger():
-    """配置日志记录器"""
+def configure_logger(loglevel=None):
+    """配置日志记录器
+
+    Args:
+        loglevel: 日志级别，可以是字符串（'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'）
+                 或logging模块的常量（如logging.DEBUG）
+    """
     # 获取根日志记录器
     root_logger = logging.getLogger()
-    root_logger.setLevel(logging.DEBUG)  # 修改为DEBUG以显示所有级别
+
+    # 设置日志级别
+    if loglevel is not None:
+        if isinstance(loglevel, str):
+            # 将字符串转换为logging级别
+            numeric_level = getattr(logging, loglevel.upper(), None)
+            if not isinstance(numeric_level, int):
+                print(f"警告: 无效的日志级别 '{loglevel}'，使用默认级别 DEBUG")
+                numeric_level = logging.DEBUG
+        else:
+            numeric_level = loglevel
+        root_logger.setLevel(numeric_level)
+    else:
+        root_logger.setLevel(logging.DEBUG)  # 默认级别
 
     # 移除已存在的处理器
     for handler in root_logger.handlers[:]:
@@ -156,7 +174,7 @@ def configure_logger():
 
     # 创建控制台处理器
     console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.DEBUG)  # 修改为DEBUG以显示所有级别
+    console_handler.setLevel(root_logger.level)  # 使用与根记录器相同的级别
 
     # 使用自定义的颜色格式化器
     color_formatter = ColoredFormatter()
