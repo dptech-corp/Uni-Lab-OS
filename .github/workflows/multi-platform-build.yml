@@ -123,12 +123,12 @@ jobs:
           retention-days: 30
 
       - name: Login to Anaconda with API token
-        if: steps.should_build.outputs.should_build == 'true' && (github.event.inputs.upload_to_anaconda == 'true' || github.ref == 'refs/heads/main')
+        if: steps.should_build.outputs.should_build == 'true' && (github.event.inputs.upload_to_anaconda == 'true' || (github.ref == 'refs/heads/main' && github.event_name != 'pull_request'))
         run: |
           anaconda login --token ${{ secrets.ANACONDA_API_TOKEN }}
 
       - name: Upload to Anaconda.org (unilab organization)
-        if: steps.should_build.outputs.should_build == 'true' && (github.event.inputs.upload_to_anaconda == 'true' || github.ref == 'refs/heads/main')
+        if: steps.should_build.outputs.should_build == 'true' && (github.event.inputs.upload_to_anaconda == 'true' || (github.ref == 'refs/heads/main' && github.event_name != 'pull_request'))
         run: |
           for package in $(find ./output -name "*.conda"); do
             echo "Uploading $package to unilab organization..."
@@ -136,6 +136,6 @@ jobs:
           done
 
       - name: Logout from Anaconda
-        if: always() && steps.should_build.outputs.should_build == 'true' && (github.event.inputs.upload_to_anaconda == 'true' || github.ref == 'refs/heads/main')
+        if: always() && steps.should_build.outputs.should_build == 'true' && (github.event.inputs.upload_to_anaconda == 'true' || (github.ref == 'refs/heads/main' && github.event_name != 'pull_request'))
         run: |
           anaconda logout || true
