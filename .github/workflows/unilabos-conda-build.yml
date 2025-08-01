@@ -1,0 +1,94 @@
+name: UniLabOS Conda Build
+
+on:
+  push:
+    branches: [main, dev]
+    tags: ['v*']
+  pull_request:
+    branches: [main, dev]
+  workflow_dispatch:
+    inputs:
+      upload_to_anaconda:
+        description: '是否上传到Anaconda.org'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniconda-version: 'latest'
+          channels: conda-forge,robostack-staging,uni-lab,defaults
+          channel-priority: strict
+          activate-environment: build-env
+          auto-activate-base: false
+          auto-update-conda: false
+          show-channel-urls: true
+
+      - name: Install rattler-build and anaconda-client
+        run: |
+          conda install -c conda-forge rattler-build anaconda-client
+
+      - name: Show environment info
+        run: |
+          conda info
+          conda list | grep -E "(rattler-build|anaconda-client)"
+          echo "Building UniLabOS package"
+
+      - name: Build conda package
+        run: |
+          rattler-build build -r .conda/recipe.yaml -c uni-lab -c robostack-staging -c conda-forge
+
+      - name: List built packages
+        run: |
+          echo "Built packages in output directory:"
+          find ./output -name "*.conda" | head -10
+          ls -la ./output/noarch/ || echo "noarch directory not found"
+          echo "Output directory structure:"
+          find ./output -type f -name "*.conda"
+
+      - name: Prepare artifacts for upload
+        run: |
+          mkdir -p conda-packages-temp
+          find ./output -name "*.conda" -exec cp {} conda-packages-temp/ \;
+          echo "Copied files to temp directory:"
+          ls -la conda-packages-temp/
+
+      - name: Upload conda package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: conda-package-unilabos
+          path: conda-packages-temp
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Login to Anaconda with API token
+        if: github.event.inputs.upload_to_anaconda == 'true' || (github.ref == 'refs/heads/main' && github.event_name != 'pull_request')
+        run: |
+          anaconda login --token ${{ secrets.ANACONDA_API_TOKEN }}
+
+      - name: Upload to Anaconda.org (uni-lab organization)
+        if: github.event.inputs.upload_to_anaconda == 'true' || (github.ref == 'refs/heads/main' && github.event_name != 'pull_request')
+        run: |
+          for package in $(find ./output -name "*.conda"); do
+            echo "Uploading $package to uni-lab organization..."
+            anaconda upload --user uni-lab --force "$package"
+          done
+
+      - name: Logout from Anaconda
+        if: always() && (github.event.inputs.upload_to_anaconda == 'true' || (github.ref == 'refs/heads/main' && github.event_name != 'pull_request'))
+        run: |
+          anaconda logout || true
