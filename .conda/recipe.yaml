@@ -6,7 +6,8 @@ build:
   noarch: python
   number: 0
   script:
-  - python -m pip install paho-mqtt opentrons_shared_data
+  - python -m pip install paho-mqtt
+  - python -m pip install opentrons_shared_data
   - python -m pip install git+https://github.com/Xuwznln/pylabrobot.git
   - python -m pip install . --no-deps
 
