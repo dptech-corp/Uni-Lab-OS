@@ -88,6 +88,9 @@ class ROS2ProtocolNode(BaseROS2DeviceNode):
             if device_config.get("type", "device") != "device":
                 continue
             # 设置硬件接口代理
+            if device_id not in self.sub_devices:
+                self.lab_logger().error(f"[Protocol Node] {device_id} 还没有正确初始化，跳过...")
+                continue
             d = self.sub_devices[device_id]
             if d:
                 hardware_interface = d.ros_node_instance._hardware_interface

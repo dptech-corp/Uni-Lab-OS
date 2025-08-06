@@ -3,6 +3,7 @@ from threading import Lock, Event
 from enum import Enum
 from dataclasses import dataclass
 import time
+import traceback
 from typing import Any, Union, Optional, overload
 
 import serial.tools.list_ports
@@ -386,3 +387,8 @@ class RunzeSyringePump:
     def list():
         for item in serial.tools.list_ports.comports():
             yield RunzeSyringePumpInfo(port=item.device)
+
+
+if __name__ == "__main__":
+    r = RunzeSyringePump("/dev/tty.usbserial-D30JUGG5", "1", 25.0)
+    r.initialize()

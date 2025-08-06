@@ -447,6 +447,8 @@ class Registry:
                         if complete_registry:
                             device_config["class"]["status_types"].clear()
                             enhanced_info = get_enhanced_class_info(device_config["class"]["module"], use_dynamic=True)
+                            if not enhanced_info.get("dynamic_import_success", False):
+                                continue
                             device_config["class"]["status_types"].update(
                                 {k: v["return_type"] for k, v in enhanced_info["status_methods"].items()}
                             )
