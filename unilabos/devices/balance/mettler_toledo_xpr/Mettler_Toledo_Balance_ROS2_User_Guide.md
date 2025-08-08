@@ -26,17 +26,7 @@ The Mettler Toledo XPR/XSR balance driver supports operations through ROS2 actio
 - **输入 / Input**: 无参数 / No parameters
 - **输出 / Output**: `{"return_info": str, "success": bool}` - 包含重量信息 / Contains weight information
 
-### 4. 带去皮读取重量 / Read with Tare (`read_with_tare`)
 
-- **功能 / Function**: 先去皮再读取重量 / Tare first then read weight
-- **输入 / Input**: 无参数 / No parameters
-- **输出 / Output**: `{"return_info": str, "success": bool}` - 包含去皮后的重量信息 / Contains weight information after taring
-
-### 5. 断开连接 / Disconnect (`disconnect`)
-
-- **功能 / Function**: 断开与天平的连接 / Disconnect from the balance
-- **输入 / Input**: 无参数 / No parameters
-- **输出 / Output**: `{"return_info": str, "success": bool}` - 断开连接结果 / Disconnection result
 
 ## 使用方法 / Usage Methods
 
@@ -66,29 +56,31 @@ ros2 action send_goal /devices/BALANCE_STATION/send_cmd unilabos_msgs/action/Sen
 }"
 ```
 
-或者使用别名 / Or use alias:
 
+### 4. 推荐的去皮读取流程 / Recommended Tare and Read Workflow
+
+**步骤1: 去皮操作 / Step 1: Tare Operation**
 ```bash
+# 放置空容器后执行去皮 / Execute tare after placing empty container
 ros2 action send_goal /devices/BALANCE_STATION/send_cmd unilabos_msgs/action/SendCmd "{
-  command: '{\"command\": \"get_weight\"}'
+  command: '{\"command\": \"tare\", \"params\": {\"immediate\": false}}'
 }"
 ```
 
-### 4. 带去皮读取重量 / Read with Tare
-
+**步骤2: 读取净重 / Step 2: Read Net Weight**
 ```bash
+# 添加物质后读取净重 / Read net weight after adding substance
 ros2 action send_goal /devices/BALANCE_STATION/send_cmd unilabos_msgs/action/SendCmd "{
-  command: '{\"command\": \"read_with_tare\"}'
+  command: '{\"command\": \"read\"}'
 }"
 ```
 
-### 5. 断开连接 / Disconnect
+**优势 / Advantages**:
+- 可以在去皮和读取之间进行确认 / Can confirm between taring and reading
+- 更好的错误处理和调试 / Better error handling and debugging
+- 操作流程更加清晰 / Clearer operation workflow
 
-```bash
-ros2 action send_goal /devices/BALANCE_STATION/send_cmd unilabos_msgs/action/SendCmd "{
-  command: '{\"command\": \"disconnect\"}'
-}"
-```
+
 
 ## 命令格式说明 / Command Format Description
 
@@ -182,13 +174,8 @@ class BalanceController(Node):
         """读取重量 / Read weight"""
         return self.send_command('read')
     
-    def read_with_tare(self):
-        """带去皮读取重量 / Read weight with tare"""
-        return self.send_command('read_with_tare')
-    
-    def disconnect_balance(self):
-        """断开连接 / Disconnect"""
-        return self.send_command('disconnect')
+
+
 
 # 使用示例 / Usage Example
 def main():
