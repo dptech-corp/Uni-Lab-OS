@@ -1,3 +1,4 @@
+import traceback
 import numpy as np
 import networkx as nx
 import asyncio
@@ -5,6 +6,8 @@ import time as time_module  # 🔧 重命名time模块
 from typing import List, Dict, Any
 import logging
 import sys
+
+from unilabos.compile.utils.vessel_parser import get_vessel
 
 logger = logging.getLogger(__name__)
 
@@ -118,10 +121,11 @@ def find_connected_pump(G, valve_node):
     # 只有多通阀等复杂阀门才需要查找连接的泵
     if ("multiway" in node_class.lower() or "valve" in node_class.lower()):
         debug_print(f"  - {valve_node} 是多通阀，查找连接的泵...")
-        
+        return valve_node
         # 方法1：直接相邻的泵
         for neighbor in G.neighbors(valve_node):
             neighbor_class = G.nodes[neighbor].get("class", "") or ""
+            # 排除非 电磁阀 和 泵 的邻居
             debug_print(f"    - 检查邻居 {neighbor}, class: {neighbor_class}")
             if "pump" in neighbor_class.lower():
                 debug_print(f"    ✅ 找到直接相连的泵: {neighbor}")
@@ -209,8 +213,8 @@ def build_pump_valve_maps(G, pump_backbone):
 
 def generate_pump_protocol(
     G: nx.DiGraph,
-    from_vessel: str,
-    to_vessel: str,
+    from_vessel_id: str,
+    to_vessel_id: str,
     volume: float,
     flowrate: float = 2.5,
     transfer_flowrate: float = 0.5,
@@ -236,26 +240,27 @@ def generate_pump_protocol(
         logger.warning(f"transfer_flowrate <= 0，使用默认值 {transfer_flowrate}mL/s")
     
     # 验证容器存在
-    if from_vessel not in G.nodes():
-        logger.error(f"源容器 '{from_vessel}' 不存在")
+    debug_print(f"🔍 验证源容器 '{from_vessel_id}' 和目标容器 '{to_vessel_id}' 是否存在...")
+    if from_vessel_id not in G.nodes():
+        logger.error(f"源容器 '{from_vessel_id}' 不存在")
         return pump_action_sequence
         
-    if to_vessel not in G.nodes():
-        logger.error(f"目标容器 '{to_vessel}' 不存在")
+    if to_vessel_id not in G.nodes():
+        logger.error(f"目标容器 '{to_vessel_id}' 不存在")
         return pump_action_sequence
     
     try:
-        shortest_path = nx.shortest_path(G, source=from_vessel, target=to_vessel)
-        debug_print(f"PUMP_TRANSFER: 路径 {from_vessel} -> {to_vessel}: {shortest_path}")
+        shortest_path = nx.shortest_path(G, source=from_vessel_id, target=to_vessel_id)
+        debug_print(f"PUMP_TRANSFER: 路径 {from_vessel_id} -> {to_vessel_id}: {shortest_path}")
     except nx.NetworkXNoPath:
-        logger.error(f"无法找到从 '{from_vessel}' 到 '{to_vessel}' 的路径")
+        logger.error(f"无法找到从 '{from_vessel_id}' 到 '{to_vessel_id}' 的路径")
         return pump_action_sequence
 
     # 🔧 关键修复：正确构建泵骨架，排除容器和电磁阀
     pump_backbone = []
     for node in shortest_path:
         # 跳过起始和结束容器
-        if node == from_vessel or node == to_vessel:
+        if node == from_vessel_id or node == to_vessel_id:
             continue
         
         # 跳过电磁阀（电磁阀不参与泵操作）
@@ -311,7 +316,7 @@ def generate_pump_protocol(
 
     repeats = int(np.ceil(volume / min_transfer_volume))
     
-    if repeats > 1 and (from_vessel.startswith("pump") or to_vessel.startswith("pump")):
+    if repeats > 1 and (from_vessel_id.startswith("pump") or to_vessel_id.startswith("pump")):
         logger.error("Cannot transfer volume larger than min_transfer_volume between two pumps.")
         return pump_action_sequence
 
@@ -340,7 +345,7 @@ def generate_pump_protocol(
         
         # 🆕 在每次循环开始时添加进度日志
         if repeats > 1:
-            start_message = f"🚀 准备开始第 {i+1}/{repeats} 次转移: {current_volume:.2f}mL ({from_vessel} → {to_vessel}) 🚰"
+            start_message = f"🚀 准备开始第 {i+1}/{repeats} 次转移: {current_volume:.2f}mL ({from_vessel_id} → {to_vessel_id}) 🚰"
             pump_action_sequence.append(create_progress_log_action(start_message))
         
         # 🔧 修复：安全地获取边数据
@@ -357,10 +362,10 @@ def generate_pump_protocol(
                 return "default"
         
         # 从源容器吸液
-        if not from_vessel.startswith("pump") and pump_backbone:
+        if not from_vessel_id.startswith("pump") and pump_backbone:
             first_pump_node = pump_backbone[0]
             if first_pump_node in valve_from_node and first_pump_node in pumps_from_node:
-                port_command = get_safe_edge_data(first_pump_node, from_vessel, first_pump_node)
+                port_command = get_safe_edge_data(first_pump_node, from_vessel_id, first_pump_node)
                 pump_action_sequence.extend([
                     {
                         "device_id": valve_from_node[first_pump_node],
@@ -423,10 +428,10 @@ def generate_pump_protocol(
                 pump_action_sequence.append({"action_name": "wait", "action_kwargs": {"time": 3}})
 
         # 排液到目标容器
-        if not to_vessel.startswith("pump") and pump_backbone:
+        if not to_vessel_id.startswith("pump") and pump_backbone:
             last_pump_node = pump_backbone[-1]
             if last_pump_node in valve_from_node and last_pump_node in pumps_from_node:
-                port_command = get_safe_edge_data(last_pump_node, to_vessel, last_pump_node)
+                port_command = get_safe_edge_data(last_pump_node, to_vessel_id, last_pump_node)
                 pump_action_sequence.extend([
                     {
                         "device_id": valve_from_node[last_pump_node],
@@ -463,8 +468,8 @@ def generate_pump_protocol(
 
 def generate_pump_protocol_with_rinsing(
     G: nx.DiGraph,
-    from_vessel: str,
-    to_vessel: str,
+    from_vessel_id: str,
+    to_vessel_id: str,
     volume: float = 0.0,
     amount: str = "",
     time: float = 0.0,  # 🔧 修复：统一使用 time
@@ -492,7 +497,7 @@ def generate_pump_protocol_with_rinsing(
     with generate_pump_protocol_with_rinsing._lock:
         debug_print("=" * 60)
         debug_print(f"PUMP_TRANSFER: 🚀 开始生成协议 (同步版本)")
-        debug_print(f"  📍 路径: {from_vessel} -> {to_vessel}")
+        debug_print(f"  📍 路径: {from_vessel_id} -> {to_vessel_id}")
         debug_print(f"  🕐 时间戳: {time_module.time()}")
         debug_print(f"  🔒 获得执行锁")
         debug_print("=" * 60)
@@ -511,8 +516,8 @@ def generate_pump_protocol_with_rinsing(
             debug_print("🎯 检测到 volume=0.0，开始自动体积检测...")
             
             # 直接从源容器读取实际体积
-            actual_volume = get_vessel_liquid_volume(G, from_vessel)
-            debug_print(f"📖 从容器 '{from_vessel}' 读取到体积: {actual_volume}mL")
+            actual_volume = get_vessel_liquid_volume(G, from_vessel_id)
+            debug_print(f"📖 从容器 '{from_vessel_id}' 读取到体积: {actual_volume}mL")
             
             if actual_volume > 0:
                 final_volume = actual_volume
@@ -534,7 +539,7 @@ def generate_pump_protocol_with_rinsing(
                 debug_print(f"✅ 使用从 amount 解析的体积: {final_volume}mL")
             elif parsed_volume == 0.0 and amount.lower().strip() == "all":
                 debug_print("🎯 检测到 amount='all'，从容器读取全部体积...")
-                actual_volume = get_vessel_liquid_volume(G, from_vessel)
+                actual_volume = get_vessel_liquid_volume(G, from_vessel_id)
                 if actual_volume > 0:
                     final_volume = actual_volume
                     debug_print(f"✅ amount='all'，设置体积为: {final_volume}mL")
@@ -597,7 +602,7 @@ def generate_pump_protocol_with_rinsing(
         try:
             # 🆕 修复：在这里调用带有循环日志的generate_pump_protocol_with_loop_logging函数
             pump_action_sequence = generate_pump_protocol_with_loop_logging(
-                G, from_vessel, to_vessel, final_volume,
+                G, from_vessel_id, to_vessel_id, final_volume,
                 final_flowrate, final_transfer_flowrate
             )
             
@@ -619,8 +624,8 @@ def generate_pump_protocol_with_rinsing(
 
 def generate_pump_protocol_with_loop_logging(
     G: nx.DiGraph,
-    from_vessel: str,
-    to_vessel: str,
+    from_vessel_id: str,
+    to_vessel_id: str,
     volume: float,
     flowrate: float = 2.5,
     transfer_flowrate: float = 0.5,
@@ -646,26 +651,26 @@ def generate_pump_protocol_with_loop_logging(
         logger.warning(f"transfer_flowrate <= 0，使用默认值 {transfer_flowrate}mL/s")
     
     # 验证容器存在
-    if from_vessel not in G.nodes():
-        logger.error(f"源容器 '{from_vessel}' 不存在")
+    if from_vessel_id not in G.nodes():
+        logger.error(f"源容器 '{from_vessel_id}' 不存在")
         return pump_action_sequence
         
-    if to_vessel not in G.nodes():
-        logger.error(f"目标容器 '{to_vessel}' 不存在")
+    if to_vessel_id not in G.nodes():
+        logger.error(f"目标容器 '{to_vessel_id}' 不存在")
         return pump_action_sequence
     
     try:
-        shortest_path = nx.shortest_path(G, source=from_vessel, target=to_vessel)
-        debug_print(f"PUMP_TRANSFER: 路径 {from_vessel} -> {to_vessel}: {shortest_path}")
+        shortest_path = nx.shortest_path(G, source=from_vessel_id, target=to_vessel_id)
+        debug_print(f"PUMP_TRANSFER: 路径 {from_vessel_id} -> {to_vessel_id}: {shortest_path}")
     except nx.NetworkXNoPath:
-        logger.error(f"无法找到从 '{from_vessel}' 到 '{to_vessel}' 的路径")
+        logger.error(f"无法找到从 '{from_vessel_id}' 到 '{to_vessel_id}' 的路径")
         return pump_action_sequence
 
     # 🔧 关键修复：正确构建泵骨架，排除容器和电磁阀
     pump_backbone = []
     for node in shortest_path:
         # 跳过起始和结束容器
-        if node == from_vessel or node == to_vessel:
+        if node == from_vessel_id or node == to_vessel_id:
             continue
         
         # 跳过电磁阀（电磁阀不参与泵操作）
@@ -721,7 +726,7 @@ def generate_pump_protocol_with_loop_logging(
 
     repeats = int(np.ceil(volume / min_transfer_volume))
     
-    if repeats > 1 and (from_vessel.startswith("pump") or to_vessel.startswith("pump")):
+    if repeats > 1 and (from_vessel_id.startswith("pump") or to_vessel_id.startswith("pump")):
         logger.error("Cannot transfer volume larger than min_transfer_volume between two pumps.")
         return pump_action_sequence
 
@@ -750,7 +755,7 @@ def generate_pump_protocol_with_loop_logging(
         
         # 🆕 在每次循环开始时添加进度日志
         if repeats > 1:
-            start_message = f"🚀 准备开始第 {i+1}/{repeats} 次转移: {current_volume:.2f}mL ({from_vessel} → {to_vessel}) 🚰"
+            start_message = f"🚀 准备开始第 {i+1}/{repeats} 次转移: {current_volume:.2f}mL ({from_vessel_id} → {to_vessel_id}) 🚰"
             pump_action_sequence.append(create_progress_log_action(start_message))
         
         # 🔧 修复：安全地获取边数据
@@ -767,10 +772,10 @@ def generate_pump_protocol_with_loop_logging(
                 return "default"
         
         # 从源容器吸液
-        if not from_vessel.startswith("pump") and pump_backbone:
+        if not from_vessel_id.startswith("pump") and pump_backbone:
             first_pump_node = pump_backbone[0]
             if first_pump_node in valve_from_node and first_pump_node in pumps_from_node:
-                port_command = get_safe_edge_data(first_pump_node, from_vessel, first_pump_node)
+                port_command = get_safe_edge_data(first_pump_node, from_vessel_id, first_pump_node)
                 pump_action_sequence.extend([
                     {
                         "device_id": valve_from_node[first_pump_node],
@@ -833,10 +838,10 @@ def generate_pump_protocol_with_loop_logging(
                 pump_action_sequence.append({"action_name": "wait", "action_kwargs": {"time": 3}})
 
         # 排液到目标容器
-        if not to_vessel.startswith("pump") and pump_backbone:
+        if not to_vessel_id.startswith("pump") and pump_backbone:
             last_pump_node = pump_backbone[-1]
             if last_pump_node in valve_from_node and last_pump_node in pumps_from_node:
-                port_command = get_safe_edge_data(last_pump_node, to_vessel, last_pump_node)
+                port_command = get_safe_edge_data(last_pump_node, to_vessel_id, last_pump_node)
                 pump_action_sequence.extend([
                     {
                         "device_id": valve_from_node[last_pump_node],
@@ -873,8 +878,8 @@ def generate_pump_protocol_with_loop_logging(
 
 def generate_pump_protocol_with_rinsing(
     G: nx.DiGraph,
-    from_vessel: str,
-    to_vessel: str,
+    from_vessel_id: str,
+    to_vessel_id: str,
     volume: float = 0.0,
     amount: str = "",
     time: float = 0.0,  # 🔧 修复：统一使用 time
@@ -895,7 +900,7 @@ def generate_pump_protocol_with_rinsing(
     """
     debug_print("=" * 60)
     debug_print(f"PUMP_TRANSFER: 🚀 开始生成协议")
-    debug_print(f"  📍 路径: {from_vessel} -> {to_vessel}")
+    debug_print(f"  📍 路径: {from_vessel_id} -> {to_vessel_id}")
     debug_print(f"  🕐 时间戳: {time_module.time()}")
     debug_print(f"  📊 原始参数:")
     debug_print(f"    - volume: {volume} (类型: {type(volume)})")
@@ -919,8 +924,8 @@ def generate_pump_protocol_with_rinsing(
         debug_print("🎯 检测到 volume=0.0，开始自动体积检测...")
         
         # 直接从源容器读取实际体积
-        actual_volume = get_vessel_liquid_volume(G, from_vessel)
-        debug_print(f"📖 从容器 '{from_vessel}' 读取到体积: {actual_volume}mL")
+        actual_volume = get_vessel_liquid_volume(G, from_vessel_id)
+        debug_print(f"📖 从容器 '{from_vessel_id}' 读取到体积: {actual_volume}mL")
         
         if actual_volume > 0:
             final_volume = actual_volume
@@ -942,7 +947,7 @@ def generate_pump_protocol_with_rinsing(
             debug_print(f"✅ 使用从 amount 解析的体积: {final_volume}mL")
         elif parsed_volume == 0.0 and amount.lower().strip() == "all":
             debug_print("🎯 检测到 amount='all'，从容器读取全部体积...")
-            actual_volume = get_vessel_liquid_volume(G, from_vessel)
+            actual_volume = get_vessel_liquid_volume(G, from_vessel_id)
             if actual_volume > 0:
                 final_volume = actual_volume
                 debug_print(f"✅ amount='all'，设置体积为: {final_volume}mL")
@@ -1034,10 +1039,10 @@ def generate_pump_protocol_with_rinsing(
     
     try:
         debug_print(f"  - 调用 generate_pump_protocol...")
-        debug_print(f"  - 参数: G, '{from_vessel}', '{to_vessel}', {final_volume}, {final_flowrate}, {final_transfer_flowrate}")
+        debug_print(f"  - 参数: G, '{from_vessel_id}', '{to_vessel_id}', {final_volume}, {final_flowrate}, {final_transfer_flowrate}")
         
         pump_action_sequence = generate_pump_protocol(
-            G, from_vessel, to_vessel, final_volume,
+            G, from_vessel_id, to_vessel_id, final_volume,
             final_flowrate, final_transfer_flowrate
         )
         
@@ -1047,12 +1052,12 @@ def generate_pump_protocol_with_rinsing(
         
         if not pump_action_sequence:
             debug_print("❌ 基础转移协议生成为空，可能是路径问题")
-            debug_print(f"  - 源容器存在: {from_vessel in G.nodes()}")
-            debug_print(f"  - 目标容器存在: {to_vessel in G.nodes()}")
+            debug_print(f"  - 源容器存在: {from_vessel_id in G.nodes()}")
+            debug_print(f"  - 目标容器存在: {to_vessel_id in G.nodes()}")
             
-            if from_vessel in G.nodes() and to_vessel in G.nodes():
+            if from_vessel_id in G.nodes() and to_vessel_id in G.nodes():
                 try:
-                    path = nx.shortest_path(G, source=from_vessel, target=to_vessel)
+                    path = nx.shortest_path(G, source=from_vessel_id, target=to_vessel_id)
                     debug_print(f"  - 路径存在: {path}")
                 except Exception as path_error:
                     debug_print(f"  - 无法找到路径: {str(path_error)}")
@@ -1062,7 +1067,7 @@ def generate_pump_protocol_with_rinsing(
                     "device_id": "system",
                     "action_name": "log_message",
                     "action_kwargs": {
-                        "message": f"⚠️ 路径问题，无法转移: {final_volume}mL 从 {from_vessel} 到 {to_vessel}"
+                        "message": f"⚠️ 路径问题，无法转移: {final_volume}mL 从 {from_vessel_id} 到 {to_vessel_id}"
                     }
                 }
             ]
@@ -1086,7 +1091,7 @@ def generate_pump_protocol_with_rinsing(
                 "device_id": "system",
                 "action_name": "log_message",
                 "action_kwargs": {
-                    "message": f"❌ 转移失败: {final_volume}mL 从 {from_vessel} 到 {to_vessel}, 错误: {str(e)}"
+                    "message": f"❌ 转移失败: {final_volume}mL 从 {from_vessel_id} 到 {to_vessel_id}, 错误: {str(e)}"
                 }
             }
         ]
@@ -1102,7 +1107,7 @@ def generate_pump_protocol_with_rinsing(
     #         if final_rinsing_solvent.strip() != "air":
     #             debug_print("  - 执行液体冲洗...")
     #             rinsing_actions = _generate_rinsing_sequence(
-    #                 G, from_vessel, to_vessel, final_rinsing_solvent,
+    #                 G, from_vessel_id, to_vessel_id, final_rinsing_solvent,
     #                 final_rinsing_volume, final_rinsing_repeats,
     #                 final_flowrate, final_transfer_flowrate
     #             )
@@ -1111,7 +1116,7 @@ def generate_pump_protocol_with_rinsing(
     #         else:
     #             debug_print("  - 执行空气冲洗...")
     #             air_rinsing_actions = _generate_air_rinsing_sequence(
-    #                 G, from_vessel, to_vessel, final_rinsing_volume, final_rinsing_repeats,
+    #                 G, from_vessel_id, to_vessel_id, final_rinsing_volume, final_rinsing_repeats,
     #                 final_flowrate, final_transfer_flowrate
     #             )
     #             pump_action_sequence.extend(air_rinsing_actions)
@@ -1130,7 +1135,7 @@ def generate_pump_protocol_with_rinsing(
     debug_print(f"🎉 PUMP_TRANSFER: 协议生成完成")
     debug_print(f"  📊 总动作数: {len(pump_action_sequence)}")
     debug_print(f"  📋 最终体积: {final_volume}mL")
-    debug_print(f"  🚀 执行路径: {from_vessel} -> {to_vessel}")
+    debug_print(f"  🚀 执行路径: {from_vessel_id} -> {to_vessel_id}")
     
     # 最终验证
     if len(pump_action_sequence) == 0:
@@ -1151,8 +1156,8 @@ def generate_pump_protocol_with_rinsing(
 
 async def generate_pump_protocol_with_rinsing_async(
     G: nx.DiGraph,
-    from_vessel: str,
-    to_vessel: str,
+    from_vessel_id: str,
+    to_vessel_id: str,
     volume: float = 0.0,
     amount: str = "",
     time: float = 0.0,
@@ -1173,7 +1178,7 @@ async def generate_pump_protocol_with_rinsing_async(
     """
     debug_print("=" * 60)
     debug_print(f"PUMP_TRANSFER: 🚀 开始生成协议 (异步版本)")
-    debug_print(f"  📍 路径: {from_vessel} -> {to_vessel}")
+    debug_print(f"  📍 路径: {from_vessel_id} -> {to_vessel_id}")
     debug_print(f"  🕐 时间戳: {time_module.time()}")
     debug_print("=" * 60)
     
@@ -1183,7 +1188,7 @@ async def generate_pump_protocol_with_rinsing_async(
     
     # 调用原有的同步版本
     result = generate_pump_protocol_with_rinsing(
-        G, from_vessel, to_vessel, volume, amount, time, viscous,
+        G, from_vessel_id, to_vessel_id, volume, amount, time, viscous,
         rinsing_solvent, rinsing_volume, rinsing_repeats, solid,
         flowrate, transfer_flowrate, rate_spec, event, through, **kwargs
     )
@@ -1201,8 +1206,8 @@ async def generate_pump_protocol_with_rinsing_async(
 # 保持原有的同步版本兼容性
 def generate_pump_protocol_with_rinsing(
     G: nx.DiGraph,
-    from_vessel: str,
-    to_vessel: str,
+    from_vessel_id: str,
+    to_vessel_id: str,
     volume: float = 0.0,
     amount: str = "",
     time: float = 0.0,
@@ -1230,7 +1235,7 @@ def generate_pump_protocol_with_rinsing(
     with generate_pump_protocol_with_rinsing._lock:
         debug_print("=" * 60)
         debug_print(f"PUMP_TRANSFER: 🚀 开始生成协议 (同步版本)")
-        debug_print(f"  📍 路径: {from_vessel} -> {to_vessel}")
+        debug_print(f"  📍 路径: {from_vessel_id} -> {to_vessel_id}")
         debug_print(f"  🕐 时间戳: {time_module.time()}")
         debug_print(f"  🔒 获得执行锁")
         debug_print("=" * 60)
@@ -1249,8 +1254,8 @@ def generate_pump_protocol_with_rinsing(
             debug_print("🎯 检测到 volume=0.0，开始自动体积检测...")
             
             # 直接从源容器读取实际体积
-            actual_volume = get_vessel_liquid_volume(G, from_vessel)
-            debug_print(f"📖 从容器 '{from_vessel}' 读取到体积: {actual_volume}mL")
+            actual_volume = get_vessel_liquid_volume(G, from_vessel_id)
+            debug_print(f"📖 从容器 '{from_vessel_id}' 读取到体积: {actual_volume}mL")
             
             if actual_volume > 0:
                 final_volume = actual_volume
@@ -1272,7 +1277,7 @@ def generate_pump_protocol_with_rinsing(
                 debug_print(f"✅ 使用从 amount 解析的体积: {final_volume}mL")
             elif parsed_volume == 0.0 and amount.lower().strip() == "all":
                 debug_print("🎯 检测到 amount='all'，从容器读取全部体积...")
-                actual_volume = get_vessel_liquid_volume(G, from_vessel)
+                actual_volume = get_vessel_liquid_volume(G, from_vessel_id)
                 if actual_volume > 0:
                     final_volume = actual_volume
                     debug_print(f"✅ amount='all'，设置体积为: {final_volume}mL")
@@ -1364,10 +1369,10 @@ def generate_pump_protocol_with_rinsing(
     
     try:
         debug_print(f"  - 调用 generate_pump_protocol...")
-        debug_print(f"  - 参数: G, '{from_vessel}', '{to_vessel}', {final_volume}, {final_flowrate}, {final_transfer_flowrate}")
+        debug_print(f"  - 参数: G, '{from_vessel_id}', '{to_vessel_id}', {final_volume}, {final_flowrate}, {final_transfer_flowrate}")
         
         pump_action_sequence = generate_pump_protocol(
-            G, from_vessel, to_vessel, final_volume,
+            G, from_vessel_id, to_vessel_id, final_volume,
             final_flowrate, final_transfer_flowrate
         )
         
@@ -1377,12 +1382,12 @@ def generate_pump_protocol_with_rinsing(
         
         if not pump_action_sequence:
             debug_print("❌ 基础转移协议生成为空，可能是路径问题")
-            debug_print(f"  - 源容器存在: {from_vessel in G.nodes()}")
-            debug_print(f"  - 目标容器存在: {to_vessel in G.nodes()}")
+            debug_print(f"  - 源容器存在: {from_vessel_id in G.nodes()}")
+            debug_print(f"  - 目标容器存在: {to_vessel_id in G.nodes()}")
             
-            if from_vessel in G.nodes() and to_vessel in G.nodes():
+            if from_vessel_id in G.nodes() and to_vessel_id in G.nodes():
                 try:
-                    path = nx.shortest_path(G, source=from_vessel, target=to_vessel)
+                    path = nx.shortest_path(G, source=from_vessel_id, target=to_vessel_id)
                     debug_print(f"  - 路径存在: {path}")
                 except Exception as path_error:
                     debug_print(f"  - 无法找到路径: {str(path_error)}")
@@ -1392,7 +1397,7 @@ def generate_pump_protocol_with_rinsing(
                     "device_id": "system",
                     "action_name": "log_message",
                     "action_kwargs": {
-                        "message": f"⚠️ 路径问题，无法转移: {final_volume}mL 从 {from_vessel} 到 {to_vessel}"
+                        "message": f"⚠️ 路径问题，无法转移: {final_volume}mL 从 {from_vessel_id} 到 {to_vessel_id}"
                     }
                 }
             ]
@@ -1416,7 +1421,7 @@ def generate_pump_protocol_with_rinsing(
                 "device_id": "system",
                 "action_name": "log_message",
                 "action_kwargs": {
-                    "message": f"❌ 转移失败: {final_volume}mL 从 {from_vessel} 到 {to_vessel}, 错误: {str(e)}"
+                    "message": f"❌ 转移失败: {final_volume}mL 从 {from_vessel_id} 到 {to_vessel_id}, 错误: {str(e)}"
                 }
             }
         ]
@@ -1432,7 +1437,7 @@ def generate_pump_protocol_with_rinsing(
     #         if final_rinsing_solvent.strip() != "air":
     #             debug_print("  - 执行液体冲洗...")
     #             rinsing_actions = _generate_rinsing_sequence(
-    #                 G, from_vessel, to_vessel, final_rinsing_solvent,
+    #                 G, from_vessel_id, to_vessel_id, final_rinsing_solvent,
     #                 final_rinsing_volume, final_rinsing_repeats,
     #                 final_flowrate, final_transfer_flowrate
     #             )
@@ -1441,7 +1446,7 @@ def generate_pump_protocol_with_rinsing(
     #         else:
     #             debug_print("  - 执行空气冲洗...")
     #             air_rinsing_actions = _generate_air_rinsing_sequence(
-    #                 G, from_vessel, to_vessel, final_rinsing_volume, final_rinsing_repeats,
+    #                 G, from_vessel_id, to_vessel_id, final_rinsing_volume, final_rinsing_repeats,
     #                 final_flowrate, final_transfer_flowrate
     #             )
     #             pump_action_sequence.extend(air_rinsing_actions)
@@ -1460,7 +1465,7 @@ def generate_pump_protocol_with_rinsing(
     debug_print(f"🎉 PUMP_TRANSFER: 协议生成完成")
     debug_print(f"  📊 总动作数: {len(pump_action_sequence)}")
     debug_print(f"  📋 最终体积: {final_volume}mL")
-    debug_print(f"  🚀 执行路径: {from_vessel} -> {to_vessel}")
+    debug_print(f"  🚀 执行路径: {from_vessel_id} -> {to_vessel_id}")
     
     # 最终验证
     if len(pump_action_sequence) == 0:
@@ -1481,8 +1486,8 @@ def generate_pump_protocol_with_rinsing(
 
 async def generate_pump_protocol_with_rinsing_async(
     G: nx.DiGraph,
-    from_vessel: str,
-    to_vessel: str,
+    from_vessel_id: str,
+    to_vessel_id: str,
     volume: float = 0.0,
     amount: str = "",
     time: float = 0.0,
@@ -1503,7 +1508,7 @@ async def generate_pump_protocol_with_rinsing_async(
     """
     debug_print("=" * 60)
     debug_print(f"PUMP_TRANSFER: 🚀 开始生成协议 (异步版本)")
-    debug_print(f"  📍 路径: {from_vessel} -> {to_vessel}")
+    debug_print(f"  📍 路径: {from_vessel_id} -> {to_vessel_id}")
     debug_print(f"  🕐 时间戳: {time_module.time()}")
     debug_print("=" * 60)
     
@@ -1513,7 +1518,7 @@ async def generate_pump_protocol_with_rinsing_async(
     
     # 调用原有的同步版本
     result = generate_pump_protocol_with_rinsing(
-        G, from_vessel, to_vessel, volume, amount, time, viscous,
+        G, from_vessel_id, to_vessel_id, volume, amount, time, viscous,
         rinsing_solvent, rinsing_volume, rinsing_repeats, solid,
         flowrate, transfer_flowrate, rate_spec, event, through, **kwargs
     )
@@ -1531,8 +1536,8 @@ async def generate_pump_protocol_with_rinsing_async(
 # 保持原有的同步版本兼容性
 def generate_pump_protocol_with_rinsing(
     G: nx.DiGraph,
-    from_vessel: str,
-    to_vessel: str,
+    from_vessel: dict,
+    to_vessel: dict,
     volume: float = 0.0,
     amount: str = "",
     time: float = 0.0,
@@ -1551,6 +1556,8 @@ def generate_pump_protocol_with_rinsing(
     """
     原有的同步版本，添加防冲突机制
     """
+    from_vessel_id, _ = get_vessel(from_vessel)
+    to_vessel_id, _ = get_vessel(to_vessel)
     
     # 添加执行锁，防止并发调用
     import threading
@@ -1560,7 +1567,7 @@ def generate_pump_protocol_with_rinsing(
     with generate_pump_protocol_with_rinsing._lock:
         debug_print("=" * 60)
         debug_print(f"PUMP_TRANSFER: 🚀 开始生成协议 (同步版本)")
-        debug_print(f"  📍 路径: {from_vessel} -> {to_vessel}")
+        debug_print(f"  📍 路径: {from_vessel_id} -> {to_vessel_id}")
         debug_print(f"  🕐 时间戳: {time_module.time()}")
         debug_print(f"  🔒 获得执行锁")
         debug_print("=" * 60)
@@ -1579,8 +1586,8 @@ def generate_pump_protocol_with_rinsing(
             debug_print("🎯 检测到 volume=0.0，开始自动体积检测...")
             
             # 直接从源容器读取实际体积
-            actual_volume = get_vessel_liquid_volume(G, from_vessel)
-            debug_print(f"📖 从容器 '{from_vessel}' 读取到体积: {actual_volume}mL")
+            actual_volume = get_vessel_liquid_volume(G, from_vessel_id)
+            debug_print(f"📖 从容器 '{from_vessel_id}' 读取到体积: {actual_volume}mL")
             
             if actual_volume > 0:
                 final_volume = actual_volume
@@ -1602,7 +1609,7 @@ def generate_pump_protocol_with_rinsing(
                 debug_print(f"✅ 使用从 amount 解析的体积: {final_volume}mL")
             elif parsed_volume == 0.0 and amount.lower().strip() == "all":
                 debug_print("🎯 检测到 amount='all'，从容器读取全部体积...")
-                actual_volume = get_vessel_liquid_volume(G, from_vessel)
+                actual_volume = get_vessel_liquid_volume(G, from_vessel_id)
                 if actual_volume > 0:
                     final_volume = actual_volume
                     debug_print(f"✅ amount='all'，设置体积为: {final_volume}mL")
@@ -1681,7 +1688,7 @@ def generate_pump_protocol_with_rinsing(
     
     try:
         pump_action_sequence = generate_pump_protocol(
-            G, from_vessel, to_vessel, final_volume,
+            G, from_vessel_id, to_vessel_id, final_volume,
             flowrate, transfer_flowrate
         )
         
@@ -1701,6 +1708,7 @@ def generate_pump_protocol_with_rinsing(
         return pump_action_sequence
             
     except Exception as e:
+        traceback.print_exc()
         logger.error(f"❌ 协议生成失败: {str(e)}")
         return [
             {
@@ -1757,7 +1765,7 @@ def _parse_amount_to_volume(amount: str) -> float:
     return 0.0
 
 
-def _generate_rinsing_sequence(G: nx.DiGraph, from_vessel: str, to_vessel: str,
+def _generate_rinsing_sequence(G: nx.DiGraph, from_vessel_id: str, to_vessel_id: str,
                               rinsing_solvent: str, rinsing_volume: float,
                               rinsing_repeats: int, flowrate: float,
                               transfer_flowrate: float) -> List[Dict[str, Any]]:
@@ -1765,7 +1773,7 @@ def _generate_rinsing_sequence(G: nx.DiGraph, from_vessel: str, to_vessel: str,
     rinsing_actions = []
 
     try:
-        shortest_path = nx.shortest_path(G, source=from_vessel, target=to_vessel)
+        shortest_path = nx.shortest_path(G, source=from_vessel_id, target=to_vessel_id)
         pump_backbone = shortest_path[1:-1]
 
         if not pump_backbone:
@@ -1812,10 +1820,10 @@ def _generate_rinsing_sequence(G: nx.DiGraph, from_vessel: str, to_vessel: str,
             # 第一种冲洗溶剂稀释源容器和目标容器
             if solvent == rinsing_solvents[0]:
                 rinsing_actions.extend(
-                    generate_pump_protocol(G, solvent_vessel, from_vessel, rinsing_volume, flowrate, transfer_flowrate)
+                    generate_pump_protocol(G, solvent_vessel, from_vessel_id, rinsing_volume, flowrate, transfer_flowrate)
                 )
                 rinsing_actions.extend(
-                    generate_pump_protocol(G, solvent_vessel, to_vessel, rinsing_volume, flowrate, transfer_flowrate)
+                    generate_pump_protocol(G, solvent_vessel, to_vessel_id, rinsing_volume, flowrate, transfer_flowrate)
                 )
 
     except Exception as e:
@@ -1824,7 +1832,7 @@ def _generate_rinsing_sequence(G: nx.DiGraph, from_vessel: str, to_vessel: str,
     return rinsing_actions
 
 
-def _generate_air_rinsing_sequence(G: nx.DiGraph, from_vessel: str, to_vessel: str,
+def _generate_air_rinsing_sequence(G: nx.DiGraph, from_vessel_id: str, to_vessel_id: str,
                                   rinsing_volume: float, repeats: int,
                                   flowrate: float, transfer_flowrate: float) -> List[Dict[str, Any]]:
     """生成空气冲洗序列"""
@@ -1839,12 +1847,12 @@ def _generate_air_rinsing_sequence(G: nx.DiGraph, from_vessel: str, to_vessel: s
         for _ in range(repeats):
             # 空气冲洗源容器
             air_rinsing_actions.extend(
-                generate_pump_protocol(G, air_vessel, from_vessel, rinsing_volume, flowrate, transfer_flowrate)
+                generate_pump_protocol(G, air_vessel, from_vessel_id, rinsing_volume, flowrate, transfer_flowrate)
             )
 
             # 空气冲洗目标容器
             air_rinsing_actions.extend(
-                generate_pump_protocol(G, air_vessel, to_vessel, rinsing_volume, flowrate, transfer_flowrate)
+                generate_pump_protocol(G, air_vessel, to_vessel_id, rinsing_volume, flowrate, transfer_flowrate)
             )
 
     except Exception as e:
