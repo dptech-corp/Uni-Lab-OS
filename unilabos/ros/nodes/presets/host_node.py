@@ -843,6 +843,15 @@ class HostNode(BaseROS2DeviceNode):
             success = bool(r)
 
         response.success = success
+
+        if success:
+            from unilabos.resources.graphio import physical_setup_graph
+            for resource in resources:
+                if resource.get("id") not in physical_setup_graph.nodes:
+                    physical_setup_graph.add_node(resource["id"], **resource)
+                else:
+                    physical_setup_graph.nodes[resource["id"]]["data"].update(resource["data"])
+
         self.lab_logger().info(f"[Host Node-Resource] Add request completed, success: {success}")
         return response
 

@@ -72,7 +72,7 @@ class VirtualFilter:
         """Execute filter action - 完全按照 Filter.action 参数 🌊"""
         vessel_id, _ = get_vessel(vessel)
         filtrate_vessel_id, _ = get_vessel(filtrate_vessel) if filtrate_vessel else (f"{vessel_id}_filtrate", {})
-        
+
         # 🔧 新增：温度自动调整
         original_temp = temp
         if temp == 0.0:
@@ -216,12 +216,17 @@ class VirtualFilter:
     def current_temp(self) -> float:
         """Filter.action feedback 字段 🌡️"""
         return self.data.get("current_temp", 25.0)
-    
+
+    @property
+    def current_status(self) -> str:
+        """Filter.action feedback 字段 📋"""
+        return self.data.get("current_status", "")
+
     @property
     def filtered_volume(self) -> float:
         """Filter.action feedback 字段 💧"""
         return self.data.get("filtered_volume", 0.0)
-    
+
     @property
     def message(self) -> str:
         return self.data.get("message", "")
