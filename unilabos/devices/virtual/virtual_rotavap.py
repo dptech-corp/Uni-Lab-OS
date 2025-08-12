@@ -99,8 +99,8 @@ class VirtualRotavap:
             self.logger.error(f"❌ 时间参数类型无效: {type(time)}，使用默认值180.0秒")
             time = 180.0
         
-        # 确保time是float类型
-        time = float(time)
+        # 确保time是float类型; 并加速
+        time = float(time) / 10.0
         
         # 🔧 简化处理：如果vessel就是设备自己，直接操作
         if vessel == self.device_id:

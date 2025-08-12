@@ -21,19 +21,6 @@ class VirtualMultiwayValve:
         self._current_position = 0  # 默认在0号位（transfer pump位置）
         self._target_position = 0
         
-        # 位置映射说明
-        self.position_map = {
-            0: "transfer_pump",  # 0号位连接转移泵
-            1: "port_1",         # 1号位
-            2: "port_2",         # 2号位
-            3: "port_3",         # 3号位
-            4: "port_4",         # 4号位
-            5: "port_5",         # 5号位
-            6: "port_6",         # 6号位
-            7: "port_7",         # 7号位
-            8: "port_8"          # 8号位
-        }
-        
         print(f"🔄 === 虚拟多通阀门已创建 === ✨")
         print(f"🎯 端口: {port} | 📊 位置范围: 0-{self.max_positions} | 🏠 初始位置: 0 (transfer_pump)")
         self.logger.info(f"🔧 多通阀门初始化: 端口={port}, 最大位置={self.max_positions}")
@@ -60,7 +47,7 @@ class VirtualMultiwayValve:
 
     def get_current_port(self) -> str:
         """获取当前连接的端口名称 🔌"""
-        return self.position_map.get(self._current_position, "unknown")
+        return self._current_position
 
     def set_position(self, command: Union[int, str]):
         """
@@ -115,7 +102,7 @@ class VirtualMultiwayValve:
             old_position = self._current_position
             old_port = self.get_current_port()
             
-            self.logger.info(f"🔄 阀门切换: {old_position}({old_port}) → {pos}({self.position_map.get(pos, 'unknown')}) {pos_emoji}")
+            self.logger.info(f"🔄 阀门切换: {old_position}({old_port}) → {pos} {pos_emoji}")
             
             self._status = "Busy"
             self._valve_state = "Moving"
@@ -190,6 +177,17 @@ class VirtualMultiwayValve:
         """获取阀门位置 - 兼容性方法 📍"""
         return self._current_position
 
+    def set_valve_position(self, command: Union[int, str]):
+        """
+        设置阀门位置 - 兼容pump_protocol调用 🎯
+        这是set_position的别名方法，用于兼容pump_protocol.py
+
+        Args:
+            command: 目标位置 (0-8) 或位置字符串
+        """
+        # 删除debug日志：self.logger.debug(f"🎯 兼容性调用: set_valve_position({command})")
+        return self.set_position(command)
+
     def is_at_position(self, position: int) -> bool:
         """检查是否在指定位置 🎯"""
         result = self._current_position == position
@@ -209,17 +207,6 @@ class VirtualMultiwayValve:
         # 删除debug日志：port_status = "是" if result else "否"
         # 删除debug日志：self.logger.debug(f"🔌 端口{port_number}检查: {port_status} (当前位置: {self._current_position})")
         return result
-
-    def get_available_positions(self) -> list:
-        """获取可用位置列表 📋"""
-        positions = list(range(0, self.max_positions + 1))
-        # 删除debug日志：self.logger.debug(f"📋 可用位置: {positions}")
-        return positions
-
-    def get_available_ports(self) -> Dict[int, str]:
-        """获取可用端口映射 🗺️"""
-        # 删除debug日志：self.logger.debug(f"🗺️ 端口映射: {self.position_map}")
-        return self.position_map.copy()
 
     def reset(self):
         """重置阀门到transfer pump位置（0号位）🔄"""
@@ -259,17 +246,6 @@ class VirtualMultiwayValve:
         
         return f"🔄 VirtualMultiwayValve({status_emoji} 位置: {self._current_position}/{self.max_positions}, 端口: {current_port}, 状态: {self._status})"
 
-    def set_valve_position(self, command: Union[int, str]):
-        """
-        设置阀门位置 - 兼容pump_protocol调用 🎯
-        这是set_position的别名方法，用于兼容pump_protocol.py
-        
-        Args:
-            command: 目标位置 (0-8) 或位置字符串
-        """
-        # 删除debug日志：self.logger.debug(f"🎯 兼容性调用: set_valve_position({command})")
-        return self.set_position(command)
-
 
 # 使用示例
 if __name__ == "__main__":
@@ -290,10 +266,6 @@ if __name__ == "__main__":
     # 切换到试剂瓶2（2号位）
     print(f"\n🔌 切换到2号位: {valve.set_to_port(2)}")
     print(f"📍 当前状态: {valve}")
-    
-    # 显示所有可用位置
-    print(f"\n📋 可用位置: {valve.get_available_positions()}")
-    print(f"🗺️ 端口映射: {valve.get_available_ports()}")
     
     # 测试切换功能
     print(f"\n🔄 智能切换测试:")

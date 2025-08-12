@@ -404,13 +404,14 @@ class HostNode(BaseROS2DeviceNode):
         class_name: str,
         parent: str,
         bind_locations: Point,
-        liquid_input_slot: list[int],
-        liquid_type: list[str],
-        liquid_volume: list[int],
-        slot_on_deck: str,
+        liquid_input_slot: list[int] = [],
+        liquid_type: list[str] = [],
+        liquid_volume: list[int] = [],
+        slot_on_deck: str = "",
     ):
         # 暂不支持多对同名父子同时存在
         res_creation_input = {
+            "id": res_id.split("/")[-1],
             "name": res_id.split("/")[-1],
             "class": class_name,
             "parent": parent.split("/")[-1],
@@ -424,8 +425,10 @@ class HostNode(BaseROS2DeviceNode):
             res_creation_input.update(
                 {
                     "data": {
+                        "liquids": [{
                         "liquid_type": liquid_type[0] if liquid_type else None,
                         "liquid_volume": liquid_volume[0] if liquid_volume else None,
+                        }]
                     }
                 }
             )

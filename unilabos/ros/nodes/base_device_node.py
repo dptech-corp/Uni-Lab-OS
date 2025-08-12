@@ -395,6 +395,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                         if "data" not in resource:
                             resource["data"] = {}
                         resource["data"].update(json.loads(container_instance.data))
+                        request.resources[0].name = resource["name"]
                         logger.info(f"更新物料{container_query_dict['name']}的数据{resource['data']} dict")
                     else:
                         logger.info(f"更新物料{container_query_dict['name']}出现不支持的数据类型{type(resource)} {resource}")

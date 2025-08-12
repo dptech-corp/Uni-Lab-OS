@@ -48,20 +48,6 @@ class VirtualSolenoidValve:
         """获取阀门位置状态"""
         return "OPEN" if self._is_open else "CLOSED"
 
-    @property
-    def state(self) -> dict:
-        """获取阀门完整状态"""
-        return {
-            "device_id": self.device_id,
-            "port": self.port,
-            "voltage": self.voltage,
-            "response_time": self.response_time,
-            "is_open": self._is_open,
-            "valve_state": self._valve_state,
-            "status": self._status,
-            "position": self.valve_position
-        }
-
     async def set_valve_position(self, command: str = None, **kwargs):
         """
         设置阀门位置 - ROS动作接口

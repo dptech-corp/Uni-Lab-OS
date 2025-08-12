@@ -125,6 +125,29 @@ def find_solvent_vessel(G: nx.DiGraph, solvent: str) -> str:
     """
     debug_print(f"🔍 正在查找溶剂 '{solvent}' 的容器... 🧪")
 
+    # 第四步：通过数据中的试剂信息匹配
+    debug_print("  🧪 步骤1: 数据试剂信息匹配...")
+    for node_id in G.nodes():
+        debug_print(f"查找 id {node_id}, type={G.nodes[node_id].get('type')}, data={G.nodes[node_id].get('data', {})} 的容器...")
+        if G.nodes[node_id].get('type') == 'container':
+            vessel_data = G.nodes[node_id].get('data', {})
+
+            # 检查 data 中的 reagent_name 字段
+            reagent_name = vessel_data.get('reagent_name', '').lower()
+            if reagent_name and solvent.lower() == reagent_name:
+                debug_print(f"  🎉 通过data.reagent_name匹配找到容器: {node_id} (试剂: {reagent_name}) ✨")
+                return node_id
+
+            # 检查 data 中的液体信息
+            liquids = vessel_data.get('liquid', []) or vessel_data.get('liquids', [])
+            for liquid in liquids:
+                if isinstance(liquid, dict):
+                    liquid_type = (liquid.get('liquid_type') or liquid.get('name', '')).lower()
+
+                    if solvent.lower() == liquid_type or solvent.lower() in liquid_type:
+                        debug_print(f"  🎉 通过液体类型匹配找到容器: {node_id} (液体类型: {liquid_type}) ✨")
+                        return node_id
+
     # 构建可能的容器名称
     possible_names = [
         f"flask_{solvent}",
@@ -140,14 +163,14 @@ def find_solvent_vessel(G: nx.DiGraph, solvent: str) -> str:
     debug_print(f"📋 候选容器名称: {possible_names[:3]}... (共{len(possible_names)}个) 📝")
 
     # 第一步：通过容器名称匹配
-    debug_print("  🎯 步骤1: 精确名称匹配...")
+    debug_print("  🎯 步骤2: 精确名称匹配...")
     for vessel_name in possible_names:
         if vessel_name in G.nodes():
             debug_print(f"  🎉 通过名称匹配找到容器: {vessel_name} ✨")
             return vessel_name
 
     # 第二步：通过模糊匹配（节点ID和名称）
-    debug_print("  🔍 步骤2: 模糊名称匹配...")
+    debug_print("  🔍 步骤3: 模糊名称匹配...")
     for node_id in G.nodes():
         if G.nodes[node_id].get('type') == 'container':
             node_name = G.nodes[node_id].get('name', '').lower()
@@ -157,7 +180,7 @@ def find_solvent_vessel(G: nx.DiGraph, solvent: str) -> str:
                 return node_id
 
     # 第三步：通过配置中的试剂信息匹配
-    debug_print("  🧪 步骤3: 配置试剂信息匹配...")
+    debug_print("  🧪 步骤4: 配置试剂信息匹配...")
     for node_id in G.nodes():
         if G.nodes[node_id].get('type') == 'container':
             # 检查 config 中的 reagent 字段
@@ -167,28 +190,6 @@ def find_solvent_vessel(G: nx.DiGraph, solvent: str) -> str:
             if config_reagent and solvent.lower() == config_reagent:
                 debug_print(f"  🎉 通过config.reagent匹配找到容器: {node_id} (试剂: {config_reagent}) ✨")
                 return node_id
-
-    # 第四步：通过数据中的试剂信息匹配
-    debug_print("  🧪 步骤4: 数据试剂信息匹配...")
-    for node_id in G.nodes():
-        if G.nodes[node_id].get('type') == 'container':
-            vessel_data = G.nodes[node_id].get('data', {})
-
-            # 检查 data 中的 reagent_name 字段
-            reagent_name = vessel_data.get('reagent_name', '').lower()
-            if reagent_name and solvent.lower() == reagent_name:
-                debug_print(f"  🎉 通过data.reagent_name匹配找到容器: {node_id} (试剂: {reagent_name}) ✨")
-                return node_id
-
-            # 检查 data 中的液体信息
-            liquids = vessel_data.get('liquid', [])
-            for liquid in liquids:
-                if isinstance(liquid, dict):
-                    liquid_type = (liquid.get('liquid_type') or liquid.get('name', '')).lower()
-
-                    if solvent.lower() in liquid_type:
-                        debug_print(f"  🎉 通过液体类型匹配找到容器: {node_id} (液体类型: {liquid_type}) ✨")
-                        return node_id
 
     # 第五步：部分匹配（如果前面都没找到）
     debug_print("  🔍 步骤5: 部分匹配...")

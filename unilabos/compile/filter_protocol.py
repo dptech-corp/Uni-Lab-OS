@@ -244,7 +244,7 @@ def generate_filter_protocol(
     # === 收集滤液（如果需要）===
     debug_print("📍 步骤5: 收集滤液... 💧")
     
-    if filtrate_vessel:
+    if filtrate_vessel_id and filtrate_vessel_id not in G.neighbors(filter_device):
         debug_print(f"  🧪 收集滤液: {filter_device} → {filtrate_vessel_id} 💧")
         
         try:

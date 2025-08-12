@@ -2161,8 +2161,6 @@ virtual_multiway_valve:
         type: SendCmd
     module: unilabos.devices.virtual.virtual_multiway_valve:VirtualMultiwayValve
     status_types:
-      available_ports: dict
-      available_positions: list
       current_port: str
       current_position: int
       flow_path: str
@@ -2268,10 +2266,6 @@ virtual_multiway_valve:
       type: object
     data:
       properties:
-        available_ports:
-          type: object
-        available_positions:
-          type: array
         current_port:
           type: string
         current_position:
@@ -2293,8 +2287,6 @@ virtual_multiway_valve:
       - target_position
       - current_port
       - valve_position
-      - available_positions
-      - available_ports
       - flow_path
       type: object
   version: 1.0.0
@@ -3775,7 +3767,6 @@ virtual_solenoid_valve:
     module: unilabos.devices.virtual.virtual_solenoid_valve:VirtualSolenoidValve
     status_types:
       is_open: bool
-      state: dict
       status: str
       valve_position: str
       valve_state: str
@@ -3813,8 +3804,6 @@ virtual_solenoid_valve:
       properties:
         is_open:
           type: boolean
-        state:
-          type: object
         status:
           type: string
         valve_position:
@@ -3826,7 +3815,6 @@ virtual_solenoid_valve:
       - valve_state
       - is_open
       - valve_position
-      - state
       type: object
   version: 1.0.0
 virtual_solid_dispenser:
