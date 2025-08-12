@@ -351,7 +351,7 @@ class HostNode(BaseROS2DeviceNode):
                 except Exception as e:
                     self.lab_logger().error(f"[Host Node] Failed to create ActionClient for {action_id}: {str(e)}")
 
-    def create_resource_detailed(
+    async def create_resource_detailed(
         self,
         resources: list[Union[list["Resource"], "Resource"]],
         device_ids: list[str],
@@ -393,11 +393,11 @@ class HostNode(BaseROS2DeviceNode):
                 },
                 ensure_ascii=False,
             )
-            response = sclient.call(request)
+            response = await sclient.call_async(request)
             responses.append(response)
         return responses
 
-    def create_resource(
+    async def create_resource(
         self,
         device_id: str,
         res_id: str,
@@ -451,7 +451,9 @@ class HostNode(BaseROS2DeviceNode):
             )
         ]
 
-        return self.create_resource_detailed(resources, device_ids, bind_parent_id, bind_location, other_calling_param)
+        response = await self.create_resource_detailed(resources, device_ids, bind_parent_id, bind_location, other_calling_param)
+
+        return response
 
     def initialize_device(self, device_id: str, device_config: Dict[str, Any]) -> None:
         """

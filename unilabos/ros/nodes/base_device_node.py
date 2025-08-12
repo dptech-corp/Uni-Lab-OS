@@ -336,7 +336,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             res.response = ""
             return res
 
-        def append_resource(req: SerialCommand_Request, res: SerialCommand_Response):
+        async def append_resource(req: SerialCommand_Request, res: SerialCommand_Response):
             # 物料传输到对应的node节点
             rclient = self.create_client(ResourceAdd, "/resources/add")
             rclient.wait_for_service()
@@ -399,7 +399,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                         logger.info(f"更新物料{container_query_dict['name']}的数据{resource['data']} dict")
                     else:
                         logger.info(f"更新物料{container_query_dict['name']}出现不支持的数据类型{type(resource)} {resource}")
-            response = rclient.call(request)
+            response = await rclient.call_async(request)
             # 应该先add_resource了
             res.response = "OK"
             # 如果driver自己就有assign的方法，那就使用driver自己的assign方法
