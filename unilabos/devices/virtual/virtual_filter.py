@@ -3,6 +3,8 @@ import logging
 import time as time_module
 from typing import Dict, Any, Optional
 
+from unilabos.compile.utils.vessel_parser import get_vessel
+
 
 class VirtualFilter:
     """Virtual filter device - 完全按照 Filter.action 规范 🌊"""
@@ -40,7 +42,6 @@ class VirtualFilter:
             "progress": 0.0,           # Filter.action feedback
             "current_temp": 25.0,      # Filter.action feedback
             "filtered_volume": 0.0,    # Filter.action feedback
-            "current_status": "Ready for filtration",  # Filter.action feedback
             "message": "Ready for filtration"
         })
         
@@ -52,9 +53,7 @@ class VirtualFilter:
         self.logger.info(f"🧹 清理虚拟过滤器 {self.device_id} 🔚")
         
         self.data.update({
-            "status": "Offline",
-            "current_status": "System offline",
-            "message": "System offline"
+            "status": "Offline"
         })
         
         self.logger.info(f"✅ 过滤器 {self.device_id} 清理完成 💤")
@@ -62,8 +61,8 @@ class VirtualFilter:
     
     async def filter(
         self, 
-        vessel: str, 
-        filtrate_vessel: str = "", 
+        vessel: dict,
+        filtrate_vessel: dict = {},
         stir: bool = False, 
         stir_speed: float = 300.0, 
         temp: float = 25.0, 
@@ -71,6 +70,8 @@ class VirtualFilter:
         volume: float = 0.0
     ) -> bool:
         """Execute filter action - 完全按照 Filter.action 参数 🌊"""
+        vessel_id, _ = get_vessel(vessel)
+        filtrate_vessel_id, _ = get_vessel(filtrate_vessel) if filtrate_vessel else (f"{vessel_id}_filtrate", {})
         
         # 🔧 新增：温度自动调整
         original_temp = temp
@@ -81,7 +82,7 @@ class VirtualFilter:
             temp = 4.0   # 小于4度自动设置为4度
             self.logger.info(f"🌡️ 温度自动调整: {original_temp}°C → {temp}°C (最低温度) ❄️")
         
-        self.logger.info(f"🌊 开始过滤操作: {vessel} → {filtrate_vessel} 🚰")
+        self.logger.info(f"🌊 开始过滤操作: {vessel_id} → {filtrate_vessel_id} 🚰")
         self.logger.info(f"  🌪️ 搅拌: {stir} ({stir_speed} RPM)")
         self.logger.info(f"  🌡️ 温度: {temp}°C")
         self.logger.info(f"  💧 体积: {volume}mL")
@@ -93,7 +94,6 @@ class VirtualFilter:
             self.logger.error(f"❌ {error_msg}")
             self.data.update({
                 "status": f"Error: 温度超出范围 ⚠️",
-                "current_status": f"Error: 温度超出范围 ⚠️",
                 "message": error_msg
             })
             return False
@@ -103,7 +103,6 @@ class VirtualFilter:
             self.logger.error(f"❌ {error_msg}")
             self.data.update({
                 "status": f"Error: 搅拌速度超出范围 ⚠️",
-                "current_status": f"Error: 搅拌速度超出范围 ⚠️",
                 "message": error_msg
             })
             return False
@@ -112,8 +111,7 @@ class VirtualFilter:
             error_msg = f"💧 过滤体积 {volume} mL 超出范围 (0-{self._max_volume} mL) ⚠️"
             self.logger.error(f"❌ {error_msg}")
             self.data.update({
-                "status": f"Error: 体积超出范围 ⚠️",
-                "current_status": f"Error: 体积超出范围 ⚠️",
+                "status": f"Error",
                 "message": error_msg
             })
             return False
@@ -123,12 +121,11 @@ class VirtualFilter:
         self.logger.info(f"🚀 开始过滤 {filter_volume}mL 液体 💧")
         
         self.data.update({
-            "status": f"🌊 过滤中: {vessel}",
+            "status": f"Running",
             "current_temp": temp,
             "filtered_volume": 0.0,
             "progress": 0.0,
-            "current_status": f"🌊 Filtering {vessel} → {filtrate_vessel}",
-            "message": f"🚀 Starting filtration: {vessel} → {filtrate_vessel}"
+            "message": f"🚀 Starting filtration: {vessel_id} → {filtrate_vessel_id}"
         })
         
         try:
@@ -164,8 +161,7 @@ class VirtualFilter:
                     "progress": progress,               # Filter.action feedback
                     "current_temp": temp,              # Filter.action feedback
                     "filtered_volume": current_filtered, # Filter.action feedback
-                    "current_status": f"🌊 Filtering: {progress:.1f}% complete", # Filter.action feedback
-                    "status": status_msg,
+                    "status": "Running",
                     "message": f"🌊 Filtering: {progress:.1f}% complete, {current_filtered:.1f}mL filtered"
                 })
                 
@@ -190,11 +186,10 @@ class VirtualFilter:
                 "progress": 100.0,                    # Filter.action feedback
                 "current_temp": final_temp,           # Filter.action feedback
                 "filtered_volume": filter_volume,     # Filter.action feedback
-                "current_status": f"✅ Filtration completed: {filter_volume}mL", # Filter.action feedback
-                "message": f"✅ Filtration completed: {filter_volume}mL filtered from {vessel}"
+                "message": f"✅ Filtration completed: {filter_volume}mL filtered from {vessel_id}"
             })
             
-            self.logger.info(f"🎉 过滤完成! 💧 {filter_volume}mL 从 {vessel} 过滤到 {filtrate_vessel} ✨")
+            self.logger.info(f"🎉 过滤完成! 💧 {filter_volume}mL 从 {vessel_id} 过滤到 {filtrate_vessel_id} ✨")
             self.logger.info(f"📊 最终状态: 温度 {final_temp}°C | 进度 100% | 体积 {filter_volume}mL 🏁")
             return True
             
@@ -202,8 +197,7 @@ class VirtualFilter:
             error_msg = f"过滤过程中发生错误: {str(e)} 💥"
             self.logger.error(f"❌ {error_msg}")
             self.data.update({
-                "status": f"❌ 过滤错误: {str(e)}",
-                "current_status": f"❌ Filtration failed: {str(e)}",
+                "status": f"Error",
                 "message": f"❌ Filtration failed: {str(e)}"
             })
             return False
@@ -227,11 +221,6 @@ class VirtualFilter:
     def filtered_volume(self) -> float:
         """Filter.action feedback 字段 💧"""
         return self.data.get("filtered_volume", 0.0)
-    
-    @property
-    def current_status(self) -> str:
-        """Filter.action feedback 字段 📋"""
-        return self.data.get("current_status", "")
     
     @property
     def message(self) -> str:

@@ -160,8 +160,8 @@ def generate_filter_protocol(
             # 使用pump protocol转移液体到过滤器
             transfer_actions = generate_pump_protocol_with_rinsing(
                 G=G,
-                from_vessel=vessel_id,  # 🔧 使用 vessel_id
-                to_vessel=filter_device,
+                from_vessel={"id": vessel_id},  # 🔧 使用 vessel_id
+                to_vessel={"id": filter_device},
                 volume=0.0,  # 转移所有液体
                 amount="",
                 time=0.0,
@@ -212,8 +212,8 @@ def generate_filter_protocol(
     # 构建过滤动作参数
     debug_print("  ⚙️ 构建过滤参数...")
     filter_kwargs = {
-        "vessel": filter_device,  # 过滤器设备
-        "filtrate_vessel": filtrate_vessel_id,  # 滤液容器（可能为空）
+        "vessel": {"id": filter_device},  # 过滤器设备
+        "filtrate_vessel": {"id": filtrate_vessel_id},  # 滤液容器（可能为空）
         "stir": kwargs.get("stir", False),
         "stir_speed": kwargs.get("stir_speed", 0.0),
         "temp": kwargs.get("temp", 25.0),
