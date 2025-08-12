@@ -656,6 +656,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
 
             action_kwargs = convert_from_ros_msg_with_mapping(goal, action_value_mapping["goal"])
             self.lab_logger().debug(f"任务 {ACTION.__name__} 接收到原始目标: {action_kwargs}")
+            error_skip = False
             # 向Host查询物料当前状态，如果是host本身的增加物料的请求，则直接跳过
             if action_name not in ["create_resource_detailed", "create_resource"]:
                 for k, v in goal.get_fields_and_field_types().items():
@@ -665,7 +666,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                         # TODO: resource后面需要分组
                         only_one_resource = False
                         try:
-                            if len(action_kwargs[k]) > 1:
+                            if isinstance(action_kwargs[k], list) and len(action_kwargs[k]) > 1:
                                 for i in action_kwargs[k]:
                                     r = ResourceGet.Request()
                                     r.id = i["id"]  # splash optional
@@ -695,17 +696,43 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                             final_resource = convert_resources_to_type(resources_list, final_type)
                         else:
                             final_resource = [convert_resources_to_type([i], final_type)[0] for i in resources_list]
-                        action_kwargs[k] = self.resource_tracker.figure_resource(final_resource)
+                        try:
+                            action_kwargs[k] = self.resource_tracker.figure_resource(final_resource)
+                        except Exception as e:
+                            self.lab_logger().error(f"物料实例获取失败: {e}\n{traceback.format_exc()}")
+                            error_skip = True
+                            execution_error = traceback.format_exc()
+                            break
 
             ##### self.lab_logger().info(f"准备执行: {action_kwargs}, 函数: {ACTION.__name__}")
             time_start = time.time()
             time_overall = 100
             future = None
-            # 将阻塞操作放入线程池执行
-            if asyncio.iscoroutinefunction(ACTION):
-                try:
-                    ##### self.lab_logger().info(f"异步执行动作 {ACTION}")
-                    future = ROS2DeviceNode.run_async_func(ACTION, trace_error=False, **action_kwargs)
+            if not error_skip:
+                # 将阻塞操作放入线程池执行
+                if asyncio.iscoroutinefunction(ACTION):
+                    try:
+                        ##### self.lab_logger().info(f"异步执行动作 {ACTION}")
+                        future = ROS2DeviceNode.run_async_func(ACTION, trace_error=False, **action_kwargs)
+
+                        def _handle_future_exception(fut):
+                            nonlocal execution_error, execution_success, action_return_value
+                            try:
+                                action_return_value = fut.result()
+                                execution_success = True
+                            except Exception as e:
+                                execution_error = traceback.format_exc()
+                                error(f"异步任务 {ACTION.__name__} 报错了\n{traceback.format_exc()}\n原始输入：{action_kwargs}")
+                                error(traceback.format_exc())
+
+                        future.add_done_callback(_handle_future_exception)
+                    except Exception as e:
+                        execution_error = traceback.format_exc()
+                        execution_success = False
+                        self.lab_logger().error(f"创建异步任务失败: {traceback.format_exc()}")
+                else:
+                #####    self.lab_logger().info(f"同步执行动作 {ACTION}")
+                    future = self._executor.submit(ACTION, **action_kwargs)
 
                     def _handle_future_exception(fut):
                         nonlocal execution_error, execution_success, action_return_value
@@ -713,28 +740,9 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                             action_return_value = fut.result()
                             execution_success = True
                         except Exception as e:
-                            execution_error = traceback.format_exc()
-                            error(f"异步任务 {ACTION.__name__} 报错了\n{traceback.format_exc()}\n原始输入：{action_kwargs}")
-                            error(traceback.format_exc())
+                            error(f"同步任务 {ACTION.__name__} 报错了\n{traceback.format_exc()}\n原始输入：{action_kwargs}")
 
                     future.add_done_callback(_handle_future_exception)
-                except Exception as e:
-                    execution_error = traceback.format_exc()
-                    execution_success = False
-                    self.lab_logger().error(f"创建异步任务失败: {traceback.format_exc()}")
-            else:
-            #####    self.lab_logger().info(f"同步执行动作 {ACTION}")
-                future = self._executor.submit(ACTION, **action_kwargs)
-
-                def _handle_future_exception(fut):
-                    nonlocal execution_error, execution_success, action_return_value
-                    try:
-                        action_return_value = fut.result()
-                        execution_success = True
-                    except Exception as e:
-                        error(f"同步任务 {ACTION.__name__} 报错了\n{traceback.format_exc()}\n原始输入：{action_kwargs}")
-
-                future.add_done_callback(_handle_future_exception)
 
             action_type = action_value_mapping["type"]
             feedback_msg_types = action_type.Feedback.get_fields_and_field_types()

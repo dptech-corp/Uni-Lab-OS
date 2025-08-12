@@ -146,6 +146,7 @@ class ROS2ProtocolNode(BaseROS2DeviceNode):
         # 为子设备的每个动作创建动作客户端
         if d is not None and hasattr(d, "ros_node_instance"):
             node = d.ros_node_instance
+            node.resource_tracker = self.resource_tracker  # 站内应当共享资源跟踪器
             for action_name, action_mapping in node._action_value_mappings.items():
                 if action_name.startswith("auto-") or str(action_mapping.get("type", "")).startswith("UniLabJsonCommand"):
                     continue

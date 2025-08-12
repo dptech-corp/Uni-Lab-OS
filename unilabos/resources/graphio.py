@@ -340,14 +340,14 @@ def convert_resources_to_type(
     Returns:
         List of resources in the given type.
     """
-    if resource_type == dict:
+    if resource_type == dict or resource_type == str:
         return list_to_nested_dict(resources_list)
     elif isinstance(resource_type, type) and issubclass(resource_type, ResourcePLR):
         if isinstance(resources_list, dict):
             return resource_ulab_to_plr(resources_list, plr_model)
         resources_tree = dict_to_tree({r["id"]: r for r in resources_list})
         return resource_ulab_to_plr(resources_tree[0], plr_model)
-    elif isinstance(resource_type, list) :
+    elif isinstance(resource_type, list):
         if all((get_origin(t) is Union) for t in resource_type):
             resources_tree = dict_to_tree({r["id"]: r for r in resources_list})
             return [resource_ulab_to_plr(r, plr_model) for r in resources_tree]

@@ -51,7 +51,7 @@ class DeviceClassCreator(Generic[T]):
         """
         if self.device_instance is not None:
             for c in self.children.values():
-                if c["type"] == "container":
+                if c["type"] != "device":
                     self.resource_tracker.add_resource(c)
 
 

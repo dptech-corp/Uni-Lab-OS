@@ -37,6 +37,8 @@ class DeviceNodeResourceTracker(object):
     def figure_resource(self, query_resource, try_mode=False):
         if isinstance(query_resource, list):
             return [self.figure_resource(r) for r in query_resource]
+        elif isinstance(query_resource, dict) and "id" not in query_resource and "name" not in query_resource:  # 临时处理，要删除的，driver有太多类型错误标注
+            return [self.figure_resource(r) for r in query_resource.values()]
         res_id = query_resource.id if hasattr(query_resource, "id") else (query_resource.get("id") if isinstance(query_resource, dict) else None)
         res_name = query_resource.name if hasattr(query_resource, "name") else (query_resource.get("name") if isinstance(query_resource, dict) else None)
         res_identifier = res_id if res_id else res_name
