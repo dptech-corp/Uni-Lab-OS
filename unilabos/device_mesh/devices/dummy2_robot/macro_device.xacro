@@ -1,0 +1,314 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="dummy2_robot">
+  <xacro:macro name="dummy2_robot" params="mesh_path:='' parent_link:='' station_name:='' device_name:='' fake_dev:='true' x:=0 y:=0 z:=0 rx:=0 ry:=0 r:=0">
+    <!-- Read .yaml files from disk, load content into properties -->
+    <xacro:property name= "joint_limit_parameters" value="${xacro.load_yaml(mesh_path + '/devices/dummy2_robot/joint_limit.yaml')}"/>
+
+    <!-- Extract subsections from yaml dictionaries -->
+    <xacro:property name= "sec_limits" value="${joint_limit_parameters['joint_limits']}"/>
+    
+    <!-- robot name parameter -->
+    <xacro:arg name="name" default="dummy2"/>
+    
+    <!-- parameters -->
+    <xacro:arg name="tf_prefix" default="${station_name}${device_name}" />
+    <xacro:arg name="joint_limit_params" default="${mesh_path}/devices/dummy2_robot/config/joint_limits.yaml"/>
+    <xacro:arg name="kinematics_params" default="${mesh_path}/devices/dummy2_robot/config/default_kinematics.yaml"/>
+    <xacro:arg name="physical_params" default="${mesh_path}/devices/dummy2_robot/config/physical_parameters.yaml"/>
+    <xacro:arg name="visual_params" default="${mesh_path}/devices/dummy2_robot/config/visual_parameters.yaml"/>
+    <xacro:arg name="transmission_hw_interface" default=""/>
+    <xacro:arg name="safety_limits" default="false"/>
+    <xacro:arg name="safety_pos_margin" default="0.15"/>
+    <xacro:arg name="safety_k_position" default="20"/>
+    
+    <!-- CAN2ETH related parameters -->
+    <xacro:arg name="can2eth_ip" default="192.168.8.88" />
+    <xacro:arg name="can2eth_port" default="8080" />
+
+    <!-- JOINTS LIMIT PARAMETERS -->
+    <xacro:property name="limit_joint_1"        value="${sec_limits['joint_1']}" />
+    <xacro:property name="limit_joint_2"        value="${sec_limits['joint_2']}" />
+    <xacro:property name="limit_joint_3"        value="${sec_limits['joint_3']}" />
+    <xacro:property name="limit_joint_4"        value="${sec_limits['joint_4']}" />
+    <xacro:property name="limit_joint_5"        value="${sec_limits['joint_5']}" />
+    <xacro:property name="limit_joint_6"        value="${sec_limits['joint_6']}" />
+    
+    <!-- create link fixed to parent -->
+    <joint name="${station_name}${device_name}base_link_joint" type="fixed">
+      <origin xyz="${x} ${y} ${z}" rpy="${rx} ${ry} ${r}" />
+      <parent link="${parent_link}"/>
+      <child link="${station_name}${device_name}base_link"/>
+      <axis xyz="0 0 0"/>
+    </joint>
+
+    <!-- base_link -->
+    <link name="${station_name}${device_name}base_link">
+      <inertial>
+        <origin xyz="0 0 0.05" rpy="0 0 0"/>
+        <mass value="5.0"/>
+        <inertia ixx="0.02" ixy="0" ixz="0" iyy="0.02" iyz="0" izz="0.02"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="file://${mesh_path}/devices/dummy2_robot/meshes/base_link.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="dummy2_base_material">
+          <color rgba="0.8 0.8 0.8 1.0"/>
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0.05" rpy="0 0 0"/>
+        <geometry>
+          <cylinder radius="0.08" length="0.1"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- Joint 1 -->
+    <joint name="${station_name}${device_name}joint_1" type="revolute">
+      <origin xyz="0 0 0.1" rpy="0 0 0"/>
+      <parent link="${station_name}${device_name}base_link"/>
+      <child link="${station_name}${device_name}link_1"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="${limit_joint_1['lower']}" upper="${limit_joint_1['upper']}" effort="${limit_joint_1['effort']}" velocity="${limit_joint_1['velocity']}"/>
+      <dynamics damping="0.0" friction="0.0"/>
+    </joint>
+
+    <link name="${station_name}${device_name}link_1">
+      <inertial>
+        <origin xyz="0 0 0.05" rpy="0 0 0"/>
+        <mass value="3.0"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="file://${mesh_path}/devices/dummy2_robot/meshes/J1_1.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="dummy2_link_material">
+          <color rgba="0.2 0.2 0.8 1.0"/>
+        </material>
+      </visual>
+    </link>
+
+    <!-- Joint 2 -->
+    <joint name="${station_name}${device_name}joint_2" type="revolute">
+      <origin xyz="0 0 0.15" rpy="0 0 0"/>
+      <parent link="${station_name}${device_name}link_1"/>
+      <child link="${station_name}${device_name}link_2"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="${limit_joint_2['lower']}" upper="${limit_joint_2['upper']}" effort="${limit_joint_2['effort']}" velocity="${limit_joint_2['velocity']}"/>
+      <dynamics damping="0.0" friction="0.0"/>
+    </joint>
+
+    <link name="${station_name}${device_name}link_2">
+      <inertial>
+        <origin xyz="0.1 0 0" rpy="0 0 0"/>
+        <mass value="2.5"/>
+        <inertia ixx="0.008" ixy="0" ixz="0" iyy="0.008" iyz="0" izz="0.008"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="file://${mesh_path}/devices/dummy2_robot/meshes/J2_1.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="dummy2_link_material"/>
+      </visual>
+    </link>
+
+    <!-- Joint 3 -->
+    <joint name="${station_name}${device_name}joint_3" type="revolute">
+      <origin xyz="0.2 0 0" rpy="0 0 0"/>
+      <parent link="${station_name}${device_name}link_2"/>
+      <child link="${station_name}${device_name}link_3"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="${limit_joint_3['lower']}" upper="${limit_joint_3['upper']}" effort="${limit_joint_3['effort']}" velocity="${limit_joint_3['velocity']}"/>
+      <dynamics damping="0.0" friction="0.0"/>
+    </joint>
+
+    <link name="${station_name}${device_name}link_3">
+      <inertial>
+        <origin xyz="0.08 0 0" rpy="0 0 0"/>
+        <mass value="2.0"/>
+        <inertia ixx="0.006" ixy="0" ixz="0" iyy="0.006" iyz="0" izz="0.006"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="file://${mesh_path}/devices/dummy2_robot/meshes/J3_1.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="dummy2_link_material"/>
+      </visual>
+    </link>
+
+    <!-- Joint 4 -->
+    <joint name="${station_name}${device_name}joint_4" type="revolute">
+      <origin xyz="0.15 0 0" rpy="0 0 0"/>
+      <parent link="${station_name}${device_name}link_3"/>
+      <child link="${station_name}${device_name}link_4"/>
+      <axis xyz="1 0 0"/>
+      <limit lower="${limit_joint_4['lower']}" upper="${limit_joint_4['upper']}" effort="${limit_joint_4['effort']}" velocity="${limit_joint_4['velocity']}"/>
+      <dynamics damping="0.0" friction="0.0"/>
+    </joint>
+
+    <link name="${station_name}${device_name}link_4">
+      <inertial>
+        <origin xyz="0 0 0.05" rpy="0 0 0"/>
+        <mass value="1.5"/>
+        <inertia ixx="0.004" ixy="0" ixz="0" iyy="0.004" iyz="0" izz="0.004"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="file://${mesh_path}/devices/dummy2_robot/meshes/J4_1.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="dummy2_link_material"/>
+      </visual>
+    </link>
+
+    <!-- Joint 5 -->
+    <joint name="${station_name}${device_name}joint_5" type="revolute">
+      <origin xyz="0 0 0.1" rpy="0 0 0"/>
+      <parent link="${station_name}${device_name}link_4"/>
+      <child link="${station_name}${device_name}link_5"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="${limit_joint_5['lower']}" upper="${limit_joint_5['upper']}" effort="${limit_joint_5['effort']}" velocity="${limit_joint_5['velocity']}"/>
+      <dynamics damping="0.0" friction="0.0"/>
+    </joint>
+
+    <link name="${station_name}${device_name}link_5">
+      <inertial>
+        <origin xyz="0 0 0.03" rpy="0 0 0"/>
+        <mass value="1.0"/>
+        <inertia ixx="0.002" ixy="0" ixz="0" iyy="0.002" iyz="0" izz="0.002"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="file://${mesh_path}/devices/dummy2_robot/meshes/J5_1.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="dummy2_link_material"/>
+      </visual>
+    </link>
+
+    <!-- Joint 6 (end effector) -->
+    <joint name="${station_name}${device_name}joint_6" type="revolute">
+      <origin xyz="0 0 0.06" rpy="0 0 0"/>
+      <parent link="${station_name}${device_name}link_5"/>
+      <child link="${station_name}${device_name}link_6"/>
+      <axis xyz="1 0 0"/>
+      <limit lower="${limit_joint_6['lower']}" upper="${limit_joint_6['upper']}" effort="${limit_joint_6['effort']}" velocity="${limit_joint_6['velocity']}"/>
+      <dynamics damping="0.0" friction="0.0"/>
+    </joint>
+
+    <link name="${station_name}${device_name}link_6">
+      <inertial>
+        <origin xyz="0 0 0.02" rpy="0 0 0"/>
+        <mass value="0.5"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="file://${mesh_path}/devices/dummy2_robot/meshes/J6_1.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="dummy2_link_material"/>
+      </visual>
+    </link>
+
+    <!-- Tool center point -->
+    <joint name="${station_name}${device_name}tool_joint" type="fixed">
+      <origin xyz="0 0 0.04" rpy="0 0 0"/>
+      <parent link="${station_name}${device_name}link_6"/>
+      <child link="${station_name}${device_name}tool_link"/>
+    </joint>
+
+    <link name="${station_name}${device_name}tool_link"/>
+
+    <!-- Camera link (if needed) -->
+    <joint name="${station_name}${device_name}camera_joint" type="fixed">
+      <origin xyz="0.05 0 0.02" rpy="0 0 0"/>
+      <parent link="${station_name}${device_name}link_6"/>
+      <child link="${station_name}${device_name}camera_link"/>
+    </joint>
+
+    <link name="${station_name}${device_name}camera_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="file://${mesh_path}/devices/dummy2_robot/meshes/camera_1.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="dummy2_camera_material">
+          <color rgba="0.1 0.1 0.1 1.0"/>
+        </material>
+      </visual>
+    </link>
+
+    <!-- ROS2 control (if needed) -->
+    <xacro:unless value="${fake_dev}">
+      <ros2_control name="${station_name}${device_name}ros2_control" type="system">
+        <hardware>
+          <plugin>dummy2_hardware_interface/Dummy2HardwareInterface</plugin>
+          <param name="can2eth_ip">$(arg can2eth_ip)</param>
+          <param name="can2eth_port">$(arg can2eth_port)</param>
+        </hardware>
+        
+        <joint name="${station_name}${device_name}joint_1">
+          <command_interface name="position">
+            <param name="min">${limit_joint_1['lower']}</param>
+            <param name="max">${limit_joint_1['upper']}</param>
+          </command_interface>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+        </joint>
+        
+        <joint name="${station_name}${device_name}joint_2">
+          <command_interface name="position">
+            <param name="min">${limit_joint_2['lower']}</param>
+            <param name="max">${limit_joint_2['upper']}</param>
+          </command_interface>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+        </joint>
+        
+        <joint name="${station_name}${device_name}joint_3">
+          <command_interface name="position">
+            <param name="min">${limit_joint_3['lower']}</param>
+            <param name="max">${limit_joint_3['upper']}</param>
+          </command_interface>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+        </joint>
+        
+        <joint name="${station_name}${device_name}joint_4">
+          <command_interface name="position">
+            <param name="min">${limit_joint_4['lower']}</param>
+            <param name="max">${limit_joint_4['upper']}</param>
+          </command_interface>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+        </joint>
+        
+        <joint name="${station_name}${device_name}joint_5">
+          <command_interface name="position">
+            <param name="min">${limit_joint_5['lower']}</param>
+            <param name="max">${limit_joint_5['upper']}</param>
+          </command_interface>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+        </joint>
+        
+        <joint name="${station_name}${device_name}joint_6">
+          <command_interface name="position">
+            <param name="min">${limit_joint_6['lower']}</param>
+            <param name="max">${limit_joint_6['upper']}</param>
+          </command_interface>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+        </joint>
+      </ros2_control>
+    </xacro:unless>
+
+  </xacro:macro>
+</robot>

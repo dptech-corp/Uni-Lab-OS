@@ -1,3 +1,318 @@
+robotic_arm.Dummy2:
+  category:
+  - robot_arm
+  class:
+    action_value_mappings:
+      auto-check_tf_update_actions:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result: {}
+        schema:
+          description: check_tf_update_actions的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: check_tf_update_actions参数
+          type: object
+        type: UniLabJsonCommand
+      auto-moveit_joint_task:
+        feedback: {}
+        goal: {}
+        goal_default:
+          joint_names: null
+          joint_positions: null
+          move_group: null
+          retry: 10
+          speed: 1
+        handles: []
+        result: {}
+        schema:
+          description: moveit_joint_task的参数schema（关节空间规划）
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                joint_names:
+                  type: string
+                joint_positions:
+                  type: string
+                move_group:
+                  type: string
+                retry:
+                  default: 10
+                  type: string
+                speed:
+                  default: 1
+                  type: string
+              required:
+              - move_group
+              - joint_positions
+              type: object
+            result: {}
+          required:
+          - goal
+          title: moveit_joint_task参数
+          type: object
+        type: UniLabJsonCommand
+      auto-moveit_task:
+        feedback: {}
+        goal: {}
+        goal_default:
+          cartesian: false
+          move_group: null
+          offsets:
+          - 0
+          - 0
+          - 0
+          position: null
+          quaternion: null
+          retry: 10
+          speed: 1
+          target_link: null
+        handles: []
+        result: {}
+        schema:
+          description: moveit_task的参数schema（笛卡尔空间/位姿规划）
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                cartesian:
+                  default: false
+                  type: string
+                move_group:
+                  type: string
+                offsets:
+                  default:
+                  - 0
+                  - 0
+                  - 0
+                  type: string
+                position:
+                  type: string
+                quaternion:
+                  type: string
+                retry:
+                  default: 10
+                  type: string
+                speed:
+                  default: 1
+                  type: string
+                target_link:
+                  type: string
+              required:
+              - move_group
+              - position
+              - quaternion
+              type: object
+            result: {}
+          required:
+          - goal
+          title: moveit_task参数
+          type: object
+        type: UniLabJsonCommand
+      auto-post_init:
+        feedback: {}
+        goal: {}
+        goal_default:
+          ros_node: null
+        handles: []
+        result: {}
+        schema:
+          description: post_init的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                ros_node:
+                  type: string
+              required:
+              - ros_node
+              type: object
+            result: {}
+          required:
+          - goal
+          title: post_init参数
+          type: object
+        type: UniLabJsonCommand
+      auto-resource_manager:
+        feedback: {}
+        goal: {}
+        goal_default:
+          parent_link: null
+          resource: null
+        handles: []
+        result: {}
+        schema:
+          description: resource_manager的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                parent_link:
+                  type: string
+                resource:
+                  type: string
+              required:
+              - resource
+              - parent_link
+              type: object
+            result: {}
+          required:
+          - goal
+          title: resource_manager参数
+          type: object
+        type: UniLabJsonCommand
+      auto-set_position:
+        feedback: {}
+        goal: {}
+        goal_default:
+          command: null
+        handles: []
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                command:
+                  type: string
+              required:
+              - command
+              type: object
+            result: {}
+          required:
+          - goal
+          title: set_position参数
+          type: object
+        type: UniLabJsonCommand
+      auto-set_status:
+        feedback: {}
+        goal: {}
+        goal_default:
+          command: null
+        handles: []
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                command:
+                  type: string
+              required:
+              - command
+              type: object
+            result: {}
+          required:
+          - goal
+          title: set_status参数
+          type: object
+        type: UniLabJsonCommand
+      auto-wait_for_resource_action:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: []
+        result: {}
+        schema:
+          description: wait_for_resource_action的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: wait_for_resource_action参数
+          type: object
+        type: UniLabJsonCommand
+      pick_and_place:
+        feedback: {}
+        goal:
+          command: command
+        goal_default:
+          command: ''
+        handles: []
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties:
+                status:
+                  type: string
+              required:
+              - status
+              title: SendCmd_Feedback
+              type: object
+            goal:
+              properties:
+                command:
+                  type: string
+              required:
+              - command
+              title: SendCmd_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: SendCmd_Result
+              type: object
+          required:
+          - goal
+          title: SendCmd
+          type: object
+        type: SendCmd
+    module: unilabos.devices.ros_dev.moveit_interface:MoveitInterface
+    status_types: {}
+    type: python
+  config_info: []
+  description: Dummy2 六自由度机械臂（与线性滑台可选配）使用 MoveIt2 进行运动规划与控制。 通过 ROS2 Action 与 MoveItInterface
+    对接，支持关节空间与笛卡尔空间规划、 轨迹执行、碰撞检测与逆运动学。底层 CAN2ETH 通信由独立服务提供，本设备 不直接管理网络参数。
+  handles: []
+  icon: dummy2_robot
+  init_param_schema:
+    config:
+      properties:
+        device_config:
+          type: string
+        joint_poses:
+          type: string
+        moveit_type:
+          type: string
+        rotation:
+          type: string
+      required:
+      - moveit_type
+      - joint_poses
+      type: object
+    data:
+      properties: {}
+      required: []
+      type: object
+  model:
+    mesh: dummy2_robot
+    type: device
+  version: 1.0.0
 robotic_arm.SCARA_with_slider.virtual:
   category:
   - robot_arm
