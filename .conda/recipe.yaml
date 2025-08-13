@@ -36,6 +36,7 @@ requirements:
   - conda-forge::python ==3.11.11
   - compilers
   - cmake
+  - zstd
   - ninja
   - if: unix
     then:
