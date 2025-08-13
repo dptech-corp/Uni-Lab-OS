@@ -697,7 +697,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                         else:
                             final_resource = [convert_resources_to_type([i], final_type)[0] for i in resources_list]
                         try:
-                            action_kwargs[k] = self.resource_tracker.figure_resource(final_resource)
+                            action_kwargs[k] = self.resource_tracker.figure_resource(final_resource, try_mode=True)
                         except Exception as e:
                             self.lab_logger().error(f"物料实例获取失败: {e}\n{traceback.format_exc()}")
                             error_skip = True
