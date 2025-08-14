@@ -25,6 +25,7 @@ from .reset_handling_protocol import generate_reset_handling_protocol
 from .dry_protocol import generate_dry_protocol
 from .recrystallize_protocol import generate_recrystallize_protocol
 from .hydrogenate_protocol import generate_hydrogenate_protocol
+from .transfer_protocol import generate_transfer_protocol
 
 
 # Define a dictionary of protocol generators.
@@ -53,5 +54,6 @@ action_protocol_generators = {
     StartStirProtocol: generate_start_stir_protocol,
     StirProtocol: generate_stir_protocol,
     StopStirProtocol: generate_stop_stir_protocol,
+    TransferProtocol: generate_transfer_protocol,
     WashSolidProtocol: generate_wash_solid_protocol,
 }

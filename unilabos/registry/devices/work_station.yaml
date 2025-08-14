@@ -6146,26 +6146,6 @@ workstation.example:
   - work_station
   class:
     action_value_mappings:
-      auto-append_resource:
-        feedback: {}
-        goal: {}
-        goal_default: {}
-        handles: []
-        result: {}
-        schema:
-          description: ''
-          properties:
-            feedback: {}
-            goal:
-              properties: {}
-              required: []
-              type: object
-            result: {}
-          required:
-          - goal
-          title: append_resource参数
-          type: object
-        type: UniLabJsonCommand
       auto-create_resource:
         feedback: {}
         goal: {}
@@ -6216,6 +6196,62 @@ workstation.example:
           required:
           - goal
           title: create_resource参数
+          type: object
+        type: UniLabJsonCommand
+      auto-transfer_bottle:
+        feedback: {}
+        goal: {}
+        goal_default:
+          base_plate: null
+          tip_rack: null
+        handles: []
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                base_plate:
+                  type: string
+                tip_rack:
+                  type: string
+              required:
+              - tip_rack
+              - base_plate
+              type: object
+            result: {}
+          required:
+          - goal
+          title: transfer_bottle参数
+          type: object
+        type: UniLabJsonCommand
+      auto-trigger_resource_update:
+        feedback: {}
+        goal: {}
+        goal_default:
+          from_plate: null
+          to_base_plate: null
+        handles: []
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                from_plate:
+                  type: string
+                to_base_plate:
+                  type: string
+              required:
+              - from_plate
+              - to_base_plate
+              type: object
+            result: {}
+          required:
+          - goal
+          title: trigger_resource_update参数
           type: object
         type: UniLabJsonCommand
     module: unilabos.ros.nodes.presets.workstation:WorkStationExample
