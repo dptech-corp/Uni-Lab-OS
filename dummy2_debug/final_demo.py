@@ -116,7 +116,8 @@ class FinalDemo(Node):
         planning_targets = [
             {"name": "规划到目标位置1", "joint": "Joint1", "value": 0.4},
             {"name": "规划到目标位置2", "joint": "Joint2", "value": 0.3},
-            {"name": "规划回到Home", "joint": "Joint1", "value": 0.0}
+            {"name": "规划回到Home", "joints": ["Joint1", "Joint2", "Joint3", "Joint4", "Joint5", "Joint6"], 
+             "values": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}
         ]
         
         for i, target in enumerate(planning_targets):
@@ -127,15 +128,29 @@ class FinalDemo(Node):
             goal_msg.request.group_name = "dummy2_arm"
             
             # 设置关节约束
-            joint_constraint = JointConstraint()
-            joint_constraint.joint_name = target["joint"]
-            joint_constraint.position = target["value"]
-            joint_constraint.tolerance_above = 0.01
-            joint_constraint.tolerance_below = 0.01
-            joint_constraint.weight = 1.0
-            
             constraints = Constraints()
-            constraints.joint_constraints = [joint_constraint]
+            
+            # 处理单关节或多关节约束
+            if "joint" in target:  # 单关节约束
+                joint_constraint = JointConstraint()
+                joint_constraint.joint_name = target["joint"]
+                joint_constraint.position = target["value"]
+                joint_constraint.tolerance_above = 0.01
+                joint_constraint.tolerance_below = 0.01
+                joint_constraint.weight = 1.0
+                constraints.joint_constraints = [joint_constraint]
+            elif "joints" in target:  # 多关节约束 (Home位置)
+                joint_constraints = []
+                for joint_name, joint_value in zip(target["joints"], target["values"]):
+                    joint_constraint = JointConstraint()
+                    joint_constraint.joint_name = joint_name
+                    joint_constraint.position = joint_value
+                    joint_constraint.tolerance_above = 0.01
+                    joint_constraint.tolerance_below = 0.01
+                    joint_constraint.weight = 1.0
+                    joint_constraints.append(joint_constraint)
+                constraints.joint_constraints = joint_constraints
+            
             goal_msg.request.goal_constraints = [constraints]
             
             # 设置规划选项
@@ -166,11 +181,39 @@ class FinalDemo(Node):
                     if result.error_code.val == 1:  # SUCCESS
                         trajectory_points = len(result.planned_trajectory.joint_trajectory.points)
                         print(f"     🎉 规划成功! 生成 {trajectory_points} 个轨迹点")
+                        
+                        # 显示目标关节位置
+                        if "joint" in target:
+                            print(f"     🎯 目标: {target['joint']} = {target['value']}")
+                        elif "joints" in target:
+                            target_info = ", ".join([f"{j}={v}" for j, v in zip(target["joints"], target["values"])])
+                            print(f"     🎯 目标: {target_info}")
+                        
                         print(f"     🤖 执行运动...")
+                        
+                        # 等待执行完成
+                        time.sleep(3)
+                        print(f"     ✅ 运动执行完成")
                     else:
                         print(f"     ⚠️ 规划失败，错误码: {result.error_code.val}")
+                        
+                        # 提供错误码解释
+                        error_meanings = {
+                            -1: "失败",
+                            -2: "无效的组名",
+                            -3: "无效的目标约束",
+                            -4: "无效的机器人状态",
+                            -5: "无效的链接名",
+                            -10: "规划超时",
+                            -11: "规划失败",
+                            -12: "无效起始状态",
+                            -13: "无效目标状态"
+                        }
+                        if result.error_code.val in error_meanings:
+                            print(f"     📝 错误说明: {error_meanings[result.error_code.val]}")
                 else:
                     print(f"     ❌ 规划请求被拒绝")
+                    print(f"     💡 建议: 检查MoveIt服务状态和机器人配置")
                     
             except Exception as e:
                 print(f"     ❌ 规划异常: {e}")

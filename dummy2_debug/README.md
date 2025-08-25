@@ -11,16 +11,16 @@
 
 ## 🚀 快速启动
 
-### 一键启动 (推荐)
+### 标准启动流程 (推荐)
 ```bash
-# 检查系统状态
-./start_dummy2_unilab.sh check
+# 1. 启动CAN2ETH通信服务 (终端1)
+./start_dummy2_unilab.sh can2eth
 
-# 启动硬件接口 (终端1)
-./start_dummy2_unilab.sh hw
+# 2. 启动MoveIt服务 (终端2)
+./start_dummy2_unilab.sh moveit no-gui
 
-# 运行控制测试 (终端2)  
-./start_dummy2_unilab.sh test
+# 3. 运行控制测试 (终端3)
+./start_dummy2_unilab.sh test direct
 ```
 
 ## 🎮 控制脚本
