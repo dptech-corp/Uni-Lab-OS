@@ -20,7 +20,76 @@ import time
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, TypedDict
 
-from pylabrobot.resources import ResourceHolder, Coordinate, create_ordered_items_2d
+from pylabrobot.resources import ResourceHolder, Coordinate, create_ordered_items_2d, Deck, Plate
+
+from unilabos.ros.nodes.base_device_node import ROS2DeviceNode
+from unilabos.ros.nodes.presets.workstation import ROS2WorkstationNode
+
+
+# ========================
+# 内部数据类和结构
+# ========================
+
+@dataclass(frozen=True)
+class ChannelKey:
+    devid: int
+    subdevid: int
+    chlid: int
+
+
+@dataclass
+class ChannelStatus:
+    state: str  # working/stop/finish/protect/pause/false/unknown
+    color: str  # 状态对应颜色
+    current_A: float  # 电流 (A)
+    voltage_V: float  # 电压 (V)
+    totaltime_s: float  # 总时间 (s)
+
+
+class BatteryTestPositionState(TypedDict):
+    voltage: float  # 电压 (V)
+    current: float  # 电流 (A)
+    time: float  # 时间 (s) - 使用totaltime
+    capacity: float  # 容量 (Ah)
+    energy: float  # 能量 (Wh)
+
+    status: str  # 通道状态
+    color: str  # 状态对应颜色
+
+    # 额外的inquire协议字段
+    relativetime: float  # 相对时间 (s)
+    open_or_close: int  # 0=关闭, 1=打开
+    step_type: str  # 步骤类型
+    cycle_id: int  # 循环ID
+    step_id: int  # 步骤ID
+    log_code: str  # 日志代码
+
+
+class BatteryTestPosition(ResourceHolder):
+    def __init__(
+            self,
+            name,
+            size_x=60,
+            size_y=60,
+            size_z=60,
+            rotation=None,
+            category="resource_holder",
+            model=None,
+            child_location: Coordinate = Coordinate.zero(),
+    ):
+        super().__init__(name, size_x, size_y, size_z, rotation, category, model, child_location=child_location)
+        self._unilabos_state: Dict[str, Any] = {}
+
+    def load_state(self, state: Dict[str, Any]) -> None:
+        """格式不变"""
+        super().load_state(state)
+        self._unilabos_state = state
+
+    def serialize_state(self) -> Dict[str, Dict[str, Any]]:
+        """格式不变"""
+        data = super().serialize_state()
+        data.update(self._unilabos_state)
+        return data
 
 
 class NewareBatteryTestSystem:
@@ -95,56 +164,8 @@ class NewareBatteryTestSystem:
         self.timeout = timeout or self.TIMEOUT
         self._last_status_update = None
         self._cached_status = {}
-        self._ros_node = None  # ROS节点引用，由框架设置
-        
-        # 初始化通道映射
-        self._channels = self._build_channel_map()
-        
-        # 创建2盘电池的物料管理系统
-        self._setup_material_management()
+        self._ros_node: Optional[ROS2WorkstationNode] = None  # ROS节点引用，由框架设置
 
-    def _setup_material_management(self):
-        """设置物料管理系统"""
-        # 第1盘：5行8列网格 (A1-E8) - 5行对应subdevid 1-5，8列对应chlid 1-8
-        plate1_resources = create_ordered_items_2d(
-            self.BatteryTestPosition,
-            num_items_x=8,  # 8列（对应chlid 1-8）
-            num_items_y=5,  # 5行（对应subdevid 1-5，即A-E）
-            dx=10,
-            dy=10,
-            dz=0,
-            item_dx=45,
-            item_dy=45
-        )
-        
-        # 为第1盘资源添加P1_前缀
-        self.station_resources_plate1 = {}
-        for name, resource in plate1_resources.items():
-            new_name = f"P1_{name}"
-            self.station_resources_plate1[new_name] = resource
-        
-        # 第2盘：5行8列网格 (A1-E8)，在Z轴上偏移 - 5行对应subdevid 6-10，8列对应chlid 1-8
-        plate2_resources = create_ordered_items_2d(
-            self.BatteryTestPosition,
-            num_items_x=8,  # 8列（对应chlid 1-8）
-            num_items_y=5,  # 5行（对应subdevid 6-10，即A-E）
-            dx=10,
-            dy=10,
-            dz=100,  # Z轴偏移100mm
-            item_dx=65,
-            item_dy=65
-        )
-        
-        # 为第2盘资源添加P2_前缀
-        self.station_resources_plate2 = {}
-        for name, resource in plate2_resources.items():
-            new_name = f"P2_{name}"
-            self.station_resources_plate2[new_name] = resource
-        
-        # 合并两盘资源为统一的station_resources
-        self.station_resources = {}
-        self.station_resources.update(self.station_resources_plate1)
-        self.station_resources.update(self.station_resources_plate2)
 
     def post_init(self, ros_node):
         """
@@ -154,6 +175,10 @@ class NewareBatteryTestSystem:
             ros_node: ROS节点实例
         """
         self._ros_node = ros_node
+        # 创建2盘电池的物料管理系统
+        self._setup_material_management()
+        # 初始化通道映射
+        self._channels = self._build_channel_map()
         try:
             # 测试设备连接
             if self.test_connection():
@@ -163,6 +188,56 @@ class NewareBatteryTestSystem:
         except Exception as e:
             ros_node.lab_logger().error(f"新威电池测试系统初始化失败: {e}")
             # 不抛出异常，允许节点继续运行，后续可以重试连接
+
+    def _setup_material_management(self):
+        """设置物料管理系统"""
+        # 第1盘：5行8列网格 (A1-E8) - 5行对应subdevid 1-5，8列对应chlid 1-8
+        # 先给物料设置一个最大的Deck
+        deck_main = Deck("ADeckName", 200, 200, 200)
+
+        plate1_resources: Dict[str, BatteryTestPosition] = create_ordered_items_2d(
+            BatteryTestPosition,
+            num_items_x=8,  # 8列（对应chlid 1-8）
+            num_items_y=5,  # 5行（对应subdevid 1-5，即A-E）
+            dx=10,
+            dy=10,
+            dz=0,
+            item_dx=45,
+            item_dy=45
+        )
+        plate1 = Plate("P1", 400, 300, 50, ordered_items=plate1_resources)
+        deck_main.assign_child_resource(plate1, location=Coordinate(0, 0, 0))
+        ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
+            "resources": [deck_main]
+        })
+        # # 为第1盘资源添加P1_前缀
+        # self.station_resources_plate1 = {}
+        # for name, resource in plate1_resources.items():
+        #     new_name = f"P1_{name}"
+        #     self.station_resources_plate1[new_name] = resource
+        #
+        # # 第2盘：5行8列网格 (A1-E8)，在Z轴上偏移 - 5行对应subdevid 6-10，8列对应chlid 1-8
+        # plate2_resources = create_ordered_items_2d(
+        #     self.BatteryTestPosition,
+        #     num_items_x=8,  # 8列（对应chlid 1-8）
+        #     num_items_y=5,  # 5行（对应subdevid 6-10，即A-E）
+        #     dx=10,
+        #     dy=10,
+        #     dz=100,  # Z轴偏移100mm
+        #     item_dx=65,
+        #     item_dy=65
+        # )
+        #
+        # # 为第2盘资源添加P2_前缀
+        # self.station_resources_plate2 = {}
+        # for name, resource in plate2_resources.items():
+        #     new_name = f"P2_{name}"
+        #     self.station_resources_plate2[new_name] = resource
+        #
+        # # 合并两盘资源为统一的station_resources
+        # self.station_resources = {}
+        # self.station_resources.update(self.station_resources_plate1)
+        # self.station_resources.update(self.station_resources_plate2)
 
     # ========================
     # 核心属性（Uni-Lab标准）
@@ -481,68 +556,6 @@ class NewareBatteryTestSystem:
             if self._ros_node:
                 self._ros_node.lab_logger().error(error_msg)
             return {"return_info": error_msg, "success": False}
-
-    # ========================
-    # 内部数据类和结构
-    # ========================
-    
-    @dataclass(frozen=True)
-    class ChannelKey:
-        devid: int
-        subdevid: int
-        chlid: int
-
-    @dataclass
-    class ChannelStatus:
-        state: str           # working/stop/finish/protect/pause/false/unknown
-        color: str           # 状态对应颜色
-        current_A: float     # 电流 (A)
-        voltage_V: float     # 电压 (V)
-        totaltime_s: float   # 总时间 (s)
-
-    class BatteryTestPositionState(TypedDict):
-        voltage: float  # 电压 (V)
-        current: float  # 电流 (A)
-        time: float  # 时间 (s) - 使用totaltime
-        capacity: float  # 容量 (Ah)
-        energy: float  # 能量 (Wh)
-        
-        status: str  # 通道状态
-        color: str  # 状态对应颜色
-        
-        # 额外的inquire协议字段
-        relativetime: float  # 相对时间 (s)
-        open_or_close: int  # 0=关闭, 1=打开
-        step_type: str  # 步骤类型
-        cycle_id: int  # 循环ID
-        step_id: int  # 步骤ID
-        log_code: str  # 日志代码
-
-    class BatteryTestPosition(ResourceHolder):
-        def __init__(
-            self,
-            name,
-            size_x=60,
-            size_y=60,
-            size_z=60,
-            rotation=None,
-            category="resource_holder",
-            model=None,
-            child_location: Coordinate = Coordinate.zero(),
-        ):
-            super().__init__(name, size_x, size_y, size_z, rotation, category, model, child_location=child_location)
-            self._unilabos_state: Dict[str, Any] = {}
-        
-        def load_state(self, state: Dict[str, Any]) -> None:
-            """格式不变"""
-            super().load_state(state)
-            self._unilabos_state = state
-        
-        def serialize_state(self) -> Dict[str, Dict[str, Any]]:
-            """格式不变"""
-            data = super().serialize_state()
-            data.update(self._unilabos_state)
-            return data
 
     # ========================
     # TCP通信和协议处理
