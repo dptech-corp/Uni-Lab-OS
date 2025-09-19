@@ -1,0 +1,12 @@
+opcua_example:
+  class:
+    action_value_mappings:
+      
+    module: unilabos.device_comms.opcua_client.client:OpcUaClient
+    status_types:
+
+    type: python
+  description: 
+  handles: []
+  icon: ''
+  init_param_schema: {}
