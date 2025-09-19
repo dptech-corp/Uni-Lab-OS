@@ -1,0 +1,294 @@
+neware_battery_test_system:
+  category:
+  - neware_battery_test_system
+  
+  class:
+    module: unilabos.devices.neware_battery_test_system.neware_battery_test_system:NewareBatteryTestSystem
+    type: python
+    
+    # 定义设备定时发布的属性类型
+    status_types:
+      status: str                      # 设备连接状态 (Connected/Disconnected/Error)
+      channel_status: dict             # 通道状态统计信息
+      connection_info: dict            # TCP连接信息 (ip, port, devtype, timeout)
+      total_channels: int              # 总通道数 (720)
+    
+    # 定义设备支持的动作映射
+    action_value_mappings:
+      # 导出状态数据到JSON文件
+      export_status_json:
+        type: UniLabJsonCommand
+        goal:
+          filepath: filepath
+        goal_default:
+          filepath: "bts_status.json"
+        feedback: {}
+        result:
+          return_info: return_info
+          success: success
+        schema:
+          description: "导出当前状态数据到JSON文件"
+          type: object
+          properties:
+            goal:
+              type: object
+              properties:
+                filepath:
+                  type: string
+                  description: "输出JSON文件路径"
+                  default: "bts_status.json"
+              required: []
+            feedback: {}
+            result:
+              type: object
+              properties:
+                return_info:
+                  type: string
+                  description: "导出操作结果信息"
+                success:
+                  type: boolean
+                  description: "导出是否成功"
+              required: ["return_info", "success"]
+          required: ["goal"]
+      
+      # 获取指定盘的状态信息
+      get_plate_status:
+        type: UniLabJsonCommand
+        goal:
+          plate_num: plate_num
+        goal_default:
+          plate_num: 1
+        feedback: {}
+        result:
+          return_info: return_info
+          success: success
+        schema:
+          description: "获取指定盘(1或2)的电池状态信息"
+          type: object
+          properties:
+            goal:
+              type: object
+              properties:
+                plate_num:
+                  type: integer
+                  description: "盘号 (1 或 2)"
+                  minimum: 1
+                  maximum: 2
+              required: ["plate_num"]
+            feedback: {}
+            result:
+              type: object
+              properties:
+                return_info:
+                  type: string
+                  description: "盘状态信息JSON格式"
+                success:
+                  type: boolean
+                  description: "查询是否成功"
+              required: ["return_info", "success"]
+          required: ["goal"]
+      
+      # 测试TCP连接
+      test_connection_action:
+        type: UniLabJsonCommand
+        goal: {}
+        goal_default: {}
+        feedback: {}
+        result:
+          return_info: return_info
+          success: success
+        schema:
+          description: "测试与电池测试系统的TCP连接"
+          type: object
+          properties:
+            goal:
+              type: object
+              properties: {}
+              required: []
+            feedback: {}
+            result:
+              type: object
+              properties:
+                return_info:
+                  type: string
+                  description: "连接测试结果信息"
+                success:
+                  type: boolean
+                  description: "连接测试是否成功"
+              required: ["return_info", "success"]
+          required: ["goal"]
+      
+      # 获取设备摘要统计
+      get_device_summary:
+        type: UniLabJsonCommand
+        goal: {}
+        goal_default: {}
+        feedback: {}
+        result:
+          return_info: return_info
+          success: success
+        schema:
+          description: "获取设备级别的摘要统计信息"
+          type: object
+          properties:
+            goal:
+              type: object
+              properties: {}
+              required: []
+            feedback: {}
+            result:
+              type: object
+              properties:
+                return_info:
+                  type: string
+                  description: "设备摘要信息JSON格式"
+                success:
+                  type: boolean
+                  description: "查询是否成功"
+              required: ["return_info", "success"]
+          required: ["goal"]
+      
+      # 打印状态摘要
+      print_status_summary_action:
+        type: UniLabJsonCommand
+        goal: {}
+        goal_default: {}
+        feedback: {}
+        result:
+          return_info: return_info
+          success: success
+        schema:
+          description: "打印通道状态摘要信息到控制台"
+          type: object
+          properties:
+            goal:
+              type: object
+              properties: {}
+              required: []
+            feedback: {}
+            result:
+              type: object
+              properties:
+                return_info:
+                  type: string
+                  description: "打印操作结果信息"
+                success:
+                  type: boolean
+                  description: "打印是否成功"
+              required: ["return_info", "success"]
+          required: ["goal"]
+  
+  # 网页端状态监控的属性定义
+  schema:
+    type: object
+    properties:
+      status:
+        type: string
+        description: "设备连接状态"
+        enum: ["Connected", "Disconnected", "Error"]
+      channel_status:
+        type: object
+        description: "通道状态统计"
+        properties:
+          working:
+            type: integer
+            description: "工作中的通道数"
+          stop:
+            type: integer
+            description: "停止的通道数"
+          finish:
+            type: integer
+            description: "完成的通道数"
+          protect:
+            type: integer
+            description: "保护状态的通道数"
+          pause:
+            type: integer
+            description: "暂停的通道数"
+          false:
+            type: integer
+            description: "无效的通道数"
+          unknown:
+            type: integer
+            description: "未知状态的通道数"
+        additionalProperties: false
+      connection_info:
+        type: object
+        description: "TCP连接信息"
+        properties:
+          ip:
+            type: string
+            description: "TCP服务器IP地址"
+          port:
+            type: string
+            description: "TCP端口"
+          devtype:
+            type: string
+            description: "设备类型"
+          timeout:
+            type: string
+            description: "通信超时时间"
+        required: ["ip", "port", "devtype", "timeout"]
+        additionalProperties: false
+      total_channels:
+        type: integer
+        description: "总通道数"
+        minimum: 0
+        maximum: 720
+    required: ["status", "channel_status", "connection_info", "total_channels"]
+    additionalProperties: false
+  
+  # 初始化参数定义
+  init_param_schema:
+    type: object
+    title: "NewareBatteryTestSystem 初始化参数"
+    description: "新威电池测试系统初始化参数"
+    properties:
+      ip:
+        type: string
+        description: "TCP服务器IP地址"
+        default: "127.0.0.1"
+      port:
+        type: integer
+        description: "TCP通信端口"
+        default: 502
+        minimum: 1
+        maximum: 65535
+      machine_id:
+        type: integer
+        description: "机器ID，用于多设备环境"
+        default: 1
+        minimum: 1
+      devtype:
+        type: string
+        description: "设备类型标识"
+        default: "27"
+      timeout:
+        type: integer
+        description: "TCP通信超时时间（秒）"
+        default: 20
+        minimum: 1
+        maximum: 300
+      size_x:
+        type: number
+        description: "设备物理尺寸X（毫米）"
+        default: 500.0
+        minimum: 0
+      size_y:
+        type: number
+        description: "设备物理尺寸Y（毫米）"
+        default: 500.0
+        minimum: 0
+      size_z:
+        type: number
+        description: "设备物理尺寸Z（毫米）"
+        default: 2000.0
+        minimum: 0
+    required: []
+  
+  # 设备基本信息
+  description: "新威电池测试系统驱动，支持720个通道的电池测试状态监控和数据导出。通过TCP通信实现远程控制，包含完整的物料管理系统，支持2盘电池的状态映射和监控。"
+  version: "1.0.0"
+  handles: []
+  config_info: []
+  icon: ""

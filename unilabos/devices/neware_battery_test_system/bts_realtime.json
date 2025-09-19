@@ -1,0 +1,830 @@
+{
+  "generated_by": "bts_inquire_by_devid.py",
+  "ip": "127.0.0.1",
+  "port": 502,
+  "devtype": "27",
+  "data": {
+    "1": {
+      "stats": {
+        "working": 15,
+        "stop": 24,
+        "finish": 1,
+        "protect": 0,
+        "pause": 0,
+        "unknown": 0
+      },
+      "subunits": {
+        "1": {
+          "1": {
+            "state": "working",
+            "color": "#22c55e",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 0.726,
+              "current_A": 0.0002,
+              "capacity_Ah": 0.0265,
+              "energy_Wh": 0.013,
+              "totaltime_s": 520077.4,
+              "relativetime_s": 476877.4
+            },
+            "meta": {
+              "step_type": "cccv",
+              "cycle_id": 1,
+              "step_id": 2,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "2": {
+            "state": "working",
+            "color": "#22c55e",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 3.9133,
+              "current_A": -0.0014,
+              "capacity_Ah": 0.0006,
+              "energy_Wh": 0.0023,
+              "totaltime_s": 520077.4,
+              "relativetime_s": 1441.7
+            },
+            "meta": {
+              "step_type": "dc",
+              "cycle_id": 58,
+              "step_id": 13,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "3": {
+            "state": "working",
+            "color": "#22c55e",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 3.9088,
+              "current_A": -0.0014,
+              "capacity_Ah": 0.0006,
+              "energy_Wh": 0.0024,
+              "totaltime_s": 520077.4,
+              "relativetime_s": 1487.9
+            },
+            "meta": {
+              "step_type": "dc",
+              "cycle_id": 56,
+              "step_id": 13,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "4": {
+            "state": "working",
+            "color": "#22c55e",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 3.4168,
+              "current_A": -0.0014,
+              "capacity_Ah": 0.0011,
+              "energy_Wh": 0.0043,
+              "totaltime_s": 520077.4,
+              "relativetime_s": 2766.0
+            },
+            "meta": {
+              "step_type": "dc",
+              "cycle_id": 55,
+              "step_id": 13,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "5": {
+            "state": "working",
+            "color": "#22c55e",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 4.5302,
+              "current_A": 0.0014,
+              "capacity_Ah": 0.0012,
+              "energy_Wh": 0.0053,
+              "totaltime_s": 520077.4,
+              "relativetime_s": 812.2
+            },
+            "meta": {
+              "step_type": "cccv",
+              "cycle_id": 52,
+              "step_id": 11,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "6": {
+            "state": "working",
+            "color": "#22c55e",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 3.5554,
+              "current_A": -0.0014,
+              "capacity_Ah": 0.0009,
+              "energy_Wh": 0.0037,
+              "totaltime_s": 520077.4,
+              "relativetime_s": 2341.8
+            },
+            "meta": {
+              "step_type": "dc",
+              "cycle_id": 53,
+              "step_id": 13,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "7": {
+            "state": "working",
+            "color": "#22c55e",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 4.6277,
+              "current_A": -0.0011,
+              "capacity_Ah": 0.0003,
+              "energy_Wh": 0.0012,
+              "totaltime_s": 177244.8,
+              "relativetime_s": 845.0
+            },
+            "meta": {
+              "step_type": "dc",
+              "cycle_id": 16,
+              "step_id": 4,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "8": {
+            "state": "working",
+            "color": "#22c55e",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 4.8817,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0,
+              "energy_Wh": 0.0,
+              "totaltime_s": 177244.8,
+              "relativetime_s": 296.0
+            },
+            "meta": {
+              "step_type": "rest",
+              "cycle_id": 19,
+              "step_id": 3,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          }
+        },
+        "2": {
+          "1": {
+            "state": "working",
+            "color": "#22c55e",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 4.5298,
+              "current_A": 0.0003,
+              "capacity_Ah": 0.0015,
+              "energy_Wh": 0.0064,
+              "totaltime_s": 520077.4,
+              "relativetime_s": 1565.6
+            },
+            "meta": {
+              "step_type": "cccv",
+              "cycle_id": 55,
+              "step_id": 11,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "2": {
+            "state": "working",
+            "color": "#22c55e",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 4.0009,
+              "current_A": -0.0014,
+              "capacity_Ah": 0.0005,
+              "energy_Wh": 0.0023,
+              "totaltime_s": 520077.4,
+              "relativetime_s": 1397.6
+            },
+            "meta": {
+              "step_type": "dc",
+              "cycle_id": 58,
+              "step_id": 13,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "3": {
+            "state": "working",
+            "color": "#22c55e",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 4.5298,
+              "current_A": 0.0007,
+              "capacity_Ah": 0.0013,
+              "energy_Wh": 0.0057,
+              "totaltime_s": 520077.4,
+              "relativetime_s": 1023.9
+            },
+            "meta": {
+              "step_type": "cccv",
+              "cycle_id": 56,
+              "step_id": 11,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "4": {
+            "state": "working",
+            "color": "#22c55e",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 4.5298,
+              "current_A": 0.003,
+              "capacity_Ah": 0.0009,
+              "energy_Wh": 0.0038,
+              "totaltime_s": 520077.4,
+              "relativetime_s": 424.9
+            },
+            "meta": {
+              "step_type": "cccv",
+              "cycle_id": 61,
+              "step_id": 11,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "5": {
+            "state": "working",
+            "color": "#22c55e",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 4.5218,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0,
+              "energy_Wh": 0.0,
+              "totaltime_s": 520077.4,
+              "relativetime_s": 116.7
+            },
+            "meta": {
+              "step_type": "rest",
+              "cycle_id": 55,
+              "step_id": 12,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "6": {
+            "state": "finish",
+            "color": "#3b82f6",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 3.0027,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0,
+              "energy_Wh": 0.0,
+              "totaltime_s": 0.0,
+              "relativetime_s": 0.0
+            },
+            "meta": {
+              "step_type": "--",
+              "cycle_id": 1,
+              "step_id": 0,
+              "aux": 0,
+              "log_code": "0"
+            }
+          },
+          "7": {
+            "state": "working",
+            "color": "#22c55e",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 4.8202,
+              "current_A": 0.0011,
+              "capacity_Ah": 0.0003,
+              "energy_Wh": 0.0014,
+              "totaltime_s": 177244.8,
+              "relativetime_s": 946.2
+            },
+            "meta": {
+              "step_type": "cccv",
+              "cycle_id": 20,
+              "step_id": 2,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "8": {
+            "state": "working",
+            "color": "#22c55e",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 4.774,
+              "current_A": 0.0011,
+              "capacity_Ah": 0.0002,
+              "energy_Wh": 0.0008,
+              "totaltime_s": 177244.8,
+              "relativetime_s": 550.8
+            },
+            "meta": {
+              "step_type": "cccv",
+              "cycle_id": 21,
+              "step_id": 2,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          }
+        },
+        "3": {
+          "1": {
+            "state": "stop",
+            "color": "#6b7280",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 2.7913,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0002,
+              "energy_Wh": 0.0011,
+              "totaltime_s": 542456.8,
+              "relativetime_s": 965.2
+            },
+            "meta": {
+              "step_type": "cccv",
+              "cycle_id": 79,
+              "step_id": 2,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "2": {
+            "state": "stop",
+            "color": "#6b7280",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 2.7949,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0005,
+              "energy_Wh": 0.002,
+              "totaltime_s": 542456.8,
+              "relativetime_s": 1840.6
+            },
+            "meta": {
+              "step_type": "dc",
+              "cycle_id": 81,
+              "step_id": 4,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "3": {
+            "state": "stop",
+            "color": "#6b7280",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 2.7922,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0003,
+              "energy_Wh": 0.0016,
+              "totaltime_s": 542402.9,
+              "relativetime_s": 1549.9
+            },
+            "meta": {
+              "step_type": "cccv",
+              "cycle_id": 84,
+              "step_id": 2,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "4": {
+            "state": "stop",
+            "color": "#6b7280",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 2.79,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0002,
+              "energy_Wh": 0.0007,
+              "totaltime_s": 542402.9,
+              "relativetime_s": 701.1
+            },
+            "meta": {
+              "step_type": "cccv",
+              "cycle_id": 76,
+              "step_id": 2,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "5": {
+            "state": "stop",
+            "color": "#6b7280",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 2.7935,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0003,
+              "energy_Wh": 0.0013,
+              "totaltime_s": 542325.3,
+              "relativetime_s": 1288.8
+            },
+            "meta": {
+              "step_type": "cccv",
+              "cycle_id": 87,
+              "step_id": 2,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "6": {
+            "state": "stop",
+            "color": "#6b7280",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 3.2491,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0001,
+              "energy_Wh": 0.0003,
+              "totaltime_s": 541914.2,
+              "relativetime_s": 221.7
+            },
+            "meta": {
+              "step_type": "dc",
+              "cycle_id": 82,
+              "step_id": 4,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "7": {
+            "state": "stop",
+            "color": "#6b7280",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 2.793,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0002,
+              "energy_Wh": 0.0009,
+              "totaltime_s": 541914.2,
+              "relativetime_s": 809.4
+            },
+            "meta": {
+              "step_type": "cccv",
+              "cycle_id": 81,
+              "step_id": 2,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "8": {
+            "state": "stop",
+            "color": "#6b7280",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 3.3342,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0,
+              "energy_Wh": 0.0,
+              "totaltime_s": 542325.3,
+              "relativetime_s": 104.3
+            },
+            "meta": {
+              "step_type": "rest",
+              "cycle_id": 80,
+              "step_id": 1,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          }
+        },
+        "4": {
+          "1": {
+            "state": "stop",
+            "color": "#6b7280",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 3.2497,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0001,
+              "energy_Wh": 0.0005,
+              "totaltime_s": 542264.6,
+              "relativetime_s": 483.6
+            },
+            "meta": {
+              "step_type": "cccv",
+              "cycle_id": 82,
+              "step_id": 2,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "2": {
+            "state": "stop",
+            "color": "#6b7280",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 2.859,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0001,
+              "energy_Wh": 0.0005,
+              "totaltime_s": 542264.6,
+              "relativetime_s": 543.6
+            },
+            "meta": {
+              "step_type": "cccv",
+              "cycle_id": 79,
+              "step_id": 2,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "3": {
+            "state": "stop",
+            "color": "#6b7280",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 2.7943,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0005,
+              "energy_Wh": 0.0023,
+              "totaltime_s": 541914.2,
+              "relativetime_s": 2172.8
+            },
+            "meta": {
+              "step_type": "cccv",
+              "cycle_id": 78,
+              "step_id": 2,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "4": {
+            "state": "stop",
+            "color": "#6b7280",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 3.0906,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0,
+              "energy_Wh": 0.0,
+              "totaltime_s": 542129.6,
+              "relativetime_s": 89.7
+            },
+            "meta": {
+              "step_type": "rest",
+              "cycle_id": 75,
+              "step_id": 3,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "5": {
+            "state": "stop",
+            "color": "#6b7280",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 3.7027,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0001,
+              "energy_Wh": 0.0005,
+              "totaltime_s": 541914.2,
+              "relativetime_s": 475.7
+            },
+            "meta": {
+              "step_type": "dc",
+              "cycle_id": 81,
+              "step_id": 4,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "6": {
+            "state": "stop",
+            "color": "#6b7280",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 3.6915,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0003,
+              "energy_Wh": 0.0012,
+              "totaltime_s": 542203.1,
+              "relativetime_s": 1755.1
+            },
+            "meta": {
+              "step_type": "cccv",
+              "cycle_id": 77,
+              "step_id": 2,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "7": {
+            "state": "stop",
+            "color": "#6b7280",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 3.5344,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0003,
+              "energy_Wh": 0.0012,
+              "totaltime_s": 541914.2,
+              "relativetime_s": 1047.2
+            },
+            "meta": {
+              "step_type": "dc",
+              "cycle_id": 79,
+              "step_id": 4,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "8": {
+            "state": "stop",
+            "color": "#6b7280",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 3.6369,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0001,
+              "energy_Wh": 0.0004,
+              "totaltime_s": 541914.2,
+              "relativetime_s": 324.5
+            },
+            "meta": {
+              "step_type": "dc",
+              "cycle_id": 85,
+              "step_id": 4,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          }
+        },
+        "5": {
+          "1": {
+            "state": "stop",
+            "color": "#6b7280",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 3.1046,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0,
+              "energy_Wh": 0.0002,
+              "totaltime_s": 541914.2,
+              "relativetime_s": 177.0
+            },
+            "meta": {
+              "step_type": "dc",
+              "cycle_id": 81,
+              "step_id": 4,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "2": {
+            "state": "stop",
+            "color": "#6b7280",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 3.3248,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0002,
+              "energy_Wh": 0.0008,
+              "totaltime_s": 542129.6,
+              "relativetime_s": 756.5
+            },
+            "meta": {
+              "step_type": "cccv",
+              "cycle_id": 73,
+              "step_id": 2,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "3": {
+            "state": "stop",
+            "color": "#6b7280",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 3.2948,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0005,
+              "energy_Wh": 0.0021,
+              "totaltime_s": 542084.4,
+              "relativetime_s": 2487.9
+            },
+            "meta": {
+              "step_type": "dc",
+              "cycle_id": 59,
+              "step_id": 4,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "4": {
+            "state": "stop",
+            "color": "#6b7280",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 2.94,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0,
+              "energy_Wh": 0.0,
+              "totaltime_s": 541914.2,
+              "relativetime_s": 102.0
+            },
+            "meta": {
+              "step_type": "rest",
+              "cycle_id": 87,
+              "step_id": 3,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "5": {
+            "state": "stop",
+            "color": "#6b7280",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 2.8527,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0,
+              "energy_Wh": 0.0,
+              "totaltime_s": 541988.2,
+              "relativetime_s": 366.8
+            },
+            "meta": {
+              "step_type": "rest",
+              "cycle_id": 74,
+              "step_id": 1,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "6": {
+            "state": "stop",
+            "color": "#6b7280",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 2.7876,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0,
+              "energy_Wh": 0.0,
+              "totaltime_s": 541914.2,
+              "relativetime_s": 388.7
+            },
+            "meta": {
+              "step_type": "rest",
+              "cycle_id": 77,
+              "step_id": 1,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "7": {
+            "state": "stop",
+            "color": "#6b7280",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 3.2398,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0005,
+              "energy_Wh": 0.002,
+              "totaltime_s": 541914.2,
+              "relativetime_s": 1864.7
+            },
+            "meta": {
+              "step_type": "dc",
+              "cycle_id": 80,
+              "step_id": 4,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          },
+          "8": {
+            "state": "stop",
+            "color": "#6b7280",
+            "open_or_close": 0,
+            "metrics": {
+              "voltage_V": 2.8055,
+              "current_A": 0.0,
+              "capacity_Ah": 0.0,
+              "energy_Wh": 0.0002,
+              "totaltime_s": 174959.8,
+              "relativetime_s": 111.7
+            },
+            "meta": {
+              "step_type": "cccv",
+              "cycle_id": 20,
+              "step_id": 2,
+              "aux": 0,
+              "log_code": "102000"
+            }
+          }
+        }
+      }
+    }
+  }
+}
