@@ -355,7 +355,6 @@ liquid_handler:
         feedback: {}
         goal:
           blow_out_air_volume: blow_out_air_volume
-          end_delay: end_delay
           flow_rates: flow_rates
           liquid_height: liquid_height
           offsets: offsets
@@ -4508,14 +4507,22 @@ liquid_handler.biomek:
                 bind_parent_id:
                   type: string
                 liquid_input_slot:
+                  items:
+                    type: integer
                   type: array
                 liquid_type:
+                  items:
+                    type: string
                   type: array
                 liquid_volume:
+                  items:
+                    type: integer
                   type: array
                 resource_tracker:
-                  type: string
+                  type: object
                 resources:
+                  items:
+                    type: object
                   type: array
                 slot_on_deck:
                   type: integer
@@ -4559,10 +4566,16 @@ liquid_handler.biomek:
                 id:
                   type: string
                 liquid_input_wells:
+                  items:
+                    type: string
                   type: array
                 liquid_type:
+                  items:
+                    type: string
                   type: array
                 liquid_volume:
+                  items:
+                    type: integer
                   type: array
                 parent:
                   type: string
@@ -5819,7 +5832,6 @@ liquid_handler.prcxi:
         feedback: {}
         goal:
           blow_out_air_volume: blow_out_air_volume
-          end_delay: end_delay
           flow_rates: flow_rates
           liquid_height: liquid_height
           offsets: offsets
@@ -6039,6 +6051,8 @@ liquid_handler.prcxi:
               properties:
                 none_keys:
                   default: []
+                  items:
+                    type: string
                   type: array
                 protocol_author:
                   default: ''
@@ -6139,7 +6153,7 @@ liquid_handler.prcxi:
                   default: 0
                   type: number
                 well:
-                  type: string
+                  type: object
               required:
               - well
               type: object
@@ -8358,8 +8372,11 @@ liquid_handler.prcxi:
           default: false
           type: string
         deck:
-          type: string
+          type: object
         host:
+          type: string
+        is_9320:
+          default: false
           type: string
         matrix_id:
           default: ''

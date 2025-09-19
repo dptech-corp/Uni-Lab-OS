@@ -329,7 +329,7 @@ def generate_evaporate_protocol(
         "device_id": rotavap_device,
         "action_name": "evaporate",
         "action_kwargs": {
-            "vessel": target_vessel,
+            "vessel": {"id": target_vessel},
             "pressure": float(pressure),
             "temp": float(temp),
             "time": float(final_time),  # 🔧 强制转换为float类型

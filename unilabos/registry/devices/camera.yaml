@@ -63,7 +63,7 @@ camera.USB:
           default: 0.1
           type: number
         resource_tracker:
-          type: string
+          type: object
       required: []
       type: object
     data:

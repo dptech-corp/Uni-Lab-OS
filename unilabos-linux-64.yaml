@@ -63,6 +63,9 @@ dependencies:
   # ros-humble-gazebo-ros // ignored because of the conflict with ign-gazebo
   # ilab equipments
   - uni-lab::ros-humble-unilabos-msgs
+  - zeep
+  - jinja2
+  - pprp
   - pip:
       - paho-mqtt
       - opentrons_shared_data

@@ -288,7 +288,7 @@ class VirtualSolidDispenser:
                 "return_info": f"dispensed_{actual_amount:.6f}g",
                 "dispensed_amount": actual_amount,
                 "reagent": reagent,
-                "vessel": vessel
+                "vessel": {"id": vessel},
             }
             
         except Exception as e:

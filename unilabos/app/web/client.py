@@ -34,7 +34,7 @@ class HTTPClient:
             info(f"正在使用ak sk作为授权信息：[{auth_secret}]")
         info(f"HTTPClient 初始化完成: remote_addr={self.remote_addr}")
 
-    def resource_edge_add(self, resources: List[Dict[str, Any]], database_process_later: bool) -> requests.Response:
+    def resource_edge_add(self, resources: List[Dict[str, Any]]) -> requests.Response:
         """
         添加资源
 
@@ -60,7 +60,7 @@ class HTTPClient:
             logger.error(f"添加物料关系失败: {response.status_code}, {response.text}")
         return response
 
-    def resource_add(self, resources: List[Dict[str, Any]], database_process_later: bool) -> requests.Response:
+    def resource_add(self, resources: List[Dict[str, Any]]) -> requests.Response:
         """
         添加资源
 

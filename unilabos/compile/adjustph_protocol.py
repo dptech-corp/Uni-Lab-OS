@@ -325,7 +325,7 @@ def generate_adjust_ph_protocol(
                     "device_id": stirrer_id,
                     "action_name": "start_stir",
                     "action_kwargs": {
-                        "vessel": vessel_id,
+                        "vessel": {"id": vessel_id},
                         "stir_speed": stir_speed,
                         "purpose": f"pH调节: 启动搅拌，准备添加 {reagent}"
                     }

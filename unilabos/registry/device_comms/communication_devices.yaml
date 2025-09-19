@@ -94,7 +94,7 @@ serial:
         port:
           type: string
         resource_tracker:
-          type: string
+          type: object
       required:
       - device_id
       - port

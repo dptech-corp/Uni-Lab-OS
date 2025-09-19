@@ -1,6 +1,6 @@
 # coding=utf-8
 from pymodbus.client import ModbusTcpClient
-from unilabos.device_comms.modbus_plc.node.modbus import Coil
+from unilabos.device_comms.modbus_plc.modbus import Coil
 import time
 
 

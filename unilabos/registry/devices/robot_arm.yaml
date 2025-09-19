@@ -133,7 +133,7 @@ robotic_arm.SCARA_with_slider.virtual:
             goal:
               properties:
                 ros_node:
-                  type: string
+                  type: object
               required:
               - ros_node
               type: object
@@ -753,7 +753,7 @@ robotic_arm.elite:
     module: unilabos.devices.arm.elite_robot:EliteRobot
     status_types:
       actual_joint_positions: String
-      arm_pose: list
+      arm_pose: String
     type: python
   config_info: []
   description: Elite robot arm
@@ -775,6 +775,8 @@ robotic_arm.elite:
         actual_joint_positions:
           type: string
         arm_pose:
+          items:
+            type: number
           type: array
       required:
       - arm_pose

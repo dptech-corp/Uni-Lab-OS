@@ -208,7 +208,6 @@ def main():
                 os.path.join(os.path.dirname(os.path.dirname(__file__)), "config", "example_config.py"), config_path
             )
             print_status(f"已创建 local_config.py 路径： {config_path}", "info")
-            os._exit(1)
         else:
             os._exit(1)
     # 加载配置文件

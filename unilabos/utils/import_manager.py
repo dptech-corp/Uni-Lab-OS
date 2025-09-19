@@ -12,8 +12,7 @@ import traceback
 import ast
 import os
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Callable, Type
-
+from typing import Dict, List, Any, Optional, Callable, Type, Union, Tuple
 
 __all__ = [
     "ImportManager",
@@ -383,7 +382,7 @@ class ImportManager:
         signature = inspect.signature(method)
         return self._get_type_string(signature.return_annotation)
 
-    def _get_type_string(self, annotation) -> str:
+    def _get_type_string(self, annotation) -> Union[str, Tuple[str, Any]]:
         """将类型注解转换为Class Library中可搜索的类名"""
         if annotation == inspect.Parameter.empty:
             return "Any"  # 如果没有注解，返回Any
@@ -400,7 +399,7 @@ class ImportManager:
                             return "Int64MultiArray"
                         elif isinstance(arg0, float):
                             return "Float64MultiArray"
-                return "list"
+                return "list", self._get_type_string(arg0)
             elif origin is dict:
                 return "dict"
             elif origin is Optional:

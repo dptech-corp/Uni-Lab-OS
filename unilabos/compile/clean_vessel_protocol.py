@@ -143,7 +143,7 @@ def generate_clean_vessel_protocol(
             "device_id": heatchill_id,
             "action_name": "heat_chill_start",
             "action_kwargs": {
-                "vessel": vessel_id,  # 🔧 使用 vessel_id
+                "vessel": {"id": vessel_id},  # 🔧 使用 vessel_id
                 "temp": temp,
                 "purpose": f"cleaning with {solvent}"
             }
@@ -295,7 +295,7 @@ def generate_clean_vessel_protocol(
             "device_id": heatchill_id,
             "action_name": "heat_chill_stop",
             "action_kwargs": {
-                "vessel": vessel_id  # 🔧 使用 vessel_id
+                "vessel": {"id": vessel_id},  # 🔧 使用 vessel_id
             }
         }
         action_sequence.append(heatchill_stop_action)

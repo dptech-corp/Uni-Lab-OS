@@ -19,7 +19,7 @@ class EnvironmentChecker:
             # 包导入名 : pip安装名
             # "pymodbus.framer.FramerType": "pymodbus==3.9.2",
             "websockets": "websockets",
-            "paho.mqtt": "paho-mqtt",
+            "msgcenterpy": "msgcenterpy",
             "opentrons_shared_data": "opentrons_shared_data",
         }
 
