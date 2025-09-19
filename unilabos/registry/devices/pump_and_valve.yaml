@@ -832,7 +832,7 @@ syringe_pump_with_valve.runze.SY03B-T06:
           default: 25.0
           type: number
         mode:
-          type: string
+          type: object
         port:
           type: string
       required:
@@ -1352,7 +1352,7 @@ syringe_pump_with_valve.runze.SY03B-T08:
           default: 25.0
           type: number
         mode:
-          type: string
+          type: object
         port:
           type: string
       required:

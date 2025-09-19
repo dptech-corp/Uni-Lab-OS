@@ -1,5 +1,0 @@
-battery_test_system.neware:
-  name: "新威电池测试系统"
-  class: 
-    module: "unilabos.devices.battery.newware_battery_test_system.NewareBatteryTestSystem"
-    type: python

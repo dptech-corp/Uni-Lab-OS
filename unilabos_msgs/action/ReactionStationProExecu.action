@@ -1,0 +1,8 @@
+# Goal - 合并工作流+执行  
+string workflow_name         # 工作流名称  
+string task_name              # 任务名称
+---
+# Result - 操作结果  
+string return_info                    # 结果消息
+---
+# Feedback - 实时反馈  

@@ -37,7 +37,7 @@ linear_motion.grbl:
             goal:
               properties:
                 position:
-                  type: string
+                  type: object
               required:
               - position
               type: object
@@ -450,6 +450,8 @@ linear_motion.grbl:
           - 0
           - -80
           - 0
+          items:
+            type: integer
           type: array
         port:
           type: string
@@ -459,7 +461,7 @@ linear_motion.grbl:
     data:
       properties:
         position:
-          type: string
+          type: object
         spindle_speed:
           type: number
         status:
@@ -605,7 +607,7 @@ linear_motion.toyo_xyz.sim:
             goal:
               properties:
                 ros_node:
-                  type: string
+                  type: object
               required:
               - ros_node
               type: object

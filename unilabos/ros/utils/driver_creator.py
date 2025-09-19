@@ -6,7 +6,6 @@
 """
 import asyncio
 import inspect
-import json
 import traceback
 from abc import abstractmethod
 from typing import Type, Any, Dict, Optional, TypeVar, Generic
@@ -267,43 +266,48 @@ class PyLabRobotCreator(DeviceClassCreator[T]):
             ROS2DeviceNode.run_async_func(getattr(self.device_instance, "setup")).add_done_callback(done_cb)
 
 
-class ProtocolNodeCreator(DeviceClassCreator[T]):
+class WorkstationNodeCreator(DeviceClassCreator[T]):
     """
-    ProtocolNode设备类创建器
+    WorkstationNode设备类创建器
 
-    这个类提供了针对ProtocolNode设备类的实例创建方法，处理children参数。
+    这个类提供了针对WorkstationNode设备类的实例创建方法，处理children参数。
     """
 
     def __init__(self, cls: Type[T], children: Dict[str, Any], resource_tracker: DeviceNodeResourceTracker):
         """
-        初始化ProtocolNode设备类创建器
+        初始化WorkstationNode设备类创建器
 
         Args:
-            cls: ProtocolNode设备类
+            cls: WorkstationNode设备类
             children: 子资源字典，用于资源替换
         """
         super().__init__(cls, children, resource_tracker)
 
-    def attach_resource(self):
-        pass  # WorkstationNode不直接附加资源
-
     def create_instance(self, data: Dict[str, Any]) -> T:
         """
-        从数据创建ProtocolNode设备实例
+        从数据创建WorkstationNode设备实例
 
         Args:
             data: 用于创建实例的数据
 
         Returns:
-            ProtocolNode设备类实例
+            WorkstationNode设备类实例
         """
         try:
             # 创建实例，额外补充一个给protocol node的字段，后面考虑取消
             data["children"] = self.children
-            self.device_instance = super(ProtocolNodeCreator, self).create_instance(data)
+            station_resource_dict = data.get("station_resource")
+            if station_resource_dict:
+                from pylabrobot.resources import Deck, Resource
+                plrc = PyLabRobotCreator(Deck, self.children, self.resource_tracker)
+                station_resource = plrc.create_instance(station_resource_dict)
+                data["station_resource"] = station_resource
+            else:
+                data["station_resource"] = None
+            self.device_instance = super(WorkstationNodeCreator, self).create_instance(data)
             self.post_create()
             return self.device_instance
         except Exception as e:
-            logger.error(f"ProtocolNode创建实例失败: {e}")
-            logger.error(f"ProtocolNode创建实例堆栈: {traceback.format_exc()}")
+            logger.error(f"WorkstationNode创建实例失败: {e}")
+            logger.error(f"WorkstationNode创建实例堆栈: {traceback.format_exc()}")
             raise

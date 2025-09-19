@@ -361,7 +361,7 @@ def generate_wash_solid_protocol(
                 "device_id": "stirrer_1",
                 "action_name": "stir",
                 "action_kwargs": {
-                    "vessel": vessel_id,  # 🔧 使用 vessel_id
+                    "vessel": {"id": vessel_id},  # 🔧 使用 vessel_id
                     "time": str(time),
                     "stir_time": final_time,
                     "stir_speed": stir_speed,
@@ -377,7 +377,7 @@ def generate_wash_solid_protocol(
             "device_id": "filter_1",
             "action_name": "filter",
             "action_kwargs": {
-                "vessel": vessel_id,  # 🔧 使用 vessel_id
+                "vessel": {"id": vessel_id},  # 🔧 使用 vessel_id
                 "filtrate_vessel": actual_filtrate_vessel,
                 "temp": temp,
                 "volume": final_volume

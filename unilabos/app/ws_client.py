@@ -384,7 +384,7 @@ class MessageProcessor:
         """停止消息处理线程"""
         self.is_running = False
         if self.thread and self.thread.is_alive():
-            self.thread.join(timeout=5)
+            self.thread.join(timeout=2)
         logger.info("[MessageProcessor] Stopped")
 
     def _run(self):
@@ -832,7 +832,7 @@ class QueueProcessor:
         """停止队列处理线程"""
         self.is_running = False
         if self.thread and self.thread.is_alive():
-            self.thread.join(timeout=5)
+            self.thread.join(timeout=2)
         logger.info("[QueueProcessor] Stopped")
 
     def _run(self):
@@ -1093,7 +1093,7 @@ class WebSocketClient(BaseCommunicationClient):
             },
         }
         self.message_processor.send_message(message)
-        logger.debug(f"[WebSocketClient] Device status published: {device_id}.{property_name}")
+        logger.trace(f"[WebSocketClient] Device status published: {device_id}.{property_name}")
 
     def publish_job_status(
         self, feedback_data: dict, item: QueueItem, status: str, return_info: Optional[dict] = None
