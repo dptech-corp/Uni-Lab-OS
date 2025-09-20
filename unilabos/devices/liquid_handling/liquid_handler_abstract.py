@@ -923,7 +923,7 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
         spread: Literal["wide", "tight", "custom"] = "wide",
         is_96_well: bool = False,
         mix_stage: Optional[Literal["none", "before", "after", "both"]] = "none",
-        mix_times: Optional[List[int]] = None,
+        mix_times: Optional[int] = None,
         mix_vol: Optional[int] = None,
         mix_rate: Optional[int] = None,
         mix_liquid_height: Optional[float] = None,
@@ -986,7 +986,7 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
                         await self.custom_delay(seconds=delays[1])
                     await self.mix(
                         targets=[targets[_]],
-                        mix_time=mix_times[0],
+                        mix_time=mix_times,
                         mix_vol=mix_vol,
                         offsets=offsets if offsets else None,
                         height_to_bottom=mix_liquid_height if mix_liquid_height else None,
@@ -1051,7 +1051,7 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
 
                     await self.mix(
                         targets=current_targets,
-                        mix_time=mix_times[0],
+                        mix_time=mix_times,
                         mix_vol=mix_vol,
                         offsets=offsets if offsets else None,
                         height_to_bottom=mix_liquid_height if mix_liquid_height else None,
