@@ -986,7 +986,7 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
                         await self.custom_delay(seconds=delays[1])
                     await self.mix(
                         targets=[targets[_]],
-                        mix_time=mix_times,
+                        mix_time=mix_times[0],
                         mix_vol=mix_vol,
                         offsets=offsets if offsets else None,
                         height_to_bottom=mix_liquid_height if mix_liquid_height else None,
@@ -1051,7 +1051,7 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
 
                     await self.mix(
                         targets=current_targets,
-                        mix_time=mix_times,
+                        mix_time=mix_times[0],
                         mix_vol=mix_vol,
                         offsets=offsets if offsets else None,
                         height_to_bottom=mix_liquid_height if mix_liquid_height else None,
