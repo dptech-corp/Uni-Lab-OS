@@ -19,6 +19,9 @@ from unilabos.utils.type_check import NoAliasDumper
 
 DEFAULT_PATHS = [Path(__file__).absolute().parent]
 
+class ROSMsgNotFound(Exception):
+    pass
+
 
 @singleton
 class Registry:
@@ -308,7 +311,7 @@ class Registry:
             return type_class
         else:
             logger.error(f"[UniLab Registry] 无法找到类型 '{type_name}' 用于设备 {device_id} 的 {field_name}")
-            sys.exit(1)
+            raise ROSMsgNotFound(f"类型 '{type_name}' 未找到，用于设备 {device_id} 的 {field_name}")
 
     def _get_json_schema_type(self, type_str: str) -> str:
         """
@@ -495,7 +498,10 @@ class Registry:
                             if isinstance(status_type, tuple) or status_type in ["Any", "None", "Unknown"]:
                                 status_type = "String"  # 替换成ROS的String，便于显示
                                 device_config["class"]["status_types"][status_name] = status_type
-                            target_type = self._replace_type_with_class(status_type, device_id, f"状态 {status_name}")
+                            try:
+                                target_type = self._replace_type_with_class(status_type, device_id, f"状态 {status_name}")
+                            except ROSMsgNotFound:
+                                continue
                             if target_type in [
                                 dict,
                                 list,
@@ -568,9 +574,12 @@ class Registry:
                                 action_type_str: str = action_config["type"]
                                 # 通过Json发放指令，而不是通过特殊的ros action进行处理
                                 if not action_type_str.startswith("UniLabJsonCommand"):
-                                    target_type = self._replace_type_with_class(
-                                        action_type_str, device_id, f"动作 {action_name}"
-                                    )
+                                    try:
+                                        target_type = self._replace_type_with_class(
+                                            action_type_str, device_id, f"动作 {action_name}"
+                                        )
+                                    except ROSMsgNotFound:
+                                        continue
                                     action_str_type_mapping[action_type_str] = target_type
                                     if target_type is not None:
                                         action_config["goal_default"] = yaml.safe_load(

@@ -553,7 +553,7 @@ class HostNode(BaseROS2DeviceNode):
 
                 # 解析设备名和属性名
                 parts = topic.split("/")
-                if len(parts) >= 4:  # 可能有ProtocolNode，创建更长的设备
+                if len(parts) >= 4:  # 可能有WorkstationNode，创建更长的设备
                     device_id = "/".join(parts[2:-1])
                     property_name = parts[-1]
 

@@ -7,13 +7,13 @@ import networkx as nx
 from unilabos_msgs.msg import Resource
 
 from unilabos.resources.container import RegularContainer
-from unilabos.ros.msgs.message_converter import convert_from_ros_msg_with_mapping, convert_to_ros_msg
+from unilabos.ros.msgs.message_converter import convert_to_ros_msg
 
 try:
     from pylabrobot.resources.resource import Resource as ResourcePLR
 except ImportError:
     pass
-from typing import Union, get_origin, get_args
+from typing import Union, get_origin
 
 physical_setup_graph: nx.Graph = None
 
@@ -327,7 +327,7 @@ def nested_dict_to_list(nested_dict: dict) -> list[dict]:  # FIXME 是tree？
     return result
 
 def convert_resources_to_type(
-    resources_list: list[dict], resource_type: type, *, plr_model: bool = False
+    resources_list: list[dict], resource_type: Union[type, list[type]], *, plr_model: bool = False
 ) -> Union[list[dict], dict, None, "ResourcePLR"]:
     """
     Convert resources to a given type (PyLabRobot or NestedDict) from flattened list of dictionaries.
@@ -358,7 +358,7 @@ def convert_resources_to_type(
         return None
 
 
-def convert_resources_from_type(resources_list, resource_type: type) -> Union[list[dict], dict, None, "ResourcePLR"]:
+def convert_resources_from_type(resources_list, resource_type: Union[type, list[type]], *, is_plr: bool = False) -> Union[list[dict], dict, None, "ResourcePLR"]:
     """
     Convert resources from a given type (PyLabRobot or NestedDict) to flattened list of dictionaries.
 
@@ -374,11 +374,11 @@ def convert_resources_from_type(resources_list, resource_type: type) -> Union[li
     elif isinstance(resource_type, type) and issubclass(resource_type, ResourcePLR):
         resources_tree = [resource_plr_to_ulab(resources_list)]
         return tree_to_list(resources_tree)
-    elif isinstance(resource_type, list) :
+    elif isinstance(resource_type, list):
         if all((get_origin(t) is Union) for t in resource_type):
             resources_tree = [resource_plr_to_ulab(r) for r in resources_list]
             return tree_to_list(resources_tree)
-        elif all(issubclass(t, ResourcePLR) for t in resource_type):
+        elif is_plr or all(issubclass(t, ResourcePLR) for t in resource_type):
             resources_tree = [resource_plr_to_ulab(r) for r in resources_list]
             return tree_to_list(resources_tree)
     else:

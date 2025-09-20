@@ -234,7 +234,7 @@ def generate_stir_protocol(
         "action_name": "stir",
         "action_kwargs": {
             # 🔧 关键修复：传递vessel_id字符串，而不是完整的Resource对象
-            "vessel": vessel_id,  # 传递字符串ID，不是Resource对象
+            "vessel": {"id": vessel_id},  # 传递字符串ID，不是Resource对象
             "time": str(time),
             "event": event,
             "time_spec": time_spec,
@@ -323,7 +323,7 @@ def generate_start_stir_protocol(
         "action_name": "start_stir",
         "action_kwargs": {
             # 🔧 关键修复：传递vessel_id字符串，而不是完整的Resource对象
-            "vessel": vessel_id,  # 传递字符串ID，不是Resource对象
+            "vessel": {"id": vessel_id},  # 传递字符串ID，不是Resource对象
             "stir_speed": stir_speed,
             "purpose": purpose or f"启动搅拌 {stir_speed} RPM"
         }
@@ -383,7 +383,7 @@ def generate_stop_stir_protocol(
         "action_name": "stop_stir",
         "action_kwargs": {
             # 🔧 关键修复：传递vessel_id字符串，而不是完整的Resource对象
-            "vessel": vessel_id  # 传递字符串ID，不是Resource对象
+            "vessel": {"id": vessel_id},  # 传递字符串ID，不是Resource对象
         }
     }]
     

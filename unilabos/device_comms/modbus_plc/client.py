@@ -8,8 +8,8 @@ from pymodbus.client import ModbusSerialClient, ModbusTcpClient
 from pymodbus.framer import FramerType
 from typing import TypedDict
 
-from unilabos.device_comms.modbus_plc.node.modbus import DeviceType, HoldRegister, Coil, InputRegister, DiscreteInputs, DataType, WorderOrder
-from unilabos.device_comms.modbus_plc.node.modbus import Base as ModbusNodeBase
+from unilabos.device_comms.modbus_plc.modbus import DeviceType, HoldRegister, Coil, InputRegister, DiscreteInputs, DataType, WorderOrder
+from unilabos.device_comms.modbus_plc.modbus import Base as ModbusNodeBase
 from unilabos.device_comms.universal_driver import UniversalDriver
 from unilabos.utils.log import logger
 import pandas as pd

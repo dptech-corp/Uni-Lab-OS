@@ -1,0 +1,9 @@
+# Goal - 通量-配置  
+string cutoff                    # 黏度_通量-配置  
+string temperature                # 温度_通量-配置
+string assign_material_name        # 分液类型_通量-配置    
+---
+# Result - 操作结果   
+string return_info                    # 结果消息
+---
+# Feedback - 实时反馈  

@@ -8375,6 +8375,9 @@ liquid_handler.prcxi:
           type: object
         host:
           type: string
+        is_9320:
+          default: false
+          type: string
         matrix_id:
           default: ''
           type: string

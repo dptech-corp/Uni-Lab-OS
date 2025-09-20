@@ -98,6 +98,19 @@ set(action_files
 
   "action/WorkStationRun.action"
   "action/AGVTransfer.action"
+
+  "action/DispenStationSolnPrep.action"
+  "action/DispenStationVialFeed.action"
+
+  "action/PostProcessGrab.action"
+  "action/PostProcessTriggerClean.action"
+  "action/PostProcessTriggerPostPro.action"
+  
+  "action/ReactionStationDripBack.action"
+  "action/ReactionStationLiquidFeed.action"
+  "action/ReactionStationProExecu.action"
+  "action/ReactionStationReaTackIn.action"
+  "action/ReactionStationSolidFeedVial.action"
 )
 
 set(srv_files

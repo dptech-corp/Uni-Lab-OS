@@ -51,7 +51,7 @@ from unilabos_msgs.msg import Resource  # type: ignore
 
 from unilabos.ros.nodes.resource_tracker import DeviceNodeResourceTracker
 from unilabos.ros.x.rclpyx import get_event_loop
-from unilabos.ros.utils.driver_creator import ProtocolNodeCreator, PyLabRobotCreator, DeviceClassCreator
+from unilabos.ros.utils.driver_creator import WorkstationNodeCreator, PyLabRobotCreator, DeviceClassCreator
 from unilabos.utils.async_util import run_async_func
 from unilabos.utils.log import info, debug, warning, error, critical, logger, trace
 from unilabos.utils.type_check import get_type_class, TypeEncoder, serialize_result_info, get_result_info_str
@@ -518,6 +518,17 @@ class BaseROS2DeviceNode(Node, Generic[T]):
         rclpy.get_global_executor().add_node(self)
         self.lab_logger().debug(f"ROS节点初始化完成")
 
+    async def update_resource(self, resources: List[Any]):
+        r = ResourceUpdate.Request()
+        unique_resources = []
+        for resource in resources:  # resource是list[ResourcePLR]
+            # 目前更新资源只支持传入plr的对象，后面要更新convert_resources_from_type函数
+            converted_list = convert_resources_from_type([resource], resource_type=[object], is_plr=True)
+            unique_resources.extend([convert_to_ros_msg(Resource, converted) for converted in converted_list])
+        r.resources = unique_resources
+        response = await self._resource_clients["resource_update"].call_async(r)
+        self.lab_logger().debug(f"资源更新结果: {response}")
+
     def register_device(self):
         """向注册表中注册设备信息"""
         topics_info = self._property_publishers.copy()
@@ -672,7 +683,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             if action_name not in ["create_resource_detailed", "create_resource"]:
                 for k, v in goal.get_fields_and_field_types().items():
                     if v in ["unilabos_msgs/Resource", "sequence<unilabos_msgs/Resource>"]:
-                        self.lab_logger().info(f"查询资源状态: Key: {k} Type: {v}")
+                        self.lab_logger().info(f"{action_name} 查询资源状态: Key: {k} Type: {v}")
                         current_resources: Union[List[Resource], List[List[Resource]]] = []
                         # TODO: resource后面需要分组
                         only_one_resource = False
@@ -711,7 +722,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                         try:
                             action_kwargs[k] = self.resource_tracker.figure_resource(final_resource, try_mode=False)
                         except Exception as e:
-                            self.lab_logger().error(f"物料实例获取失败: {e}\n{traceback.format_exc()}")
+                            self.lab_logger().error(f"{action_name} 物料实例获取失败: {e}\n{traceback.format_exc()}")
                             error_skip = True
                             execution_error = traceback.format_exc()
                             break
@@ -947,6 +958,7 @@ class ROS2DeviceNode:
         self._driver_class = driver_class
         self.device_config = device_config
         self.driver_is_ros = driver_is_ros
+        self.driver_is_workstation = False
         self.resource_tracker = DeviceNodeResourceTracker()
 
         # use_pylabrobot_creator 使用 cls的包路径检测
@@ -967,10 +979,10 @@ class ROS2DeviceNode:
                 driver_class, children=children, resource_tracker=self.resource_tracker
             )
         else:
-            from unilabos.ros.nodes.presets.protocol_node import ROS2ProtocolNode
-
-            if issubclass(self._driver_class, ROS2ProtocolNode):  # 是ProtocolNode的子节点，就要调用ProtocolNodeCreator
-                self._driver_creator = ProtocolNodeCreator(driver_class, children=children, resource_tracker=self.resource_tracker)
+            from unilabos.devices.workstation.workstation_base import WorkstationBase
+            if issubclass(self._driver_class, WorkstationBase):  # 是WorkstationNode的子节点，就要调用WorkstationNodeCreator
+                self.driver_is_workstation = True
+                self._driver_creator = WorkstationNodeCreator(driver_class, children=children, resource_tracker=self.resource_tracker)
             else:
                 self._driver_creator = DeviceClassCreator(driver_class, children=children, resource_tracker=self.resource_tracker)
 
@@ -985,6 +997,19 @@ class ROS2DeviceNode:
         # 创建ROS2节点
         if driver_is_ros:
             self._ros_node = self._driver_instance  # type: ignore
+        elif self.driver_is_workstation:
+            from unilabos.ros.nodes.presets.workstation import ROS2WorkstationNode
+            self._ros_node = ROS2WorkstationNode(
+                protocol_type=driver_params["protocol_type"],
+                children=children,
+                driver_instance=self._driver_instance,  # type: ignore
+                device_id=device_id,
+                status_types=status_types,
+                action_value_mappings=action_value_mappings,
+                hardware_interface=hardware_interface,
+                print_publish=print_publish,
+                resource_tracker=self.resource_tracker,
+            )
         else:
             self._ros_node = BaseROS2DeviceNode(
                 driver_instance=self._driver_instance,
