@@ -13,7 +13,7 @@ float64[] blow_out_air_volume
 string spread
 bool is_96_well
 string mix_stage
-int32[] mix_times
+int32 mix_times
 int32 mix_vol
 int32 mix_rate
 float64 mix_liquid_height

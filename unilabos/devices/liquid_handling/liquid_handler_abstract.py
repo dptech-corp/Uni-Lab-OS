@@ -923,7 +923,7 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
         spread: Literal["wide", "tight", "custom"] = "wide",
         is_96_well: bool = False,
         mix_stage: Optional[Literal["none", "before", "after", "both"]] = "none",
-        mix_times: Optional[List[int]] = None,
+        mix_times: Optional[int] = None,
         mix_vol: Optional[int] = None,
         mix_rate: Optional[int] = None,
         mix_liquid_height: Optional[float] = None,
