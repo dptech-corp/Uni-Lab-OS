@@ -207,9 +207,17 @@ class NewareBatteryTestSystem:
         )
         plate1 = Plate("P1", 400, 300, 50, ordered_items=plate1_resources)
         deck_main.assign_child_resource(plate1, location=Coordinate(0, 0, 0))
-        ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
-            "resources": [deck_main]
-        })
+        
+        # 只有在真实ROS环境下才调用update_resource
+        if hasattr(self._ros_node, 'update_resource') and callable(getattr(self._ros_node, 'update_resource')):
+            try:
+                ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
+                    "resources": [deck_main]
+                })
+            except Exception as e:
+                if hasattr(self._ros_node, 'lab_logger'):
+                    self._ros_node.lab_logger().warning(f"更新资源失败: {e}")
+                # 在非ROS环境下忽略此错误
         
         # 为第1盘资源添加P1_前缀
         self.station_resources_plate1 = {}
@@ -480,6 +488,8 @@ class NewareBatteryTestSystem:
 
 
 
+
+
     # ========================
     # 辅助方法
     # ========================
@@ -511,8 +521,11 @@ class NewareBatteryTestSystem:
                 
             print(f"   状态统计:")
             total_channels = 0
-            for state, count in status_data.items():
-                if count > 0:
+            
+            # 从channel_status获取stats字段
+            stats = status_data.get("stats", {})
+            for state, count in stats.items():
+                if isinstance(count, int) and count > 0:
                     color = self.STATUS_COLOR.get(state, "#000000")
                     print(f"     {state}: {count} 个通道 ({color})")
                     total_channels += count
@@ -533,6 +546,10 @@ class NewareBatteryTestSystem:
             dict: ROS2动作结果格式 {"return_info": str, "success": bool}
         """
         try:
+            # 确保_channels已初始化
+            if not hasattr(self, '_channels') or not self._channels:
+                self._channels = self._build_channel_map()
+            
             summary = {}
             for channel in self._channels:
                 devid = channel.devid
@@ -946,6 +963,19 @@ def main():
     # 创建设备实例
     bts = NewareBatteryTestSystem()
     
+    # 创建一个模拟的ROS节点用于初始化
+    class MockRosNode:
+        def lab_logger(self):
+            import logging
+            return logging.getLogger(__name__)
+        
+        def update_resource(self, *args, **kwargs):
+            pass  # 空实现，避免ROS调用错误
+    
+    # 调用post_init进行正确的初始化
+    mock_ros_node = MockRosNode()
+    bts.post_init(mock_ros_node)
+    
     # 测试连接
     print(f"\n1. 连接测试:")
     print(f"   连接信息: {bts.connection_info}")
@@ -958,9 +988,14 @@ def main():
     # 获取设备摘要
     print(f"\n2. 设备摘要:")
     print(f"   总通道数: {bts.total_channels}")
-    summary = bts.get_device_summary()
-    for devid, count in summary.items():
-        print(f"   设备ID {devid}: {count} 个通道")
+    summary_result = bts.get_device_summary()
+    if summary_result["success"]:
+        # 直接解析return_info，因为它就是JSON字符串
+        summary = json.loads(summary_result["return_info"])
+        for devid, count in summary.items():
+            print(f"   设备ID {devid}: {count} 个通道")
+    else:
+        print(f"   获取设备摘要失败: {summary_result['return_info']}")
     
     # 显示物料管理系统信息
     print(f"\n3. 物料管理系统:")
@@ -978,14 +1013,19 @@ def main():
     # 分别获取两盘的状态
     print(f"\n5. 分盘状态统计:")
     try:
+        plate_status_data = bts.plate_status
         for plate_num in [1, 2]:
-            plate_status = bts.get_plate_status(plate_num)
-            print(f"   第{plate_num}盘:")
-            print(f"     总位置数: {plate_status['total_positions']}")
-            print(f"     活跃位置数: {plate_status['active_positions']}")
-            for state, count in plate_status['stats'].items():
-                if count > 0:
-                    print(f"     {state}: {count} 个位置")
+            plate_key = f"plate{plate_num}"  # 修正键名格式：plate1, plate2
+            if plate_key in plate_status_data:
+                plate_info = plate_status_data[plate_key]
+                print(f"   第{plate_num}盘:")
+                print(f"     总位置数: {plate_info['total_positions']}")
+                print(f"     活跃位置数: {plate_info['active_positions']}")
+                for state, count in plate_info['stats'].items():
+                    if count > 0:
+                        print(f"     {state}: {count} 个位置")
+            else:
+                print(f"   第{plate_num}盘: 无数据")
     except Exception as e:
         print(f"   获取分盘状态失败: {e}")
     
