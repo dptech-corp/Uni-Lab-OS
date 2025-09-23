@@ -210,34 +210,35 @@ class NewareBatteryTestSystem:
         ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
             "resources": [deck_main]
         })
-        # # 为第1盘资源添加P1_前缀
-        # self.station_resources_plate1 = {}
-        # for name, resource in plate1_resources.items():
-        #     new_name = f"P1_{name}"
-        #     self.station_resources_plate1[new_name] = resource
-        #
-        # # 第2盘：5行8列网格 (A1-E8)，在Z轴上偏移 - 5行对应subdevid 6-10，8列对应chlid 1-8
-        # plate2_resources = create_ordered_items_2d(
-        #     self.BatteryTestPosition,
-        #     num_items_x=8,  # 8列（对应chlid 1-8）
-        #     num_items_y=5,  # 5行（对应subdevid 6-10，即A-E）
-        #     dx=10,
-        #     dy=10,
-        #     dz=100,  # Z轴偏移100mm
-        #     item_dx=65,
-        #     item_dy=65
-        # )
-        #
-        # # 为第2盘资源添加P2_前缀
-        # self.station_resources_plate2 = {}
-        # for name, resource in plate2_resources.items():
-        #     new_name = f"P2_{name}"
-        #     self.station_resources_plate2[new_name] = resource
-        #
-        # # 合并两盘资源为统一的station_resources
-        # self.station_resources = {}
-        # self.station_resources.update(self.station_resources_plate1)
-        # self.station_resources.update(self.station_resources_plate2)
+        
+        # 为第1盘资源添加P1_前缀
+        self.station_resources_plate1 = {}
+        for name, resource in plate1_resources.items():
+            new_name = f"P1_{name}"
+            self.station_resources_plate1[new_name] = resource
+
+        # 第2盘：5行8列网格 (A1-E8)，在Z轴上偏移 - 5行对应subdevid 6-10，8列对应chlid 1-8
+        plate2_resources = create_ordered_items_2d(
+            BatteryTestPosition,
+            num_items_x=8,  # 8列（对应chlid 1-8）
+            num_items_y=5,  # 5行（对应subdevid 6-10，即A-E）
+            dx=10,
+            dy=10,
+            dz=100,  # Z轴偏移100mm
+            item_dx=65,
+            item_dy=65
+        )
+
+        # 为第2盘资源添加P2_前缀
+        self.station_resources_plate2 = {}
+        for name, resource in plate2_resources.items():
+            new_name = f"P2_{name}"
+            self.station_resources_plate2[new_name] = resource
+
+        # 合并两盘资源为统一的station_resources
+        self.station_resources = {}
+        self.station_resources.update(self.station_resources_plate1)
+        self.station_resources.update(self.station_resources_plate2)
 
     # ========================
     # 核心属性（Uni-Lab标准）
@@ -268,7 +269,17 @@ class NewareBatteryTestSystem:
         status_map = self._query_all_channels()
         status_processed = {} if not status_map else self._group_by_devid(status_map)
         
+        # 修复数据过滤逻辑：如果machine_id对应的数据不存在，尝试使用第一个可用的设备数据
         status_current_machine = status_processed.get(self.machine_id, {})
+        
+        if not status_current_machine and status_processed:
+            # 如果machine_id没有匹配到数据，使用第一个可用的设备数据
+            first_devid = next(iter(status_processed.keys()))
+            status_current_machine = status_processed[first_devid]
+            if self._ros_node:
+                self._ros_node.lab_logger().warning(
+                    f"machine_id {self.machine_id} 没有匹配到数据，使用设备ID {first_devid} 的数据"
+                )
         
         # 确保有默认的数据结构
         if not status_current_machine:
@@ -283,7 +294,7 @@ class NewareBatteryTestSystem:
         # 处理2盘电池的状态映射
         self._update_plate_resources(subunits)
         
-        return status_current_machine.get("stats", {s: 0 for s in self.STATUS_SET | {"unknown"}})
+        return status_current_machine
 
     def _update_plate_resources(self, subunits: Dict):
         """更新两盘电池资源的状态"""
@@ -394,52 +405,80 @@ class NewareBatteryTestSystem:
                 self._ros_node.lab_logger().error(error_msg)
             return {"return_info": error_msg, "success": False}
 
-    def get_plate_status(self, plate_num: int) -> Dict[str, Any]:
+    @property
+    def plate_status(self) -> Dict[str, Any]:
         """
-        获取指定盘的状态信息（设备动作）
+        获取所有盘的状态信息（属性）
         
-        Args:
-            plate_num: 盘号 (1 或 2)
-            
         Returns:
-            指定盘的状态统计和资源信息
+            包含所有盘状态信息的字典
         """
-        # 确保先更新所有资源的状态数据
-        _ = self.channel_status  # 这会触发状态更新并调用load_state
-        
-        if plate_num == 1:
-            resources = self.station_resources_plate1
-            prefix = "P1_"
-        elif plate_num == 2:
-            resources = self.station_resources_plate2
-            prefix = "P2_"
-        else:
-            raise ValueError("盘号必须是1或2")
-        
-        plate_stats = {s: 0 for s in self.STATUS_SET | {"unknown"}}
-        active_resources = []
-        
-        for name, resource in resources.items():
-            state = getattr(resource, '_unilabos_state', {})
-            status = state.get('status', 'unknown')
-            plate_stats[status] += 1
+        try:
+            # 确保先更新所有资源的状态数据
+            _ = self.channel_status  # 这会触发状态更新并调用load_state
             
-            if status != 'unknown':
-                active_resources.append({
-                    'name': name,
-                    'status': status,
-                    'color': state.get('color', self.STATUS_COLOR['unknown']),
-                    'voltage': state.get('voltage', 0.0),
-                    'current': state.get('current', 0.0),
-                })
-        
-        return {
-            'plate_num': plate_num,
-            'stats': plate_stats,
-            'total_positions': len(resources),
-            'active_positions': len(active_resources),
-            'resources': active_resources
-        }
+            # 手动计算两盘的状态，避免调用需要参数的get_plate_status方法
+            plate1_stats = {s: 0 for s in self.STATUS_SET | {"unknown"}}
+            plate1_active = []
+            
+            for name, resource in self.station_resources_plate1.items():
+                state = getattr(resource, '_unilabos_state', {})
+                status = state.get('status', 'unknown')
+                plate1_stats[status] += 1
+                
+                if status != 'unknown':
+                    plate1_active.append({
+                        'name': name,
+                        'status': status,
+                        'color': state.get('color', self.STATUS_COLOR['unknown']),
+                        'voltage': state.get('voltage', 0.0),
+                        'current': state.get('current', 0.0),
+                    })
+            
+            plate2_stats = {s: 0 for s in self.STATUS_SET | {"unknown"}}
+            plate2_active = []
+            
+            for name, resource in self.station_resources_plate2.items():
+                state = getattr(resource, '_unilabos_state', {})
+                status = state.get('status', 'unknown')
+                plate2_stats[status] += 1
+                
+                if status != 'unknown':
+                    plate2_active.append({
+                        'name': name,
+                        'status': status,
+                        'color': state.get('color', self.STATUS_COLOR['unknown']),
+                        'voltage': state.get('voltage', 0.0),
+                        'current': state.get('current', 0.0),
+                    })
+            
+            return {
+                "plate1": {
+                    'plate_num': 1,
+                    'stats': plate1_stats,
+                    'total_positions': len(self.station_resources_plate1),
+                    'active_positions': len(plate1_active),
+                    'resources': plate1_active
+                },
+                "plate2": {
+                    'plate_num': 2,
+                    'stats': plate2_stats,
+                    'total_positions': len(self.station_resources_plate2),
+                    'active_positions': len(plate2_active),
+                    'resources': plate2_active
+                },
+                "total_plates": 2
+            }
+        except Exception as e:
+            if self._ros_node:
+                self._ros_node.lab_logger().error(f"获取盘状态失败: {e}")
+            return {
+                "plate1": {"error": str(e)},
+                "plate2": {"error": str(e)},
+                "total_plates": 2
+            }
+
+
 
     # ========================
     # 辅助方法
@@ -557,6 +596,131 @@ class NewareBatteryTestSystem:
                 self._ros_node.lab_logger().error(error_msg)
             return {"return_info": error_msg, "success": False}
 
+    def query_plate_action(self, plate_id: str = "P1") -> dict:
+        """
+        查询指定盘的详细信息（设备动作）
+        
+        Args:
+            plate_id: 盘号标识，如"P1"或"P2"
+            
+        Returns:
+            dict: ROS2动作结果格式，包含指定盘的详细通道信息
+        """
+        try:
+            # 解析盘号
+            if plate_id.upper() == "P1":
+                plate_num = 1
+            elif plate_id.upper() == "P2":
+                plate_num = 2
+            else:
+                error_msg = f"无效的盘号: {plate_id}，仅支持P1或P2"
+                if self._ros_node:
+                    self._ros_node.lab_logger().warning(error_msg)
+                return {"return_info": error_msg, "success": False}
+            
+            # 获取指定盘的详细信息
+            plate_detail = self._get_plate_detail_info(plate_num)
+            
+            success_msg = f"成功获取{plate_id}盘详细信息，包含{len(plate_detail['channels'])}个通道"
+            if self._ros_node:
+                self._ros_node.lab_logger().info(success_msg)
+            
+            return {
+                "return_info": success_msg,
+                "success": True,
+                "plate_data": plate_detail
+            }
+            
+        except Exception as e:
+            error_msg = f"查询盘{plate_id}详细信息失败: {str(e)}"
+            if self._ros_node:
+                self._ros_node.lab_logger().error(error_msg)
+            return {"return_info": error_msg, "success": False}
+
+    def _get_plate_detail_info(self, plate_num: int) -> dict:
+        """
+        获取指定盘的详细信息，包含设备ID、子设备ID、通道ID映射
+        
+        Args:
+            plate_num: 盘号 (1 或 2)
+            
+        Returns:
+            dict: 包含详细通道信息的字典
+        """
+        # 获取最新的通道状态数据
+        channel_status_data = self.channel_status
+        subunits = channel_status_data.get('subunits', {})
+        
+        if plate_num == 1:
+            devid = 1
+            subdevid_range = range(1, 6)  # 子设备ID 1-5
+        elif plate_num == 2:
+            devid = 1
+            subdevid_range = range(6, 11)  # 子设备ID 6-10
+        else:
+            raise ValueError("盘号必须是1或2")
+        
+        channels = []
+        
+        # 直接从subunits数据构建通道信息，而不依赖资源状态
+        for subdev_id in subdevid_range:
+            status_row = subunits.get(subdev_id, {})
+            
+            for chl_id in range(1, 9):  # chlid 1-8
+                try:
+                    # 计算在5×8网格中的位置
+                    if plate_num == 1:
+                        row_idx = (subdev_id - 1)  # 0-4 (对应A-E)
+                    else:  # plate_num == 2
+                        row_idx = (subdev_id - 6)  # 0-4 (subdevid 6->0, 7->1, ..., 10->4) (对应A-E)
+                    
+                    col_idx = (chl_id - 1)     # 0-7 (对应1-8)
+                    position = f"{self.LETTERS[row_idx]}{col_idx + 1}"
+                    name = f"P{plate_num}_{position}"
+                    
+                    # 从subunits直接获取通道状态数据
+                    status_channel = status_row.get(chl_id, {})
+                    
+                    # 提取metrics数据（如果存在）
+                    metrics = status_channel.get('metrics', {})
+                    
+                    channel_info = {
+                        'name': name,
+                        'devid': devid,
+                        'subdevid': subdev_id,
+                        'chlid': chl_id,
+                        'position': position,
+                        'status': status_channel.get('state', 'unknown'),
+                        'color': status_channel.get('color', self.STATUS_COLOR['unknown']),
+                        'voltage': metrics.get('voltage_V', 0.0),
+                        'current': metrics.get('current_A', 0.0),
+                        'time': metrics.get('totaltime_s', 0.0)
+                    }
+                    
+                    channels.append(channel_info)
+                    
+                except (ValueError, IndexError, KeyError):
+                    # 如果解析失败，跳过该通道
+                    continue
+        
+        # 按位置排序（先按行，再按列）
+        channels.sort(key=lambda x: (x['subdevid'], x['chlid']))
+        
+        # 统计状态
+        stats = {s: 0 for s in self.STATUS_SET | {"unknown"}}
+        for channel in channels:
+            stats[channel['status']] += 1
+        
+        return {
+            'plate_id': f"P{plate_num}",
+            'plate_num': plate_num,
+            'devid': devid,
+            'subdevid_range': list(subdevid_range),
+            'total_channels': len(channels),
+            'stats': stats,
+            'channels': channels
+        }
+
     # ========================
     # TCP通信和协议处理
     # ========================
@@ -569,17 +733,17 @@ class NewareBatteryTestSystem:
         for devid in range(1, 8):
             for sub in range(1, 11):
                 for ch in range(1, 9):
-                    channels.append(self.ChannelKey(devid, sub, ch))
+                    channels.append(ChannelKey(devid, sub, ch))
         
         # devid 8: subdevid 11-20, chlid 1-8
         for sub in range(11, 21):
             for ch in range(1, 9):
-                channels.append(self.ChannelKey(8, sub, ch))
+                channels.append(ChannelKey(8, sub, ch))
         
         # devid 86: subdevid 1-10, chlid 1-8
         for sub in range(1, 11):
             for ch in range(1, 9):
-                channels.append(self.ChannelKey(86, sub, ch))
+                channels.append(ChannelKey(86, sub, ch))
                 
         return channels
 
@@ -676,7 +840,7 @@ class NewareBatteryTestSystem:
                 except ValueError:
                     continue
 
-                key = self.ChannelKey(devid, subdevid, chlid)
+                key = ChannelKey(devid, subdevid, chlid)
 
                 # 提取属性，带类型转换与缺省值
                 def fget(name: str, cast, default):

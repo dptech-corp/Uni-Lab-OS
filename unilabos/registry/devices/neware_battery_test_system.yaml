@@ -209,6 +209,46 @@ neware_battery_test_system:
           - goal
           type: object
         type: UniLabJsonCommand
+      query_plate_action:
+        feedback: {}
+        goal:
+          string: plate_id
+        goal_default:
+          string: ''
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: StrSingleInput_Feedback
+              type: object
+            goal:
+              properties:
+                string:
+                  type: string
+              required:
+              - string
+              title: StrSingleInput_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: StrSingleInput_Result
+              type: object
+          required:
+          - goal
+          title: StrSingleInput
+          type: object
+        type: StrSingleInput
       test_connection_action:
         feedback: {}
         goal: {}
@@ -247,6 +287,9 @@ neware_battery_test_system:
       connection_info: dict
       device_summary: dict
       plate_status: dict
+
+
+      
       status: str
       total_channels: int
     type: python
