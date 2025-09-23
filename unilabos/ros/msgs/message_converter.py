@@ -51,6 +51,8 @@ SendCmd = msg_converter_manager.get_class("unilabos_msgs.action:SendCmd")
 imsg = msg_converter_manager.get_module("unilabos.messages")
 Point3D = msg_converter_manager.get_class("unilabos.messages:Point3D")
 
+from control_msgs.action import *
+
 # 基本消息类型映射
 _msg_mapping: Dict[Type, Type] = {
     float: Float64,
@@ -193,7 +195,7 @@ _msg_converter_back: Dict[Type, Any] = {
         "children": list(x.children),
         "parent": x.parent if x.parent else None,
         "type": x.type,
-        "class": x.category,
+        "class": "",
         "position": {"x": x.pose.position.x, "y": x.pose.position.y, "z": x.pose.position.z},
         "config": json_or_yaml_loads(x.config or "{}"),
         "data": json_or_yaml_loads(x.data or "{}"),

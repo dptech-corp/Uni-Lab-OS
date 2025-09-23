@@ -265,7 +265,7 @@ def generate_separate_protocol(
                     "device_id": stirrer_device,
                     "action_name": "start_stir",
                     "action_kwargs": {
-                        "vessel": final_vessel_id,  # 🔧 使用 final_vessel_id
+                        "vessel": {"id": final_vessel_id},  # 🔧 使用 final_vessel_id
                         "stir_speed": stir_speed,
                         "purpose": f"分离混合 - {purpose}"
                     }

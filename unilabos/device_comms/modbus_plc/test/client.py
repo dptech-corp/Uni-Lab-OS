@@ -1,6 +1,6 @@
 import time
 from pymodbus.client import ModbusTcpClient
-from unilabos.device_comms.modbus_plc.node.modbus import Coil, HoldRegister
+from unilabos.device_comms.modbus_plc.modbus import Coil, HoldRegister
 from pymodbus.payload import BinaryPayloadDecoder
 from pymodbus.constants import Endian
 

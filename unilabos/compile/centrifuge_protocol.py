@@ -156,7 +156,7 @@ def generate_centrifuge_protocol(
         "device_id": centrifuge_id,
         "action_name": "centrifuge",
         "action_kwargs": {
-            "vessel": centrifuge_vessel,
+            "vessel": {"id": centrifuge_vessel},
             "speed": speed,
             "time": time,
             "temp": temp

@@ -220,7 +220,7 @@ def generate_heat_chill_protocol(
         "device_id": heatchill_id,
         "action_name": "heat_chill",
         "action_kwargs": {
-            "vessel": vessel,
+            "vessel": {"id": vessel},
             "temp": float(final_temp),
             "time": float(final_time),
             "stir": bool(stir),
@@ -287,7 +287,8 @@ def generate_heat_chill_start_protocol(
         "action_name": "heat_chill_start",
         "action_kwargs": {
             "temp": temp,
-            "purpose": purpose or f"开始加热到 {temp}°C"
+            "purpose": purpose or f"开始加热到 {temp}°C",
+            "vessel": {"id": vessel_id},
         }
     }]
     
