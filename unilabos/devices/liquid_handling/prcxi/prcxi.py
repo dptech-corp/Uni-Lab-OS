@@ -1637,9 +1637,16 @@ if __name__ == "__main__":
     asyncio.run(handler.create_protocol(protocol_name="Test Protocol"))
     asyncio.run(handler.pick_up_tips([plate5.get_item("C5")], [0]))
     asyncio.run(handler.aspirate([plate9.get_item("H12")], [5], [0]))
-    asyncio.run(handler.dispense([plate10.get_item("H12")], [1], [0]))
-    asyncio.run(handler.dispense([plate13.get_item("A1")], [1], [0]))
-    asyncio.run(handler.dispense([plate14.get_item("C5")], [1], [0]))
+
+    for well in plate13.get_all_items():
+        # well_pos = well.name.split("_")[1]       # 走一行
+        # if well_pos.startswith("A"):             
+        if well.name.startswith("PlateT13"):       # 走整个Plate
+            asyncio.run(handler.dispense([well], [0.01], [0]))
+        
+    # asyncio.run(handler.dispense([plate10.get_item("H12")], [1], [0]))
+    # asyncio.run(handler.dispense([plate13.get_item("A1")], [1], [0]))
+    # asyncio.run(handler.dispense([plate14.get_item("C5")], [1], [0]))
     asyncio.run(handler.mix([plate10.get_item("H12")], mix_time=3, mix_vol=5))
     asyncio.run(handler.discard_tips([0]))
     asyncio.run(handler.run_protocol())
