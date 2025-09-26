@@ -967,6 +967,7 @@ class ROS2DeviceNode:
             or driver_class.__name__ == "LiquidHandlerAbstract"
             or driver_class.__name__ == "LiquidHandlerBiomek"
             or driver_class.__name__ == "PRCXI9300Handler"
+            or driver_class.__name__ == "TransformXYZHandler"
         )
 
         # TODO: 要在创建之前预先请求服务器是否有当前id的物料，放到resource_tracker中，让pylabrobot进行创建

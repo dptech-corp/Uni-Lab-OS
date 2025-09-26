@@ -5,7 +5,7 @@
             "name": "liquid_handler",
             "parent": null,
             "type": "device",
-            "class": "liquid_handler.laiyu",
+            "class": "liquid_handler",
             "position": {
                 "x": 0,
                 "y": 0,
@@ -18,8 +18,15 @@
             "config": {
                 "deck": {
                     "_resource_child_name": "deck",
-                    "_resource_type": "pylabrobot.resources.opentrons.deck:OTDeck"
-                }
+                    "_resource_type": "unilabos.devices.liquid_handling.laiyu.laiyu:TransformXYZDeck",
+                    "name": "deck"
+                },
+                "backend": {
+                    "type": "UniLiquidHandlerRvizBackend"
+                    
+                },
+                "simulator": true,
+                "total_height": 300
             }
         },
         {
@@ -39,35 +46,6 @@
                 "x": 0,
                 "y": 0,
                 "z": 18
-            },
-            "pose": {
-                "layout": "2d",
-                "position": {
-                    "x": 0,
-                    "y": 0,
-                    "z": 0
-                },
-                "position_3d": {
-                    "x": 0,
-                    "y": 0,
-                    "z": 0
-                },
-                "size": {
-                    "width": 200,
-                    "height": 200,
-                    "depth": 20
-                },
-                "scale": {
-                    "x": 1,
-                    "y": 1,
-                    "z": 1
-                },
-                "rotation": {
-                    "x": 0,
-                    "y": 0,
-                    "z": 0
-                },
-                "extra": null
             },
             "config": {
                 "type": "TransformXYZDeck",
@@ -94,24 +72,15 @@
             "type": "tip_rack",
             "class": "tiprack_box",
             "position": {
-                "x": 146.0,
-                "y": 3,
+                "x": 150,
+                "y": 7,
                 "z": 103
-            },
-
-            "pose": {
-                "position_3d": {
-                    "x": 146.0,
-                    "y": 3,
-                    "z": 103
-                },
-                "extra": null
             },
             "config": {
                 "type": "TipRack",
-                "size_x": 122.4,
-                "size_y": 82.6,
-                "size_z": 20.0,
+                "size_x": 134,
+                "size_y": 96,
+                "size_z": 7.0,
                 "rotation": {
                     "x": 0,
                     "y": 0,
@@ -147,7 +116,7 @@
                 "type": "TipSpot",
                 "size_x": 9,
                 "size_y": 9,
-                "size_z": 0,
+                "size_z": 95,
                 "rotation": {
                     "x": 0,
                     "y": 0,
@@ -158,9 +127,9 @@
                 "model": null,
                 "prototype_tip": {
                     "type": "Tip",
-                    "total_tip_length": 39.2,
+                    "total_tip_length": 95,
                     "has_filter": false,
-                    "maximal_volume": 10.0,
+                    "maximal_volume": 1000.0,
                     "fitting_depth": 3.29
                 }
             },
@@ -203,7 +172,7 @@
                 "type": "Plate",
                 "size_x": 127.76,
                 "size_y": 85.48,
-                "size_z": 14.2,
+                "size_z": 45.5,
                 "rotation": {
                     "x": 0,
                     "y": 0,
@@ -232,8 +201,8 @@
             "type": "device",
             "class": "",
             "position": {
-                "x": 6.1,
-                "y": 65.95,
+                "x": 10.1,
+                "y": 70,
                 "z": 6.1
             },
             "config": {
@@ -280,7 +249,7 @@
                 "z": 0
             },
             "config": {
-                "type": "TubeRack",
+                "type": "Plate",
                 "size_x": 151,
                 "size_y": 75,
                 "size_z": 75,
@@ -290,7 +259,6 @@
                     "z": 0,
                     "type": "Rotation"
                 },
-                "category": "tube_rack",
                 "model": "tube_container",
                 "ordering": [
                     "A1"
@@ -314,7 +282,7 @@
                 "z": 10
             },
             "config": {
-                "type": "Tube",
+                "type": "Well",
                 "size_x": 34,
                 "size_y": 34,
                 "size_z": 117,
@@ -360,7 +328,7 @@
                 "z": 0
             },
             "config": {
-                "type": "TubeRack",
+                "type": "Plate",
                 "size_x": 80,
                 "size_y": 80,
                 "size_z": 8,
@@ -394,9 +362,9 @@
                 "z": 8
             },
             "config": {
-                "type": "Tube",
-                "size_x": 40,
-                "size_y": 40,
+                "type": "Well",
+                "size_x": 80,
+                "size_y": 80,
                 "size_z": 117,
                 "rotation": {
                     "x": 0,

@@ -7,7 +7,7 @@ import asyncio
 import time
 import pprint as pp
 from pylabrobot.liquid_handling import LiquidHandler, LiquidHandlerBackend, LiquidHandlerChatterboxBackend, Strictness
-from unilabos.devices.liquid_handling.opentrons.ot_backend import UniLiquidHandlerRvizBackend
+from unilabos.devices.liquid_handling.rviz_backend import UniLiquidHandlerRvizBackend
 from pylabrobot.liquid_handling.liquid_handler import TipPresenceProbingMethod
 from pylabrobot.liquid_handling.standard import GripDirection
 from pylabrobot.resources import (
@@ -28,11 +28,11 @@ from pylabrobot.resources import (
 
 
 class LiquidHandlerMiddleware(LiquidHandler):
-    def __init__(self, backend: LiquidHandlerBackend, deck: Deck, simulator: bool = False, channel_num: int = 8):
+    def __init__(self, backend: LiquidHandlerBackend, deck: Deck, simulator: bool = False, channel_num: int = 8,total_height: float = 310):
         self._simulator = simulator
         self.channel_num = channel_num
         if simulator:
-            self._simulate_backend = UniLiquidHandlerRvizBackend(channel_num)
+            self._simulate_backend = UniLiquidHandlerRvizBackend(channel_num,total_height)
             self._simulate_handler = LiquidHandlerAbstract(self._simulate_backend, deck, False)
         super().__init__(backend, deck)
 
@@ -538,7 +538,7 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
     """Extended LiquidHandler with additional operations."""
     support_touch_tip = True
 
-    def __init__(self, backend: LiquidHandlerBackend, deck: Deck, simulator: bool=False, channel_num:int = 8,**backend_kwargs):
+    def __init__(self, backend: LiquidHandlerBackend, deck: Deck, simulator: bool=False, channel_num:int = 8,total_height: float = 310,**backend_kwargs):
         """Initialize a LiquidHandler.
 
         Args:
@@ -547,7 +547,7 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
         """
         self._simulator = simulator
         self.group_info = dict()
-        super().__init__(backend, deck, simulator, channel_num)
+        super().__init__(backend, deck, simulator, channel_num,total_height)
 
     @classmethod
     def set_liquid(self, wells: list[Well], liquid_names: list[str], volumes: list[float]):

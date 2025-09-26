@@ -75,7 +75,7 @@
         <parent link="${station_name}${device_name}base_link"/>
         <child link="${station_name}${device_name}x_link"/>
         <axis xyz="0 1 0"/>
-        <limit effort="0" lower="0" upper="0" velocity="0"/>
+        <limit effort="50" lower="-0.3" upper="0" velocity="1"/>
       </joint>
       <link name="${station_name}${device_name}y_link">
         <inertial>
@@ -100,11 +100,11 @@
         </collision>
       </link>
       <joint name="${station_name}${device_name}y_joint" type="prismatic">
-        <origin rpy="0 0 0" xyz="0.3105 -0.0330000368868711 0.0578"/>
+        <origin rpy="0 0 0" xyz="0.2855 -0.0330000368868711 0.0578"/>
         <parent link="${station_name}${device_name}x_link"/>
         <child link="${station_name}${device_name}y_link"/>
         <axis xyz="-1 0 0"/>
-        <limit effort="0" lower="0" upper="0" velocity="0"/>
+        <limit effort="50" lower="-0.25" upper="0.25" velocity="1"/>
       </joint>
       <link name="${station_name}${device_name}z_link">
         <inertial>
@@ -129,11 +129,11 @@
         </collision>
       </link>
       <joint name="${station_name}${device_name}z_joint" type="prismatic">
-        <origin rpy="0 0 0" xyz="0.000950000000001387 -0.0737000000000002 -0.223401988238447"/>
+        <origin rpy="0 0 0" xyz="0.000950000000001387 -0.0737000000000002 0"/>
         <parent link="${station_name}${device_name}y_link"/>
         <child link="${station_name}${device_name}z_link"/>
         <axis xyz="0 0 1"/>
-        <limit effort="0" lower="0" upper="0" velocity="0"/>
+        <limit effort="50" lower="-0.2" upper="0" velocity="1"/>
       </joint>
       <link name="${station_name}${device_name}p_link">
         

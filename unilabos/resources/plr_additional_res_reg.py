@@ -11,4 +11,4 @@ def register():
     from unilabos.devices.liquid_handling.laiyu.laiyu import TransformXYZDeck
     from unilabos.devices.liquid_handling.laiyu.laiyu import TransformXYZContainer
 
-    from unilabos.devices.liquid_handling.opentrons.ot_backend import UniLiquidHandlerRvizBackend
+    from unilabos.devices.liquid_handling.rviz_backend import UniLiquidHandlerRvizBackend

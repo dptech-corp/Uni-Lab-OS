@@ -47,20 +47,20 @@
             "z_link"
         ],
         "x":{
-            "x_joint":{
-            "factor":0.001,
-            "offset":0.0
+            "y_joint":{
+            "factor":-0.001,
+            "offset":0.145
             }
         },
         "y":{
-            "y_joint":{
+            "x_joint":{
             "factor":0.001,
-            "offset":0.0
+            "offset":-0.21415
             }
         },
         "z":{
             "z_joint":{
-            "factor":0.001,
+            "factor":-0.001,
             "offset":0.0
             }
         }

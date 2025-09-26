@@ -26,7 +26,7 @@ from pylabrobot.liquid_handling.standard import (
 from pylabrobot.resources import Tip, Deck, Plate, Well, TipRack, Resource, Container, Coordinate, TipSpot, Trash
 
 from unilabos.devices.liquid_handling.liquid_handler_abstract import LiquidHandlerAbstract
-from unilabos.devices.liquid_handling.opentrons.ot_backend import UniLiquidHandlerRvizBackend
+from unilabos.devices.liquid_handling.rviz_backend import UniLiquidHandlerRvizBackend
 from unilabos.devices.ros_dev.liquid_handler_joint_publisher import JointStatePublisher
 
 

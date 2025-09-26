@@ -51,10 +51,12 @@ class UniLiquidHandlerRvizBackend(LiquidHandlerBackend):
   # _pickup_method_length = 20
   _filter_length = 10
 
-  def __init__(self, num_channels: int = 8):
+  def __init__(self, num_channels: int = 8 , tip_length: float = 0 , total_height: float = 310):
     """Initialize a chatter box backend."""
     super().__init__()
     self._num_channels = num_channels
+    self.tip_length = tip_length
+    self.total_height = total_height
 # rclpy.init()
     if not rclpy.ok():
         rclpy.init()
@@ -113,11 +115,13 @@ class UniLiquidHandlerRvizBackend(LiquidHandlerBackend):
       )
       # print(row)
       # print(op.resource.get_absolute_location())
+    
+    self.tip_length = ops[0].tip.total_tip_length
     coordinate = ops[0].resource.get_absolute_location(x="c",y="c")
-    x = coordinate.x
-    y = coordinate.y
-    z = coordinate.z + 70
-    # print(x, y, z)
+    offset_xyz = ops[0].offset
+    x = coordinate.x + offset_xyz.x
+    y = coordinate.y + offset_xyz.y
+    z = self.total_height - (coordinate.z + self.tip_length) + offset_xyz.z
     # print("moving")
     self.joint_state_publisher.send_resource_action(ops[0].resource.name, x, y, z, "pick",channels=use_channels)
     #   goback()
@@ -156,9 +160,10 @@ class UniLiquidHandlerRvizBackend(LiquidHandlerBackend):
       # print(row)
 
     coordinate = ops[0].resource.get_absolute_location(x="c",y="c")
-    x = coordinate.x
-    y = coordinate.y
-    z = coordinate.z + 70
+    offset_xyz = ops[0].offset
+    x = coordinate.x + offset_xyz.x
+    y = coordinate.y + offset_xyz.y
+    z = self.total_height - (coordinate.z + self.tip_length) + offset_xyz.z
     # print(x, y, z)
     # print("moving")
     self.joint_state_publisher.send_resource_action(ops[0].resource.name, x, y, z, "drop_trash",channels=use_channels)
@@ -205,9 +210,10 @@ class UniLiquidHandlerRvizBackend(LiquidHandlerBackend):
         row += f" {value:<15}"
       # print(row)
     coordinate = ops[0].resource.get_absolute_location(x="c",y="c")
-    x = coordinate.x
-    y = coordinate.y
-    z = coordinate.z + 70 
+    offset_xyz = ops[0].offset
+    x = coordinate.x + offset_xyz.x
+    y = coordinate.y + offset_xyz.y
+    z = self.total_height - (coordinate.z + self.tip_length) + offset_xyz.z
     # print(x, y, z)
     # print("moving")
     self.joint_state_publisher.send_resource_action(ops[0].resource.name, x, y, z, "",channels=use_channels)
@@ -254,9 +260,10 @@ class UniLiquidHandlerRvizBackend(LiquidHandlerBackend):
         row += f" {value:<{UniLiquidHandlerRvizBackend._kwargs_length}}"
       # print(row)
     coordinate = ops[0].resource.get_absolute_location(x="c",y="c")
-    x = coordinate.x
-    y = coordinate.y
-    z = coordinate.z + 70
+    offset_xyz = ops[0].offset
+    x = coordinate.x + offset_xyz.x
+    y = coordinate.y + offset_xyz.y
+    z = self.total_height - (coordinate.z + self.tip_length) + offset_xyz.z
     # print(x, y, z)
     # print("moving")
     self.joint_state_publisher.send_resource_action(ops[0].resource.name, x, y, z, "",channels=use_channels)
