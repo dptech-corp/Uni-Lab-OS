@@ -7,6 +7,7 @@ import asyncio
 import time
 import pprint as pp
 from pylabrobot.liquid_handling import LiquidHandler, LiquidHandlerBackend, LiquidHandlerChatterboxBackend, Strictness
+from unilabos.devices.liquid_handling.opentrons.ot_backend import UniLiquidHandlerRvizBackend
 from pylabrobot.liquid_handling.liquid_handler import TipPresenceProbingMethod
 from pylabrobot.liquid_handling.standard import GripDirection
 from pylabrobot.resources import (
@@ -31,7 +32,7 @@ class LiquidHandlerMiddleware(LiquidHandler):
         self._simulator = simulator
         self.channel_num = channel_num
         if simulator:
-            self._simulate_backend = LiquidHandlerChatterboxBackend(channel_num)
+            self._simulate_backend = UniLiquidHandlerRvizBackend(channel_num)
             self._simulate_handler = LiquidHandlerAbstract(self._simulate_backend, deck, False)
         super().__init__(backend, deck)
 
@@ -537,7 +538,7 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
     """Extended LiquidHandler with additional operations."""
     support_touch_tip = True
 
-    def __init__(self, backend: LiquidHandlerBackend, deck: Deck, simulator: bool=False, channel_num:int = 8):
+    def __init__(self, backend: LiquidHandlerBackend, deck: Deck, simulator: bool=False, channel_num:int = 8,**backend_kwargs):
         """Initialize a LiquidHandler.
 
         Args:
