@@ -132,7 +132,7 @@ class HTTPClient:
         """
         response = requests.put(
             f"{self.remote_addr}/lab/material",
-            json=resources,
+            json={"nodes": resources},
             headers={"Authorization": f"Lab {self.auth}"},
             timeout=100,
         )
