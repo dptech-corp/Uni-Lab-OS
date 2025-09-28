@@ -25,6 +25,7 @@ class HTTPClient:
             remote_addr: 远程服务器地址，如果不提供则从配置中获取
             auth: 授权信息
         """
+        self.initialized = False
         self.remote_addr = remote_addr or HTTPConfig.remote_addr
         if auth is not None:
             self.auth = auth
@@ -69,12 +70,22 @@ class HTTPClient:
         Returns:
             Response: API响应对象
         """
-        response = requests.post(
-            f"{self.remote_addr}/lab/material",
-            json={"nodes": resources},
-            headers={"Authorization": f"Lab {self.auth}"},
-            timeout=100,
-        )
+        if not self.initialized:
+            self.initialized = True
+            info(f"首次添加资源，当前远程地址: {self.remote_addr}")
+            response = requests.post(
+                f"{self.remote_addr}/lab/material",
+                json={"nodes": resources},
+                headers={"Authorization": f"Lab {self.auth}"},
+                timeout=100,
+            )
+        else:
+            response = requests.put(
+                f"{self.remote_addr}/lab/material",
+                json={"nodes": resources},
+                headers={"Authorization": f"Lab {self.auth}"},
+                timeout=100,
+            )
         if response.status_code == 200:
             res = response.json()
             if "code" in res and res["code"] != 0:
@@ -130,12 +141,22 @@ class HTTPClient:
         Returns:
             Response: API响应对象
         """
-        response = requests.put(
-            f"{self.remote_addr}/lab/material",
-            json={"nodes": resources},
-            headers={"Authorization": f"Lab {self.auth}"},
-            timeout=100,
-        )
+        if not self.initialized:
+            self.initialized = True
+            info(f"首次添加资源，当前远程地址: {self.remote_addr}")
+            response = requests.post(
+                f"{self.remote_addr}/lab/material",
+                json={"nodes": resources},
+                headers={"Authorization": f"Lab {self.auth}"},
+                timeout=100,
+            )
+        else:
+            response = requests.put(
+                f"{self.remote_addr}/lab/material",
+                json={"nodes": resources},
+                headers={"Authorization": f"Lab {self.auth}"},
+                timeout=100,
+            )
         if response.status_code == 200:
             res = response.json()
             if "code" in res and res["code"] != 0:

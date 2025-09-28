@@ -24,6 +24,8 @@ class WSConfig:
     max_reconnect_attempts = 999  # 最大重连次数
     ping_interval = 30  # ping间隔（秒）
 ```
+您可以进入实验室，点击左下角的头像在实验室详情中获取所在实验室的ak sk
+![copy_aksk.gif](image/copy_aksk.gif)
 
 ### 完整配置示例
 
