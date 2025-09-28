@@ -7,19 +7,22 @@ LaiYu_Liquid 驱动程序模块
 """
 
 # SOPA移液器驱动程序导入
-from .sopa_pipette_driver import SOPAPipette, SOPAConfig
+from .sopa_pipette_driver import SOPAPipette, SOPAConfig, SOPAStatusCode
 
 # XYZ步进电机驱动程序导入  
-from .xyz_stepper_driver import StepperMotorDriver, XYZStepperController
+from .xyz_stepper_driver import StepperMotorDriver, XYZStepperController, MotorAxis, MotorStatus
 
 __all__ = [
     # SOPA移液器
     "SOPAPipette",
     "SOPAConfig",
+    "SOPAStatusCode",
     
     # XYZ步进电机
     "StepperMotorDriver", 
     "XYZStepperController",
+    "MotorAxis",
+    "MotorStatus",
 ]
 
 __version__ = "1.0.0"

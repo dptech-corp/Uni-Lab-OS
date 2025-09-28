@@ -34,7 +34,7 @@ project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(o
 sys.path.insert(0, project_root)
 
 # 导入原有的驱动
-from unilabos.devices.LaiYu_Liquid.drivers.xyz_stepper_driver import XYZStepperController, MotorAxis, MotorStatus
+from unilabos.devices.laiyu_liquid.drivers.xyz_stepper_driver import XYZStepperController, MotorAxis, MotorStatus
 
 logger = logging.getLogger(__name__)
 
@@ -43,8 +43,8 @@ logger = logging.getLogger(__name__)
 class MachineConfig:
     """机械配置参数"""
     # 步距配置 (基于16384步/圈的步进电机)
-    steps_per_mm_x: float = 195.05   # X轴步距 (16384步/圈 ÷ 84mm导程)
-    steps_per_mm_y: float = 195.05   # Y轴步距 (16384步/圈 ÷ 84mm导程)  
+    steps_per_mm_x: float = 204.8    # X轴步距 (16384步/圈 ÷ 80mm导程)
+    steps_per_mm_y: float = 204.8    # Y轴步距 (16384步/圈 ÷ 80mm导程)  
     steps_per_mm_z: float = 3276.8   # Z轴步距 (16384步/圈 ÷ 5mm导程)
     
     # 行程限制
@@ -52,15 +52,19 @@ class MachineConfig:
     max_travel_y: float = 250.0     # Y轴最大行程
     max_travel_z: float = 160.0     # Z轴最大行程
     
+    # 安全移动参数
+    safe_z_height: float = 0.0      # Z轴安全移动高度 (mm) - 液体处理工作站安全高度
+    z_approach_height: float = 5.0  # Z轴接近高度 (mm) - 在目标位置上方的预备高度
+    
     # 回零参数
-    homing_speed: int = 50          # 回零速度 (rpm)
+    homing_speed: int = 100          # 回零速度 (rpm)
     homing_timeout: float = 30.0    # 回零超时时间
     safe_clearance: float = 1.0     # 安全间隙 (mm)
     position_stable_time: float = 3.0  # 位置稳定检测时间（秒）
     position_check_interval: float = 0.2  # 位置检查间隔（秒）
     
     # 运动参数
-    default_speed: int = 50         # 默认运动速度 (rpm)
+    default_speed: int = 100         # 默认运动速度 (rpm)
     default_acceleration: int = 1000 # 默认加速度
 
 
@@ -416,10 +420,15 @@ class XYZController(XYZStepperController):
     
     def home_all_axes(self, sequence: list = None) -> bool:
         """
-        全轴回零
+        全轴回零 (液体处理工作站安全回零)
+        
+        液体处理工作站回零策略：
+        1. Z轴必须首先回零，避免与容器、试管架等碰撞
+        2. 然后XY轴回零，确保移动路径安全
+        3. 严格按照Z->X->Y顺序执行，不允许更改
         
         Args:
-            sequence: 回零顺序，默认为Z->X->Y
+            sequence: 回零顺序，液体处理工作站固定为Z->X->Y，不建议修改
             
         Returns:
             bool: 全轴回零是否成功
@@ -427,8 +436,14 @@ class XYZController(XYZStepperController):
         if not self.is_connected:
             logger.error("设备未连接，无法执行回零操作")
             return False
+        
+        # 液体处理工作站安全回零序列：Z轴绝对优先
+        safe_sequence = [MotorAxis.Z, MotorAxis.X, MotorAxis.Y]
+        
+        if sequence is not None and sequence != safe_sequence:
+            logger.warning(f"液体处理工作站不建议修改回零序列，使用安全序列: {[axis.name for axis in safe_sequence]}")
             
-        sequence = sequence or [MotorAxis.Z, MotorAxis.X, MotorAxis.Y]
+        sequence = safe_sequence  # 强制使用安全序列
         
         logger.info("开始全轴回零")
         
@@ -483,10 +498,11 @@ class XYZController(XYZStepperController):
     
     # ==================== 高级运动控制方法 ====================
     
-    def move_to_work_coord(self, x: float = None, y: float = None, z: float = None,
-                          speed: int = None, acceleration: int = None) -> bool:
+    def move_to_work_coord_safe(self, x: float = None, y: float = None, z: float = None,
+                               speed: int = None, acceleration: int = None) -> bool:
         """
-        移动到工作坐标系指定位置
+        安全移动到工作坐标系指定位置 (液体处理工作站专用)
+        移动策略：Z轴先上升到安全高度 -> XY轴移动到目标位置 -> Z轴下降到目标位置
         
         Args:
             x, y, z: 工作坐标系下的目标位置 (mm)
@@ -508,44 +524,74 @@ class XYZController(XYZStepperController):
             # 检查行程限制
             self.check_travel_limits(x, y, z)
             
-            # 转换为机械坐标步数
-            machine_steps = self.work_to_machine_steps(x, y, z)
-            
             # 设置运动参数
             speed = speed or self.machine_config.default_speed
             acceleration = acceleration or self.machine_config.default_acceleration
             
-            # 执行运动
-            success_count = 0
-            total_axes = 0
-            
-            if x is not None:
-                if self.move_to_position(MotorAxis.X, machine_steps['x'], speed, acceleration):
-                    success_count += 1
-                total_axes += 1
-                
-            if y is not None:
-                if self.move_to_position(MotorAxis.Y, machine_steps['y'], speed, acceleration):
-                    success_count += 1
-                total_axes += 1
-                
+            # 步骤1: Z轴先上升到安全高度
             if z is not None:
-                if self.move_to_position(MotorAxis.Z, machine_steps['z'], speed, acceleration):
-                    success_count += 1
-                total_axes += 1
-            
-            success = (success_count == total_axes)
-            
-            if success:
-                logger.info(f"移动到工作坐标 X:{x} Y:{y} Z:{z} (mm)")
-            else:
-                logger.error("部分轴移动失败")
+                safe_z_steps = self.work_to_machine_steps(None, None, self.machine_config.safe_z_height)
+                if not self.move_to_position(MotorAxis.Z, safe_z_steps['z'], speed, acceleration):
+                    logger.error("Z轴上升到安全高度失败")
+                    return False
+                logger.info(f"Z轴上升到安全高度: {self.machine_config.safe_z_height} mm")
                 
-            return success
+                # 等待Z轴移动完成
+                self.wait_for_completion(MotorAxis.Z, 10.0)
+            
+            # 步骤2: XY轴移动到目标位置
+            xy_success = True
+            if x is not None:
+                machine_steps = self.work_to_machine_steps(x, None, None)
+                if not self.move_to_position(MotorAxis.X, machine_steps['x'], speed, acceleration):
+                    xy_success = False
+                    
+            if y is not None:
+                machine_steps = self.work_to_machine_steps(None, y, None)
+                if not self.move_to_position(MotorAxis.Y, machine_steps['y'], speed, acceleration):
+                    xy_success = False
+            
+            if not xy_success:
+                logger.error("XY轴移动失败")
+                return False
+                
+            if x is not None or y is not None:
+                logger.info(f"XY轴移动到目标位置: X:{x} Y:{y} mm")
+                # 等待XY轴移动完成
+                if x is not None:
+                    self.wait_for_completion(MotorAxis.X, 10.0)
+                if y is not None:
+                    self.wait_for_completion(MotorAxis.Y, 10.0)
+            
+            # 步骤3: Z轴下降到目标位置
+            if z is not None:
+                machine_steps = self.work_to_machine_steps(None, None, z)
+                if not self.move_to_position(MotorAxis.Z, machine_steps['z'], speed, acceleration):
+                    logger.error("Z轴下降到目标位置失败")
+                    return False
+                logger.info(f"Z轴下降到目标位置: {z} mm")
+                self.wait_for_completion(MotorAxis.Z, 10.0)
+            
+            logger.info(f"安全移动到工作坐标 X:{x} Y:{y} Z:{z} (mm) 完成")
+            return True
             
         except Exception as e:
-            logger.error(f"工作坐标移动失败: {e}")
+            logger.error(f"安全移动失败: {e}")
             return False
+
+    def move_to_work_coord(self, x: float = None, y: float = None, z: float = None,
+                          speed: int = None, acceleration: int = None) -> bool:
+        """
+        移动到工作坐标 (已禁用)
+        
+        此方法已被禁用，请使用 move_to_work_coord_safe() 方法。
+        
+        Raises:
+            RuntimeError: 方法已禁用
+        """
+        error_msg = "Method disabled, use move_to_work_coord_safe instead"
+        logger.error(error_msg)
+        raise RuntimeError(error_msg)
     
     def move_relative_work_coord(self, dx: float = 0, dy: float = 0, dz: float = 0,
                                speed: int = None, acceleration: int = None) -> bool:
@@ -573,7 +619,7 @@ class XYZController(XYZStepperController):
             target_y = current_work['y'] + dy if dy != 0 else None  
             target_z = current_work['z'] + dz if dz != 0 else None
             
-            return self.move_to_work_coord(target_x, target_y, target_z, speed, acceleration)
+            return self.move_to_work_coord_safe(target_x, target_y, target_z, speed, acceleration)
             
         except Exception as e:
             logger.error(f"相对移动失败: {e}")
@@ -677,3 +723,461 @@ class XYZController(XYZStepperController):
     def __exit__(self, exc_type, exc_val, exc_tb):
         """上下文管理器出口"""
         self.disconnect_device()
+
+
+def interactive_control(controller: XYZController):
+    """
+    交互式控制模式
+    
+    Args:
+        controller: 已连接的控制器实例
+    """
+    print("\n" + "="*60)
+    print("进入交互式控制模式")
+    print("="*60)
+    
+    # 显示当前状态
+    def show_status():
+        try:
+            current_pos = controller.get_current_position_mm()
+            print(f"\n当前位置: X={current_pos['x']:.2f}mm, Y={current_pos['y']:.2f}mm, Z={current_pos['z']:.2f}mm")
+        except Exception as e:
+            print(f"获取位置失败: {e}")
+    
+    # 显示帮助信息
+    def show_help():
+        print("\n可用命令:")
+        print("  move <轴> <距离>     - 相对移动，例: move x 10.5")
+        print("  goto <x> <y> <z>     - 绝对移动到指定坐标，例: goto 10 20 5")
+        print("  home [轴]            - 回零操作，例: home 或 home x")
+        print("  origin               - 设置当前位置为工作原点")
+        print("  status               - 显示当前状态")
+        print("  speed <速度>         - 设置运动速度(rpm)，例: speed 2000")
+        print("  limits               - 显示行程限制")
+        print("  config               - 显示机械配置")
+        print("  help                 - 显示此帮助信息")
+        print("  quit/exit            - 退出交互模式")
+        print("\n提示:")
+        print("  - 轴名称: x, y, z")
+        print("  - 距离单位: 毫米(mm)")
+        print("  - 正数向正方向移动，负数向负方向移动")
+    
+    # 安全回零操作
+    def safe_homing():
+        print("\n系统安全初始化...")
+        print("为确保操作安全，系统将执行回零操作")
+        print("提示: 已安装限位开关，超时后将假设回零成功")
+        
+        # 询问用户是否继续
+        while True:
+            user_choice = input("是否继续执行回零操作? (y/n/skip): ").strip().lower()
+            if user_choice in ['y', 'yes', '是']:
+                print("\n开始执行全轴回零...")
+                print("回零过程可能需要一些时间，请耐心等待...")
+                
+                # 执行回零操作
+                homing_success = controller.home_all_axes()
+                
+                if homing_success:
+                    print("回零操作完成，系统已就绪")
+                    # 设置当前位置为工作原点
+                    if controller.set_work_origin_here():
+                        print("工作原点已设置为回零位置")
+                    else:
+                        print("工作原点设置失败，但可以继续操作")
+                    return True
+                else:
+                    print("回零操作失败")
+                    print("这可能是由于通信问题，但限位开关应该已经起作用")
+                    
+                    # 询问是否继续
+                    retry_choice = input("是否仍要继续操作? (y/n): ").strip().lower()
+                    if retry_choice in ['y', 'yes', '是']:
+                        print("继续操作，请手动确认设备位置安全")
+                        return True
+                    else:
+                        return False
+                        
+            elif user_choice in ['n', 'no', '否']:
+                print("用户取消回零操作，退出交互模式")
+                return False
+            elif user_choice in ['skip', 's', '跳过']:
+                print("跳过回零操作，请注意安全！")
+                print("建议在开始操作前手动执行 'home' 命令")
+                return True
+            else:
+                print("请输入 y(继续)/n(取消)/skip(跳过)")
+    
+    # 安全回原点操作
+    def safe_return_home():
+        print("\n系统安全关闭...")
+        print("正在将所有轴移动到安全位置...")
+        
+        try:
+            # 移动到工作原点 (0,0,0) - 使用安全移动方法
+            if controller.move_to_work_coord_safe(0, 0, 0, speed=500):
+                print("已安全返回工作原点")
+                show_status()
+            else:
+                print("返回原点失败，请手动检查设备位置")
+        except Exception as e:
+            print(f"返回原点时出错: {e}")
+    
+    # 当前运动速度
+    current_speed = controller.machine_config.default_speed
+    
+    try:
+        # 1. 首先执行安全回零
+        if not safe_homing():
+            return
+        
+        # 2. 显示初始状态和帮助
+        show_status()
+        show_help()
+        
+        while True:
+            try:
+                # 获取用户输入
+                user_input = input("\n请输入命令 (输入 help 查看帮助): ").strip().lower()
+                
+                if not user_input:
+                    continue
+                
+                # 解析命令
+                parts = user_input.split()
+                command = parts[0]
+                
+                if command in ['quit', 'exit', 'q']:
+                    print("准备退出交互模式...")
+                    # 执行安全回原点操作
+                    safe_return_home()
+                    print("退出交互模式")
+                    break
+                
+                elif command == 'help' or command == 'h':
+                    show_help()
+                
+                elif command == 'status' or command == 's':
+                    show_status()
+                    print(f"当前速度: {current_speed} rpm")
+                    print(f"是否已回零: {controller.coordinate_origin.is_homed}")
+                
+                elif command == 'move' or command == 'm':
+                    if len(parts) != 3:
+                        print("格式错误，正确格式: move <轴> <距离>")
+                        print("   例如: move x 10.5")
+                        continue
+                    
+                    axis = parts[1].lower()
+                    try:
+                        distance = float(parts[2])
+                    except ValueError:
+                        print("距离必须是数字")
+                        continue
+                    
+                    if axis not in ['x', 'y', 'z']:
+                        print("轴名称必须是 x, y 或 z")
+                        continue
+                    
+                    print(f"{axis.upper()}轴移动 {distance:+.2f}mm...")
+                    
+                    # 执行移动
+                    kwargs = {f'd{axis}': distance, 'speed': current_speed}
+                    if controller.move_relative_work_coord(**kwargs):
+                        print(f"{axis.upper()}轴移动完成")
+                        show_status()
+                    else:
+                        print(f"{axis.upper()}轴移动失败")
+                
+                elif command == 'goto' or command == 'g':
+                    if len(parts) != 4:
+                        print("格式错误，正确格式: goto <x> <y> <z>")
+                        print("   例如: goto 10 20 5")
+                        continue
+                    
+                    try:
+                        x = float(parts[1])
+                        y = float(parts[2])
+                        z = float(parts[3])
+                    except ValueError:
+                        print("坐标必须是数字")
+                        continue
+                    
+                    print(f"移动到坐标 ({x}, {y}, {z})...")
+                    print("使用安全移动策略: Z轴先上升 → XY移动 → Z轴下降")
+                    
+                    if controller.move_to_work_coord_safe(x, y, z, speed=current_speed):
+                        print("安全移动到目标位置完成")
+                        show_status()
+                    else:
+                        print("移动失败")
+                
+                elif command == 'home':
+                    if len(parts) == 1:
+                        # 全轴回零
+                        print("开始全轴回零...")
+                        if controller.home_all_axes():
+                            print("全轴回零完成")
+                            show_status()
+                        else:
+                            print("回零失败")
+                    elif len(parts) == 2:
+                        # 单轴回零
+                        axis_name = parts[1].lower()
+                        if axis_name not in ['x', 'y', 'z']:
+                            print("轴名称必须是 x, y 或 z")
+                            continue
+                        
+                        axis = MotorAxis[axis_name.upper()]
+                        print(f"{axis_name.upper()}轴回零...")
+                        
+                        if controller.home_axis(axis):
+                            print(f"{axis_name.upper()}轴回零完成")
+                            show_status()
+                        else:
+                            print(f"{axis_name.upper()}轴回零失败")
+                    else:
+                        print("格式错误，正确格式: home 或 home <轴>")
+                
+                elif command == 'origin' or command == 'o':
+                    print("设置当前位置为工作原点...")
+                    if controller.set_work_origin_here():
+                        print("工作原点设置完成")
+                        show_status()
+                    else:
+                        print("工作原点设置失败")
+                
+                elif command == 'speed':
+                    if len(parts) != 2:
+                        print("格式错误，正确格式: speed <速度>")
+                        print("   例如: speed 2000")
+                        continue
+                    
+                    try:
+                        new_speed = int(parts[1])
+                        if new_speed <= 0:
+                            print("速度必须大于0")
+                            continue
+                        if new_speed > 10000:
+                            print("速度不能超过10000 rpm")
+                            continue
+                        
+                        current_speed = new_speed
+                        print(f"运动速度设置为: {current_speed} rpm")
+                        
+                    except ValueError:
+                        print("速度必须是整数")
+                
+                elif command == 'limits' or command == 'l':
+                    config = controller.machine_config
+                    print("\n行程限制:")
+                    print(f"  X轴: 0 ~ {config.max_travel_x} mm")
+                    print(f"  Y轴: 0 ~ {config.max_travel_y} mm")
+                    print(f"  Z轴: 0 ~ {config.max_travel_z} mm")
+                
+                elif command == 'config' or command == 'c':
+                    config = controller.machine_config
+                    print("\n机械配置:")
+                    print(f"  X轴步距: {config.steps_per_mm_x:.1f} 步/mm")
+                    print(f"  Y轴步距: {config.steps_per_mm_y:.1f} 步/mm")
+                    print(f"  Z轴步距: {config.steps_per_mm_z:.1f} 步/mm")
+                    print(f"  回零速度: {config.homing_speed} rpm")
+                    print(f"  默认速度: {config.default_speed} rpm")
+                    print(f"  安全间隙: {config.safe_clearance} mm")
+                
+                else:
+                    print(f"未知命令: {command}")
+                    print("输入 help 查看可用命令")
+            
+            except KeyboardInterrupt:
+                print("\n\n用户中断，退出交互模式")
+                break
+            except Exception as e:
+                print(f"命令执行错误: {e}")
+                print("输入 help 查看正确的命令格式")
+    
+    finally:
+        # 确保正确断开连接
+        try:
+            controller.disconnect_device()
+            print("设备连接已断开")
+        except Exception as e:
+            print(f"断开连接时出错: {e}")
+
+
+def run_tests():
+    """运行测试函数"""
+    print("=== XYZ控制器测试 ===")
+    
+    # 1. 测试机械配置
+    print("\n1. 测试机械配置")
+    config = MachineConfig(
+        steps_per_mm_x=204.8,   # 16384步/圈 ÷ 80mm导程
+        steps_per_mm_y=204.8,   # 16384步/圈 ÷ 80mm导程
+        steps_per_mm_z=3276.8,  # 16384步/圈 ÷ 5mm导程
+        max_travel_x=340.0,
+        max_travel_y=250.0,
+        max_travel_z=160.0,
+        homing_speed=100,
+        default_speed=100
+    )
+    print(f"X轴步距: {config.steps_per_mm_x} 步/mm")
+    print(f"Y轴步距: {config.steps_per_mm_y} 步/mm")
+    print(f"Z轴步距: {config.steps_per_mm_z} 步/mm")
+    print(f"行程限制: X={config.max_travel_x}mm, Y={config.max_travel_y}mm, Z={config.max_travel_z}mm")
+    
+    # 2. 测试坐标原点数据结构
+    print("\n2. 测试坐标原点数据结构")
+    origin = CoordinateOrigin()
+    print(f"初始状态: 已回零={origin.is_homed}")
+    print(f"机械原点: {origin.machine_origin_steps}")
+    print(f"工作原点: {origin.work_origin_steps}")
+    
+    # 设置示例数据
+    origin.machine_origin_steps = {'x': 0, 'y': 0, 'z': 0}
+    origin.work_origin_steps = {'x': 16384, 'y': 16384, 'z': 13107}  # 5mm, 5mm, 2mm (基于16384步/圈)
+    origin.is_homed = True
+    origin.timestamp = "2024-09-26 12:00:00"
+    print(f"设置后: 已回零={origin.is_homed}")
+    print(f"机械原点: {origin.machine_origin_steps}")
+    print(f"工作原点: {origin.work_origin_steps}")
+    
+    # 3. 测试离线功能
+    print("\n3. 测试离线功能")
+    
+    # 创建离线控制器（不自动连接）
+    offline_controller = XYZController(
+        port='/dev/tty.usbserial-3130',
+        machine_config=config,
+        auto_connect=False
+    )
+    
+    # 测试单位转换
+    print("\n单位转换测试:")
+    test_distances = [1.0, 5.0, 10.0, 25.5]
+    for distance in test_distances:
+        x_steps = offline_controller.mm_to_steps(MotorAxis.X, distance)
+        y_steps = offline_controller.mm_to_steps(MotorAxis.Y, distance)
+        z_steps = offline_controller.mm_to_steps(MotorAxis.Z, distance)
+        print(f"{distance}mm -> X:{x_steps}步, Y:{y_steps}步, Z:{z_steps}步")
+        
+        # 反向转换验证
+        x_mm = offline_controller.steps_to_mm(MotorAxis.X, x_steps)
+        y_mm = offline_controller.steps_to_mm(MotorAxis.Y, y_steps)
+        z_mm = offline_controller.steps_to_mm(MotorAxis.Z, z_steps)
+        print(f"反向转换: X:{x_mm:.2f}mm, Y:{y_mm:.2f}mm, Z:{z_mm:.2f}mm")
+    
+    # 测试坐标系转换
+    print("\n坐标系转换测试:")
+    offline_controller.coordinate_origin = origin  # 使用示例原点
+    work_coords = [(0, 0, 0), (10, 15, 5), (50, 30, 20)]
+    
+    for x, y, z in work_coords:
+        try:
+            machine_steps = offline_controller.work_to_machine_steps(x, y, z)
+            print(f"工作坐标 ({x}, {y}, {z}) -> 机械步数 {machine_steps}")
+            
+            # 反向转换验证
+            work_coords_back = offline_controller.machine_to_work_coords(machine_steps)
+            print(f"反向转换: ({work_coords_back['x']:.2f}, {work_coords_back['y']:.2f}, {work_coords_back['z']:.2f})")
+        except Exception as e:
+            print(f"转换失败: {e}")
+    
+    # 测试行程限制检查
+    print("\n行程限制检查测试:")
+    test_positions = [
+        (50, 50, 25, "正常位置"),
+        (250, 50, 25, "X轴超限"),
+        (50, 350, 25, "Y轴超限"),
+        (50, 50, 150, "Z轴超限"),
+        (-10, 50, 25, "X轴负超限"),
+        (50, -10, 25, "Y轴负超限"),
+        (50, 50, -5, "Z轴负超限")
+    ]
+    
+    for x, y, z, desc in test_positions:
+        try:
+            offline_controller.check_travel_limits(x, y, z)
+            print(f"{desc} ({x}, {y}, {z}): 有效")
+        except CoordinateSystemError as e:
+            print(f"{desc} ({x}, {y}, {z}): 超限 - {e}")
+    
+    print("\n=== 离线功能测试完成 ===")
+    
+    # 4. 硬件连接测试
+    print("\n4. 硬件连接测试")
+    print("尝试连接真实设备...")
+    
+    # 可能的串口列表
+    possible_ports = [
+        '/dev/tty.usbserial-3130'
+    ]
+    
+    connected_controller = None
+    
+    for port in possible_ports:
+        try:
+            print(f"尝试连接端口: {port}")
+            controller = XYZController(
+                port=port,
+                machine_config=config,
+                auto_connect=True
+            )
+            
+            if controller.is_connected:
+                print(f"成功连接到 {port}")
+                connected_controller = controller
+                
+                # 获取系统状态
+                status = controller.get_system_status()
+                print("\n系统状态:")
+                print(f"  连接状态: {status['connection']['is_connected']}")
+                print(f"  是否已回零: {status['coordinate_system']['is_homed']}")
+                
+                if 'current_position' in status:
+                    print("  当前位置:")
+                    for axis, pos_info in status['current_position'].items():
+                        print(f"    {axis.upper()}轴: {pos_info['steps']}步 ({pos_info['mm']:.2f}mm)")
+                
+                # 测试基本移动功能
+                print("\n测试基本移动功能:")
+                try:
+                    # 获取当前位置
+                    current_pos = controller.get_current_position_mm()
+                    print(f"当前工作坐标: {current_pos}")
+                    
+                    # 小幅移动测试
+                    print("执行小幅移动测试 (X+1mm)...")
+                    if controller.move_relative_work_coord(dx=1.0, speed=500):
+                        print("移动成功")
+                        time.sleep(1)
+                        new_pos = controller.get_current_position_mm()
+                        print(f"移动后坐标: {new_pos}")
+                    else:
+                        print("移动失败")
+                        
+                except Exception as e:
+                    print(f"移动测试失败: {e}")
+                
+                break
+                
+        except Exception as e:
+            print(f"连接 {port} 失败: {e}")
+            continue
+    
+    if not connected_controller:
+        print("未找到可用的设备端口")
+        print("请检查:")
+        print("  1. 设备是否正确连接")
+        print("  2. 串口端口是否正确")
+        print("  3. 设备驱动是否安装")
+    else:
+        # 进入交互式控制模式
+        interactive_control(connected_controller)
+    
+    print("\n=== XYZ控制器测试完成 ===")
+
+
+# ==================== 测试和示例代码 ====================
+if __name__ == "__main__":
+    run_tests()

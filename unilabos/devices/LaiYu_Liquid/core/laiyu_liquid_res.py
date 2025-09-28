@@ -72,7 +72,13 @@ def load_deck_config() -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: 配置字典
     """
-    config_path = Path(__file__).parent / "config" / "deck.json"
+    # 优先使用最新的deckconfig.json文件
+    config_path = Path(__file__).parent / "controllers" / "deckconfig.json"
+    
+    # 如果最新配置文件不存在，回退到旧配置文件
+    if not config_path.exists():
+        config_path = Path(__file__).parent / "config" / "deck.json"
+    
     try:
         with open(config_path, 'r', encoding='utf-8') as f:
             return json.load(f)
@@ -80,9 +86,9 @@ def load_deck_config() -> Dict[str, Any]:
         # 如果找不到配置文件，返回默认配置
         return {
             "name": "LaiYu_Liquid_Deck",
-            "size_x": 600.0,
-            "size_y": 400.0,
-            "size_z": 115.0
+            "size_x": 340.0,  
+            "size_y": 250.0,
+            "size_z": 160.0
         }
 
 
@@ -118,57 +124,115 @@ class LaiYuTipRack1000(LaiYuLiquidTipRack):
     
     def _create_tip_spots(self, tip_count: int, tip_spacing: float, tip_type: str):
         """
-        创建枪头位置
+        创建枪头位置 - 从配置文件中读取绝对坐标
         
         Args:
             tip_count: 枪头数量
             tip_spacing: 枪头间距
             tip_type: 枪头类型
         """
-        rows = 8
-        cols = 12
+        # 从配置文件中获取枪头架的孔位信息
+        config = DECK_CONFIG
+        tip_module = None
         
-        for row in range(rows):
-            for col in range(cols):
-                spot_name = f"{chr(65 + row)}{col + 1:02d}"
-                x = col * tip_spacing + tip_spacing / 2
-                y = row * tip_spacing + tip_spacing / 2
-                
-                # 创建枪头 - 根据PyLabRobot或模拟类使用不同参数
-                if PYLABROBOT_AVAILABLE:
-                    # PyLabRobot的Tip需要特定参数
-                    tip = Tip(
-                        has_filter=False,
-                        total_tip_length=95.0,  # 1000ul枪头长度
-                        maximal_volume=1000.0,  # 最大体积
-                        fitting_depth=8.0       # 安装深度
+        # 查找枪头架模块
+        for module in config.get("children", []):
+            if module.get("type") == "tip_rack":
+                tip_module = module
+                break
+        
+        if not tip_module:
+            # 如果配置文件中没有找到，使用默认的相对坐标计算
+            rows = 8
+            cols = 12
+            
+            for row in range(rows):
+                for col in range(cols):
+                    spot_name = f"{chr(65 + row)}{col + 1:02d}"
+                    x = col * tip_spacing + tip_spacing / 2
+                    y = row * tip_spacing + tip_spacing / 2
+                    
+                    # 创建枪头 - 根据PyLabRobot或模拟类使用不同参数
+                    if PYLABROBOT_AVAILABLE:
+                        # PyLabRobot的Tip需要特定参数
+                        tip = Tip(
+                            has_filter=False,
+                            total_tip_length=95.0,  # 1000ul枪头长度
+                            maximal_volume=1000.0,  # 最大体积
+                            fitting_depth=8.0       # 安装深度
+                        )
+                    else:
+                        # 模拟类只需要name
+                        tip = Tip(name=f"tip_{spot_name}")
+                    
+                    # 创建枪头位置
+                    if PYLABROBOT_AVAILABLE:
+                        # PyLabRobot的TipSpot需要特定参数
+                        tip_spot = TipSpot(
+                            name=spot_name,
+                            size_x=9.0,  # 枪头位置宽度
+                            size_y=9.0,  # 枪头位置深度
+                            size_z=95.0,  # 枪头位置高度
+                            make_tip=lambda: tip  # 创建枪头的函数
+                        )
+                    else:
+                        # 模拟类只需要name
+                        tip_spot = TipSpot(name=spot_name)
+                    
+                    # 将吸头位置分配到吸头架
+                    self.assign_child_resource(
+                        tip_spot,
+                        location=Coordinate(x, y, 0)
                     )
-                else:
-                    # 模拟类只需要name
-                    tip = Tip(name=f"tip_{spot_name}")
-                
-                # 创建枪头位置
-                if PYLABROBOT_AVAILABLE:
-                    # PyLabRobot的TipSpot需要特定参数
-                    tip_spot = TipSpot(
-                        name=spot_name,
-                        size_x=9.0,  # 枪头位置宽度
-                        size_y=9.0,  # 枪头位置深度
-                        size_z=95.0,  # 枪头位置高度
-                        make_tip=lambda: tip  # 创建枪头的函数
-                    )
-                else:
-                    # 模拟类只需要name
-                    tip_spot = TipSpot(name=spot_name)
-                
-                # 将吸头位置分配到吸头架
-                self.assign_child_resource(
-                    tip_spot,
-                    location=Coordinate(x, y, 0)
+            return
+        
+        # 使用配置文件中的绝对坐标
+        module_position = tip_module.get("position", {"x": 0, "y": 0, "z": 0})
+        
+        for well_config in tip_module.get("wells", []):
+            spot_name = well_config["id"]
+            well_pos = well_config["position"]
+            
+            # 计算相对于模块的坐标（绝对坐标减去模块位置）
+            relative_x = well_pos["x"] - module_position["x"]
+            relative_y = well_pos["y"] - module_position["y"]
+            relative_z = well_pos["z"] - module_position["z"]
+            
+            # 创建枪头 - 根据PyLabRobot或模拟类使用不同参数
+            if PYLABROBOT_AVAILABLE:
+                # PyLabRobot的Tip需要特定参数
+                tip = Tip(
+                    has_filter=False,
+                    total_tip_length=95.0,  # 1000ul枪头长度
+                    maximal_volume=1000.0,  # 最大体积
+                    fitting_depth=8.0       # 安装深度
                 )
-                
-                # 注意：在PyLabRobot中，Tip不是Resource，不需要分配给TipSpot
-                # TipSpot的make_tip函数会在需要时创建Tip
+            else:
+                # 模拟类只需要name
+                tip = Tip(name=f"tip_{spot_name}")
+            
+            # 创建枪头位置
+            if PYLABROBOT_AVAILABLE:
+                # PyLabRobot的TipSpot需要特定参数
+                tip_spot = TipSpot(
+                    name=spot_name,
+                    size_x=well_config.get("diameter", 9.0),  # 使用配置中的直径
+                    size_y=well_config.get("diameter", 9.0),
+                    size_z=well_config.get("depth", 95.0),    # 使用配置中的深度
+                    make_tip=lambda: tip  # 创建枪头的函数
+                )
+            else:
+                # 模拟类只需要name
+                tip_spot = TipSpot(name=spot_name)
+            
+            # 将吸头位置分配到吸头架
+            self.assign_child_resource(
+                tip_spot,
+                location=Coordinate(relative_x, relative_y, relative_z)
+            )
+            
+            # 注意：在PyLabRobot中，Tip不是Resource，不需要分配给TipSpot
+            # TipSpot的make_tip函数会在需要时创建Tip
 
 
 class LaiYuTipRack200(LaiYuLiquidTipRack):
@@ -287,36 +351,76 @@ class LaiYu96WellPlate(LaiYuLiquidContainer):
     
     def _create_wells(self, well_count: int, well_volume: float, well_spacing: float):
         """
-        创建孔位
+        创建孔位 - 从配置文件中读取绝对坐标
         
         Args:
             well_count: 孔位数量
             well_volume: 孔位体积
             well_spacing: 孔位间距
         """
-        rows = 8
-        cols = 12
+        # 从配置文件中获取96孔板的孔位信息
+        config = DECK_CONFIG
+        plate_module = None
         
-        for row in range(rows):
-            for col in range(cols):
-                well_name = f"{chr(65 + row)}{col + 1:02d}"
-                x = col * well_spacing + well_spacing / 2
-                y = row * well_spacing + well_spacing / 2
-                
-                # 创建孔位
-                well = PlateWell(
-                    name=well_name,
-                    size_x=well_spacing * 0.8,
-                    size_y=well_spacing * 0.8,
-                    size_z=self.get_size_z(),
-                    max_volume=well_volume
-                )
-                
-                # 添加到板
-                self.assign_child_resource(
-                    well,
-                    location=Coordinate(x, y, 0)
-                )
+        # 查找96孔板模块
+        for module in config.get("children", []):
+            if module.get("type") == "96_well_plate":
+                plate_module = module
+                break
+        
+        if not plate_module:
+            # 如果配置文件中没有找到，使用默认的相对坐标计算
+            rows = 8
+            cols = 12
+            
+            for row in range(rows):
+                for col in range(cols):
+                    well_name = f"{chr(65 + row)}{col + 1:02d}"
+                    x = col * well_spacing + well_spacing / 2
+                    y = row * well_spacing + well_spacing / 2
+                    
+                    # 创建孔位
+                    well = PlateWell(
+                        name=well_name,
+                        size_x=well_spacing * 0.8,
+                        size_y=well_spacing * 0.8,
+                        size_z=self.get_size_z(),
+                        max_volume=well_volume
+                    )
+                    
+                    # 添加到板
+                    self.assign_child_resource(
+                        well,
+                        location=Coordinate(x, y, 0)
+                    )
+            return
+        
+        # 使用配置文件中的绝对坐标
+        module_position = plate_module.get("position", {"x": 0, "y": 0, "z": 0})
+        
+        for well_config in plate_module.get("wells", []):
+            well_name = well_config["id"]
+            well_pos = well_config["position"]
+            
+            # 计算相对于模块的坐标（绝对坐标减去模块位置）
+            relative_x = well_pos["x"] - module_position["x"]
+            relative_y = well_pos["y"] - module_position["y"]
+            relative_z = well_pos["z"] - module_position["z"]
+            
+            # 创建孔位
+            well = PlateWell(
+                name=well_name,
+                size_x=well_config.get("diameter", 8.2) * 0.8,  # 使用配置中的直径
+                size_y=well_config.get("diameter", 8.2) * 0.8,
+                size_z=well_config.get("depth", self.get_size_z()),
+                max_volume=well_config.get("volume", well_volume)
+            )
+            
+            # 添加到板
+            self.assign_child_resource(
+                well,
+                location=Coordinate(relative_x, relative_y, relative_z)
+            )
 
 
 class LaiYuDeepWellPlate(LaiYuLiquidContainer):
@@ -354,36 +458,82 @@ class LaiYuDeepWellPlate(LaiYuLiquidContainer):
     
     def _create_wells(self, well_count: int, well_volume: float, well_spacing: float):
         """
-        创建孔位
+        创建孔位 - 从配置文件中读取绝对坐标
         
         Args:
             well_count: 孔位数量
             well_volume: 孔位体积
             well_spacing: 孔位间距
         """
-        rows = 8
-        cols = 12
+        # 从配置文件中获取深孔板的孔位信息
+        config = DECK_CONFIG
+        plate_module = None
         
-        for row in range(rows):
-            for col in range(cols):
-                well_name = f"{chr(65 + row)}{col + 1:02d}"
-                x = col * well_spacing + well_spacing / 2
-                y = row * well_spacing + well_spacing / 2
-                
-                # 创建孔位
-                well = PlateWell(
-                    name=well_name,
-                    size_x=well_spacing * 0.8,
-                    size_y=well_spacing * 0.8,
-                    size_z=self.get_size_z(),
-                    max_volume=well_volume
-                )
-                
-                # 添加到板
-                self.assign_child_resource(
-                    well,
-                    location=Coordinate(x, y, 0)
-                )
+        # 查找深孔板模块（通常是第二个96孔板模块）
+        plate_modules = []
+        for module in config.get("children", []):
+            if module.get("type") == "96_well_plate":
+                plate_modules.append(module)
+        
+        # 如果有多个96孔板模块，选择第二个作为深孔板
+        if len(plate_modules) > 1:
+            plate_module = plate_modules[1]
+        elif len(plate_modules) == 1:
+            plate_module = plate_modules[0]
+        
+        if not plate_module:
+            # 如果配置文件中没有找到，使用默认的相对坐标计算
+            rows = 8
+            cols = 12
+            
+            for row in range(rows):
+                for col in range(cols):
+                    well_name = f"{chr(65 + row)}{col + 1:02d}"
+                    x = col * well_spacing + well_spacing / 2
+                    y = row * well_spacing + well_spacing / 2
+                    
+                    # 创建孔位
+                    well = PlateWell(
+                        name=well_name,
+                        size_x=well_spacing * 0.8,
+                        size_y=well_spacing * 0.8,
+                        size_z=self.get_size_z(),
+                        max_volume=well_volume
+                    )
+                    
+                    # 添加到板
+                    self.assign_child_resource(
+                        well,
+                        location=Coordinate(x, y, 0)
+                    )
+            return
+        
+        # 使用配置文件中的绝对坐标
+        module_position = plate_module.get("position", {"x": 0, "y": 0, "z": 0})
+        
+        for well_config in plate_module.get("wells", []):
+            well_name = well_config["id"]
+            well_pos = well_config["position"]
+            
+            # 计算相对于模块的坐标（绝对坐标减去模块位置）
+            relative_x = well_pos["x"] - module_position["x"]
+            relative_y = well_pos["y"] - module_position["y"]
+            relative_z = well_pos["z"] - module_position["z"]
+            
+            # 创建孔位
+            well = PlateWell(
+                name=well_name,
+                size_x=well_config.get("diameter", 8.2) * 0.8,  # 使用配置中的直径
+                size_y=well_config.get("diameter", 8.2) * 0.8,
+                size_z=well_config.get("depth", self.get_size_z()),
+                max_volume=well_config.get("volume", well_volume)
+            )
+            
+            # 添加到板
+            self.assign_child_resource(
+                well,
+                location=Coordinate(relative_x, relative_y, relative_z)
+            )
 
 
 class LaiYuWasteContainer(Container):
@@ -441,6 +591,111 @@ class LaiYuReagentContainer(Container):
             size_z=100.0,
             max_volume=2000.0
         )
+
+
+class LaiYu8TubeRack(LaiYuLiquidContainer):
+    """8管试管架"""
+    
+    def __init__(self, name: str):
+        """
+        初始化8管试管架
+        
+        Args:
+            name: 试管架名称
+        """
+        super().__init__(
+            name=name,
+            size_x=151.0,
+            size_y=75.0,
+            size_z=75.0,
+            container_type="tube_rack",
+            volume=0.0,
+            max_volume=77000.0
+        )
+        
+        # 创建孔位
+        self._create_wells(
+            well_count=8,
+            well_volume=77000.0,
+            well_spacing=35.0
+        )
+    
+    def get_size_z(self) -> float:
+        """获取孔位深度"""
+        return 117.0  # 试管深度
+    
+    def _create_wells(self, well_count: int, well_volume: float, well_spacing: float):
+        """
+        创建孔位 - 从配置文件中读取绝对坐标
+        
+        Args:
+            well_count: 孔位数量
+            well_volume: 孔位体积
+            well_spacing: 孔位间距
+        """
+        # 从配置文件中获取8管试管架的孔位信息
+        config = DECK_CONFIG
+        tube_module = None
+        
+        # 查找8管试管架模块
+        for module in config.get("children", []):
+            if module.get("type") == "tube_rack":
+                tube_module = module
+                break
+        
+        if not tube_module:
+            # 如果配置文件中没有找到，使用默认的相对坐标计算
+            rows = 2
+            cols = 4
+            
+            for row in range(rows):
+                for col in range(cols):
+                    well_name = f"{chr(65 + row)}{col + 1}"
+                    x = col * well_spacing + well_spacing / 2
+                    y = row * well_spacing + well_spacing / 2
+                    
+                    # 创建孔位
+                    well = PlateWell(
+                        name=well_name,
+                        size_x=29.0,
+                        size_y=29.0,
+                        size_z=self.get_size_z(),
+                        max_volume=well_volume
+                    )
+                    
+                    # 添加到试管架
+                    self.assign_child_resource(
+                        well,
+                        location=Coordinate(x, y, 0)
+                    )
+            return
+        
+        # 使用配置文件中的绝对坐标
+        module_position = tube_module.get("position", {"x": 0, "y": 0, "z": 0})
+        
+        for well_config in tube_module.get("wells", []):
+            well_name = well_config["id"]
+            well_pos = well_config["position"]
+            
+            # 计算相对于模块的坐标（绝对坐标减去模块位置）
+            relative_x = well_pos["x"] - module_position["x"]
+            relative_y = well_pos["y"] - module_position["y"]
+            relative_z = well_pos["z"] - module_position["z"]
+            
+            # 创建孔位
+            well = PlateWell(
+                name=well_name,
+                size_x=well_config.get("diameter", 29.0),
+                size_y=well_config.get("diameter", 29.0),
+                size_z=well_config.get("depth", self.get_size_z()),
+                max_volume=well_config.get("volume", well_volume)
+            )
+            
+            # 添加到试管架
+            self.assign_child_resource(
+                well,
+                location=Coordinate(relative_x, relative_y, relative_z)
+            )
 
 
 class LaiYuTipDisposal(Resource):
@@ -532,6 +787,19 @@ def create_deep_well_plate(name: str = "deep_well_plate", lid_height: float = 0.
         LaiYuDeepWellPlate: 深孔板实例
     """
     return LaiYuDeepWellPlate(name, lid_height)
+
+
+def create_8_tube_rack(name: str = "8_tube_rack") -> LaiYu8TubeRack:
+    """
+    创建8管试管架
+    
+    Args:
+        name: 试管架名称
+        
+    Returns:
+        LaiYu8TubeRack: 8管试管架实例
+    """
+    return LaiYu8TubeRack(name)
 
 
 def create_waste_container(name: str = "waste_container") -> LaiYuWasteContainer:
@@ -678,6 +946,7 @@ TipRack1000ul = LaiYuTipRack1000
 TipRack200ul = LaiYuTipRack200
 Plate96Well = LaiYu96WellPlate
 Plate96DeepWell = LaiYuDeepWellPlate
+TubeRack8 = LaiYu8TubeRack
 WasteContainer = LaiYuWasteContainer
 WashContainer = LaiYuWashContainer
 ReagentContainer = LaiYuReagentContainer

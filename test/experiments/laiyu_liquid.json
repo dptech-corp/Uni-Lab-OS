@@ -4,457 +4,145 @@
             "id": "laiyu_liquid_station",
             "name": "LaiYu液体处理工作站",
             "children": [
-                "tip_rack_1000ul_1",
-                "tip_rack_1000ul_2", 
-                "tip_rack_200ul_1",
-                "tip_rack_200ul_2",
-                "plate_96well_1",
-                "plate_96well_2",
-                "deep_well_plate_1",
-                "reagent_container_1",
-                "reagent_container_2",
-                "reagent_container_3",
-                "wash_container",
-                "waste_container",
-                "tip_disposal",
-                "maintenance_position"
+                "module_1_8tubes",
+                "module_2_96well_deep", 
+                "module_3_beaker",
+                "module_4_96well_tips"
             ],
             "parent": null,
             "type": "device",
             "class": "laiyu_liquid",
             "position": {
-                "x": 300.0,
-                "y": 200.0,
-                "z": 0.0
+                "x": 500,
+                "y": 200,
+                "z": 0
             },
             "config": {
-                "port": "/dev/cu.usbserial-3130",
-                "address": 1,
-                "baudrate": 9600,
-                "timeout": 5.0,
-                "deck_width": 340.0,
-                "deck_height": 250.0,
-                "deck_depth": 160.0,
-                "max_volume": 1000.0,
-                "min_volume": 0.1,
-                "max_speed": 100.0,
-                "acceleration": 50.0,
-                "safe_height": 50.0,
-                "tip_pickup_depth": 10.0,
-                "liquid_detection": true
+                "total_modules": 4,
+                "total_wells": 201,
+                "safety_margin": {
+                    "x": 5.0,
+                    "y": 5.0,
+                    "z": 5.0
+                },
+                "protocol_type": ["LiquidHandlingProtocol", "PipettingProtocol", "TransferProtocol"]
             },
             "data": {
-                "current_position": [0.0, 0.0, 50.0],
-                "tip_attached": false,
+                "status": "Ready",
+                "version": "1.0"
+            }
+        },
+        {
+            "id": "module_1_8tubes",
+            "name": "8管位置模块",
+            "children": [],
+            "parent": "laiyu_liquid_station",
+            "type": "container",
+            "class": "opentrons_24_tuberack_nest_1point5ml_snapcap",
+            "position": {
+                "x": 100,
+                "y": 100,
+                "z": 0
+            },
+            "config": {
+                "module_type": "tube_rack",
+                "wells_count": 8,
+                "well_diameter": 29.0,
+                "well_depth": 117.0,
+                "well_volume": 77000.0,
+                "well_shape": "circular",
+                "layout": "2x4"
+            },
+            "data": {
+                "max_volume": 77000.0,
                 "current_volume": 0.0,
-                "is_connected": false,
-                "is_initialized": false
+                "wells": ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4"]
             }
         },
         {
-            "id": "tip_rack_1000ul_1",
-            "name": "1000μL枪头架-1",
+            "id": "module_2_96well_deep",
+            "name": "96深孔板",
             "children": [],
             "parent": "laiyu_liquid_station",
-            "type": "resource",
-            "class": "tip_rack",
+            "type": "plate",
+            "class": "nest_96_wellplate_2ml_deep",
             "position": {
-                "x": 50.0,
-                "y": 50.0,
-                "z": 0.0
+                "x": 300,
+                "y": 100,
+                "z": 0
             },
             "config": {
-                "tip_volume": 1000.0,
-                "tip_count": 96,
-                "rows": 8,
-                "columns": 12,
-                "tip_spacing": 9.0
+                "module_type": "96_well_deep_plate",
+                "wells_count": 96,
+                "well_diameter": 8.2,
+                "well_depth": 39.4,
+                "well_volume": 2080.0,
+                "well_shape": "circular",
+                "layout": "8x12"
             },
             "data": {
-                "available_tips": 96,
-                "used_tips": []
-            }
-        },
-        {
-            "id": "tip_rack_1000ul_2",
-            "name": "1000μL枪头架-2",
-            "children": [],
-            "parent": "laiyu_liquid_station",
-            "type": "resource",
-            "class": "tip_rack",
-            "position": {
-                "x": 180.0,
-                "y": 50.0,
-                "z": 0.0
-            },
-            "config": {
-                "tip_volume": 1000.0,
-                "tip_count": 96,
-                "rows": 8,
-                "columns": 12,
-                "tip_spacing": 9.0
-            },
-            "data": {
-                "available_tips": 96,
-                "used_tips": []
-            }
-        },
-        {
-            "id": "tip_rack_200ul_1",
-            "name": "200μL枪头架-1",
-            "children": [],
-            "parent": "laiyu_liquid_station",
-            "type": "resource",
-            "class": "tip_rack",
-            "position": {
-                "x": 310.0,
-                "y": 50.0,
-                "z": 0.0
-            },
-            "config": {
-                "tip_volume": 200.0,
-                "tip_count": 96,
-                "rows": 8,
-                "columns": 12,
-                "tip_spacing": 9.0
-            },
-            "data": {
-                "available_tips": 96,
-                "used_tips": []
-            }
-        },
-        {
-            "id": "tip_rack_200ul_2",
-            "name": "200μL枪头架-2",
-            "children": [],
-            "parent": "laiyu_liquid_station",
-            "type": "resource",
-            "class": "tip_rack",
-            "position": {
-                "x": 50.0,
-                "y": 150.0,
-                "z": 0.0
-            },
-            "config": {
-                "tip_volume": 200.0,
-                "tip_count": 96,
-                "rows": 8,
-                "columns": 12,
-                "tip_spacing": 9.0
-            },
-            "data": {
-                "available_tips": 96,
-                "used_tips": []
-            }
-        },
-        {
-            "id": "plate_96well_1",
-            "name": "96孔板-1",
-            "children": [],
-            "parent": "laiyu_liquid_station",
-            "type": "resource",
-            "class": "plate",
-            "position": {
-                "x": 180.0,
-                "y": 150.0,
-                "z": 0.0
-            },
-            "config": {
-                "well_count": 96,
-                "rows": 8,
-                "columns": 12,
-                "well_volume": 200.0,
-                "max_volume": 300.0,
-                "well_spacing": 9.0,
-                "plate_type": "96_well_standard"
-            },
-            "data": {
-                "well_volumes": {},
-                "sample_ids": {}
-            }
-        },
-        {
-            "id": "plate_96well_2",
-            "name": "96孔板-2",
-            "children": [],
-            "parent": "laiyu_liquid_station",
-            "type": "resource",
-            "class": "plate",
-            "position": {
-                "x": 310.0,
-                "y": 150.0,
-                "z": 0.0
-            },
-            "config": {
-                "well_count": 96,
-                "rows": 8,
-                "columns": 12,
-                "well_volume": 200.0,
-                "max_volume": 300.0,
-                "well_spacing": 9.0,
-                "plate_type": "96_well_standard"
-            },
-            "data": {
-                "well_volumes": {},
-                "sample_ids": {}
-            }
-        },
-        {
-            "id": "deep_well_plate_1",
-            "name": "深孔板-1",
-            "children": [],
-            "parent": "laiyu_liquid_station",
-            "type": "resource",
-            "class": "plate",
-            "position": {
-                "x": 50.0,
-                "y": 250.0,
-                "z": 0.0
-            },
-            "config": {
-                "well_count": 96,
-                "rows": 8,
-                "columns": 12,
-                "well_volume": 1000.0,
-                "max_volume": 2000.0,
-                "well_spacing": 9.0,
-                "plate_type": "96_deep_well"
-            },
-            "data": {
-                "well_volumes": {},
-                "sample_ids": {}
-            }
-        },
-        {
-            "id": "reagent_container_1",
-            "name": "试剂容器-1",
-            "children": [],
-            "parent": "laiyu_liquid_station",
-            "type": "resource",
-            "class": "container",
-            "position": {
-                "x": 180.0,
-                "y": 250.0,
-                "z": 0.0
-            },
-            "config": {
-                "volume": 50000.0,
-                "max_volume": 50000.0,
-                "container_type": "reagent",
-                "material": "polypropylene"
-            },
-            "data": {
-                "current_volume": 50000.0,
-                "reagent_type": "buffer",
-                "concentration": "1x"
-            }
-        },
-        {
-            "id": "reagent_container_2",
-            "name": "试剂容器-2",
-            "children": [],
-            "parent": "laiyu_liquid_station",
-            "type": "resource",
-            "class": "container",
-            "position": {
-                "x": 210.0,
-                "y": 250.0,
-                "z": 0.0
-            },
-            "config": {
-                "volume": 50000.0,
-                "max_volume": 50000.0,
-                "container_type": "reagent",
-                "material": "polypropylene"
-            },
-            "data": {
-                "current_volume": 50000.0,
-                "reagent_type": "enzyme",
-                "concentration": "10x"
-            }
-        },
-        {
-            "id": "reagent_container_3",
-            "name": "试剂容器-3",
-            "children": [],
-            "parent": "laiyu_liquid_station",
-            "type": "resource",
-            "class": "container",
-            "position": {
-                "x": 240.0,
-                "y": 250.0,
-                "z": 0.0
-            },
-            "config": {
-                "volume": 50000.0,
-                "max_volume": 50000.0,
-                "container_type": "reagent",
-                "material": "polypropylene"
-            },
-            "data": {
-                "current_volume": 50000.0,
-                "reagent_type": "substrate",
-                "concentration": "5mM"
-            }
-        },
-        {
-            "id": "wash_container",
-            "name": "清洗容器",
-            "children": [],
-            "parent": "laiyu_liquid_station",
-            "type": "resource",
-            "class": "container",
-            "position": {
-                "x": 270.0,
-                "y": 250.0,
-                "z": 0.0
-            },
-            "config": {
-                "volume": 100000.0,
-                "max_volume": 100000.0,
-                "container_type": "wash",
-                "material": "stainless_steel"
-            },
-            "data": {
-                "current_volume": 100000.0,
-                "liquid_type": "distilled_water"
-            }
-        },
-        {
-            "id": "waste_container",
-            "name": "废液容器",
-            "children": [],
-            "parent": "laiyu_liquid_station",
-            "type": "resource",
-            "class": "container",
-            "position": {
-                "x": 300.0,
-                "y": 250.0,
-                "z": 0.0
-            },
-            "config": {
-                "volume": 0.0,
-                "max_volume": 200000.0,
-                "container_type": "waste",
-                "material": "polypropylene"
-            },
-            "data": {
+                "max_volume": 2080.0,
                 "current_volume": 0.0,
-                "waste_type": "general"
+                "plate_type": "deep_well"
             }
         },
         {
-            "id": "tip_disposal",
-            "name": "枪头丢弃位",
+            "id": "module_3_beaker",
+            "name": "敞口玻璃瓶",
             "children": [],
             "parent": "laiyu_liquid_station",
-            "type": "resource",
-            "class": "disposal",
+            "type": "container",
+            "class": "container",
             "position": {
-                "x": 330.0,
-                "y": 250.0,
-                "z": 0.0
+                "x": 500,
+                "y": 100,
+                "z": 0
             },
             "config": {
-                "capacity": 1000,
-                "disposal_type": "tip"
+                "module_type": "beaker_holder",
+                "wells_count": 1,
+                "well_diameter": 85.0,
+                "well_depth": 120.0,
+                "well_volume": 500000.0,
+                "well_shape": "circular",
+                "supported_containers": ["250ml", "500ml", "1000ml"]
             },
             "data": {
-                "used_count": 0
+                "max_volume": 500000.0,
+                "current_volume": 0.0,
+                "container_type": "beaker",
+                "wells": ["A1"]
             }
         },
         {
-            "id": "maintenance_position",
-            "name": "维护位置",
+            "id": "module_4_96well_tips",
+            "name": "96吸头架",
             "children": [],
             "parent": "laiyu_liquid_station",
-            "type": "resource",
-            "class": "maintenance",
+            "type": "container",
+            "class": "tip_rack",
             "position": {
-                "x": 170.0,
-                "y": 125.0,
-                "z": 100.0
+                "x": 700,
+                "y": 100,
+                "z": 0
             },
             "config": {
-                "position_type": "maintenance",
-                "access_level": "service"
+                "module_type": "tip_rack",
+                "wells_count": 96,
+                "well_diameter": 8.2,
+                "well_depth": 60.0,
+                "well_volume": 6000.0,
+                "well_shape": "circular",
+                "layout": "8x12",
+                "tip_type": "standard"
             },
             "data": {
-                "last_maintenance": null,
-                "maintenance_required": false
+                "max_volume": 6000.0,
+                "current_volume": 0.0,
+                "tip_capacity": "1000μL",
+                "tips_available": 96
             }
         }
     ],
-    "links": [
-        {
-            "source": "laiyu_liquid_station",
-            "target": "tip_rack_1000ul_1",
-            "type": "contains"
-        },
-        {
-            "source": "laiyu_liquid_station",
-            "target": "tip_rack_1000ul_2",
-            "type": "contains"
-        },
-        {
-            "source": "laiyu_liquid_station",
-            "target": "tip_rack_200ul_1",
-            "type": "contains"
-        },
-        {
-            "source": "laiyu_liquid_station",
-            "target": "tip_rack_200ul_2",
-            "type": "contains"
-        },
-        {
-            "source": "laiyu_liquid_station",
-            "target": "plate_96well_1",
-            "type": "contains"
-        },
-        {
-            "source": "laiyu_liquid_station",
-            "target": "plate_96well_2",
-            "type": "contains"
-        },
-        {
-            "source": "laiyu_liquid_station",
-            "target": "deep_well_plate_1",
-            "type": "contains"
-        },
-        {
-            "source": "laiyu_liquid_station",
-            "target": "reagent_container_1",
-            "type": "contains"
-        },
-        {
-            "source": "laiyu_liquid_station",
-            "target": "reagent_container_2",
-            "type": "contains"
-        },
-        {
-            "source": "laiyu_liquid_station",
-            "target": "reagent_container_3",
-            "type": "contains"
-        },
-        {
-            "source": "laiyu_liquid_station",
-            "target": "wash_container",
-            "type": "contains"
-        },
-        {
-            "source": "laiyu_liquid_station",
-            "target": "waste_container",
-            "type": "contains"
-        },
-        {
-            "source": "laiyu_liquid_station",
-            "target": "tip_disposal",
-            "type": "contains"
-        },
-        {
-            "source": "laiyu_liquid_station",
-            "target": "maintenance_position",
-            "type": "contains"
-        }
-    ]
+    "links": []
 }

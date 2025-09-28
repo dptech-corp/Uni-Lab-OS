@@ -42,7 +42,7 @@ LaiYu_Liquid 是一个完全集成到 UniLabOS 系统的自动化液体处理工
   - 运动路径优化
   - 安全运动控制
 
-### ✅ UniLabOS集成 (`LaiYu_Liquid.py`)
+### ✅ UniLabOS集成 (`core/LaiYu_Liquid.py`)
 - **完整的液体处理抽象接口**
 - **标准化的资源管理系统**
 - **与PyLabRobot兼容的后端实现**
@@ -95,15 +95,17 @@ LaiYu_Liquid 是一个完全集成到 UniLabOS 系统的自动化液体处理工
 
 ```
 LaiYu_Liquid/
-├── LaiYu_Liquid.py          # 主模块文件，核心液体处理接口
 ├── __init__.py              # 模块初始化和API导出
-├── abstract_protocol.py    # 抽象协议定义
-├── laiyu_liquid_res.py     # 资源管理和创建函数
-├── rviz_backend.py         # RViz可视化后端
 ├── readme.md               # 本文档
+├── rviz_backend.py         # RViz可视化后端
 ├── backend/                # 后端驱动模块
 │   ├── __init__.py
 │   └── laiyu_backend.py    # PyLabRobot兼容后端
+├── core/                   # 核心模块
+│   ├── core/
+│   │   └── LaiYu_Liquid.py    # 主设备类
+│   ├── abstract_protocol.py # 抽象协议
+│   └── laiyu_liquid_res.py # 设备资源定义
 ├── config/                 # 配置文件目录
 │   └── deck.json          # 工作台布局配置
 ├── controllers/           # 高级控制器
@@ -112,11 +114,13 @@ LaiYu_Liquid/
 │   └── xyz_controller.py      # XYZ运动控制器
 ├── docs/                  # 技术文档
 │   ├── SOPA气动式移液器RS485控制指令.md
-│   └── 步进电机控制指令.md
-└── drivers/               # 底层驱动程序
-    ├── __init__.py
-    ├── sopa_pipette_driver.py  # SOPA移液器驱动
-    └── xyz_stepper_driver.py   # XYZ步进电机驱动
+│   ├── 步进电机控制指令.md
+│   └── hardware/          # 硬件相关文档
+├── drivers/               # 底层驱动程序
+│   ├── __init__.py
+│   ├── sopa_pipette_driver.py  # SOPA移液器驱动
+│   └── xyz_stepper_driver.py   # XYZ步进电机驱动
+└── tests/                 # 测试文件
 ```
 
 ## 🔧 快速开始
@@ -125,7 +129,12 @@ LaiYu_Liquid/
 
 ```python
 # 验证模块安装
-from unilabos.devices.LaiYu_Liquid import create_quick_setup, print_module_info
+from unilabos.devices.laiyu_liquid import (
+    LaiYuLiquid,
+    LaiYuLiquidConfig,
+    create_quick_setup,
+    print_module_info
+)
 
 # 查看模块信息
 print_module_info()
@@ -160,7 +169,7 @@ print(f"后端设备: {backend.name}")
 ### 3. 后端驱动使用
 
 ```python
-from unilabos.devices.LaiYu_Liquid.backend import create_laiyu_backend
+from unilabos.devices.laiyu_liquid.backend import create_laiyu_backend
 
 # 创建后端实例
 backend = create_laiyu_backend("LaiYu_Liquid_Station")
@@ -222,18 +231,18 @@ print(f"枪头架: {tip_rack.name}, 容量: {len(tip_rack.children)} 个枪头")
 ### 功能验证
 ```python
 # 验证模块安装
-from unilabos.devices.LaiYu_Liquid import validate_installation
+from unilabos.devices.laiyu_liquid import validate_installation
 validate_installation()
 
 # 查看模块信息
-from unilabos.devices.LaiYu_Liquid import print_module_info
+from unilabos.devices.laiyu_liquid import print_module_info
 print_module_info()
 ```
 
 ### 硬件连接测试
 ```python
 # 测试SOPA移液器连接
-from unilabos.devices.LaiYu_Liquid.drivers import SOPAPipette, SOPAConfig
+from unilabos.devices.laiyu_liquid.drivers import SOPAPipette, SOPAConfig
 
 config = SOPAConfig(port="/dev/cu.usbserial-3130", address=4)
 pipette = SOPAPipette(config)

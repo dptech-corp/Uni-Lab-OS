@@ -377,13 +377,16 @@ class LaiYuLiquidBackend:
                 # 初始化移液器控制器
                 self.pipette_controller = PipetteController(
                     port=self.config.port,
-                    address=self.config.address,
-                    baudrate=self.config.baudrate
+                    address=self.config.address
                 )
                 
                 # 初始化XYZ控制器
                 machine_config = MachineConfig()
-                self.xyz_controller = XYZController(machine_config)
+                self.xyz_controller = XYZController(
+                    port=self.config.port,
+                    baudrate=self.config.baudrate,
+                    machine_config=machine_config
+                )
                 
                 # 连接设备
                 pipette_connected = await asyncio.to_thread(self.pipette_controller.connect)

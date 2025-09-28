@@ -1761,7 +1761,7 @@ laiyu_liquid:
           title: LiquidHandlerTransfer
           type: object
         type: LiquidHandlerTransfer
-    module: unilabos.devices.LaiYu_Liquid.LaiYu_Liquid:LaiYuLiquid
+    module: unilabos.devices.laiyu_liquid.core.LaiYu_Liquid:LaiYuLiquid
     status_types:
       current_position: list
       current_volume: float
@@ -1798,7 +1798,7 @@ laiyu_liquid:
     description: 工作台深度 (mm)
     name: deck_depth
     type: number
-  - default: 1000.0
+  - default: 77000.0
     description: 最大体积 (μL)
     name: max_volume
     type: number
@@ -1826,6 +1826,26 @@ laiyu_liquid:
     description: 液面检测功能
     name: liquid_detection
     type: boolean
+  - default: 10.0
+    description: X轴最小安全边距 (mm)
+    name: safety_margin_x_min
+    type: number
+  - default: 10.0
+    description: X轴最大安全边距 (mm)
+    name: safety_margin_x_max
+    type: number
+  - default: 10.0
+    description: Y轴最小安全边距 (mm)
+    name: safety_margin_y_min
+    type: number
+  - default: 10.0
+    description: Y轴最大安全边距 (mm)
+    name: safety_margin_y_max
+    type: number
+  - default: 20.0
+    description: Z轴安全间隙 (mm)
+    name: safety_margin_z_clearance
+    type: number
   description: LaiYu液体处理工作站，基于RS485通信协议的自动化液体处理设备。集成XYZ三轴运动平台和SOPA气动式移液器，支持精确的液体分配和转移操作。具备完整的硬件控制、资源管理和标准化接口，适用于实验室自动化液体处理、样品制备、试剂分配等应用场景。设备通过RS485总线控制步进电机和移液器，提供高精度的位置控制和液体处理能力。
   handles: []
   icon: ''
@@ -1865,7 +1885,7 @@ laiyu_liquid:
           description: 最大速度
           type: number
         max_volume:
-          default: 1000.0
+          default: 77000.0
           description: 最大体积
           type: number
         min_volume:
@@ -1879,6 +1899,26 @@ laiyu_liquid:
         safe_height:
           default: 50.0
           description: 安全高度
+          type: number
+        safety_margin_x_max:
+          default: 10.0
+          description: X轴最大安全边距
+          type: number
+        safety_margin_x_min:
+          default: 10.0
+          description: X轴最小安全边距
+          type: number
+        safety_margin_y_max:
+          default: 10.0
+          description: Y轴最大安全边距
+          type: number
+        safety_margin_y_min:
+          default: 10.0
+          description: Y轴最小安全边距
+          type: number
+        safety_margin_z_clearance:
+          default: 20.0
+          description: Z轴安全间隙
           type: number
         timeout:
           default: 5.0

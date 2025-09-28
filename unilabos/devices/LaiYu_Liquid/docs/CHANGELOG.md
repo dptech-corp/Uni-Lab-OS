@@ -27,7 +27,8 @@
 ### 文件结构
 ```
 LaiYu_Liquid/
-├── LaiYu_Liquid.py          # 主模块文件
+├── core/
+│   └── LaiYu_Liquid.py      # 主模块文件
 ├── __init__.py              # 模块初始化
 ├── abstract_protocol.py    # 抽象协议
 ├── laiyu_liquid_res.py     # 资源管理

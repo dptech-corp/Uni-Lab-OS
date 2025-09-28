@@ -40,54 +40,46 @@ __description__ = "LaiYu_Liquid 液体处理工作站 UniLabOS 集成模块"
 
 # 驱动程序导入
 from .drivers import (
-    SOPAPipette,
-    SOPAConfig,
-    StepperMotorDriver,
     XYZStepperController,
+    SOPAPipette,
+    MotorAxis,
+    MotorStatus,
+    SOPAConfig,
+    SOPAStatusCode,
+    StepperMotorDriver
 )
 
 # 控制器导入
 from .controllers import (
-    PipetteController,
     XYZController,
+    PipetteController,
 )
 
 # 后端导入
-from .rviz_backend import (
+from .backend.rviz_backend import (
     LiquidHandlerRvizBackend,
 )
 
 # 资源类和创建函数导入
-from .laiyu_liquid_res import (
-    # 资源类
-    LaiYuTipRack1000,
-    LaiYuTipRack200,
-    LaiYu96WellPlate,
-    LaiYuDeepWellPlate,
-    LaiYuWasteContainer,
-    LaiYuWashContainer,
-    LaiYuReagentContainer,
-    LaiYuTipDisposal,
-    LaiYuMaintenancePosition,
-    # 创建函数
-    create_tip_rack_1000ul,
-    create_tip_rack_200ul,
-    create_96_well_plate,
-    create_deep_well_plate,
-    create_standard_deck,
-    create_waste_container,
-    create_wash_container,
-    create_reagent_container,
-    load_deck_config,
+from .core.laiyu_liquid_res import (
+    LaiYuLiquidDeck,
+    LaiYuLiquidContainer,
+    LaiYuLiquidTipRack
 )
 
-# 从主模块导入工作台类
-from .LaiYu_Liquid import (
+# 主设备类和配置
+from .core.LaiYu_Liquid import (
+    LaiYuLiquid,
+    LaiYuLiquidConfig,
     LaiYuLiquidDeck,
+    LaiYuLiquidContainer,
+    LaiYuLiquidTipRack,
+    create_quick_setup
 )
 
 # 后端创建函数导入
 from .backend import (
+    LaiYuLiquidBackend,
     create_laiyu_backend,
 )
 
@@ -116,6 +108,7 @@ __all__ = [
     "create_tip_rack_200ul", 
     "create_96_well_plate",
     "create_deep_well_plate",
+    "create_8_tube_rack",
     "create_standard_deck",
     "create_waste_container",
     "create_wash_container",
@@ -125,6 +118,12 @@ __all__ = [
     # 后端创建函数
     "create_laiyu_backend",
     
+    # 主要类
+    "LaiYuLiquid",
+    "LaiYuLiquidConfig", 
+    "LaiYuLiquidBackend",
+    "LaiYuLiquidDeck",
+    
     # 工具函数
     "get_version",
     "get_supported_resources",
@@ -133,6 +132,11 @@ __all__ = [
     "print_module_info",
     "setup_logging",
 ]
+
+# 别名定义，为了向后兼容
+LaiYuLiquidDevice = LaiYuLiquid  # 主设备类别名
+LaiYuLiquidController = XYZController  # 控制器别名
+LaiYuLiquidDriver = XYZStepperController  # 驱动器别名
 
 # 模块级别的便捷函数
 
@@ -155,21 +159,16 @@ def get_supported_resources() -> dict:
     """
     return {
         "tip_racks": {
-            "1000ul": LaiYuTipRack1000,
-            "200ul": LaiYuTipRack200,
-        },
-        "plates": {
-            "96_well": LaiYu96WellPlate,
-            "deep_well": LaiYuDeepWellPlate,
+            "LaiYuLiquidTipRack": LaiYuLiquidTipRack,
         },
         "containers": {
-            "waste": LaiYuWasteContainer,
-            "wash": LaiYuWashContainer,
-            "reagent": LaiYuReagentContainer,
+            "LaiYuLiquidContainer": LaiYuLiquidContainer,
         },
-        "special_positions": {
-            "tip_disposal": LaiYuTipDisposal,
-            "maintenance": LaiYuMaintenancePosition,
+        "decks": {
+            "LaiYuLiquidDeck": LaiYuLiquidDeck,
+        },
+        "devices": {
+            "LaiYuLiquid": LaiYuLiquid,
         }
     }
 
@@ -215,22 +214,15 @@ def validate_installation() -> bool:
         bool: 安装是否正确
     """
     try:
-        # 检查配置文件
-        config = load_deck_config()
+        # 检查核心类是否可以导入
+        from .core.LaiYu_Liquid import LaiYuLiquid, LaiYuLiquidConfig
+        from .backend import LaiYuLiquidBackend
+        from .controllers import XYZController, PipetteController
+        from .drivers import XYZStepperController, SOPAPipette
         
-        # 检查必要的配置项
-        required_keys = ["deck_info", "resource_types", "resource_positions"]
-        for key in required_keys:
-            if key not in config:
-                print(f"配置文件缺少必要项: {key}")
-                return False
-        
-        # 尝试创建基本资源
-        tip_rack = create_tip_rack_1000ul("test_tip_rack")
-        plate = create_96_well_plate("test_plate")
-        
-        # 尝试创建工作台
-        deck = create_standard_deck()
+        # 尝试创建基本对象
+        config = LaiYuLiquidConfig()
+        backend = create_laiyu_backend("validation_test")
         
         print("模块安装验证成功")
         return True
