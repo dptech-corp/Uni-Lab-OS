@@ -348,7 +348,7 @@ robotic_arm.SCARA_with_slider.moveit.virtual:
       type: object
   model:
     mesh: arm_slider
-    path: https://uni-lab-test.oss-cn-zhangjiakou.aliyuncs.com/uni-lab-test/devices/arm_slider/macro_device.xacro
+    path: https://uni-lab.oss-cn-zhangjiakou.aliyuncs.com/uni-lab/devices/arm_slider/macro_device.xacro
     type: device
   version: 1.0.0
 robotic_arm.UR:

@@ -329,8 +329,8 @@
             },
             "config": {
                 "type": "Plate",
-                "size_x": 80,
-                "size_y": 80,
+                "size_x": 130,
+                "size_y": 117,
                 "size_z": 8,
                 "rotation": {
                     "x": 0,

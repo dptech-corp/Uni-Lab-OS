@@ -10,7 +10,7 @@ hplc_plate:
   init_param_schema: {}
   model:
     mesh: hplc_plate/meshes/hplc_plate.stl
-    path: https://uni-lab-test.oss-cn-zhangjiakou.aliyuncs.com/uni-lab-test/resources/hplc_plate/modal.xacro
+    path: https://uni-lab.oss-cn-zhangjiakou.aliyuncs.com/uni-lab/resources/hplc_plate/modal.xacro
     mesh_tf:
     - 0
     - 0
@@ -33,7 +33,7 @@ plate_96_high:
   init_param_schema: {}
   model:
     mesh: plate_96_high/meshes/plate_96_high.stl
-    path: https://uni-lab-test.oss-cn-zhangjiakou.aliyuncs.com/uni-lab-test/resources/plate_96_high/modal.xacro
+    path: https://uni-lab.oss-cn-zhangjiakou.aliyuncs.com/uni-lab/resources/plate_96_high/modal.xacro
     mesh_tf:
     - 0
     - 0.086
@@ -56,7 +56,7 @@ tiprack_96_high:
   init_param_schema: {}
   model:
     children_mesh: generic_labware_tube_10_75/meshes/0_base.stl
-    children_mesh_path: https://uni-lab-test.oss-cn-zhangjiakou.aliyuncs.com/uni-lab-test/resources/generic_labware_tube_10_75/modal.xacro
+    children_mesh_path: https://uni-lab.oss-cn-zhangjiakou.aliyuncs.com/uni-lab/resources/generic_labware_tube_10_75/modal.xacro
     children_mesh_tf:
     - 0.0018
     - 0.0018
@@ -65,7 +65,7 @@ tiprack_96_high:
     - 0
     - 0
     mesh: tiprack_96_high/meshes/tiprack_96_high.stl
-    path: https://uni-lab-test.oss-cn-zhangjiakou.aliyuncs.com/uni-lab-test/resources/tiprack_96_high/modal.xacro
+    path: https://uni-lab.oss-cn-zhangjiakou.aliyuncs.com/uni-lab/resources/tiprack_96_high/modal.xacro
     mesh_tf:
     - 0
     - 0.086
@@ -89,7 +89,7 @@ tiprack_box:
   init_param_schema: {}
   model:
     children_mesh: tip/meshes/tip.stl
-    children_mesh_path: https://uni-lab-test.oss-cn-zhangjiakou.aliyuncs.com/uni-lab-test/resources/tip/modal.xacro
+    children_mesh_path: https://uni-lab.oss-cn-zhangjiakou.aliyuncs.com/uni-lab/resources/tip/modal.xacro
     children_mesh_tf:
     - 0.0045
     - 0.0045
@@ -98,7 +98,7 @@ tiprack_box:
     - 0
     - 0
     mesh: tiprack_box/meshes/tiprack_box.stl
-    path: https://uni-lab-test.oss-cn-zhangjiakou.aliyuncs.com/uni-lab-test/resources/tiprack_box/modal.xacro
+    path: https://uni-lab.oss-cn-zhangjiakou.aliyuncs.com/uni-lab/resources/tiprack_box/modal.xacro
     mesh_tf:
     - 0
     - 0
@@ -122,7 +122,7 @@ plate_96:
   init_param_schema: {}
   model:
     mesh: plate_96/meshes/plate_96.stl
-    path: https://uni-lab-test.oss-cn-zhangjiakou.aliyuncs.com/uni-lab-test/resources/plate_96/modal.xacro
+    path: https://uni-lab.oss-cn-zhangjiakou.aliyuncs.com/uni-lab/resources/plate_96/modal.xacro
     mesh_tf:
     - 0
     - 0
