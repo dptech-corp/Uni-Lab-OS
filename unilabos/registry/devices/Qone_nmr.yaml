@@ -1,0 +1,156 @@
+Qone_nmr:
+  category:
+  - Qone_nmr
+  class:
+    action_value_mappings:
+      abort:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: EmptyIn_Feedback
+              type: object
+            goal:
+              properties: {}
+              required: []
+              title: EmptyIn_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+              required:
+              - return_info
+              title: EmptyIn_Result
+              type: object
+          required:
+          - goal
+          title: EmptyIn
+          type: object
+        type: EmptyIn
+      get_status:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: EmptyIn_Feedback
+              type: object
+            goal:
+              properties: {}
+              required: []
+              title: EmptyIn_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+              required:
+              - return_info
+              title: EmptyIn_Result
+              type: object
+          required:
+          - goal
+          title: EmptyIn
+          type: object
+        type: EmptyIn
+      start:
+        feedback: {}
+        goal:
+          string: string
+        goal_default:
+          string: ''
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: StrSingleInput_Feedback
+              type: object
+            goal:
+              properties:
+                string:
+                  type: string
+              required:
+              - string
+              title: StrSingleInput_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: StrSingleInput_Result
+              type: object
+          required:
+          - goal
+          title: StrSingleInput
+          type: object
+        type: StrSingleInput
+    module: unilabos.devices.Qone_nmr.Qone_nmr:Qone_nmr
+    status_types:
+      files_generated: int
+      return_info: str
+      success: bool
+    type: python
+  config_info: []
+  description: Oxford NMR设备驱动，支持CSV字符串到TXT文件的批量转换功能，并监测对应.nmr文件的大小变化以确认结果生成完成
+  handles: []
+  icon: ''
+  init_param_schema:
+    config:
+      properties:
+        check_interval:
+          default: 60
+          description: 文件监测检查间隔时间（秒）
+          maximum: 300
+          minimum: 10
+          type: integer
+        monitor_dir:
+          default: D:/Data/MyPC/Automation
+          type: string
+        output_dir:
+          default: D:/setup/txt
+          type: string
+        stability_checks:
+          default: 3
+          description: 文件大小稳定性检查次数，文件大小连续N次不变时认为文件完成
+          maximum: 10
+          minimum: 1
+          type: integer
+      required: []
+      type: object
+    data:
+      properties:
+        files_generated:
+          type: integer
+        return_info:
+          type: string
+        success:
+          type: boolean
+      required:
+      - return_info
+      - success
+      - files_generated
+      type: object
+  version: 1.0.0
