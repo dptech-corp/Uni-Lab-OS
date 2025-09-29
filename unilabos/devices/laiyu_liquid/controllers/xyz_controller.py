@@ -1110,7 +1110,7 @@ def run_tests():
     
     # 可能的串口列表
     possible_ports = [
-        '/dev/tty.usbserial-3130'
+        '/dev/ttyCH341USB0'  # CH340 USB串口转换器 
     ]
     
     connected_controller = None
