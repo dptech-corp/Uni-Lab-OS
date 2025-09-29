@@ -1,8 +1,8 @@
-# LaiYu_Liquid 液体处理工作站 - 生产就绪版本
+# LaiYu_Liquid 液体处理工作站
 
 ## 概述
 
-LaiYu_Liquid 是一个完全集成到 UniLabOS 系统的自动化液体处理工作站，基于 RS485 通信协议，专为精确的液体分配和转移操作而设计。本模块已完成生产环境部署准备，提供完整的硬件控制、资源管理和标准化接口。
+LaiYu_Liquid 是一个完全集成到 UniLabOS 的自动化液体处理工作站，基于 RS485 通信协议，专为精确的液体分配和转移操作而设计。本模块已完成生产环境部署准备，提供完整的硬件控制、资源管理和标准化接口。
 
 ## 系统组成
 
@@ -65,11 +65,11 @@ LaiYu_Liquid 是一个完全集成到 UniLabOS 系统的自动化液体处理工
   - 依赖检查和安装验证
   - 专业的模块信息展示
 
-### ✅ 可视化支持
+<!-- ### ✅ 可视化支持
 - **`rviz_backend.py`** - RViz可视化后端
   - 实时运动状态可视化
   - 液体处理过程监控
-  - 与ROS系统的无缝集成
+  - 与ROS系统的无缝集成 -->
 
 ## 🚀 核心功能特性
 
@@ -97,7 +97,6 @@ LaiYu_Liquid 是一个完全集成到 UniLabOS 系统的自动化液体处理工
 LaiYu_Liquid/
 ├── __init__.py              # 模块初始化和API导出
 ├── readme.md               # 本文档
-├── rviz_backend.py         # RViz可视化后端
 ├── backend/                # 后端驱动模块
 │   ├── __init__.py
 │   └── laiyu_backend.py    # PyLabRobot兼容后端
@@ -267,19 +266,4 @@ print(f"SOPA连接状态: {'成功' if success else '失败'}")
 - **插件接口**: 支持第三方插件和扩展
 - **API兼容**: 向后兼容的API设计
 
-## 📞 技术支持
 
-### 常见问题
-1. **串口权限问题**: 确保用户有串口访问权限
-2. **依赖库安装**: 使用pip安装所需的Python库
-3. **设备连接**: 检查RS485适配器和设备地址配置
-
-### 联系方式
-- **技术文档**: 查看UniLabOS官方文档
-- **问题反馈**: 通过GitHub Issues提交问题
-- **社区支持**: 加入UniLabOS开发者社区
-
----
-
-**LaiYu_Liquid v1.0.0** - 生产就绪的液体处理工作站集成模块  
-© 2024 UniLabOS Project. All rights reserved.
