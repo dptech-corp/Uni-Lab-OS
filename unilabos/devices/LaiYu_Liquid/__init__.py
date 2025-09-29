@@ -14,7 +14,7 @@ LaiYu_Liquid 液体处理工作站集成模块
 - 便捷创建函数和配置管理
 
 使用示例：
-    from unilabos.devices.LaiYu_Liquid import (
+    from unilabos.devices.laiyu_liquid import (
         LaiYuLiquid, 
         LaiYuLiquidBackend,
         create_standard_deck,
@@ -68,7 +68,7 @@ from .core.laiyu_liquid_res import (
 )
 
 # 主设备类和配置
-from .core.LaiYu_Liquid import (
+from .core.laiyu_liquid_main import (
     LaiYuLiquid,
     LaiYuLiquidConfig,
     LaiYuLiquidDeck,
@@ -215,7 +215,7 @@ def validate_installation() -> bool:
     """
     try:
         # 检查核心类是否可以导入
-        from .core.LaiYu_Liquid import LaiYuLiquid, LaiYuLiquidConfig
+        from .core.laiyu_liquid_main import LaiYuLiquid, LaiYuLiquidConfig
         from .backend import LaiYuLiquidBackend
         from .controllers import XYZController, PipetteController
         from .drivers import XYZStepperController, SOPAPipette

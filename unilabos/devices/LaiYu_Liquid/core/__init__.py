@@ -12,7 +12,7 @@ LaiYu液体处理设备核心模块
 版本: 2.0.0
 """
 
-from .LaiYu_Liquid import (
+from .laiyu_liquid_main import (
     LaiYuLiquid,
     LaiYuLiquidConfig,
     LaiYuLiquidDeck,

@@ -62,7 +62,7 @@ except ImportError:
             self.z = z
 
 # 本地导入
-from .LaiYu_Liquid import LaiYuLiquidDeck, LaiYuLiquidContainer, LaiYuLiquidTipRack
+from .laiyu_liquid_main import LaiYuLiquidDeck, LaiYuLiquidContainer, LaiYuLiquidTipRack
 
 
 def load_deck_config() -> Dict[str, Any]:
