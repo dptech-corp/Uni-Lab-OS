@@ -15,6 +15,7 @@ LaiYu液体处理设备核心模块
 from .laiyu_liquid_main import (
     LaiYuLiquid,
     LaiYuLiquidConfig,
+    LaiYuLiquidBackend,
     LaiYuLiquidDeck,
     LaiYuLiquidContainer,
     LaiYuLiquidTipRack,
@@ -31,6 +32,7 @@ __all__ = [
     # 主设备类
     'LaiYuLiquid',
     'LaiYuLiquidConfig',
+    'LaiYuLiquidBackend',
     
     # 设备资源
     'LaiYuLiquidDeck',
