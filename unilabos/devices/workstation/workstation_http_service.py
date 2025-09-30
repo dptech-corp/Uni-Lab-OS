@@ -149,6 +149,22 @@ class WorkstationHTTPHandler(BaseHTTPRequestHandler):
             )
             self._send_response(error_response)
     
+    def do_OPTIONS(self):
+        """处理OPTIONS请求 - CORS预检请求"""
+        try:
+            # 发送CORS响应头
+            self.send_response(200)
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+            self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+            self.send_header('Access-Control-Max-Age', '86400')
+            self.end_headers()
+            
+        except Exception as e:
+            logger.error(f"OPTIONS请求处理失败: {e}")
+            self.send_response(500)
+            self.end_headers()
+    
     def _handle_step_finish_report(self, request_data: Dict[str, Any]) -> HttpResponse:
         """处理步骤完成报送（统一LIMS协议规范）"""
         try:
@@ -206,7 +222,7 @@ class WorkstationHTTPHandler(BaseHTTPRequestHandler):
             
             # 验证data字段内容
             data = request_data['data']
-            data_required_fields = ['orderCode', 'orderName', 'sampleId', 'startTime', 'endTime', 'Status']
+            data_required_fields = ['orderCode', 'orderName', 'sampleId', 'startTime', 'endTime', 'status']
             if data_missing_fields := [field for field in data_required_fields if field not in data]:
                 return HttpResponse(
                     success=False,
@@ -227,7 +243,7 @@ class WorkstationHTTPHandler(BaseHTTPRequestHandler):
                 "0": "待生产", "2": "进样", "10": "开始", 
                 "20": "完成", "-2": "异常停止", "-3": "人工停止"
             }
-            status_desc = status_names.get(str(data['Status']), f"状态{data['Status']}")
+            status_desc = status_names.get(str(data['status']), f"状态{data['status']}")
             
             return HttpResponse(
                 success=True,
@@ -380,6 +396,21 @@ class WorkstationHTTPHandler(BaseHTTPRequestHandler):
         """处理物料变更报送"""
         try:
             # 验证必需字段
+            if 'brand' in request_data:
+                if request_data['brand'] == "bioyond":  # 奔曜
+                    error_msg = request_data["text"]
+                    logger.info(f"收到奔曜错误处理报送: {error_msg}")
+                    return HttpResponse(
+                        success=True,
+                        message=f"错误处理报送已收到: {error_msg}",
+                        acknowledgment_id=f"ERROR_{int(time.time() * 1000)}_{error_msg.get('action_id', 'unknown')}",
+                        data=None
+                    )
+            else:
+                return HttpResponse(
+                    success=False,
+                    message=f"缺少厂家信息（brand字段）"
+                )
             required_fields = ['workstation_id', 'timestamp', 'resource_id', 'change_type']
             if missing_fields := [field for field in required_fields if field not in request_data]:
                 return HttpResponse(
@@ -407,23 +438,45 @@ class WorkstationHTTPHandler(BaseHTTPRequestHandler):
     def _handle_error_handling_report(self, request_data: Dict[str, Any]) -> HttpResponse:
         """处理错误处理报送"""
         try:
-            # 验证必需字段
-            required_fields = ['workstation_id', 'timestamp', 'error_type', 'error_message']
-            if missing_fields := [field for field in required_fields if field not in request_data]:
+            # 检查是否为奔曜格式的错误报送
+            if 'brand' in request_data and str(request_data['brand']).lower() == "bioyond":
+                # 奔曜格式处理
+                if 'text' not in request_data:
+                    return HttpResponse(
+                        success=False,
+                        message="奔曜格式缺少text字段"
+                    )
+                
+                error_data = request_data["text"]
+                logger.info(f"收到奔曜错误处理报送: {error_data}")
+                
+                # 调用工作站的处理方法
+                result = self.workstation.handle_external_error(error_data)
+                
                 return HttpResponse(
-                    success=False,
-                    message=f"缺少必要字段: {', '.join(missing_fields)}"
+                    success=True,
+                    message=f"错误处理报送已收到: 任务{error_data.get('task', 'unknown')}, 错误代码{error_data.get('code', 'unknown')}",
+                    acknowledgment_id=f"ERROR_{int(time.time() * 1000)}_{error_data.get('task', 'unknown')}",
+                    data=result
                 )
-            
-            # 调用工作站的处理方法
-            result = self.workstation.handle_external_error(request_data)
-            
-            return HttpResponse(
-                success=True,
-                message=f"错误处理报送已处理: {request_data['error_type']} - {request_data['error_message']}",
-                acknowledgment_id=f"ERROR_{int(time.time() * 1000)}_{request_data.get('action_id', 'unknown')}",
-                data=result
-            )
+            else:
+                # 标准格式处理
+                required_fields = ['workstation_id', 'timestamp', 'error_type', 'error_message']
+                if missing_fields := [field for field in required_fields if field not in request_data]:
+                    return HttpResponse(
+                        success=False,
+                        message=f"缺少必要字段: {', '.join(missing_fields)}"
+                    )
+                
+                # 调用工作站的处理方法
+                result = self.workstation.handle_external_error(request_data)
+                
+                return HttpResponse(
+                    success=True,
+                    message=f"错误处理报送已处理: {request_data['error_type']} - {request_data['error_message']}",
+                    acknowledgment_id=f"ERROR_{int(time.time() * 1000)}_{request_data.get('action_id', 'unknown')}",
+                    data=result
+                )
                 
         except Exception as e:
             logger.error(f"处理错误处理报送失败: {e}")
@@ -548,12 +601,18 @@ class WorkstationHTTPService:
         """停止HTTP服务"""
         try:
             if self.running and self.server:
+                logger.info("正在停止工作站HTTP报送服务...")
                 self.running = False
-                self.server.shutdown()
-                self.server.server_close()
                 
+                # 停止serve_forever循环
+                self.server.shutdown()
+                
+                # 等待服务器线程结束
                 if self.server_thread and self.server_thread.is_alive():
                     self.server_thread.join(timeout=5.0)
+                
+                # 关闭服务器套接字
+                self.server.server_close()
                 
                 logger.info("工作站HTTP报送服务已停止")
                 
@@ -563,11 +622,13 @@ class WorkstationHTTPService:
     def _run_server(self):
         """运行HTTP服务器"""
         try:
-            while self.running:
-                self.server.handle_request()
+            # 使用serve_forever()让服务持续运行
+            self.server.serve_forever()
         except Exception as e:
             if self.running:  # 只在非正常停止时记录错误
                 logger.error(f"HTTP服务运行错误: {e}")
+        finally:
+            logger.info("HTTP服务器线程已退出")
     
     @property
     def is_running(self) -> bool:
@@ -603,3 +664,49 @@ __all__ = [
     'MaterialChangeReport',
     'TaskExecutionReport'
 ]
+
+
+if __name__ == "__main__":
+    # 简单测试HTTP服务
+    class DummyWorkstation:
+        device_id = "WS-001"
+        
+        def process_step_finish_report(self, report_request):
+            return {"processed": True}
+        
+        def process_sample_finish_report(self, report_request):
+            return {"processed": True}
+        
+        def process_order_finish_report(self, report_request, used_materials):
+            return {"processed": True}
+        
+        def process_material_change_report(self, report_data):
+            return {"processed": True}
+        
+        def handle_external_error(self, error_data):
+            return {"handled": True}
+    
+    workstation = DummyWorkstation()
+    http_service = WorkstationHTTPService(workstation)
+    
+    try:
+        http_service.start()
+        print(f"测试服务器已启动: {http_service.service_url}")
+        print("按 Ctrl+C 停止服务器")
+        print("服务将持续运行，等待接收HTTP请求...")
+        
+        # 保持服务器运行 - 使用更好的等待机制
+        try:
+            while http_service.is_running:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            print("\n接收到停止信号...")
+            
+    except KeyboardInterrupt:
+        print("\n正在停止服务器...")
+        http_service.stop()
+        print("服务器已停止")
+    except Exception as e:
+        print(f"服务器运行错误: {e}")
+        http_service.stop()
+

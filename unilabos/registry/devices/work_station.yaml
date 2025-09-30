@@ -6034,10 +6034,108 @@ workstation:
   init_param_schema:
     config:
       properties:
-        station_resource:
+        deck:
           type: string
       required:
-      - station_resource
+      - deck
+      type: object
+    data:
+      properties: {}
+      required: []
+      type: object
+  version: 1.0.0
+workstation.bioyond:
+  category:
+  - work_station
+  class:
+    action_value_mappings:
+      auto-execute_bioyond_sync_workflow:
+        feedback: {}
+        goal: {}
+        goal_default:
+          parameters: null
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                parameters:
+                  type: object
+              required:
+              - parameters
+              type: object
+            result: {}
+          required:
+          - goal
+          title: execute_bioyond_sync_workflow参数
+          type: object
+        type: UniLabJsonCommandAsync
+      auto-execute_bioyond_update_workflow:
+        feedback: {}
+        goal: {}
+        goal_default:
+          parameters: null
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                parameters:
+                  type: object
+              required:
+              - parameters
+              type: object
+            result: {}
+          required:
+          - goal
+          title: execute_bioyond_update_workflow参数
+          type: object
+        type: UniLabJsonCommandAsync
+      auto-load_bioyond_data_from_file:
+        feedback: {}
+        goal: {}
+        goal_default:
+          file_path: null
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                file_path:
+                  type: string
+              required:
+              - file_path
+              type: object
+            result: {}
+          required:
+          - goal
+          title: load_bioyond_data_from_file参数
+          type: object
+        type: UniLabJsonCommand
+    module: unilabos.devices.workstation.bioyond_studio.station:BioyondWorkstation
+    status_types: {}
+    type: python
+  config_info: []
+  description: ''
+  handles: []
+  icon: 反应站.webp
+  init_param_schema:
+    config:
+      properties:
+        bioyond_config:
+          type: string
+        deck:
+          type: string
+      required: []
       type: object
     data:
       properties: {}

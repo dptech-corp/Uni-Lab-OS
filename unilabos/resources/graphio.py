@@ -4,6 +4,7 @@ import json
 from typing import Union, Any, Dict
 import numpy as np
 import networkx as nx
+from pylabrobot.resources import ResourceHolder
 from unilabos_msgs.msg import Resource
 
 from unilabos.resources.container import RegularContainer
@@ -480,7 +481,54 @@ def resource_plr_to_ulab(resource_plr: "ResourcePLR", parent_name: str = None, w
     return r
 
 
-def initialize_resource(resource_config: dict) -> list[dict]:
+def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: dict = {}, deck: Any = None) -> list[dict]:
+    """
+    将 bioyond 物料格式转换为 ulab 物料格式
+
+    Args:
+        bioyond_materials: bioyond 系统的物料查询结果列表
+        type_mapping: 物料类型映射字典，格式 {bioyond_type: plr_class_name}
+        location_id_mapping: 库位 ID 到名称的映射字典，格式 {location_id: location_name}
+
+    Returns:
+        pylabrobot 格式的物料列表
+    """
+    plr_materials = []
+
+    for material in bioyond_materials:
+        className = type_mapping.get(material.get("typeName"), "RegularContainer") if type_mapping else "RegularContainer"
+        
+        plr_material: ResourcePLR = initialize_resource({"name": material["name"], "class": className}, resource_type=ResourcePLR)
+        plr_material.code = material.get("code", "") and material.get("barCode", "") or ""
+
+        # 处理子物料（detail）
+        if material.get("detail") and len(material["detail"]) > 0:
+            child_ids = []
+            for detail in material["detail"]:
+                number = (detail.get("z", 0) - 1) * plr_material.num_items_x * plr_material.num_items_y + \
+                         (detail.get("x", 0) - 1) * plr_material.num_items_x + \
+                         (detail.get("y", 0) - 1)
+                bottle = plr_material[number]
+                bottle.code = detail.get("code", "")
+                bottle.tracker.liquids = [(detail["name"], float(detail.get("quantity", 0)) if detail.get("quantity") else 0)]
+                
+        plr_materials.append(plr_material)
+
+        if deck and hasattr(deck, "warehouses"):
+            for loc in material.get("locations", []):
+                if hasattr(deck, "warehouses") and loc.get("whName") in deck.warehouses:
+                    warehouse = deck.warehouses[loc["whName"]]
+                    idx = (loc.get("y", 0) - 1) * warehouse.num_items_x * warehouse.num_items_y + \
+                          (loc.get("x", 0) - 1) * warehouse.num_items_x + \
+                          (loc.get("z", 0) - 1)
+                    if 0 <= idx < warehouse.capacity:
+                        if warehouse[idx] is None or isinstance(warehouse[idx], ResourceHolder):
+                            warehouse[idx] = plr_material
+
+    return plr_materials
+
+
+def initialize_resource(resource_config: dict, resource_type: Any = None) -> Union[list[dict], ResourcePLR]:
     """Initializes a resource based on its configuration.
 
     If the config is detailed, then do nothing;
@@ -512,11 +560,14 @@ def initialize_resource(resource_config: dict) -> list[dict]:
 
         if resource_class_config["type"] == "pylabrobot":
             resource_plr = RESOURCE(name=resource_config["name"])
-            r = resource_plr_to_ulab(resource_plr=resource_plr, parent_name=resource_config.get("parent", None))
-            # r = resource_plr_to_ulab(resource_plr=resource_plr)
-            if resource_config.get("position") is not None:
-                r["position"] = resource_config["position"]
-            r = tree_to_list([r])
+            if resource_type != ResourcePLR:
+                r = resource_plr_to_ulab(resource_plr=resource_plr, parent_name=resource_config.get("parent", None))
+                # r = resource_plr_to_ulab(resource_plr=resource_plr)
+                if resource_config.get("position") is not None:
+                    r["position"] = resource_config["position"]
+                r = tree_to_list([r])
+            else:
+                r = resource_plr
         elif resource_class_config["type"] == "unilabos":
             res_instance: RegularContainer = RESOURCE(id=resource_config["name"])
             res_instance.ulr_resource = convert_to_ros_msg(Resource, {k:v for k,v in resource_config.items() if k != "class"})

@@ -41,7 +41,7 @@
                     "HydrogenateProtocol",
                     "RecrystallizeProtocol"
                 ],
-                "station_resource": {
+                "deck": {
                     "data": {
                         "_resource_child_name": "deck",
                         "_resource_type": "pylabrobot.resources.opentrons.deck:OTDeck"

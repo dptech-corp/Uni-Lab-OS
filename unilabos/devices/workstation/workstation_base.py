@@ -112,17 +112,17 @@ class ResourceSynchronizer(ABC):
         self.workstation = workstation
 
     @abstractmethod
-    async def sync_from_external(self) -> bool:
+    def sync_from_external(self) -> bool:
         """从外部系统同步物料到本地deck"""
         pass
 
     @abstractmethod
-    async def sync_to_external(self, plr_resource: PLRResource) -> bool:
+    def sync_to_external(self, plr_resource: PLRResource) -> bool:
         """将本地物料同步到外部系统"""
         pass
 
     @abstractmethod
-    async def handle_external_change(self, change_info: Dict[str, Any]) -> bool:
+    def handle_external_change(self, change_info: Dict[str, Any]) -> bool:
         """处理外部系统的变更通知"""
         pass
 
@@ -147,17 +147,15 @@ class WorkstationBase(ABC):
 
     def __init__(
         self,
-        station_resource: PLRResource,
+        deck: Deck,
         *args,
         **kwargs,  # 必须有kwargs
     ):
-        # 基本配置
-        print(station_resource)
-        self.deck_config = station_resource
-
         # PLR 物料系统
-        self.deck: Optional[Deck] = None
+        self.deck: Optional[Deck] = deck
         self.plr_resources: Dict[str, PLRResource] = {}
+
+        self.resource_synchronizer = None  # type: Optional[ResourceSynchronizer]
         # 硬件接口
         self.hardware_interface: Union[Any, str] = None
 
@@ -173,46 +171,7 @@ class WorkstationBase(ABC):
     def post_init(self, ros_node: ROS2WorkstationNode) -> None:
         # 初始化物料系统
         self._ros_node = ros_node
-        self._initialize_material_system()
-
-    def _initialize_material_system(self):
-        """初始化物料系统 - 使用 graphio 转换"""
-        pass
-
-    def _create_complete_resource_config(self) -> Dict[str, Any]:
-        """创建完整的资源配置 - 合并 deck_config 和 children"""
-        # 创建主 deck 配置
-        return {}
-
-    def _normalize_child_resource(self, resource_id: str, config: Dict[str, Any], parent_id: str) -> Dict[str, Any]:
-        """标准化子资源配置"""
-        return {
-            "id": resource_id,
-            "name": config.get("name", resource_id),
-            "type": config.get("type", "container"),
-            "position": self._normalize_position(config.get("position", {})),
-            "config": config.get("config", {}),
-            "data": config.get("data", {}),
-            "children": [],  # 简化版本：只支持一层子资源
-            "parent": parent_id,
-        }
-
-    def _normalize_position(self, position: Any) -> Dict[str, float]:
-        """标准化位置信息"""
-        if isinstance(position, dict):
-            return {
-                "x": float(position.get("x", 0)),
-                "y": float(position.get("y", 0)),
-                "z": float(position.get("z", 0)),
-            }
-        elif isinstance(position, (list, tuple)) and len(position) >= 2:
-            return {
-                "x": float(position[0]),
-                "y": float(position[1]),
-                "z": float(position[2]) if len(position) > 2 else 0.0,
-            }
-        else:
-            return {"x": 0.0, "y": 0.0, "z": 0.0}
+        self._ros_node.update_resource([self.deck])
 
     def _build_resource_mappings(self, deck: Deck):
         """递归构建资源映射"""
@@ -296,14 +255,14 @@ class WorkstationBase(ABC):
         """按类型查找资源"""
         return [res for res in self.plr_resources.values() if isinstance(res, resource_type)]
 
-    async def sync_with_external_system(self) -> bool:
+    def sync_with_external_system(self) -> bool:
         """与外部物料系统同步"""
         if not self.resource_synchronizer:
             logger.info(f"工作站 {self._ros_node.device_id} 没有配置资源同步器")
             return True
 
         try:
-            success = await self.resource_synchronizer.sync_from_external()
+            success = self.resource_synchronizer.sync_from_external()
             if success:
                 logger.info(f"工作站 {self._ros_node.device_id} 外部同步成功")
             else:
@@ -391,5 +350,5 @@ class WorkstationBase(ABC):
 
 
 class ProtocolNode(WorkstationBase):
-    def __init__(self, station_resource: Optional[PLRResource], *args, **kwargs):
-        super().__init__(station_resource, *args, **kwargs)
+    def __init__(self, deck: Optional[PLRResource], *args, **kwargs):
+        super().__init__(deck, *args, **kwargs)

@@ -296,14 +296,14 @@ class WorkstationNodeCreator(DeviceClassCreator[T]):
         try:
             # 创建实例，额外补充一个给protocol node的字段，后面考虑取消
             data["children"] = self.children
-            station_resource_dict = data.get("station_resource")
-            if station_resource_dict:
+            deck_dict = data.get("deck")
+            if deck_dict:
                 from pylabrobot.resources import Deck, Resource
                 plrc = PyLabRobotCreator(Deck, self.children, self.resource_tracker)
-                station_resource = plrc.create_instance(station_resource_dict)
-                data["station_resource"] = station_resource
+                deck = plrc.create_instance(deck_dict)
+                data["deck"] = deck
             else:
-                data["station_resource"] = None
+                data["deck"] = None
             self.device_instance = super(WorkstationNodeCreator, self).create_instance(data)
             self.post_create()
             return self.device_instance
