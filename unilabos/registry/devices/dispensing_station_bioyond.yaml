@@ -1,0 +1,334 @@
+dispensing_station.bioyond:
+  category:
+  - work_station
+  - dispensing_station_bioyond
+  class:
+    action_value_mappings:
+      bioyond_sync:
+        feedback: {}
+        goal:
+          force_sync: force_sync
+          sync_type: sync_type
+        goal_default:
+          force_sync: false
+          sync_type: full
+        handles: {}
+        result: {}
+        schema:
+          description: 从Bioyond系统同步物料
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                force_sync:
+                  description: 是否强制同步
+                  type: boolean
+                sync_type:
+                  description: 同步类型
+                  enum:
+                  - full
+                  - incremental
+                  type: string
+              required:
+              - sync_type
+              type: object
+            result: {}
+          required:
+          - goal
+          title: bioyond_sync参数
+          type: object
+        type: UniLabJsonCommand
+      bioyond_update:
+        feedback: {}
+        goal:
+          material_ids: material_ids
+          sync_all: sync_all
+        goal_default:
+          material_ids: []
+          sync_all: true
+        handles: {}
+        result: {}
+        schema:
+          description: 将本地物料变更同步到Bioyond
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                material_ids:
+                  description: 要同步的物料ID列表
+                  items:
+                    type: string
+                  type: array
+                sync_all:
+                  description: 是否同步所有物料
+                  type: boolean
+              required:
+              - sync_all
+              type: object
+            result: {}
+          required:
+          - goal
+          title: bioyond_update参数
+          type: object
+        type: UniLabJsonCommand
+      create_90_10_vial_feeding_task:
+        feedback: {}
+        goal:
+          feeding_parameters: feeding_parameters
+          vial_config: vial_config
+        goal_default:
+          feeding_parameters: {}
+          vial_config: {}
+        handles: {}
+        result: {}
+        schema:
+          description: 创建90-10试管进料任务
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                feeding_parameters:
+                  description: 进料参数
+                  type: object
+                vial_config:
+                  description: 试管配置
+                  type: object
+              required:
+              - vial_config
+              - feeding_parameters
+              type: object
+            result: {}
+          required:
+          - goal
+          title: create_90_10_vial_feeding_task参数
+          type: object
+        type: UniLabJsonCommand
+      create_diamine_solution_task:
+        feedback: {}
+        goal:
+          concentration: concentration
+          solution_config: solution_config
+        goal_default:
+          concentration: 0.0
+          solution_config: {}
+        handles: {}
+        result: {}
+        schema:
+          description: 创建二胺溶液任务
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                concentration:
+                  description: 浓度(mol/L)
+                  type: number
+                solution_config:
+                  description: 溶液配置
+                  type: object
+              required:
+              - solution_config
+              - concentration
+              type: object
+            result: {}
+          required:
+          - goal
+          title: create_diamine_solution_task参数
+          type: object
+        type: UniLabJsonCommand
+      create_resource:
+        feedback: {}
+        goal:
+          resource_config: resource_config
+          resource_type: resource_type
+        goal_default:
+          resource_config: {}
+          resource_type: ''
+        handles: {}
+        result: {}
+        schema:
+          description: 创建资源操作
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                resource_config:
+                  description: 资源配置
+                  type: object
+                resource_type:
+                  description: 资源类型
+                  type: string
+              required:
+              - resource_type
+              - resource_config
+              type: object
+            result: {}
+          required:
+          - goal
+          title: create_resource参数
+          type: object
+        type: UniLabJsonCommand
+      dispensing_material_inbound:
+        feedback: {}
+        goal:
+          location: location
+          material_id: material_id
+        goal_default:
+          location: ''
+          material_id: ''
+        handles: {}
+        result: {}
+        schema:
+          description: 配液站物料入库操作
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                location:
+                  description: 存储位置
+                  type: string
+                material_id:
+                  description: 物料ID
+                  type: string
+              required:
+              - material_id
+              - location
+              type: object
+            result: {}
+          required:
+          - goal
+          title: dispensing_material_inbound参数
+          type: object
+        type: UniLabJsonCommand
+      dispensing_material_outbound:
+        feedback: {}
+        goal:
+          material_id: material_id
+          quantity: quantity
+        goal_default:
+          material_id: ''
+          quantity: 0.0
+        handles: {}
+        result: {}
+        schema:
+          description: 配液站物料出库操作
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                material_id:
+                  description: 物料ID
+                  type: string
+                quantity:
+                  description: 出库数量
+                  type: number
+              required:
+              - material_id
+              - quantity
+              type: object
+            result: {}
+          required:
+          - goal
+          title: dispensing_material_outbound参数
+          type: object
+        type: UniLabJsonCommand
+      sample_waste_removal:
+        feedback: {}
+        goal:
+          sample_id: sample_id
+          waste_type: waste_type
+        goal_default:
+          sample_id: ''
+          waste_type: general
+        handles: {}
+        result: {}
+        schema:
+          description: 样品废料移除操作
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                sample_id:
+                  description: 样品ID
+                  type: string
+                waste_type:
+                  description: 废料类型
+                  enum:
+                  - general
+                  - hazardous
+                  - organic
+                  - inorganic
+                  type: string
+              required:
+              - sample_id
+              type: object
+            result: {}
+          required:
+          - goal
+          title: sample_waste_removal参数
+          type: object
+        type: UniLabJsonCommand
+    module: unilabos.devices.workstation.bioyond_studio.station:BioyondWorkstation
+    protocol_type: []
+    status_types:
+      bioyond_status: dict
+      enable_dispensing_station: bool
+      enable_reaction_station: bool
+      station_type: str
+    type: python
+  config_info: []
+  description: Bioyond配液站 - 专门用于物料配制和管理的工作站
+  handles: []
+  icon: 配液站.webp
+  init_param_schema:
+    config:
+      properties:
+        bioyond_config:
+          description: Bioyond API配置
+          properties:
+            api_host:
+              description: Bioyond API主机地址
+              type: string
+            api_key:
+              description: Bioyond API密钥
+              type: string
+            material_type_mappings:
+              description: 物料类型映射配置
+              type: object
+            workflow_mappings:
+              description: 工作流映射配置
+              type: object
+          type: object
+        deck:
+          description: Deck配置
+          type: object
+        station_config:
+          description: 配液站配置
+          properties:
+            description:
+              description: 配液站描述
+              type: string
+            enable_dispensing_station:
+              default: true
+              description: 启用配液站功能
+              type: boolean
+            enable_reaction_station:
+              default: false
+              description: 禁用反应站功能
+              type: boolean
+            station_name:
+              description: 配液站名称
+              type: string
+            station_type:
+              default: dispensing_station
+              description: 站点类型 - 配液站
+              enum:
+              - dispensing_station
+              type: string
+          type: object
+      required: []
+      type: object
+    data:
+      properties: {}
+      required: []
+      type: object
+  version: 1.0.0

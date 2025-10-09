@@ -1,0 +1,384 @@
+reaction_station.bioyond:
+  category:
+  - work_station
+  - reaction_station_bioyond
+  class:
+    action_value_mappings:
+      bioyond_sync:
+        feedback: {}
+        goal:
+          force_sync: force_sync
+          sync_type: sync_type
+        goal_default:
+          force_sync: false
+          sync_type: full
+        handles: {}
+        result: {}
+        schema:
+          description: 从Bioyond系统同步物料
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                force_sync:
+                  description: 是否强制同步
+                  type: boolean
+                sync_type:
+                  description: 同步类型
+                  enum:
+                  - full
+                  - incremental
+                  type: string
+              required:
+              - sync_type
+              type: object
+            result: {}
+          required:
+          - goal
+          title: bioyond_sync参数
+          type: object
+        type: UniLabJsonCommand
+      bioyond_update:
+        feedback: {}
+        goal:
+          material_ids: material_ids
+          sync_all: sync_all
+        goal_default:
+          material_ids: []
+          sync_all: true
+        handles: {}
+        result: {}
+        schema:
+          description: 将本地物料变更同步到Bioyond
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                material_ids:
+                  description: 要同步的物料ID列表
+                  items:
+                    type: string
+                  type: array
+                sync_all:
+                  description: 是否同步所有物料
+                  type: boolean
+              required:
+              - sync_all
+              type: object
+            result: {}
+          required:
+          - goal
+          title: bioyond_update参数
+          type: object
+        type: UniLabJsonCommand
+      reaction_station_drip_back:
+        feedback: {}
+        goal:
+          assign_material_name: assign_material_name
+          time: time
+          torque_variation: torque_variation
+          volume: volume
+        goal_default:
+          assign_material_name: ''
+          time: ''
+          torque_variation: ''
+          volume: ''
+        handles: {}
+        result: {}
+        schema:
+          description: 反应站滴回操作
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                assign_material_name:
+                  description: 溶剂名称
+                  type: string
+                time:
+                  description: 观察时间（单位min）
+                  type: string
+                torque_variation:
+                  description: 是否观察1否2是
+                  type: string
+                volume:
+                  description: 投料体积
+                  type: string
+              required:
+              - volume
+              - assign_material_name
+              - time
+              - torque_variation
+              type: object
+            result: {}
+          required:
+          - goal
+          title: reaction_station_drip_back参数
+          type: object
+        type: UniLabJsonCommand
+      reaction_station_liquid_feed:
+        feedback: {}
+        goal:
+          assign_material_name: assign_material_name
+          time: time
+          titration_type: titration_type
+          torque_variation: torque_variation
+          volume: volume
+        goal_default:
+          assign_material_name: ''
+          time: ''
+          titration_type: ''
+          torque_variation: ''
+          volume: ''
+        handles: {}
+        result: {}
+        schema:
+          description: 反应站液体进料操作
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                assign_material_name:
+                  description: 溶剂名称
+                  type: string
+                time:
+                  description: 观察时间（单位min）
+                  type: string
+                titration_type:
+                  description: 滴定类型1否2是
+                  type: string
+                torque_variation:
+                  description: 是否观察1否2是
+                  type: string
+                volume:
+                  description: 投料体积
+                  type: string
+              required:
+              - titration_type
+              - volume
+              - assign_material_name
+              - time
+              - torque_variation
+              type: object
+            result: {}
+          required:
+          - goal
+          title: reaction_station_liquid_feed参数
+          type: object
+        type: UniLabJsonCommand
+      reaction_station_process_execute:
+        feedback: {}
+        goal:
+          task_name: task_name
+          workflow_name: workflow_name
+        goal_default:
+          task_name: ''
+          workflow_name: ''
+        handles: {}
+        result: {}
+        schema:
+          description: 反应站流程执行
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                task_name:
+                  description: 任务名称
+                  type: string
+                workflow_name:
+                  description: 工作流名称
+                  type: string
+              required:
+              - workflow_name
+              - task_name
+              type: object
+            result: {}
+          required:
+          - goal
+          title: reaction_station_process_execute参数
+          type: object
+        type: UniLabJsonCommand
+      reaction_station_reactor_taken_out:
+        feedback: {}
+        goal:
+          order_id: order_id
+          preintake_id: preintake_id
+        goal_default:
+          order_id: ''
+          preintake_id: ''
+        handles: {}
+        result: {}
+        schema:
+          description: 反应站反应器取出操作 - 通过订单ID和预取样ID进行精确控制
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                order_id:
+                  description: 订单ID，用于标识要取出的订单
+                  type: string
+                preintake_id:
+                  description: 预取样ID，用于标识具体的取样任务
+                  type: string
+              required: []
+              type: object
+            result:
+              properties:
+                code:
+                  description: 操作结果代码（1表示成功，0表示失败）
+                  type: integer
+                return_info:
+                  description: 操作结果详细信息
+                  type: string
+              type: object
+          required:
+          - goal
+          title: reaction_station_reactor_taken_out参数
+          type: object
+        type: UniLabJsonCommand
+      reaction_station_solid_feed_vial:
+        feedback: {}
+        goal:
+          assign_material_name: assign_material_name
+          material_id: material_id
+          time: time
+          torque_variation: torque_variation
+        goal_default:
+          assign_material_name: ''
+          material_id: ''
+          time: ''
+          torque_variation: ''
+        handles: {}
+        result: {}
+        schema:
+          description: 反应站固体进料操作
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                assign_material_name:
+                  description: 固体名称_粉末加样模块-投料
+                  type: string
+                material_id:
+                  description: 固体投料类型_粉末加样模块-投料
+                  type: string
+                time:
+                  description: 观察时间_反应模块-观察搅拌结果
+                  type: string
+                torque_variation:
+                  description: 是否观察1否2是_反应模块-观察搅拌结果
+                  type: string
+              required:
+              - assign_material_name
+              - material_id
+              - time
+              - torque_variation
+              type: object
+            result: {}
+          required:
+          - goal
+          title: reaction_station_solid_feed_vial参数
+          type: object
+        type: UniLabJsonCommand
+      reaction_station_take_in:
+        feedback: {}
+        goal:
+          assign_material_name: assign_material_name
+          cutoff: cutoff
+          temperature: temperature
+        goal_default:
+          assign_material_name: ''
+          cutoff: ''
+          temperature: ''
+        handles: {}
+        result: {}
+        schema:
+          description: 反应站取入操作
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                assign_material_name:
+                  description: 物料名称
+                  type: string
+                cutoff:
+                  description: 截止参数
+                  type: string
+                temperature:
+                  description: 温度
+                  type: string
+              required:
+              - cutoff
+              - temperature
+              - assign_material_name
+              type: object
+            result: {}
+          required:
+          - goal
+          title: reaction_station_take_in参数
+          type: object
+        type: UniLabJsonCommand
+    module: unilabos.devices.workstation.bioyond_studio.station:BioyondWorkstation
+    protocol_type: []
+    status_types:
+      bioyond_status: dict
+      enable_dispensing_station: bool
+      enable_reaction_station: bool
+      station_type: str
+    type: python
+  config_info: []
+  description: Bioyond反应站 - 专门用于化学反应操作的工作站
+  handles: []
+  icon: 反应站.webp
+  init_param_schema:
+    config:
+      properties:
+        bioyond_config:
+          description: Bioyond API配置
+          properties:
+            api_host:
+              description: Bioyond API主机地址
+              type: string
+            api_key:
+              description: Bioyond API密钥
+              type: string
+            material_type_mappings:
+              description: 物料类型映射配置
+              type: object
+            workflow_mappings:
+              description: 工作流映射配置
+              type: object
+          type: object
+        deck:
+          description: Deck配置
+          type: object
+        station_config:
+          description: 反应站配置
+          properties:
+            description:
+              description: 反应站描述
+              type: string
+            enable_dispensing_station:
+              default: false
+              description: 禁用配液站功能
+              type: boolean
+            enable_reaction_station:
+              default: true
+              description: 启用反应站功能
+              type: boolean
+            station_name:
+              description: 反应站名称
+              type: string
+            station_type:
+              default: reaction_station
+              description: 站点类型 - 反应站
+              enum:
+              - reaction_station
+              type: string
+          type: object
+      required: []
+      type: object
+    data:
+      properties: {}
+      required: []
+      type: object
+  version: 1.0.0

@@ -1,8 +1,10 @@
-# Goal - 滴回去操作参数
-string volume                   # 投料体积
-string assign_material_name     # 溶剂名称
+# Goal - 液体投料-烧杯操作参数
+string volume                    # 投料体积
+string assign_material_name      # 溶剂名称
+string titration_type           # 滴定类型1否2是
 string time                     # 观察时间（单位min）
 string torque_variation         # 是否观察1否2是
+string temperature              # 温度设置
 ---
 # Result - 操作结果
 bool success                    # 操作是否成功
