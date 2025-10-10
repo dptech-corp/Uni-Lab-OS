@@ -74,28 +74,108 @@ dispensing_station.bioyond:
       create_90_10_vial_feeding_task:
         feedback: {}
         goal:
-          feeding_parameters: feeding_parameters
-          vial_config: vial_config
+          delay_time: delay_time
+          order_name: order_name
+          percent_10_1_assign_material_name: percent_10_1_assign_material_name
+          percent_10_1_liquid_material_name: percent_10_1_liquid_material_name
+          percent_10_1_target_weigh: percent_10_1_target_weigh
+          percent_10_1_volume: percent_10_1_volume
+          percent_10_2_assign_material_name: percent_10_2_assign_material_name
+          percent_10_2_liquid_material_name: percent_10_2_liquid_material_name
+          percent_10_2_target_weigh: percent_10_2_target_weigh
+          percent_10_2_volume: percent_10_2_volume
+          percent_90_1_assign_material_name: percent_90_1_assign_material_name
+          percent_90_1_target_weigh: percent_90_1_target_weigh
+          percent_90_2_assign_material_name: percent_90_2_assign_material_name
+          percent_90_2_target_weigh: percent_90_2_target_weigh
+          percent_90_3_assign_material_name: percent_90_3_assign_material_name
+          percent_90_3_target_weigh: percent_90_3_target_weigh
+          speed: speed
+          temperature: temperature
         goal_default:
-          feeding_parameters: {}
-          vial_config: {}
+          delay_time: '600'
+          order_name: ''
+          percent_10_1_assign_material_name: ''
+          percent_10_1_liquid_material_name: ''
+          percent_10_1_target_weigh: ''
+          percent_10_1_volume: ''
+          percent_10_2_assign_material_name: ''
+          percent_10_2_liquid_material_name: ''
+          percent_10_2_target_weigh: ''
+          percent_10_2_volume: ''
+          percent_90_1_assign_material_name: ''
+          percent_90_1_target_weigh: ''
+          percent_90_2_assign_material_name: ''
+          percent_90_2_target_weigh: ''
+          percent_90_3_assign_material_name: ''
+          percent_90_3_target_weigh: ''
+          speed: '400'
+          temperature: '20'
         handles: {}
         result: {}
         schema:
-          description: 创建90-10试管进料任务
+          description: 创建90%/10%小瓶投料任务
           properties:
             feedback: {}
             goal:
               properties:
-                feeding_parameters:
-                  description: 进料参数
-                  type: object
-                vial_config:
-                  description: 试管配置
-                  type: object
-              required:
-              - vial_config
-              - feeding_parameters
+                delay_time:
+                  default: '600'
+                  description: 延迟时间(s)
+                  type: string
+                order_name:
+                  description: 任务名称
+                  type: string
+                percent_10_1_assign_material_name:
+                  description: 10%组分1物料名称
+                  type: string
+                percent_10_1_liquid_material_name:
+                  description: 10%组分1液体物料名称
+                  type: string
+                percent_10_1_target_weigh:
+                  description: 10%组分1目标重量(g)
+                  type: string
+                percent_10_1_volume:
+                  description: 10%组分1液体体积(mL)
+                  type: string
+                percent_10_2_assign_material_name:
+                  description: 10%组分2物料名称
+                  type: string
+                percent_10_2_liquid_material_name:
+                  description: 10%组分2液体物料名称
+                  type: string
+                percent_10_2_target_weigh:
+                  description: 10%组分2目标重量(g)
+                  type: string
+                percent_10_2_volume:
+                  description: 10%组分2液体体积(mL)
+                  type: string
+                percent_90_1_assign_material_name:
+                  description: 90%组分1物料名称
+                  type: string
+                percent_90_1_target_weigh:
+                  description: 90%组分1目标重量(g)
+                  type: string
+                percent_90_2_assign_material_name:
+                  description: 90%组分2物料名称
+                  type: string
+                percent_90_2_target_weigh:
+                  description: 90%组分2目标重量(g)
+                  type: string
+                percent_90_3_assign_material_name:
+                  description: 90%组分3物料名称
+                  type: string
+                percent_90_3_target_weigh:
+                  description: 90%组分3目标重量(g)
+                  type: string
+                speed:
+                  default: '400'
+                  description: 搅拌速度(rpm)
+                  type: string
+                temperature:
+                  default: '20'
+                  description: 温度(°C)
+                  type: string
               type: object
             result: {}
           required:
@@ -103,31 +183,123 @@ dispensing_station.bioyond:
           title: create_90_10_vial_feeding_task参数
           type: object
         type: UniLabJsonCommand
-      create_diamine_solution_task:
+      create_batch_90_10_vial_feeding_task:
         feedback: {}
         goal:
-          concentration: concentration
-          solution_config: solution_config
+          batch_data: batch_data
         goal_default:
-          concentration: 0.0
-          solution_config: {}
+          batch_data: '{}'
         handles: {}
         result: {}
         schema:
-          description: 创建二胺溶液任务
+          description: 创建批量90%10%小瓶投料任务
           properties:
             feedback: {}
             goal:
               properties:
-                concentration:
-                  description: 浓度(mol/L)
-                  type: number
-                solution_config:
-                  description: 溶液配置
-                  type: object
+                batch_data:
+                  description: 批量90%10%小瓶投料任务数据(JSON格式)，包含batch_name、tasks列表和global_settings
+                  type: string
               required:
-              - solution_config
-              - concentration
+              - batch_data
+              type: object
+            result: {}
+          required:
+          - goal
+          title: create_batch_90_10_vial_feeding_task参数
+          type: object
+        type: UniLabJsonCommand
+      create_batch_diamine_solution_task:
+        feedback: {}
+        goal:
+          batch_data: batch_data
+        goal_default:
+          batch_data: '{}'
+        handles: {}
+        result: {}
+        schema:
+          description: 创建批量二胺溶液配制任务
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                batch_data:
+                  description: 批量二胺溶液配制任务数据(JSON格式)，包含batch_name、tasks列表和global_settings
+                  type: string
+              required:
+              - batch_data
+              type: object
+            result: {}
+          required:
+          - goal
+          title: create_batch_diamine_solution_task参数
+          type: object
+        type: UniLabJsonCommand
+      create_diamine_solution_task:
+        feedback: {}
+        goal:
+          delay_time: delay_time
+          hold_m_name: hold_m_name
+          liquid_material_name: liquid_material_name
+          material_name: material_name
+          order_name: order_name
+          speed: speed
+          target_weigh: target_weigh
+          temperature: temperature
+          volume: volume
+        goal_default:
+          delay_time: '600'
+          hold_m_name: ''
+          liquid_material_name: NMP
+          material_name: ''
+          order_name: ''
+          speed: '400'
+          target_weigh: ''
+          temperature: '20'
+          volume: ''
+        handles: {}
+        result: {}
+        schema:
+          description: 创建二胺溶液配制任务
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                delay_time:
+                  default: '600'
+                  description: 延迟时间(s)
+                  type: string
+                hold_m_name:
+                  description: 库位名称(如ODA-1)
+                  type: string
+                liquid_material_name:
+                  default: NMP
+                  description: 液体物料名称
+                  type: string
+                material_name:
+                  description: 固体物料名称
+                  type: string
+                order_name:
+                  description: 任务名称
+                  type: string
+                speed:
+                  default: '400'
+                  description: 搅拌速度(rpm)
+                  type: string
+                target_weigh:
+                  description: 固体目标重量(g)
+                  type: string
+                temperature:
+                  default: '20'
+                  description: 温度(°C)
+                  type: string
+                volume:
+                  description: 液体体积(mL)
+                  type: string
+              required:
+              - material_name
+              - target_weigh
+              - volume
               type: object
             result: {}
           required:
