@@ -49,7 +49,7 @@ class ResourceDict(BaseModel):
     uuid: str = Field(description="Resource UUID")
     name: str = Field(description="Resource name")
     description: str = Field(description="Resource description", default="")
-    schema: Dict[str, Any] = Field(description="Resource schema", default_factory=dict)
+    resource_schema: Dict[str, Any] = Field(description="Resource schema", default_factory=dict, serialization_alias="schema", validation_alias="schema")
     model: Dict[str, Any] = Field(description="Resource model", default_factory=dict)
     icon: str = Field(description="Resource icon", default="")
     parent_uuid: Optional["str"] = Field(description="Parent resource uuid", default=None)  # 先设定parent_uuid
