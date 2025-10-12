@@ -4,13 +4,14 @@ package_name = 'unilabos'
 
 setup(
     name=package_name,
-    version='0.10.6',
+    version='0.10.7',
     packages=find_packages(),
     include_package_data=True,
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='Junhan Chang',
-    maintainer_email='changjh@pku.edu.cn',
+    author="The unilabos developers",
+    maintainer='Junhan Chang, Xuwznln',
+    maintainer_email='Junhan Chang <changjh@pku.edu.cn>, Xuwznln <18435084+Xuwznln@users.noreply.github.com>',
     description='',
     license='GPL v3',
     tests_require=['pytest'],

@@ -2,6 +2,7 @@ import asyncio
 import collections
 import contextlib
 import json
+import os
 import socket
 import time
 from typing import Any, List, Dict, Optional, Tuple, TypedDict, Union, Sequence, Iterator, Literal
@@ -548,7 +549,7 @@ class PRCXI9300Backend(LiquidHandlerBackend):
             blending_times=0,
             balance_height=0,
             plate_or_hole=f"H{hole_col}-8,T{PlateNo}",
-            hole_numbers="1,2,3,4,5,6,7,8",
+            hole_numbers=f"{(hole_col - 1) * 8 + hole_row}" if self._num_channels == 1 else "1,2,3,4,5",
         )
         self.steps_todo_list.append(step)
 
@@ -1618,24 +1619,39 @@ if __name__ == "__main__":
         host="192.168.0.121",
         port=9999,
         timeout=10.0,
-        setup=False,
+        setup=True,
         debug=False,
         matrix_id="5de524d0-3f95-406c-86dd-f83626ebc7cb",
         channel_num=1,
-        axis="Left",
+        axis="Right",
         simulator=False,
         is_9320=True,
-    )  # Initialize the handler with the deck and host settings
+    )
     backend: PRCXI9300Backend = handler.backend
-    res = backend.api_client.get_all_materials()
-    handler.set_tiprack([plate8])  # Set the tip rack for the handler
-    asyncio.run(handler.setup())  # Initialize the handler and setup the connection
     from pylabrobot.resources import set_volume_tracking
-
-    # from pylabrobot.resources import set_tip_tracking
     set_volume_tracking(enabled=True)
+    # res = backend.api_client.get_all_materials()
+    asyncio.run(handler.setup())  # Initialize the handler and setup the connection
+    handler.set_tiprack([plate1, plate5])  # Set the tip rack for the handler
+    handler.set_liquid([plate9.get_well("H12")], ["water"], [5])
+    asyncio.run(handler.create_protocol(protocol_name="Test Protocol"))
+    asyncio.run(handler.pick_up_tips([plate5.get_item("C5")], [0]))
+    asyncio.run(handler.aspirate([plate9.get_item("H12")], [5], [0]))
 
-
+    for well in plate13.get_all_items():
+        # well_pos = well.name.split("_")[1]       # 走一行
+        # if well_pos.startswith("A"):             
+        if well.name.startswith("PlateT13"):       # 走整个Plate
+            asyncio.run(handler.dispense([well], [0.01], [0]))
+        
+    # asyncio.run(handler.dispense([plate10.get_item("H12")], [1], [0]))
+    # asyncio.run(handler.dispense([plate13.get_item("A1")], [1], [0]))
+    # asyncio.run(handler.dispense([plate14.get_item("C5")], [1], [0]))
+    asyncio.run(handler.mix([plate10.get_item("H12")], mix_time=3, mix_vol=5))
+    asyncio.run(handler.discard_tips([0]))
+    asyncio.run(handler.run_protocol())
+    time.sleep(5)
+    os._exit(0)
 # 第一种情景：一个孔往多个孔加液
     # plate_2_liquids = handler.set_group("water", [plate2.children[0]], [300])
     # plate5_liquids = handler.set_group("master_mix", plate5.children[:23], [100]*23)
@@ -1652,7 +1668,7 @@ if __name__ == "__main__":
 #     #     json.dump(A, f, indent=4, ensure_ascii=False)
 
 #     print(plate11.get_well(0).tracker.get_used_volume())
-    asyncio.run(handler.create_protocol(protocol_name="Test Protocol"))  # Initialize the backend and setup the connection
+     # Initialize the backend and setup the connection
     asyncio.run(handler.transfer_group("water", "master_mix", 10))  # Reset tip tracking
 
 

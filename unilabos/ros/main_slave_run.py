@@ -1,4 +1,3 @@
-import copy
 import json
 import threading
 import time
@@ -183,14 +182,22 @@ def slave(
             )
             tree_response: SerialCommand_Response = rclient.call_async(request).result()
             uuid_mapping = json.loads(tree_response.response)
+            # 创建反向映射：new_uuid -> old_uuid
+            reverse_uuid_mapping = {new_uuid: old_uuid for old_uuid, new_uuid in uuid_mapping.items()}
             for node in resources_config.root_nodes:
                 if node.res_content.type == "device":
                     for sub_node in node.children:
                         # 只有二级子设备
                         if sub_node.res_content.type != "device":
                             device_tracker = devices_instances[node.res_content.id].resource_tracker
-                            resource_instance = device_tracker.figure_resource(
-                                {"uuid": sub_node.res_content.uuid})
+                            # sub_node.res_content.uuid 已经是新UUID，需要用旧UUID去查找
+                            old_uuid = reverse_uuid_mapping.get(sub_node.res_content.uuid)
+                            if old_uuid:
+                                # 找到旧UUID，使用UUID查找
+                                resource_instance = device_tracker.figure_resource({"uuid": old_uuid})
+                            else:
+                                # 未找到旧UUID，使用name查找
+                                resource_instance = device_tracker.figure_resource({"name": sub_node.res_content.name})
                             device_tracker.loop_update_uuid(resource_instance, uuid_mapping)
                 else:
                     logger.error("Slave模式不允许新增非设备节点下的物料")

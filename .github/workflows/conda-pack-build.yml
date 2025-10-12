@@ -283,29 +283,24 @@ jobs:
           ls -lh dist-package/
           echo ""
 
-      - name: Create Windows ZIP archive
+      - name: Finalize Windows distribution package
         if: steps.should_build.outputs.should_build == 'true' && matrix.platform == 'win-64'
         run: |
           echo ==========================================
-          echo Creating Windows ZIP archive (ZIP64 support for large files)...
-          echo Archive: unilab-pack-${{ matrix.platform }}.zip
-          echo Contents: install_unilab.bat + unilab-env-${{ matrix.platform }}.tar.gz + extras
+          echo Windows distribution package ready
           echo.
-
-          rem Use Python script with ZIP64 support instead of PowerShell Compress-Archive
-          rem PowerShell Compress-Archive has a 2GB limitation
-          python scripts\create_zip_archive.py dist-package unilab-pack-${{ matrix.platform }}.zip
-
+          echo Package will be uploaded as artifact
+          echo GitHub Actions will automatically create ZIP
+          echo.
+          echo Contents:
+          dir /b dist-package
+          echo.
+          echo Users will download a ZIP containing:
+          echo   - install_unilab.bat
+          echo   - unilab-env-${{ matrix.platform }}.tar.gz
+          echo   - verify_installation.py
+          echo   - README.txt
           echo ==========================================
-          echo.
-          echo Final package created:
-          dir unilab-pack-*
-          echo.
-          echo Users can now:
-          echo   1. Download unilab-pack-${{ matrix.platform }}.zip
-          echo   2. Extract it
-          echo   3. Run install_unilab.bat
-          echo.
 
       - name: Create Unix/Linux TAR.GZ archive
         if: steps.should_build.outputs.should_build == 'true' && matrix.platform != 'win-64'
@@ -333,7 +328,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: unilab-pack-${{ matrix.platform }}-${{ github.event.inputs.branch }}
-          path: unilab-pack-*
+          path: dist-package/
           retention-days: 90
           if-no-files-found: error
 
@@ -347,17 +342,13 @@ jobs:
           echo Branch: ${{ github.event.inputs.branch }}
           echo Python version: 3.11.11
           echo.
-          echo Package contents:
-          echo   - unilab-pack-${{ matrix.platform }}.zip
-          echo   - unilab-env-${{ matrix.platform }}.tar.gz (packed environment)
-          echo   - install_unilab.bat
-          echo   - verify_installation.py
-          echo   - README.txt
+          echo Distribution package contents:
+          dir dist-package
           echo.
-          echo Package size:
-          dir unilab-pack-*
+          echo Artifact name: unilab-pack-${{ matrix.platform }}-${{ github.event.inputs.branch }}
           echo.
-          echo Download the artifact and run the install script!
+          echo After download, extract the ZIP and run:
+          echo   install_unilab.bat
           echo ==========================================
 
       - name: Display package info (Unix)
@@ -371,15 +362,15 @@ jobs:
           echo "Branch: ${{ github.event.inputs.branch }}"
           echo "Python version: 3.11.11"
           echo ""
-          echo "Package contents:"
-          echo "  - unilab-pack-${{ matrix.platform }}.tar.gz"
-          echo "  - unilab-env-${{ matrix.platform }}.tar.gz (packed environment)"
-          echo "  - install_unilab.sh"
-          echo "  - verify_installation.py"
-          echo "  - README.txt"
+          echo "Distribution package contents:"
+          ls -lh dist-package/
           echo ""
-          echo "Package size:"
-          ls -lh unilab-pack-*
+          echo "Package size (tar.gz):"
+          ls -lh unilab-pack-*.tar.gz
           echo ""
-          echo "Download the artifact and run the install script!"
+          echo "Artifact name: unilab-pack-${{ matrix.platform }}-${{ github.event.inputs.branch }}"
+          echo ""
+          echo "After download:"
+          echo "  - Windows/macOS: Extract ZIP, then: tar -xzf unilab-pack-${{ matrix.platform }}.tar.gz"
+          echo "  - Linux: Extract ZIP (or download tar.gz directly), run install_unilab.sh"
           echo "=========================================="

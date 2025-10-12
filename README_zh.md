@@ -31,7 +31,7 @@ Uni-Lab-OS 是一个用于实验室自动化的综合平台，旨在连接和控
 
 详细文档可在以下位置找到:
 
-- [在线文档](https://readthedocs.dp.tech/Uni-Lab/v0.8.0/)
+- [在线文档](https://dptech-corp.github.io/Uni-Lab-OS/)
 
 ## 快速开始
 
@@ -57,7 +57,7 @@ pip install .
 
 3. 启动 Uni-Lab 系统:
 
-请见[文档-启动样例](https://readthedocs.dp.tech/Uni-Lab/v0.8.0/boot_examples/index.html)
+请见[文档-启动样例](https://dptech-corp.github.io/Uni-Lab-OS/boot_examples/index.html)
 
 ## 消息格式
 

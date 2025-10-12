@@ -1060,6 +1060,8 @@ class DeviceNodeResourceTracker(object):
             else:
                 # 对于实例类型，需要特殊处理 uuid 字段
                 # 如果查找的是 unilabos_uuid，使用 getattr
+                if identifier_key == "uuid":
+                    identifier_key = "unilabos_uuid"
                 if hasattr(resource, identifier_key):
                     if getattr(resource, identifier_key) == compare_value:
                         res_list.append((parent_res, resource))

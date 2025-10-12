@@ -44,7 +44,7 @@ def get_readme_content(platform: str, branch: str) -> str:
         archive_ext = "zip"
         install_script = "install_unilab.bat"
         platform_instructions = """Windows:
-  1. Extract unilab-pack-win-64.zip
+  1. Extract the downloaded ZIP file
   2. Double-click install_unilab.bat (or run in cmd)
   3. Follow the prompts"""
     else:
@@ -52,9 +52,14 @@ def get_readme_content(platform: str, branch: str) -> str:
         install_script = "install_unilab.sh"
         platform_name = {"linux-64": "linux-64", "osx-64": "osx-64", "osx-arm64": "osx-arm64"}.get(platform, platform)
         platform_instructions = f"""macOS/Linux:
-  1. Extract unilab-pack-{platform_name}.tar.gz
+  1. Download and extract unilab-pack-{platform_name}.tar.gz
   2. Run: bash install_unilab.sh
-  3. Follow the prompts"""
+  3. Follow the prompts
+  
+  Alternative (if downloaded from GitHub Actions):
+  1. Extract the artifact ZIP file
+  2. Extract unilab-pack-{platform_name}.tar.gz inside
+  3. Run: bash install_unilab.sh"""
 
     # Generate README content
     readme = f"""UniLabOS Conda-Pack Environment

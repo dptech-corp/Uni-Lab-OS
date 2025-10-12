@@ -1,3 +1,24 @@
+disposal:
+  category:
+  - disposal
+  - waste
+  - resource_container
+  class:
+    module: unilabos.resources.disposal:Disposal
+    type: unilabos
+  description: 废料处理位置，用于处理实验废料
+  handles:
+  - data_key: disposal_access
+    data_source: handle
+    data_type: fluid
+    handler_key: access
+    io_type: target
+    label: access
+    side: NORTH
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
 hplc_plate:
   category:
   - resource_container
@@ -20,6 +41,55 @@ hplc_plate:
     type: resource
   registry_type: resource
   version: 1.0.0
+maintenance:
+  category:
+  - maintenance
+  - position
+  - resource_container
+  class:
+    module: unilabos.resources.maintenance:Maintenance
+    type: unilabos
+  description: 维护位置，用于设备维护和校准
+  handles:
+  - data_key: maintenance_access
+    data_source: handle
+    data_type: mechanical
+    handler_key: access
+    io_type: target
+    label: access
+    side: NORTH
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+plate:
+  category:
+  - plate
+  - labware
+  - resource_container
+  class:
+    module: unilabos.resources.plate:Plate
+    type: unilabos
+  description: 实验板，用于放置样品和试剂
+  handles:
+  - data_key: plate_access
+    data_source: handle
+    data_type: mechanical
+    handler_key: access
+    io_type: target
+    label: access
+    side: NORTH
+  - data_key: sample_wells
+    data_source: handle
+    data_type: fluid
+    handler_key: wells
+    io_type: target
+    label: wells
+    side: CENTER
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
 plate_96_high:
   category:
   - resource_container
@@ -40,6 +110,34 @@ plate_96_high:
     - 0
     - 1.5708
     type: resource
+  registry_type: resource
+  version: 1.0.0
+tip_rack:
+  category:
+  - tip_rack
+  - labware
+  - resource_container
+  class:
+    module: unilabos.resources.tip_rack:TipRack
+    type: unilabos
+  description: 枪头架资源，用于存放和管理移液器枪头
+  handles:
+  - data_key: tip_access
+    data_source: handle
+    data_type: mechanical
+    handler_key: access
+    io_type: target
+    label: access
+    side: NORTH
+  - data_key: tip_pickup
+    data_source: handle
+    data_type: mechanical
+    handler_key: pickup
+    io_type: target
+    label: pickup
+    side: SOUTH
+  icon: ''
+  init_param_schema: {}
   registry_type: resource
   version: 1.0.0
 tiprack_96_high:

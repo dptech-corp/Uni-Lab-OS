@@ -252,6 +252,8 @@ class HostNode(BaseROS2DeviceNode):
                     )
                     # resources_config 通过各个设备的 resource_tracker 进行uuid更新，利用uuid_mapping
                     # resources_config 的 root node 是
+                    # 创建反向映射：new_uuid -> old_uuid
+                    reverse_uuid_mapping = {new_uuid: old_uuid for old_uuid, new_uuid in uuid_mapping.items()}
                     for tree in resources_config.trees:
                         node = tree.root_node
                         if node.res_content.type == "device":
@@ -260,8 +262,16 @@ class HostNode(BaseROS2DeviceNode):
                                 if sub_node.res_content.type != "device":
                                     # slave节点走c2s更新接口，拿到add自行update uuid
                                     device_tracker = self.devices_instances[node.res_content.id].resource_tracker
-                                    resource_instance = device_tracker.figure_resource(
-                                        {"uuid": sub_node.res_content.uuid})
+                                    # sub_node.res_content.uuid 已经是新UUID，需要用旧UUID去查找
+                                    old_uuid = reverse_uuid_mapping.get(sub_node.res_content.uuid)
+                                    if old_uuid:
+                                        # 找到旧UUID，使用UUID查找
+                                        resource_instance = device_tracker.figure_resource({"uuid": old_uuid})
+                                    else:
+                                        # 未找到旧UUID，使用name查找
+                                        resource_instance = device_tracker.figure_resource(
+                                            {"name": sub_node.res_content.name}
+                                        )
                                     device_tracker.loop_update_uuid(resource_instance, uuid_mapping)
                         else:
                             try:
@@ -897,6 +907,7 @@ class HostNode(BaseROS2DeviceNode):
         uuid_list: List[str] = data["data"]
         with_children: bool = data["with_children"]
         from unilabos.app.web.client import http_client
+
         resource_response = http_client.resource_tree_get(uuid_list, with_children)
         response.response = json.dumps(resource_response)
 
@@ -920,6 +931,7 @@ class HostNode(BaseROS2DeviceNode):
         )
 
         from unilabos.app.web.client import http_client
+
         resource_start_time = time.time()
         uuid_mapping = http_client.resource_tree_update(resource_tree_set, "", False)
         success = bool(uuid_mapping)
@@ -1254,7 +1266,9 @@ class HostNode(BaseROS2DeviceNode):
             "status": "success",
         }
 
-    def test_resource(self, resource: ResourceSlot, resources: List[ResourceSlot], device: DeviceSlot, devices: List[DeviceSlot]):
+    def test_resource(
+        self, resource: ResourceSlot, resources: List[ResourceSlot], device: DeviceSlot, devices: List[DeviceSlot]
+    ):
         return {
             "resources": ResourceTreeSet.from_plr_resources([resource, *resources]).dump(),
             "devices": [device, *devices],
@@ -1280,9 +1294,7 @@ class HostNode(BaseROS2DeviceNode):
         else:
             self.lab_logger().warning("⚠️ 收到无效的Pong响应（缺少ping_id）")
 
-    def notify_resource_tree_update(
-        self, device_id: str, action: str, resource_uuid_list: List[str]
-    ) -> bool:
+    def notify_resource_tree_update(self, device_id: str, action: str, resource_uuid_list: List[str]) -> bool:
         """
         通知设备节点更新资源树
 

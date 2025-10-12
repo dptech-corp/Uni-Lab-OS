@@ -97,6 +97,30 @@ else
 fi
 
 echo ""
+echo "Checking UniLabOS entry point..."
+# Check if unilab script exists in bin directory
+UNILAB_SCRIPT="$ENV_PATH/bin/unilab"
+if [ ! -f "$UNILAB_SCRIPT" ]; then
+    echo "WARNING: unilab script not found, creating it..."
+    cat > "$UNILAB_SCRIPT" << 'EOF'
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import re
+import sys
+
+from unilabos.app.main import main
+
+if __name__ == '__main__':
+    sys.argv[0] = re.sub(r'(-script\.pyw?|\.exe)?$', '', sys.argv[0])
+    sys.exit(main())
+EOF
+    chmod +x "$UNILAB_SCRIPT"
+    echo "Created: $UNILAB_SCRIPT"
+else
+    echo "Found: $UNILAB_SCRIPT"
+fi
+
+echo ""
 echo "================================================"
 echo "Installation completed successfully!"
 echo "================================================"
