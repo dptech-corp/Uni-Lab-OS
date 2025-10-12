@@ -8,7 +8,10 @@ This script verifies that UniLabOS and its dependencies are correctly installed.
 Run this script after installing the conda-pack environment to ensure everything works.
 
 Usage:
-    python verify_installation.py
+    python verify_installation.py [--auto-install]
+
+    Options:
+        --auto-install    Automatically install missing packages
 
     Or in the conda environment:
     conda activate unilab
@@ -17,14 +20,15 @@ Usage:
 
 import sys
 import os
+import argparse
 
 # IMPORTANT: Set UTF-8 encoding BEFORE any other imports
 # This ensures all subsequent imports (including unilabos) can output UTF-8 characters
 if sys.platform == "win32":
     # Method 1: Reconfigure stdout/stderr to use UTF-8 with error handling
     try:
-        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # type: ignore
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")  # type: ignore
     except (AttributeError, OSError):
         pass
 
@@ -49,7 +53,7 @@ CHECK_MARK = "[OK]"
 CROSS_MARK = "[FAIL]"
 
 
-def check_package(package_name: str, display_name: str = None) -> bool:
+def check_package(package_name: str, display_name: str | None = None) -> bool:
     """
     Check if a package can be imported.
 
@@ -87,9 +91,25 @@ def check_python_version() -> bool:
 
 def main():
     """Run all verification checks."""
+    # Parse command line arguments
+    parser = argparse.ArgumentParser(
+        description="Verify UniLabOS installation",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "--auto-install",
+        action="store_true",
+        help="Automatically install missing packages",
+    )
+    args = parser.parse_args()
+
     print("=" * 60)
     print("UniLabOS Installation Verification")
     print("=" * 60)
+    if args.auto_install:
+        print("Mode: Auto-install missing packages")
+    else:
+        print("Mode: Verification only")
     print()
 
     all_passed = True
@@ -113,14 +133,16 @@ def main():
 
         print(f"  {CHECK_MARK} UniLabOS installed")
 
-        # Check environment without auto-install (verification only)
+        # Check environment with optional auto-install
         # Set show_details=False to suppress detailed Chinese output that may cause encoding issues
-        env_check_passed = check_environment(auto_install=False, show_details=False)
+        env_check_passed = check_environment(auto_install=args.auto_install, show_details=False)
 
         if env_check_passed:
             print(f"  {CHECK_MARK} All required packages available")
         else:
             print(f"  {CROSS_MARK} Some optional packages are missing")
+            if not args.auto_install:
+                print("  Hint: Run with --auto-install to automatically install missing packages")
     except ImportError:
         print(f"  {CROSS_MARK} UniLabOS not installed")
         all_passed = False

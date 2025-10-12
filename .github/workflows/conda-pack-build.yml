@@ -73,7 +73,6 @@ jobs:
           channels: conda-forge,robostack-staging,uni-lab,defaults
           channel-priority: flexible
           activate-environment: unilab
-          auto-activate-base: true
           auto-update-conda: false
           show-channel-urls: true
 
@@ -82,7 +81,7 @@ jobs:
         run: |
           echo Installing unilabos and dependencies to unilab environment...
           echo Using mamba for faster and more reliable dependency resolution...
-          mamba install uni-lab::unilabos conda-pack -c uni-lab -c robostack-staging -c conda-forge -y
+          mamba install -n unilab uni-lab::unilabos conda-pack -c uni-lab -c robostack-staging -c conda-forge -y
 
       - name: Install conda-pack, unilabos and dependencies (Unix)
         if: steps.should_build.outputs.should_build == 'true' && matrix.platform != 'win-64'
@@ -90,15 +89,15 @@ jobs:
         run: |
           echo "Installing unilabos and dependencies to unilab environment..."
           echo "Using mamba for faster and more reliable dependency resolution..."
-          mamba install uni-lab::unilabos conda-pack -c uni-lab -c robostack-staging -c conda-forge -y
+          mamba install -n unilab uni-lab::unilabos conda-pack -c uni-lab -c robostack-staging -c conda-forge -y
 
       - name: Get latest ros-humble-unilabos-msgs version (Windows)
         if: steps.should_build.outputs.should_build == 'true' && matrix.platform == 'win-64'
         id: msgs_version_win
         run: |
           echo Checking installed ros-humble-unilabos-msgs version...
-          conda list ros-humble-unilabos-msgs
-          for /f "tokens=2" %%i in ('conda list ros-humble-unilabos-msgs --json ^| python -c "import sys, json; pkgs=json.load(sys.stdin); print(pkgs[0]['version'] if pkgs else 'not-found')"') do set VERSION=%%i
+          conda list -n unilab ros-humble-unilabos-msgs
+          for /f "tokens=2" %%i in ('conda list -n unilab ros-humble-unilabos-msgs --json ^| python -c "import sys, json; pkgs=json.load(sys.stdin); print(pkgs[0]['version'] if pkgs else 'not-found')"') do set VERSION=%%i
           echo installed_version=%VERSION% >> %GITHUB_OUTPUT%
           echo Installed ros-humble-unilabos-msgs version: %VERSION%
 
@@ -108,7 +107,7 @@ jobs:
         shell: bash
         run: |
           echo "Checking installed ros-humble-unilabos-msgs version..."
-          VERSION=$(conda list ros-humble-unilabos-msgs --json | python -c "import sys, json; pkgs=json.load(sys.stdin); print(pkgs[0]['version'] if pkgs else 'not-found')")
+          VERSION=$(conda list -n unilab ros-humble-unilabos-msgs --json | python -c "import sys, json; pkgs=json.load(sys.stdin); print(pkgs[0]['version'] if pkgs else 'not-found')")
           echo "installed_version=$VERSION" >> $GITHUB_OUTPUT
           echo "Installed ros-humble-unilabos-msgs version: $VERSION"
 
@@ -119,7 +118,7 @@ jobs:
           mamba search ros-humble-unilabos-msgs -c uni-lab -c robostack-staging -c conda-forge || echo Search completed
           echo.
           echo Updating ros-humble-unilabos-msgs to latest version...
-          mamba update ros-humble-unilabos-msgs -c uni-lab -c robostack-staging -c conda-forge -y || echo Already at latest version
+          mamba update -n unilab ros-humble-unilabos-msgs -c uni-lab -c robostack-staging -c conda-forge -y || echo Already at latest version
 
       - name: Check for newer ros-humble-unilabos-msgs (Unix)
         if: steps.should_build.outputs.should_build == 'true' && matrix.platform != 'win-64'
@@ -129,28 +128,28 @@ jobs:
           mamba search ros-humble-unilabos-msgs -c uni-lab -c robostack-staging -c conda-forge || echo "Search completed"
           echo ""
           echo "Updating ros-humble-unilabos-msgs to latest version..."
-          mamba update ros-humble-unilabos-msgs -c uni-lab -c robostack-staging -c conda-forge -y || echo "Already at latest version"
+          mamba update -n unilab ros-humble-unilabos-msgs -c uni-lab -c robostack-staging -c conda-forge -y || echo "Already at latest version"
 
       - name: Install latest unilabos from source (Windows)
         if: steps.should_build.outputs.should_build == 'true' && matrix.platform == 'win-64'
         run: |
           echo Uninstalling existing unilabos...
-          pip uninstall unilabos -y || echo unilabos not installed via pip
+          conda run -n unilab pip uninstall unilabos -y || echo unilabos not installed via pip
           echo Installing unilabos from source (branch: ${{ github.event.inputs.branch }})...
-          pip install .
+          conda run -n unilab pip install .
           echo Verifying installation...
-          pip show unilabos
+          conda run -n unilab pip show unilabos
 
       - name: Install latest unilabos from source (Unix)
         if: steps.should_build.outputs.should_build == 'true' && matrix.platform != 'win-64'
         shell: bash
         run: |
           echo "Uninstalling existing unilabos..."
-          pip uninstall unilabos -y || echo "unilabos not installed via pip"
+          conda run -n unilab pip uninstall unilabos -y || echo "unilabos not installed via pip"
           echo "Installing unilabos from source (branch: ${{ github.event.inputs.branch }})..."
-          pip install .
+          conda run -n unilab pip install .
           echo "Verifying installation..."
-          pip show unilabos
+          conda run -n unilab pip show unilabos
 
       - name: Display environment info (Windows)
         if: steps.should_build.outputs.should_build == 'true' && matrix.platform == 'win-64'
@@ -159,10 +158,10 @@ jobs:
           conda env list
           echo.
           echo === Installed Packages ===
-          conda list | findstr /C:"unilabos" /C:"ros-humble-unilabos-msgs" || conda list
+          conda list -n unilab | findstr /C:"unilabos" /C:"ros-humble-unilabos-msgs" || conda list -n unilab
           echo.
           echo === Python Packages ===
-          pip list | findstr unilabos || pip list
+          conda run -n unilab pip list | findstr unilabos || conda run -n unilab pip list
 
       - name: Display environment info (Unix)
         if: steps.should_build.outputs.should_build == 'true' && matrix.platform != 'win-64'
@@ -172,22 +171,22 @@ jobs:
           conda env list
           echo ""
           echo "=== Installed Packages ==="
-          conda list | grep -E "(unilabos|ros-humble-unilabos-msgs)" || conda list
+          conda list -n unilab | grep -E "(unilabos|ros-humble-unilabos-msgs)" || conda list -n unilab
           echo ""
           echo "=== Python Packages ==="
-          pip list | grep unilabos || pip list
+          conda run -n unilab pip list | grep unilabos || conda run -n unilab pip list
 
       - name: Verify environment integrity (Windows)
         if: steps.should_build.outputs.should_build == 'true' && matrix.platform == 'win-64'
         run: |
           echo Verifying Python version...
-          python -c "import sys; print(f'Python version: {sys.version}')"
+          conda run -n unilab python -c "import sys; print(f'Python version: {sys.version}')"
           echo Verifying unilabos import...
-          python -c "import unilabos; print(f'UniLabOS version: {unilabos.__version__}')" || echo Warning: Could not import unilabos
+          conda run -n unilab python -c "import unilabos; print(f'UniLabOS version: {unilabos.__version__}')" || echo Warning: Could not import unilabos
           echo Checking critical packages...
-          python -c "import rclpy; print('ROS2 rclpy: OK')"
-          echo Running comprehensive verification script...
-          python scripts\verify_installation.py || echo Warning: Verification script reported issues
+          conda run -n unilab python -c "import rclpy; print('ROS2 rclpy: OK')"
+          echo Running comprehensive verification script with auto-install...
+          conda run -n unilab python scripts\verify_installation.py --auto-install || echo Warning: Verification script reported issues
           echo Environment verification complete!
 
       - name: Verify environment integrity (Unix)
@@ -195,13 +194,13 @@ jobs:
         shell: bash
         run: |
           echo "Verifying Python version..."
-          python -c "import sys; print(f'Python version: {sys.version}')"
+          conda run -n unilab python -c "import sys; print(f'Python version: {sys.version}')"
           echo "Verifying unilabos import..."
-          python -c "import unilabos; print(f'UniLabOS version: {unilabos.__version__}')" || echo "Warning: Could not import unilabos"
+          conda run -n unilab python -c "import unilabos; print(f'UniLabOS version: {unilabos.__version__}')" || echo "Warning: Could not import unilabos"
           echo "Checking critical packages..."
-          python -c "import rclpy; print('ROS2 rclpy: OK')"
-          echo "Running comprehensive verification script..."
-          python scripts/verify_installation.py || echo "Warning: Verification script reported issues"
+          conda run -n unilab python -c "import rclpy; print('ROS2 rclpy: OK')"
+          echo "Running comprehensive verification script with auto-install..."
+          conda run -n unilab python scripts/verify_installation.py --auto-install || echo "Warning: Verification script reported issues"
           echo "Environment verification complete!"
 
       - name: Pack conda environment (Windows)

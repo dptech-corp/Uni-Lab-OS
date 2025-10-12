@@ -11,18 +11,14 @@ from typing import Dict, Any, List
 import networkx as nx
 import yaml
 
-from unilabos.ros.nodes.resource_tracker import ResourceTreeSet, ResourceDict
-
 # 首先添加项目根目录到路径
 current_dir = os.path.dirname(os.path.abspath(__file__))
 unilabos_dir = os.path.dirname(os.path.dirname(current_dir))
 if unilabos_dir not in sys.path:
     sys.path.append(unilabos_dir)
 
-from unilabos.config.config import load_config, BasicConfig, HTTPConfig
 from unilabos.utils.banner_print import print_status, print_unilab_banner
-from unilabos.resources.graphio import modify_to_backend_format
-
+from unilabos.config.config import load_config, BasicConfig, HTTPConfig
 
 def load_config_from_file(config_path):
     if config_path is None:
@@ -268,6 +264,8 @@ def main():
     from unilabos.app.web import http_client
     from unilabos.app.web import start_server
     from unilabos.app.register import register_devices_and_resources
+    from unilabos.resources.graphio import modify_to_backend_format
+    from unilabos.ros.nodes.resource_tracker import ResourceTreeSet, ResourceDict
 
     # 显示启动横幅
     print_unilab_banner(args_dict)
