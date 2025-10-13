@@ -1,3 +1,493 @@
+bettery_station_registry:
+  category:
+  - work_station
+  class:
+    action_value_mappings:
+      auto-change_hole_sheet_to_2:
+        feedback: {}
+        goal: {}
+        goal_default:
+          hole: null
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                hole:
+                  type: object
+              required:
+              - hole
+              type: object
+            result: {}
+          required:
+          - goal
+          title: change_hole_sheet_to_2参数
+          type: object
+        type: UniLabJsonCommandAsync
+      auto-fill_plate:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: fill_plate参数
+          type: object
+        type: UniLabJsonCommandAsync
+      auto-fun_wuliao_test:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: fun_wuliao_test参数
+          type: object
+        type: UniLabJsonCommand
+      auto-func_allpack_cmd:
+        feedback: {}
+        goal: {}
+        goal_default:
+          elec_num: null
+          elec_use_num: null
+          file_path: D:\coin_cell_data
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                elec_num:
+                  type: string
+                elec_use_num:
+                  type: string
+                file_path:
+                  default: D:\coin_cell_data
+                  type: string
+              required:
+              - elec_num
+              - elec_use_num
+              type: object
+            result: {}
+          required:
+          - goal
+          title: func_allpack_cmd参数
+          type: object
+        type: UniLabJsonCommand
+      auto-func_get_csv_export_status:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: func_get_csv_export_status参数
+          type: object
+        type: UniLabJsonCommand
+      auto-func_pack_device_auto:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: func_pack_device_auto参数
+          type: object
+        type: UniLabJsonCommand
+      auto-func_pack_device_init:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: func_pack_device_init参数
+          type: object
+        type: UniLabJsonCommand
+      auto-func_pack_device_start:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: func_pack_device_start参数
+          type: object
+        type: UniLabJsonCommand
+      auto-func_pack_device_stop:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: func_pack_device_stop参数
+          type: object
+        type: UniLabJsonCommand
+      auto-func_pack_get_msg_cmd:
+        feedback: {}
+        goal: {}
+        goal_default:
+          file_path: D:\coin_cell_data
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                file_path:
+                  default: D:\coin_cell_data
+                  type: string
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: func_pack_get_msg_cmd参数
+          type: object
+        type: UniLabJsonCommand
+      auto-func_pack_send_bottle_num:
+        feedback: {}
+        goal: {}
+        goal_default:
+          bottle_num: null
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                bottle_num:
+                  type: integer
+              required:
+              - bottle_num
+              type: object
+            result: {}
+          required:
+          - goal
+          title: func_pack_send_bottle_num参数
+          type: object
+        type: UniLabJsonCommand
+      auto-func_pack_send_finished_cmd:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: func_pack_send_finished_cmd参数
+          type: object
+        type: UniLabJsonCommand
+      auto-func_pack_send_msg_cmd:
+        feedback: {}
+        goal: {}
+        goal_default:
+          elec_use_num: null
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                elec_use_num:
+                  type: string
+              required:
+              - elec_use_num
+              type: object
+            result: {}
+          required:
+          - goal
+          title: func_pack_send_msg_cmd参数
+          type: object
+        type: UniLabJsonCommand
+      auto-func_read_data_and_output:
+        feedback: {}
+        goal: {}
+        goal_default:
+          file_path: D:\coin_cell_data
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                file_path:
+                  default: D:\coin_cell_data
+                  type: string
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: func_read_data_and_output参数
+          type: object
+        type: UniLabJsonCommand
+      auto-func_stop_read_data:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: func_stop_read_data参数
+          type: object
+        type: UniLabJsonCommand
+      auto-modify_deck_name:
+        feedback: {}
+        goal: {}
+        goal_default:
+          resource_name: null
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                resource_name:
+                  type: string
+              required:
+              - resource_name
+              type: object
+            result: {}
+          required:
+          - goal
+          title: modify_deck_name参数
+          type: object
+        type: UniLabJsonCommand
+      auto-post_init:
+        feedback: {}
+        goal: {}
+        goal_default:
+          ros_node: null
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                ros_node:
+                  type: object
+              required:
+              - ros_node
+              type: object
+            result: {}
+          required:
+          - goal
+          title: post_init参数
+          type: object
+        type: UniLabJsonCommand
+    module: unilabos.devices.workstation.coin_cell_assembly.coin_cell_assembly:CoinCellAssemblyWorkstation
+    status_types:
+      data_assembly_coin_cell_num: int
+      data_assembly_pressure: int
+      data_assembly_time: float
+      data_axis_x_pos: float
+      data_axis_y_pos: float
+      data_axis_z_pos: float
+      data_coin_cell_code: str
+      data_coin_num: int
+      data_electrolyte_code: str
+      data_electrolyte_volume: int
+      data_glove_box_o2_content: float
+      data_glove_box_pressure: float
+      data_glove_box_water_content: float
+      data_open_circuit_voltage: float
+      data_pole_weight: float
+      request_rec_msg_status: bool
+      request_send_msg_status: bool
+      sys_mode: str
+      sys_status: str
+    type: python
+  config_info: []
+  description: ''
+  handles: []
+  icon: ''
+  init_param_schema:
+    config:
+      properties:
+        address:
+          default: 192.168.1.20
+          type: string
+        debug_mode:
+          default: true
+          type: boolean
+        port:
+          default: '502'
+          type: string
+        station_resource:
+          type: object
+      required:
+      - station_resource
+      type: object
+    data:
+      properties:
+        data_assembly_coin_cell_num:
+          type: integer
+        data_assembly_pressure:
+          type: integer
+        data_assembly_time:
+          type: number
+        data_axis_x_pos:
+          type: number
+        data_axis_y_pos:
+          type: number
+        data_axis_z_pos:
+          type: number
+        data_coin_cell_code:
+          type: string
+        data_coin_num:
+          type: integer
+        data_electrolyte_code:
+          type: string
+        data_electrolyte_volume:
+          type: integer
+        data_glove_box_o2_content:
+          type: number
+        data_glove_box_pressure:
+          type: number
+        data_glove_box_water_content:
+          type: number
+        data_open_circuit_voltage:
+          type: number
+        data_pole_weight:
+          type: number
+        request_rec_msg_status:
+          type: boolean
+        request_send_msg_status:
+          type: boolean
+        sys_mode:
+          type: string
+        sys_status:
+          type: string
+      required:
+      - sys_status
+      - sys_mode
+      - request_rec_msg_status
+      - request_send_msg_status
+      - data_assembly_coin_cell_num
+      - data_assembly_time
+      - data_open_circuit_voltage
+      - data_axis_x_pos
+      - data_axis_y_pos
+      - data_axis_z_pos
+      - data_pole_weight
+      - data_assembly_pressure
+      - data_electrolyte_volume
+      - data_coin_num
+      - data_coin_cell_code
+      - data_electrolyte_code
+      - data_glove_box_pressure
+      - data_glove_box_o2_content
+      - data_glove_box_water_content
+      type: object
+  version: 1.0.0
 workstation:
   category:
   - work_station
@@ -6024,9 +6514,97 @@ workstation:
           title: WashSolid
           type: object
         type: WashSolid
-    module: unilabos.devices.workstation.workstation_base:ProtocolNode
+      auto-create_ros_action_server:
+        feedback: {}
+        goal: {}
+        goal_default:
+          action_name: null
+          action_value_mapping: null
+        handles: {}
+        result: {}
+        schema:
+          description: create_ros_action_server的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                action_name:
+                  type: string
+                action_value_mapping:
+                  type: string
+              required:
+              - action_name
+              - action_value_mapping
+              type: object
+            result: {}
+          required:
+          - goal
+          title: create_ros_action_server参数
+          type: object
+        type: UniLabJsonCommand
+      auto-execute_single_action:
+        feedback: {}
+        goal: {}
+        goal_default:
+          action_kwargs: null
+          action_name: null
+          device_id: null
+        handles: {}
+        result: {}
+        schema:
+          description: execute_single_action的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                action_kwargs:
+                  type: string
+                action_name:
+                  type: string
+                device_id:
+                  type: string
+              required:
+              - device_id
+              - action_name
+              - action_kwargs
+              type: object
+            result: {}
+          required:
+          - goal
+          title: execute_single_action参数
+          type: object
+        type: UniLabJsonCommandAsync
+      auto-initialize_device:
+        feedback: {}
+        goal: {}
+        goal_default:
+          device_config: null
+          device_id: null
+        handles: {}
+        result: {}
+        schema:
+          description: initialize_device的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                device_config:
+                  type: string
+                device_id:
+                  type: string
+              required:
+              - device_id
+              - device_config
+              type: object
+            result: {}
+          required:
+          - goal
+          title: initialize_device参数
+          type: object
+        type: UniLabJsonCommand
+    module: unilabos.ros.nodes.presets.workstation:ROS2WorkstationNode
     status_types: {}
-    type: python
+    type: ros2
   config_info: []
   description: Workstation
   handles: []
@@ -6034,10 +6612,60 @@ workstation:
   init_param_schema:
     config:
       properties:
-        deck:
+        action_value_mappings:
+          type: object
+        children:
+          type: object
+        device_id:
           type: string
+        driver_instance:
+          type: string
+        hardware_interface:
+          type: object
+        print_publish:
+          default: true
+          type: string
+        protocol_type:
+          items:
+            type: string
+          type: array
+        resource_tracker:
+          type: string
+        status_types:
+          type: object
       required:
-      - deck
+      - protocol_type
+      - children
+      - driver_instance
+      - device_id
+      - status_types
+      - action_value_mappings
+      - hardware_interface
+      type: object
+    data:
+      properties: {}
+      required: []
+      type: object
+  version: 1.0.0
+workstation.example:
+  category:
+  - work_station
+  class:
+    action_value_mappings: {}
+    module: unilabos.devices.workstation.workstation_base:WorkstationExample
+    status_types: {}
+    type: python
+  config_info: []
+  description: ''
+  handles: []
+  icon: ''
+  init_param_schema:
+    config:
+      properties:
+        station_resource:
+          type: object
+      required:
+      - station_resource
       type: object
     data:
       properties: {}
