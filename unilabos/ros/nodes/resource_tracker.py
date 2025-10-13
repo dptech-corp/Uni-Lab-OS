@@ -868,8 +868,9 @@ class DeviceNodeResourceTracker(object):
         def process(res):
             current_uuid = self._get_resource_attr(res, "uuid", "unilabos_uuid")
             if current_uuid:
+                old = self.uuid_to_resources.get(current_uuid)
                 self.uuid_to_resources[current_uuid] = res
-                logger.debug(f"收集资源UUID映射: {current_uuid} -> {res}")
+                logger.debug(f"收集资源UUID映射: {current_uuid} -> {res} {'' if old is None else f'(覆盖旧值: {old})'}")
             return 0
 
         self._traverse_and_process(resource, process)
@@ -907,13 +908,6 @@ class DeviceNodeResourceTracker(object):
         for r in self.resources:
             if id(r) == id(resource):
                 return
-        if isinstance(resource, dict):
-            uid = resource.get("uuid", None)
-        else:
-            uid = getattr(resource, "unilabos_uuid", None)
-        if uid and uid in self.uuid_to_resources:
-            self.remove_resource(self.uuid_to_resources[uid])
-            logger.warning(f"资源 UUID {uid} 已存在，覆盖为: {resource}")
         self.resources.append(resource)
         # 递归收集uuid映射
         self._collect_uuid_mapping(resource)

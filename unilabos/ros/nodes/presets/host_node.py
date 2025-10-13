@@ -266,7 +266,7 @@ class HostNode(BaseROS2DeviceNode):
                                     old_uuid = reverse_uuid_mapping.get(sub_node.res_content.uuid)
                                     if old_uuid:
                                         # 找到旧UUID，使用UUID查找
-                                        resource_instance = device_tracker.figure_resource({"uuid": old_uuid})
+                                        resource_instance = device_tracker.uuid_to_resources.get(old_uuid)
                                     else:
                                         # 未找到旧UUID，使用name查找
                                         resource_instance = device_tracker.figure_resource(
