@@ -932,7 +932,7 @@ class HostNode(BaseROS2DeviceNode):
 
         from unilabos.app.web.client import http_client
 
-        uuid_to_trees = collections.defaultdict(list)
+        uuid_to_trees: Dict[str, List[ResourceTreeInstance]] = collections.defaultdict(list)
         for tree in resource_tree_set.trees:
             uuid_to_trees[tree.root_node.res_content.uuid].append(tree)
 
@@ -944,7 +944,7 @@ class HostNode(BaseROS2DeviceNode):
             success = bool(uuid_mapping)
             resource_end_time = time.time()
             self.lab_logger().info(
-                f"[Host Node-Resource] 挂载 {uuid} 物料更新上传 {round(resource_end_time - resource_start_time, 5) * 1000} ms"
+                f"[Host Node-Resource] 物料 {[root_node.res_content.id for root_node in new_tree_set.root_nodes]} 挂载 {uid} P{trees[0].root_node.res_content.parent} 更新上传 {round(resource_end_time - resource_start_time, 5) * 1000} ms"
             )
             if uuid_mapping:
                 self.lab_logger().info(f"[Host Node-Resource] UUID映射: {len(uuid_mapping)} 个节点")
