@@ -715,16 +715,9 @@ class ResourceTreeSet(object):
         Returns:
             ResourceTreeSet: 反序列化后的资源树集合
         """
-        # 将每个字典转换为 ResourceInstanceDict
-        # FIXME: 需要重新确定parent关系
         nested_lists = []
         for tree_data in data:
-            flatten_instances = [
-                ResourceDictInstance.get_resource_instance_from_dict(node_dict) for node_dict in tree_data
-            ]
-            nested_lists.append(flatten_instances)
-
-        # 使用现有的构造函数创建 ResourceTreeSet
+            nested_lists.extend(ResourceTreeSet.from_raw_list(tree_data).trees)
         return cls(nested_lists)
 
 
