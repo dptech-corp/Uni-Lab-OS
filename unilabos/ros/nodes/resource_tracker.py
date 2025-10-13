@@ -907,9 +907,8 @@ class DeviceNodeResourceTracker(object):
         for r in self.resources:
             if id(r) == id(resource):
                 return
-        uid = None
         if isinstance(resource, dict):
-            uid = resource["uuid"]
+            uid = resource.get("uuid", None)
         else:
             uid = getattr(resource, "unilabos_uuid", None)
         if uid and uid in self.uuid_to_resources:
