@@ -129,7 +129,6 @@ class BioyondWorkstation(WorkstationBase):
         self,
         bioyond_config: Optional[Dict[str, Any]] = None,
         deck: Optional[Any] = None,
-        station_config: Optional[Dict[str, Any]] = None,
         *args,
         **kwargs,
     ):
@@ -152,9 +151,6 @@ class BioyondWorkstation(WorkstationBase):
             if isinstance(resource, WareHouse):
                 self.deck.warehouses[resource.name] = resource
 
-        # 配置站点类型
-        self._configure_station_type(station_config)
-
         # 创建通信模块
         self._create_communication_module(bioyond_config)
         self.resource_synchronizer = BioyondResourceSynchronizer(self)
@@ -167,8 +163,6 @@ class BioyondWorkstation(WorkstationBase):
         self.workflow_mappings = {}
         self.workflow_sequence = []
         self.pending_task_params = []
-        self.material_cache = {}
-        self._load_material_cache()
 
         if "workflow_mappings" in bioyond_config:
             self._set_workflow_mappings(bioyond_config["workflow_mappings"])
@@ -325,10 +319,22 @@ class BioyondWorkstation(WorkstationBase):
             }
 
     def append_to_workflow_sequence(self, web_workflow_name: str) -> bool:
-        workflow_id = self._get_workflow(web_workflow_name)
+        # 检查是否为JSON格式的字符串
+        actual_workflow_name = web_workflow_name
+        if web_workflow_name.startswith('{') and web_workflow_name.endswith('}'):
+            try:
+                data = json.loads(web_workflow_name)
+                actual_workflow_name = data.get("web_workflow_name", web_workflow_name)
+                print(f"解析JSON格式工作流名称: {web_workflow_name} -> {actual_workflow_name}")
+            except json.JSONDecodeError:
+                print(f"JSON解析失败，使用原始字符串: {web_workflow_name}")
+        
+        workflow_id = self._get_workflow(actual_workflow_name)
         if workflow_id:
             self.workflow_sequence.append(workflow_id)
-            print(f"添加工作流到执行顺序: {web_workflow_name} -> {workflow_id}")
+            print(f"添加工作流到执行顺序: {actual_workflow_name} -> {workflow_id}")
+            return True
+        return False
 
     def set_workflow_sequence(self, json_str: str) -> List[str]:
         try:

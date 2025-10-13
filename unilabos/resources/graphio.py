@@ -4,6 +4,7 @@ import json
 import os.path
 import traceback
 from typing import Union, Any, Dict, List, Tuple
+import uuid
 import networkx as nx
 from pylabrobot.resources import ResourceHolder
 from unilabos_msgs.msg import Resource
@@ -629,6 +630,7 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
             {"name": material["name"], "class": className}, resource_type=ResourcePLR
         )
         plr_material.code = material.get("code", "") and material.get("barCode", "") or ""
+        plr_material.unilabos_uuid = str(uuid.uuid4())
 
         # 处理子物料（detail）
         if material.get("detail") and len(material["detail"]) > 0:

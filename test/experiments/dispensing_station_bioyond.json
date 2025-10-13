@@ -8,7 +8,7 @@
             ],
             "parent": null,
             "type": "device",
-            "class": "dispensing_station.bioyond",
+            "class": "workstation.bioyond_dispensing_station",
             "config": {
                 "config": {
                     "api_key": "DE9BDDA0",
@@ -19,13 +19,6 @@
                         "_resource_child_name": "Bioyond_Dispensing_Deck",
                         "_resource_type": "unilabos.resources.bioyond.decks:BIOYOND_PolymerPreparationStation_Deck"
                     }
-                },
-                "station_config": {
-                    "station_type": "dispensing_station",
-                    "enable_dispensing_station": true,
-                    "enable_reaction_station": false,
-                    "station_name": "DispensingStation_001",
-                    "description": "Bioyond配液工作站"
                 },
                 "protocol_type": []
             },
