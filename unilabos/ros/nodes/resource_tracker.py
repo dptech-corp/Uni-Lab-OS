@@ -289,8 +289,6 @@ class ResourceTreeSet(object):
         elif isinstance(resource_list[0], ResourceTreeInstance):
             # 已经是ResourceTree列表
             self.trees = cast(List[ResourceTreeInstance], resource_list)
-        elif isinstance(resource_list[0], list):
-            pass
         else:
             raise TypeError(
                 f"不支持的类型: {type(resource_list[0])}。"
