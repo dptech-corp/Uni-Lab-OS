@@ -1037,13 +1037,19 @@ class DeviceNodeResourceTracker(object):
     ) -> List[Tuple[Any, Any]]:
         res_list = []
         # print(resource, target_resource_cls_type, identifier_key, compare_value)
-        children = getattr(resource, "children", [])
+        children = []
+        if not isinstance(resource, dict):
+            children = getattr(resource, "children", [])
+        else:
+            children = resource.get("children")
+            if children is not None:
+                children = list(children.values()) if isinstance(children, dict) else children
         for child in children:
             res_list.extend(
                 self.loop_find_resource(child, target_resource_cls_type, identifier_key, compare_value, resource)
             )
         if issubclass(type(resource), target_resource_cls_type):
-            if target_resource_cls_type == dict:
+            if type(resource) == dict:
                 # 对于字典类型，直接检查 identifier_key
                 if identifier_key in resource:
                     if resource[identifier_key] == compare_value:

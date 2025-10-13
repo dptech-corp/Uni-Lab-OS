@@ -336,6 +336,9 @@ class WorkstationNodeCreator(DeviceClassCreator[T]):
         try:
             # 创建实例，额外补充一个给protocol node的字段，后面考虑取消
             data["children"] = self.children
+            for material_id, child in self.children.items():
+                if child["type"] != "device":
+                    self.resource_tracker.add_resource(self.children[material_id])
             deck_dict = data.get("deck")
             if deck_dict:
                 from pylabrobot.resources import Deck, Resource

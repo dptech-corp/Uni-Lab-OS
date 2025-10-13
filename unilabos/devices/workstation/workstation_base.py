@@ -171,7 +171,6 @@ class WorkstationBase(ABC):
     def post_init(self, ros_node: ROS2WorkstationNode) -> None:
         # 初始化物料系统
         self._ros_node = ros_node
-        self._ros_node.update_resource([self.deck])
 
     def _build_resource_mappings(self, deck: Deck):
         """递归构建资源映射"""
