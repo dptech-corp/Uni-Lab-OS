@@ -67,7 +67,7 @@ def canonicalize_nodes_data(
             if z is not None:
                 node["position"]["position"]["z"] = z
         for k in list(node.keys()):
-            if k not in ["id", "uuid", "name", "description", "schema", "model", "icon", "parent_uuid", "parent", "type", "class", "position", "config", "data"]:
+            if k not in ["id", "uuid", "name", "description", "schema", "model", "icon", "parent_uuid", "parent", "type", "class", "position", "config", "data", "children"]:
                 v = node.pop(k)
                 node["config"][k] = v
 
