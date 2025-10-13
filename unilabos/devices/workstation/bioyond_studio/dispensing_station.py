@@ -6,8 +6,15 @@ from unilabos.devices.workstation.bioyond_studio.station import BioyondWorkstati
 
 
 class BioyondDispensingStation(BioyondWorkstation):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(
+        self, 
+        config,
+            # 桌子
+        deck,
+        *args,
+        **kwargs,
+        ):
+        super().__init__(config, deck, *args, **kwargs)
         # self.config = config
         # self.api_key = config["api_key"]
         # self.host = config["api_host"]
