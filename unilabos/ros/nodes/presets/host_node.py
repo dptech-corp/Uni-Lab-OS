@@ -932,18 +932,25 @@ class HostNode(BaseROS2DeviceNode):
 
         from unilabos.app.web.client import http_client
 
-        resource_start_time = time.time()
-        uuid_mapping = http_client.resource_tree_update(resource_tree_set, "", False)
-        success = bool(uuid_mapping)
-        resource_end_time = time.time()
-        self.lab_logger().info(
-            f"[Host Node-Resource] 物料更新上传 {round(resource_end_time - resource_start_time, 5) * 1000} ms"
-        )
-        if uuid_mapping:
-            self.lab_logger().info(f"[Host Node-Resource] UUID映射: {len(uuid_mapping)} 个节点")
-        # 还需要加入到资源图中，暂不实现，考虑资源图新的获取方式
-        response.response = json.dumps(uuid_mapping)
-        self.lab_logger().info(f"[Host Node-Resource] Resource tree add completed, success: {success}")
+        uuid_to_trees = collections.defaultdict(list)
+        for root_node in resource_tree_set.root_nodes:
+            uuid_to_trees[root_node.res_content.uuid].append(root_node)
+
+        for uuid, trees in uuid_to_trees.items():
+
+            new_tree_set = ResourceTreeSet(trees)
+            resource_start_time = time.time()
+            uuid_mapping = http_client.resource_tree_add(new_tree_set, uuid, False)
+            success = bool(uuid_mapping)
+            resource_end_time = time.time()
+            self.lab_logger().info(
+                f"[Host Node-Resource] 挂载 {uuid} 物料更新上传 {round(resource_end_time - resource_start_time, 5) * 1000} ms"
+            )
+            if uuid_mapping:
+                self.lab_logger().info(f"[Host Node-Resource] UUID映射: {len(uuid_mapping)} 个节点")
+            # 还需要加入到资源图中，暂不实现，考虑资源图新的获取方式
+            response.response = json.dumps(uuid_mapping)
+            self.lab_logger().info(f"[Host Node-Resource] Resource tree add completed, success: {success}")
 
     def _resource_tree_update_callback(self, request: SerialCommand_Request, response: SerialCommand_Response):
         """
