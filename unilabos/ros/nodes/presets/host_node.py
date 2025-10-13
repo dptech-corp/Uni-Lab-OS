@@ -933,14 +933,14 @@ class HostNode(BaseROS2DeviceNode):
         from unilabos.app.web.client import http_client
 
         uuid_to_trees = collections.defaultdict(list)
-        for root_node in resource_tree_set.root_nodes:
-            uuid_to_trees[root_node.res_content.uuid].append(root_node)
+        for tree in resource_tree_set.trees:
+            uuid_to_trees[tree.root_node.res_content.uuid].append(tree)
 
-        for uuid, trees in uuid_to_trees.items():
+        for uid, trees in uuid_to_trees.items():
 
             new_tree_set = ResourceTreeSet(trees)
             resource_start_time = time.time()
-            uuid_mapping = http_client.resource_tree_add(new_tree_set, uuid, False)
+            uuid_mapping = http_client.resource_tree_add(new_tree_set, uid, False)
             success = bool(uuid_mapping)
             resource_end_time = time.time()
             self.lab_logger().info(
