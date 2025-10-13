@@ -1,3 +1,4 @@
+import traceback
 import uuid
 from pydantic import BaseModel, field_serializer, field_validator
 from pydantic import Field
@@ -213,7 +214,7 @@ class ResourceTreeInstance(object):
             if node.res_content.uuid:
                 known_uuids.add(node.res_content.uuid)
             else:
-                print(f"警告: 资源 {node.res_content.id} 没有uuid")
+                logger.warning(f"警告: 资源 {node.res_content.id} 没有uuid")
 
             # 验证并递归处理子节点
             for child in node.children:
@@ -318,7 +319,12 @@ class ResourceTreeSet(object):
 
         def build_uuid_mapping(res: "PLRResource", uuid_list: list):
             """递归构建uuid映射字典"""
-            uuid_list.append(getattr(res, "unilabos_uuid", ""))
+            uid = getattr(res, "unilabos_uuid", "")
+            if not uid:
+                uid = str(uuid.uuid4())
+                res.unilabos_uuid = uid
+                logger.warning(f"{res}没有uuid，请设置后再传入，默认填充{uid}！\n{traceback.format_exc()}")
+            uuid_list.append(uid)
             for child in res.children:
                 build_uuid_mapping(child, uuid_list)
 
