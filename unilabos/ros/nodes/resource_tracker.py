@@ -907,6 +907,14 @@ class DeviceNodeResourceTracker(object):
         for r in self.resources:
             if id(r) == id(resource):
                 return
+        uid = None
+        if isinstance(resource, dict):
+            uid = resource["uuid"]
+        else:
+            uid = getattr(resource, "unilabos_uuid", None)
+        if uid and uid in self.uuid_to_resources:
+            self.remove_resource(self.uuid_to_resources[uid])
+            logger.warning(f"资源 UUID {uid} 已存在，覆盖为: {resource}")
         self.resources.append(resource)
         # 递归收集uuid映射
         self._collect_uuid_mapping(resource)
