@@ -52,7 +52,7 @@ def canonicalize_nodes_data(
         if not node.get("type"):
             node["type"] = "device"
             print_status(f"Warning: Node {node.get('id', 'unknown')} missing 'type', defaulting to 'device'", "warning")
-        if not node.get("name"):
+        if node.get("name", None) is None:
             node["name"] = node.get("id")
             print_status(f"Warning: Node {node.get('id', 'unknown')} missing 'name', defaulting to {node['name']}", "warning")
         if not isinstance(node.get("position"), dict):

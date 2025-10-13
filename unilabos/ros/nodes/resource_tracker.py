@@ -140,7 +140,7 @@ class ResourceDictInstance(object):
     def get_nested_dict(self) -> Dict[str, Any]:
         """获取资源实例的嵌套字典表示"""
         res_dict = self.res_content.model_dump(by_alias=True)
-        res_dict["children"] = {child.res_content.name: child.get_nested_dict() for child in self.children}
+        res_dict["children"] = {child.res_content.id: child.get_nested_dict() for child in self.children}
         res_dict["parent"] = self.res_content.parent_instance_name
         res_dict["position"] = self.res_content.position.position.model_dump()
         return res_dict
