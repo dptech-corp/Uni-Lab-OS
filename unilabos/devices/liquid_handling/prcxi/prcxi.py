@@ -64,7 +64,7 @@ class PRCXI9300Deck(Deck):
     该类定义了 PRCXI 9300 的工作台布局和槽位信息。
     """
 
-    def __init__(self, name: str, size_x: float, size_y: float, size_z: float):
+    def __init__(self, name: str, size_x: float, size_y: float, size_z: float, **kwargs):
         super().__init__(name, size_x, size_y, size_z)
         self.slots = [None] * 6  # PRCXI 9300 有 6 个槽位
 
@@ -84,6 +84,7 @@ class PRCXI9300Container(Plate, TipRack):
         category: str,
         ordering: collections.OrderedDict,
         model: Optional[str] = None,
+        **kwargs,
     ):
         super().__init__(name, size_x, size_y, size_z, category=category, ordering=ordering, model=model)
         self._unilabos_state = {}
