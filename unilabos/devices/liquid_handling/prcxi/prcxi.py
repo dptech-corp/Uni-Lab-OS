@@ -1616,7 +1616,7 @@ if __name__ == "__main__":
 
     handler = PRCXI9300Handler(
         deck=deck,
-        host="192.168.0.121",
+        host="192.168.1.201",
         port=9999,
         timeout=10.0,
         setup=True,
