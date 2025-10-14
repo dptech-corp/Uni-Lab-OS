@@ -2,7 +2,7 @@ import base64
 import traceback
 import os
 import importlib.util
-from typing import Optional
+from typing import Optional, Literal
 from unilabos.utils import logger
 
 
@@ -18,6 +18,7 @@ class BasicConfig:
     vis_2d_enable = False
     enable_resource_load = True
     communication_protocol = "websocket"
+    log_level: Literal['TRACE', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'] = "DEBUG"  # 'TRACE', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
 
     @classmethod
     def auth_secret(cls):

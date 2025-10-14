@@ -180,6 +180,7 @@ def main():
         working_dir = os.path.abspath(os.getcwd())
     else:
         working_dir = os.path.abspath(os.path.join(os.getcwd(), "unilabos_data"))
+
     if args_dict.get("working_dir"):
         working_dir = args_dict.get("working_dir", "")
         if config_path and not os.path.exists(config_path):
@@ -211,6 +212,14 @@ def main():
     # 加载配置文件
     print_status(f"当前工作目录为 {working_dir}", "info")
     load_config_from_file(config_path)
+
+    # 根据配置重新设置日志级别
+    from unilabos.utils.log import configure_logger, logger
+
+    if hasattr(BasicConfig, "log_level"):
+        logger.info(f"Log level set to '{BasicConfig.log_level}' from config file.")
+        configure_logger(loglevel=BasicConfig.log_level)
+
     if args_dict["addr"] == "test":
         print_status("使用测试环境地址", "info")
         HTTPConfig.remote_addr = "https://uni-lab.test.bohrium.com/api/v1"
