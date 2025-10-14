@@ -16,14 +16,14 @@
                     "_resource_child_name": "PRCXI_Deck",
                     "_resource_type": "unilabos.devices.liquid_handling.prcxi.prcxi:PRCXI9300Deck"
                 },
-                "host": "192.168.0.121",
+                "host": "192.168.1.201",
                 "port": 9999,
                 "timeout": 10.0,
                 "axis": "Right",
                 "channel_num": 1,
-                "setup": true,
-                "debug": false,
-                "simulator": false,
+                "setup": false,
+                "debug": true,
+                "simulator": true,
                 "matrix_id": "5de524d0-3f95-406c-86dd-f83626ebc7cb",
                 "is_9320": true
             },
