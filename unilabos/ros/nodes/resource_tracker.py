@@ -849,6 +849,7 @@ class DeviceNodeResourceTracker(object):
 
         def process(res):
             current_uuid = self._get_resource_attr(res, "uuid", "unilabos_uuid")
+            replaced = 0
             if current_uuid and current_uuid in uuid_map:
                 new_uuid = uuid_map[current_uuid]
                 if current_uuid != new_uuid:
@@ -858,8 +859,8 @@ class DeviceNodeResourceTracker(object):
                         self.uuid_to_resources.pop(current_uuid)
                     self.uuid_to_resources[new_uuid] = res
                     logger.debug(f"更新uuid: {current_uuid} -> {new_uuid}")
-                    return 1
-            return 0
+                    replaced = 1
+            return replaced
 
         return self._traverse_and_process(resource, process)
 
@@ -911,9 +912,23 @@ class DeviceNodeResourceTracker(object):
         Args:
             resource: 资源对象（可以是dict或实例）
         """
+        root_uuids = {}
         for r in self.resources:
+            res_uuid = r.get("uuid") if isinstance(r, dict) else getattr(r, "unilabos_uuid", None)
+            if res_uuid:
+                root_uuids[res_uuid] = r
             if id(r) == id(resource):
                 return
+
+        # 这里只做uuid的根节点比较
+        if isinstance(resource, dict):
+            res_uuid = resource.get("uuid")
+        else:
+            res_uuid = getattr(resource, "unilabos_uuid", None)
+        if res_uuid in root_uuids:
+            old_res = root_uuids[res_uuid]
+            # self.remove_resource(old_res)
+            logger.warning(f"资源{resource}已存在，旧资源: {old_res}")
         self.resources.append(resource)
         # 递归收集uuid映射
         self._collect_uuid_mapping(resource)

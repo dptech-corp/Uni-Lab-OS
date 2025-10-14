@@ -73,6 +73,8 @@ class HTTPClient:
         Returns:
             Dict[str, str]: 旧UUID到新UUID的映射关系 {old_uuid: new_uuid}
         """
+        with open(os.path.join(BasicConfig.working_dir, "req_resource_tree_add.json"), "w", encoding="utf-8") as f:
+            f.write(json.dumps({"nodes": [x for xs in resources.dump() for x in xs], "mount_uuid": mount_uuid}, indent=4))
         # 从序列化数据中提取所有节点的UUID（保存旧UUID）
         old_uuids = {n.res_content.uuid: n for n in resources.all_nodes}
         if not self.initialized or first_add:
@@ -92,6 +94,8 @@ class HTTPClient:
                 timeout=100,
             )
 
+        with open(os.path.join(BasicConfig.working_dir, "res_resource_tree_add.json"), "w", encoding="utf-8") as f:
+            f.write(f"{response.status_code}" + "\n" + response.text)
         # 处理响应，构建UUID映射
         uuid_mapping = {}
         if response.status_code == 200:

@@ -132,6 +132,7 @@ class ROSLoggerAdapter:
 def init_wrapper(
     self,
     device_id: str,
+    device_uuid: str,
     driver_class: type[T],
     device_config: Dict[str, Any],
     status_types: Dict[str, Any],
@@ -150,6 +151,7 @@ def init_wrapper(
     if children is None:
         children = []
     kwargs["device_id"] = device_id
+    kwargs["device_uuid"] = device_uuid
     kwargs["driver_class"] = driver_class
     kwargs["device_config"] = device_config
     kwargs["driver_params"] = driver_params
@@ -266,6 +268,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
         self,
         driver_instance: T,
         device_id: str,
+        device_uuid: str,
         status_types: Dict[str, Any],
         action_value_mappings: Dict[str, Any],
         hardware_interface: Dict[str, Any],
@@ -278,6 +281,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
         Args:
             driver_instance: 设备实例
             device_id: 设备标识符
+            device_uuid: 设备标识符
             status_types: 需要发布的状态和传感器信息
             action_value_mappings: 设备动作
             hardware_interface: 硬件接口配置
@@ -285,7 +289,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
         """
         self.driver_instance = driver_instance
         self.device_id = device_id
-        self.uuid = str(uuid.uuid4())
+        self.uuid = device_uuid
         self.publish_high_frequency = False
         self.callback_group = ReentrantCallbackGroup()
         self.resource_tracker = resource_tracker
@@ -554,6 +558,11 @@ class BaseROS2DeviceNode(Node, Generic[T]):
     async def update_resource(self, resources: List["ResourcePLR"]):
         r = SerialCommand.Request()
         tree_set = ResourceTreeSet.from_plr_resources(resources)
+        for tree in tree_set.trees:
+            root_node = tree.root_node
+            if not root_node.res_content.uuid_parent:
+                logger.warning(f"更新无父节点物料{root_node}，自动以当前设备作为根节点")
+                root_node.res_content.parent_uuid = self.uuid
         r.command = json.dumps({"data": {"data": tree_set.dump()}, "action": "update"})
         response: SerialCommand_Response = await self._resource_clients["c2s_update_resource_tree"].call_async(r)  # type: ignore
         try:
@@ -1347,6 +1356,7 @@ class ROS2DeviceNode:
     def __init__(
         self,
         device_id: str,
+        device_uuid: str,
         driver_class: Type[T],
         device_config: Dict[str, Any],
         driver_params: Dict[str, Any],
@@ -1362,6 +1372,7 @@ class ROS2DeviceNode:
 
         Args:
             device_id: 设备标识符
+            device_uuid: 设备uuid
             driver_class: 设备类
             device_config: 原始初始化的json
             driver_params: driver初始化的参数
@@ -1436,6 +1447,7 @@ class ROS2DeviceNode:
                 children=children,
                 driver_instance=self._driver_instance,  # type: ignore
                 device_id=device_id,
+                device_uuid=device_uuid,
                 status_types=status_types,
                 action_value_mappings=action_value_mappings,
                 hardware_interface=hardware_interface,
@@ -1446,6 +1458,7 @@ class ROS2DeviceNode:
             self._ros_node = BaseROS2DeviceNode(
                 driver_instance=self._driver_instance,
                 device_id=device_id,
+                device_uuid=device_uuid,
                 status_types=status_types,
                 action_value_mappings=action_value_mappings,
                 hardware_interface=hardware_interface,

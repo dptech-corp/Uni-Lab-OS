@@ -26,6 +26,7 @@ def initialize_device_from_dict(device_id, device_config) -> Optional[ROS2Device
     d = None
     original_device_config = copy.deepcopy(device_config)
     device_class_config = device_config["class"]
+    uid = device_config["uuid"]
     if isinstance(device_class_config, str):  # 如果是字符串，则直接去lab_registry中查找，获取class
         if len(device_class_config) == 0:
             raise DeviceClassInvalid(f"Device [{device_id}] class cannot be an empty string. {device_config}")
@@ -50,7 +51,7 @@ def initialize_device_from_dict(device_id, device_config) -> Optional[ROS2Device
         )
         try:
             d = DEVICE(
-                device_id=device_id, driver_is_ros=device_class_config["type"] == "ros2", driver_params=device_config.get("config", {})
+                device_id=device_id, device_uuid=uid, driver_is_ros=device_class_config["type"] == "ros2", driver_params=device_config.get("config", {})
             )
         except DeviceInitError as ex:
             return d
