@@ -52,20 +52,24 @@ class MachineConfig:
     max_travel_x: float = 340.0     # X轴最大行程
     max_travel_y: float = 250.0     # Y轴最大行程
     max_travel_z: float = 160.0     # Z轴最大行程
-    
+    reference_distance: Dict[str, float] = {
+    "x": 29,
+    "y": -13,
+    "z": 70
+    }
     # 安全移动参数
     safe_z_height: float = 0.0      # Z轴安全移动高度 (mm) - 液体处理工作站安全高度
     z_approach_height: float = 5.0  # Z轴接近高度 (mm) - 在目标位置上方的预备高度
     
     # 回零参数
-    homing_speed: int = 100          # 回零速度 (mm/s)
+    homing_speed: int = 50          # 回零速度 (mm/s)
     homing_timeout: float = 30.0    # 回零超时时间
     safe_clearance: float = 10.0     # 安全间隙 (mm)
-    position_stable_time: float = 3.0  # 位置稳定检测时间（秒）
+    position_stable_time: float = 1.0  # 位置稳定检测时间（秒）
     position_check_interval: float = 0.2  # 位置检查间隔（秒）
     
     # 运动参数
-    default_speed: int = 100         # 默认运动速度 (mm/s)
+    default_speed: int = 50         # 默认运动速度 (mm/s)
     default_acceleration: int = 1000 # 默认加速度
 
 
@@ -314,12 +318,12 @@ class XYZController(XYZStepperController):
             
             # 设置回零速度模式，根据方向设置正负
             if speed is None:
-                speed_ = self.machine_config.homing_speed * direction
+                speed_ = self.machine_config.homing_speed 
             else:
-                speed_ = self.ms_to_rpm(axis, abs(speed)) * direction
+                speed_ = speed
 
-            speed_ = min(max(speed_, 0), 500)
-            if not self.set_speed_mode(axis, self.ms_to_rpm(axis, speed_)):
+            speed_ = min(max(speed_, 0), 500) 
+            if not self.set_speed_mode(axis, self.ms_to_rpm(axis, speed_) * direction):
                 raise CoordinateSystemError(f"{axis.name}轴设置回零速度失败")
             
 
@@ -407,7 +411,7 @@ class XYZController(XYZStepperController):
                 safe_position = final_position + (clearance_steps * -direction)  # 反方向退出
                 
                 if not self.move_to_position(axis, safe_position, 
-                                            self.ms_to_rpm(axis, self.machine_config.default_speed)):
+                                            self.ms_to_rpm(axis, speed_)):
                     logger.warning(f"{axis.name}轴无法退出到安全位置")
                 else:
                     self.wait_for_completion(axis, 10.0)
@@ -461,14 +465,6 @@ class XYZController(XYZStepperController):
                 # 轴间等待时间
                 time.sleep(0.5)
 
-            self.move_relative_work_coord(30, 30, 30, speed=self.machine_config.homing_speed/10)
-
-            for axis in sequence:
-                if not self.home_axis(axis, speed=self.machine_config.homing_speed/10):
-                    logger.error(f"全轴回零失败，停止在{axis.name}轴")
-                    return False
-                # 轴间等待时间
-                time.sleep(0.5)
                             # 标记为已回零
             self.coordinate_origin.is_homed = True
             self._save_coordinate_origin()
@@ -534,7 +530,7 @@ class XYZController(XYZStepperController):
         rps = velocity_mms / lead_mm
         # rps -> rpm
         rpm = int(rps * 60.0)
-        return min(max(rpm, 0), 500)
+        return min(max(rpm, 0), 150)
 
         
     # ==================== 高级运动控制方法 ====================
@@ -571,7 +567,7 @@ class XYZController(XYZStepperController):
             
             # 步骤1: Z轴先上升到安全高度
             if z is not None:
-                safe_z_steps = self.work_to_machine_steps(None, None, self.machine_config.safe_z_height)
+                safe_z_steps = self.work_to_machine_steps(None, None, self.machine_config.safe_z_height+self.machine_config.reference_distance['z'])
                 if not self.move_to_position(MotorAxis.Z, safe_z_steps['z'], self.ms_to_rpm(MotorAxis.Z, speed), acceleration):
                     logger.error("Z轴上升到安全高度失败")
                     return False
@@ -583,12 +579,12 @@ class XYZController(XYZStepperController):
             # 步骤2: XY轴移动到目标位置
             xy_success = True
             if x is not None:
-                machine_steps = self.work_to_machine_steps(x, None, None)
+                machine_steps = self.work_to_machine_steps(x+self.machine_config.reference_distance['x'], None, None)
                 if not self.move_to_position(MotorAxis.X, machine_steps['x'], self.ms_to_rpm(MotorAxis.X, speed), acceleration):
                     xy_success = False
                     
             if y is not None:
-                machine_steps = self.work_to_machine_steps(None, y, None)
+                machine_steps = self.work_to_machine_steps(None, y+self.machine_config.reference_distance['y'], None)
                 if not self.move_to_position(MotorAxis.Y, machine_steps['y'], self.ms_to_rpm(MotorAxis.Y, speed), acceleration):
                     xy_success = False
             
@@ -606,7 +602,7 @@ class XYZController(XYZStepperController):
             
             # 步骤3: Z轴下降到目标位置
             if z is not None:
-                machine_steps = self.work_to_machine_steps(None, None, z)
+                machine_steps = self.work_to_machine_steps(None, None, z+self.machine_config.reference_distance['z'])
                 if not self.move_to_position(MotorAxis.Z, machine_steps['z'], self.ms_to_rpm(MotorAxis.Z, speed), acceleration):
                     logger.error("Z轴下降到目标位置失败")
                     return False
@@ -793,7 +789,7 @@ def interactive_control(controller: XYZController):
         print("  home [轴]            - 回零操作，例: home 或 home x")
         print("  origin               - 设置当前位置为工作原点")
         print("  status               - 显示当前状态")
-        print("  speed <速度>         - 设置运动速度(rpm)，例: speed 2000")
+        print("  speed <速度>         - 设置运动速度(mm/s)，例: speed 2000")
         print("  limits               - 显示行程限制")
         print("  config               - 显示机械配置")
         print("  help                 - 显示此帮助信息")
@@ -802,6 +798,8 @@ def interactive_control(controller: XYZController):
         print("  - 轴名称: x, y, z")
         print("  - 距离单位: 毫米(mm)")
         print("  - 正数向正方向移动，负数向负方向移动")
+    
+
     
     # 安全回零操作
     def safe_homing():
@@ -822,10 +820,7 @@ def interactive_control(controller: XYZController):
                 if homing_success:
                     print("回零操作完成，系统已就绪")
                     # 设置当前位置为工作原点
-                    if controller.set_work_origin_here():
-                        print("工作原点已设置为回零位置")
-                    else:
-                        print("工作原点设置失败，但可以继续操作")
+
                     return True
                 else:
                     print("回零操作失败")
@@ -856,7 +851,7 @@ def interactive_control(controller: XYZController):
         
         try:
             # 移动到工作原点 (0,0,0) - 使用安全移动方法
-            if controller.move_to_work_coord_safe(0, 0, 0, speed=500):
+            if controller.move_to_work_coord_safe(0, 0, 0, speed=50):
                 print("已安全返回工作原点")
                 show_status()
             else:
@@ -1223,7 +1218,7 @@ def run_tests():
 if __name__ == "__main__":
     # run_tests()
     xyz_controller = XYZController(port='/dev/ttyUSB_CH340', auto_connect=True)
-    xyz_controller.stop_all_axes()
+    # xyz_controller.stop_all_axes()
     xyz_controller.connect_device()
     time.sleep(1)
     xyz_controller.home_all_axes()

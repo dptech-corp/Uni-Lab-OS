@@ -128,8 +128,9 @@ class UniLiquidHandlerLaiyuBackend(LiquidHandlerBackend):
     y = coordinate.y + offset_xyz.y
     z = self.total_height - (coordinate.z + self.tip_length) + offset_xyz.z
     # print("moving")
-    self.hardware_interface.xyz_controller.move_to_work_coord_safe(x, y, z)
-    self.joint_state_publisher.send_resource_action(ops[0].resource.name, x, y, z, "pick",channels=use_channels)
+    self.hardware_interface.xyz_controller.move_to_work_coord_safe(x=x, y=y, z=z)
+    self.hardware_interface.xyz_controller.move_to_work_coord_safe(z=self.hardware_interface.xyz_controller.machine_config.safe_z_height)
+    # self.joint_state_publisher.send_resource_action(ops[0].resource.name, x, y, z, "pick",channels=use_channels)
     #   goback()
 
 
@@ -172,8 +173,10 @@ class UniLiquidHandlerLaiyuBackend(LiquidHandlerBackend):
     z = self.total_height - (coordinate.z + self.tip_length) + offset_xyz.z
     # print(x, y, z)
     # print("moving")
-    self.hardware_interface.xyz_controller.move_to_work_coord_safe(x, y, z)
-    self.joint_state_publisher.send_resource_action(ops[0].resource.name, x, y, z, "drop_trash",channels=use_channels)
+    self.hardware_interface.xyz_controller.move_to_work_coord_safe(x=x, y=y, z=z)
+    self.hardware_interface.xyz_controller.move_to_work_coord_safe(z=self.hardware_interface.xyz_controller.machine_config.safe_z_height)
+
+    # self.joint_state_publisher.send_resource_action(ops[0].resource.name, x, y, z, "drop_trash",channels=use_channels)
     #   goback()
 
   async def aspirate(
@@ -223,8 +226,10 @@ class UniLiquidHandlerLaiyuBackend(LiquidHandlerBackend):
     z = self.total_height - (coordinate.z + self.tip_length) + offset_xyz.z
     # print(x, y, z)
     # print("moving")
-    self.hardware_interface.xyz_controller.move_to_work_coord_safe(x, y, z)
-    self.joint_state_publisher.send_resource_action(ops[0].resource.name, x, y, z, "",channels=use_channels)
+    self.hardware_interface.xyz_controller.move_to_work_coord_safe(x=x, y=y, z=z)
+    self.hardware_interface.aspirate()
+    self.hardware_interface.xyz_controller.move_to_work_coord_safe(z=self.hardware_interface.xyz_controller.machine_config.safe_z_height)
+    # self.joint_state_publisher.send_resource_action(ops[0].resource.name, x, y, z, "",channels=use_channels)
 
 
   async def dispense(
@@ -274,8 +279,9 @@ class UniLiquidHandlerLaiyuBackend(LiquidHandlerBackend):
     z = self.total_height - (coordinate.z + self.tip_length) + offset_xyz.z
     # print(x, y, z)
     # print("moving")
-    self.hardware_interface.xyz_controller.move_to_work_coord_safe(x, y, z)
-    self.joint_state_publisher.send_resource_action(ops[0].resource.name, x, y, z, "",channels=use_channels)
+    self.hardware_interface.xyz_controller.move_to_work_coord_safe(x=x, y=y, z=z)
+    self.hardware_interface.xyz_controller.move_to_work_coord_safe(z=self.hardware_interface.xyz_controller.machine_config.safe_z_height)
+    # self.joint_state_publisher.send_resource_action(ops[0].resource.name, x, y, z, "",channels=use_channels)
 
   async def pick_up_tips96(self, pickup: PickupTipRack, **backend_kwargs):
     print(f"Picking up tips from {pickup.resource.name}.")

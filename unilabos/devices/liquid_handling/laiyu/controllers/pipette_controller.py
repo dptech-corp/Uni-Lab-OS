@@ -139,7 +139,7 @@ class PipetteController:
         self.xyz_connected = False
 
         # 统计信息
-        self.tip_count = 0
+        # self.tip_count = 0
         self.aspirate_count = 0
         self.dispense_count = 0
 
@@ -361,6 +361,7 @@ class PipetteController:
         Returns:
             是否成功
         """
+        self._update_tip_status()
         if self.tip_status == TipStatus.TIP_ATTACHED:
             logger.warning("已有枪头，无需重复装载")
             return True
@@ -370,11 +371,16 @@ class PipetteController:
         # 使用相对移动方法，向下移动10mm
         if self.move_z_relative(distance_mm=10.0, speed=2000, acceleration=500):
             # 更新枪头状态
-            self.tip_status = TipStatus.TIP_ATTACHED
-            self.tip_count += 1
+            self._update_tip_status()
+            # self.tip_status = TipStatus.TIP_ATTACHED
+            # self.tip_count += 1
             self.current_volume = 0.0
-            logger.info("枪头装载成功")
-            return True
+            if self.tip_status == TipStatus.TIP_ATTACHED:
+                logger.info("枪头装载成功")
+                return True
+            else :
+                logger.info("枪头装载失败")
+                return False
         else:
             logger.error("枪头装载失败 - Z轴移动失败")
             return False
@@ -386,16 +392,19 @@ class PipetteController:
         Returns:
             是否成功
         """
+        self._update_tip_status()
+
         if self.tip_status == TipStatus.NO_TIP:
             logger.warning("无枪头可弹出")
             return True
 
         try:
             if self.pipette.eject_tip():
-                self.tip_status = TipStatus.NO_TIP
-                self.current_volume = 0.0
-                logger.info("枪头已弹出")
-                return True
+                self._update_tip_status()
+                if self.tip_status == TipStatus.NO_TIP:
+                    self.current_volume = 0.0
+                    logger.info("枪头已弹出")
+                    return True
             return False
         except Exception as e:
             logger.error(f"弹出枪头失败: {e}")
@@ -414,6 +423,7 @@ class PipetteController:
         Returns:
             是否成功
         """
+        self._update_tip_status()
         if self.tip_status != TipStatus.TIP_ATTACHED:
             logger.error("无枪头，无法吸液")
             return False
@@ -474,6 +484,7 @@ class PipetteController:
         Returns:
             是否成功
         """
+        self._update_tip_status()
         if self.tip_status != TipStatus.TIP_ATTACHED:
             logger.error("无枪头，无法排液")
             return False
@@ -647,7 +658,7 @@ class PipetteController:
             'max_volume': self.max_volume,
             'liquid_class': self.liquid_class.value,
             'statistics': {
-                'tip_count': self.tip_count,
+                # 'tip_count': self.tip_count,
                 'aspirate_count': self.aspirate_count,
                 'dispense_count': self.dispense_count
             }
@@ -655,7 +666,7 @@ class PipetteController:
 
     def reset_statistics(self):
         """重置统计信息"""
-        self.tip_count = 0
+        # self.tip_count = 0
         self.aspirate_count = 0
         self.dispense_count = 0
 
@@ -748,7 +759,7 @@ if __name__ == "__main__":
                     print(f"  📏 最大体积: {status['max_volume']}ul")
                     print(f"  🧪 液体类型: {status['liquid_class']}")
                     print(f"  📈 统计信息:")
-                    print(f"    🔧 枪头使用次数: {status['statistics']['tip_count']}")
+                    # print(f"    🔧 枪头使用次数: {status['statistics']['tip_count']}")
                     print(f"    ⬆️  吸液次数: {status['statistics']['aspirate_count']}")
                     print(f"    ⬇️  排液次数: {status['statistics']['dispense_count']}")
                 
@@ -1027,7 +1038,7 @@ if __name__ == "__main__":
             print(f"  📏 最大体积: {status['max_volume']}ul")
             print(f"  🧪 液体类型: {status['liquid_class']}")
             print(f"  📈 统计信息:")
-            print(f"    🔧 枪头使用次数: {status['statistics']['tip_count']}")
+            # print(f"    🔧 枪头使用次数: {status['statistics']['tip_count']}")
             print(f"    ⬆️ 吸液次数: {status['statistics']['aspirate_count']}")
             print(f"    ⬇️ 排液次数: {status['statistics']['dispense_count']}")
             
