@@ -18,7 +18,7 @@ from unilabos_msgs.srv import (
     ResourceDelete,
     ResourceUpdate,
     ResourceList,
-    SerialCommand,
+    SerialCommand, ResourceGet,
 )  # type: ignore
 from unilabos_msgs.srv._serial_command import SerialCommand_Request, SerialCommand_Response
 from unique_identifier_msgs.msg import UUID
@@ -41,6 +41,7 @@ from unilabos.ros.nodes.resource_tracker import (
     ResourceTreeSet,
     ResourceTreeInstance,
 )
+from unilabos.utils import logger
 from unilabos.utils.exception import DeviceClassInvalid
 from unilabos.utils.type_check import serialize_result_info
 from unilabos.registry.placeholder_type import ResourceSlot, DeviceSlot
@@ -99,17 +100,6 @@ class HostNode(BaseROS2DeviceNode):
         """
         if self._instance is not None:
             self._instance.lab_logger().critical("[Host Node] HostNode instance already exists.")
-        # 初始化Node基类，传递空参数覆盖列表
-        BaseROS2DeviceNode.__init__(
-            self,
-            driver_instance=self,
-            device_id=device_id,
-            status_types={},
-            action_value_mappings=lab_registry.device_type_registry["host_node"]["class"]["action_value_mappings"],
-            hardware_interface={},
-            print_publish=False,
-            resource_tracker=self._resource_tracker,  # host node并不是通过initialize 包一层传进来的
-        )
 
         # 设置单例实例
         self.__class__._instance = self
@@ -126,6 +116,91 @@ class HostNode(BaseROS2DeviceNode):
         if bridges is None:
             bridges = []
         self.bridges = bridges
+
+        # 创建 host_node 作为一个单独的 ResourceTree
+        host_node_dict = {
+            "id": "host_node",
+            "uuid": str(uuid.uuid4()),
+            "parent_uuid": "",
+            "name": "host_node",
+            "type": "device",
+            "class": "host_node",
+            "config": {},
+            "data": {},
+            "children": [],
+            "description": "",
+            "schema": {},
+            "model": {},
+            "icon": "",
+        }
+
+        # 创建 host_node 的 ResourceTree
+        host_node_instance = ResourceDictInstance.get_resource_instance_from_dict(host_node_dict)
+        host_node_tree = ResourceTreeInstance(host_node_instance)
+        resources_config.trees.insert(0, host_node_tree)
+        try:
+            for bridge in self.bridges:
+                if hasattr(bridge, "resource_tree_add") and resources_config:
+                    from unilabos.app.web.client import HTTPClient
+
+                    client: HTTPClient = bridge
+                    resource_start_time = time.time()
+                    # 传递 ResourceTreeSet 对象，在 client 中转换为字典并获取 UUID 映射
+                    uuid_mapping = client.resource_tree_add(resources_config, "", True)
+                    device_uuid = resources_config.root_nodes[0].res_content.uuid
+                    resource_end_time = time.time()
+                    logger.info(
+                        f"[Host Node-Resource] 物料上传 {round(resource_end_time - resource_start_time, 5) * 1000} ms"
+                    )
+                    for edge in self.resources_edge_config:
+                        edge["source_uuid"] = uuid_mapping.get(edge["source_uuid"], edge["source_uuid"])
+                        edge["target_uuid"] = uuid_mapping.get(edge["target_uuid"], edge["target_uuid"])
+                    resource_add_res = client.resource_edge_add(self.resources_edge_config)
+                    resource_edge_end_time = time.time()
+                    logger.info(
+                        f"[Host Node-Resource] 物料关系上传 {round(resource_edge_end_time - resource_end_time, 5) * 1000} ms"
+                    )
+                    # resources_config 通过各个设备的 resource_tracker 进行uuid更新，利用uuid_mapping
+                    # resources_config 的 root node 是
+                    # # 创建反向映射：new_uuid -> old_uuid
+                    # reverse_uuid_mapping = {new_uuid: old_uuid for old_uuid, new_uuid in uuid_mapping.items()}
+                    # for tree in resources_config.trees:
+                    #     node = tree.root_node
+                    #     if node.res_content.type == "device":
+                    #         if node.res_content.id == "host_node":
+                    #             continue
+                    #         # slave节点走c2s更新接口，拿到add自行update uuid
+                    #         device_tracker = self.devices_instances[node.res_content.id].resource_tracker
+                    #         old_uuid = reverse_uuid_mapping.get(node.res_content.uuid)
+                    #         if old_uuid:
+                    #             # 找到旧UUID，使用UUID查找
+                    #             resource_instance = device_tracker.uuid_to_resources.get(old_uuid)
+                    #         else:
+                    #             # 未找到旧UUID，使用name查找
+                    #             resource_instance = device_tracker.figure_resource(
+                    #                 {"name": node.res_content.name}
+                    #             )
+                    #         device_tracker.loop_update_uuid(resource_instance, uuid_mapping)
+                    #     else:
+                    #         try:
+                    #             for plr_resource in ResourceTreeSet([tree]).to_plr_resources():
+                    #                 self.resource_tracker.add_resource(plr_resource)
+                    #         except Exception as ex:
+                    #             self.lab_logger().warning("[Host Node-Resource] 根节点物料序列化失败！")
+        except Exception as ex:
+            logger.error(f"[Host Node-Resource] 添加物料出错！\n{traceback.format_exc()}")
+        # 初始化Node基类，传递空参数覆盖列表
+        BaseROS2DeviceNode.__init__(
+            self,
+            driver_instance=self,
+            device_id=device_id,
+            device_uuid=host_node_dict["uuid"],
+            status_types={},
+            action_value_mappings=lab_registry.device_type_registry["host_node"]["class"]["action_value_mappings"],
+            hardware_interface={},
+            print_publish=False,
+            resource_tracker=self._resource_tracker,  # host node并不是通过initialize 包一层传进来的
+        )
 
         # 创建设备、动作客户端和目标存储
         self.devices_names: Dict[str, str] = {device_id: self.namespace}  # 存储设备名称和命名空间的映射
@@ -207,81 +282,7 @@ class HostNode(BaseROS2DeviceNode):
             ].items():
                 controller_config["update_rate"] = update_rate
                 self.initialize_controller(controller_id, controller_config)
-        # 创建 host_node 作为一个单独的 ResourceTree
 
-        host_node_dict = {
-            "id": "host_node",
-            "uuid": str(uuid.uuid4()),
-            "parent_uuid": "",
-            "name": "host_node",
-            "type": "device",
-            "class": "host_node",
-            "config": {},
-            "data": {},
-            "children": [],
-            "description": "",
-            "schema": {},
-            "model": {},
-            "icon": "",
-        }
-
-        # 创建 host_node 的 ResourceTree
-        host_node_instance = ResourceDictInstance.get_resource_instance_from_dict(host_node_dict)
-        host_node_tree = ResourceTreeInstance(host_node_instance)
-        resources_config.trees.insert(0, host_node_tree)
-        try:
-            for bridge in self.bridges:
-                if hasattr(bridge, "resource_tree_add") and resources_config:
-                    from unilabos.app.web.client import HTTPClient
-
-                    client: HTTPClient = bridge
-                    resource_start_time = time.time()
-                    # 传递 ResourceTreeSet 对象，在 client 中转换为字典并获取 UUID 映射
-                    uuid_mapping = client.resource_tree_add(resources_config, "", True)
-                    resource_end_time = time.time()
-                    self.lab_logger().info(
-                        f"[Host Node-Resource] 物料上传 {round(resource_end_time - resource_start_time, 5) * 1000} ms"
-                    )
-                    for edge in self.resources_edge_config:
-                        edge["source_uuid"] = uuid_mapping.get(edge["source_uuid"], edge["source_uuid"])
-                        edge["target_uuid"] = uuid_mapping.get(edge["target_uuid"], edge["target_uuid"])
-                    resource_add_res = client.resource_edge_add(self.resources_edge_config)
-                    resource_edge_end_time = time.time()
-                    self.lab_logger().info(
-                        f"[Host Node-Resource] 物料关系上传 {round(resource_edge_end_time - resource_end_time, 5) * 1000} ms"
-                    )
-                    # resources_config 通过各个设备的 resource_tracker 进行uuid更新，利用uuid_mapping
-                    # resources_config 的 root node 是
-                    # 创建反向映射：new_uuid -> old_uuid
-                    reverse_uuid_mapping = {new_uuid: old_uuid for old_uuid, new_uuid in uuid_mapping.items()}
-                    for tree in resources_config.trees:
-                        node = tree.root_node
-                        if node.res_content.type == "device":
-                            for sub_node in node.children:
-                                # 只有二级子设备
-                                if sub_node.res_content.type != "device":
-                                    # slave节点走c2s更新接口，拿到add自行update uuid
-                                    device_tracker = self.devices_instances[node.res_content.id].resource_tracker
-                                    # sub_node.res_content.uuid 已经是新UUID，需要用旧UUID去查找
-                                    old_uuid = reverse_uuid_mapping.get(sub_node.res_content.uuid)
-                                    if old_uuid:
-                                        # 找到旧UUID，使用UUID查找
-                                        resource_instance = device_tracker.uuid_to_resources.get(old_uuid)
-                                    else:
-                                        # 未找到旧UUID，使用name查找
-                                        resource_instance = device_tracker.figure_resource(
-                                            {"name": sub_node.res_content.name}
-                                        )
-                                    device_tracker.loop_update_uuid(resource_instance, uuid_mapping)
-                        else:
-                            try:
-                                for plr_resource in ResourceTreeSet([tree]).to_plr_resources():
-                                    self.resource_tracker.add_resource(plr_resource)
-                            except Exception as ex:
-                                self.lab_logger().warning("[Host Node-Resource] 根节点物料序列化失败！")
-        except Exception as ex:
-            self.lab_logger().error("[Host Node-Resource] 添加物料出错！")
-            self.lab_logger().error(traceback.format_exc())
         # 创建定时器，定期发现设备
         self._discovery_timer = self.create_timer(
             discovery_interval, self._discovery_devices_callback, callback_group=ReentrantCallbackGroup()
@@ -862,7 +863,7 @@ class HostNode(BaseROS2DeviceNode):
             ),
         }
 
-    def _resource_tree_action_add_callback(self, data: dict, response: SerialCommand_Response):  # OK
+    async def _resource_tree_action_add_callback(self, data: dict, response: SerialCommand_Response):  # OK
         resource_tree_set = ResourceTreeSet.load(data["data"])
         mount_uuid = data["mount_uuid"]
         first_add = data["first_add"]
@@ -903,7 +904,7 @@ class HostNode(BaseROS2DeviceNode):
         response.response = json.dumps(uuid_mapping) if success else "FAILED"
         self.lab_logger().info(f"[Host Node-Resource] Resource tree add completed, success: {success}")
 
-    def _resource_tree_action_get_callback(self, data: dict, response: SerialCommand_Response):  # OK
+    async def _resource_tree_action_get_callback(self, data: dict, response: SerialCommand_Response):  # OK
         uuid_list: List[str] = data["data"]
         with_children: bool = data["with_children"]
         from unilabos.app.web.client import http_client
@@ -911,7 +912,7 @@ class HostNode(BaseROS2DeviceNode):
         resource_response = http_client.resource_tree_get(uuid_list, with_children)
         response.response = json.dumps(resource_response)
 
-    def _resource_tree_action_remove_callback(self, data: dict, response: SerialCommand_Response):
+    async def _resource_tree_action_remove_callback(self, data: dict, response: SerialCommand_Response):
         """
         子节点通知Host物料树删除
         """
@@ -919,7 +920,7 @@ class HostNode(BaseROS2DeviceNode):
         response.response = "OK"
         self.lab_logger().info(f"[Host Node-Resource] Resource tree remove completed")
 
-    def _resource_tree_action_update_callback(self, data: dict, response: SerialCommand_Response):
+    async def _resource_tree_action_update_callback(self, data: dict, response: SerialCommand_Response):
         """
         子节点通知Host物料树更新
         """
@@ -937,14 +938,16 @@ class HostNode(BaseROS2DeviceNode):
             uuid_to_trees[tree.root_node.res_content.uuid].append(tree)
 
         for uid, trees in uuid_to_trees.items():
-
             new_tree_set = ResourceTreeSet(trees)
             resource_start_time = time.time()
+            self.lab_logger().info(
+                f"[Host Node-Resource] 物料 {[root_node.res_content.id for root_node in new_tree_set.root_nodes]} {uid} 挂载 {trees[0].root_node.res_content.parent_uuid} 请求更新上传"
+            )
             uuid_mapping = http_client.resource_tree_add(new_tree_set, uid, False)
             success = bool(uuid_mapping)
             resource_end_time = time.time()
             self.lab_logger().info(
-                f"[Host Node-Resource] 物料 {[root_node.res_content.id for root_node in new_tree_set.root_nodes]} 挂载 {uid} P{trees[0].root_node.res_content.parent} 更新上传 {round(resource_end_time - resource_start_time, 5) * 1000} ms"
+                f"[Host Node-Resource] 物料更新上传 {round(resource_end_time - resource_start_time, 5) * 1000} ms"
             )
             if uuid_mapping:
                 self.lab_logger().info(f"[Host Node-Resource] UUID映射: {len(uuid_mapping)} 个节点")
@@ -952,7 +955,7 @@ class HostNode(BaseROS2DeviceNode):
             response.response = json.dumps(uuid_mapping)
             self.lab_logger().info(f"[Host Node-Resource] Resource tree add completed, success: {success}")
 
-    def _resource_tree_update_callback(self, request: SerialCommand_Request, response: SerialCommand_Response):
+    async def _resource_tree_update_callback(self, request: SerialCommand_Request, response: SerialCommand_Response):
         """
         子节点通知Host物料树更新
 
@@ -965,13 +968,13 @@ class HostNode(BaseROS2DeviceNode):
             action = data["action"]
             data = data["data"]
             if action == "add":
-                self._resource_tree_action_add_callback(data, response)
+                await self._resource_tree_action_add_callback(data, response)
             elif action == "get":
-                self._resource_tree_action_get_callback(data, response)
+                await self._resource_tree_action_get_callback(data, response)
             elif action == "update":
-                self._resource_tree_action_update_callback(data, response)
+                await self._resource_tree_action_update_callback(data, response)
             elif action == "remove":
-                self._resource_tree_action_remove_callback(data, response)
+                await self._resource_tree_action_remove_callback(data, response)
             else:
                 self.lab_logger().error(f"[Host Node-Resource] Invalid action: {action}")
                 response.response = "ERROR"

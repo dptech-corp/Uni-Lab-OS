@@ -11,8 +11,7 @@ from unilabos.messages import *  # type: ignore  # protocol names
 from rclpy.action import ActionServer, ActionClient
 from rclpy.action.server import ServerGoalHandle
 from rclpy.callback_groups import ReentrantCallbackGroup
-from unilabos_msgs.msg import Resource  # type: ignore
-from unilabos_msgs.srv import ResourceGet, ResourceUpdate  # type: ignore
+from unilabos_msgs.srv._serial_command import SerialCommand_Request, SerialCommand_Response
 
 from unilabos.compile import action_protocol_generators
 from unilabos.resources.graphio import list_to_nested_dict, nested_dict_to_list
@@ -20,11 +19,11 @@ from unilabos.ros.initialize_device import initialize_device_from_dict
 from unilabos.ros.msgs.message_converter import (
     get_action_type,
     convert_to_ros_msg,
-    convert_from_ros_msg,
     convert_from_ros_msg_with_mapping,
 )
 from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode, DeviceNodeResourceTracker, ROS2DeviceNode
-from unilabos.utils.type_check import serialize_result_info, get_result_info_str
+from unilabos.ros.nodes.resource_tracker import ResourceTreeSet
+from unilabos.utils.type_check import get_result_info_str
 
 if TYPE_CHECKING:
     from unilabos.devices.workstation.workstation_base import WorkstationBase
@@ -50,6 +49,7 @@ class ROS2WorkstationNode(BaseROS2DeviceNode):
         *,
         driver_instance: "WorkstationBase",
         device_id: str,
+        device_uuid: str,
         status_types: Dict[str, Any],
         action_value_mappings: Dict[str, Any],
         hardware_interface: Dict[str, Any],
@@ -64,6 +64,7 @@ class ROS2WorkstationNode(BaseROS2DeviceNode):
         super().__init__(
             driver_instance=driver_instance,
             device_id=device_id,
+            device_uuid=device_uuid,
             status_types=status_types,
             action_value_mappings={**action_value_mappings, **self.protocol_action_mappings},
             hardware_interface=hardware_interface,
@@ -222,16 +223,28 @@ class ROS2WorkstationNode(BaseROS2DeviceNode):
                 # 向Host查询物料当前状态
                 for k, v in goal.get_fields_and_field_types().items():
                     if v in ["unilabos_msgs/Resource", "sequence<unilabos_msgs/Resource>"]:
-                        r = ResourceGet.Request()
-                        resource_id = (
-                            protocol_kwargs[k]["id"] if v == "unilabos_msgs/Resource" else protocol_kwargs[k][0]["id"]
-                        )
-                        r.id = resource_id
-                        r.with_children = True
-                        response = await self._resource_clients["resource_get"].call_async(r)
-                        protocol_kwargs[k] = list_to_nested_dict(
-                            [convert_from_ros_msg(rs) for rs in response.resources]
-                        )
+                        self.lab_logger().info(f"{protocol_name} 查询资源状态: Key: {k} Type: {v}")
+
+                        try:
+                            # 统一处理单个或多个资源
+                            resource_id = (
+                                protocol_kwargs[k]["id"] if v == "unilabos_msgs/Resource" else protocol_kwargs[k][0]["id"]
+                            )
+                            r = SerialCommand_Request()
+                            r.command = json.dumps({"id": resource_id, "with_children": True})
+                            # 发送请求并等待响应
+                            response: SerialCommand_Response = await self._resource_clients[
+                                "resource_get"
+                            ].call_async(
+                                r
+                            )  # type: ignore
+                            raw_data = json.loads(response.response)
+                            tree_set = ResourceTreeSet.from_raw_list(raw_data)
+                            target = tree_set.dump()
+                            protocol_kwargs[k] = target[0]
+                        except Exception as ex:
+                            self.lab_logger().error(f"查询资源失败: {k}, 错误: {ex}\n{traceback.format_exc()}")
+                            raise
 
                 self.lab_logger().info(f"🔍 最终的 vessel: {protocol_kwargs.get('vessel', 'NOT_FOUND')}")
 
