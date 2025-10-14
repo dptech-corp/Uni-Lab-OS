@@ -1124,7 +1124,7 @@ class DefaultLayout:
             self.waste_liquid_slot = 6
 
         elif product_name == "PRCXI9320":
-            self.rows = 3
+            self.rows = 4
             self.columns = 4
             self.layout = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
             self.trash_slot = 16
