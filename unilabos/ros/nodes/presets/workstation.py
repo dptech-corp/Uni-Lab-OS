@@ -6,6 +6,8 @@ from typing import List, Dict, Any, Optional, TYPE_CHECKING
 
 import rclpy
 from rosidl_runtime_py import message_to_ordereddict
+from unilabos_msgs.msg import Resource
+from unilabos_msgs.srv import ResourceUpdate
 
 from unilabos.messages import *  # type: ignore  # protocol names
 from rclpy.action import ActionServer, ActionClient
