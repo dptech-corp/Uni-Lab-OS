@@ -935,7 +935,7 @@ class HostNode(BaseROS2DeviceNode):
 
         uuid_to_trees: Dict[str, List[ResourceTreeInstance]] = collections.defaultdict(list)
         for tree in resource_tree_set.trees:
-            uuid_to_trees[tree.root_node.res_content.uuid].append(tree)
+            uuid_to_trees[tree.root_node.res_content.parent_uuid].append(tree)
 
         for uid, trees in uuid_to_trees.items():
             new_tree_set = ResourceTreeSet(trees)
