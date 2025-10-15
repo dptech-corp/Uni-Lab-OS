@@ -957,9 +957,10 @@ class BaseROS2DeviceNode(Node, Generic[T]):
 
                             # 通过资源跟踪器获取本地实例
                             final_resources = queried_resources if is_sequence else queried_resources[0]
-                            final_resources = self.resource_tracker.figure_resource({"name": final_resources.id}, try_mode=False) if not is_sequence else [
-                                self.resource_tracker.figure_resource({"name": res.id}, try_mode=False) for res in queried_resources
+                            final_resources = self.resource_tracker.figure_resource({"name": final_resources.name}, try_mode=False) if not is_sequence else [
+                                self.resource_tracker.figure_resource({"name": res.name}, try_mode=False) for res in queried_resources
                             ]
+                            action_kwargs[k] = final_resources
 
                         except Exception as e:
                             self.lab_logger().error(f"{action_name} 物料实例获取失败: {e}\n{traceback.format_exc()}")

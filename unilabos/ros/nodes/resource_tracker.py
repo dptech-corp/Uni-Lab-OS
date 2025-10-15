@@ -840,7 +840,7 @@ class DeviceNodeResourceTracker(object):
         """
         递归遍历资源树，更新所有节点的uuid
 
-        Args:
+        Args:0
             resource: 资源对象（可以是dict或实例）
             uuid_map: uuid映射字典，{old_uuid: new_uuid}
 
