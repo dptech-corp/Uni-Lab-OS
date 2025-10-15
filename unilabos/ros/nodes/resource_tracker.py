@@ -774,7 +774,8 @@ class DeviceNodeResourceTracker(object):
         else:
             return getattr(resource, uuid_attr, None)
 
-    def _set_resource_uuid(self, resource, new_uuid: str):
+    @classmethod
+    def set_resource_uuid(cls, resource, new_uuid: str):
         """
         设置资源的 uuid，统一处理 dict 和 instance 两种类型
 
@@ -827,7 +828,7 @@ class DeviceNodeResourceTracker(object):
             resource_name = self._get_resource_attr(res, "name")
             if resource_name and resource_name in name_to_uuid_map:
                 new_uuid = name_to_uuid_map[resource_name]
-                self._set_resource_uuid(res, new_uuid)
+                self.set_resource_uuid(res, new_uuid)
                 self.uuid_to_resources[new_uuid] = res
                 logger.debug(f"设置资源UUID: {resource_name} -> {new_uuid}")
                 return 1
@@ -853,7 +854,7 @@ class DeviceNodeResourceTracker(object):
             if current_uuid and current_uuid in uuid_map:
                 new_uuid = uuid_map[current_uuid]
                 if current_uuid != new_uuid:
-                    self._set_resource_uuid(res, new_uuid)
+                    self.set_resource_uuid(res, new_uuid)
                     # 更新uuid_to_resources映射
                     if current_uuid in self.uuid_to_resources:
                         self.uuid_to_resources.pop(current_uuid)

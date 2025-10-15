@@ -6,7 +6,7 @@ import threading
 import time
 import traceback
 import uuid
-from typing import get_type_hints, TypeVar, Generic, Dict, Any, Type, TypedDict, Optional, List, TYPE_CHECKING
+from typing import get_type_hints, TypeVar, Generic, Dict, Any, Type, TypedDict, Optional, List, TYPE_CHECKING, Union
 
 from concurrent.futures import ThreadPoolExecutor
 import asyncio
@@ -657,15 +657,27 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                             results.append({"success": True, "action": "update"})
                     elif action == "remove":
                         # 移除资源
-                        plr_resources: List[ResourcePLR] = [
-                            self.resource_tracker.uuid_to_resources[i] for i in resources_uuid
-                        ]
+                        found_resources: List[List[Union[ResourcePLR, dict]]] = self.resource_tracker.figure_resource(
+                            [{"uuid": uid} for uid in resources_uuid], try_mode=True
+                        )
+                        found_plr_resources = []
+                        other_plr_resources = []
+                        for res_list in found_resources:
+                            for res in res_list:
+                                if issubclass(res.__class__, ResourcePLR):
+                                    found_plr_resources.append(res)
+                                else:
+                                    other_plr_resources.append(res)
                         func = getattr(self.driver_instance, "resource_tree_remove", None)
                         if callable(func):
-                            func(plr_resources)
-                        for plr_resource in plr_resources:
+                            func(found_plr_resources)
+                        for plr_resource in found_plr_resources:
                             plr_resource.parent.unassign_child_resource(plr_resource)
                             self.resource_tracker.remove_resource(plr_resource)
+                            self.lab_logger().info(f"移除物料 {plr_resource} 及其子节点")
+                        for res in other_plr_resources:
+                            self.resource_tracker.remove_resource(res)
+                            self.lab_logger().info(f"移除物料 {res} 及其子节点")
                         results.append({"success": True, "action": "remove"})
                 except Exception as e:
                     error_msg = f"Error processing {action} operation: {str(e)}"
@@ -945,7 +957,9 @@ class BaseROS2DeviceNode(Node, Generic[T]):
 
                             # 通过资源跟踪器获取本地实例
                             final_resources = queried_resources if is_sequence else queried_resources[0]
-                            action_kwargs[k] = self.resource_tracker.figure_resource(final_resources, try_mode=False)
+                            final_resources = self.resource_tracker.figure_resource({"name": final_resources.id}, try_mode=False) if not is_sequence else [
+                                self.resource_tracker.figure_resource({"name": res.id}, try_mode=False) for res in queried_resources
+                            ]
 
                         except Exception as e:
                             self.lab_logger().error(f"{action_name} 物料实例获取失败: {e}\n{traceback.format_exc()}")

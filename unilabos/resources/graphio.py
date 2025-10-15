@@ -17,6 +17,7 @@ from unilabos.ros.nodes.resource_tracker import (
     ResourceDictInstance,
     ResourceTreeSet,
 )
+from unilabos.utils import logger
 from unilabos.utils.banner_print import print_status
 
 try:
@@ -67,6 +68,10 @@ def canonicalize_nodes_data(
             z = node.pop("z", None)
             if z is not None:
                 node["position"]["position"]["z"] = z
+        if "sample_id" in node:
+            sample_id = node.pop("sample_id")
+            if sample_id:
+                logger.error(f"{node}的sample_id参数已弃用，sample_id: {sample_id}")
         for k in list(node.keys()):
             if k not in ["id", "uuid", "name", "description", "schema", "model", "icon", "parent_uuid", "parent", "type", "class", "position", "config", "data", "children"]:
                 v = node.pop(k)
