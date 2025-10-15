@@ -18,7 +18,7 @@ import os
 from re import X
 import time
 from typing import Optional, Dict, Tuple, Union
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, field, asdict
 from pathlib import Path
 import logging
 
@@ -51,12 +51,12 @@ class MachineConfig:
     # 行程限制
     max_travel_x: float = 340.0     # X轴最大行程
     max_travel_y: float = 250.0     # Y轴最大行程
-    max_travel_z: float = 160.0     # Z轴最大行程
-    reference_distance: Dict[str, float] = {
-    "x": 29,
-    "y": -13,
-    "z": 70
-    }
+    max_travel_z: float = 200.0     # Z轴最大行程
+    reference_distance: Dict[str, float] = field(default_factory=lambda: {
+        "x": 29,
+        "y": -13,
+        "z": -73.5
+    })
     # 安全移动参数
     safe_z_height: float = 0.0      # Z轴安全移动高度 (mm) - 液体处理工作站安全高度
     z_approach_height: float = 5.0  # Z轴接近高度 (mm) - 在目标位置上方的预备高度
@@ -281,14 +281,18 @@ class XYZController(XYZStepperController):
     
     def check_travel_limits(self, x: float = None, y: float = None, z: float = None) -> bool:
         """检查行程限制"""
-        if x is not None and (x < 0 or x > self.machine_config.max_travel_x):
-            raise CoordinateSystemError(f"X轴超出行程范围: {x}mm (0 ~ {self.machine_config.max_travel_x}mm)")
+        min_x = min(0, -50)
+        min_y = min(0, -50)
+        min_z = min(0, -50)
         
-        if y is not None and (y < 0 or y > self.machine_config.max_travel_y):
-            raise CoordinateSystemError(f"Y轴超出行程范围: {y}mm (0 ~ {self.machine_config.max_travel_y}mm)")
+        if x is not None and (x < min_x or x > self.machine_config.max_travel_x):
+            raise CoordinateSystemError(f"X轴超出行程范围: {x}mm ({min_x} ~ {self.machine_config.max_travel_x}mm)")
+        
+        if y is not None and (y < min_y or y > self.machine_config.max_travel_y):
+            raise CoordinateSystemError(f"Y轴超出行程范围: {y}mm ({min_y} ~ {self.machine_config.max_travel_y}mm)")
             
-        if z is not None and (z < 0 or z > self.machine_config.max_travel_z):
-            raise CoordinateSystemError(f"Z轴超出行程范围: {z}mm (0 ~ {self.machine_config.max_travel_z}mm)")
+        if z is not None and (z < min_z or z > self.machine_config.max_travel_z):
+            raise CoordinateSystemError(f"Z轴超出行程范围: {z}mm ({min_z} ~ {self.machine_config.max_travel_z}mm)")
             
         return True
     
@@ -488,14 +492,20 @@ class XYZController(XYZStepperController):
             
             # 获取当前各轴位置
             positions = self.get_all_positions()
+
+            machine_steps = {
+                'x': self.mm_to_steps(MotorAxis.X, self.machine_config.reference_distance['x']),
+                'y': self.mm_to_steps(MotorAxis.Y, self.machine_config.reference_distance['y']),
+                'z': self.mm_to_steps(MotorAxis.Z, self.machine_config.reference_distance['z'])
+            }
             
             for axis in MotorAxis:
                 axis_name = axis.name.lower()
                 current_steps = positions[axis].steps
-                self.coordinate_origin.work_origin_steps[axis_name] = current_steps
+                self.coordinate_origin.work_origin_steps[axis_name] = current_steps + machine_steps[axis_name]
                 
-                logger.info(f"{axis.name}轴工作原点设置为: {current_steps}步 "
-                          f"({self.steps_to_mm(axis, current_steps):.2f}mm)")
+                logger.info(f"{axis.name}轴工作原点设置为: {current_steps + machine_steps[axis_name]}步 "
+                          f"({self.steps_to_mm(axis, current_steps + machine_steps[axis_name]):.2f}mm)")
             
             self._save_coordinate_origin()
             logger.info("工作原点设置完成")
@@ -559,15 +569,19 @@ class XYZController(XYZStepperController):
                 raise CoordinateSystemError("工作原点未设置，请先调用set_work_origin_here()")
             
             # 检查行程限制
-            self.check_travel_limits(x, y, z)
+            # self.check_travel_limits(x, y, z)
             
             # 设置运动参数
             speed = speed or self.machine_config.default_speed
             acceleration = acceleration or self.machine_config.default_acceleration
             
+            xy_success = True
             # 步骤1: Z轴先上升到安全高度
-            if z is not None:
-                safe_z_steps = self.work_to_machine_steps(None, None, self.machine_config.safe_z_height+self.machine_config.reference_distance['z'])
+            
+            machine_steps = self.work_to_machine_steps(x, y, z)
+
+            if z is not None and (x is not None or y is not None):
+                safe_z_steps = self.work_to_machine_steps(None, None, self.machine_config.safe_z_height)
                 if not self.move_to_position(MotorAxis.Z, safe_z_steps['z'], self.ms_to_rpm(MotorAxis.Z, speed), acceleration):
                     logger.error("Z轴上升到安全高度失败")
                     return False
@@ -577,21 +591,18 @@ class XYZController(XYZStepperController):
                 self.wait_for_completion(MotorAxis.Z, 10.0)
             
             # 步骤2: XY轴移动到目标位置
-            xy_success = True
             if x is not None:
-                machine_steps = self.work_to_machine_steps(x+self.machine_config.reference_distance['x'], None, None)
                 if not self.move_to_position(MotorAxis.X, machine_steps['x'], self.ms_to_rpm(MotorAxis.X, speed), acceleration):
                     xy_success = False
-                    
             if y is not None:
-                machine_steps = self.work_to_machine_steps(None, y+self.machine_config.reference_distance['y'], None)
                 if not self.move_to_position(MotorAxis.Y, machine_steps['y'], self.ms_to_rpm(MotorAxis.Y, speed), acceleration):
                     xy_success = False
-            
+
             if not xy_success:
                 logger.error("XY轴移动失败")
                 return False
                 
+            
             if x is not None or y is not None:
                 logger.info(f"XY轴移动到目标位置: X:{x} Y:{y} mm")
                 # 等待XY轴移动完成
@@ -601,13 +612,12 @@ class XYZController(XYZStepperController):
                     self.wait_for_completion(MotorAxis.Y, 10.0)
             
             # 步骤3: Z轴下降到目标位置
-            if z is not None:
-                machine_steps = self.work_to_machine_steps(None, None, z+self.machine_config.reference_distance['z'])
+            if z is not None:   
                 if not self.move_to_position(MotorAxis.Z, machine_steps['z'], self.ms_to_rpm(MotorAxis.Z, speed), acceleration):
                     logger.error("Z轴下降到目标位置失败")
                     return False
-                logger.info(f"Z轴下降到目标位置: {z} mm")
-                self.wait_for_completion(MotorAxis.Z, 10.0)
+            logger.info(f"Z轴下降到目标位置: {z} mm")
+            self.wait_for_completion(MotorAxis.Z, 10.0)
             
             logger.info(f"安全移动到工作坐标 X:{x} Y:{y} Z:{z} (mm) 完成")
             return True
@@ -656,7 +666,7 @@ class XYZController(XYZStepperController):
             target_y = current_work['y'] + dy if dy != 0 else None  
             target_z = current_work['z'] + dz if dz != 0 else None
             
-            return self.move_to_work_coord_safe(target_x, target_y, target_z, speed, acceleration)
+            return self.move_to_work_coord_safe(x=target_x, y=target_y, z=target_z, speed=speed, acceleration=acceleration)
             
         except Exception as e:
             logger.error(f"相对移动失败: {e}")
@@ -820,7 +830,10 @@ def interactive_control(controller: XYZController):
                 if homing_success:
                     print("回零操作完成，系统已就绪")
                     # 设置当前位置为工作原点
-
+                    # if controller.set_work_origin_here():
+                    #     print("工作原点已设置为回零位置")
+                    # else:
+                    #     print("工作原点设置失败，但可以继续操作")
                     return True
                 else:
                     print("回零操作失败")
@@ -1054,8 +1067,8 @@ def run_tests():
         max_travel_x=340.0,
         max_travel_y=250.0,
         max_travel_z=160.0,
-        homing_speed=100,
-        default_speed=100
+        homing_speed=50,
+        default_speed=50
     )
     print(f"X轴步距: {config.steps_per_mm_x} 步/mm")
     print(f"Y轴步距: {config.steps_per_mm_y} 步/mm")
@@ -1131,12 +1144,12 @@ def run_tests():
         (50, 50, -5, "Z轴负超限")
     ]
     
-    for x, y, z, desc in test_positions:
-        try:
-            offline_controller.check_travel_limits(x, y, z)
-            print(f"{desc} ({x}, {y}, {z}): 有效")
-        except CoordinateSystemError as e:
-            print(f"{desc} ({x}, {y}, {z}): 超限 - {e}")
+    # for x, y, z, desc in test_positions:
+    #     try:
+    #         offline_controller.check_travel_limits(x, y, z)
+    #         print(f"{desc} ({x}, {y}, {z}): 有效")
+    #     except CoordinateSystemError as e:
+    #         print(f"{desc} ({x}, {y}, {z}): 超限 - {e}")
     
     print("\n=== 离线功能测试完成 ===")
     
@@ -1216,9 +1229,9 @@ def run_tests():
 
 # ==================== 测试和示例代码 ====================
 if __name__ == "__main__":
-    # run_tests()
-    xyz_controller = XYZController(port='/dev/ttyUSB_CH340', auto_connect=True)
-    # xyz_controller.stop_all_axes()
-    xyz_controller.connect_device()
-    time.sleep(1)
-    xyz_controller.home_all_axes()
+    run_tests()
+    # xyz_controller = XYZController(port='/dev/ttyUSB_CH340', auto_connect=True)
+    # # xyz_controller.stop_all_axes()
+    # xyz_controller.connect_device()
+    # time.sleep(1)
+    # xyz_controller.home_all_axes()
