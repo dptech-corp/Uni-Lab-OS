@@ -7,7 +7,8 @@ import argparse
 import importlib
 import subprocess
 import sys
-from .banner_print import print_status
+
+from unilabos.utils.banner_print import print_status
 
 
 class EnvironmentChecker:
@@ -49,17 +50,17 @@ class EnvironmentChecker:
             result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)  # 5分钟超时
 
             if result.returncode == 0:
-                print_status(f"✅ {package_name} 安装成功", "success")
+                print_status(f"✓ {package_name} 安装成功", "success")
                 return True
             else:
-                print_status(f"❌ {package_name} 安装失败: {result.stderr}", "error")
+                print_status(f"× {package_name} 安装失败: {result.stderr}", "error")
                 return False
 
         except subprocess.TimeoutExpired:
-            print_status(f"❌ {package_name} 安装超时", "error")
+            print_status(f"× {package_name} 安装超时", "error")
             return False
         except Exception as e:
-            print_status(f"❌ {package_name} 安装异常: {str(e)}", "error")
+            print_status(f"× {package_name} 安装异常: {str(e)}", "error")
             return False
 
     def check_all_packages(self) -> bool:
@@ -77,7 +78,7 @@ class EnvironmentChecker:
                 self.missing_packages.append((package_name, install_url))
 
         if not self.missing_packages:
-            print_status("✅ 所有依赖包检查完成，环境正常", "success")
+            print_status("✓ 所有依赖包检查完成，环境正常", "success")
             return True
 
         print_status(f"发现 {len(self.missing_packages)} 个缺失的包", "warning")
@@ -109,7 +110,7 @@ class EnvironmentChecker:
                 print_status(f"  - {import_name} (pip install {pip_name})", "error")
             return False
 
-        print_status(f"✅ 成功安装 {success_count} 个包", "success")
+        print_status(f"✓ 成功安装 {success_count} 个包", "success")
         return True
 
     def verify_installation(self) -> bool:
@@ -130,7 +131,7 @@ class EnvironmentChecker:
                 print_status(f"  - {import_name}", "error")
             return False
 
-        print_status("✅ 所有包验证通过", "success")
+        print_status("✓ 所有包验证通过", "success")
         return True
 
 

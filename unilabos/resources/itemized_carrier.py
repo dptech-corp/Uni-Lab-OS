@@ -5,15 +5,19 @@ Automated Liquid Handling Station Resource Classes - Simplified Version
 
 from __future__ import annotations
 
-from typing import Dict, Optional
+from typing import Dict, List, Optional, TypeVar, Union, Sequence, Tuple
 
-from pylabrobot.resources.coordinate import Coordinate
-from pylabrobot.resources.container import Container
-from pylabrobot.resources.resource_holder import ResourceHolder
+import pylabrobot
+
 from pylabrobot.resources import Resource as ResourcePLR
+from pylabrobot.resources import Well, ResourceHolder
+from pylabrobot.resources.coordinate import Coordinate
 
 
-class Bottle(Container):
+LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+
+class Bottle(Well):
     """瓶子类 - 简化版，不追踪瓶盖"""
 
     def __init__(
@@ -37,6 +41,8 @@ class Bottle(Container):
             max_volume=max_volume,
             category=category,
             model=model,
+            bottom_type="flat",
+            cross_section_type="circle"
         )
         self.diameter = diameter
         self.height = height
@@ -49,13 +55,6 @@ class Bottle(Container):
             "height": self.height,
             "barcode": self.barcode,
         }
-
-
-from string import ascii_uppercase as LETTERS
-from typing import Dict, List, Optional, Type, TypeVar, Union, Sequence, Tuple
-
-import pylabrobot
-from pylabrobot.resources.resource_holder import ResourceHolder
 
 T = TypeVar("T", bound=ResourceHolder)
 
@@ -163,6 +162,89 @@ class ItemizedCarrier(ResourcePLR):
       raise ValueError(f"Resource {resource} is not assigned to this carrier")
     if hasattr(resource, "unassign"):
       resource.unassign()
+
+  def get_child_identifier(self, child: ResourcePLR):
+    """Get the identifier information for a given child resource.
+    
+    Args:
+        child: The Resource object to find the identifier for
+        
+    Returns:
+        dict: A dictionary containing:
+            - identifier: The string identifier (e.g. "A1", "B2")
+            - idx: The integer index in the sites list
+            - x: The x index (column index, 0-based)
+            - y: The y index (row index, 0-based)  
+            - z: The z index (layer index, 0-based)
+            
+    Raises:
+        ValueError: If the child resource is not found in this carrier
+    """
+    # Find the child resource in sites
+    for idx, resource in enumerate(self.sites):
+      if resource is child:
+        # Get the identifier from ordering keys
+        identifier = list(self._ordering.keys())[idx]
+        
+        # Parse identifier to get x, y, z indices
+        x_idx, y_idx, z_idx = self._parse_identifier_to_indices(identifier, idx)
+        
+        return {
+          "identifier": identifier,
+          "idx": idx,
+          "x": x_idx,
+          "y": y_idx,
+          "z": z_idx
+        }
+    
+    # If not found, raise an error
+    raise ValueError(f"Resource {child} is not assigned to this carrier")
+
+  def _parse_identifier_to_indices(self, identifier: str, idx: int) -> Tuple[int, int, int]:
+    """Parse identifier string to get x, y, z indices.
+    
+    Args:
+        identifier: String identifier like "A1", "B2", etc.
+        idx: Linear index as fallback for calculation
+        
+    Returns:
+        Tuple of (x_idx, y_idx, z_idx)
+    """
+    # If we have explicit dimensions, calculate from idx
+    if self.num_items_x > 0 and self.num_items_y > 0:
+      # Calculate 3D indices from linear index
+      z_idx = idx // (self.num_items_x * self.num_items_y) if self.num_items_z > 0 else 0
+      remaining = idx % (self.num_items_x * self.num_items_y)
+      y_idx = remaining // self.num_items_x
+      x_idx = remaining % self.num_items_x
+      return x_idx, y_idx, z_idx
+    
+    # Fallback: parse from Excel-style identifier
+    if isinstance(identifier, str) and len(identifier) >= 2:
+      # Extract row (letter) and column (number)
+      row_letters = ""
+      col_numbers = ""
+      
+      for char in identifier:
+        if char.isalpha():
+          row_letters += char
+        elif char.isdigit():
+          col_numbers += char
+      
+      if row_letters and col_numbers:
+        # Convert letter(s) to row index (A=0, B=1, etc.)
+        y_idx = 0
+        for char in row_letters:
+          y_idx = y_idx * 26 + (ord(char.upper()) - ord('A'))
+        
+        # Convert number to column index (1-based to 0-based)
+        x_idx = int(col_numbers) - 1
+        z_idx = 0  # Default layer
+        
+        return x_idx, y_idx, z_idx
+    
+    # If all else fails, assume linear arrangement
+    return idx, 0, 0
 
   def __getitem__(
     self,

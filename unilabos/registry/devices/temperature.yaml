@@ -12,6 +12,7 @@ chiller:
           register_address: null
           value: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: build_modbus_frame的参数schema
@@ -46,6 +47,7 @@ chiller:
           decimal_points: 1
           temperature: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: convert_temperature_to_modbus_value的参数schema
@@ -73,6 +75,7 @@ chiller:
         goal_default:
           data: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: modbus_crc的参数schema
@@ -96,6 +99,7 @@ chiller:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: stop的参数schema
@@ -188,6 +192,7 @@ heaterstirrer.dalong:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: close的参数schema
@@ -209,6 +214,7 @@ heaterstirrer.dalong:
         goal_default:
           speed: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: set_stir_speed的参数schema
@@ -234,6 +240,7 @@ heaterstirrer.dalong:
           temp: null
           type: warning
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: set_temp_inner的参数schema
@@ -580,6 +587,7 @@ tempsensor:
           register_address: null
           register_count: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: build_modbus_request的参数schema
@@ -613,6 +621,7 @@ tempsensor:
         goal_default:
           data: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: calculate_crc的参数schema
@@ -637,6 +646,7 @@ tempsensor:
         goal_default:
           response: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: read_modbus_response的参数schema
@@ -661,6 +671,7 @@ tempsensor:
         goal_default:
           command: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: send_prototype_command的参数schema

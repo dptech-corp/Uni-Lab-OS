@@ -8,6 +8,7 @@ solenoid_valve:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: close的参数schema
@@ -28,6 +29,7 @@ solenoid_valve:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: is_closed的参数schema
@@ -48,6 +50,7 @@ solenoid_valve:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: is_open的参数schema
@@ -68,6 +71,7 @@ solenoid_valve:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: ''
@@ -88,6 +92,7 @@ solenoid_valve:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: read_data的参数schema
@@ -109,6 +114,7 @@ solenoid_valve:
         goal_default:
           command: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: send_command的参数schema
@@ -205,6 +211,7 @@ solenoid_valve.mock:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: is_closed的参数schema
@@ -225,6 +232,7 @@ solenoid_valve.mock:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: is_open的参数schema
@@ -246,6 +254,7 @@ solenoid_valve.mock:
         goal_default:
           position: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: set_valve_position的参数schema
@@ -376,6 +385,7 @@ syringe_pump_with_valve.runze.SY03B-T06:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: close的参数schema
@@ -396,6 +406,7 @@ syringe_pump_with_valve.runze.SY03B-T06:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: initialize的参数schema
@@ -417,6 +428,7 @@ syringe_pump_with_valve.runze.SY03B-T06:
         goal_default:
           volume: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: pull_plunger的参数schema
@@ -441,6 +453,7 @@ syringe_pump_with_valve.runze.SY03B-T06:
         goal_default:
           volume: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: push_plunger的参数schema
@@ -464,6 +477,7 @@ syringe_pump_with_valve.runze.SY03B-T06:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: query_aux_input_status_1的参数schema
@@ -484,6 +498,7 @@ syringe_pump_with_valve.runze.SY03B-T06:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: query_aux_input_status_2的参数schema
@@ -504,6 +519,7 @@ syringe_pump_with_valve.runze.SY03B-T06:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: query_backlash_position的参数schema
@@ -524,6 +540,7 @@ syringe_pump_with_valve.runze.SY03B-T06:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: query_command_buffer_status的参数schema
@@ -544,6 +561,7 @@ syringe_pump_with_valve.runze.SY03B-T06:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: query_software_version的参数schema
@@ -565,6 +583,7 @@ syringe_pump_with_valve.runze.SY03B-T06:
         goal_default:
           full_command: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: send_command的参数schema
@@ -589,6 +608,7 @@ syringe_pump_with_valve.runze.SY03B-T06:
         goal_default:
           baudrate: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: set_baudrate的参数schema
@@ -613,6 +633,7 @@ syringe_pump_with_valve.runze.SY03B-T06:
         goal_default:
           velocity: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: set_max_velocity的参数schema
@@ -638,6 +659,7 @@ syringe_pump_with_valve.runze.SY03B-T06:
           max_velocity: null
           position: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: set_position的参数schema
@@ -664,6 +686,7 @@ syringe_pump_with_valve.runze.SY03B-T06:
         goal_default:
           position: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: set_valve_position的参数schema
@@ -688,6 +711,7 @@ syringe_pump_with_valve.runze.SY03B-T06:
         goal_default:
           velocity: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: set_velocity_grade的参数schema
@@ -711,6 +735,7 @@ syringe_pump_with_valve.runze.SY03B-T06:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: stop_operation的参数schema
@@ -731,6 +756,7 @@ syringe_pump_with_valve.runze.SY03B-T06:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: wait_error的参数schema
@@ -880,6 +906,7 @@ syringe_pump_with_valve.runze.SY03B-T08:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: close的参数schema
@@ -900,6 +927,7 @@ syringe_pump_with_valve.runze.SY03B-T08:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: initialize的参数schema
@@ -921,6 +949,7 @@ syringe_pump_with_valve.runze.SY03B-T08:
         goal_default:
           volume: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: pull_plunger的参数schema
@@ -945,6 +974,7 @@ syringe_pump_with_valve.runze.SY03B-T08:
         goal_default:
           volume: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: push_plunger的参数schema
@@ -968,6 +998,7 @@ syringe_pump_with_valve.runze.SY03B-T08:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: query_aux_input_status_1的参数schema
@@ -988,6 +1019,7 @@ syringe_pump_with_valve.runze.SY03B-T08:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: query_aux_input_status_2的参数schema
@@ -1008,6 +1040,7 @@ syringe_pump_with_valve.runze.SY03B-T08:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: query_backlash_position的参数schema
@@ -1028,6 +1061,7 @@ syringe_pump_with_valve.runze.SY03B-T08:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: query_command_buffer_status的参数schema
@@ -1048,6 +1082,7 @@ syringe_pump_with_valve.runze.SY03B-T08:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: query_software_version的参数schema
@@ -1069,6 +1104,7 @@ syringe_pump_with_valve.runze.SY03B-T08:
         goal_default:
           full_command: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: send_command的参数schema
@@ -1093,6 +1129,7 @@ syringe_pump_with_valve.runze.SY03B-T08:
         goal_default:
           baudrate: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: set_baudrate的参数schema
@@ -1117,6 +1154,7 @@ syringe_pump_with_valve.runze.SY03B-T08:
         goal_default:
           velocity: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: set_max_velocity的参数schema
@@ -1142,6 +1180,7 @@ syringe_pump_with_valve.runze.SY03B-T08:
           max_velocity: null
           position: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: set_position的参数schema
@@ -1168,6 +1207,7 @@ syringe_pump_with_valve.runze.SY03B-T08:
         goal_default:
           position: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: set_valve_position的参数schema
@@ -1192,6 +1232,7 @@ syringe_pump_with_valve.runze.SY03B-T08:
         goal_default:
           velocity: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: set_velocity_grade的参数schema
@@ -1215,6 +1256,7 @@ syringe_pump_with_valve.runze.SY03B-T08:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: stop_operation的参数schema
@@ -1235,6 +1277,7 @@ syringe_pump_with_valve.runze.SY03B-T08:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: wait_error的参数schema

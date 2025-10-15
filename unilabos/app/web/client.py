@@ -9,6 +9,7 @@ import os
 from typing import List, Dict, Any, Optional
 
 import requests
+from unilabos.ros.nodes.resource_tracker import ResourceTreeSet
 from unilabos.utils.log import info
 from unilabos.config.config import HTTPConfig, BasicConfig
 from unilabos.utils import logger
@@ -46,7 +47,7 @@ class HTTPClient:
             Response: API响应对象
         """
         response = requests.post(
-            f"{self.remote_addr}/lab/material/edge",
+            f"{self.remote_addr}/edge/material/edge",
             json={
                 "edges": resources,
             },
@@ -60,6 +61,87 @@ class HTTPClient:
         if response.status_code != 200 and response.status_code != 201:
             logger.error(f"添加物料关系失败: {response.status_code}, {response.text}")
         return response
+
+    def resource_tree_add(self, resources: ResourceTreeSet, mount_uuid: str, first_add: bool) -> Dict[str, str]:
+        """
+        添加资源
+
+        Args:
+            resources: 要添加的资源树集合（ResourceTreeSet）
+            mount_uuid: 要挂载的资源的uuid
+            first_add: 是否为首次添加资源，可以是host也可以是slave来的
+        Returns:
+            Dict[str, str]: 旧UUID到新UUID的映射关系 {old_uuid: new_uuid}
+        """
+        with open(os.path.join(BasicConfig.working_dir, "req_resource_tree_add.json"), "w", encoding="utf-8") as f:
+            f.write(json.dumps({"nodes": [x for xs in resources.dump() for x in xs], "mount_uuid": mount_uuid}, indent=4))
+        # 从序列化数据中提取所有节点的UUID（保存旧UUID）
+        old_uuids = {n.res_content.uuid: n for n in resources.all_nodes}
+        if not self.initialized or first_add:
+            self.initialized = True
+            info(f"首次添加资源，当前远程地址: {self.remote_addr}")
+            response = requests.post(
+                f"{self.remote_addr}/edge/material",
+                json={"nodes": [x for xs in resources.dump() for x in xs], "mount_uuid": mount_uuid},
+                headers={"Authorization": f"Lab {self.auth}"},
+                timeout=100,
+            )
+        else:
+            response = requests.put(
+                f"{self.remote_addr}/edge/material",
+                json={"nodes": [x for xs in resources.dump() for x in xs], "mount_uuid": mount_uuid},
+                headers={"Authorization": f"Lab {self.auth}"},
+                timeout=100,
+            )
+
+        with open(os.path.join(BasicConfig.working_dir, "res_resource_tree_add.json"), "w", encoding="utf-8") as f:
+            f.write(f"{response.status_code}" + "\n" + response.text)
+        # 处理响应，构建UUID映射
+        uuid_mapping = {}
+        if response.status_code == 200:
+            res = response.json()
+            if "code" in res and res["code"] != 0:
+                logger.error(f"添加物料失败: {response.text}")
+            else:
+                data = res["data"]
+                for i in data:
+                    uuid_mapping[i["uuid"]] = i["cloud_uuid"]
+        else:
+            logger.error(f"添加物料失败: {response.text}")
+        for u, n in old_uuids.items():
+            if u in uuid_mapping:
+                n.res_content.uuid = uuid_mapping[u]
+                for c in n.children:
+                    c.res_content.parent_uuid = n.res_content.uuid
+            else:
+                logger.warning(f"资源UUID未更新: {u}")
+        return uuid_mapping
+
+    def resource_tree_get(self, uuid_list: List[str], with_children: bool) -> List[Dict[str, Any]]:
+        """
+        添加资源
+
+        Args:
+            uuid_list: List[str]
+        Returns:
+            Dict[str, str]: 旧UUID到新UUID的映射关系 {old_uuid: new_uuid}
+        """
+        response = requests.post(
+            f"{self.remote_addr}/edge/material/query",
+            json={"uuids": uuid_list, "with_children": with_children},
+            headers={"Authorization": f"Lab {self.auth}"},
+            timeout=100,
+        )
+        if response.status_code == 200:
+            res = response.json()
+            if "code" in res and res["code"] != 0:
+                logger.error(f"查询物料失败: {response.text}")
+            else:
+                data = res["data"]["nodes"]
+                return data
+        else:
+            logger.error(f"查询物料失败: {response.text}")
+        return []
 
     def resource_add(self, resources: List[Dict[str, Any]]) -> requests.Response:
         """
@@ -220,7 +302,7 @@ class HTTPClient:
             Response: API响应对象
         """
         response = requests.get(
-            f"{self.remote_addr}/lab/resource/graph_info/",
+            f"{self.remote_addr}/edge/material/download",
             headers={"Authorization": f"Lab {self.auth}"},
             timeout=(3, 30),
         )

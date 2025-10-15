@@ -1,15 +1,3 @@
-BIOYOND_PolymerReactionStation_Deck:
-  category:
-  - deck
-  class:
-    module: unilabos.resources.bioyond.decks:BIOYOND_PolymerReactionStation_Deck
-    type: pylabrobot
-  description: BIOYOND PolymerReactionStation Deck
-  handles: []
-  icon: '反应站.webp'
-  init_param_schema: {}
-  registry_type: resource
-  version: 1.0.0
 BIOYOND_PolymerPreparationStation_Deck:
   category:
   - deck
@@ -18,7 +6,19 @@ BIOYOND_PolymerPreparationStation_Deck:
     type: pylabrobot
   description: BIOYOND PolymerPreparationStation Deck
   handles: []
-  icon: '配液站.webp'
+  icon: 配液站.webp
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+BIOYOND_PolymerReactionStation_Deck:
+  category:
+  - deck
+  class:
+    module: unilabos.resources.bioyond.decks:BIOYOND_PolymerReactionStation_Deck
+    type: pylabrobot
+  description: BIOYOND PolymerReactionStation Deck
+  handles: []
+  icon: 反应站.webp
   init_param_schema: {}
   registry_type: resource
   version: 1.0.0

@@ -5,19 +5,24 @@ Bioyond Workstation Implementation
 集成Bioyond物料管理的工作站示例
 """
 import traceback
+from datetime import datetime
 from typing import Dict, Any, List, Optional, Union
 import json
 
 from unilabos.devices.workstation.workstation_base import WorkstationBase, ResourceSynchronizer
 from unilabos.devices.workstation.bioyond_studio.bioyond_rpc import BioyondV1RPC
+from unilabos.registry.placeholder_type import ResourceSlot, DeviceSlot
 from unilabos.resources.warehouse import WareHouse
 from unilabos.utils.log import logger
-from unilabos.resources.graphio import resource_bioyond_to_plr
+from unilabos.resources.graphio import resource_bioyond_to_plr, resource_plr_to_bioyond
 
 from unilabos.ros.nodes.base_device_node import ROS2DeviceNode, BaseROS2DeviceNode
 from unilabos.ros.nodes.presets.workstation import ROS2WorkstationNode
+from pylabrobot.resources.resource import Resource as ResourcePLR
 
-from unilabos.devices.workstation.bioyond_studio.config import API_CONFIG, WORKFLOW_MAPPINGS, MATERIAL_TYPE_MAPPINGS
+from unilabos.devices.workstation.bioyond_studio.config import (
+    API_CONFIG, WORKFLOW_MAPPINGS, MATERIAL_TYPE_MAPPINGS, WAREHOUSE_MAPPING
+)
 
 
 class BioyondResourceSynchronizer(ResourceSynchronizer):
@@ -63,7 +68,11 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
                 return False
 
             # 转换为UniLab格式
-            unilab_resources = resource_bioyond_to_plr(bioyond_data, type_mapping=self.workstation.bioyond_config["material_type_mappings"], deck=self.workstation.deck)
+            unilab_resources = resource_bioyond_to_plr(
+                bioyond_data,
+                type_mapping=self.workstation.bioyond_config["material_type_mappings"],
+                deck=self.workstation.deck
+            )
 
             logger.info(f"从Bioyond同步了 {len(unilab_resources)} 个资源")
             return True
@@ -79,11 +88,22 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
                 logger.error("Bioyond API客户端未初始化")
                 return False
 
-            # 调用入库、出库操作
-            # bioyond_format_data = self._convert_resource_to_bioyond_format(resource)
-            # success = await self.bioyond_api_client.update_material(bioyond_format_data)
-            #
-            # if success
+            bioyond_material = resource_plr_to_bioyond(
+                [resource],
+                type_mapping=self.workstation.bioyond_config["material_type_mappings"],
+                warehouse_mapping=self.workstation.bioyond_config["warehouse_mapping"]
+            )[0]
+
+            location_info = bioyond_material.pop("locations")
+
+            material_id = self.bioyond_api_client.add_material(bioyond_material)
+
+            response = self.bioyond_api_client.material_inbound(material_id, location_info[0]["id"])
+            if not response:
+                return {
+                    "status": "error",
+                    "message": "Failed to inbound material"
+                }
         except:
             pass
 
@@ -101,10 +121,10 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
 
 class BioyondWorkstation(WorkstationBase):
     """Bioyond工作站
-    
+
     集成Bioyond物料管理的工作站实现
     """
-    
+
     def __init__(
         self,
         bioyond_config: Optional[Dict[str, Any]] = None,
@@ -119,23 +139,47 @@ class BioyondWorkstation(WorkstationBase):
             *args,
             **kwargs,
         )
+
+        # 检查 deck 是否为 None，防止 AttributeError
+        if self.deck is None:
+            logger.error("❌ Deck 配置为空，请检查配置文件中的 deck 参数")
+            raise ValueError("Deck 配置不能为空，请在配置文件中添加正确的 deck 配置")
+
+        # 初始化 warehouses 属性
         self.deck.warehouses = {}
         for resource in self.deck.children:
             if isinstance(resource, WareHouse):
                 self.deck.warehouses[resource.name] = resource
-        
+
+        # 创建通信模块
         self._create_communication_module(bioyond_config)
         self.resource_synchronizer = BioyondResourceSynchronizer(self)
         self.resource_synchronizer.sync_from_external()
-        
+
         # TODO: self._ros_node里面拿属性
+
+        # 工作流加载
+        self.is_running = False
+        self.workflow_mappings = {}
+        self.workflow_sequence = []
+        self.pending_task_params = []
+
+        if "workflow_mappings" in bioyond_config:
+            self._set_workflow_mappings(bioyond_config["workflow_mappings"])
         logger.info(f"Bioyond工作站初始化完成")
-    
+
     def post_init(self, ros_node: ROS2WorkstationNode):
         self._ros_node = ros_node
-        #self.deck = create_a_coin_cell_deck()
         ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
             "resources": [self.deck]
+        })
+
+    def transfer_resource_to_another(self, resource: List[ResourceSlot], mount_resource: List[ResourceSlot], sites: List[str], mount_device_id: DeviceSlot):
+        ROS2DeviceNode.run_async_func(self._ros_node.transfer_resource_to_another, True, **{
+            "plr_resources": resource,
+            "target_device_id": mount_device_id,
+            "target_resources": mount_resource,
+            "sites": sites,
         })
 
     def _create_communication_module(self, config: Optional[Dict[str, Any]] = None) -> None:
@@ -143,145 +187,331 @@ class BioyondWorkstation(WorkstationBase):
         self.bioyond_config = config or {
             **API_CONFIG,
             "workflow_mappings": WORKFLOW_MAPPINGS,
-            "material_type_mappings": MATERIAL_TYPE_MAPPINGS
+            "material_type_mappings": MATERIAL_TYPE_MAPPINGS,
+            "warehouse_mapping": WAREHOUSE_MAPPING
         }
+
         self.hardware_interface = BioyondV1RPC(self.bioyond_config)
-        
-        return None
-    
-    def _register_supported_workflows(self):
-        """注册Bioyond支持的工作流"""
-        from unilabos.devices.workstation.workstation_base import WorkflowInfo
-        
-        # Bioyond物料同步工作流
-        self.supported_workflows["bioyond_sync"] = WorkflowInfo(
-            name="bioyond_sync",
-            description="从Bioyond系统同步物料",
-            parameters={
-                "sync_type": {"type": "string", "default": "full", "options": ["full", "incremental"]},
-                "force_sync": {"type": "boolean", "default": False}
-            }
-        )
-        
-        # Bioyond物料更新工作流
-        self.supported_workflows["bioyond_update"] = WorkflowInfo(
-            name="bioyond_update",
-            description="将本地物料变更同步到Bioyond",
-            parameters={
-                "material_ids": {"type": "list", "default": []},
-                "sync_all": {"type": "boolean", "default": True}
-            }
-        )
-        
-        logger.info(f"注册了 {len(self.supported_workflows)} 个Bioyond工作流")
-    
-    async def execute_bioyond_sync_workflow(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """执行Bioyond同步工作流"""
+
+    def resource_tree_add(self, resources: List[ResourcePLR]) -> None:
+        """添加资源到资源树并更新ROS节点
+
+        Args:
+            resources (List[ResourcePLR]): 要添加的资源列表
+        """
+        self.resource_synchronizer.sync_to_external(resources)
+
+    @property
+    def bioyond_status(self) -> Dict[str, Any]:
+        """获取 Bioyond 系统状态信息
+
+        这个属性被 ROS 节点用来发布设备状态
+
+        Returns:
+            Dict[str, Any]: Bioyond 系统的状态信息
+        """
         try:
-            sync_type = parameters.get("sync_type", "full")
-            force_sync = parameters.get("force_sync", False)
-            
-            logger.info(f"开始执行Bioyond同步工作流: {sync_type}")
-            
-            # 获取物料管理模块
-            material_manager = self.material_management
-            
-            if sync_type == "full":
-                # 全量同步
-                success = await material_manager.sync_from_bioyond()
-            else:
-                # 增量同步（这里可以实现增量同步逻辑）
-                success = await material_manager.sync_from_bioyond()
-            
-            if success:
-                result = {
-                    "status": "success",
-                    "message": f"Bioyond同步完成: {sync_type}",
-                    "synced_resources": len(material_manager.plr_resources)
-                }
-            else:
-                result = {
-                    "status": "failed",
-                    "message": "Bioyond同步失败"
-                }
-            
-            logger.info(f"Bioyond同步工作流执行完成: {result['status']}")
-            return result
-            
+            # 基础状态信息
+            status = {
+            }
+
+            # 如果有反应站接口，获取调度器状态
+            if self.hardware_interface:
+                try:
+                    scheduler_status = self.hardware_interface.scheduler_status()
+                    status["scheduler"] = scheduler_status
+                except Exception as e:
+                    logger.warning(f"获取调度器状态失败: {e}")
+                    status["scheduler"] = {"error": str(e)}
+
+            # 添加物料缓存信息
+            if self.hardware_interface:
+                try:
+                    available_materials = self.hardware_interface.get_available_materials()
+                    status["material_cache_count"] = len(available_materials)
+                except Exception as e:
+                    logger.warning(f"获取物料缓存失败: {e}")
+                    status["material_cache_count"] = 0
+
+            return status
+
         except Exception as e:
-            logger.error(f"Bioyond同步工作流执行失败: {e}")
+            logger.error(f"获取Bioyond状态失败: {e}")
             return {
                 "status": "error",
-                "message": str(e)
+                "message": str(e),
+                "station_type": getattr(self, 'station_type', 'unknown'),
+                "station_name": getattr(self, 'station_name', 'unknown')
             }
-    
-    async def execute_bioyond_update_workflow(self, parameters: Dict[str, Any]) -> Dict[str, Any]:
-        """执行Bioyond更新工作流"""
+
+    # ==================== 工作流合并与参数设置 API ====================
+
+    def merge_workflow_with_parameters(self, json_str: str) -> dict:
+        """合并工作流并设置参数"""
         try:
-            material_ids = parameters.get("material_ids", [])
-            sync_all = parameters.get("sync_all", True)
-            
-            logger.info(f"开始执行Bioyond更新工作流: sync_all={sync_all}")
-            
-            # 获取物料管理模块
-            material_manager = self.material_management
-            
-            if sync_all:
-                # 同步所有物料
-                success_count = 0
-                for resource in material_manager.plr_resources.values():
-                    success = await material_manager.sync_to_bioyond(resource)
-                    if success:
-                        success_count += 1
-            else:
-                # 同步指定物料
-                success_count = 0
-                for material_id in material_ids:
-                    resource = material_manager.find_material_by_id(material_id)
-                    if resource:
-                        success = await material_manager.sync_to_bioyond(resource)
-                        if success:
-                            success_count += 1
-            
-            result = {
-                "status": "success",
-                "message": f"Bioyond更新完成",
-                "updated_resources": success_count,
-                "total_resources": len(material_ids) if not sync_all else len(material_manager.plr_resources)
+            # 解析输入的 JSON 数据
+            data = json.loads(json_str)
+
+            # 构造 API 请求参数
+            params = {
+                "name": data.get("name", ""),
+                "workflows": data.get("workflows", [])
             }
-            
-            logger.info(f"Bioyond更新工作流执行完成: {result['status']}")
-            return result
-            
-        except Exception as e:
-            logger.error(f"Bioyond更新工作流执行失败: {e}")
+
+            # 验证必要参数
+            if not params["name"]:
+                return {
+                    "code": 0,
+                    "message": "工作流名称不能为空",
+                    "timestamp": int(datetime.now().timestamp() * 1000)
+                }
+
+            if not params["workflows"]:
+                return {
+                    "code": 0,
+                    "message": "工作流列表不能为空",
+                    "timestamp": int(datetime.now().timestamp() * 1000)
+                }
+
+        except json.JSONDecodeError as e:
             return {
-                "status": "error",
-                "message": str(e)
+                "code": 0,
+                "message": f"JSON 解析错误: {str(e)}",
+                "timestamp": int(datetime.now().timestamp() * 1000)
             }
-    
+        except Exception as e:
+            return {
+                "code": 0,
+                "message": f"参数处理错误: {str(e)}",
+                "timestamp": int(datetime.now().timestamp() * 1000)
+            }
+
+        # 发送 POST 请求到 Bioyond API
+        try:
+            response = self.hardware_interface.post(
+                url=f'{self.hardware_interface.host}/api/lims/workflow/merge-workflow-with-parameters',
+                params={
+                    "apiKey": self.hardware_interface.api_key,
+                    "requestTime": self.hardware_interface.get_current_time_iso8601(),
+                    "data": params,
+                })
+
+            # 处理响应
+            if not response:
+                return {
+                    "code": 0,
+                    "message": "API 请求失败，未收到响应",
+                    "timestamp": int(datetime.now().timestamp() * 1000)
+                }
+
+            # 返回完整的响应结果
+            return {
+                "code": response.get("code", 0),
+                "message": response.get("message", ""),
+                "timestamp": response.get("timestamp", int(datetime.now().timestamp() * 1000))
+            }
+
+        except Exception as e:
+            return {
+                "code": 0,
+                "message": f"API 请求异常: {str(e)}",
+                "timestamp": int(datetime.now().timestamp() * 1000)
+            }
+
+    def append_to_workflow_sequence(self, web_workflow_name: str) -> bool:
+        # 检查是否为JSON格式的字符串
+        actual_workflow_name = web_workflow_name
+        if web_workflow_name.startswith('{') and web_workflow_name.endswith('}'):
+            try:
+                data = json.loads(web_workflow_name)
+                actual_workflow_name = data.get("web_workflow_name", web_workflow_name)
+                print(f"解析JSON格式工作流名称: {web_workflow_name} -> {actual_workflow_name}")
+            except json.JSONDecodeError:
+                print(f"JSON解析失败，使用原始字符串: {web_workflow_name}")
+        
+        workflow_id = self._get_workflow(actual_workflow_name)
+        if workflow_id:
+            self.workflow_sequence.append(workflow_id)
+            print(f"添加工作流到执行顺序: {actual_workflow_name} -> {workflow_id}")
+            return True
+        return False
+
+    def set_workflow_sequence(self, json_str: str) -> List[str]:
+        try:
+            data = json.loads(json_str)
+            web_workflow_names = data.get("web_workflow_names", [])
+        except:
+            return []
+
+        sequence = []
+        for web_name in web_workflow_names:
+            workflow_id = self._get_workflow(web_name)
+            if workflow_id:
+                sequence.append(workflow_id)
+
+    def get_all_workflows(self) -> Dict[str, str]:
+        return self.workflow_mappings.copy()
+
+    def _get_workflow(self, web_workflow_name: str) -> str:
+        if web_workflow_name not in self.workflow_mappings:
+            print(f"未找到工作流映射配置: {web_workflow_name}")
+            return ""
+        workflow_id = self.workflow_mappings[web_workflow_name]
+        print(f"获取工作流: {web_workflow_name} -> {workflow_id}")
+        return workflow_id
+
+    def _set_workflow_mappings(self, mappings: Dict[str, str]):
+        self.workflow_mappings = mappings
+        print(f"设置工作流映射配置: {mappings}")
+
+    def process_web_workflows(self, json_str: str) -> Dict[str, str]:
+        try:
+            data = json.loads(json_str)
+            web_workflow_list = data.get("web_workflow_list", [])
+        except json.JSONDecodeError:
+            print(f"无效的JSON字符串: {json_str}")
+            return {}
+        result = {}
+
+        self.workflow_sequence = []
+        for web_name in web_workflow_list:
+            workflow_id = self._get_workflow(web_name)
+            if workflow_id:
+                result[web_name] = workflow_id
+                self.workflow_sequence.append(workflow_id)
+            else:
+                print(f"无法获取工作流ID: {web_name}")
+        print(f"工作流执行顺序: {self.workflow_sequence}")
+        return result
+
+    def clear_workflows(self):
+        self.workflow_sequence = []
+        print("清空工作流执行顺序")
+
+    # ==================== 基础物料管理接口 ====================
+
+    # ============ 工作站状态管理 ============
+
+    def get_workstation_status(self) -> Dict[str, Any]:
+        """获取工作站状态
+
+        Returns:
+            Dict[str, Any]: 工作站状态信息
+        """
+        try:
+            # 获取基础工作站状态
+            base_status = {
+                "station_info": self.get_station_info(),
+                "bioyond_status": self.bioyond_status
+            }
+
+            # 如果有接口，获取设备列表
+            if self.hardware_interface:
+                try:
+                    devices = self.hardware_interface.device_list()
+                    base_status["devices"] = devices
+                except Exception as e:
+                    logger.warning(f"获取设备列表失败: {e}")
+                    base_status["devices"] = []
+
+            return {
+                "success": True,
+                "data": base_status,
+                "action": "get_workstation_status"
+            }
+
+        except Exception as e:
+            error_msg = f"获取工作站状态失败: {str(e)}"
+            logger.error(error_msg)
+            return {
+                "success": False,
+                "message": error_msg,
+                "action": "get_workstation_status"
+            }
+
+    def get_bioyond_status(self) -> Dict[str, Any]:
+        """获取完整的 Bioyond 状态信息
+
+        这个方法提供了比 bioyond_status 属性更详细的状态信息，
+        包括错误处理和格式化的响应结构
+
+        Returns:
+            Dict[str, Any]: 格式化的 Bioyond 状态响应
+        """
+        try:
+            status = self.bioyond_status
+            return {
+                "success": True,
+                "data": status,
+                "action": "get_bioyond_status"
+            }
+
+        except Exception as e:
+            error_msg = f"获取 Bioyond 状态失败: {str(e)}"
+            logger.error(error_msg)
+            return {
+                "success": False,
+                "message": error_msg,
+                "action": "get_bioyond_status"
+            }
+
+    def reset_workstation(self) -> Dict[str, Any]:
+        """重置工作站
+
+        重置工作站到初始状态
+
+        Returns:
+            Dict[str, Any]: 操作结果
+        """
+        try:
+            logger.info("开始重置工作站")
+
+            # 重置调度器
+            if self.hardware_interface:
+                self.hardware_interface.scheduler_reset()
+
+            # 刷新物料缓存
+            if self.hardware_interface:
+                self.hardware_interface.refresh_material_cache()
+
+            # 重新同步资源
+            if self.resource_synchronizer:
+                self.resource_synchronizer.sync_from_external()
+
+            logger.info("工作站重置完成")
+            return {
+                "success": True,
+                "message": "工作站重置成功",
+                "action": "reset_workstation"
+            }
+
+        except Exception as e:
+            error_msg = f"重置工作站失败: {str(e)}"
+            logger.error(error_msg)
+            return {
+                "success": False,
+                "message": error_msg,
+                "action": "reset_workstation"
+            }
+
     def load_bioyond_data_from_file(self, file_path: str) -> bool:
         """从文件加载Bioyond数据（用于测试）"""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 bioyond_data = json.load(f)
-            
-            # 获取物料管理模块
-            material_manager = self.material_management
-            
+
+            logger.info(f"从文件加载Bioyond数据: {file_path}")
+
             # 转换为UniLab格式
-            if isinstance(bioyond_data, dict) and "data" in bioyond_data:
-                unilab_resources = material_manager.resource_bioyond_container_to_ulab(bioyond_data)
-            else:
-                unilab_resources = material_manager.resource_bioyond_to_ulab(bioyond_data)
-            
-            # 分配到Deck
-            import asyncio
-            asyncio.create_task(material_manager._assign_resources_to_deck(unilab_resources))
-            
-            logger.info(f"从文件 {file_path} 加载了 {len(unilab_resources)} 个Bioyond资源")
+            unilab_resources = resource_bioyond_to_plr(
+                bioyond_data, 
+                type_mapping=self.bioyond_config["material_type_mappings"], 
+                deck=self.deck
+            )
+
+            logger.info(f"成功加载 {len(unilab_resources)} 个资源")
             return True
-            
+
         except Exception as e:
             logger.error(f"从文件加载Bioyond数据失败: {e}")
             return False
@@ -290,10 +520,10 @@ class BioyondWorkstation(WorkstationBase):
 # 使用示例
 def create_bioyond_workstation_example():
     """创建Bioyond工作站示例"""
-    
+
     # 配置参数
     device_id = "bioyond_workstation_001"
-    
+
     # 子资源配置
     children = {
         "plate_1": {
@@ -308,7 +538,7 @@ def create_bioyond_workstation_example():
             }
         }
     }
-    
+
     # Bioyond配置
     bioyond_config = {
         "base_url": "http://bioyond.example.com/api",
@@ -316,7 +546,7 @@ def create_bioyond_workstation_example():
         "sync_interval": 60,  # 60秒同步一次
         "timeout": 30
     }
-    
+
     # Deck配置
     deck_config = {
         "size_x": 1000.0,
@@ -324,77 +554,16 @@ def create_bioyond_workstation_example():
         "size_z": 100.0,
         "model": "BioyondDeck"
     }
-    
+
     # 创建工作站
     workstation = BioyondWorkstation(
         station_resource=deck_config,
         bioyond_config=bioyond_config,
         deck_config=deck_config,
     )
-    
+
     return workstation
 
 
 if __name__ == "__main__":
-    # 创建示例工作站
-    #workstation = create_bioyond_workstation_example()
-    
-    # 从文件加载测试数据
-    #workstation.load_bioyond_data_from_file("bioyond_test_yibin.json")
-    
-    # 获取状态
-    #status = workstation.get_bioyond_status()
-    #print("Bioyond工作站状态:", status)
-
-    # 创建测试数据 - 使用resource_bioyond_container_to_ulab函数期望的格式
-  
-  # 读取 bioyond_resources_unilab_output3 copy.json 文件
-    from unilabos.resources.graphio import resource_ulab_to_plr, convert_resources_to_type
-    from Bioyond_wuliao import *
-    from typing import List
-    from pylabrobot.resources import Resource as PLRResource
-    import json
-    from pylabrobot.resources.deck import Deck
-    from pylabrobot.resources.coordinate import Coordinate
-    
-    with open("./bioyond_test_yibin3_unilab_result_corr.json", "r", encoding="utf-8") as f:
-        bioyond_resources_unilab = json.load(f)
-    print(f"成功读取 JSON 文件，包含 {len(bioyond_resources_unilab)} 个资源")
-    ulab_resources = convert_resources_to_type(bioyond_resources_unilab, List[PLRResource])
-    print(f"转换结果类型: {type(ulab_resources)}")
-    print(f"转换结果长度: {len(ulab_resources) if ulab_resources else 0}")
-    deck = Deck(size_x=2000,
-                size_y=653.5,
-                size_z=900)
-
-    Stack0 = Stack(name="Stack0", location=Coordinate(0, 100, 0))
-    Stack1 = Stack(name="Stack1", location=Coordinate(100, 100, 0))
-    Stack2 = Stack(name="Stack2", location=Coordinate(200, 100, 0))
-    Stack3 = Stack(name="Stack3", location=Coordinate(300, 100, 0))
-    Stack4 = Stack(name="Stack4", location=Coordinate(400, 100, 0))
-    Stack5 = Stack(name="Stack5", location=Coordinate(500, 100, 0))
-
-    deck.assign_child_resource(Stack1, Stack1.location)
-    deck.assign_child_resource(Stack2, Stack2.location)
-    deck.assign_child_resource(Stack3, Stack3.location)
-    deck.assign_child_resource(Stack4, Stack4.location)
-    deck.assign_child_resource(Stack5, Stack5.location)
-
-    Stack0.assign_child_resource(ulab_resources[0], Stack0.location)
-    Stack1.assign_child_resource(ulab_resources[1], Stack1.location)
-    Stack2.assign_child_resource(ulab_resources[2], Stack2.location)
-    Stack3.assign_child_resource(ulab_resources[3], Stack3.location)
-    Stack4.assign_child_resource(ulab_resources[4], Stack4.location)
-    Stack5.assign_child_resource(ulab_resources[5], Stack5.location)
-
-    from unilabos.resources.graphio import convert_resources_from_type
-    from unilabos.app.web.client import http_client
-
-    resources = convert_resources_from_type([deck], [PLRResource])
-
-    
-    print(resources)
-    http_client.remote_addr = "https://uni-lab.bohrium.com/api/v1"
-    #http_client.auth = "9F05593C"
-    http_client.auth = "ED634D1C"
-    http_client.resource_add(resources, database_process_later=False)
+    pass

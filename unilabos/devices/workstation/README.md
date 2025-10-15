@@ -37,7 +37,7 @@ def _initialize_material_system(self, deck_config: Dict[str, Any], children_conf
 **定义在**: `workstation_base.py`
 
 **设计目的**：
-- 提供外部物料系统（如Bioyong、LIMS等）集成的标准接口
+- 提供外部物料系统（如Bioyond、LIMS等）集成的标准接口
 - 双向同步：从外部系统同步到本地deck，以及将本地变更同步到外部系统
 - 处理外部系统的变更通知
 
@@ -59,7 +59,7 @@ async def handle_external_change(self, change_info: Dict[str, Any]) -> bool:
 **扩展功能**：
 - HTTP报送接收服务集成
 - 具体工作流实现（液体转移、板洗等）
-- Bioyong物料系统同步器示例
+- Bioyond物料系统同步器示例
 - 外部报送处理方法
 
 ## 技术栈
@@ -142,11 +142,11 @@ success = workstation.execute_workflow("liquid_transfer", {
 ### 3. 外部系统集成
 
 ```python
-class BioyongResourceSynchronizer(ResourceSynchronizer):
-    """Bioyong系统同步器"""
+class BioyondResourceSynchronizer(ResourceSynchronizer):
+    """Bioyond系统同步器"""
     
     async def sync_from_external(self) -> bool:
-        # 从Bioyong API获取物料
+        # 从Bioyond API获取物料
         external_materials = await self._fetch_bioyong_materials()
         
         # 转换并添加到本地deck

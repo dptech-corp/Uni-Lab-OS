@@ -8,6 +8,7 @@ robotic_arm.SCARA_with_slider.moveit.virtual:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: check_tf_update_actions的参数schema
@@ -33,6 +34,7 @@ robotic_arm.SCARA_with_slider.moveit.virtual:
           retry: 10
           speed: 1
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: moveit_joint_task的参数schema
@@ -78,6 +80,7 @@ robotic_arm.SCARA_with_slider.moveit.virtual:
           speed: 1
           target_link: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: moveit_task的参数schema
@@ -125,6 +128,7 @@ robotic_arm.SCARA_with_slider.moveit.virtual:
         goal_default:
           ros_node: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: post_init的参数schema
@@ -150,6 +154,7 @@ robotic_arm.SCARA_with_slider.moveit.virtual:
           parent_link: null
           resource: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: resource_manager的参数schema
@@ -176,6 +181,7 @@ robotic_arm.SCARA_with_slider.moveit.virtual:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: wait_for_resource_action的参数schema
@@ -361,6 +367,7 @@ robotic_arm.UR:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: 机械臂初始化函数。执行UR机械臂的完整初始化流程，包括上电、释放制动器、解除保护停止状态等。该函数确保机械臂从安全停止状态恢复到可操作状态，是机械臂使用前的必要步骤。初始化完成后机械臂将处于就绪状态，可以接收后续的运动指令。
@@ -382,6 +389,7 @@ robotic_arm.UR:
         goal_default:
           data: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: 从JSON字符串加载位置数据函数。接收包含机械臂位置信息的JSON格式字符串，解析并存储位置数据供后续运动任务使用。位置数据通常包含多个预定义的工作位置坐标，用于实现精确的多点运动控制。适用于动态配置机械臂工作位置的场景。
@@ -406,6 +414,7 @@ robotic_arm.UR:
         goal_default:
           file: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: 从文件加载位置数据函数。读取指定的JSON文件并加载其中的机械臂位置信息。该函数支持从外部配置文件中获取预设的工作位置，便于位置数据的管理和重用。适用于需要从固定配置文件中读取复杂位置序列的应用场景。
@@ -429,6 +438,7 @@ robotic_arm.UR:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: 重新加载位置数据函数。重新读取并解析之前设置的位置文件，更新内存中的位置数据。该函数用于在位置文件被修改后刷新机械臂的位置配置，无需重新初始化整个系统。适用于动态更新机械臂工作位置的场景。
@@ -537,6 +547,7 @@ robotic_arm.elite:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: ''
@@ -557,6 +568,7 @@ robotic_arm.elite:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: ''
@@ -580,6 +592,7 @@ robotic_arm.elite:
           start_addr: null
           unit_id: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: ''
@@ -610,6 +623,7 @@ robotic_arm.elite:
         goal_default:
           job_id: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: ''
@@ -636,6 +650,7 @@ robotic_arm.elite:
           unit_id: null
           value: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: ''
@@ -666,6 +681,7 @@ robotic_arm.elite:
         goal_default:
           response: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: ''
@@ -690,6 +706,7 @@ robotic_arm.elite:
         goal_default:
           command: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: ''

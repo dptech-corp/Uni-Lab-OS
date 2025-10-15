@@ -8,6 +8,7 @@ linear_motion.grbl:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: CNC设备初始化函数。执行Grbl CNC的完整初始化流程，包括归零操作、轴校准和状态复位。该函数将所有轴移动到原点位置(0,0,0)，确保设备处于已知的参考状态。初始化完成后设备进入空闲状态，可接收后续的运动指令。
@@ -29,6 +30,7 @@ linear_motion.grbl:
         goal_default:
           position: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: CNC绝对位置设定函数。控制CNC设备移动到指定的三维坐标位置(x,y,z)。该函数支持安全限位检查，防止超出设备工作范围。移动过程中会监控设备状态，确保安全到达目标位置。适用于精确定位和轨迹控制操作。
@@ -52,6 +54,7 @@ linear_motion.grbl:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: CNC操作停止函数。立即停止当前正在执行的所有CNC运动，包括轴移动和主轴旋转。该函数用于紧急停止或任务中断，确保设备和工件的安全。停止后设备将保持当前位置，等待新的指令。
@@ -72,6 +75,7 @@ linear_motion.grbl:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: wait_error的参数schema
@@ -482,6 +486,7 @@ linear_motion.toyo_xyz.sim:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: check_tf_update_actions的参数schema
@@ -507,6 +512,7 @@ linear_motion.toyo_xyz.sim:
           retry: 10
           speed: 1
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: moveit_joint_task的参数schema
@@ -552,6 +558,7 @@ linear_motion.toyo_xyz.sim:
           speed: 1
           target_link: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: moveit_task的参数schema
@@ -599,6 +606,7 @@ linear_motion.toyo_xyz.sim:
         goal_default:
           ros_node: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: post_init的参数schema
@@ -624,6 +632,7 @@ linear_motion.toyo_xyz.sim:
           parent_link: null
           resource: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: resource_manager的参数schema
@@ -650,6 +659,7 @@ linear_motion.toyo_xyz.sim:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: wait_for_resource_action的参数schema
@@ -837,6 +847,7 @@ motor.iCL42:
           position: null
           velocity: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: 步进电机执行运动函数。直接执行电机运动命令，包括位置设定、速度控制和路径规划。该函数处理底层的电机控制协议，消除警告信息，设置运动参数并启动电机运行。适用于需要直接控制电机运动的应用场景。
@@ -866,6 +877,7 @@ motor.iCL42:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: iCL42电机设备初始化函数。建立与iCL42步进电机驱动器的串口通信连接，配置通信参数包括波特率、数据位、校验位等。该函数是电机使用前的必要步骤，确保驱动器处于可控状态并准备接收运动指令。
@@ -889,6 +901,7 @@ motor.iCL42:
           position: null
           velocity: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: 步进电机运动控制函数。根据指定的运动模式、目标位置和速度参数控制电机运动。支持多种运动模式和精确的位置控制，自动处理运动轨迹规划和执行。该函数提供异步执行和状态反馈，确保运动的准确性和可靠性。

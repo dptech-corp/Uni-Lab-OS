@@ -11,6 +11,7 @@ agv.SEER:
           ex_data: ''
           obj: receive_socket
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: AGV底层通信命令发送函数。通过TCP socket连接向AGV发送底层控制命令，支持pose（位置）、status（状态）、nav（导航）等命令类型。用于获取AGV当前位置坐标、运行状态或发送导航指令。该函数封装了AGV的通信协议，将命令转换为十六进制数据包并处理响应解析。

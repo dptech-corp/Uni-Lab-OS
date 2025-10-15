@@ -1,89 +1,152 @@
 import importlib
 import inspect
 import json
-from typing import Union, Any, Dict
-import numpy as np
+import os.path
+import traceback
+from typing import Union, Any, Dict, List, Tuple
+import uuid
 import networkx as nx
 from pylabrobot.resources import ResourceHolder
 from unilabos_msgs.msg import Resource
 
+from unilabos.config.config import BasicConfig
 from unilabos.resources.container import RegularContainer
+from unilabos.resources.itemized_carrier import ItemizedCarrier
 from unilabos.ros.msgs.message_converter import convert_to_ros_msg
+from unilabos.ros.nodes.resource_tracker import (
+    ResourceDictInstance,
+    ResourceTreeSet,
+)
+from unilabos.utils.banner_print import print_status
 
 try:
     from pylabrobot.resources.resource import Resource as ResourcePLR
 except ImportError:
     pass
-from typing import Union, get_origin
+from typing import get_origin
 
 physical_setup_graph: nx.Graph = None
 
 
-def canonicalize_nodes_data(data: dict, parent_relation: dict = {}) -> dict:
-    for node in data.get("nodes", []):
+def canonicalize_nodes_data(
+    nodes: List[Dict[str, Any]], parent_relation: Dict[str, List[str]] = {}
+) -> ResourceTreeSet:
+    """
+    标准化节点数据，使用 ResourceInstanceDictFlatten 进行规范化并创建 ResourceTreeSet
+
+    Args:
+        nodes: 原始节点列表
+        parent_relation: 父子关系映射 {parent_id: [child_id1, child_id2, ...]}
+
+    Returns:
+        ResourceTreeSet: 标准化后的资源树集合
+    """
+    print_status(f"{len(nodes)} Resources loaded:", "info")
+
+    # 第一步：基本预处理（处理graphml的label字段）
+    for node in nodes:
         if node.get("label") is not None:
-            id = node.pop("label")
-            node["id"] = node["name"] = id
-        if "id" not in node:
-            node["id"] = node.get("name", "NaN")
-        if "name" not in node:
-            node["name"] = node["id"]
-        if node.get("position") is None:
-            node["position"] = {
-                "x": node.pop("x", 0.0),
-                "y": node.pop("y", 0.0),
-                "z": node.pop("z", 0.0),
-            }
-        if node.get("config") is None:
+            node_id = node.pop("label")
+            node["id"] = node["name"] = node_id
+        if not isinstance(node.get("config"), dict):
             node["config"] = {}
-            node["data"] = {}
-            for k in list(node.keys()):
-                if k not in [
-                    "id",
-                    "name",
-                    "class",
-                    "type",
-                    "position",
-                    "children",
-                    "parent",
-                    "config",
-                    "data",
-                ]:
-                    if k in ["chemical", "current_volume"]:
-                        if node["data"].get("liquids") is None:
-                            node["data"]["liquids"] = [{}]
-                    if k == "chemical":
-                        node["data"]["liquids"][0]["liquid_name"] = node.pop(k)
-                    elif k == "current_volume":
-                        node["data"]["liquids"][0]["liquid_volume"] = node.pop(k)
-                    elif k == "max_volume":
-                        node["data"]["max_volume"] = node.pop(k)
-                    elif k == "url":
-                        node.pop(k)
-                    else:
-                        node["config"][k] = node.pop(k)
-        if "class" not in node:
-            node["class"] = None
-        if "type" not in node:
-            node["type"] = (
-                "container"
-                if node["class"] is None
-                else "device" if node["class"] not in ["container", "plate"] else node["class"]
-            )
-        if "children" not in node:
-            node["children"] = []
+        if not node.get("type"):
+            node["type"] = "device"
+            print_status(f"Warning: Node {node.get('id', 'unknown')} missing 'type', defaulting to 'device'", "warning")
+        if node.get("name", None) is None:
+            node["name"] = node.get("id")
+            print_status(f"Warning: Node {node.get('id', 'unknown')} missing 'name', defaulting to {node['name']}", "warning")
+        if not isinstance(node.get("position"), dict):
+            node["position"] = {"position": {}}
+            x = node.pop("x", None)
+            if x is not None:
+                node["position"]["position"]["x"] = x
+            y = node.pop("y", None)
+            if y is not None:
+                node["position"]["position"]["y"] = y
+            z = node.pop("z", None)
+            if z is not None:
+                node["position"]["position"]["z"] = z
+        for k in list(node.keys()):
+            if k not in ["id", "uuid", "name", "description", "schema", "model", "icon", "parent_uuid", "parent", "type", "class", "position", "config", "data", "children"]:
+                v = node.pop(k)
+                node["config"][k] = v
 
-    id2idx = {node_data["id"]: idx for idx, node_data in enumerate(data["nodes"])}
+    # 第二步：处理parent_relation
+    id2idx = {node["id"]: idx for idx, node in enumerate(nodes)}
     for parent, children in parent_relation.items():
-        data["nodes"][id2idx[parent]]["children"] = children
-        for child in children:
-            data["nodes"][id2idx[child]]["parent"] = parent
-    return data
+        if parent in id2idx:
+            nodes[id2idx[parent]]["children"] = children
+            for child in children:
+                if child in id2idx:
+                    nodes[id2idx[child]]["parent"] = parent
+
+    # 第三步：使用 ResourceInstanceDictFlatten 标准化每个节点
+    standardized_instances = []
+    known_nodes: Dict[str, ResourceDictInstance] = {}  # {node_id: ResourceDictInstance}
+    uuid_to_instance: Dict[str, ResourceDictInstance] = {}  # {uuid: ResourceDictInstance}
+
+    for node in nodes:
+        try:
+            print_status(f"DeviceId: {node['id']}, Class: {node['class']}", "info")
+            # 使用标准化方法
+            resource_instance = ResourceDictInstance.get_resource_instance_from_dict(node)
+            known_nodes[node["id"]] = resource_instance
+            uuid_to_instance[resource_instance.res_content.uuid] = resource_instance
+            standardized_instances.append(resource_instance)
+        except Exception as e:
+            print_status(f"Failed to standardize node {node.get('id', 'unknown')}:\n{traceback.format_exc()}", "error")
+            continue
+
+    # 第四步：建立 parent 和 children 关系
+    for node in nodes:
+        node_id = node["id"]
+        if node_id not in known_nodes:
+            continue
+
+        current_instance = known_nodes[node_id]
+
+        # 优先使用 parent_uuid 进行匹配，如果不存在则使用 parent
+        parent_uuid = node.get("parent_uuid")
+        parent_id = node.get("parent")
+        parent_instance = None
+
+        # 优先用 parent_uuid 匹配
+        if parent_uuid and parent_uuid in uuid_to_instance:
+            parent_instance = uuid_to_instance[parent_uuid]
+        # 否则用 parent_id 匹配
+        elif parent_id and parent_id in known_nodes:
+            parent_instance = known_nodes[parent_id]
+
+        # 设置 parent 引用
+        if parent_instance:
+            current_instance.res_content.parent = parent_instance.res_content
+            # 将当前节点添加到父节点的 children 列表
+            parent_instance.children.append(current_instance)
+
+    # 第五步：创建 ResourceTreeSet
+    resource_tree_set = ResourceTreeSet.from_nested_list(standardized_instances)
+    return resource_tree_set
 
 
-def canonicalize_links_ports(data: dict) -> dict:
+def canonicalize_links_ports(links: List[Dict[str, Any]], resource_tree_set: ResourceTreeSet) -> List[Dict[str, Any]]:
+    """
+    标准化边/连接的端口信息
+
+    Args:
+        links: 原始连接列表
+        resource_tree_set: 资源树集合，用于获取节点的UUID信息
+
+    Returns:
+        标准化后的连接列表
+    """
+    # 构建 id 到 uuid 的映射
+    id_to_uuid: Dict[str, str] = {}
+    for node in resource_tree_set.all_nodes:
+        id_to_uuid[node.res_content.id] = node.res_content.uuid
+
     # 第一遍处理：将字符串类型的port转换为字典格式
-    for link in data.get("links", []):
+    for link in links:
         port = link.get("port")
         if link.get("type", "physical") == "physical":
             link["type"] = "fluid"
@@ -107,11 +170,11 @@ def canonicalize_links_ports(data: dict) -> dict:
             link["port"] = {link["source"]: None, link["target"]: None}
 
     # 构建边字典，键为(source节点, target节点)，值为对应的port信息
-    edges = {(link["source"], link["target"]): link["port"] for link in data.get("links", [])}
+    edges = {(link["source"], link["target"]): link["port"] for link in links}
 
     # 第二遍处理：填充反向边的dest信息
     delete_reverses = []
-    for i, link in enumerate(data.get("links", [])):
+    for i, link in enumerate(links):
         s, t = link["source"], link["target"]
         current_port = link["port"]
         if current_port.get(t) is None:
@@ -127,9 +190,22 @@ def canonicalize_links_ports(data: dict) -> dict:
                 # 若不存在反向边，初始化为空结构
                 current_port[t] = current_port[s]
     # 删除已被使用反向端口信息的反向边
-    data["links"] = [link for i, link in enumerate(data.get("links", [])) if i not in delete_reverses]
+    standardized_links = [link for i, link in enumerate(links) if i not in delete_reverses]
 
-    return data
+    # 第三遍处理：为每个 link 添加 source_uuid 和 target_uuid
+    for link in standardized_links:
+        source_id = link.get("source")
+        target_id = link.get("target")
+
+        # 添加 source_uuid
+        if source_id and source_id in id_to_uuid:
+            link["source_uuid"] = id_to_uuid[source_id]
+
+        # 添加 target_uuid
+        if target_id and target_id in id_to_uuid:
+            link["target_uuid"] = id_to_uuid[target_id]
+
+    return standardized_links
 
 
 def handle_communications(G: nx.Graph):
@@ -151,18 +227,43 @@ def handle_communications(G: nx.Graph):
             G.nodes[device]["config"]["io_device_port"] = int(edata["port"][device_comm])
 
 
-def read_node_link_json(json_info: Union[str, Dict[str, Any]]) -> tuple[nx.Graph, dict]:
+def read_node_link_json(
+    json_info: Union[str, Dict[str, Any]],
+) -> tuple[nx.Graph, ResourceTreeSet, List[Dict[str, Any]]]:
+    """
+    读取节点-边的JSON数据并构建图
+
+    Args:
+        json_info: JSON文件路径或字典数据
+
+    Returns:
+        tuple[nx.Graph, ResourceTreeSet, List[Dict[str, Any]]]:
+            返回NetworkX图对象、资源树集合和标准化后的连接列表
+    """
     global physical_setup_graph
     if isinstance(json_info, str):
         data = json.load(open(json_info, encoding="utf-8"))
     else:
         data = json_info
-    data = canonicalize_nodes_data(data)
-    data = canonicalize_links_ports(data)
 
-    physical_setup_graph = nx.node_link_graph(data, multigraph=False)  # edges="links" 3.6 warning
+    # 标准化节点数据并创建 ResourceTreeSet
+    nodes = data.get("nodes", [])
+    resource_tree_set = canonicalize_nodes_data(nodes)
+
+    # 标准化边数据
+    links = data.get("links", [])
+    standardized_links = canonicalize_links_ports(links, resource_tree_set)
+
+    # 构建 NetworkX 图（需要转换回 dict 格式）
+    # 从 ResourceTreeSet 获取所有节点
+    graph_data = {
+        "nodes": [node.res_content.model_dump(by_alias=True) for node in resource_tree_set.all_nodes],
+        "links": standardized_links,
+    }
+    physical_setup_graph = nx.node_link_graph(graph_data, edges="links", multigraph=False)
     handle_communications(physical_setup_graph)
-    return physical_setup_graph, data
+
+    return physical_setup_graph, resource_tree_set, standardized_links
 
 
 def modify_to_backend_format(data: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -185,7 +286,17 @@ def modify_to_backend_format(data: list[dict[str, Any]]) -> list[dict[str, Any]]
     return data
 
 
-def read_graphml(graphml_file):
+def read_graphml(graphml_file: str) -> tuple[nx.Graph, ResourceTreeSet, List[Dict[str, Any]]]:
+    """
+    读取GraphML文件并构建图
+
+    Args:
+        graphml_file: GraphML文件路径
+
+    Returns:
+        tuple[nx.Graph, ResourceTreeSet, List[Dict[str, Any]]]:
+            返回NetworkX图对象、资源树集合和标准化后的连接列表
+    """
     global physical_setup_graph
 
     G = nx.read_graphml(graphml_file)
@@ -202,12 +313,29 @@ def read_graphml(graphml_file):
 
     G2 = nx.relabel_nodes(G, mapping)
     data = nx.node_link_data(G2)
-    data = canonicalize_nodes_data(data, parent_relation=parent_relation)
-    data = canonicalize_links_ports(data)
 
-    physical_setup_graph = nx.node_link_graph(data, edges="links", multigraph=False)  # edges="links" 3.6 warning
+    # 标准化节点数据并创建 ResourceTreeSet
+    nodes = data.get("nodes", [])
+    resource_tree_set = canonicalize_nodes_data(nodes, parent_relation=parent_relation)
+
+    # 标准化边数据
+    links = data.get("links", [])
+    standardized_links = canonicalize_links_ports(links, resource_tree_set)
+
+    # 构建 NetworkX 图（需要转换回 dict 格式）
+    # 从 ResourceTreeSet 获取所有节点
+    graph_data = {
+        "nodes": [node.res_content.model_dump(by_alias=True) for node in resource_tree_set.all_nodes],
+        "links": standardized_links,
+    }
+    dump_json_path = os.path.join(BasicConfig.working_dir, os.path.basename(graphml_file).rsplit(".")[0] + ".json")
+    with open(dump_json_path, "w", encoding="utf-8") as f:
+        f.write(json.dumps(graph_data, indent=4, ensure_ascii=False))
+        print_status(f"GraphML converted to JSON and saved to {dump_json_path}", "info")
+    physical_setup_graph = nx.node_link_graph(graph_data, link="links", multigraph=False)
     handle_communications(physical_setup_graph)
-    return physical_setup_graph, data
+
+    return physical_setup_graph, resource_tree_set, standardized_links
 
 
 def dict_from_graph(graph: nx.Graph) -> dict:
@@ -229,11 +357,7 @@ def dict_to_tree(nodes: dict, devices_only: bool = False) -> list[dict]:
                 is_root[child_id] = False
 
     # 找到根节点并返回
-    root_nodes = [
-        node
-        for node in nodes_list
-        if is_root.get(node["id"], False) or len(nodes_list) == 1
-    ]
+    root_nodes = [node for node in nodes_list if is_root.get(node["id"], False) or len(nodes_list) == 1]
 
     # 如果存在多个根节点，返回所有根节点
     return root_nodes
@@ -258,11 +382,7 @@ def dict_to_nested_dict(nodes: dict, devices_only: bool = False) -> dict:
             node["config"]["children"] = node["children"]
 
     # 找到根节点并返回
-    root_nodes = {
-        node["id"]: node
-        for node in nodes_list
-        if is_root.get(node["id"], False) or len(nodes_list) == 1
-    }
+    root_nodes = {node["id"]: node for node in nodes_list if is_root.get(node["id"], False) or len(nodes_list) == 1}
 
     # 如果存在多个根节点，返回所有根节点
     return root_nodes
@@ -337,6 +457,7 @@ def nested_dict_to_list(nested_dict: dict) -> list[dict]:  # FIXME 是tree？
 
     return result
 
+
 def convert_resources_to_type(
     resources_list: list[dict], resource_type: Union[type, list[type]], *, plr_model: bool = False
 ) -> Union[list[dict], dict, None, "ResourcePLR"]:
@@ -369,7 +490,9 @@ def convert_resources_to_type(
         return None
 
 
-def convert_resources_from_type(resources_list, resource_type: Union[type, list[type]], *, is_plr: bool = False) -> Union[list[dict], dict, None, "ResourcePLR"]:
+def convert_resources_from_type(
+    resources_list, resource_type: Union[type, list[type]], *, is_plr: bool = False
+) -> Union[list[dict], dict, None, "ResourcePLR"]:
     """
     Convert resources from a given type (PyLabRobot or NestedDict) to flattened list of dictionaries.
 
@@ -432,6 +555,7 @@ def resource_ulab_to_plr(resource: dict, plr_model=False) -> "ResourcePLR":
     d = resource_ulab_to_plr_inner(resource)
     """无法通过Resource进行反序列化，例如TipSpot必须内部序列化好，直接用TipSpot序列化会多参数，导致出错"""
     from pylabrobot.utils.object_parsing import find_subclass
+
     sub_cls = find_subclass(d["type"], ResourcePLR)
     spect = inspect.signature(sub_cls)
     if "category" not in spect.parameters:
@@ -456,6 +580,7 @@ def resource_plr_to_ulab(resource_plr: "ResourcePLR", parent_name: str = None, w
         else:
             print("转换pylabrobot的时候，出现未知类型", source)
             return "container"
+
     def resource_plr_to_ulab_inner(d: dict, all_states: dict, child=True) -> dict:
         r = {
             "id": d["name"],
@@ -474,6 +599,7 @@ def resource_plr_to_ulab(resource_plr: "ResourcePLR", parent_name: str = None, w
             "data": all_states[d["name"]],
         }
         return r
+
     d = resource_plr.serialize()
     all_states = resource_plr.serialize_all_state()
     r = resource_plr_to_ulab_inner(d, all_states, with_children)
@@ -481,13 +607,13 @@ def resource_plr_to_ulab(resource_plr: "ResourcePLR", parent_name: str = None, w
     return r
 
 
-def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: dict = {}, deck: Any = None) -> list[dict]:
+def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[str, Tuple[str, str]] = {}, deck: Any = None) -> list[dict]:
     """
     将 bioyond 物料格式转换为 ulab 物料格式
 
     Args:
         bioyond_materials: bioyond 系统的物料查询结果列表
-        type_mapping: 物料类型映射字典，格式 {bioyond_type: plr_class_name}
+        type_mapping: 物料类型映射字典，格式 {bioyond_type: [plr_class_name, class_uuid]}
         location_id_mapping: 库位 ID 到名称的映射字典，格式 {location_id: location_name}
 
     Returns:
@@ -496,36 +622,116 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: dict = 
     plr_materials = []
 
     for material in bioyond_materials:
-        className = type_mapping.get(material.get("typeName"), "RegularContainer") if type_mapping else "RegularContainer"
-        
-        plr_material: ResourcePLR = initialize_resource({"name": material["name"], "class": className}, resource_type=ResourcePLR)
+        className = (
+            type_mapping.get(material.get("typeName"), ("RegularContainer", ""))[0] if type_mapping else "RegularContainer"
+        )
+
+        plr_material: ResourcePLR = initialize_resource(
+            {"name": material["name"], "class": className}, resource_type=ResourcePLR
+        )
         plr_material.code = material.get("code", "") and material.get("barCode", "") or ""
+        plr_material.unilabos_uuid = str(uuid.uuid4())
 
         # 处理子物料（detail）
         if material.get("detail") and len(material["detail"]) > 0:
             child_ids = []
             for detail in material["detail"]:
-                number = (detail.get("z", 0) - 1) * plr_material.num_items_x * plr_material.num_items_y + \
-                         (detail.get("x", 0) - 1) * plr_material.num_items_x + \
-                         (detail.get("y", 0) - 1)
+                number = (
+                    (detail.get("z", 0) - 1) * plr_material.num_items_x * plr_material.num_items_y
+                    + (detail.get("x", 0) - 1) * plr_material.num_items_x
+                    + (detail.get("y", 0) - 1)
+                )
                 bottle = plr_material[number]
+                if detail["name"] in type_mapping:
+                    # plr_material.unassign_child_resource(bottle)
+                    plr_material.sites[number] = None
+                    plr_material[number] = initialize_resource(
+                        {"name": f'{detail["name"]}_{number}', "class": type_mapping[detail["name"]][0]}, resource_type=ResourcePLR
+                    )
+                else:
+                    bottle.tracker.liquids = [
+                        (detail["name"], float(detail.get("quantity", 0)) if detail.get("quantity") else 0)
+                    ]
                 bottle.code = detail.get("code", "")
-                bottle.tracker.liquids = [(detail["name"], float(detail.get("quantity", 0)) if detail.get("quantity") else 0)]
-                
+        else:
+            bottle = plr_material[0] if plr_material.capacity > 0 else plr_material
+            bottle.tracker.liquids = [
+                (material["name"], float(material.get("quantity", 0)) if material.get("quantity") else 0)
+            ]
+
         plr_materials.append(plr_material)
 
         if deck and hasattr(deck, "warehouses"):
             for loc in material.get("locations", []):
                 if hasattr(deck, "warehouses") and loc.get("whName") in deck.warehouses:
                     warehouse = deck.warehouses[loc["whName"]]
-                    idx = (loc.get("y", 0) - 1) * warehouse.num_items_x * warehouse.num_items_y + \
-                          (loc.get("x", 0) - 1) * warehouse.num_items_x + \
-                          (loc.get("z", 0) - 1)
+                    idx = (
+                        (loc.get("y", 0) - 1) * warehouse.num_items_x * warehouse.num_items_y
+                        + (loc.get("x", 0) - 1) * warehouse.num_items_x
+                        + (loc.get("z", 0) - 1)
+                    )
                     if 0 <= idx < warehouse.capacity:
                         if warehouse[idx] is None or isinstance(warehouse[idx], ResourceHolder):
                             warehouse[idx] = plr_material
 
     return plr_materials
+
+
+def resource_plr_to_bioyond(plr_resources: list[ResourcePLR], type_mapping: dict = {}, warehouse_mapping: dict = {}) -> list[dict]:
+    bioyond_materials = []
+    for resource in plr_resources:
+        if hasattr(resource, "capacity") and resource.capacity > 1:
+            material = {
+                "typeId": type_mapping.get(resource.model)[1],
+                "name": resource.name,
+                "unit": "个",
+                "quantity": 1,
+                "details": [],
+                "Parameters": "{}"
+            }
+            for bottle in resource.children:
+                if isinstance(resource, ItemizedCarrier):
+                    site = resource.get_child_identifier(bottle)
+                else:
+                    site = {"x": bottle.location.x - 1, "y": bottle.location.y - 1}
+                detail_item = {
+                    "typeId": type_mapping.get(bottle.model)[1],
+                    "name": bottle.name,
+                    "code": bottle.code if hasattr(bottle, "code") else "",
+                    "quantity": sum(qty for _, qty in bottle.tracker.liquids) if hasattr(bottle, "tracker") else 0,
+                    "x": site["x"] + 1,
+                    "y": site["y"] + 1,
+                    "molecular": 1,
+                    "Parameters": json.dumps({"molecular": 1})
+                }
+                material["details"].append(detail_item)
+        else:
+            bottle = resource[0] if resource.capacity > 0 else resource
+            material = {
+                "typeId": "3a14196b-24f2-ca49-9081-0cab8021bf1a",
+                "name": resource.get("name", ""),
+                "unit": "",
+                "quantity": sum(qty for _, qty in bottle.tracker.liquids) if hasattr(bottle, "tracker") else 0,
+                "Parameters": "{}"
+            }
+
+        if resource.parent is not None and isinstance(resource.parent, ItemizedCarrier):
+            site_in_parent = resource.parent.get_child_identifier(resource)
+            material["locations"] = [
+                {
+                    "id": warehouse_mapping[resource.parent.name]["site_uuids"][site_in_parent["identifier"]],
+                    "whid": warehouse_mapping[resource.parent.name]["uuid"],
+                    "whName": resource.parent.name,
+                    "x": site_in_parent["z"] + 1,
+                    "y": site_in_parent["y"] + 1,
+                    "z": 1,
+                    "quantity": 0
+                }
+            ],
+
+        print(f"material_data: {material}")
+        bioyond_materials.append(material)
+    return bioyond_materials
 
 
 def initialize_resource(resource_config: dict, resource_type: Any = None) -> Union[list[dict], ResourcePLR]:
@@ -541,6 +747,7 @@ def initialize_resource(resource_config: dict, resource_type: Any = None) -> Uni
         None
     """
     from unilabos.registry.registry import lab_registry
+
     resource_class_config = resource_config.get("class", None)
     if resource_class_config is None:
         return [resource_config]
@@ -570,7 +777,9 @@ def initialize_resource(resource_config: dict, resource_type: Any = None) -> Uni
                 r = resource_plr
         elif resource_class_config["type"] == "unilabos":
             res_instance: RegularContainer = RESOURCE(id=resource_config["name"])
-            res_instance.ulr_resource = convert_to_ros_msg(Resource, {k:v for k,v in resource_config.items() if k != "class"})
+            res_instance.ulr_resource = convert_to_ros_msg(
+                Resource, {k: v for k, v in resource_config.items() if k != "class"}
+            )
             r = [res_instance.get_ulr_resource_as_dict()]
         elif isinstance(RESOURCE, dict):
             r = [RESOURCE.copy()]

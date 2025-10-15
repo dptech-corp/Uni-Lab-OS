@@ -1,14 +1,15 @@
 import threading
 
+from unilabos.ros.nodes.resource_tracker import ResourceTreeSet
 from unilabos.utils import logger
 
 
 # 根据选择的 backend 启动相应的功能
 def start_backend(
     backend: str,
-    devices_config: dict = {},
-    resources_config: list = [],
-    resources_edge_config: list = [],
+    devices_config: ResourceTreeSet,
+    resources_config: ResourceTreeSet,
+    resources_edge_config: list[dict] = [],
     graph=None,
     controllers_config: dict = {},
     bridges=[],

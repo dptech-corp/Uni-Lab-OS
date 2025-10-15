@@ -127,16 +127,16 @@ add_action_files(
 ```bash
 mamba remove --force ros-humble-unilabos-msgs
 mamba config set safety_checks disabled  # 如果没有提升版本号，会触发md5与网络上md5不一致，是正常现象，因此通过本指令关闭md5检查
-mamba install xxx.conda2 --offline
+mamba install xxx.conda --offline
 ```
 
 ## 常见问题
 
-**Q: 构建失败怎么办？**  
+**Q: 构建失败怎么办？**
 A: 检查 Actions 日志中的错误信息，通常是语法错误或依赖问题。修复后重新推送代码即可自动触发新的构建。
 
-**Q: 如何测试特定平台？**  
+**Q: 如何测试特定平台？**
 A: 在手动触发构建时，在平台选择中只填写你需要的平台，如 `linux-64` 或 `win-64`。
 
-**Q: 构建包在哪里下载？**  
+**Q: 构建包在哪里下载？**
 A: 在 Actions 页面的构建结果中，查找 "Artifacts" 部分，每个平台都有对应的构建包可供下载。

@@ -2,6 +2,7 @@ configs/
 temp/
 output/
 unilabos_data/
+pyrightconfig.json
 ## Python
 
 # Byte-compiled / optimized / DLL files

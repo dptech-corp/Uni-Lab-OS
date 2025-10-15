@@ -1,0 +1,13 @@
+# Sphinx文档构建依赖
+sphinx>=7.0.0
+sphinx-rtd-theme>=2.0.0
+myst-parser>=2.0.0
+
+# 用于支持Jupyter notebook文档
+myst-nb>=1.0.0
+
+# 用于代码复制按钮
+sphinx-copybutton>=0.5.0
+
+# 用于自动摘要生成
+sphinx-autobuild>=2024.2.4

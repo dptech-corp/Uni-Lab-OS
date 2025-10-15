@@ -8,6 +8,7 @@ gas_source.mock:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: is_closed的参数schema
@@ -28,6 +29,7 @@ gas_source.mock:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: is_open的参数schema
@@ -188,6 +190,7 @@ vacuum_pump.mock:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: is_closed的参数schema
@@ -208,6 +211,7 @@ vacuum_pump.mock:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: is_open的参数schema

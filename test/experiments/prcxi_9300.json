@@ -21,7 +21,7 @@
                 "timeout": 10.0,
                 "axis": "Left",
                 "channel_num": 8,
-                "setup": true,
+                "setup": false,
                 "debug": true,
                 "simulator": true,
                 "matrix_id": "71593"

@@ -40,6 +40,7 @@ zhida_gcms:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: 安全关闭与智达 GCMS 设备的 TCP 连接，释放网络资源。
@@ -60,6 +61,7 @@ zhida_gcms:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: 与智达 GCMS 设备建立 TCP 连接，配置超时参数。
@@ -81,6 +83,7 @@ zhida_gcms:
         goal_default:
           ros_node: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: ''

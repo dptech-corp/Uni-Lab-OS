@@ -103,10 +103,14 @@ set(action_files
   "action/PostProcessGrab.action"
   "action/PostProcessTriggerClean.action"
   "action/PostProcessTriggerPostPro.action"
-  
+
   "action/ReactionStationDripBack.action"
-  "action/ReactionStationLiquidFeed.action"
+  "action/ReactionStationLiquidFeedBeaker.action"
+  "action/ReactionStationLiquidFeedSolvents.action"
+  "action/ReactionStationLiquidFeedTitration.action"
+  "action/ReactionStationLiquidFeedVialsNonTitration.action"
   "action/ReactionStationProExecu.action"
+  "action/ReactionStationReactorTakenOut.action"
   "action/ReactionStationReaTackIn.action"
   "action/ReactionStationSolidFeedVial.action"
 )

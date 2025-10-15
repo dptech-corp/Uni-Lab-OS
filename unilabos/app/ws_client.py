@@ -19,9 +19,12 @@ import websockets
 import ssl as ssl_module
 from queue import Queue, Empty
 from dataclasses import dataclass, field
-from typing import Optional, Dict, Any, Callable, List, Set
+from typing import Optional, Dict, Any, List
 from urllib.parse import urlparse
 from enum import Enum
+
+from jedi.inference.gradual.typing import TypedDict
+
 from unilabos.app.model import JobAddReq
 from unilabos.ros.nodes.presets.host_node import HostNode
 from unilabos.utils.type_check import serialize_result_info
@@ -94,6 +97,14 @@ class WebSocketMessage:
     action: str
     data: Dict[str, Any]
     timestamp: float = field(default_factory=time.time)
+
+
+class WSResourceChatData(TypedDict):
+    uuid: str
+    device_uuid: str
+    device_id: str
+    device_old_uuid: str
+    device_old_id: str
 
 
 class DeviceActionManager:
@@ -543,7 +554,7 @@ class MessageProcessor:
     async def _process_message(self, data: Dict[str, Any]):
         """处理收到的消息"""
         message_type = data.get("action", "")
-        message_data = data.get("data", {})
+        message_data = data.get("data")
 
         logger.debug(f"[MessageProcessor] Processing message: {message_type}")
 
@@ -556,8 +567,12 @@ class MessageProcessor:
                 await self._handle_job_start(message_data)
             elif message_type == "cancel_action" or message_type == "cancel_task":
                 await self._handle_cancel_action(message_data)
-            elif message_type == "":
-                return
+            elif message_type == "add_material":
+                await self._handle_resource_tree_update(message_data, "add")
+            elif message_type == "update_material":
+                await self._handle_resource_tree_update(message_data, "update")
+            elif message_type == "remove_material":
+                await self._handle_resource_tree_update(message_data, "remove")
             else:
                 logger.debug(f"[MessageProcessor] Unknown message type: {message_type}")
 
@@ -574,6 +589,7 @@ class MessageProcessor:
     async def _handle_query_action_state(self, data: Dict[str, Any]):
         """处理query_action_state消息"""
         device_id = data.get("device_id", "")
+        device_uuid = data.get("device_uuid", "")
         action_name = data.get("action_name", "")
         task_id = data.get("task_id", "")
         job_id = data.get("job_id", "")
@@ -759,6 +775,92 @@ class MessageProcessor:
                 logger.warning(f"[MessageProcessor] Failed to cancel any jobs for task_id: {task_id}")
         else:
             logger.warning("[MessageProcessor] Cancel request missing both task_id and job_id")
+
+    async def _handle_resource_tree_update(self, resource_uuid_list: List[WSResourceChatData], action: str):
+        """处理资源树更新消息（add_material/update_material/remove_material）"""
+        if not resource_uuid_list:
+            return
+
+        # 按device_id和action分组
+        # device_action_groups: {(device_id, action): [uuid_list]}
+        device_action_groups = {}
+
+        for item in resource_uuid_list:
+            device_id = item["device_id"]
+            if not device_id:
+                device_id = "host_node"
+
+            # 特殊处理update action: 检查是否设备迁移
+            if action == "update":
+                device_old_id = item.get("device_old_id", "")
+                if not device_old_id:
+                    device_old_id = "host_node"
+
+                # 设备迁移：device_id != device_old_id
+                if device_id != device_old_id:
+                    # 给旧设备发送remove
+                    key_remove = (device_old_id, "remove")
+                    if key_remove not in device_action_groups:
+                        device_action_groups[key_remove] = []
+                    device_action_groups[key_remove].append(item["uuid"])
+
+                    # 给新设备发送add
+                    key_add = (device_id, "add")
+                    if key_add not in device_action_groups:
+                        device_action_groups[key_add] = []
+                    device_action_groups[key_add].append(item["uuid"])
+
+                    logger.info(
+                        f"[MessageProcessor] Resource migrated: {item['uuid'][:8]} from {device_old_id} to {device_id}"
+                    )
+                else:
+                    # 正常update
+                    key = (device_id, "update")
+                    if key not in device_action_groups:
+                        device_action_groups[key] = []
+                    device_action_groups[key].append(item["uuid"])
+            else:
+                # add或remove action，直接分组
+                key = (device_id, action)
+                if key not in device_action_groups:
+                    device_action_groups[key] = []
+                device_action_groups[key].append(item["uuid"])
+
+        logger.info(f"触发物料更新 {action} 分组数量: {len(device_action_groups)}, 总数量: {len(resource_uuid_list)}")
+
+        # 为每个(device_id, action)创建独立的更新线程
+        for (device_id, actual_action), items in device_action_groups.items():
+            logger.info(f"设备 {device_id} 物料更新 {actual_action} 数量: {len(items)}")
+
+            def _notify_resource_tree(dev_id, act, item_list):
+                try:
+                    host_node = HostNode.get_instance(timeout=5)
+                    if not host_node:
+                        logger.error(f"[MessageProcessor] HostNode instance not available for {act}")
+                        return
+
+                    success = host_node.notify_resource_tree_update(dev_id, act, item_list)
+
+                    if success:
+                        logger.info(
+                            f"[MessageProcessor] Resource tree {act} completed for device {dev_id}, "
+                            f"items: {len(item_list)}"
+                        )
+                    else:
+                        logger.warning(f"[MessageProcessor] Resource tree {act} failed for device {dev_id}")
+
+                except Exception as e:
+                    logger.error(f"[MessageProcessor] Error in resource tree {act} for device {dev_id}: {str(e)}")
+                    logger.error(traceback.format_exc())
+
+            # 在新线程中执行通知
+            thread = threading.Thread(
+                target=_notify_resource_tree,
+                args=(device_id, actual_action, items),
+                daemon=True,
+                name=f"ResourceTreeUpdate-{actual_action}-{device_id}",
+            )
+            thread.start()
 
     async def _send_action_state_response(
         self, device_id: str, action_name: str, task_id: str, job_id: str, typ: str, free: bool, need_more: int
@@ -1008,6 +1110,8 @@ class WebSocketClient(BaseCommunicationClient):
 
         # 构建WebSocket URL
         self.websocket_url = self._build_websocket_url()
+        if not self.websocket_url:
+            self.websocket_url = ""  # 默认空字符串，避免None
 
         # 两个核心线程
         self.message_processor = MessageProcessor(self.websocket_url, self.send_queue, self.device_manager)

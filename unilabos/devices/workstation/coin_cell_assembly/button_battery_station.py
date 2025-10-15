@@ -61,7 +61,6 @@ class ElectrodeSheet(Resource):
             info=None
         )
 
-    # TODO: 这个还要不要？给self._unilabos_state赋值的？
     def load_state(self, state: Dict[str, Any]) -> None:
         """格式不变"""
         super().load_state(state)
@@ -665,7 +664,6 @@ class BatteryPressSlot(Resource):
         reassign: bool = True,
     ):
         """放置极片"""
-        # TODO: 让高京看下槽位只有一个电池时是否这么写。
         if self.has_battery():
             raise ValueError(f"槽位已含有一个电池，无法再放置其他电池")
         super().assign_child_resource(resource, location, reassign)
@@ -674,7 +672,6 @@ class BatteryPressSlot(Resource):
     def get_battery_info(self, index: int) -> Battery:
         return self.children[0]
 
-# TODO:这个移液枪架子看一下从哪继承
 class TipBox64State(TypedDict):
     """电池状态字典"""
     tip_diameter: float = 5.0

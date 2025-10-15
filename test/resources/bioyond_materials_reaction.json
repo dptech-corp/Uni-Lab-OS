@@ -1,5 +1,4 @@
-{
-    "data": [
+[
         {
             "id": "3a1c67a9-aed7-b94d-9e24-bfdf10c8baa9",
             "typeName": "烧杯",
@@ -191,8 +190,4 @@
                 }
             ]
         }
-    ],
-    "code": 1,
-    "message": "",
-    "timestamp": 1758560573511
-}
+    ]

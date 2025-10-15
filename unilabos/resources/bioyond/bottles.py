@@ -2,7 +2,7 @@ from unilabos.resources.itemized_carrier import Bottle, BottleCarrier
 # 工厂函数
 
 
-def BIOYOND_PolymerStation_Solid_Vial(
+def BIOYOND_PolymerStation_Solid_Stock(
     name: str,
     diameter: float = 20.0,
     height: float = 100.0,
@@ -16,7 +16,43 @@ def BIOYOND_PolymerStation_Solid_Vial(
         height=height,
         max_volume=max_volume,
         barcode=barcode,
+        model="BIOYOND_PolymerStation_Solid_Stock",
+    )
+
+
+def BIOYOND_PolymerStation_Solid_Vial(
+    name: str,
+    diameter: float = 25.0,
+    height: float = 60.0,
+    max_volume: float = 30000.0,  # 30mL
+    barcode: str = None,
+) -> Bottle:
+    """创建粉末瓶"""
+    return Bottle(
+        name=name,
+        diameter=diameter,
+        height=height,
+        max_volume=max_volume,
+        barcode=barcode,
         model="BIOYOND_PolymerStation_Solid_Vial",
+    )
+
+
+def BIOYOND_PolymerStation_Liquid_Vial(
+    name: str,
+    diameter: float = 25.0,
+    height: float = 60.0,
+    max_volume: float = 30000.0,  # 30mL
+    barcode: str = None,
+) -> Bottle:
+    """创建滴定液瓶"""
+    return Bottle(
+        name=name,
+        diameter=diameter,
+        height=height,
+        max_volume=max_volume,
+        barcode=barcode,
+        model="BIOYOND_PolymerStation_Liquid_Vial",
     )
 
 

@@ -1012,7 +1012,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         #    else:
         #        print("子弹夹洞位0没有极片")
         #  
-        #    # TODO:#把电解液从瓶中取到电池夹子中
+        #    #把电解液从瓶中取到电池夹子中
         #    battery_site = deck.get_resource("battery_press_1")
         #    clip_magazine_battery = deck.get_resource("clip_magazine_battery")
         #    if battery_site.has_battery():

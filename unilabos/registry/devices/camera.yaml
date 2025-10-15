@@ -8,6 +8,7 @@ camera.USB:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: 用于安全地关闭摄像头设备，释放摄像头资源，停止视频采集和发布服务。调用此函数将清理OpenCV摄像头连接并销毁ROS2节点。
@@ -28,6 +29,7 @@ camera.USB:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: 定时器回调函数的参数schema。此函数负责定期采集摄像头视频帧，将OpenCV格式的图像转换为ROS Image消息格式，并发布到指定的视频话题。默认以10Hz频率执行，确保视频流的连续性和实时性。

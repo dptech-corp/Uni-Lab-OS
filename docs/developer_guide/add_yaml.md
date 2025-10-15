@@ -111,8 +111,8 @@ new_device: # 设备名，要唯一
 
 1. 以 `auto-` 开头的动作：从你 Python 类的方法自动生成
 2. 通用的驱动动作：
-   - `_execute_driver_command`：同步执行驱动命令
-   - `_execute_driver_command_async`：异步执行驱动命令
+   - `_execute_driver_command`：同步执行驱动命令（仅本地可用）
+   - `_execute_driver_command_async`：异步执行驱动命令（仅本地可用）
 
 ### 如果要手动定义动作
 

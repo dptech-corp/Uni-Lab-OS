@@ -9,6 +9,7 @@ neware_battery_test_system:
         goal_default:
           ros_node: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: ''
@@ -32,6 +33,7 @@ neware_battery_test_system:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: ''
@@ -52,6 +54,7 @@ neware_battery_test_system:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: ''

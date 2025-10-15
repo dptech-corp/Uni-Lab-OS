@@ -10,6 +10,7 @@ serial:
           request: null
           response: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: handle_serial_request的参数schema
@@ -36,6 +37,7 @@ serial:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: read_data的参数schema
@@ -57,6 +59,7 @@ serial:
         goal_default:
           command: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: send_command的参数schema
