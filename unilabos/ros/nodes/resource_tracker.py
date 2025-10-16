@@ -387,9 +387,6 @@ class ResourceTreeSet(object):
         from pylabrobot.utils.object_parsing import find_subclass
         import inspect
 
-        # 类型映射
-        TYPE_MAP = {"plate": "plate", "well": "well", "container": "tip_spot", "deck": "deck", "tip_rack": "tip_rack"}
-
         def collect_node_data(node: ResourceDictInstance, name_to_uuid: dict, all_states: dict):
             """一次遍历收集 name_to_uuid 和 all_states"""
             name_to_uuid[node.res_content.name] = node.res_content.uuid
@@ -400,9 +397,6 @@ class ResourceTreeSet(object):
         def node_to_plr_dict(node: ResourceDictInstance, has_model: bool):
             """转换节点为 PLR 字典格式"""
             res = node.res_content
-            plr_type = TYPE_MAP.get(res.type, "tip_spot")
-            if res.type not in TYPE_MAP:
-                logger.warning(f"未知类型 {res.type}，使用默认类型 tip_spot")
 
             d = {
                 "name": res.name,
@@ -417,7 +411,7 @@ class ResourceTreeSet(object):
                     "type": "Coordinate",
                 },
                 "rotation": {"x": 0, "y": 0, "z": 0, "type": "Rotation"},
-                "category": plr_type,
+                "category": res.type,
                 "children": [node_to_plr_dict(child, has_model) for child in node.children],
                 "parent_name": res.parent_instance_name,
                 **res.config,
