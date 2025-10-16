@@ -781,6 +781,7 @@ def initialize_resource(resource_config: dict, resource_type: Any = None) -> Uni
             else:
                 r = resource_plr
         elif resource_class_config["type"] == "unilabos":
+            raise ValueError(f"No more support for unilabos Resource class {resource_class_config}")
             res_instance: RegularContainer = RESOURCE(id=resource_config["name"])
             res_instance.ulr_resource = convert_to_ros_msg(
                 Resource, {k: v for k, v in resource_config.items() if k != "class"}
