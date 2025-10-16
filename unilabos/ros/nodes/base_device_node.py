@@ -582,6 +582,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
         - update: 更新现有资源
         - remove: 从资源树中移除资源
         """
+        from pylabrobot.resources.resource import Resource as ResourcePLR
         try:
             data = json.loads(req.command)
             results = []
@@ -672,7 +673,8 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                         if callable(func):
                             func(found_plr_resources)
                         for plr_resource in found_plr_resources:
-                            plr_resource.parent.unassign_child_resource(plr_resource)
+                            if plr_resource.parent is not None:
+                                plr_resource.parent.unassign_child_resource(plr_resource)
                             self.resource_tracker.remove_resource(plr_resource)
                             self.lab_logger().info(f"移除物料 {plr_resource} 及其子节点")
                         for res in other_plr_resources:
