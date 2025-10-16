@@ -7,7 +7,14 @@ from unilabos.ros.msgs.message_converter import convert_from_ros_msg
 
 
 class RegularContainer(Container):
-    pass
+    def __init__(self, *args, **kwargs):
+        if "size_x" not in kwargs:
+            kwargs["size_x"] = 0
+        if "size_y" not in kwargs:
+            kwargs["size_y"] = 0
+        if "size_z" not in kwargs:
+            kwargs["size_z"] = 0
+        super().__init__(*args, **kwargs)
 
 
 #
