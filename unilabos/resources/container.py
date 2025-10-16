@@ -1,4 +1,5 @@
 import json
+from typing import Dict, Any
 
 from pylabrobot.resources import Container
 from unilabos_msgs.msg import Resource
@@ -15,9 +16,11 @@ class RegularContainer(Container):
         if "size_z" not in kwargs:
             kwargs["size_z"] = 0
         self.kwargs = kwargs
+        self.state = {}
         super().__init__(*args, **kwargs)
 
-
+    def load_state(self, state: Dict[str, Any]):
+        self.state = state
 #
 # class RegularContainer(object):
 #     # 第一个参数必须是id传入

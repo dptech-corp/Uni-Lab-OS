@@ -178,12 +178,8 @@
                 "size_z": 0
             },
             "data": {
-                "liquids": [
-                    {
-                        "liquid_type": "DMF",
-                        "liquid_volume": 1000.0
-                    }
-                ]
+                "liquids": [["DMF", 500.0]],
+                "pending_liquids": [["DMF", 500.0]]
             }
         },
         {
@@ -207,12 +203,8 @@
                 "size_z": 0
             },
             "data": {
-                "liquids": [
-                    {
-                        "liquid_type": "ethyl_acetate",
-                        "liquid_volume": 1000.0
-                    }
-                ]
+                "liquids": [["ethyl_acetate", 1000.0]],
+                "pending_liquids": [["ethyl_acetate", 1000.0]]
             }
         },
         {
@@ -236,12 +228,8 @@
                 "size_z": 0
             },
             "data": {
-                "liquids": [
-                    {
-                        "liquid_type": "hexane",
-                        "liquid_volume": 1000.0
-                    }
-                ]
+                "liquids": [["hexane", 1000.0]],
+                "pending_liquids": [["hexane", 1000.0]]
             }
         },
         {
@@ -265,12 +253,8 @@
                 "size_z": 0
             },
             "data": {
-                "liquids": [
-                    {
-                        "liquid_type": "methanol",
-                        "liquid_volume": 1000.0
-                    }
-                ]
+                "liquids": [["methanol", 1000.0]],
+                "pending_liquids": [["methanol", 1000.0]]
             }
         },
         {
@@ -294,12 +278,8 @@
                 "size_z": 0
             },
             "data": {
-                "liquids": [
-                    {
-                        "liquid_type": "water",
-                        "liquid_volume": 1000.0
-                    }
-                ]
+                "liquids": [["water", 1000.0]],
+                "pending_liquids": [["water", 1000.0]]
             }
         },
         {
@@ -368,8 +348,8 @@
                 "has_heater": true
             },
             "data": {
-                "liquids": [
-                ]
+                "liquids": [],
+                "pending_liquids": []
             }
         },
         {
@@ -454,8 +434,8 @@
                 "size_z": 0
             },
             "data": {
-                "liquids": [
-                ]
+                "liquids": [],
+                "pending_liquids": []
             }
         },
         {
@@ -479,8 +459,8 @@
                 "size_z": 0
             },
             "data": {
-                "liquids": [
-                ]
+                "liquids": [],
+                "pending_liquids": []
             }
         },
         {
@@ -694,8 +674,8 @@
                 "size_z": 0
             },
             "data": {
-                "liquids": [
-                ]
+                "liquids": [],
+                "pending_liquids": []
             }
         },
         {
@@ -719,8 +699,8 @@
                 "size_z": 0
             },
             "data": {
-                "liquids": [
-                ]
+                "liquids": [],
+                "pending_liquids": []
             }
         },
         {
@@ -744,8 +724,8 @@
                 "size_z": 0
             },
             "data": {
-                "liquids": [
-                ]
+                "liquids": [],
+                "pending_liquids": []
             }
         },
         {
