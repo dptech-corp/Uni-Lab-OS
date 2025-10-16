@@ -663,12 +663,12 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                         )
                         found_plr_resources = []
                         other_plr_resources = []
-                        for res_list in found_resources:
-                            for res in res_list:
-                                if issubclass(res.__class__, ResourcePLR):
-                                    found_plr_resources.append(res)
+                        for found_resource in found_resources:
+                            for resource in found_resource:
+                                if issubclass(resource.__class__, ResourcePLR):
+                                    found_plr_resources.append(resource)
                                 else:
-                                    other_plr_resources.append(res)
+                                    other_plr_resources.append(resource)
                         func = getattr(self.driver_instance, "resource_tree_remove", None)
                         if callable(func):
                             func(found_plr_resources)
@@ -677,9 +677,9 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                                 plr_resource.parent.unassign_child_resource(plr_resource)
                             self.resource_tracker.remove_resource(plr_resource)
                             self.lab_logger().info(f"移除物料 {plr_resource} 及其子节点")
-                        for res in other_plr_resources:
-                            self.resource_tracker.remove_resource(res)
-                            self.lab_logger().info(f"移除物料 {res} 及其子节点")
+                        for other_plr_resource in other_plr_resources:
+                            self.resource_tracker.remove_resource(other_plr_resource)
+                            self.lab_logger().info(f"移除物料 {other_plr_resource} 及其子节点")
                         results.append({"success": True, "action": "remove"})
                 except Exception as e:
                     error_msg = f"Error processing {action} operation: {str(e)}"
