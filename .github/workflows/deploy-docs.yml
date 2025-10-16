@@ -39,24 +39,55 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.branch || github.ref }}
+          fetch-depth: 0
 
-      - name: Setup Python environment
-        uses: actions/setup-python@v5
+      - name: Setup Miniforge (with mamba)
+        uses: conda-incubator/setup-miniconda@v3
         with:
-          python-version: '3.10'
+          miniforge-version: latest
+          use-mamba: true
+          python-version: '3.11.11'
+          channels: conda-forge,robostack-staging,uni-lab,defaults
+          channel-priority: flexible
+          activate-environment: unilab
+          auto-update-conda: false
+          show-channel-urls: true
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y pandoc
 
-      - name: Install Python dependencies
+      - name: Install unilabos and dependencies
         run: |
-          python -m pip install --upgrade pip
-          # Install package in development mode to get version info
-          pip install -e .
-          # Install documentation dependencies
-          pip install -r docs/requirements.txt
+          echo "Installing unilabos and dependencies to unilab environment..."
+          echo "Using mamba for faster and more reliable dependency resolution..."
+          mamba install -n unilab uni-lab::unilabos -c uni-lab -c robostack-staging -c conda-forge -y
+
+      - name: Install latest unilabos from source
+        run: |
+          echo "Uninstalling existing unilabos..."
+          mamba run -n unilab pip uninstall unilabos -y || echo "unilabos not installed via pip"
+          echo "Installing unilabos from source..."
+          mamba run -n unilab pip install .
+          echo "Verifying installation..."
+          mamba run -n unilab pip show unilabos
+
+      - name: Install documentation dependencies
+        run: |
+          echo "Installing documentation build dependencies..."
+          mamba run -n unilab pip install -r docs/requirements.txt
+
+      - name: Display environment info
+        run: |
+          echo "=== Environment Information ==="
+          mamba env list
+          echo ""
+          echo "=== Installed Packages ==="
+          mamba list -n unilab | grep -E "(unilabos|ros-humble|control_msgs|nav2_msgs)" || mamba list -n unilab
+          echo ""
+          echo "=== Python Packages ==="
+          mamba run -n unilab pip list | grep unilabos || mamba run -n unilab pip list
 
       - name: Setup Pages
         id: pages
@@ -68,8 +99,8 @@ jobs:
           cd docs
           # Clean previous builds
           rm -rf _build
-          # Build HTML documentation
-          python -m sphinx -b html . _build/html -v
+          # Build HTML documentation in conda environment
+          mamba run -n unilab python -m sphinx -b html . _build/html -v
 
       - name: Check build results
         run: |
