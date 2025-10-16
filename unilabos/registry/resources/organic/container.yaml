@@ -3,7 +3,7 @@ container:
   - container
   class:
     module: unilabos.resources.container:RegularContainer
-    type: unilabos
+    type: pylabrobot
   description: regular organic container
   handles:
   - data_key: fluid_in

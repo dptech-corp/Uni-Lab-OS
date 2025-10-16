@@ -170,15 +170,16 @@
                 "z": 0
             },
             "config": {
-                "max_volume": 1000.0
+                "max_volume": 1000.0,
+                "type": "RegularContainer",
+                "category": "container",
+                "size_x": 200,
+                "size_y": 150,
+                "size_z": 0
             },
             "data": {
-                "liquids": [
-                    {
-                        "liquid_type": "DMF",
-                        "liquid_volume": 1000.0
-                    }
-                ]
+                "liquids": [["DMF", 500.0]],
+                "pending_liquids": [["DMF", 500.0]]
             }
         },
         {
@@ -194,15 +195,16 @@
                 "z": 0
             },
             "config": {
-                "max_volume": 1000.0
+                "max_volume": 1000.0,
+                "type": "RegularContainer",
+                "category": "container",
+                "size_x": 200,
+                "size_y": 150,
+                "size_z": 0
             },
             "data": {
-                "liquids": [
-                    {
-                        "liquid_type": "ethyl_acetate",
-                        "liquid_volume": 1000.0
-                    }
-                ]
+                "liquids": [["ethyl_acetate", 1000.0]],
+                "pending_liquids": [["ethyl_acetate", 1000.0]]
             }
         },
         {
@@ -218,15 +220,16 @@
                 "z": 0
             },
             "config": {
-                "max_volume": 1000.0
+                "max_volume": 1000.0,
+                "type": "RegularContainer",
+                "category": "container",
+                "size_x": 300,
+                "size_y": 150,
+                "size_z": 0
             },
             "data": {
-                "liquids": [
-                    {
-                        "liquid_type": "hexane",
-                        "liquid_volume": 1000.0
-                    }
-                ]
+                "liquids": [["hexane", 1000.0]],
+                "pending_liquids": [["hexane", 1000.0]]
             }
         },
         {
@@ -242,15 +245,16 @@
                 "z": 0
             },
             "config": {
-                "max_volume": 1000.0
+                "max_volume": 1000.0,
+                "type": "RegularContainer",
+                "category": "container",
+                "size_x": 900,
+                "size_y": 150,
+                "size_z": 0
             },
             "data": {
-                "liquids": [
-                    {
-                        "liquid_type": "methanol",
-                        "liquid_volume": 1000.0
-                    }
-                ]
+                "liquids": [["methanol", 1000.0]],
+                "pending_liquids": [["methanol", 1000.0]]
             }
         },
         {
@@ -266,15 +270,16 @@
                 "z": 0
             },
             "config": {
-                "max_volume": 1000.0
+                "max_volume": 1000.0,
+                "type": "RegularContainer",
+                "category": "container",
+                "size_x": 950,
+                "size_y": 150,
+                "size_z": 0
             },
             "data": {
-                "liquids": [
-                    {
-                        "liquid_type": "water",
-                        "liquid_volume": 1000.0
-                    }
-                ]
+                "liquids": [["water", 1000.0]],
+                "pending_liquids": [["water", 1000.0]]
             }
         },
         {
@@ -335,14 +340,16 @@
             },
             "config": {
                 "max_volume": 500.0,
+                "type": "RegularContainer",
+                "category": "container",
                 "max_temp": 200.0,
                 "min_temp": -20.0,
                 "has_stirrer": true,
                 "has_heater": true
             },
             "data": {
-                "liquids": [
-                ]
+                "liquids": [],
+                "pending_liquids": []
             }
         },
         {
@@ -419,11 +426,16 @@
                 "z": 0
             },
             "config": {
-                "max_volume": 2000.0
+                "max_volume": 2000.0,
+                "type": "RegularContainer",
+                "category": "container",
+                "size_x": 500,
+                "size_y": 400,
+                "size_z": 0
             },
             "data": {
-                "liquids": [
-                ]
+                "liquids": [],
+                "pending_liquids": []
             }
         },
         {
@@ -439,11 +451,16 @@
                 "z": 0
             },
             "config": {
-                "max_volume": 2000.0
+                "max_volume": 2000.0,
+                "type": "RegularContainer",
+                "category": "container",
+                "size_x": 1100,
+                "size_y": 500,
+                "size_z": 0
             },
             "data": {
-                "liquids": [
-                ]
+                "liquids": [],
+                "pending_liquids": []
             }
         },
         {
@@ -649,11 +666,16 @@
                 "z": 0
             },
             "config": {
-                "max_volume": 250.0
+                "max_volume": 250.0,
+                "type": "RegularContainer",
+                "category": "container",
+                "size_x": 900,
+                "size_y": 500,
+                "size_z": 0
             },
             "data": {
-                "liquids": [
-                ]
+                "liquids": [],
+                "pending_liquids": []
             }
         },
         {
@@ -669,11 +691,16 @@
                 "z": 0
             },
             "config": {
-                "max_volume": 250.0
+                "max_volume": 250.0,
+                "type": "RegularContainer",
+                "category": "container",
+                "size_x": 950,
+                "size_y": 500,
+                "size_z": 0
             },
             "data": {
-                "liquids": [
-                ]
+                "liquids": [],
+                "pending_liquids": []
             }
         },
         {
@@ -689,11 +716,16 @@
                 "z": 0
             },
             "config": {
-                "max_volume": 250.0
+                "max_volume": 250.0,
+                "type": "RegularContainer",
+                "category": "container",
+                "size_x": 1050,
+                "size_y": 500,
+                "size_z": 0
             },
             "data": {
-                "liquids": [
-                ]
+                "liquids": [],
+                "pending_liquids": []
             }
         },
         {
@@ -733,6 +765,11 @@
             },
             "config": {
                 "max_volume": 500.0,
+                "size_x": 550,
+                "size_y": 250,
+                "size_z": 0,
+                "type": "RegularContainer",
+                "category": "container",
                 "reagent": "sodium_chloride",
                 "physical_state": "solid"
             },
@@ -756,6 +793,11 @@
             },
             "config": {
                 "volume": 500.0,
+                "size_x": 600,
+                "size_y": 250,
+                "size_z": 0,
+                "type": "RegularContainer",
+                "category": "container",
                 "reagent": "sodium_carbonate",
                 "physical_state": "solid"
             },
@@ -779,6 +821,11 @@
             },
             "config": {
                 "volume": 500.0,
+                "size_x": 650,
+                "size_y": 250,
+                "size_z": 0,
+                "type": "RegularContainer",
+                "category": "container",
                 "reagent": "magnesium_chloride",
                 "physical_state": "solid"
             },
