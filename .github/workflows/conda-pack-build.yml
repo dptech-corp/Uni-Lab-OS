@@ -242,6 +242,10 @@ jobs:
           echo Adding: verify_installation.py
           copy scripts\verify_installation.py dist-package\
 
+          rem Copy source code repository (including .git)
+          echo Adding: Uni-Lab-OS source repository
+          robocopy . dist-package\Uni-Lab-OS /E /XD dist-package /NFL /NDL /NJH /NJS /NC /NS || if %ERRORLEVEL% LSS 8 exit /b 0
+
           rem Create README using Python script
           echo Creating: README.txt
           python scripts\create_readme.py ${{ matrix.platform }} ${{ github.event.inputs.branch }} dist-package\README.txt
@@ -273,6 +277,10 @@ jobs:
           # Copy verification script
           echo "Adding: verify_installation.py"
           cp scripts/verify_installation.py dist-package/
+
+          # Copy source code repository (including .git)
+          echo "Adding: Uni-Lab-OS source repository"
+          rsync -a --exclude='dist-package' . dist-package/Uni-Lab-OS
 
           # Create README using Python script
           echo "Creating: README.txt"
