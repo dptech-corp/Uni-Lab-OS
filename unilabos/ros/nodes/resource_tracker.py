@@ -399,11 +399,11 @@ class ResourceTreeSet(object):
             res = node.res_content
             plr_type = TYPE_MAP.get(res.type, res.type)
             if res.type not in TYPE_MAP:
-                logger.warning(f"未知类型 {res.type}，使用默认类型 tip_spot")
+                logger.warning(f"未知类型 {res.type}")
 
             d = {
                 "name": res.name,
-                "type": res.type,
+                "type": res.config.get("type", plr_type),
                 "size_x": res.config.get("size_x", 0),
                 "size_y": res.config.get("size_y", 0),
                 "size_z": res.config.get("size_z", 0),
