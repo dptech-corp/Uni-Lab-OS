@@ -306,10 +306,7 @@ class ResourceTreeSet(object):
             replace_info = {
                 "plate": "plate",
                 "well": "well",
-                "tip_spot": "container",
-                "trash": "container",
                 "deck": "deck",
-                "tip_rack": "container",
             }
             if source in replace_info:
                 return replace_info[source]
@@ -387,6 +384,9 @@ class ResourceTreeSet(object):
         from pylabrobot.utils.object_parsing import find_subclass
         import inspect
 
+        # 类型映射
+        TYPE_MAP = {"plate": "Plate", "well": "Well", "deck": "Deck"}
+
         def collect_node_data(node: ResourceDictInstance, name_to_uuid: dict, all_states: dict):
             """一次遍历收集 name_to_uuid 和 all_states"""
             name_to_uuid[node.res_content.name] = node.res_content.uuid
@@ -397,10 +397,13 @@ class ResourceTreeSet(object):
         def node_to_plr_dict(node: ResourceDictInstance, has_model: bool):
             """转换节点为 PLR 字典格式"""
             res = node.res_content
+            plr_type = TYPE_MAP.get(res.type, res.type)
+            if res.type not in TYPE_MAP:
+                logger.warning(f"未知类型 {res.type}，使用默认类型 tip_spot")
 
             d = {
                 "name": res.name,
-                "type": plr_type,
+                "type": res.type,
                 "size_x": res.config.get("size_x", 0),
                 "size_y": res.config.get("size_y", 0),
                 "size_z": res.config.get("size_z", 0),
@@ -411,7 +414,7 @@ class ResourceTreeSet(object):
                     "type": "Coordinate",
                 },
                 "rotation": {"x": 0, "y": 0, "z": 0, "type": "Rotation"},
-                "category": res.type,
+                "category": res.config.get("category", plr_type),
                 "children": [node_to_plr_dict(child, has_model) for child in node.children],
                 "parent_name": res.parent_instance_name,
                 **res.config,
