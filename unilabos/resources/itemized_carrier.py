@@ -32,6 +32,7 @@ class Bottle(Well):
         barcode: Optional[str] = "",
         category: str = "container",
         model: Optional[str] = None,
+        **kwargs,
     ):
         super().__init__(
             name=name,
@@ -427,6 +428,7 @@ class BottleCarrier(ItemizedCarrier):
         sites: Optional[Dict[Union[int, str], ResourceHolder]] = None,
         category: str = "bottle_carrier",
         model: Optional[str] = None,
+        **kwargs,
     ):
         super().__init__(
             name=name,
