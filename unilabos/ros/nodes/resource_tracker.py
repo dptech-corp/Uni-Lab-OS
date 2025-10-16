@@ -439,7 +439,7 @@ class ResourceTreeSet(object):
             try:
                 sub_cls = find_subclass(plr_dict["type"], PLRResource)
                 if sub_cls is None:
-                    raise ValueError(f"无法找到类型 {plr_dict['type']} 对应的 PLR 资源类")
+                    raise ValueError(f"无法找到类型 {plr_dict['type']} 对应的 PLR 资源类。原始信息：{tree.root_node.res_content}")
                 spec = inspect.signature(sub_cls)
                 if "category" not in spec.parameters:
                     plr_dict.pop("category", None)
