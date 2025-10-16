@@ -23,7 +23,7 @@ extensions = [
     "myst_parser",
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",  # 如果您使用 Google 或 NumPy 风格的 docstrings
-    "sphinx_rtd_theme"
+    "sphinx_rtd_theme",
 ]
 
 source_suffix = {

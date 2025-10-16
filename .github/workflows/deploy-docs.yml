@@ -53,11 +53,6 @@ jobs:
           auto-update-conda: false
           show-channel-urls: true
 
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y pandoc
-
       - name: Install unilabos and dependencies
         run: |
           echo "Installing unilabos and dependencies to unilab environment..."
@@ -77,17 +72,6 @@ jobs:
         run: |
           echo "Installing documentation build dependencies..."
           mamba run -n unilab pip install -r docs/requirements.txt
-
-      - name: Display environment info
-        run: |
-          echo "=== Environment Information ==="
-          mamba env list
-          echo ""
-          echo "=== Installed Packages ==="
-          mamba list -n unilab | grep -E "(unilabos|ros-humble|control_msgs|nav2_msgs)" || mamba list -n unilab
-          echo ""
-          echo "=== Python Packages ==="
-          mamba run -n unilab pip list | grep unilabos || mamba run -n unilab pip list
 
       - name: Setup Pages
         id: pages
