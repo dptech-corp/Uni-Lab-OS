@@ -14,6 +14,7 @@ class RegularContainer(Container):
             kwargs["size_y"] = 0
         if "size_z" not in kwargs:
             kwargs["size_z"] = 0
+        self.kwargs = kwargs
         super().__init__(*args, **kwargs)
 
 

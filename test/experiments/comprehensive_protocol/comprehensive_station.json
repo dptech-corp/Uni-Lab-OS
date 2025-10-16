@@ -171,6 +171,7 @@
             },
             "config": {
                 "max_volume": 1000.0,
+                "category": "RegularContainer",
                 "size_x": 200,
                 "size_y": 150,
                 "size_z": 0
@@ -198,6 +199,7 @@
             },
             "config": {
                 "max_volume": 1000.0,
+                "category": "RegularContainer",
                 "size_x": 200,
                 "size_y": 150,
                 "size_z": 0
@@ -225,6 +227,7 @@
             },
             "config": {
                 "max_volume": 1000.0,
+                "category": "RegularContainer",
                 "size_x": 300,
                 "size_y": 150,
                 "size_z": 0
@@ -252,6 +255,7 @@
             },
             "config": {
                 "max_volume": 1000.0,
+                "category": "RegularContainer",
                 "size_x": 900,
                 "size_y": 150,
                 "size_z": 0
@@ -279,6 +283,7 @@
             },
             "config": {
                 "max_volume": 1000.0,
+                "category": "RegularContainer",
                 "size_x": 950,
                 "size_y": 150,
                 "size_z": 0
@@ -350,6 +355,7 @@
             },
             "config": {
                 "max_volume": 500.0,
+                "category": "RegularContainer",
                 "max_temp": 200.0,
                 "min_temp": -20.0,
                 "has_stirrer": true,
@@ -435,6 +441,7 @@
             },
             "config": {
                 "max_volume": 2000.0,
+                "category": "RegularContainer",
                 "size_x": 500,
                 "size_y": 400,
                 "size_z": 0
@@ -458,6 +465,7 @@
             },
             "config": {
                 "max_volume": 2000.0,
+                "category": "RegularContainer",
                 "size_x": 1100,
                 "size_y": 500,
                 "size_z": 0
@@ -671,6 +679,7 @@
             },
             "config": {
                 "max_volume": 250.0,
+                "category": "RegularContainer",
                 "size_x": 900,
                 "size_y": 500,
                 "size_z": 0
@@ -694,6 +703,7 @@
             },
             "config": {
                 "max_volume": 250.0,
+                "category": "RegularContainer",
                 "size_x": 950,
                 "size_y": 500,
                 "size_z": 0
@@ -717,6 +727,7 @@
             },
             "config": {
                 "max_volume": 250.0,
+                "category": "RegularContainer",
                 "size_x": 1050,
                 "size_y": 500,
                 "size_z": 0
@@ -766,6 +777,7 @@
                 "size_x": 550,
                 "size_y": 250,
                 "size_z": 0,
+                "category": "RegularContainer",
                 "reagent": "sodium_chloride",
                 "physical_state": "solid"
             },
@@ -792,6 +804,7 @@
                 "size_x": 600,
                 "size_y": 250,
                 "size_z": 0,
+                "category": "RegularContainer",
                 "reagent": "sodium_carbonate",
                 "physical_state": "solid"
             },
@@ -818,6 +831,7 @@
                 "size_x": 650,
                 "size_y": 250,
                 "size_z": 0,
+                "category": "RegularContainer",
                 "reagent": "magnesium_chloride",
                 "physical_state": "solid"
             },
