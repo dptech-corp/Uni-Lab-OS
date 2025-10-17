@@ -543,7 +543,9 @@ class BioyondReactionStation(BioyondWorkstation):
         if not result:
             return self._create_error_result("创建任务失败", "create_order")
         
+        # 清空工作流序列和参数，防止下次执行时累积重复
         self.pending_task_params = []
+        self.clear_workflows()  
         
         # print(f"\n✅ 任务创建成功: {result}")
         # print(f"\n✅ 任务创建成功")
