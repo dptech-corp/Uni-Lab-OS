@@ -18,7 +18,7 @@
             "config": {
                 "deck": {
                     "_resource_child_name": "deck",
-                    "_resource_type": "pylabrobot.resources.opentrons.deck:OTDeck",
+                    "_resource_type": "unilabos.devices.liquid_handling.laiyu.laiyu:TransformXYZDeck",
                     "name": "deck"
                 },
                 "backend": {

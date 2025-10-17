@@ -1,0 +1,14 @@
+{
+  "machine_origin_steps": {
+    "x": -7846,
+    "y": -35486,
+    "z": -18888
+  },
+  "work_origin_steps": {
+    "x": 4297,
+    "y": 8327,
+    "z": -12148
+  },
+  "is_homed": true,
+  "timestamp": "2025-10-16T00:14:36.161397"
+}

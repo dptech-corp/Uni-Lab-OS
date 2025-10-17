@@ -1420,6 +1420,7 @@ class ROS2DeviceNode:
             or driver_class.__name__ == "LiquidHandlerAbstract"
             or driver_class.__name__ == "LiquidHandlerBiomek"
             or driver_class.__name__ == "PRCXI9300Handler"
+            or driver_class.__name__ == "TransformXYZHandler"
         )
 
         # 创建设备类实例

@@ -10,24 +10,22 @@
                 "x": 620.6111111111111,
                 "y": 171,
                 "z": 0
-            },
-            "config": {
-                "data": {
-                    "children": [
-                        {
-                            "_resource_child_name": "deck",
-                            "_resource_type": "pylabrobot.resources.opentrons.deck:OTDeck"
-                        }
-                    ],
-                    "backend": {
-                        "type": "LiquidHandlerRvizBackend"
-                    }
-                }
-            },
+            },            
             "data": {},
             "children": [
                 "deck"
-            ]
+            ],
+            "config": {
+                "deck": {
+                        "_resource_child_name": "deck",
+                        "_resource_type": "pylabrobot.resources.opentrons.deck:OTDeck"
+                },
+                "backend": {
+                    "type": "UniLiquidHandlerRvizBackend"
+                },
+                "simulator": true
+            }
+
         },
         {
             "id": "deck",
@@ -9650,7 +9648,7 @@
             "children": [],
             "parent": null,
             "type": "device",
-            "class": "robotic_arm.SCARA_with_slider.virtual",
+            "class": "robotic_arm.SCARA_with_slider.moveit.virtual",
             "position": {
                 "x": -500,
                 "y": 1000,
