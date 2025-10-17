@@ -64,7 +64,7 @@ class PRCXI9300Deck(Deck):
     该类定义了 PRCXI 9300 的工作台布局和槽位信息。
     """
 
-    def __init__(self, name: str, size_x: float, size_y: float, size_z: float):
+    def __init__(self, name: str, size_x: float, size_y: float, size_z: float, **kwargs):
         super().__init__(name, size_x, size_y, size_z)
         self.slots = [None] * 6  # PRCXI 9300 有 6 个槽位
 
@@ -84,6 +84,7 @@ class PRCXI9300Container(Plate, TipRack):
         category: str,
         ordering: collections.OrderedDict,
         model: Optional[str] = None,
+        **kwargs,
     ):
         super().__init__(name, size_x, size_y, size_z, category=category, ordering=ordering, model=model)
         self._unilabos_state = {}
@@ -1124,7 +1125,7 @@ class DefaultLayout:
             self.waste_liquid_slot = 6
 
         elif product_name == "PRCXI9320":
-            self.rows = 3
+            self.rows = 4
             self.columns = 4
             self.layout = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
             self.trash_slot = 16
@@ -1616,7 +1617,7 @@ if __name__ == "__main__":
 
     handler = PRCXI9300Handler(
         deck=deck,
-        host="192.168.0.121",
+        host="192.168.1.201",
         port=9999,
         timeout=10.0,
         setup=True,
