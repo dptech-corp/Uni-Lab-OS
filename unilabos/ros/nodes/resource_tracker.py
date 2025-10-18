@@ -32,7 +32,7 @@ class ResourceDictPositionObject(BaseModel):
 class ResourceDictPosition(BaseModel):
     size: ResourceDictPositionSize = Field(description="Resource size", default_factory=ResourceDictPositionSize)
     scale: ResourceDictPositionScale = Field(description="Resource scale", default_factory=ResourceDictPositionScale)
-    layout: Literal["2d"] = Field(description="Resource layout", default="2d")
+    layout: Literal["2d", "x-y", "z-y", "x-z"] = Field(description="Resource layout", default="x-y")
     position: ResourceDictPositionObject = Field(
         description="Resource position", default_factory=ResourceDictPositionObject
     )
@@ -42,6 +42,7 @@ class ResourceDictPosition(BaseModel):
     rotation: ResourceDictPositionObject = Field(
         description="Resource rotation", default_factory=ResourceDictPositionObject
     )
+    cross_section_type: Literal["rectangle", "circle", "rounded_rectangle"] = Field(description="Cross section type", default="rectangle")
 
 
 # 统一的资源字典模型，parent 自动序列化为 parent_uuid，children 不序列化
@@ -58,6 +59,7 @@ class ResourceDict(BaseModel):
     type: Literal["device"] | str = Field(description="Resource type")
     klass: str = Field(alias="class", description="Resource class name")
     position: ResourceDictPosition = Field(description="Resource position", default_factory=ResourceDictPosition)
+    pose: ResourceDictPosition = Field(description="Resource position", default_factory=ResourceDictPosition)
     config: Dict[str, Any] = Field(description="Resource configuration")
     data: Dict[str, Any] = Field(description="Resource data")
 
@@ -136,6 +138,8 @@ class ResourceDictInstance(object):
             content["config"] = {}
         if not content.get("data"):
             content["data"] = {}
+        if "pose" not in content:
+            content["pose"] = content.get("position", {})
         return ResourceDictInstance(ResourceDict.model_validate(content))
 
     def get_nested_dict(self) -> Dict[str, Any]:
@@ -330,6 +334,20 @@ class ResourceTreeSet(object):
         ) -> ResourceDictInstance:
             current_uuid = uuids.pop(0)
 
+            raw_pos = (
+                {"x": d["location"]["x"], "y": d["location"]["y"], "z": d["location"]["z"]}
+                if d["location"]
+                else {"x": 0, "y": 0, "z": 0}
+            )
+            pos = {
+                "size": {"width": d["size_x"], "height": d["size_y"], "depth": d["size_z"]},
+                "scale": {"x": 1.0, "y": 1.0, "z": 1.0},
+                "position": raw_pos,
+                "position3d": raw_pos,
+                "rotation": d["rotation"],
+                "cross_section_type": d.get("cross_section_type", "rectangle"),
+            }
+
             # 先构建当前节点的字典（不包含children）
             r_dict = {
                 "id": d["name"],
@@ -338,12 +356,10 @@ class ResourceTreeSet(object):
                 "parent": parent_resource,  # 直接传入 ResourceDict 对象
                 "type": replace_plr_type(d.get("category", "")),
                 "class": d.get("class", ""),
-                "position": (
-                    {"x": d["location"]["x"], "y": d["location"]["y"], "z": d["location"]["z"]}
-                    if d["location"]
-                    else {"x": 0, "y": 0, "z": 0}
-                ),
-                "config": {k: v for k, v in d.items() if k not in ["name", "children", "parent_name", "location"]},
+                "position": pos,
+                "pose": pos,
+                "config": {k: v for k, v in d.items() if k not in
+                           ["name", "children", "parent_name", "location", "rotation", "size_x", "size_y", "size_z", "cross_section_type", "bottom_type"]},
                 "data": states[d["name"]],
             }
 
