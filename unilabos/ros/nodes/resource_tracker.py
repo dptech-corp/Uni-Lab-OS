@@ -342,6 +342,7 @@ class ResourceTreeSet(object):
             pos = {
                 "size": {"width": d["size_x"], "height": d["size_y"], "depth": d["size_z"]},
                 "scale": {"x": 1.0, "y": 1.0, "z": 1.0},
+                "layout": d.get("layout", "x-y"),
                 "position": raw_pos,
                 "position3d": raw_pos,
                 "rotation": d["rotation"],

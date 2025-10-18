@@ -74,6 +74,7 @@ class ItemizedCarrier(ResourcePLR):
     num_items_x: int = 0,
     num_items_y: int = 0,
     num_items_z: int = 0,
+    layout: str = "x-y",
     sites: Optional[Dict[Union[int, str], Optional[ResourcePLR]]] = None,
     category: Optional[str] = "carrier",
     model: Optional[str] = None,
@@ -88,6 +89,8 @@ class ItemizedCarrier(ResourcePLR):
     )
     self.num_items = len(sites)
     self.num_items_x, self.num_items_y, self.num_items_z = num_items_x, num_items_y, num_items_z
+    self.layout = "z-y" if self.num_items_z > 1 and self.num_items_x == 1 else "x-z" if self.num_items_z > 1 and self.num_items_y == 1 else "x-y"
+
     if isinstance(sites, dict):
       sites = sites or {}
       self.sites: List[Optional[ResourcePLR]] = list(sites.values())
@@ -150,7 +153,7 @@ class ItemizedCarrier(ResourcePLR):
   def assign_resource_to_site(self, resource: ResourcePLR, spot: int):
     if self.sites[spot] is not None and not isinstance(self.sites[spot], ResourceHolder):
       raise ValueError(f"spot {spot} already has a resource, {resource}")
-    self.assign_child_resource(resource, location=self.child_locations.get(str(spot)), spot=spot)
+    self.assign_child_resource(resource, location=self.child_locations.get(list(self._ordering.keys())[spot]), spot=spot)
 
   def unassign_child_resource(self, resource: ResourcePLR):
     found = False
@@ -161,8 +164,9 @@ class ItemizedCarrier(ResourcePLR):
         break
     if not found:
       raise ValueError(f"Resource {resource} is not assigned to this carrier")
-    if hasattr(resource, "unassign"):
-      resource.unassign()
+    super().unassign_child_resource(resource)
+    # if hasattr(resource, "unassign"):
+    #   resource.unassign()
 
   def get_child_identifier(self, child: ResourcePLR):
     """Get the identifier information for a given child resource.
@@ -403,6 +407,7 @@ class ItemizedCarrier(ResourcePLR):
       "num_items_x": self.num_items_x,
       "num_items_y": self.num_items_y,
       "num_items_z": self.num_items_z,
+      "layout": self.layout,
       "sites": [{
         "label": str(identifier),
         "visible": True if self[identifier] is not None else False,
