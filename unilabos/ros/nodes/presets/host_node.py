@@ -494,7 +494,7 @@ class HostNode(BaseROS2DeviceNode):
         if len(init_new_res) > 1:  # 一个物料，多个子节点
             init_new_res = [init_new_res]
         resources: List[Resource] | List[List[Resource]] = init_new_res  # initialize_resource已经返回list[dict]
-        device_ids = [device_id]
+        device_ids = [device_id.split("/")[-1]]
         bind_parent_id = [res_creation_input["parent"]]
         bind_location = [bind_locations]
         other_calling_param = [
