@@ -1,0 +1,20 @@
+{
+  "nodes": [
+  {
+        "id": "bioyond_workstation",
+        "name": "配液分液工站",
+        "children": [
+        ],
+        "parent": null,
+        "type": "device",
+        "class": "bioyondworkstation_device",
+        "config": {
+            "protocol_type": [],
+            "station_resource": {}
+
+        },
+        "data": {}
+    }
+  ],
+  "links": []
+}
