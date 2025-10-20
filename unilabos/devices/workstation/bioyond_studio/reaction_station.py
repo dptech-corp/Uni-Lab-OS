@@ -605,7 +605,8 @@ class BioyondReactionStation(BioyondWorkstation):
                         total_params += 1
                         step_parameters[step_id][action_name].append({
                             "Key": param_key,
-                            "DisplayValue": param_value
+                            "DisplayValue": param_value,
+                            "Value": param_value
                         })
                         successful_params += 1
                         # print(f"         ✓ {param_key} = {param_value}")
