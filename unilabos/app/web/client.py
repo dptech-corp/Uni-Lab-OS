@@ -199,7 +199,7 @@ class HTTPClient:
             headers={"Authorization": f"Lab {self.auth}"},
             timeout=20,
         )
-        with open(os.path.join(BasicConfig.working_dir, "req_resource_get.json"), "w", encoding="utf-8") as f:
+        with open(os.path.join(BasicConfig.working_dir, "res_resource_get.json"), "w", encoding="utf-8") as f:
             f.write(f"{response.status_code}" + "\n" + response.text)
         return response.json()
 
