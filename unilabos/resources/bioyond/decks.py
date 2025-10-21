@@ -1,6 +1,7 @@
+from os import name
 from pylabrobot.resources import Deck, Coordinate, Rotation
 
-from unilabos.resources.bioyond.warehouses import bioyond_warehouse_1x4x4, bioyond_warehouse_1x4x2, bioyond_warehouse_liquid_and_lid_handling
+from unilabos.resources.bioyond.warehouses import bioyond_warehouse_1x4x4, bioyond_warehouse_1x4x2, bioyond_warehouse_liquid_and_lid_handling, bioyond_warehouse_1x2x2, bioyond_warehouse_1x3x3, bioyond_warehouse_10x1x1, bioyond_warehouse_3x3x1, bioyond_warehouse_3x3x1_2, bioyond_warehouse_5x1x1
 
 
 class BIOYOND_PolymerReactionStation_Deck(Deck):
@@ -66,3 +67,60 @@ class BIOYOND_PolymerPreparationStation_Deck(Deck):
 
         for warehouse_name, warehouse in self.warehouses.items():
             self.assign_child_resource(warehouse, location=self.warehouse_locations[warehouse_name])
+
+class BIOYOND_YB_Deck(Deck):
+    def __init__(
+        self, 
+        name: str = "YB_Deck",
+        size_x: float = 4150,
+        size_y: float = 1400.0,
+        size_z: float = 2670.0,
+        category: str = "deck",
+        setup: bool = False
+    ) -> None:
+        super().__init__(name=name, size_x=4150.0, size_y=1400.0, size_z=2670.0)
+        if setup:
+            self.setup()
+
+    def setup(self) -> None:
+        # 添加仓库
+        self.warehouses = {
+            "321窗口": bioyond_warehouse_1x2x2("321窗口"),
+            "43窗口": bioyond_warehouse_1x2x2("43窗口"),
+            "手动传递窗左": bioyond_warehouse_1x3x3("手动传递窗左"),
+            "手动传递窗右": bioyond_warehouse_1x3x3("手动传递窗右"),
+            "加样头堆栈左": bioyond_warehouse_10x1x1("加样头堆栈左"),
+            "加样头堆栈右": bioyond_warehouse_10x1x1("加样头堆栈右"),
+
+            "15ml配液堆栈左": bioyond_warehouse_3x3x1("15ml配液堆栈左"),
+            "母液加样右": bioyond_warehouse_3x3x1_2("母液加样右"),
+            "大瓶母液堆栈左": bioyond_warehouse_5x1x1("大瓶母液堆栈左"),
+            "大瓶母液堆栈右": bioyond_warehouse_5x1x1("大瓶母液堆栈右"),
+        }
+        # warehouse 的位置
+        self.warehouse_locations = {
+            "321窗口": Coordinate(-150.0, 158.0, 0.0),
+            "43窗口": Coordinate(4160.0, 158.0, 0.0),
+            "手动传递窗左": Coordinate(-150.0, 877.0, 0.0),
+            "手动传递窗右": Coordinate(4160.0, 877.0, 0.0),
+            "加样头堆栈左": Coordinate(385.0, 1300.0, 0.0),
+            "加样头堆栈右": Coordinate(2187.0, 1300.0, 0.0),
+
+            "15ml配液堆栈左": Coordinate(749.0, 355.0, 0.0),
+            "母液加样右": Coordinate(2152.0, 333.0, 0.0),
+            "大瓶母液堆栈左": Coordinate(1164.0, 676.0, 0.0),
+            "大瓶母液堆栈右": Coordinate(2717.0, 676.0, 0.0),
+        }
+
+        for warehouse_name, warehouse in self.warehouses.items():
+            self.assign_child_resource(warehouse, location=self.warehouse_locations[warehouse_name])
+            
+def YB_Deck(name: str) -> Deck:
+    by=BIOYOND_YB_Deck(name=name)
+    by.setup()
+    return by
+
+
+
+
+
