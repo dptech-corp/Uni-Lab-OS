@@ -338,7 +338,7 @@ class BioyondDispensingStation(BioyondWorkstation):
             workflow_id = "3a15d4a1-3bbe-76f9-a458-292896a338f5"
             
             # 4. 查询工作流对应的holdMID
-            material_info = self.material_id_query(workflow_id)
+            material_info = self.hardware_interface.material_id_query(workflow_id)
             if not material_info:
                 raise BioyondException(f"无法查询工作流 {workflow_id} 的物料信息")
             
