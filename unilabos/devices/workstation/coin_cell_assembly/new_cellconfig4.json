@@ -16,9 +16,9 @@
       },
       "config": {
           "debug_mode": false,
-          "_comment": "protocol_type接外部工站固定写法字段，一般为空，deck写法也固定",
+          "_comment": "protocol_type接外部工站固定写法字段，一般为空，station_resource写法也固定",
           "protocol_type": [],
-          "deck": {
+          "station_resource": {
               "data": {
                   "_resource_child_name": "coin_cell_deck",
                   "_resource_type": "unilabos.devices.workstation.coin_cell_assembly.button_battery_station:CoincellDeck"

@@ -237,7 +237,7 @@ bettery_station_registry:
             goal:
               properties:
                 bottle_num:
-                  type: string
+                  type: integer
               required:
               - bottle_num
               type: object

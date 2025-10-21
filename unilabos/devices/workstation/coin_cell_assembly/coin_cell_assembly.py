@@ -21,7 +21,7 @@ from unilabos.ros.nodes.presets.workstation import ROS2WorkstationNode
 class CoinCellAssemblyWorkstation(WorkstationBase):
     def __init__(
         self,
-        deck: CoincellDeck,
+        station_resource: CoincellDeck,
         address: str = "192.168.1.20",
         port: str = "502",
         debug_mode: bool = True,
@@ -30,12 +30,12 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
     ):
         super().__init__(
             #桌子
-            deck=deck,
+            station_resource=station_resource,
             *args,
             **kwargs,
         )
         self.debug_mode = debug_mode
-        self.deck = deck
+        self.station_resource = station_resource
         """ 连接初始化 """
         modbus_client = TCPClient(addr=address, port=port)
         print("modbus_client", modbus_client)
@@ -60,6 +60,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         self.csv_export_thread = None
         self.csv_export_running = False
         self.csv_export_file = None
+        self.coin_num_N = 0  #已组装电池数量
         #创建一个物料台面，包含两个极片板
         #self.deck = create_a_coin_cell_deck()
         
@@ -74,7 +75,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         self._ros_node = ros_node
         #self.deck = create_a_coin_cell_deck()
         ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
-            "resources": [self.deck]
+            "resources": [self.station_resource]
         })
 
     # 批量操作在这里写
@@ -84,7 +85,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
 
     
     async def fill_plate(self):
-        plate_1: MaterialPlate = self.deck.children[0].children[0]
+        plate_1: MaterialPlate = self.station_resource.children[0].children[0]
         #plate_1
         return await self._ros_node.update_resource(plate_1)
 
@@ -341,7 +342,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
     def modify_deck_name(self, resource_name: str):
         # figure_res = self._ros_node.resource_tracker.figure_resource({"name": resource_name})
         # print(f"!!! figure_res: {type(figure_res)}")
-        self.deck.children[1]
+        self.station_resource.children[1]
         return
 
     @property
@@ -606,7 +607,8 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
             print("waiting for start_cmd")
             time.sleep(1)      
 
-    def func_pack_send_bottle_num(self, bottle_num: int):
+    def func_pack_send_bottle_num(self, bottle_num):
+        bottle_num = int(bottle_num)
         #发送电解液平台数
         print("启动")
         while (self._unilab_rece_electrolyte_bottle_num()) == False:
@@ -697,6 +699,23 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         print("data_electrolyte_code", data_electrolyte_code)
         print("data_coin_cell_code", data_coin_cell_code)
         #接收完信息后，读取完毕标志位置True
+        liaopan3 = self.station_resource.get_resource("\u7535\u6c60\u6599\u76d8")        
+        #把物料解绑后放到另一盘上
+        battery = ElectrodeSheet(name=f"battery_{self.coin_num_N}", size_x=14, size_y=14, size_z=2)
+        battery._unilabos_state = {
+                            "electrolyte_name": data_coin_cell_code,
+                            "data_electrolyte_code": data_electrolyte_code,
+                            "open_circuit_voltage": data_open_circuit_voltage,
+                            "assembly_pressure": data_assembly_pressure,
+                            "electrolyte_volume": data_electrolyte_volume
+                            }
+        liaopan3.children[self.coin_num_N].assign_child_resource(battery, location=None)
+        #print(jipian2.parent)
+        ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
+            "resources": [self.station_resource]
+        })
+
+
         self._unilab_rec_msg_succ_cmd(True)
         time.sleep(1)
         #等待允许读取标志位置False
@@ -757,6 +776,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
 
 
     def func_allpack_cmd(self, elec_num, elec_use_num, file_path: str="D:\\coin_cell_data") -> bool:
+        elec_num, elec_use_num = int(elec_num), int(elec_use_num)
         summary_csv_file = os.path.join(file_path, "duandian.csv")
         # 如果断点文件存在，先读取之前的进度
         if os.path.exists(summary_csv_file):
@@ -784,20 +804,22 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
             elec_num_N = 0
             elec_use_num_N = 0
             coin_num_N = 0
-
-        print(f"剩余电解液瓶数: {elec_num}, 已组装电池数: {elec_use_num}")
-
+        for i in range(20):
+            print(f"剩余电解液瓶数: {elec_num}, 已组装电池数: {elec_use_num}")
+            print(f"剩余电解液瓶数: {type(elec_num)}, 已组装电池数: {type(elec_use_num)}")
+            print(f"剩余电解液瓶数: {type(int(elec_num))}, 已组装电池数: {type(int(elec_use_num))}")
         
         #如果是第一次运行，则进行初始化、切换自动、启动, 如果是断点重启则跳过。
         if read_status_flag == False:
+            pass
             #初始化
-            self.func_pack_device_init()
+            #self.func_pack_device_init()
             #切换自动
-            self.func_pack_device_auto()
+            #self.func_pack_device_auto()
             #启动，小车收回
-            self.func_pack_device_start()
+            #self.func_pack_device_start()
             #发送电解液瓶数量，启动搬运,多搬运没事
-            self.func_pack_send_bottle_num(elec_num)
+            #self.func_pack_send_bottle_num(elec_num)
         last_i = elec_num_N
         last_j = elec_use_num_N
         for i in range(last_i, elec_num):
@@ -811,27 +833,9 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
                 #读取电池组装数据并存入csv
                 self.func_pack_get_msg_cmd(file_path)
                 time.sleep(1)
-
-                #这里定义物料系统
                 # TODO:读完再将电池数加一还是进入循环就将电池数加一需要考虑
-                liaopan1 = self.deck.get_resource("liaopan1")
-                liaopan4 = self.deck.get_resource("liaopan4")
-                jipian1 = liaopan1.children[coin_num_N].children[0]
-                jipian4 = liaopan4.children[coin_num_N].children[0]
-                #print(jipian1)
-                #从料盘上去物料解绑后放到另一盘上
-                jipian1.parent.unassign_child_resource(jipian1)
-                jipian4.parent.unassign_child_resource(jipian4)
-                
-                #print(jipian2.parent)
-                battery = Battery(name = f"battery_{coin_num_N}")
-                battery.assign_child_resource(jipian1, location=None)
-                battery.assign_child_resource(jipian4, location=None)
-                
-                zidanjia6 = self.deck.get_resource("zi_dan_jia6")
 
-                zidanjia6.children[0].assign_child_resource(battery, location=None)
-               
+
 
                 # 生成断点文件
                 # 生成包含elec_num_N、coin_num_N、timestamp的CSV文件
@@ -842,6 +846,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
                     writer.writerow([elec_num, elec_use_num, elec_num_N, elec_use_num_N, coin_num_N, timestamp])
                     csvfile.flush()
                 coin_num_N += 1
+                self.coin_num_N = coin_num_N
                 elec_use_num_N += 1
             elec_num_N += 1
             elec_use_num_N = 0
@@ -878,34 +883,37 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
     
     def fun_wuliao_test(self) -> bool: 
         #找到data_init中构建的2个物料盘
-        #liaopan1 = self.deck.get_resource("liaopan1")
-        #liaopan4 = self.deck.get_resource("liaopan4")
-        #for coin_num_N in range(16):
-        #    liaopan1 = self.deck.get_resource("liaopan1")
-        #    liaopan4 = self.deck.get_resource("liaopan4")
-        #    jipian1 = liaopan1.children[coin_num_N].children[0]
-        #    jipian4 = liaopan4.children[coin_num_N].children[0]
-        #    #print(jipian1)
-        #    #从料盘上去物料解绑后放到另一盘上
-        #    jipian1.parent.unassign_child_resource(jipian1)
-        #    jipian4.parent.unassign_child_resource(jipian4)
-        #    
-        #    #print(jipian2.parent)
-        #    battery = Battery(name = f"battery_{coin_num_N}")
-        #    battery.assign_child_resource(jipian1, location=None)
-        #    battery.assign_child_resource(jipian4, location=None)
-        #    
-        #    zidanjia6 = self.deck.get_resource("zi_dan_jia6")
-        #    zidanjia6.children[0].assign_child_resource(battery, location=None)
-        #    ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
-        #        "resources": [self.deck]
-        #    })
-        #    time.sleep(2)
-        for i in range(20):
-            print(f"输出{i}")
-            time.sleep(2)
+        liaopan1 = self.station_resource.get_resource("liaopan1")
+        liaopan2 = self.station_resource.get_resource("liaopan2")
+        for i in range(16):
+            #找到liaopan1上每一个jipian
+            jipian_linshi = liaopan1.children[i].children[0]
+            #把物料解绑后放到另一盘上
+            print("极片:", jipian_linshi)
+            jipian_linshi.parent.unassign_child_resource(jipian_linshi)
+            liaopan2.children[i].assign_child_resource(jipian_linshi, location=None)
+            ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
+                "resources": [self.station_resource]
+            })
+            time.sleep(4)
+        """
+        liaopan3 = self.station_resource.get_resource("\u7535\u6c60\u6599\u76d8")
+        for i in range(16):            
+            battery = ElectrodeSheet(name=f"battery_{i}", size_x=16, size_y=16, size_z=2)
+            battery._unilabos_state = {
+                                "diameter": 20.0,
+                                "height": 20.0,
+                                "assembly_pressure": i,
+                                "electrolyte_volume": 20.0,
+                                "electrolyte_name": f"DP{i}"
+                                }
+            liaopan3.children[i].assign_child_resource(battery, location=None) 
 
-            
+            ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
+                "resources": [self.station_resource]
+            })
+            time.sleep(4)
+        """ 
     # 数据读取与输出
     def func_read_data_and_output(self, file_path: str="D:\\coin_cell_data"):
         # 检查CSV导出是否正在运行，已运行则跳出，防止同时启动两个while循环
@@ -1119,24 +1127,52 @@ if __name__ == "__main__":
     #print("success")
     #创建一个物料台面
 
-    #deck = create_a_coin_cell_deck()
+    deck = create_a_coin_cell_deck()
+    #deck = create_a_full_coin_cell_deck()
+
 
     ##在台面上找到料盘和极片
     #liaopan1 = deck.get_resource("liaopan1")
     #liaopan2 = deck.get_resource("liaopan2")
     #jipian1 = liaopan1.children[1].children[0]
-#
-    ##print(jipian1)
+##
+    #print(jipian1)
     ##把物料解绑后放到另一盘上
     #jipian1.parent.unassign_child_resource(jipian1)
     #liaopan2.children[1].assign_child_resource(jipian1, location=None)
     ##print(jipian2.parent)
+    
+    liaopan1 = deck.get_resource("liaopan1")
+    liaopan2 = deck.get_resource("liaopan2")
+    for i in range(16):
+        #找到liaopan1上每一个jipian
+        jipian_linshi = liaopan1.children[i].children[0]
+        #把物料解绑后放到另一盘上
+        print("极片:", jipian_linshi)
+        jipian_linshi.parent.unassign_child_resource(jipian_linshi)
+        liaopan2.children[i].assign_child_resource(jipian_linshi, location=None)
+
+
     from unilabos.resources.graphio import resource_ulab_to_plr, convert_resources_to_type
+    #with open("./button_battery_station_resources_unilab.json", "r", encoding="utf-8") as f:
+    #    bioyond_resources_unilab = json.load(f)
+    #print(f"成功读取 JSON 文件，包含 {len(bioyond_resources_unilab)} 个资源")
+    #ulab_resources = convert_resources_to_type(bioyond_resources_unilab, List[PLRResource])
+    #print(f"转换结果类型: {type(ulab_resources)}")
+    #print(ulab_resources)
 
-    with open("./button_battery_decks_unilab.json", "r", encoding="utf-8") as f:
-        bioyond_resources_unilab = json.load(f)
-    print(f"成功读取 JSON 文件，包含 {len(bioyond_resources_unilab)} 个资源")
-    ulab_resources = convert_resources_to_type(bioyond_resources_unilab, List[PLRResource])
-    print(f"转换结果类型: {type(ulab_resources)}")
-    print(ulab_resources)
 
+
+    from unilabos.resources.graphio import convert_resources_from_type
+    from unilabos.config.config import BasicConfig 
+    BasicConfig.ak = "beb0c15f-2279-46a1-aba5-00eaf89aef55"
+    BasicConfig.sk = "15d4f25e-3512-4f9c-9bfb-43ab85e7b561"
+    from unilabos.app.web.client import http_client
+
+    resources = convert_resources_from_type([deck], [Resource])
+    json.dump({"nodes": resources, "links": []}, open("button_battery_station_resources_unilab.json", "w"), indent=2)
+   
+    #print(resources)
+    http_client.remote_addr = "https://uni-lab.test.bohrium.com/api/v1"
+ 
+    http_client.resource_add(resources)

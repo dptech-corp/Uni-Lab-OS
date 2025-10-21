@@ -1,0 +1,812 @@
+bioyondworkstation_device:
+  category:
+  - bioyond_workstation
+  class:
+    action_value_mappings:
+      auto-Bioystation_1_to_2_task:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: Bioystation_1_to_2_task参数
+          type: object
+        type: UniLabJsonCommand
+      auto-Bioystation_3_to_2_task:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: Bioystation_3_to_2_task参数
+          type: object
+        type: UniLabJsonCommand
+      auto-Bioystation_feeding4to3_from_xlsx_task:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: Bioystation_feeding4to3_from_xlsx_task参数
+          type: object
+        type: UniLabJsonCommand
+      auto-Bioystation_scheduler_continue_task:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: Bioystation_scheduler_continue_task参数
+          type: object
+        type: UniLabJsonCommand
+      auto-Bioystation_scheduler_start_task:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: Bioystation_scheduler_start_task参数
+          type: object
+        type: UniLabJsonCommand
+      auto-Bioystation_scheduler_stop_task:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: Bioystation_scheduler_stop_task参数
+          type: object
+        type: UniLabJsonCommand
+      auto-Bioystation_start_experiment_task:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: Bioystation_start_experiment_task参数
+          type: object
+        type: UniLabJsonCommand
+      auto-auto_batch_outbound_from_xlsx:
+        feedback: {}
+        goal: {}
+        goal_default:
+          xlsx_path: null
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                xlsx_path:
+                  type: string
+              required:
+              - xlsx_path
+              type: object
+            result: {}
+          required:
+          - goal
+          title: auto_batch_outbound_from_xlsx参数
+          type: object
+        type: UniLabJsonCommand
+      auto-auto_feeding4to3_from_xlsx:
+        feedback: {}
+        goal: {}
+        goal_default:
+          xlsx_path: null
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                xlsx_path:
+                  type: string
+              required:
+              - xlsx_path
+              type: object
+            result: {}
+          required:
+          - goal
+          title: auto_feeding4to3_from_xlsx参数
+          type: object
+        type: UniLabJsonCommand
+      auto-create_orders:
+        feedback: {}
+        goal: {}
+        goal_default:
+          xlsx_path: null
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                xlsx_path:
+                  type: string
+              required:
+              - xlsx_path
+              type: object
+            result: {}
+          required:
+          - goal
+          title: create_orders参数
+          type: object
+        type: UniLabJsonCommand
+      auto-order_list:
+        feedback: {}
+        goal: {}
+        goal_default:
+          begin_time: null
+          end_time: null
+          filter_text: null
+          page: 10
+          skip: 0
+          status: null
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                begin_time:
+                  type: string
+                end_time:
+                  type: string
+                filter_text:
+                  type: string
+                page:
+                  default: 10
+                  type: integer
+                skip:
+                  default: 0
+                  type: integer
+                status:
+                  type: string
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: order_list参数
+          type: object
+        type: UniLabJsonCommand
+      auto-order_list_v2:
+        feedback: {}
+        goal: {}
+        goal_default:
+          beginTime: ''
+          endTime: ''
+          filter: ''
+          pageCount: 1
+          skipCount: 0
+          sorting: ''
+          status: ''
+          timeType: string
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                beginTime:
+                  default: ''
+                  type: string
+                endTime:
+                  default: ''
+                  type: string
+                filter:
+                  default: ''
+                  type: string
+                pageCount:
+                  default: 1
+                  type: integer
+                skipCount:
+                  default: 0
+                  type: integer
+                sorting:
+                  default: ''
+                  type: string
+                status:
+                  default: ''
+                  type: string
+                timeType:
+                  default: string
+                  type: string
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: order_list_v2参数
+          type: object
+        type: UniLabJsonCommand
+      auto-order_report:
+        feedback: {}
+        goal: {}
+        goal_default:
+          order_id: null
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                order_id:
+                  type: string
+              required:
+              - order_id
+              type: object
+            result: {}
+          required:
+          - goal
+          title: order_report参数
+          type: object
+        type: UniLabJsonCommand
+      auto-report_material_change:
+        feedback: {}
+        goal: {}
+        goal_default:
+          material_obj: null
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                material_obj:
+                  type: object
+              required:
+              - material_obj
+              type: object
+            result: {}
+          required:
+          - goal
+          title: report_material_change参数
+          type: object
+        type: UniLabJsonCommand
+      auto-report_order_finish:
+        feedback: {}
+        goal: {}
+        goal_default:
+          completion_time: null
+          end_time: null
+          order_code: null
+          order_name: null
+          start_time: null
+          status: '30'
+          used_materials: null
+          workflow_status: Finished
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                completion_time:
+                  type: string
+                end_time:
+                  type: string
+                order_code:
+                  type: string
+                order_name:
+                  type: string
+                start_time:
+                  type: string
+                status:
+                  default: '30'
+                  type: string
+                used_materials:
+                  type: string
+                workflow_status:
+                  default: Finished
+                  type: string
+              required:
+              - order_code
+              - order_name
+              - start_time
+              - end_time
+              type: object
+            result: {}
+          required:
+          - goal
+          title: report_order_finish参数
+          type: object
+        type: UniLabJsonCommand
+      auto-report_step_finish:
+        feedback: {}
+        goal: {}
+        goal_default:
+          end_time: null
+          execution_status: completed
+          order_code: null
+          order_name: null
+          sample_id: null
+          start_time: null
+          step_id: null
+          step_name: null
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                end_time:
+                  type: string
+                execution_status:
+                  default: completed
+                  type: string
+                order_code:
+                  type: string
+                order_name:
+                  type: string
+                sample_id:
+                  type: string
+                start_time:
+                  type: string
+                step_id:
+                  type: string
+                step_name:
+                  type: string
+              required:
+              - order_code
+              - order_name
+              - step_name
+              - step_id
+              - sample_id
+              - start_time
+              - end_time
+              type: object
+            result: {}
+          required:
+          - goal
+          title: report_step_finish参数
+          type: object
+        type: UniLabJsonCommand
+      auto-run_full_workflow:
+        feedback: {}
+        goal: {}
+        goal_default:
+          inbound_items: null
+          orders: null
+          poll_filter_code: null
+          poll_interval_s: 5
+          poll_timeout_s: 600
+          takeout_order_id: null
+          transfer_source: null
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                inbound_items:
+                  items:
+                    type: object
+                  type: array
+                orders:
+                  items:
+                    type: object
+                  type: array
+                poll_filter_code:
+                  type: string
+                poll_interval_s:
+                  default: 5
+                  type: integer
+                poll_timeout_s:
+                  default: 600
+                  type: integer
+                takeout_order_id:
+                  type: string
+                transfer_source:
+                  type: string
+              required:
+              - inbound_items
+              - orders
+              type: object
+            result: {}
+          required:
+          - goal
+          title: run_full_workflow参数
+          type: object
+        type: UniLabJsonCommand
+      auto-scheduler_continue:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: scheduler_continue参数
+          type: object
+        type: UniLabJsonCommand
+      auto-scheduler_start:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: scheduler_start参数
+          type: object
+        type: UniLabJsonCommand
+      auto-scheduler_stop:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: scheduler_stop参数
+          type: object
+        type: UniLabJsonCommand
+      auto-start_station1_internal_flow:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: start_station1_internal_flow参数
+          type: object
+        type: UniLabJsonCommand
+      auto-storage_batch_inbound:
+        feedback: {}
+        goal: {}
+        goal_default:
+          items: null
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                items:
+                  items:
+                    type: object
+                  type: array
+              required:
+              - items
+              type: object
+            result: {}
+          required:
+          - goal
+          title: storage_batch_inbound参数
+          type: object
+        type: UniLabJsonCommand
+      auto-storage_inbound:
+        feedback: {}
+        goal: {}
+        goal_default:
+          location_id: null
+          material_id: null
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                location_id:
+                  type: string
+                material_id:
+                  type: string
+              required:
+              - material_id
+              - location_id
+              type: object
+            result: {}
+          required:
+          - goal
+          title: storage_inbound参数
+          type: object
+        type: UniLabJsonCommand
+      auto-take_out:
+        feedback: {}
+        goal: {}
+        goal_default:
+          material_ids: null
+          order_id: null
+          preintake_ids: null
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                material_ids:
+                  type: string
+                order_id:
+                  type: string
+                preintake_ids:
+                  type: string
+              required:
+              - order_id
+              type: object
+            result: {}
+          required:
+          - goal
+          title: take_out参数
+          type: object
+        type: UniLabJsonCommand
+      auto-test_benyao_workstation:
+        feedback: {}
+        goal: {}
+        goal_default:
+          num1: null
+          num2: null
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                num1:
+                  type: string
+                num2:
+                  type: string
+              required:
+              - num1
+              - num2
+              type: object
+            result: {}
+          required:
+          - goal
+          title: test_benyao_workstation参数
+          type: object
+        type: UniLabJsonCommand
+      auto-transfer_1_to_2:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: transfer_1_to_2参数
+          type: object
+        type: UniLabJsonCommand
+      auto-transfer_3_to_2_to_1:
+        feedback: {}
+        goal: {}
+        goal_default:
+          source_wh_id: 3a19debc-84b4-0359-e2d4-b3beea49348b
+          source_x: 1
+          source_y: 1
+          source_z: 1
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                source_wh_id:
+                  default: 3a19debc-84b4-0359-e2d4-b3beea49348b
+                  type: string
+                source_x:
+                  default: 1
+                  type: integer
+                source_y:
+                  default: 1
+                  type: integer
+                source_z:
+                  default: 1
+                  type: integer
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: transfer_3_to_2_to_1参数
+          type: object
+        type: UniLabJsonCommand
+      auto-wait_for_transfer_task:
+        feedback: {}
+        goal: {}
+        goal_default:
+          filter_text: null
+          interval: 5
+          timeout: 3000
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                filter_text:
+                  type: string
+                interval:
+                  default: 5
+                  type: integer
+                timeout:
+                  default: 3000
+                  type: integer
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: wait_for_transfer_task参数
+          type: object
+        type: UniLabJsonCommand
+    module: unilabos.devices.workstation.bioyond_cell.bioyond_workstation:BioyondWorkstation
+    status_types: {}
+    type: python
+  config_info: []
+  description: 宜宾配液分液工站
+  handles: []
+  icon: ''
+  init_param_schema:
+    config:
+      properties:
+        bioyond_config:
+          type: string
+        debug_mode:
+          default: false
+          type: boolean
+        station_resource:
+          type: string
+      required: []
+      type: object
+    data:
+      properties: {}
+      required: []
+      type: object
+  registry_type: device
+  version: 1.0.0
