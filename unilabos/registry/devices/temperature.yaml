@@ -573,6 +573,119 @@ heaterstirrer.dalong:
       - temp_target
       type: object
   version: 1.0.0
+heaterstirrer.ika:
+  category:
+  - temperature
+  class:
+    action_value_mappings:
+      auto-set_stir_speed:
+        feedback: {}
+        goal: {}
+        goal_default:
+          speed: null
+        handles: {}
+        placeholder_keys: {}
+        result: {}
+        schema:
+          description: set_stir_speed的参数schema
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                speed:
+                  type: number
+              required:
+              - speed
+              type: object
+            result: {}
+          required:
+          - goal
+          title: set_stir_speed参数
+          type: object
+        type: UniLabJsonCommand
+      set_temp_target:
+        feedback: {}
+        goal:
+          command: temp
+        goal_default:
+          command: ''
+        handles: {}
+        result:
+          success: success
+        schema:
+          description: ''
+          properties:
+            feedback:
+              properties:
+                status:
+                  type: string
+              required:
+              - status
+              title: SendCmd_Feedback
+              type: object
+            goal:
+              properties:
+                command:
+                  type: string
+              required:
+              - command
+              title: SendCmd_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  type: string
+                success:
+                  type: boolean
+              required:
+              - return_info
+              - success
+              title: SendCmd_Result
+              type: object
+          required:
+          - goal
+          title: SendCmd
+          type: object
+        type: SendCmd
+    module: unilabos.devices.heaterstirrer.ika:HeaterStirrer_IKA
+    status_types:
+      status: str
+      stir_speed: float
+      temp: float
+      temp_target: float
+    type: python
+  config_info: []
+  description: IKA 加热搅拌器（NAMUR 串口协议，9600 7E1），提供转速设置与加热控制。
+  handles: []
+  icon: ''
+  init_param_schema:
+    config:
+      properties:
+        baudrate:
+          default: 9600
+          type: integer
+        port:
+          default: COM7
+          type: string
+      required: []
+      type: object
+    data:
+      properties:
+        status:
+          type: string
+        stir_speed:
+          type: number
+        temp:
+          type: number
+        temp_target:
+          type: number
+      required:
+      - status
+      - stir_speed
+      - temp
+      - temp_target
+      type: object
+  version: 1.0.0
 tempsensor:
   category:
   - temperature

@@ -1,0 +1,336 @@
+{
+    "nodes": [
+        {
+            "id": "ReactorX",
+            "name": "模拟常量合成工作站",
+            "children": [
+                "reactor",
+                "IKA1",
+                "serial_pump",
+                "bottle_water_1",
+                "bottle_MAA_2",
+                "bottle_HEMA_3",
+                "bottle_acrylamide_4",
+                "bottle_TEA_5",
+                "bottle_ethanol_6",
+                "bottle_water_7",
+                "bottle_KPS_8",
+                "waste_bottle_1",
+                "waste_bottle_2",
+                "workbench_deck",
+                "lab_deck"
+            ],
+            "parent": null,
+            "type": "device",
+            "class": "workstation",
+            "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+            },
+            "config": {
+                "protocol_type": ["EvacuateAndRefillProtocol"],
+                "deck": {
+                    "data": {
+                        "_resource_child_name": "lab_deck",
+                        "_resource_type": "pylabrobot.resources.opentrons.deck:OTDeck"
+                    }
+                }
+            },
+            "data": {
+            }
+        }, 
+        {
+            "id": "reactor",
+            "name": "reactor",
+            "children": [],
+            "parent": "ReactorX",
+            "type": "container",
+            "class": "container",
+            "position": {
+                "x": 698.1111111111111,
+                "y": 428,
+                "z": 0
+            },
+            "config": {
+                "max_volume": 5000.0,
+                "size_x": 200.0,
+                "size_y": 200.0,
+                "size_z": 200.0
+            },
+            "data": { "liquids": [] }
+        },
+        {
+            "id": "workbench_deck",
+            "name": "workbench_deck",
+            "children": [],
+            "parent": "ReactorX",
+            "type": "container",
+            "class": "container",
+            "position": { "x": 0, "y": 0, "z": 0 },
+            "config": {
+                "max_volume": 0.0,
+                "size_x": 60000.0,
+                "size_y": 36000.0,
+                "size_z": 10.0
+            },
+            "data": { "liquids": [] }
+        },
+        {
+            "id": "lab_deck",
+            "name": "lab_deck",
+            "children": [],
+            "parent": "ReactorX",
+            "type": "deck",
+            "class": "OTDeck",
+            "position": { "x": 0, "y": 0, "z": 0 },
+            "config": {
+                "type": "OTDeck",
+                "with_trash": false,
+                "rotation": { "x": 0, "y": 0, "z": 0, "type": "Rotation" }
+            },
+            "data": { "liquids": [] }
+        },
+        {
+            "id": "IKA1",
+            "name": "IKA HeaterStirrer",
+            "children": [],
+            "parent": "ReactorX",
+            "type": "device",
+            "class": "heaterstirrer.ika",
+            "position": {
+                "x": 620,
+                "y": 428,
+                "z": 0
+            },
+            "config": {
+                "port": "COM7",
+                "baudrate": 9600
+            },
+            "data": {
+                "status": "Idle",
+                "stir_speed": 0,
+                "temp": 20,
+                "temp_target": 20
+            }
+        },
+        {
+            "id": "serial_pump",
+            "name": "serial_pump",
+            "children": [],
+            "parent": "ReactorX",
+            "type": "device",
+            "class": "serial",
+            "position": { "x": 780, "y": 80, "z": 0 },
+            "config": { "port": "COM8", "baudrate": 9600 },
+            "data": {}
+        },
+        {
+            "id": "pump_T08_1",
+            "name": "T08-1",
+            "children": [],
+            "parent": "serial_pump",
+            "type": "device",
+            "class": "syringe_pump_with_valve.runze.SY03B-T08",
+            "position": { "x": 640, "y": 200, "z": 0 },
+            "config": { "port": "serial_pump", "address": "1", "max_volume": 25.0 },
+            "data": {}
+        },
+        {
+            "id": "pump_T06_1",
+            "name": "T06-1",
+            "children": [],
+            "parent": "serial_pump",
+            "type": "device",
+            "class": "syringe_pump_with_valve.runze.SY03B-T06",
+            "position": { "x": 940, "y": 200, "z": 0 },
+            "config": { "port": "serial_pump", "address": "2", "max_volume": 25.0 },
+            "data": {}
+        },
+        {
+            "id": "bottle_water_1",
+            "name": "bottle_water_1",
+            "children": [],
+            "parent": "ReactorX",
+            "type": "container",
+            "class": "container",
+            "position": { "x": 360, "y": 360, "z": 0 },
+            "config": { "max_volume": 1000.0, "size_x": 80.0, "size_y": 80.0, "size_z": 150.0 },
+            "data": { "liquids": [["Water", 500.0]] }
+        },
+        {
+            "id": "bottle_MAA_2",
+            "name": "bottle_MAA_2",
+            "children": [],
+            "parent": "ReactorX",
+            "type": "container",
+            "class": "container",
+            "position": { "x": 360, "y": 440, "z": 0 },
+            "config": { "max_volume": 500.0, "size_x": 80.0, "size_y": 80.0, "size_z": 150.0 },
+            "data": { "liquids": [["MAA", 300.0]] }
+        },
+        {
+            "id": "bottle_HEMA_3",
+            "name": "bottle_HEMA_3",
+            "children": [],
+            "parent": "ReactorX",
+            "type": "container",
+            "class": "container",
+            "position": { "x": 360, "y": 520, "z": 0 },
+            "config": { "max_volume": 500.0, "size_x": 80.0, "size_y": 80.0, "size_z": 150.0 },
+            "data": { "liquids": [["HEMA", 300.0]] }
+        },
+        {
+            "id": "bottle_acrylamide_4",
+            "name": "bottle_acrylamide_4",
+            "children": [],
+            "parent": "ReactorX",
+            "type": "container",
+            "class": "container",
+            "position": { "x": 260, "y": 520, "z": 0 },
+            "config": { "max_volume": 500.0, "size_x": 80.0, "size_y": 80.0, "size_z": 150.0 },
+            "data": { "liquids": [["Acrylamide", 300.0]] }
+        },
+        {
+            "id": "bottle_TEA_5",
+            "name": "bottle_TEA_5",
+            "children": [],
+            "parent": "ReactorX",
+            "type": "container",
+            "class": "container",
+            "position": { "x": 260, "y": 440, "z": 0 },
+            "config": { "max_volume": 500.0, "size_x": 80.0, "size_y": 80.0, "size_z": 150.0 },
+            "data": { "liquids": [["Triethylamine", 300.0]] }
+        },
+        {
+            "id": "bottle_ethanol_6",
+            "name": "bottle_ethanol_6",
+            "children": [],
+            "parent": "ReactorX",
+            "type": "container",
+            "class": "container",
+            "position": { "x": 920, "y": 520, "z": 0 },
+            "config": { "max_volume": 1000.0, "size_x": 80.0, "size_y": 80.0, "size_z": 150.0 },
+            "data": { "liquids": [["Ethanol", 500.0]] }
+        },
+        {
+            "id": "bottle_water_7",
+            "name": "bottle_water_7",
+            "children": [],
+            "parent": "ReactorX",
+            "type": "container",
+            "class": "container",
+            "position": { "x": 920, "y": 440, "z": 0 },
+            "config": { "max_volume": 1000.0, "size_x": 80.0, "size_y": 80.0, "size_z": 150.0 },
+            "data": { "liquids": [["Water", 500.0]] }
+        },
+        {
+            "id": "bottle_KPS_8",
+            "name": "bottle_KPS_8",
+            "children": [],
+            "parent": "ReactorX",
+            "type": "container",
+            "class": "container",
+            "position": { "x": 920, "y": 360, "z": 0 },
+            "config": { "max_volume": 500.0, "size_x": 80.0, "size_y": 80.0, "size_z": 150.0 },
+            "data": { "liquids": [["K2S2O8", 200.0]] }
+        },
+        {
+            "id": "waste_bottle_1",
+            "name": "waste_bottle_1",
+            "children": [],
+            "parent": "ReactorX",
+            "type": "container",
+            "class": "container",
+            "position": { "x": 540, "y": 600, "z": 0 },
+            "config": { "max_volume": 2000.0, "size_x": 80.0, "size_y": 80.0, "size_z": 150.0 },
+            "data": { "liquids": [] }
+        },
+        {
+            "id": "waste_bottle_2",
+            "name": "waste_bottle_2",
+            "children": [],
+            "parent": "ReactorX",
+            "type": "container",
+            "class": "container",
+            "position": { "x": 600, "y": 600, "z": 0 },
+            "config": { "max_volume": 2000.0, "size_x": 80.0, "size_y": 80.0, "size_z": 150.0 },
+            "data": { "liquids": [] }
+        }
+    ],
+    "links": [
+        {
+            "source": "pump_T08_1",
+            "target": "bottle_water_7",
+            "type": "fluid",
+            "port": { "pump_T08_1": "7", "bottle_water_7": "top" }
+        },
+        {
+            "source": "pump_T08_1",
+            "target": "bottle_MAA_2",
+            "type": "fluid",
+            "port": { "pump_T08_1": "6", "bottle_MAA_2": "top" }
+        },
+        {
+            "source": "pump_T08_1",
+            "target": "bottle_HEMA_3",
+            "type": "fluid",
+            "port": { "pump_T08_1": "5", "bottle_HEMA_3": "top" }
+        },
+        {
+            "source": "pump_T08_1",
+            "target": "bottle_acrylamide_4",
+            "type": "fluid",
+            "port": { "pump_T08_1": "4", "bottle_acrylamide_4": "top" }
+        },
+        {
+            "source": "pump_T08_1",
+            "target": "bottle_TEA_5",
+            "type": "fluid",
+            "port": { "pump_T08_1": "1", "bottle_TEA_5": "top" }
+        },
+        {
+            "source": "pump_T08_1",
+            "target": "reactor",
+            "type": "fluid",
+            "port": { "pump_T08_1": "3", "reactor": "top" }
+        },
+        {
+            "source": "pump_T08_1",
+            "target": "waste_bottle_1",
+            "type": "fluid",
+            "port": { "pump_T08_1": "8", "waste_bottle_1": "top" }
+        },
+        {
+            "source": "pump_T06_1",
+            "target": "bottle_ethanol_6",
+            "type": "fluid",
+            "port": { "pump_T06_1": "4", "bottle_ethanol_6": "top" }
+        },
+        {
+            "source": "pump_T06_1",
+            "target": "bottle_water_1",
+            "type": "fluid",
+            "port": { "pump_T06_1": "3", "bottle_water_1": "top" }
+        },
+        {
+            "source": "pump_T06_1",
+            "target": "bottle_KPS_8",
+            "type": "fluid",
+            "port": { "pump_T06_1": "2", "bottle_KPS_8": "top" }
+        },
+        {
+            "source": "pump_T08_1",
+            "target": "pump_T06_1",
+            "type": "fluid",
+            "port": {"pump_T08_1": "2" , "pump_T06_1": "5"}
+        },
+
+        {
+            "source": "pump_T06_1",
+            "target": "waste_bottle_2",
+            "type": "fluid",
+            "port": { "pump_T06_1": "6", "waste_bottle_2": "top" }
+        }
+    ]
+}

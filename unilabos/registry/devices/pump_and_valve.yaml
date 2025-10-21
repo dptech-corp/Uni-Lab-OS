@@ -847,6 +847,14 @@ syringe_pump_with_valve.runze.SY03B-T06:
     io_type: target
     label: 6-in
     side: WEST
+  - data_key: fluid_port_5
+    data_source: executor
+    data_type: fluid
+    description: 六通阀门端口5-特殊输入
+    handler_key: '5'
+    io_type: target
+    label: 5-in
+    side: WEST
   icon: ''
   init_param_schema:
     config:

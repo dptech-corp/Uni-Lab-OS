@@ -385,8 +385,14 @@ class ResourceTreeSet(object):
         import inspect
 
         # 类型映射
-        TYPE_MAP = {"plate": "Plate", "well": "Well", "deck": "Deck"}
-
+        # 统一将常见小写类型映射到 PLR 类名；同时兜底将 "resource" 视作通用容器
+        TYPE_MAP = {
+            "plate": "Plate",
+            "well": "Well",
+            "deck": "Deck",
+            "container": "Container",
+            "resource": "Container",
+        }
         def collect_node_data(node: ResourceDictInstance, name_to_uuid: dict, all_states: dict):
             """一次遍历收集 name_to_uuid 和 all_states"""
             name_to_uuid[node.res_content.name] = node.res_content.uuid

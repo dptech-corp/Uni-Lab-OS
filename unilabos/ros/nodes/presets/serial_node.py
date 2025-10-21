@@ -27,6 +27,7 @@ class ROS2SerialNode(BaseROS2DeviceNode):
         # 初始化BaseROS2DeviceNode，使用自身作为driver_instance
         BaseROS2DeviceNode.__init__(
             self,
+            device_uuid=kwargs.get("device_uuid", str(uuid.uuid4())),
             driver_instance=self,
             device_id=device_id,
             status_types={},
