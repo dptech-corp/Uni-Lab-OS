@@ -31,7 +31,7 @@ Join the [Intelligent Organic Chemistry Synthesis Competition](https://bohrium.d
 
 Detailed documentation can be found at:
 
-- [Online Documentation](https://dptech-corp.github.io/Uni-Lab-OS/)
+- [Online Documentation](https://xuwznln.github.io/Uni-Lab-OS-Doc/)
 
 ## Quick Start
 
@@ -55,7 +55,7 @@ pip install .
 
 3. Start Uni-Lab System:
 
-Please refer to [Documentation - Boot Examples](https://dptech-corp.github.io/Uni-Lab-OS/boot_examples/index.html)
+Please refer to [Documentation - Boot Examples](https://xuwznln.github.io/Uni-Lab-OS-Doc/boot_examples/index.html)
 
 ## Message Format
 

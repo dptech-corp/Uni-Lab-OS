@@ -6,6 +6,8 @@ from typing import List, Dict, Any, Optional, TYPE_CHECKING
 
 import rclpy
 from rosidl_runtime_py import message_to_ordereddict
+from unilabos_msgs.msg import Resource
+from unilabos_msgs.srv import ResourceUpdate
 
 from unilabos.messages import *  # type: ignore  # protocol names
 from rclpy.action import ActionServer, ActionClient
@@ -241,7 +243,7 @@ class ROS2WorkstationNode(BaseROS2DeviceNode):
                             raw_data = json.loads(response.response)
                             tree_set = ResourceTreeSet.from_raw_list(raw_data)
                             target = tree_set.dump()
-                            protocol_kwargs[k] = target[0]
+                            protocol_kwargs[k] = target[0][0] if v == "unilabos_msgs/Resource" else target
                         except Exception as ex:
                             self.lab_logger().error(f"查询资源失败: {k}, 错误: {ex}\n{traceback.format_exc()}")
                             raise

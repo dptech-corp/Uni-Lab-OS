@@ -91,7 +91,7 @@
 使用以下命令启动模拟反应器：
 
 ```bash
-unilab -g test/experiments/mock_reactor.json --app_bridges ""
+unilab -g test/experiments/mock_reactor.json
 ```
 
 ### 2. 执行抽真空和充气操作
