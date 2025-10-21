@@ -656,15 +656,24 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
     #    self.success = True
     #    return self.success
 
-    def func_pack_send_msg_cmd(self, elec_use_num) -> bool:
+    def func_pack_send_msg_cmd(self, elec_use_num, elec_vol, assembly_type, assembly_pressure) -> bool:
         """UNILAB写参数"""    
         while (self.request_rec_msg_status) == False: 
             print("wait for request_rec_msg_status to True")
             time.sleep(1)
         self.success = False
         #self._unilab_send_msg_electrolyte_num(elec_num)
-        time.sleep(1)
+        #设置平行样数目
         self._unilab_send_msg_electrolyte_use_num(elec_use_num)
+        time.sleep(1)
+        #发送电解液加注量
+        self._unilab_send_msg_electrolyte_vol(elec_vol)
+        time.sleep(1)
+        #发送电解液组装类型
+        self._unilab_send_msg_assembly_type(assembly_type)
+        time.sleep(1)
+        #发送电池压制力
+        self._unilab_send_msg_assembly_pressure(assembly_pressure)
         time.sleep(1)
         self._unilab_send_msg_succ_cmd(True)
         time.sleep(1)
@@ -775,8 +784,8 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
 
 
 
-    def func_allpack_cmd(self, elec_num, elec_use_num, file_path: str="D:\\coin_cell_data") -> bool:
-        elec_num, elec_use_num = int(elec_num), int(elec_use_num)
+    def func_allpack_cmd(self, elec_num, elec_use_num, elec_vol:int=50, assembly_type:int=7, assembly_pressure:int=4200, file_path: str="D:\\coin_cell_data") -> bool:
+        elec_num, elec_use_num, elec_vol, assembly_type, assembly_pressure = int(elec_num), int(elec_use_num), int(elec_vol), int(assembly_type), int(assembly_pressure)
         summary_csv_file = os.path.join(file_path, "duandian.csv")
         # 如果断点文件存在，先读取之前的进度
         if os.path.exists(summary_csv_file):
@@ -826,7 +835,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
             print(f"开始第{last_i+i+1}瓶电解液的组装")
             #第一个循环从上次断点继续，后续循环从0开始
             j_start = last_j if i == last_i else 0
-            self.func_pack_send_msg_cmd(elec_use_num-j_start)
+            self.func_pack_send_msg_cmd(elec_use_num-j_start, elec_vol, assembly_type, assembly_pressure)
 
             for j in range(j_start, elec_use_num):
                 print(f"开始第{last_i+i+1}瓶电解液的第{j+j_start+1}个电池组装")
@@ -883,20 +892,6 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
     
     def fun_wuliao_test(self) -> bool: 
         #找到data_init中构建的2个物料盘
-        liaopan1 = self.station_resource.get_resource("liaopan1")
-        liaopan2 = self.station_resource.get_resource("liaopan2")
-        for i in range(16):
-            #找到liaopan1上每一个jipian
-            jipian_linshi = liaopan1.children[i].children[0]
-            #把物料解绑后放到另一盘上
-            print("极片:", jipian_linshi)
-            jipian_linshi.parent.unassign_child_resource(jipian_linshi)
-            liaopan2.children[i].assign_child_resource(jipian_linshi, location=None)
-            ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
-                "resources": [self.station_resource]
-            })
-            time.sleep(4)
-        """
         liaopan3 = self.station_resource.get_resource("\u7535\u6c60\u6599\u76d8")
         for i in range(16):            
             battery = ElectrodeSheet(name=f"battery_{i}", size_x=16, size_y=16, size_z=2)
@@ -907,13 +902,12 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
                                 "electrolyte_volume": 20.0,
                                 "electrolyte_name": f"DP{i}"
                                 }
-            liaopan3.children[i].assign_child_resource(battery, location=None) 
-
+            liaopan3.children[i].assign_child_resource(battery, location=None)
+            
             ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
                 "resources": [self.station_resource]
             })
             time.sleep(4)
-        """ 
     # 数据读取与输出
     def func_read_data_and_output(self, file_path: str="D:\\coin_cell_data"):
         # 检查CSV导出是否正在运行，已运行则跳出，防止同时启动两个while循环
