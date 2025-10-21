@@ -23,28 +23,28 @@ reaction_station.bioyond:
         handles: {}
         result: {}
         schema:
-          description: 滴回操作
+          description: 滴回去
           properties:
             feedback: {}
             goal:
               properties:
                 assign_material_name:
-                  description: 溶剂名称
+                  description: 物料名称（不能为空）
                   type: string
                 temperature:
-                  description: 温度(°C)
+                  description: 温度设定(°C)
                   type: string
                 time:
-                  description: 观察时间(单位min)
+                  description: 观察时间(分钟)
                   type: string
                 titration_type:
-                  description: 是否滴定
+                  description: 是否滴定(1=否, 2=是)
                   type: string
                 torque_variation:
-                  description: 是否观察1否2是
+                  description: 是否观察 (1=否, 2=是)
                   type: string
                 volume:
-                  description: 分液量(μL)
+                  description: 分液公式(μL)
                   type: string
               required:
               - volume
@@ -79,28 +79,28 @@ reaction_station.bioyond:
         handles: {}
         result: {}
         schema:
-          description: 液体进料烧杯操作
+          description: 液体进料烧杯
           properties:
             feedback: {}
             goal:
               properties:
                 assign_material_name:
-                  description: 溶剂名称
+                  description: 物料名称
                   type: string
                 temperature:
-                  description: 温度(°C)
+                  description: 温度设定(°C)
                   type: string
                 time:
-                  description: 观察时间(单位min)
+                  description: 观察时间(分钟)
                   type: string
                 titration_type:
-                  description: 是否滴定
+                  description: 是否滴定(1=否, 2=是)
                   type: string
                 torque_variation:
-                  description: 是否观察1否2是
+                  description: 是否观察 (1=否, 2=是)
                   type: string
                 volume:
-                  description: 分液量(μL)
+                  description: 分液公式(μL)
                   type: string
               required:
               - volume
@@ -135,28 +135,28 @@ reaction_station.bioyond:
         handles: {}
         result: {}
         schema:
-          description: 液体进料溶剂操作
+          description: 液体投料-溶剂
           properties:
             feedback: {}
             goal:
               properties:
                 assign_material_name:
-                  description: 溶剂名称
+                  description: 物料名称
                   type: string
                 temperature:
-                  description: 温度上限(°C)
+                  description: 温度设定(°C)
                   type: string
                 time:
-                  description: 观察时间(单位min)
+                  description: 观察时间(分钟)
                   type: string
                 titration_type:
-                  description: 是否滴定
+                  description: 是否滴定(1=否, 2=是)
                   type: string
                 torque_variation:
-                  description: 是否观察1否2是
+                  description: 是否观察 (1=否, 2=是)
                   type: string
                 volume:
-                  description: 分液量(μL)
+                  description: 分液公式(μL)
                   type: string
               required:
               - volume
@@ -191,25 +191,25 @@ reaction_station.bioyond:
         handles: {}
         result: {}
         schema:
-          description: 液体进料滴定操作
+          description: 液体进料(滴定)
           properties:
             feedback: {}
             goal:
               properties:
                 assign_material_name:
-                  description: 溶剂名称
+                  description: 物料名称
                   type: string
                 temperature:
-                  description: 温度(°C)
+                  description: 温度设定(°C)
                   type: string
                 time:
-                  description: 观察时间(单位min)
+                  description: 观察时间(分钟)
                   type: string
                 titration_type:
-                  description: 是否滴定
+                  description: 是否滴定(1=否, 2=是)
                   type: string
                 torque_variation:
-                  description: 是否观察1否2是
+                  description: 是否观察 (1=否, 2=是)
                   type: string
                 volume_formula:
                   description: 分液公式(μL)
@@ -247,25 +247,25 @@ reaction_station.bioyond:
         handles: {}
         result: {}
         schema:
-          description: 液体进料小瓶(非滴定)操作
+          description: 液体进料小瓶(非滴定)
           properties:
             feedback: {}
             goal:
               properties:
                 assign_material_name:
-                  description: 溶剂名称
+                  description: 物料名称
                   type: string
                 temperature:
-                  description: 温度(°C)
+                  description: 温度设定(°C)
                   type: string
                 time:
-                  description: 观察时间(单位min)
+                  description: 观察时间(分钟)
                   type: string
                 titration_type:
-                  description: 是否滴定(1=滴定, 其他=非滴定)
+                  description: 是否滴定(1=否, 2=是)
                   type: string
                 torque_variation:
-                  description: 是否观察1否2是
+                  description: 是否观察 (1=否, 2=是)
                   type: string
                 volume_formula:
                   description: 分液公式(μL)
@@ -329,7 +329,7 @@ reaction_station.bioyond:
         handles: {}
         result: {}
         schema:
-          description: 反应器取入操作
+          description: 反应器放入 - 将反应器放入工作站，配置物料名称、粘度上限和温度参数
           properties:
             feedback: {}
             goal:
@@ -338,10 +338,10 @@ reaction_station.bioyond:
                   description: 物料名称
                   type: string
                 cutoff:
-                  description: 截止参数
+                  description: 粘度上限
                   type: string
                 temperature:
-                  description: 温度
+                  description: 温度设定(°C)
                   type: string
               required:
               - cutoff
@@ -361,7 +361,7 @@ reaction_station.bioyond:
         handles: {}
         result: {}
         schema:
-          description: 反应器取出操作 - 无需参数的简单操作
+          description: 反应器取出 - 从工作站中取出反应器，无需参数的简单操作
           properties:
             feedback: {}
             goal:
@@ -399,25 +399,25 @@ reaction_station.bioyond:
         handles: {}
         result: {}
         schema:
-          description: 固体进料小瓶操作
+          description: 固体进料小瓶 - 通过小瓶向反应器中添加固体物料，支持多种粉末类型(盐、面粉、BTDA)
           properties:
             feedback: {}
             goal:
               properties:
                 assign_material_name:
-                  description: 固体名称_粉末加样模块-投料
+                  description: 物料名称(用于获取试剂瓶位ID)
                   type: string
                 material_id:
-                  description: 固体投料类型_粉末加样模块-投料
+                  description: 粉末类型ID，1=盐（21分钟），2=面粉（27分钟），3=BTDA（38分钟）
                   type: string
                 temperature:
-                  description: 温度上限(°C)
+                  description: 温度设定(°C)
                   type: string
                 time:
-                  description: 观察时间_反应模块-观察搅拌结果
+                  description: 观察时间(分钟)
                   type: string
                 torque_variation:
-                  description: 是否观察1否2是_反应模块-观察搅拌结果
+                  description: 是否观察 (1=否, 2=是)
                   type: string
               required:
               - assign_material_name
@@ -440,7 +440,7 @@ reaction_station.bioyond:
       workstation_status: dict
     type: python
   config_info: []
-  description: Bioyond反应站 - 专门用于化学反应操作的工作站,包含8个核心工作流方法和1个执行方法
+  description: Bioyond反应站
   handles: []
   icon: reaction_station.webp
   init_param_schema:
