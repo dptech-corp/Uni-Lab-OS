@@ -32,7 +32,7 @@ class ResourceDictPositionObject(BaseModel):
 class ResourceDictPosition(BaseModel):
     size: ResourceDictPositionSize = Field(description="Resource size", default_factory=ResourceDictPositionSize)
     scale: ResourceDictPositionScale = Field(description="Resource scale", default_factory=ResourceDictPositionScale)
-    layout: Literal["2d", "x-y", "z-y", "x-z"] = Field(description="Resource layout", default="x-y")
+    layout: Literal["2d", "x-y", "z-y", "x-z", ""] = Field(description="Resource layout", default="x-y")
     position: ResourceDictPositionObject = Field(
         description="Resource position", default_factory=ResourceDictPositionObject
     )
@@ -42,7 +42,7 @@ class ResourceDictPosition(BaseModel):
     rotation: ResourceDictPositionObject = Field(
         description="Resource rotation", default_factory=ResourceDictPositionObject
     )
-    cross_section_type: Literal["rectangle", "circle", "rounded_rectangle"] = Field(description="Cross section type", default="rectangle")
+    cross_section_type: Literal["rectangle", "circle", "rounded_rectangle", ""] = Field(description="Cross section type", default="rectangle")
 
 
 # 统一的资源字典模型，parent 自动序列化为 parent_uuid，children 不序列化
@@ -311,12 +311,16 @@ class ResourceTreeSet(object):
                 "plate": "plate",
                 "well": "well",
                 "deck": "deck",
+                "tip_rack": "tip_rack",
+                "tip_spot": "tip_spot",
+                "tube": "tube",
+                "bottle_carrier": "bottle_carrier",
             }
             if source in replace_info:
                 return replace_info[source]
             else:
                 print("转换pylabrobot的时候，出现未知类型", source)
-                return "container"
+                return source
 
         def build_uuid_mapping(res: "PLRResource", uuid_list: list):
             """递归构建uuid映射字典"""
@@ -402,7 +406,7 @@ class ResourceTreeSet(object):
         import inspect
 
         # 类型映射
-        TYPE_MAP = {"plate": "Plate", "well": "Well", "deck": "Deck"}
+        TYPE_MAP = {"plate": "Plate", "well": "Well", "deck": "Deck", "container": "RegularContainer"}
 
         def collect_node_data(node: ResourceDictInstance, name_to_uuid: dict, all_states: dict):
             """一次遍历收集 name_to_uuid 和 all_states"""

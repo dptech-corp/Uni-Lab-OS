@@ -126,12 +126,16 @@ class HTTPClient:
         Returns:
             Dict[str, str]: 旧UUID到新UUID的映射关系 {old_uuid: new_uuid}
         """
+        with open(os.path.join(BasicConfig.working_dir, "req_resource_tree_get.json"), "w", encoding="utf-8") as f:
+            f.write(json.dumps({"uuids": uuid_list, "with_children": with_children}, indent=4))
         response = requests.post(
             f"{self.remote_addr}/edge/material/query",
             json={"uuids": uuid_list, "with_children": with_children},
             headers={"Authorization": f"Lab {self.auth}"},
             timeout=100,
         )
+        with open(os.path.join(BasicConfig.working_dir, "res_resource_tree_get.json"), "w", encoding="utf-8") as f:
+            f.write(f"{response.status_code}" + "\n" + response.text)
         if response.status_code == 200:
             res = response.json()
             if "code" in res and res["code"] != 0:
@@ -187,12 +191,16 @@ class HTTPClient:
         Returns:
             Dict: 返回的资源数据
         """
+        with open(os.path.join(BasicConfig.working_dir, "req_resource_get.json"), "w", encoding="utf-8") as f:
+            f.write(json.dumps({"id": id, "with_children": with_children}, indent=4))
         response = requests.get(
             f"{self.remote_addr}/lab/material",
             params={"id": id, "with_children": with_children},
             headers={"Authorization": f"Lab {self.auth}"},
             timeout=20,
         )
+        with open(os.path.join(BasicConfig.working_dir, "req_resource_get.json"), "w", encoding="utf-8") as f:
+            f.write(f"{response.status_code}" + "\n" + response.text)
         return response.json()
 
     def resource_del(self, id: str) -> requests.Response:
