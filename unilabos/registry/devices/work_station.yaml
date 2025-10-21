@@ -71,8 +71,11 @@ bettery_station_registry:
         feedback: {}
         goal: {}
         goal_default:
+          assembly_pressure: 4200
+          assembly_type: 7
           elec_num: null
           elec_use_num: null
+          elec_vol: 50
           file_path: D:\coin_cell_data
         handles: {}
         result: {}
@@ -82,10 +85,19 @@ bettery_station_registry:
             feedback: {}
             goal:
               properties:
+                assembly_pressure:
+                  default: 4200
+                  type: integer
+                assembly_type:
+                  default: 7
+                  type: integer
                 elec_num:
                   type: string
                 elec_use_num:
                   type: string
+                elec_vol:
+                  default: 50
+                  type: integer
                 file_path:
                   default: D:\coin_cell_data
                   type: string
@@ -271,7 +283,10 @@ bettery_station_registry:
         feedback: {}
         goal: {}
         goal_default:
+          assembly_pressure: null
+          assembly_type: null
           elec_use_num: null
+          elec_vol: null
         handles: {}
         result: {}
         schema:
@@ -280,10 +295,19 @@ bettery_station_registry:
             feedback: {}
             goal:
               properties:
+                assembly_pressure:
+                  type: string
+                assembly_type:
+                  type: string
                 elec_use_num:
+                  type: string
+                elec_vol:
                   type: string
               required:
               - elec_use_num
+              - elec_vol
+              - assembly_type
+              - assembly_pressure
               type: object
             result: {}
           required:
