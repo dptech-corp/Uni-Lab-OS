@@ -639,25 +639,24 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
 
         # 处理子物料（detail）
         if material.get("detail") and len(material["detail"]) > 0:
+            for bottle in reversed(plr_material.children):
+                plr_material.unassign_child_resource(bottle)
             child_ids = []
             for detail in material["detail"]:
                 number = (
                     (detail.get("z", 0) - 1) * plr_material.num_items_x * plr_material.num_items_y
-                    + (detail.get("x", 0) - 1) * plr_material.num_items_x
-                    + (detail.get("y", 0) - 1)
+                    + (detail.get("y", 0) - 1) * plr_material.num_items_y
+                    + (detail.get("x", 0) - 1)
                 )
-                bottle = plr_material[number]
-                if detail["name"] in type_mapping:
-                    # plr_material.unassign_child_resource(bottle)
-                    plr_material.sites[number] = None
-                    plr_material[number] = initialize_resource(
-                        {"name": f'{detail["name"]}_{number}', "class": type_mapping[detail["name"]][0]}, resource_type=ResourcePLR
+                typeName = detail.get("typeName", detail.get("name", ""))
+                if typeName in type_mapping:
+                    bottle = plr_material[number] = initialize_resource(
+                        {"name": f'{detail["name"]}_{number}', "class": type_mapping[typeName][0]}, resource_type=ResourcePLR
                     )
-                else:
                     bottle.tracker.liquids = [
                         (detail["name"], float(detail.get("quantity", 0)) if detail.get("quantity") else 0)
                     ]
-                bottle.code = detail.get("code", "")
+                    bottle.code = detail.get("code", "")
         else:
             bottle = plr_material[0] if plr_material.capacity > 0 else plr_material
             bottle.tracker.liquids = [

@@ -232,8 +232,9 @@ class ROS2WorkstationNode(BaseROS2DeviceNode):
                             resource_id = (
                                 protocol_kwargs[k]["id"] if v == "unilabos_msgs/Resource" else protocol_kwargs[k][0]["id"]
                             )
+                            resource_uuid = protocol_kwargs[k].get("uuid", None)
                             r = SerialCommand_Request()
-                            r.command = json.dumps({"id": resource_id, "with_children": True})
+                            r.command = json.dumps({"id": resource_id, "uuid": resource_uuid, "with_children": True})
                             # 发送请求并等待响应
                             response: SerialCommand_Response = await self._resource_clients[
                                 "resource_get"

@@ -356,7 +356,7 @@ def main():
 
     if BasicConfig.upload_registry:
         # 设备注册到服务端 - 需要 ak 和 sk
-        if args_dict.get("ak") and args_dict.get("sk"):
+        if BasicConfig.ak and BasicConfig.sk:
             print_status("开始注册设备到服务端...", "info")
             try:
                 register_devices_and_resources(lab_registry)

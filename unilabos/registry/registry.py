@@ -708,6 +708,8 @@ class Registry:
                         for status_name, status_type in device_config["class"]["status_types"].items():
                             device_config["class"]["status_types"][status_name] = status_str_type_mapping[status_type]
                         for action_name, action_config in device_config["class"]["action_value_mappings"].items():
+                            if action_config["type"] not in action_str_type_mapping:
+                                continue
                             action_config["type"] = action_str_type_mapping[action_config["type"]]
                         # 添加内置的驱动命令动作
                         self._add_builtin_actions(device_config, device_id)

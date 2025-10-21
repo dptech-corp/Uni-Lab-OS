@@ -582,6 +582,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
         - update: 更新现有资源
         - remove: 从资源树中移除资源
         """
+        from pylabrobot.resources.resource import Resource as ResourcePLR
         try:
             data = json.loads(req.command)
             results = []
@@ -662,22 +663,23 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                         )
                         found_plr_resources = []
                         other_plr_resources = []
-                        for res_list in found_resources:
-                            for res in res_list:
-                                if issubclass(res.__class__, ResourcePLR):
-                                    found_plr_resources.append(res)
+                        for found_resource in found_resources:
+                            for resource in found_resource:
+                                if issubclass(resource.__class__, ResourcePLR):
+                                    found_plr_resources.append(resource)
                                 else:
-                                    other_plr_resources.append(res)
+                                    other_plr_resources.append(resource)
                         func = getattr(self.driver_instance, "resource_tree_remove", None)
                         if callable(func):
                             func(found_plr_resources)
                         for plr_resource in found_plr_resources:
-                            plr_resource.parent.unassign_child_resource(plr_resource)
+                            if plr_resource.parent is not None:
+                                plr_resource.parent.unassign_child_resource(plr_resource)
                             self.resource_tracker.remove_resource(plr_resource)
                             self.lab_logger().info(f"移除物料 {plr_resource} 及其子节点")
-                        for res in other_plr_resources:
-                            self.resource_tracker.remove_resource(res)
-                            self.lab_logger().info(f"移除物料 {res} 及其子节点")
+                        for other_plr_resource in other_plr_resources:
+                            self.resource_tracker.remove_resource(other_plr_resource)
+                            self.lab_logger().info(f"移除物料 {other_plr_resource} 及其子节点")
                         results.append({"success": True, "action": "remove"})
                 except Exception as e:
                     error_msg = f"Error processing {action} operation: {str(e)}"
@@ -941,7 +943,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                             queried_resources = []
                             for resource_data in resource_inputs:
                                 r = SerialCommand.Request()
-                                r.command = json.dumps({"id": resource_data["id"], "with_children": True})
+                                r.command = json.dumps({"id": resource_data["id"], "uuid": resource_data.get("uuid", None), "with_children": True})
                                 # 发送请求并等待响应
                                 response: SerialCommand_Response = await self._resource_clients[
                                     "resource_get"

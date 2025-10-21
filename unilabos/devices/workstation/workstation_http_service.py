@@ -668,7 +668,7 @@ __all__ = [
 
 if __name__ == "__main__":
     # 简单测试HTTP服务
-    class DummyWorkstation:
+    class BioyondWorkstation:
         device_id = "WS-001"
         
         def process_step_finish_report(self, report_request):

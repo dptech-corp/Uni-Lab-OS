@@ -10,7 +10,7 @@
             "type": "device",
             "class": "reaction_station.bioyond",
             "config": {
-                "bioyond_config": {
+                "config": {
                     "api_key": "DE9BDDA0",
                     "api_host": "http://192.168.1.200:44402",
                     "workflow_mappings": {
@@ -19,8 +19,8 @@
                         "Solid_feeding_vials": "3a160877-87e7-7699-7bc6-ec72b05eb5e6",
                         "Liquid_feeding_vials(non-titration)": "3a167d99-6158-c6f0-15b5-eb030f7d8e47",
                         "Liquid_feeding_solvents": "3a160824-0665-01ed-285a-51ef817a9046",
-                        "Liquid_feeding(titration)": "3a160824-0665-01ed-285a-51ef817a9046",
-                        "Liquid_feeding_beaker": "3a16087e-124f-8ddb-8ec1-c2dff09ca784",
+                        "Liquid_feeding(titration)": "3a16082a-96ac-0449-446a-4ed39f3365b6",
+                        "liquid_feeding_beaker": "3a16087e-124f-8ddb-8ec1-c2dff09ca784",
                         "Drip_back": "3a162cf9-6aac-565a-ddd7-682ba1796a4a"
                     },
                     "material_type_mappings": {
