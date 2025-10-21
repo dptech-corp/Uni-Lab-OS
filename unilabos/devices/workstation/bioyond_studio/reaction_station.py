@@ -12,13 +12,13 @@ from unilabos.devices.workstation.bioyond_studio.config import API_CONFIG
 
 class BioyondReactionStation(BioyondWorkstation):
     """Bioyond反应站类
-    
+
     继承自BioyondWorkstation，提供反应站特定的业务方法
     """
-    
+
     def __init__(self, config: dict = None, deck=None, protocol_type=None, **kwargs):
         """初始化反应站
-        
+
         Args:
             config: 配置字典，应包含workflow_mappings等配置
             deck: Deck对象
@@ -27,13 +27,13 @@ class BioyondReactionStation(BioyondWorkstation):
         """
         if deck is None and config:
             deck = config.get('deck')
-        
+
         print(f"BioyondReactionStation初始化 - config包含workflow_mappings: {'workflow_mappings' in (config or {})}")
         if config and 'workflow_mappings' in config:
             print(f"workflow_mappings内容: {config['workflow_mappings']}")
-        
+
         super().__init__(bioyond_config=config, deck=deck)
-        
+
         print(f"BioyondReactionStation初始化完成 - workflow_mappings: {self.workflow_mappings}")
         print(f"workflow_mappings长度: {len(self.workflow_mappings)}")
 
@@ -49,21 +49,21 @@ class BioyondReactionStation(BioyondWorkstation):
         return json.dumps({"suc": True})
 
     def reactor_taken_in(
-        self, 
-        assign_material_name: str, 
+        self,
+        assign_material_name: str,
         cutoff: str = "900000",
         temperature: float = -10.00
     ):
         """反应器放入
-        
+
         Args:
             assign_material_name: 物料名称（不能为空）
-            cutoff: 截止值/通量配置（需为有效数字字符串，默认 "900000"）
-            temperature: 温度上限（°C，范围：-50.00 至 100.00）
-        
+            cutoff: 粘度上限（需为有效数字字符串，默认 "900000"）
+            temperature: 温度设定（°C，范围：-50.00 至 100.00）
+
         Returns:
             str: JSON 字符串，格式为 {"suc": True}
-        
+
         Raises:
             ValueError: 若物料名称无效或 cutoff 格式错误
         """
@@ -73,7 +73,7 @@ class BioyondReactionStation(BioyondWorkstation):
             float(cutoff)
         except ValueError:
             raise ValueError("cutoff 必须是有效的数字字符串")
-        
+
         self.append_to_workflow_sequence('{"web_workflow_name": "reactor_taken_in"}')
         material_id = self.hardware_interface._get_material_id_by_name(assign_material_name)
         if material_id is None:
@@ -103,21 +103,21 @@ class BioyondReactionStation(BioyondWorkstation):
         return json.dumps({"suc": True})
 
     def solid_feeding_vials(
-        self, 
-        material_id: str, 
-        time: str = "0", 
+        self,
+        material_id: str,
+        time: str = "0",
         torque_variation: int = 1,
-        assign_material_name: str = None, 
+        assign_material_name: str = None,
         temperature: float = 25.00
     ):
         """固体进料小瓶
-        
+
         Args:
-            material_id: 粉末类型ID
+            material_id: 粉末类型ID，1=盐（21分钟），2=面粉（27分钟），3=BTDA（38分钟）
             time: 观察时间(分钟)
-            torque_variation: 是否观察扭矩变化(int类型, 1=否, 2=是)
+            torque_variation: 是否观察(int类型, 1=否, 2=是)
             assign_material_name: 物料名称(用于获取试剂瓶位ID)
-            temperature: 温度上限(°C)
+            temperature: 温度设定(°C)
         """
         self.append_to_workflow_sequence('{"web_workflow_name": "Solid_feeding_vials"}')
         material_id_m = self.hardware_interface._get_material_id_by_name(assign_material_name) if assign_material_name else None
@@ -127,7 +127,7 @@ class BioyondReactionStation(BioyondWorkstation):
 
         feeding_step_id = WORKFLOW_STEP_IDS["solid_feeding_vials"]["feeding"]
         observe_step_id = WORKFLOW_STEP_IDS["solid_feeding_vials"]["observe"]
-        
+
         solid_feeding_vials_params = {
             "param_values": {
                 feeding_step_id: {
@@ -152,22 +152,22 @@ class BioyondReactionStation(BioyondWorkstation):
         return json.dumps({"suc": True})
 
     def liquid_feeding_vials_non_titration(
-        self, 
+        self,
         volume_formula: str,
         assign_material_name: str,
         titration_type: str = "1",
         time: str = "0",
-        torque_variation: int = 1, 
+        torque_variation: int = 1,
         temperature: float = 25.00
     ):
         """液体进料小瓶(非滴定)
-        
+
         Args:
             volume_formula: 分液公式(μL)
             assign_material_name: 物料名称
-            titration_type: 是否滴定(1=滴定, 其他=非滴定)
+            titration_type: 是否滴定(1=否, 2=是)
             time: 观察时间(分钟)
-            torque_variation: 是否观察扭矩变化(int类型, 1=否, 2=是)
+            torque_variation: 是否观察(int类型, 1=否, 2=是)
             temperature: 温度(°C)
         """
         self.append_to_workflow_sequence('{"web_workflow_name": "Liquid_feeding_vials(non-titration)"}')
@@ -180,7 +180,7 @@ class BioyondReactionStation(BioyondWorkstation):
 
         liquid_step_id = WORKFLOW_STEP_IDS["liquid_feeding_vials_non_titration"]["liquid"]
         observe_step_id = WORKFLOW_STEP_IDS["liquid_feeding_vials_non_titration"]["observe"]
-        
+
         params = {
             "param_values": {
                 liquid_step_id: {
@@ -206,23 +206,23 @@ class BioyondReactionStation(BioyondWorkstation):
         return json.dumps({"suc": True})
 
     def liquid_feeding_solvents(
-        self, 
-        assign_material_name: str, 
-        volume: str, 
+        self,
+        assign_material_name: str,
+        volume: str,
         titration_type: str = "1",
-        time: str = "360", 
-        torque_variation: int = 2, 
+        time: str = "360",
+        torque_variation: int = 2,
         temperature: float = 25.00
     ):
         """液体进料-溶剂
-        
+
         Args:
             assign_material_name: 物料名称
             volume: 分液量(μL)
-            titration_type: 是否滴定
+            titration_type: 是否滴定(1=否, 2=是)
             time: 观察时间(分钟)
-            torque_variation: 是否观察扭矩变化(int类型, 1=否, 2=是)
-            temperature: 温度上限(°C)
+            torque_variation: 是否观察(int类型, 1=否, 2=是)
+            temperature: 温度设定(°C)
         """
         self.append_to_workflow_sequence('{"web_workflow_name": "Liquid_feeding_solvents"}')
         material_id = self.hardware_interface._get_material_id_by_name(assign_material_name)
@@ -231,10 +231,10 @@ class BioyondReactionStation(BioyondWorkstation):
 
         if isinstance(temperature, str):
             temperature = float(temperature)
-        
+
         liquid_step_id = WORKFLOW_STEP_IDS["liquid_feeding_solvents"]["liquid"]
         observe_step_id = WORKFLOW_STEP_IDS["liquid_feeding_solvents"]["observe"]
-        
+
         params = {
             "param_values": {
                 liquid_step_id: {
@@ -260,22 +260,22 @@ class BioyondReactionStation(BioyondWorkstation):
         return json.dumps({"suc": True})
 
     def liquid_feeding_titration(
-        self, 
-        volume_formula: str, 
-        assign_material_name: str, 
+        self,
+        volume_formula: str,
+        assign_material_name: str,
         titration_type: str = "1",
-        time: str = "90", 
+        time: str = "90",
         torque_variation: int = 2,
         temperature: float = 25.00
     ):
         """液体进料(滴定)
-        
+
         Args:
             volume_formula: 分液公式(μL)
             assign_material_name: 物料名称
-            titration_type: 是否滴定
+            titration_type: 是否滴定(1=否, 2=是)
             time: 观察时间(分钟)
-            torque_variation: 是否观察扭矩变化(int类型, 1=否, 2=是)
+            torque_variation: 是否观察(int类型, 1=否, 2=是)
             temperature: 温度(°C)
         """
         self.append_to_workflow_sequence('{"web_workflow_name": "Liquid_feeding(titration)"}')
@@ -314,23 +314,23 @@ class BioyondReactionStation(BioyondWorkstation):
         return json.dumps({"suc": True})
 
     def liquid_feeding_beaker(
-        self, 
-        volume: str = "35000", 
+        self,
+        volume: str = "35000",
         assign_material_name: str = "BAPP",
-        time: str = "0", 
-        torque_variation: int = 1, 
+        time: str = "0",
+        torque_variation: int = 1,
         titration_type: str = "1",
         temperature: float = 25.00
     ):
         """液体进料烧杯
-        
+
         Args:
             volume: 分液量(μL)
             assign_material_name: 物料名称(试剂瓶位)
             time: 观察时间(分钟)
-            torque_variation: 是否观察扭矩变化(int类型, 1=否, 2=是)
-            titration_type: 是否滴定
-            temperature: 温度上限(°C)
+            torque_variation: 是否观察(int类型, 1=否, 2=是)
+            titration_type: 是否滴定(1=否, 2=是)
+            temperature: 温度设定(°C)
         """
         self.append_to_workflow_sequence('{"web_workflow_name": "liquid_feeding_beaker"}')
         material_id = self.hardware_interface._get_material_id_by_name(assign_material_name)
@@ -366,7 +366,7 @@ class BioyondReactionStation(BioyondWorkstation):
         print(f"成功添加液体进料烧杯参数: volume={volume}μL, material={assign_material_name}->ID:{material_id}")
         print(f"当前队列长度: {len(self.pending_task_params)}")
         return json.dumps({"suc": True})
-    
+
     def drip_back(
         self,
         assign_material_name: str,
@@ -377,13 +377,13 @@ class BioyondReactionStation(BioyondWorkstation):
         temperature: float = 25.00
     ):
         """滴回去
-        
+
         Args:
             assign_material_name: 物料名称(液体种类)
             volume: 分液量(μL)
-            titration_type: 是否滴定
+            titration_type: 是否滴定(1=否, 2=是)
             time: 观察时间(分钟)
-            torque_variation: 是否观察扭矩变化(int类型, 1=否, 2=是)
+            torque_variation: 是否观察(int类型, 1=否, 2=是)
             temperature: 温度(°C)
         """
         self.append_to_workflow_sequence('{"web_workflow_name": "drip_back"}')
@@ -425,7 +425,7 @@ class BioyondReactionStation(BioyondWorkstation):
 
     def get_workflow_sequence(self) -> List[str]:
         """获取当前工作流执行顺序
-        
+
         Returns:
             工作流名称列表
         """
@@ -439,10 +439,10 @@ class BioyondReactionStation(BioyondWorkstation):
 
     def workflow_step_query(self, workflow_id: str) -> dict:
         """查询工作流步骤参数
-        
+
         Args:
             workflow_id: 工作流ID
-            
+
         Returns:
             工作流步骤参数字典
         """
@@ -450,10 +450,10 @@ class BioyondReactionStation(BioyondWorkstation):
 
     def create_order(self, json_str: str) -> dict:
         """创建订单
-        
+
         Args:
             json_str: 订单参数的JSON字符串
-            
+
         Returns:
             创建结果
         """
@@ -463,10 +463,10 @@ class BioyondReactionStation(BioyondWorkstation):
 
     def process_web_workflows(self, web_workflow_json: str) -> List[Dict[str, str]]:
         """处理网页工作流列表
-        
+
         Args:
             web_workflow_json: JSON 格式的网页工作流列表
-            
+
         Returns:
             List[Dict[str, str]]: 包含工作流 ID 和名称的字典列表
         """
@@ -492,11 +492,11 @@ class BioyondReactionStation(BioyondWorkstation):
     def process_and_execute_workflow(self, workflow_name: str, task_name: str) -> dict:
         """
         一站式处理工作流程：解析网页工作流列表，合并工作流(带参数)，然后发布任务
-        
+
         Args:
             workflow_name: 合并后的工作流名称
             task_name: 任务名称
-            
+
         Returns:
             任务创建结果
         """
@@ -504,32 +504,32 @@ class BioyondReactionStation(BioyondWorkstation):
         print(f"\n{'='*60}")
         print(f"📋 处理网页工作流列表: {web_workflow_list}")
         print(f"{'='*60}")
-        
+
         web_workflow_json = json.dumps({"web_workflow_list": web_workflow_list})
         workflows_result = self.process_web_workflows(web_workflow_json)
-        
+
         if not workflows_result:
             return self._create_error_result("处理网页工作流列表失败", "process_web_workflows")
-        
+
         print(f"workflows_result 类型: {type(workflows_result)}")
         print(f"workflows_result 内容: {workflows_result}")
-        
+
         workflows_with_params = self._build_workflows_with_parameters(workflows_result)
-        
+
         merge_data = {
             "name": workflow_name,
             "workflows": workflows_with_params
         }
-        
+
         # print(f"\n🔄 合并工作流（带参数），名称: {workflow_name}")
         merged_workflow = self.merge_workflow_with_parameters(json.dumps(merge_data))
-        
+
         if not merged_workflow:
             return self._create_error_result("合并工作流失败", "merge_workflow_with_parameters")
-        
+
         workflow_id = merged_workflow.get("subWorkflows", [{}])[0].get("id", "")
         # print(f"\n📤 使用工作流创建任务: {workflow_name} (ID: {workflow_id})")
-        
+
         order_params = [{
             "orderCode": f"task_{self.hardware_interface.get_current_time_iso8601()}",
             "orderName": task_name,
@@ -537,16 +537,16 @@ class BioyondReactionStation(BioyondWorkstation):
             "borderNumber": 1,
             "paramValues": {}
         }]
-        
+
         result = self.create_order(json.dumps(order_params))
-        
+
         if not result:
             return self._create_error_result("创建任务失败", "create_order")
-        
+
         # 清空工作流序列和参数，防止下次执行时累积重复
         self.pending_task_params = []
-        self.clear_workflows()  
-        
+        self.clear_workflows()  # 清空工作流序列，避免重复累积
+
         # print(f"\n✅ 任务创建成功: {result}")
         # print(f"\n✅ 任务创建成功")
         print(f"{'='*60}\n")
@@ -555,10 +555,10 @@ class BioyondReactionStation(BioyondWorkstation):
     def _build_workflows_with_parameters(self, workflows_result: list) -> list:
         """
         构建带参数的工作流列表
-        
+
         Args:
             workflows_result: 处理后的工作流列表（应为包含 id 和 name 的字典列表）
-            
+
         Returns:
             符合新接口格式的工作流参数结构
         """
@@ -577,19 +577,19 @@ class BioyondReactionStation(BioyondWorkstation):
                 continue
             workflow_name = workflow_info.get("name", "")
             # print(f"\n🔧 处理工作流 [{idx}]: {workflow_name} (ID: {workflow_id})")
-            
+
             if idx >= len(self.pending_task_params):
                 # print(f"   ⚠️ 无对应参数，跳过")
                 workflows_with_params.append({"id": workflow_id})
                 continue
-            
+
             param_data = self.pending_task_params[idx]
             param_values = param_data.get("param_values", {})
             if not param_values:
                 # print(f"   ⚠️ 参数为空，跳过")
                 workflows_with_params.append({"id": workflow_id})
                 continue
-            
+
             step_parameters = {}
             for step_id, actions_dict in param_values.items():
                 # print(f"   📍 步骤ID: {step_id}")
@@ -646,25 +646,25 @@ class BioyondReactionStation(BioyondWorkstation):
     def merge_workflow_with_parameters(self, json_str: str) -> dict:
         """
         调用新接口：合并工作流并传递参数
-        
+
         Args:
             json_str: JSON格式的字符串，包含:
                 - name: 工作流名称
                 - workflows: [{"id": "工作流ID", "stepParameters": {...}}]
-                
+
         Returns:
             合并后的工作流信息
         """
         try:
             data = json.loads(json_str)
-            
+
             # 在工作流名称后面添加时间戳，避免重复
             if "name" in data and data["name"]:
                 timestamp = self.hardware_interface.get_current_time_iso8601().replace(":", "-").replace(".", "-")
                 original_name = data["name"]
                 data["name"] = f"{original_name}_{timestamp}"
                 print(f"🕒 工作流名称已添加时间戳: {original_name} -> {data['name']}")
-            
+
             request_data = {
                 "apiKey": API_CONFIG["api_key"],
                 "requestTime": self.hardware_interface.get_current_time_iso8601(),
@@ -673,37 +673,37 @@ class BioyondReactionStation(BioyondWorkstation):
             print(f"\n📤 发送合并请求:")
             print(f"   工作流名称: {data.get('name')}")
             print(f"   子工作流数量: {len(data.get('workflows', []))}")
-            
+
             # 打印完整的POST请求内容
             print(f"\n🔍 POST请求详细内容:")
             print(f"   URL: {self.hardware_interface.host}/api/lims/workflow/merge-workflow-with-parameters")
             print(f"   Headers: {{'Content-Type': 'application/json'}}")
             print(f"   Request Data:")
             print(f"   {json.dumps(request_data, indent=4, ensure_ascii=False)}")
-            # 
+            #
             response = requests.post(
                 f"{self.hardware_interface.host}/api/lims/workflow/merge-workflow-with-parameters",
                 json=request_data,
                 headers={"Content-Type": "application/json"},
                 timeout=30
             )
-            
+
             # # 打印响应详细内容
             # print(f"\n📥 POST响应详细内容:")
             # print(f"   状态码: {response.status_code}")
             # print(f"   响应头: {dict(response.headers)}")
             # print(f"   响应体: {response.text}")
-            # # 
+            # #
             try:
                 result = response.json()
-                # # 
+                # #
                 # print(f"\n📋 解析后的响应JSON:")
                 # print(f"   {json.dumps(result, indent=4, ensure_ascii=False)}")
-                # # 
+                # #
             except json.JSONDecodeError:
                 print(f"❌ 服务器返回非 JSON 格式响应: {response.text}")
                 return None
-            
+
             if result.get("code") == 1:
                 print(f"✅ 工作流合并成功（带参数）")
                 return result.get("data", {})
@@ -711,7 +711,7 @@ class BioyondReactionStation(BioyondWorkstation):
                 error_msg = result.get('message', '未知错误')
                 print(f"❌ 工作流合并失败: {error_msg}")
                 return None
-                
+
         except requests.exceptions.Timeout:
             print(f"❌ 合并工作流请求超时")
             return None
@@ -727,10 +727,10 @@ class BioyondReactionStation(BioyondWorkstation):
 
     def _validate_and_refresh_workflow_if_needed(self, workflow_name: str) -> bool:
         """验证工作流ID是否有效，如果无效则重新合并
-        
+
         Args:
             workflow_name: 工作流名称
-            
+
         Returns:
             bool: 验证或刷新是否成功
         """
