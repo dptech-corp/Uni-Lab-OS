@@ -8,7 +8,7 @@
             ],
             "parent": null,
             "type": "device",
-            "class": "workstation.bioyond_dispensing_station",
+            "class": "bioyond_dispensing_station",
             "config": {
                 "config": {
                     "api_key": "DE9BDDA0",
