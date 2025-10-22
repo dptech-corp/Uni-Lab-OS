@@ -624,7 +624,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                                     try:
                                         # 特殊兼容所有plr的物料的assign方法，和create_resource append_resource后期同步
                                         additional_params = {}
-                                        extra = getattr(plr_resource, "extra", {})
+                                        extra = getattr(plr_resource, "unilabos_extra", {})
                                         if len(extra):
                                             self.lab_logger().info(f"发现物料{plr_resource}额外参数: " + str(extra))
                                         if "update_resource_site" in extra:
