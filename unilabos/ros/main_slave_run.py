@@ -10,7 +10,7 @@ from unilabos.ros.nodes.presets.resource_mesh_manager import ResourceMeshManager
 from unilabos.ros.nodes.resource_tracker import DeviceNodeResourceTracker, ResourceTreeSet
 from unilabos.devices.ros_dev.liquid_handler_joint_publisher import LiquidHandlerJointPublisher
 from unilabos_msgs.srv import SerialCommand  # type: ignore
-from rclpy.executors import MultiThreadedExecutor
+from rclpy.executors import MultiThreadedExecutor, SingleThreadedExecutor
 from rclpy.node import Node
 from rclpy.timer import Timer
 

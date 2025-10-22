@@ -535,6 +535,7 @@ def resource_ulab_to_plr(resource: dict, plr_model=False) -> "ResourcePLR":
 
     def resource_ulab_to_plr_inner(resource: dict):
         all_states[resource["name"]] = resource["data"]
+        extra = resource.pop("extra", {})
         d = {
             "name": resource["name"],
             "type": resource["type"],
