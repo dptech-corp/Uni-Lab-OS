@@ -1,5 +1,6 @@
 import json
 import sys
+from datetime import datetime
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
@@ -87,6 +88,7 @@ def test_build_protocol_graph(protocol_name):
         protocol_steps=protocol_steps,
         workstation_name="PRCXi",
     )
-    output_path = data_path.with_name(f"{protocol_name}_graph.png")
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M")
+    output_path = data_path.with_name(f"{protocol_name}_graph_{timestamp}.png")
     draw_protocol_graph_with_ports(graph, str(output_path))
     print(graph)

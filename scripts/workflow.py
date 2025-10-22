@@ -92,7 +92,7 @@ def refactor_data(data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     # 定义操作映射，包含生物实验和有机化学的所有操作
     OPERATION_MAPPING = {
         # 生物实验操作
-        "transfer_liquid": "SynBioFactory-liquid_handler.transfer_liquid",
+        "transfer_liquid": "SynBioFactory-liquid_handler.prcxi-transfer_liquid",
         "transfer": "SynBioFactory-liquid_handler.biomek-transfer",
         "incubation": "SynBioFactory-liquid_handler.biomek-incubation",
         "move_labware": "SynBioFactory-liquid_handler.biomek-move_labware",
@@ -159,7 +159,10 @@ def build_protocol_graph(
     protocol_steps = refactor_data(protocol_steps)
 
     # 检查协议步骤中的模板来判断协议类型
-    has_biomek_template = any("biomek" in step.get("template", "") for step in protocol_steps)
+    has_biomek_template = any(
+        ("biomek" in step.get("template", "")) or ("prcxi" in step.get("template", ""))
+        for step in protocol_steps
+    )
 
     if has_biomek_template:
         # 生物实验协议图构建
@@ -178,12 +181,14 @@ def build_protocol_graph(
             resource_last_writer[labware_id] = f"{node_id}:labware"
 
         # 处理协议步骤
+        prev_node = None
         for i, step in enumerate(protocol_steps):
             node_id = str(uuid.uuid4())
             G.add_node(node_id, **step)
 
             # 添加控制流边
-            G.add_edge(prev_node, node_id, source_port="ready", target_port="ready")
+            if prev_node is not None:
+                G.add_edge(prev_node, node_id, source_port="ready", target_port="ready")
             prev_node = node_id
 
             # 处理物料流
@@ -198,7 +203,8 @@ def build_protocol_graph(
         # 添加协议结束节点
         end_id = str(uuid.uuid4())
         G.add_node(end_id, template=f"{LAB_NAME}-liquid_handler.biomek-run_protocol")
-        G.add_edge(prev_node, end_id, source_port="ready", target_port="ready")
+        if prev_node is not None:
+            G.add_edge(prev_node, end_id, source_port="ready", target_port="ready")
 
     else:
         # 有机化学协议图构建
