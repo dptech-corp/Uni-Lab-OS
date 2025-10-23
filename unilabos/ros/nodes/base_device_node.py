@@ -49,7 +49,7 @@ from unilabos_msgs.msg import Resource  # type: ignore
 
 from unilabos.ros.nodes.resource_tracker import (
     DeviceNodeResourceTracker,
-    ResourceTreeSet,
+    ResourceTreeSet, ResourceTreeInstance,
 )
 from unilabos.ros.x.rclpyx import get_event_loop
 from unilabos.ros.utils.driver_creator import WorkstationNodeCreator, PyLabRobotCreator, DeviceClassCreator
@@ -573,6 +573,35 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             self.lab_logger().error(traceback.format_exc())
         self.lab_logger().debug(f"资源更新结果: {response}")
 
+    def transfer_to_new_resource(self, plr_resource: "ResourcePLR", tree: ResourceTreeInstance, additional_add_params: Dict[str, Any]):
+        parent_uuid = tree.root_node.res_content.parent_uuid
+        if parent_uuid:
+            parent_resource: ResourcePLR = self.resource_tracker.uuid_to_resources.get(parent_uuid)
+            if parent_resource is None:
+                self.lab_logger().warning(
+                    f"物料{plr_resource}请求挂载{tree.root_node.res_content.name}的父节点{parent_uuid}不存在"
+                )
+            else:
+                try:
+                    # 特殊兼容所有plr的物料的assign方法，和create_resource append_resource后期同步
+                    additional_params = {}
+                    extra = getattr(plr_resource, "unilabos_extra", {})
+                    if len(extra):
+                        self.lab_logger().info(f"发现物料{plr_resource}额外参数: " + str(extra))
+                    if "update_resource_site" in extra:
+                        additional_params["site"] = extra["update_resource_site"]
+                    site = additional_add_params.get("site", None)
+                    spec = inspect.signature(parent_resource.assign_child_resource)
+                    if "spot" in spec.parameters:
+                        additional_params["spot"] = site
+                    parent_resource.assign_child_resource(
+                        plr_resource, location=None, **additional_params
+                    )
+                except Exception as e:
+                    self.lab_logger().warning(
+                        f"物料{plr_resource}请求挂载{tree.root_node.res_content.name}的父节点{parent_resource}[{parent_uuid}]失败！\n{traceback.format_exc()}"
+                    )
+
     async def s2c_resource_tree(self, req: SerialCommand_Request, res: SerialCommand_Response):
         """
         处理资源树更新请求
@@ -613,33 +642,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                         plr_resources = tree_set.to_plr_resources()
                         for plr_resource, tree in zip(plr_resources, tree_set.trees):
                             self.resource_tracker.add_resource(plr_resource)
-                            parent_uuid = tree.root_node.res_content.parent_uuid
-                            if parent_uuid:
-                                parent_resource: ResourcePLR = self.resource_tracker.uuid_to_resources.get(parent_uuid)
-                                if parent_resource is None:
-                                    self.lab_logger().warning(
-                                        f"物料{plr_resource}请求挂载{tree.root_node.res_content.name}的父节点{parent_uuid}不存在"
-                                    )
-                                else:
-                                    try:
-                                        # 特殊兼容所有plr的物料的assign方法，和create_resource append_resource后期同步
-                                        additional_params = {}
-                                        extra = getattr(plr_resource, "unilabos_extra", {})
-                                        if len(extra):
-                                            self.lab_logger().info(f"发现物料{plr_resource}额外参数: " + str(extra))
-                                        if "update_resource_site" in extra:
-                                            additional_params["site"] = extra["update_resource_site"]
-                                        site = additional_add_params.get("site", None)
-                                        spec = inspect.signature(parent_resource.assign_child_resource)
-                                        if "spot" in spec.parameters:
-                                            additional_params["spot"] = site
-                                        parent_resource.assign_child_resource(
-                                            plr_resource, location=None, **additional_params
-                                        )
-                                    except Exception as e:
-                                        self.lab_logger().warning(
-                                            f"物料{plr_resource}请求挂载{tree.root_node.res_content.name}的父节点{parent_resource}[{parent_uuid}]失败！\n{traceback.format_exc()}"
-                                        )
+                            self.transfer_to_new_resource(plr_resource, tree, additional_add_params)
                         func = getattr(self.driver_instance, "resource_tree_add", None)
                         if callable(func):
                             func(plr_resources)
@@ -652,6 +655,14 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                             original_instance: ResourcePLR = self.resource_tracker.figure_resource(
                                 {"uuid": tree.root_node.res_content.uuid}, try_mode=False
                             )
+                            original_parent_resource = original_instance.parent
+                            original_parent_resource_uuid = getattr(original_parent_resource, "unilabos_uuid", None)
+                            target_parent_resource_uuid = tree.root_node.res_content.uuid_parent
+                            self.lab_logger().info(
+                                f"物料{plr_resource} 原始父节点{original_parent_resource_uuid} 目标父节点{target_parent_resource_uuid} 更新"
+                            )
+                            if original_parent_resource_uuid != target_parent_resource_uuid and original_parent_resource is not None:
+                                self.transfer_to_new_resource(plr_resource, tree, additional_add_params)
                             original_instance.load_all_state(states)
                             self.lab_logger().info(
                                 f"更新了资源属性 {plr_resource}[{tree.root_node.res_content.uuid}] 及其子节点 {len(original_instance.get_all_children())} 个"
