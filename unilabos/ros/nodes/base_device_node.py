@@ -338,12 +338,12 @@ class BaseROS2DeviceNode(Node, Generic[T]):
 
         # 创建资源管理客户端
         self._resource_clients: Dict[str, Client] = {
-            "resource_add": self.create_client(ResourceAdd, "/resources/add"),
-            "resource_get": self.create_client(SerialCommand, "/resources/get"),
-            "resource_delete": self.create_client(ResourceDelete, "/resources/delete"),
-            "resource_update": self.create_client(ResourceUpdate, "/resources/update"),
-            "resource_list": self.create_client(ResourceList, "/resources/list"),
-            "c2s_update_resource_tree": self.create_client(SerialCommand, "/c2s_update_resource_tree"),
+            "resource_add": self.create_client(ResourceAdd, "/resources/add", callback_group=self.callback_group),
+            "resource_get": self.create_client(SerialCommand, "/resources/get", callback_group=self.callback_group),
+            "resource_delete": self.create_client(ResourceDelete, "/resources/delete", callback_group=self.callback_group),
+            "resource_update": self.create_client(ResourceUpdate, "/resources/update", callback_group=self.callback_group),
+            "resource_list": self.create_client(ResourceList, "/resources/list", callback_group=self.callback_group),
+            "c2s_update_resource_tree": self.create_client(SerialCommand, "/c2s_update_resource_tree", callback_group=self.callback_group),
         }
 
         def re_register_device(req, res):
@@ -884,7 +884,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             action_type,
             action_name,
             execute_callback=self._create_execute_callback(action_name, action_value_mapping),
-            callback_group=ReentrantCallbackGroup(),
+            callback_group=self.callback_group,
         )
 
         self.lab_logger().trace(f"发布动作: {action_name}, 类型: {str_action_type}")
@@ -1505,7 +1505,7 @@ class ROS2DeviceNode:
             asyncio.set_event_loop(loop)
             loop.run_forever()
 
-        ROS2DeviceNode._loop_thread = threading.Thread(target=run_event_loop, daemon=True, name="ROS2DeviceNode")
+        ROS2DeviceNode._loop_thread = threading.Thread(target=run_event_loop, daemon=True, name="ROS2DeviceNodeLoop")
         ROS2DeviceNode._loop_thread.start()
         logger.info(f"循环线程已启动")
 

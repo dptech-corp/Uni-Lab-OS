@@ -194,7 +194,7 @@ class ROS2WorkstationNode(BaseROS2DeviceNode):
             action_type,
             action_name,
             execute_callback=self._create_protocol_execute_callback(action_name, protocol_steps_generator),
-            callback_group=ReentrantCallbackGroup(),
+            callback_group=self.callback_group,
         )
         self.lab_logger().trace(f"发布动作: {action_name}, 类型: {str_action_type}")
         return

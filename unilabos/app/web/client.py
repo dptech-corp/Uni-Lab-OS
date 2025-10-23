@@ -6,6 +6,8 @@ HTTP客户端模块
 
 import json
 import os
+import time
+from threading import Thread
 from typing import List, Dict, Any, Optional
 
 import requests
@@ -84,14 +86,14 @@ class HTTPClient:
                 f"{self.remote_addr}/edge/material",
                 json={"nodes": [x for xs in resources.dump() for x in xs], "mount_uuid": mount_uuid},
                 headers={"Authorization": f"Lab {self.auth}"},
-                timeout=100,
+                timeout=60,
             )
         else:
             response = requests.put(
                 f"{self.remote_addr}/edge/material",
                 json={"nodes": [x for xs in resources.dump() for x in xs], "mount_uuid": mount_uuid},
                 headers={"Authorization": f"Lab {self.auth}"},
-                timeout=100,
+                timeout=10,
             )
 
         with open(os.path.join(BasicConfig.working_dir, "res_resource_tree_add.json"), "w", encoding="utf-8") as f:
