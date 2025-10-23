@@ -676,8 +676,8 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                                 f"物料{plr_resource} 原始父节点{original_parent_resource_uuid} 目标父节点{target_parent_resource_uuid} 更新"
                             )
                             # todo: 对extra进行update
-                            if getattr(plr_resource, "extra", None) is not None:
-                                original_parent_resource.extra = getattr(plr_resource, "extra")
+                            if getattr(plr_resource, "unilabos_extra", None) is not None:
+                                original_parent_resource.unilabos_extra = getattr(plr_resource, "unilabos_extra")
                             if original_parent_resource_uuid != target_parent_resource_uuid and original_parent_resource is not None:
                                 self.transfer_to_new_resource(original_instance, tree, additional_add_params)
                             original_instance.load_all_state(states)
