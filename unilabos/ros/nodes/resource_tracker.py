@@ -468,7 +468,6 @@ class ResourceTreeSet(object):
                 "category": res.config.get("category", plr_type),
                 "children": [node_to_plr_dict(child, has_model) for child in node.children],
                 "parent_name": res.parent_instance_name,
-                "extra": res.extra,
             }
             if has_model:
                 d["model"] = res.config.get("model", None)
