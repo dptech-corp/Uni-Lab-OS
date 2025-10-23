@@ -593,6 +593,10 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                     site = additional_add_params.get("site", None)
                     spec = inspect.signature(parent_resource.assign_child_resource)
                     if "spot" in spec.parameters:
+                        converter_func = getattr(plr_resource, "_parse_identifier_to_indices")
+                        if callable(converter_func):
+                            site = converter_func(site, 0)
+                            self.lab_logger().info(f"物料{plr_resource}转换挂载位置site: {site}")
                         additional_params["spot"] = site
                     old_parent = plr_resource.parent
                     if old_parent is not None:
