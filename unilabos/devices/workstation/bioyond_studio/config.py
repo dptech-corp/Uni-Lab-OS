@@ -25,7 +25,7 @@ BIOYOND_FULL_CONFIG = {
     # HTTP 服务配置
     "HTTP_host": os.getenv("BIOYOND_HTTP_HOST", "0.0.0.0"),  # HTTP服务监听地址（0.0.0.0 表示监听所有网络接口）
     "HTTP_port": int(os.getenv("BIOYOND_HTTP_PORT", "8080")),
-    "report_ip": os.getenv("BIOYOND_REPORT_IP", "172.21.32.57"),  # 报送给 Bioyond 的本机IP地址（留空则自动检测）
+    "report_ip": os.getenv("BIOYOND_REPORT_IP", "172.21.32.172"),  # 报送给 Bioyond 的本机IP地址（留空则自动检测）
     # 调试模式
     "debug_mode": os.getenv("BIOYOND_DEBUG_MODE", "False").lower() == "true",
 }
@@ -110,6 +110,31 @@ WAREHOUSE_MAPPING = {
             "B2": "3a14198c-c2d0-1559-105d-0ea30682cab4",
             "B3": "3a14198c-c2d0-725e-523d-34c037ac2440",
             "B4": "3a14198c-c2d0-efce-0939-69ca5a7dfd39"
+        }
+    },
+    "粉末加样头堆栈": {
+        "uuid": "",
+        "site_uuids": {
+            "A01": "3a19da56-1379-20c8-5886-f7c4fbcb5733",
+            "B01": "3a19da56-1379-2424-d751-fe6e94cef938",
+            "C01": "3a19da56-1379-271c-03e3-6bdb590e395e",
+            "D01": "3a19da56-1379-277f-2b1b-0d11f7cf92c6",
+            "E01": "3a19da56-1379-2f1c-a15b-e01db90eb39a",
+            "F01": "3a19da56-1379-3fa1-846b-088158ac0b3d",
+            "G01": "3a19da56-1379-5aeb-d0cd-d3b4609d66e1",
+            "H01": "3a19da56-1379-6077-8258-bdc036870b78",
+            "I01": "3a19da56-1379-863b-a120-f606baf04617",
+            "J01": "3a19da56-1379-8a74-74e5-35a9b41d4fd5",
+            "K01": "3a19da56-1379-b270-b7af-f18773918abe",
+            "L01": "3a19da56-1379-ba54-6d78-fd770a671ffc",
+            "M01": "3a19da56-1379-c22d-c96f-0ceb5eb54a04",
+            "N01": "3a19da56-1379-d64e-c6c5-c72ea4829888",
+            "O01": "3a19da56-1379-d887-1a3c-6f9cce90f90e",
+            "P01": "3a19da56-1379-e77d-0e65-7463b238a3b9",
+            "Q01": "3a19da56-1379-edf6-1472-802ddb628774",
+            "R01": "3a19da56-1379-f281-0273-e0ef78f0fd97",
+            "S01": "3a19da56-1379-f924-7f68-df1fa51489f4",
+            "T01": "3a19da56-1379-ff7c-1745-07e200b44ce2"
         }
     }
 }
