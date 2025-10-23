@@ -601,11 +601,11 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                             f"物料{plr_resource}请求从{old_parent}卸载"
                         )
                         old_parent.unassign_child_resource(plr_resource)
+                    self.lab_logger().warning(
+                        f"物料{plr_resource}请求挂载到{parent_resource}，额外参数：{additional_params}"
+                    )
                     parent_resource.assign_child_resource(
                         plr_resource, location=None, **additional_params
-                    )
-                    self.lab_logger().warning(
-                        f"物料{plr_resource}请求挂载到{parent_resource}"
                     )
                     func = getattr(self.driver_instance, "resource_tree_transfer", None)
                     if callable(func):
@@ -675,6 +675,9 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                             self.lab_logger().info(
                                 f"物料{plr_resource} 原始父节点{original_parent_resource_uuid} 目标父节点{target_parent_resource_uuid} 更新"
                             )
+                            # todo: 对extra进行update
+                            if getattr(plr_resource, "extra", None) is not None:
+                                original_parent_resource.extra = getattr(plr_resource, "extra")
                             if original_parent_resource_uuid != target_parent_resource_uuid and original_parent_resource is not None:
                                 self.transfer_to_new_resource(original_instance, tree, additional_add_params)
                             original_instance.load_all_state(states)
