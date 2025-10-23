@@ -594,9 +594,22 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                     spec = inspect.signature(parent_resource.assign_child_resource)
                     if "spot" in spec.parameters:
                         additional_params["spot"] = site
+                    old_parent = plr_resource.parent
+                    if old_parent is not None:
+                        self.lab_logger().warning(
+                            f"物料{plr_resource}请求从{old_parent}卸载"
+                        )
+                        plr_resource.unassign_child_resource(plr_resource)
                     parent_resource.assign_child_resource(
                         plr_resource, location=None, **additional_params
                     )
+                    self.lab_logger().warning(
+                        f"物料{plr_resource}请求挂载到{parent_resource}"
+                    )
+                    func = getattr(self.driver_instance, "resource_tree_transfer", None)
+                    if callable(func):
+                        # 分别是 物料的原来父节点，当前物料的状态，物料的新父节点（此时物料已经重新assign了）
+                        func(old_parent, plr_resource, parent_resource)
                 except Exception as e:
                     self.lab_logger().warning(
                         f"物料{plr_resource}请求挂载{tree.root_node.res_content.name}的父节点{parent_resource}[{parent_uuid}]失败！\n{traceback.format_exc()}"
