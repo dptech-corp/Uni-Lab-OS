@@ -595,12 +595,12 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                     if "spot" in spec.parameters:
                         additional_params["spot"] = site
                     old_parent = plr_resource.parent
-                    # if old_parent is not None:
-                    #     # plr并不支持同一个deck的加载和卸载
-                    #     self.lab_logger().warning(
-                    #         f"物料{plr_resource}请求从{old_parent}卸载"
-                    #     )
-                    #     plr_resource.unassign_child_resource(plr_resource)
+                    if old_parent is not None:
+                        # plr并不支持同一个deck的加载和卸载
+                        self.lab_logger().warning(
+                            f"物料{plr_resource}请求从{old_parent}卸载"
+                        )
+                        plr_resource.unassign_child_resource(plr_resource)
                     parent_resource.assign_child_resource(
                         plr_resource, location=None, **additional_params
                     )
