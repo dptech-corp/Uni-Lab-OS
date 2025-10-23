@@ -600,7 +600,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                         self.lab_logger().warning(
                             f"物料{plr_resource}请求从{old_parent}卸载"
                         )
-                        plr_resource.unassign_child_resource(plr_resource)
+                        old_parent.unassign_child_resource(plr_resource)
                     parent_resource.assign_child_resource(
                         plr_resource, location=None, **additional_params
                     )
