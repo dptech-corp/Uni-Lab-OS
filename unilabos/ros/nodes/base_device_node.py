@@ -673,11 +673,11 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                             original_parent_resource_uuid = getattr(original_parent_resource, "unilabos_uuid", None)
                             target_parent_resource_uuid = tree.root_node.res_content.uuid_parent
                             self.lab_logger().info(
-                                f"物料{plr_resource} 原始父节点{original_parent_resource_uuid} 目标父节点{target_parent_resource_uuid} 更新"
+                                f"物料{original_instance} 原始父节点{original_parent_resource_uuid} 目标父节点{target_parent_resource_uuid} 更新"
                             )
                             # todo: 对extra进行update
                             if getattr(plr_resource, "unilabos_extra", None) is not None:
-                                original_parent_resource.unilabos_extra = getattr(plr_resource, "unilabos_extra")
+                                original_instance.unilabos_extra = getattr(plr_resource, "unilabos_extra")
                             if original_parent_resource_uuid != target_parent_resource_uuid and original_parent_resource is not None:
                                 self.transfer_to_new_resource(original_instance, tree, additional_add_params)
                             original_instance.load_all_state(states)
