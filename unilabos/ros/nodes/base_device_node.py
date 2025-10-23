@@ -589,7 +589,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                     if len(extra):
                         self.lab_logger().info(f"发现物料{plr_resource}额外参数: " + str(extra))
                     if "update_resource_site" in extra:
-                        additional_params["site"] = extra["update_resource_site"]
+                        additional_add_params["site"] = extra["update_resource_site"]
                     site = additional_add_params.get("site", None)
                     spec = inspect.signature(parent_resource.assign_child_resource)
                     if "spot" in spec.parameters:
