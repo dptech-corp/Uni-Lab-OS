@@ -595,11 +595,12 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                     if "spot" in spec.parameters:
                         additional_params["spot"] = site
                     old_parent = plr_resource.parent
-                    if old_parent is not None:
-                        self.lab_logger().warning(
-                            f"物料{plr_resource}请求从{old_parent}卸载"
-                        )
-                        plr_resource.unassign_child_resource(plr_resource)
+                    # if old_parent is not None:
+                    #     # plr并不支持同一个deck的加载和卸载
+                    #     self.lab_logger().warning(
+                    #         f"物料{plr_resource}请求从{old_parent}卸载"
+                    #     )
+                    #     plr_resource.unassign_child_resource(plr_resource)
                     parent_resource.assign_child_resource(
                         plr_resource, location=None, **additional_params
                     )
@@ -675,7 +676,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                                 f"物料{plr_resource} 原始父节点{original_parent_resource_uuid} 目标父节点{target_parent_resource_uuid} 更新"
                             )
                             if original_parent_resource_uuid != target_parent_resource_uuid and original_parent_resource is not None:
-                                self.transfer_to_new_resource(plr_resource, tree, additional_add_params)
+                                self.transfer_to_new_resource(original_instance, tree, additional_add_params)
                             original_instance.load_all_state(states)
                             self.lab_logger().info(
                                 f"更新了资源属性 {plr_resource}[{tree.root_node.res_content.uuid}] 及其子节点 {len(original_instance.get_all_children())} 个"
