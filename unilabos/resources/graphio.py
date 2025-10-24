@@ -624,6 +624,8 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
     Returns:
         pylabrobot 格式的物料列表
     """
+    print("1:bioyond_materials:",bioyond_materials)
+    # print("2:type_mapping:",type_mapping)
     plr_materials = []
 
     for material in bioyond_materials:

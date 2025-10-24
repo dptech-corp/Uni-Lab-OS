@@ -48,7 +48,7 @@ def bioyond_warehouse_1x2x2(name: str) -> WareHouse:
         item_dx=137.0,
         item_dy=96.0,
         item_dz=120.0,
-        category="warehouse",
+        category="YB_warehouse",
     )
 def bioyond_warehouse_10x1x1(name: str) -> WareHouse:
     """创建BioYond 4x1x4仓库"""

@@ -12,7 +12,7 @@ def YB_Solid_Stock(
     """创建粉末瓶"""
     return Bottle(
         name=name,
-        diameter=diameter,
+        diameter=diameter,# 未知
         height=height,
         max_volume=max_volume,
         barcode=barcode,

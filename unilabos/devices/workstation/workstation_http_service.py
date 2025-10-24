@@ -71,11 +71,11 @@ class WorkstationHTTPHandler(BaseHTTPRequestHandler):
             if content_length > 0:
                 post_data = self.rfile.read(content_length)
                 request_data = json.loads(post_data.decode('utf-8'))
-                
             else:
                 request_data = {}
-            logger.info(f"收到工作站报送: {endpoint} 收到接受数据：{request_data}")
-            # logger.info(f"收到的json数据: {request_data}")
+            
+            logger.info(f"收到工作站报送: {endpoint} - {request_data.get('token', 'unknown')}")
+            
             # 统一的报送端点路由（基于LIMS协议规范）
             if endpoint == '/report/step_finish':
                 response = self._handle_step_finish_report(request_data)
@@ -668,7 +668,7 @@ __all__ = [
 
 if __name__ == "__main__":
     # 简单测试HTTP服务
-    class BioyondWorkstation:
+    class DummyWorkstation:
         device_id = "WS-001"
         
         def process_step_finish_report(self, report_request):
