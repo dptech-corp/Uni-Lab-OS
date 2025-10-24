@@ -2,7 +2,7 @@ from unilabos.resources.itemized_carrier import Bottle, BottleCarrier
 # 工厂函数
 
 
-def BIOYOND_PolymerStation_Solid_Stock(
+def YB_Solid_Stock(
     name: str,
     diameter: float = 20.0,
     height: float = 100.0,
@@ -20,7 +20,7 @@ def BIOYOND_PolymerStation_Solid_Stock(
     )
 
 
-def BIOYOND_PolymerStation_Solid_Vial(
+def YB_Solid_Vial(
     name: str,
     diameter: float = 25.0,
     height: float = 60.0,
@@ -38,7 +38,7 @@ def BIOYOND_PolymerStation_Solid_Vial(
     )
 
 
-def BIOYOND_PolymerStation_Liquid_Vial(
+def YB_Liquid_Vial(
     name: str,
     diameter: float = 25.0,
     height: float = 60.0,
@@ -56,7 +56,7 @@ def BIOYOND_PolymerStation_Liquid_Vial(
     )
 
 
-def BIOYOND_PolymerStation_Solution_Beaker(
+def YB_Solution_Beaker(
     name: str,
     diameter: float = 60.0,
     height: float = 70.0,
@@ -74,7 +74,7 @@ def BIOYOND_PolymerStation_Solution_Beaker(
     )
 
 
-def BIOYOND_PolymerStation_Reagent_Bottle(
+def YB_Reagent_Bottle(
     name: str,
     diameter: float = 70.0,
     height: float = 120.0,
@@ -92,7 +92,7 @@ def BIOYOND_PolymerStation_Reagent_Bottle(
     )
 
 
-def BIOYOND_PolymerStation_100ml_Liquid_Bottle(
+def YB_100ml_Liquid_Bottle(
     name: str,
     diameter: float = 50.0,
     height: float = 80.0,
@@ -110,7 +110,7 @@ def BIOYOND_PolymerStation_100ml_Liquid_Bottle(
     )
 
 
-def BIOYOND_PolymerStation_Liquid_Bottle(
+def YB_Liquid_Bottle(
     name: str,
     diameter: float = 40.0,
     height: float = 70.0,
@@ -128,7 +128,7 @@ def BIOYOND_PolymerStation_Liquid_Bottle(
     )
 
 
-def BIOYOND_PolymerStation_High_Viscosity_Liquid_Bottle(
+def YB_High_Viscosity_Liquid_Bottle(
     name: str,
     diameter: float = 45.0,
     height: float = 75.0,
@@ -146,7 +146,7 @@ def BIOYOND_PolymerStation_High_Viscosity_Liquid_Bottle(
     )
 
 
-def BIOYOND_PolymerStation_Large_Dispense_Head(
+def YB_Large_Dispense_Head(
     name: str,
     diameter: float = 35.0,
     height: float = 90.0,
@@ -164,7 +164,7 @@ def BIOYOND_PolymerStation_Large_Dispense_Head(
     )
 
 
-def BIOYOND_PolymerStation_5ml_Dispensing_Vial(
+def YB_5ml_Dispensing_Vial(
     name: str,
     diameter: float = 15.0,
     height: float = 45.0,
@@ -182,7 +182,7 @@ def BIOYOND_PolymerStation_5ml_Dispensing_Vial(
     )
 
 
-def BIOYOND_PolymerStation_20ml_Dispensing_Vial(
+def YB_20ml_Dispensing_Vial(
     name: str,
     diameter: float = 20.0,
     height: float = 65.0,
@@ -200,7 +200,7 @@ def BIOYOND_PolymerStation_20ml_Dispensing_Vial(
     )
 
 
-def BIOYOND_PolymerStation_Small_Solution_Bottle(
+def YB_Small_Solution_Bottle(
     name: str,
     diameter: float = 35.0,
     height: float = 60.0,
@@ -218,7 +218,7 @@ def BIOYOND_PolymerStation_Small_Solution_Bottle(
     )
 
 
-def BIOYOND_PolymerStation_Large_Solution_Bottle(
+def YB_Large_Solution_Bottle(
     name: str,
     diameter: float = 55.0,
     height: float = 90.0,
@@ -236,7 +236,7 @@ def BIOYOND_PolymerStation_Large_Solution_Bottle(
     )
 
 
-def BIOYOND_PolymerStation_Pipette_Tip(
+def YB_Pipette_Tip(
     name: str,
     diameter: float = 10.0,
     height: float = 50.0,

@@ -2,17 +2,17 @@ from pylabrobot.resources import create_homogeneous_resources, Coordinate, Resou
 
 from unilabos.resources.itemized_carrier import Bottle, BottleCarrier
 from unilabos.resources.bioyond.bottles import (
-    BIOYOND_PolymerStation_Solid_Stock,
-    BIOYOND_PolymerStation_Solid_Vial,
-    BIOYOND_PolymerStation_Liquid_Vial,
-    BIOYOND_PolymerStation_Solution_Beaker,
-    BIOYOND_PolymerStation_Reagent_Bottle,
-    BIOYOND_PolymerStation_5ml_Dispensing_Vial,
-    BIOYOND_PolymerStation_20ml_Dispensing_Vial,
-    BIOYOND_PolymerStation_Small_Solution_Bottle,
-    BIOYOND_PolymerStation_Large_Solution_Bottle,
-    BIOYOND_PolymerStation_Large_Dispense_Head,
-    BIOYOND_PolymerStation_Pipette_Tip
+    YB_Solid_Stock,
+    YB_Solid_Vial,
+    YB_Liquid_Vial,
+    YB_Solution_Beaker,
+    YB_Reagent_Bottle,
+    YB_5ml_Dispensing_Vial,
+    YB_20ml_Dispensing_Vial,
+    YB_Small_Solution_Bottle,
+    YB_Large_Solution_Bottle,
+    YB_Large_Dispense_Head,
+    YB_Pipette_Tip
 )
 # 命名约定：试剂瓶-Bottle，烧杯-Beaker，烧瓶-Flask，小瓶-Vial
 
@@ -63,7 +63,7 @@ def BIOYOND_Electrolyte_6VialCarrier(name: str) -> BottleCarrier:
     carrier.num_items_y = 2
     carrier.num_items_z = 1
     for i in range(6):
-        carrier[i] = BIOYOND_PolymerStation_Solid_Vial(f"{name}_vial_{i+1}")
+        carrier[i] = YB_Solid_Vial(f"{name}_vial_{i+1}")
     return carrier
 
 
@@ -100,11 +100,11 @@ def BIOYOND_Electrolyte_1BottleCarrier(name: str) -> BottleCarrier:
     carrier.num_items_x = 1
     carrier.num_items_y = 1
     carrier.num_items_z = 1
-    carrier[0] = BIOYOND_PolymerStation_Solution_Beaker(f"{name}_beaker_1")
+    carrier[0] = YB_Solution_Beaker(f"{name}_beaker_1")
     return carrier
 
 
-def BIOYOND_PolymerStation_6StockCarrier(name: str) -> BottleCarrier:
+def YB_6StockCarrier(name: str) -> BottleCarrier:
     """6瓶载架 - 2x3布局"""
 
     # 载架尺寸 (mm)
@@ -151,11 +151,11 @@ def BIOYOND_PolymerStation_6StockCarrier(name: str) -> BottleCarrier:
     carrier.num_items_z = 1
     ordering = ["A1", "A2", "A3", "B1", "B2", "B3"]  # 自定义顺序
     for i in range(6):
-        carrier[i] = BIOYOND_PolymerStation_Solid_Stock(f"{name}_vial_{ordering[i]}")
+        carrier[i] = YB_Solid_Stock(f"{name}_vial_{ordering[i]}")
     return carrier
 
 
-def BIOYOND_PolymerStation_6VialCarrier(name: str) -> BottleCarrier:
+def YB_6VialCarrier(name: str) -> BottleCarrier:
     """6瓶载架 - 2x3布局"""
 
     # 载架尺寸 (mm)
@@ -202,13 +202,13 @@ def BIOYOND_PolymerStation_6VialCarrier(name: str) -> BottleCarrier:
     carrier.num_items_z = 1
     ordering = ["A1", "A2", "A3", "B1", "B2", "B3"]  # 自定义顺序
     for i in range(3):
-        carrier[i] = BIOYOND_PolymerStation_Solid_Vial(f"{name}_solidvial_{ordering[i]}")
+        carrier[i] = YB_Solid_Vial(f"{name}_solidvial_{ordering[i]}")
     for i in range(3, 6):
-        carrier[i] = BIOYOND_PolymerStation_Liquid_Vial(f"{name}_liquidvial_{ordering[i]}")
+        carrier[i] = YB_Liquid_Vial(f"{name}_liquidvial_{ordering[i]}")
     return carrier
 
 
-def BIOYOND_PolymerStation_1BottleCarrier(name: str) -> BottleCarrier:
+def YB_1BottleCarrier(name: str) -> BottleCarrier:
     """1瓶载架 - 单个中央位置"""
 
     # 载架尺寸 (mm)
@@ -241,11 +241,11 @@ def BIOYOND_PolymerStation_1BottleCarrier(name: str) -> BottleCarrier:
     carrier.num_items_x = 1
     carrier.num_items_y = 1
     carrier.num_items_z = 1
-    carrier[0] = BIOYOND_PolymerStation_Reagent_Bottle(f"{name}_flask_1")
+    carrier[0] = YB_Reagent_Bottle(f"{name}_flask_1")
     return carrier
 
 
-def BIOYOND_PolymerStation_1FlaskCarrier(name: str) -> BottleCarrier:
+def YB_1FlaskCarrier(name: str) -> BottleCarrier:
     """1瓶载架 - 单个中央位置"""
 
     # 载架尺寸 (mm)
@@ -278,11 +278,11 @@ def BIOYOND_PolymerStation_1FlaskCarrier(name: str) -> BottleCarrier:
     carrier.num_items_x = 1
     carrier.num_items_y = 1
     carrier.num_items_z = 1
-    carrier[0] = BIOYOND_PolymerStation_Reagent_Bottle(f"{name}_bottle_1")
+    carrier[0] = YB_Reagent_Bottle(f"{name}_bottle_1")
     return carrier
 
 
-def BIOYOND_PolymerStation_6x5ml_DispensingVialCarrier(name: str) -> BottleCarrier:
+def YB_6x5ml_DispensingVialCarrier(name: str) -> BottleCarrier:
     """5ml分液瓶板 - 4x2布局，8个位置"""
 
     # 载架尺寸 (mm)
@@ -328,11 +328,11 @@ def BIOYOND_PolymerStation_6x5ml_DispensingVialCarrier(name: str) -> BottleCarri
     carrier.num_items_z = 1
     ordering = ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4"]
     for i in range(8):
-        carrier[i] = BIOYOND_PolymerStation_5ml_Dispensing_Vial(f"{name}_vial_{ordering[i]}")
+        carrier[i] = YB_5ml_Dispensing_Vial(f"{name}_vial_{ordering[i]}")
     return carrier
 
 
-def BIOYOND_PolymerStation_6x20ml_DispensingVialCarrier(name: str) -> BottleCarrier:
+def YB_6x20ml_DispensingVialCarrier(name: str) -> BottleCarrier:
     """20ml分液瓶板 - 4x2布局，8个位置"""
 
     # 载架尺寸 (mm)
@@ -378,11 +378,11 @@ def BIOYOND_PolymerStation_6x20ml_DispensingVialCarrier(name: str) -> BottleCarr
     carrier.num_items_z = 1
     ordering = ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4"]
     for i in range(8):
-        carrier[i] = BIOYOND_PolymerStation_20ml_Dispensing_Vial(f"{name}_vial_{ordering[i]}")
+        carrier[i] = YB_20ml_Dispensing_Vial(f"{name}_vial_{ordering[i]}")
     return carrier
 
 
-def BIOYOND_PolymerStation_6x_SmallSolutionBottleCarrier(name: str) -> BottleCarrier:
+def YB_6x_SmallSolutionBottleCarrier(name: str) -> BottleCarrier:
     """配液瓶(小)板 - 4x2布局，8个位置"""
 
     # 载架尺寸 (mm)
@@ -428,11 +428,11 @@ def BIOYOND_PolymerStation_6x_SmallSolutionBottleCarrier(name: str) -> BottleCar
     carrier.num_items_z = 1
     ordering = ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4"]
     for i in range(8):
-        carrier[i] = BIOYOND_PolymerStation_Small_Solution_Bottle(f"{name}_bottle_{ordering[i]}")
+        carrier[i] = YB_Small_Solution_Bottle(f"{name}_bottle_{ordering[i]}")
     return carrier
 
 
-def BIOYOND_PolymerStation_4x_LargeSolutionBottleCarrier(name: str) -> BottleCarrier:
+def YB_4x_LargeSolutionBottleCarrier(name: str) -> BottleCarrier:
     """配液瓶(大)板 - 2x2布局，4个位置"""
 
     # 载架尺寸 (mm)
@@ -478,11 +478,11 @@ def BIOYOND_PolymerStation_4x_LargeSolutionBottleCarrier(name: str) -> BottleCar
     carrier.num_items_z = 1
     ordering = ["A1", "A2", "B1", "B2"]
     for i in range(4):
-        carrier[i] = BIOYOND_PolymerStation_Large_Solution_Bottle(f"{name}_bottle_{ordering[i]}")
+        carrier[i] = YB_Large_Solution_Bottle(f"{name}_bottle_{ordering[i]}")
     return carrier
 
 
-def BIOYOND_PolymerStation_6x_LargeDispenseHeadCarrier(name: str) -> BottleCarrier:
+def YB_6x_LargeDispenseHeadCarrier(name: str) -> BottleCarrier:
     """加样头(大)板 - 1x1布局，1个位置"""
 
     # 载架尺寸 (mm)
@@ -526,11 +526,11 @@ def BIOYOND_PolymerStation_6x_LargeDispenseHeadCarrier(name: str) -> BottleCarri
     carrier.num_items_x = 1
     carrier.num_items_y = 1
     carrier.num_items_z = 1
-    carrier[0] = BIOYOND_PolymerStation_Large_Dispense_Head(f"{name}_head_1")
+    carrier[0] = YB_Large_Dispense_Head(f"{name}_head_1")
     return carrier
 
 
-def BIOYOND_PolymerStation_AdapterBlock(name: str) -> BottleCarrier:
+def YB_AdapterBlock(name: str) -> BottleCarrier:
     """适配器块 - 单个中央位置"""
 
     # 载架尺寸 (mm)
@@ -567,7 +567,7 @@ def BIOYOND_PolymerStation_AdapterBlock(name: str) -> BottleCarrier:
     return carrier
 
 
-def BIOYOND_PolymerStation_TipBox(name: str) -> BottleCarrier:
+def YB_TipBox(name: str) -> BottleCarrier:
     """枪头盒 - 8x12布局，96个位置"""
 
     # 载架尺寸 (mm)
@@ -615,6 +615,6 @@ def BIOYOND_PolymerStation_TipBox(name: str) -> BottleCarrier:
     for i in range(96):
         row = chr(65 + i // 12)  # A-H
         col = (i % 12) + 1  # 1-12
-        carrier[i] = BIOYOND_PolymerStation_Pipette_Tip(f"{name}_tip_{row}{col}")
+        carrier[i] = YB_Pipette_Tip(f"{name}_tip_{row}{col}")
     return carrier
 
