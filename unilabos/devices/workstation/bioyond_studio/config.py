@@ -148,7 +148,7 @@ MATERIAL_TYPE_MAPPINGS = {
     "样品瓶": ("BIOYOND_PolymerStation_Solid_Stock", "3a14196a-cf7d-8aea-48d8-b9662c7dba94"),
     "90%分装小瓶": ("BIOYOND_PolymerStation_Solid_Vial", "3a14196c-cdcf-088d-dc7d-5cf38f0ad9ea"),
     "10%分装小瓶": ("BIOYOND_PolymerStation_Liquid_Vial", "3a14196c-76be-2279-4e22-7310d69aed68"),
-    "20ml分液瓶": ("BIOYOND_PolymerStation_6x20ml_DispensingVialCarrier", "3a14196e-5dfe-6e21-0c79-fe2036d052c4"),
+    "20ml分液瓶": ("BIOYOND_PolymerStation_20ml_Dispensing_Vial", "3a192c2b-19e8-f0a3-035e-041ca8ca1035"),
     "100ml液体": ("BIOYOND_PolymerStation_100ml_Liquid_Bottle", "d37166b3-ecaa-481e-bd84-3032b795ba07"),
     "液": ("BIOYOND_PolymerStation_Liquid_Bottle", "3a190ca1-2add-2b23-f8e1-bbd348b7f790"),
     "高粘液": ("BIOYOND_PolymerStation_High_Viscosity_Liquid_Bottle", "abe8df30-563d-43d2-85e0-cabec59ddc16"),
