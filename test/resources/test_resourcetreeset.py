@@ -13,13 +13,13 @@ lab_registry.setup()
 
 
 type_mapping = {
-    "烧杯": ("BIOYOND_PolymerStation_1FlaskCarrier", "3a14196b-24f2-ca49-9081-0cab8021bf1a"),
-    "试剂瓶": ("BIOYOND_PolymerStation_1BottleCarrier", ""),
-    "样品板": ("BIOYOND_PolymerStation_6StockCarrier", "3a14196e-b7a0-a5da-1931-35f3000281e9"),
-    "分装板": ("BIOYOND_PolymerStation_6VialCarrier", "3a14196e-5dfe-6e21-0c79-fe2036d052c4"),
-    "样品瓶": ("BIOYOND_PolymerStation_Solid_Stock", "3a14196a-cf7d-8aea-48d8-b9662c7dba94"),
-    "90%分装小瓶": ("BIOYOND_PolymerStation_Solid_Vial", "3a14196c-cdcf-088d-dc7d-5cf38f0ad9ea"),
-    "10%分装小瓶": ("BIOYOND_PolymerStation_Liquid_Vial", "3a14196c-76be-2279-4e22-7310d69aed68"),
+    "烧杯": ("YB_1FlaskCarrier", "3a14196b-24f2-ca49-9081-0cab8021bf1a"),
+    "试剂瓶": ("YB_1BottleCarrier", ""),
+    "样品板": ("YB_6StockCarrier", "3a14196e-b7a0-a5da-1931-35f3000281e9"),
+    "分装板": ("YB_6VialCarrier", "3a14196e-5dfe-6e21-0c79-fe2036d052c4"),
+    "样品瓶": ("YB_Solid_Stock", "3a14196a-cf7d-8aea-48d8-b9662c7dba94"),
+    "90%分装小瓶": ("YB_Solid_Vial", "3a14196c-cdcf-088d-dc7d-5cf38f0ad9ea"),
+    "10%分装小瓶": ("YB_Liquid_Vial", "3a14196c-76be-2279-4e22-7310d69aed68"),
 }
 
 
