@@ -21,7 +21,7 @@ API_CONFIG = {
     # HTTP 服务配置
     "HTTP_host": os.getenv("BIOYOND_HTTP_HOST", "0.0.0.0"),  # HTTP服务监听地址（0.0.0.0 表示监听所有网络接口）
     "HTTP_port": int(os.getenv("BIOYOND_HTTP_PORT", "8080")),
-    "report_ip": os.getenv("BIOYOND_REPORT_IP", "172.21.32.172"),  # 报送给 Bioyond 的本机IP地址（留空则自动检测）
+    "report_ip": os.getenv("BIOYOND_REPORT_IP", "172.21.32.22"),  # 报送给 Bioyond 的本机IP地址（留空则自动检测）
     # 调试模式
     "debug_mode": False,
 }
@@ -112,10 +112,10 @@ SOLID_LIQUID_MAPPINGS = {
     #     "barCode": "",
     #     "name": "LiFSI",
     #     "unit": "g",
-    #     "parameters": {"Density": "1.533"},
+    #     "parameters": "",
     #     "quantity": 2,
     #     "warningQuantity": 1,
-    #     "details": [{}]
+    #     "details": []
     # },
     # "DTC": {
     #     "typeId": "3a190ca0-b2f6-9aeb-8067-547e72c11469",
@@ -123,10 +123,10 @@ SOLID_LIQUID_MAPPINGS = {
     #     "barCode": "",
     #     "name": "DTC",
     #     "unit": "g",
-    #     "parameters": {"Density": "1.533"},
+    #     "parameters": "",
     #     "quantity": 2,
     #     "warningQuantity": 1,
-    #     "details": [{}]
+    #     "details": []
     # },
     # "LiPO2F2": {
     #     "typeId": "3a190ca0-b2f6-9aeb-8067-547e72c11469",
@@ -134,10 +134,10 @@ SOLID_LIQUID_MAPPINGS = {
     #     "barCode": "",
     #     "name": "LiPO2F2",
     #     "unit": "g",
-    #     "parameters": {"Density": "1.533"},
+    #     "parameters": "",
     #     "quantity": 2,
     #     "warningQuantity": 1,
-    #     "details": [{}]
+    #     "details": []
     # },
     # 液体
     # "SA": ("BIOYOND_PolymerStation_Solid_Stock", "3a190ca0-b2f6-9aeb-8067-547e72c11469"),
