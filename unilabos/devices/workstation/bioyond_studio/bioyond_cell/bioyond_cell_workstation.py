@@ -9,14 +9,13 @@ import time
 from datetime import datetime, timedelta
 import re
 import threading
-import os
-import socket
+import json
 
 from urllib3 import response
 from unilabos.devices.workstation.workstation_base import WorkstationBase
 from unilabos.devices.workstation.bioyond_studio.station import BioyondWorkstation, BioyondResourceSynchronizer
 from unilabos.devices.workstation.bioyond_studio.config import (
-    BIOYOND_FULL_CONFIG, WORKFLOW_MAPPINGS, MATERIAL_TYPE_MAPPINGS, WAREHOUSE_MAPPING
+    API_CONFIG, MATERIAL_TYPE_MAPPINGS, WAREHOUSE_MAPPING, SOLID_LIQUID_MAPPINGS
 )
 from unilabos.devices.workstation.workstation_http_service import WorkstationHTTPService
 from unilabos.utils.log import logger
@@ -43,32 +42,52 @@ class BioyondCellWorkstation(BioyondWorkstation):
         *args, **kwargs,
         ):
 
-        # 使用统一配置，支持自定义覆盖
-        self.bioyond_config = bioyond_config or {
-            **BIOYOND_FULL_CONFIG,  # 从 config.py 加载完整配置
-            "workflow_mappings": WORKFLOW_MAPPINGS,
+        # 使用统一配置，支持自定义覆盖, 从 config.py 加载完整配置
+        self.bioyond_config = bioyond_config or  {
+            **API_CONFIG,
             "material_type_mappings": MATERIAL_TYPE_MAPPINGS,
             "warehouse_mapping": WAREHOUSE_MAPPING
-        }
+    }
+          
+            # "material_type_mappings": MATERIAL_TYPE_MAPPINGS
+            # "warehouse_mapping": WAREHOUSE_MAPPING
+
+        print(self.bioyond_config)
         self.debug_mode = self.bioyond_config["debug_mode"]
-        self.http_service_started = False
+        self.http_service_started = self.debug_mode
         deck = kwargs.pop("deck", None)
         self.device_id = kwargs.pop("device_id", "bioyond_cell_workstation")
         super().__init__(bioyond_config=self.bioyond_config, deck=deck, station_resource=station_resource, *args, **kwargs)
-        # 步骤通量任务通知铃
-        self._pending_events: dict[str, threading.Event] = {}
+        self.update_push_ip() #直接修改奔耀端的报送ip地址
+        logger.info("已更新奔耀端推送 IP 地址")
+
+        # 启动 HTTP 服务线程
+        t = threading.Thread(target=self._start_http_service, daemon=True, name="unilab_http")
+        t.start()
+        logger.info("HTTP 服务线程已启动")
+        # 等到任务报送成功
+        self.order_finish_event = threading.Event()
+        self.last_order_status = None
+        self.last_order_code = None
         logger.info(f"Bioyond工作站初始化完成 (debug_mode={self.debug_mode})")
 
-        # 实例化并在后台线程启动 HTTP 报送服务
-        self.order_status = {} # 记录任务完成情况，用于接受bioyond post信息和反馈信息，尤其用于硬件查询和物料信息变化
+    def _start_http_service(self):
+        """启动 HTTP 服务"""
+        host = self.bioyond_config.get("HTTP_host", "")
+        port = self.bioyond_config.get("HTTP_port", None)
         try:
-            logger.info("准备开始unilab_HTTP后台线程")
-            t = threading.Thread(target=self._start_http_service, daemon=True, name="unilab_http")
-            t.start()
+            self.service = WorkstationHTTPService(self, host=host, port=port)
+            self.service.start()
+            self.http_service_started = True
+            logger.info(f"WorkstationHTTPService 成功启动: {host}:{port}")
+            while True:
+                time.sleep(1) #一直挂着，直到进程退出
         except Exception as e:
-            logger.error(f"unilab-HTTP后台线程启动失败: {e}")
+            self.http_service_started = False
+            logger.error(f"启动 WorkstationHTTPService 失败: {e}", exc_info=True)
 
-    # http报送服务
+
+    # http报送服务，返回数据部分
     def process_step_finish_report(self, report_request):
         stepId = report_request.data.get("stepId")
         logger.info(f"步骤完成: stepId: {stepId}, stepName:{report_request.data.get('stepName')}")
@@ -82,147 +101,65 @@ class BioyondCellWorkstation(BioyondWorkstation):
         order_code = report_request.data.get("orderCode")
         status = report_request.data.get("status")
         logger.info(f"report_request: {report_request}")
-
         logger.info(f"任务完成: {order_code}, status={status}")
-        
-        # 记录订单状态码
-        if order_code:
-            self.order_status[order_code] = status
-        
-        self._set_pending_event(order_code)
+
+        # 保存完整报文
+        self.last_order_report = report_request.data
+        # 如果是当前等待的订单，触发事件
+        if self.last_order_code == order_code:
+            self.order_finish_event.set()
+
         return {"status": "received"}
 
-    def _set_pending_event(self, taskname: Optional[str]) -> None:
-        if not taskname:
-            return
-        event = self._pending_events.get(taskname)
-        if event is None:
-            event = threading.Event()
-            self._pending_events[taskname] = event
-        event.set()
-
-    def _wait_for_order_completion(self, order_code: Optional[str], timeout: int = 600) -> bool:
+    def wait_for_order_finish(self, order_code: str, timeout: int = 1800) -> Dict[str, Any]:
+        """
+        等待指定 orderCode 的 /report/order_finish 报送。
+        Args:
+            order_code: 任务编号
+            timeout: 超时时间（秒）
+        Returns:
+            完整的报送数据 + 状态判断结果
+        """
         if not order_code:
-            logger.warning("无法等待任务完成：order_code 为空")
-            return False
-        event = self._pending_events.get(order_code)
-        if event is None:
-            event = threading.Event()
-            self._pending_events[order_code] = event
-        elif event.is_set():
-            logger.info(f"任务 {order_code} 在等待之前已完成")
-            self._pending_events.pop(order_code, None)
-            return True
-        logger.info(f"等待任务 {order_code} 完成 (timeout={timeout}s)")
-        finished = event.wait(timeout)
-        if not finished:
-            logger.warning(f"等待任务 {order_code} 完成超时（{timeout}s）")
-        self._pending_events.pop(order_code, None)
-        return finished
+            logger.error("wait_for_order_finish() 被调用，但 order_code 为空！")
+            return {"status": "error", "message": "empty order_code"}
 
-    def _wait_for_response_orders(self, response: Dict[str, Any], context: str, timeout: int = 600) -> None:
-        order_codes = self._extract_order_codes(response)
-        if not order_codes:
-            logger.warning(f"{context} 响应中未找到 orderCode，无法跟踪任务完成")
-            return
-        for code in order_codes:
-            finished = self._wait_for_order_completion(code, timeout=timeout)
-            if finished:
-                # 检查订单返回码是否为30（正常完成）
-                status = self.order_status.get(code)
-                if status == 30 or status == "30":
-                    logger.info(f"订单 {code} 成功完成，状态码: {status}")
-                else:
-                    logger.warning(f"订单 {code} 完成但状态码异常: {status} (期望: 30, -11=异常停止, -12=人工停止)")
-                # 清理状态记录
-                self.order_status.pop(code, None)
-            else:
-                logger.error(f"订单 {code} 等待超时，未收到完成通知")
+        self.last_order_code = order_code
+        self.last_order_report = None
+        self.order_finish_event.clear()
 
-    @staticmethod
-    def _extract_order_codes(response: Dict[str, Any]) -> List[str]:
-        order_codes: List[str] = []
-        if not isinstance(response, dict):
-            return order_codes
-        data = response.get("data")
-        keys = ["orderCode", "order_code", "orderId", "order_id"]
-        if isinstance(data, dict):
-            for key in keys:
-                if key in data and data[key]:
-                    order_codes.append(str(data[key]))
-            if not order_codes and "orders" in data and isinstance(data["orders"], list):
-                for order in data["orders"]:
-                    if isinstance(order, dict):
-                        for key in keys:
-                            if key in order and order[key]:
-                                order_codes.append(str(order[key]))
-        elif isinstance(data, list):
-            for item in data:
-                if isinstance(item, dict):
-                    for key in keys:
-                        if key in item and item[key]:
-                            order_codes.append(str(item[key]))
-        elif isinstance(data, str):
-            if data:
-                order_codes.append(data)
-        meta = response.get("orderCode")
-        if meta:
-            order_codes.append(str(meta))
-        # 去重
-        seen = set()
-        unique_codes: List[str] = []
-        for code in order_codes:
-            if code not in seen:
-                seen.add(code)
-                unique_codes.append(code)
-        return unique_codes
+        logger.info(f"等待任务完成报送: orderCode={order_code} (timeout={timeout}s)")
 
+        if not self.order_finish_event.wait(timeout=timeout):
+            logger.error(f"等待任务超时: orderCode={order_code}")
+            return {"status": "timeout", "orderCode": order_code}
 
-    def _start_http_service(self, host: Optional[str] = None, port: Optional[int] = None) -> None:
-        host = host or self.bioyond_config.get("HTTP_host", "")
-        port = port or self.bioyond_config.get("HTTP_port", )
+        # 报送数据匹配验证
+        report = self.last_order_report or {}
+        report_code = report.get("orderCode")
+        status = str(report.get("status", ""))
 
-        logger.info("准备开始unilab_HTTP服务")
-        try:
-            self.service = WorkstationHTTPService(self, host=host, port=port)
-            logger.info("WorkstationHTTPService 实例化完成")
-            self.service.start()
-            self.http_service_started = True
-            logger.info(f"WorkstationHTTPService成功启动: {host}:{port}")
-            
-            # 启动成功后，上报本机推送地址（3.36）
-            try:
-                # 优先使用配置中的 report_ip
-                report_ip = self.bioyond_config.get("report_ip", "").strip()
-                
-                # 如果配置中没有指定 report_ip，且监听地址是 0.0.0.0，则自动检测
-                if not report_ip and host in ("0.0.0.0", ""):
-                    # 从 Bioyond 配置中提取服务器地址
-                    bioyond_server = self.bioyond_config.get("base_url", "")
-                    if bioyond_server:
-                        import urllib.parse
-                        parsed = urllib.parse.urlparse(bioyond_server)
-                    
-                elif not report_ip:
-                    # 如果没有配置 report_ip，使用监听地址
-                    report_ip = host
-                
-                r = self.update_push_ip(report_ip, port)
-                logger.info(f"向 Bioyond 报送推送地址: {report_ip}:{port}, 结果: {r}")
-            except Exception as e:
-                logger.warning(f"调用更新推送IP接口失败: {e}")
-            
-            #一直挂着，直到进程退出
-            while True:
-                time.sleep(1)
-        except Exception as e:
-            self.http_service_started = False # 调试用
-            logger.error(f"启动WorkstationHTTPService失败: {e}", exc_info=True)
+        if report_code != order_code:
+            logger.warning(f"收到的报送 orderCode 不匹配: {report_code} ≠ {order_code}")
+            return {"status": "mismatch", "report": report}
+
+        if status == "30":
+            logger.info(f"任务成功完成 (orderCode={order_code})")
+            return {"status": "success", "report": report}
+        elif status == "-11":
+            logger.error(f"任务异常停止 (orderCode={order_code})")
+            return {"status": "abnormal_stop", "report": report}
+        elif status == "-12":
+            logger.warning(f"任务人工停止 (orderCode={order_code})")
+            return {"status": "manual_stop", "report": report}
+        else:
+            logger.warning(f"任务未知状态 ({status}) (orderCode={order_code})")
+            return {"status": f"unknown_{status}", "report": report}
+
 
     # -------------------- 基础HTTP封装 --------------------
     def _url(self, path: str) -> str:
-
-        return f"{self.bioyond_config['base_url'].rstrip('/')}/{path.lstrip('/')}"
+        return f"{self.bioyond_config['api_host'].rstrip('/')}/{path.lstrip('/')}"
 
     def _post_lims(self, path: str, data: Optional[Any] = None) -> Dict[str, Any]:
         """LIMS API：大多数接口用 {apiKey/requestTime,data} 包装"""
@@ -236,9 +173,11 @@ class BioyondCellWorkstation(BioyondWorkstation):
         if self.debug_mode:
             # 模拟返回，不发真实请求
             logger.info(f"[DEBUG] POST {path} with payload={payload}")
+            
             return {"debug": True, "url": self._url(path), "payload": payload, "status": "ok"}
 
         try:
+            logger.info(json.dumps(payload, ensure_ascii=False))
             response = requests.post(
                 self._url(path), 
                 json=payload,
@@ -248,7 +187,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
             response.raise_for_status()
             return response.json()
         except Exception as e:
-            logger.info(f"{self.bioyond_config['base_url'].rstrip('/')}/{path.lstrip('/')}")
+            logger.info(f"{self.bioyond_config['api_host'].rstrip('/')}/{path.lstrip('/')}")
             logger.error(f"POST {path} 失败: {e}")
             return {"error": str(e)}
 
@@ -263,7 +202,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
 
         if self.debug_mode:
             logger.info(f"[DEBUG] PUT {path} with payload={payload}")
-            return {"debug": True, "url": self._url(path), "payload": payload, "status": "ok"}
+            return {"debug_mode": True, "url": self._url(path), "payload": payload, "status": "ok"}
 
         try:
             response = requests.put(
@@ -275,7 +214,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
             response.raise_for_status()
             return response.json()
         except Exception as e:
-            logger.info(f"{self.bioyond_config['base_url'].rstrip('/')}/{path.lstrip('/')}")
+            logger.info(f"{self.bioyond_config['api_host'].rstrip('/')}/{path.lstrip('/')}")
             logger.error(f"PUT {path} 失败: {e}")
             return {"error": str(e)}
 
@@ -310,11 +249,10 @@ class BioyondCellWorkstation(BioyondWorkstation):
         return self._post_lims("/api/lims/storage/batch-inbound", items)
 
 
-
     def auto_feeding4to3(
         self,
         # ★ 修改点：默认模板路径
-        xlsx_path: Optional[str] = "/Users/calvincao/Desktop/work/uni-lab-all/Uni-Lab-OS/unilabos/devices/workstation/bioyond_studio/bioyond_cell/样品导入模板.xlsx",
+        xlsx_path: Optional[str] = "unilabos\\devices\\workstation\\bioyond_studio\\bioyond_cell\\样品导入模板.xlsx",
         # ---------------- WH4 - 加样头面 (Z=1, 12个点位) ----------------
         WH4_x1_y1_z1_1_materialName: str = "", WH4_x1_y1_z1_1_quantity: float = 0.0,
         WH4_x2_y1_z1_2_materialName: str = "", WH4_x2_y1_z1_2_quantity: float = 0.0,
@@ -443,9 +381,15 @@ class BioyondCellWorkstation(BioyondWorkstation):
             return {"code": 0, "message": "no valid items", "data": []}
         logger.info(items)
         response = self._post_lims("/api/lims/order/auto-feeding4to3", items)
-        self._wait_for_response_orders(response, "auto_feeding4to3")
-        return response
 
+        # 等待任务报送成功
+        order_code = response.get("data", {}).get("orderCode")
+        if not order_code:
+            logger.error("上料任务未返回有效 orderCode！")
+            return response
+          # 等待完成报送
+        result = self.wait_for_order_finish(order_code)
+        return result
 
 
 
@@ -681,31 +625,17 @@ class BioyondCellWorkstation(BioyondWorkstation):
             }
             orders.append(order_data)
 
-        # print(orders)
-        while True:
-            time.sleep(5)
-            response = self._post_lims("/api/lims/order/orders", orders)
-            if response.get("data", []):
-                break
-            logger.info(f"等待配液实验创建完成")
 
-
-       
-        # self.order_status[response["data"]["orderCode"]] = "running"
-
-        # while True:
-        #     time.sleep(5)
-        #     if self.order_status.get(response["data"]["orderCode"], None) == "finished":
-        #         logger.info(f"配液实验已完成 ，即将执行 3-2-1 转运")
-        #         break
-        #     logger.info(f"等待配液实验完成")
-
-        # self.transfer_3_to_2_to_1()
-        # self.wait_for_transfer_task()
-        # logger.info(f"3-2-1 转运完成，返回结果")
-        # return r321
-        self._wait_for_response_orders(response, "create_orders", timeout=1800)
-        return response
+        response = self._post_lims("/api/lims/order/orders", orders)
+        print(response)
+        # 等待任务报送成功
+        order_code = response.get("data", {}).get("orderCode")
+        if not order_code:
+            logger.error("上料任务未返回有效 orderCode！")
+            return response
+          # 等待完成报送
+        result = self.wait_for_order_finish(order_code)
+        return result
 
     # 2.7 启动调度
     def scheduler_start(self) -> Dict[str, Any]:
@@ -726,6 +656,13 @@ class BioyondCellWorkstation(BioyondWorkstation):
         请求体只包含 apiKey 和 requestTime
         """
         return self._post_lims("/api/lims/scheduler/continue")
+    def scheduler_reset(self) -> Dict[str, Any]:
+        """
+        复位调度 (2.11)
+        请求体只包含 apiKey 和 requestTime
+        """
+        return self._post_lims("/api/lims/scheduler/reset")
+
 
     # 2.24 物料变更推送
     def report_material_change(self, material_obj: Dict[str, Any]) -> Dict[str, Any]:
@@ -744,7 +681,16 @@ class BioyondCellWorkstation(BioyondWorkstation):
         }
         if source_wh_id:
             payload["sourceWHID"] = source_wh_id
-        return self._post_lims("/api/lims/order/transfer-task3To2To1", payload)
+
+        response = self._post_lims("/api/lims/order/transfer-task3To2To1", payload)
+        # 等待任务报送成功
+        order_code = response.get("data", {}).get("orderCode")
+        if not order_code:
+            logger.error("上料任务未返回有效 orderCode！")
+            return response
+          # 等待完成报送
+        result = self.wait_for_order_finish(order_code)
+        return result
 
     # 3.35 1→2 物料转运
     def transfer_1_to_2(self) -> Dict[str, Any]:
@@ -753,7 +699,15 @@ class BioyondCellWorkstation(BioyondWorkstation):
         URL: /api/lims/order/transfer-task1To2
         只需要 apiKey 和 requestTime
         """
-        return self._post_lims("/api/lims/order/transfer-task1To2")
+        response = self._post_lims("/api/lims/order/transfer-task1To2")
+                # 等待任务报送成功
+        order_code = response.get("data", {}).get("orderCode")
+        if not order_code:
+            logger.error("上料任务未返回有效 orderCode！")
+            return response
+          # 等待完成报送
+        result = self.wait_for_order_finish(order_code)
+        return result
    
     # 2.5 批量查询实验报告(post过滤关键字查询)
     def order_list_v2(self,
@@ -825,28 +779,23 @@ class BioyondCellWorkstation(BioyondWorkstation):
         logger.warning("超时未找到成功的物料转移任务")
         return False
 
-    def create_solid_materials(self, material_names: List[str], type_id: str = "3a190ca0-b2f6-9aeb-8067-547e72c11469") -> List[Dict[str, Any]]:
+    def create_materials(self, mappings: Dict[str, Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
-        批量创建固体物料
-        
-        Args:
-            material_names: 物料名称列表
-            type_id: 物料类型ID（默认为固体物料类型）
-            
-        Returns:
-            创建的物料列表，每个元素包含物料信息和ID
+        将 SOLID_LIQUID_MAPPINGS 中的所有物料逐个 POST 到 /api/lims/storage/material
         """
-        created_materials = []
-        total = len(material_names)
-        
-        for i, name in enumerate(material_names, 1):
-            # 根据接口文档构建完整的请求体
-            material_data = {
-                "typeId": type_id,
-                "name": name,
-                "unit": "g",              # 添加单位
-                "quantity": 1,            # 添加数量（默认1）
-                "parameters": ""          # 参数字段（空字符串表示无参数）
+        results = []
+
+        for name, data in mappings.items():
+            data = {
+                "typeId": data["typeId"],
+                "code": data.get("code", ""),
+                "barCode": data.get("barCode", ""),
+                "name": data["name"],
+                "unit": data.get("unit", "g"),
+                "parameters": data.get("parameters", ""),
+                "quantity": data.get("quantity", ""),
+                "warningQuantity": data.get("warningQuantity", ""),
+                "details": data.get("details", [])
             }
             
             logger.info(f"正在创建第 {i}/{total} 个固体物料: {name}")
@@ -1019,20 +968,24 @@ class BioyondCellWorkstation(BioyondWorkstation):
 
 if __name__ == "__main__":
     ws = BioyondCellWorkstation()
-    logger.info(ws.scheduler_start())
+    logger.info(ws.scheduler_stop())
     
+    
+    results = ws.create_materials(SOLID_LIQUID_MAPPINGS)
+    for r in results:
+        logger.info(r)
     # 从CSV文件读取物料列表并批量创建入库
     result = ws.create_and_inbound_materials()
     
     # 继续后续流程
-    logger.info(ws.auto_feeding4to3()) #搬运物料到3号箱
-    # 使用正斜杠或 Path 对象来指定文件路径
-    excel_path = Path("unilabos/devices/workstation/bioyond_studio/bioyond_cell/2025092701.xlsx")
-    logger.info(ws.create_orders(excel_path))
-    logger.info(ws.transfer_3_to_2_to_1())
+    # logger.info(ws.auto_feeding4to3()) #搬运物料到3号箱
+    # # 使用正斜杠或 Path 对象来指定文件路径
+    # excel_path = Path("unilabos\\devices\\workstation\\bioyond_studio\\bioyond_cell\\2025092701.xlsx")
+    # logger.info(ws.create_orders(excel_path))
+    # logger.info(ws.transfer_3_to_2_to_1())
 
-    logger.info(ws.transfer_1_to_2())
-
+    # logger.info(ws.transfer_1_to_2())
+    # logger.info(ws.scheduler_start())
 
 
     while True:
