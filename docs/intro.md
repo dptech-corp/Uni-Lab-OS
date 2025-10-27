@@ -32,9 +32,8 @@ developer_guide/device_driver
 developer_guide/add_device
 developer_guide/add_action
 developer_guide/actions
+developer_guide/workstation_architecture
 developer_guide/add_protocol
-developer_guide/add_batteryPLC
-developer_guide/materials_tutorial.md
 ```
 
 ## 接口文档

@@ -120,6 +120,7 @@ reaction_station.bioyond:
         feedback: {}
         goal:
           assign_material_name: assign_material_name
+          solvents: solvents
           temperature: temperature
           time: time
           titration_type: titration_type
@@ -127,15 +128,23 @@ reaction_station.bioyond:
           volume: volume
         goal_default:
           assign_material_name: ''
-          temperature: ''
-          time: ''
-          titration_type: ''
-          torque_variation: ''
+          solvents: ''
+          temperature: '25.00'
+          time: '360'
+          titration_type: '1'
+          torque_variation: '2'
           volume: ''
-        handles: {}
+        handles:
+          input:
+          - data_key: solvents
+            data_source: handle
+            data_type: object
+            handler_key: solvents
+            io_type: source
+            label: Solvents Data From Calculation Node
         result: {}
         schema:
-          description: 液体投料-溶剂
+          description: 液体投料-溶剂。可以直接提供volume(μL),或通过solvents对象自动从additional_solvent(mL)计算volume。
           properties:
             feedback: {}
             goal:
@@ -143,28 +152,30 @@ reaction_station.bioyond:
                 assign_material_name:
                   description: 物料名称
                   type: string
+                solvents:
+                  description: '溶剂信息对象(可选),包含: additional_solvent(溶剂体积mL), total_liquid_volume(总液体体积mL)。如果提供,将自动计算volume'
+                  type: string
                 temperature:
-                  description: 温度设定(°C)
+                  default: '25.00'
+                  description: 温度设定(°C),默认25.00
                   type: string
                 time:
-                  description: 观察时间(分钟)
+                  default: '360'
+                  description: 观察时间(分钟),默认360
                   type: string
                 titration_type:
-                  description: 是否滴定(1=否, 2=是)
+                  default: '1'
+                  description: 是否滴定(1=否, 2=是),默认1
                   type: string
                 torque_variation:
-                  description: 是否观察 (1=否, 2=是)
+                  default: '2'
+                  description: 是否观察 (1=否, 2=是),默认2
                   type: string
                 volume:
-                  description: 分液公式(μL)
+                  description: 分液量(μL)。可直接提供,或通过solvents参数自动计算
                   type: string
               required:
-              - volume
               - assign_material_name
-              - time
-              - torque_variation
-              - titration_type
-              - temperature
               type: object
             result: {}
           required:

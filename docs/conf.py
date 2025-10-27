@@ -24,6 +24,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.napoleon",  # 如果您使用 Google 或 NumPy 风格的 docstrings
     "sphinx_rtd_theme",
+    "sphinxcontrib.mermaid"
 ]
 
 source_suffix = {
@@ -41,6 +42,8 @@ myst_enable_extensions = [
     "smartquotes",
     "substitution",
 ]
+
+myst_fence_as_directive = ["mermaid"]
 
 templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
@@ -203,3 +206,5 @@ def generate_action_includes(app):
 
 def setup(app):
     app.connect("builder-inited", generate_action_includes)
+    app.add_js_file("https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js")
+    app.add_js_file(None, body="mermaid.initialize({startOnLoad:true});")
