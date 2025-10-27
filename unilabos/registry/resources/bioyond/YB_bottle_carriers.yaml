@@ -1,10 +1,24 @@
-YB_jia_yang_tou_da_1X1_carrier:
+
+YB_6StockCarrier:
   category:
   - yb3
   class:
-    module: unilabos.resources.bioyond.YB_bottle_carriers:YB_jia_yang_tou_da_1X1_carrier
+    module: unilabos.resources.bioyond.YB_bottle_carriers:YB_6StockCarrier
     type: pylabrobot
-  description: YB_jia_yang_tou_da_1X1_carrier
+  description: YB_6StockCarrier
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+
+YB_6VialCarrier:
+  category:
+  - yb3
+  class:
+    module: unilabos.resources.bioyond.YB_bottle_carriers:YB_6VialCarrier
+    type: pylabrobot
+  description: YB_6VialCarrier
   handles: []
   icon: ''
   init_param_schema: {}
@@ -18,6 +32,175 @@ YB_1BottleCarrier:
     module: unilabos.resources.bioyond.YB_bottle_carriers:YB_1BottleCarrier
     type: pylabrobot
   description: YB_1BottleCarrier
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+
+YB_1GaoNianYeBottleCarrier:
+  category:
+  - yb3
+  class:
+    module: unilabos.resources.bioyond.YB_bottle_carriers:YB_1GaoNianYeBottleCarrier
+    type: pylabrobot
+  description: YB_1GaoNianYeBottleCarrier
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+
+YB_1Bottle100mlCarrier:
+  category:
+  - yb3
+  class:
+    module: unilabos.resources.bioyond.YB_bottle_carriers:YB_1Bottle100mlCarrier
+    type: pylabrobot
+  description: YB_1Bottle100mlCarrier
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+
+YB_6x5ml_DispensingVialCarrier:
+  category:
+  - yb3
+  class:
+    module: unilabos.resources.bioyond.YB_bottle_carriers:YB_6x5ml_DispensingVialCarrier
+    type: pylabrobot
+  description: YB_6x5ml_DispensingVialCarrier
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+
+YB_6x20ml_DispensingVialCarrier:
+  category:
+  - yb3
+  class:
+    module: unilabos.resources.bioyond.YB_bottle_carriers:YB_6x20ml_DispensingVialCarrier
+    type: pylabrobot
+  description: YB_6x20ml_DispensingVialCarrier
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+
+YB_6x_SmallSolutionBottleCarrier:
+  category:
+  - yb3
+  class:
+    module: unilabos.resources.bioyond.YB_bottle_carriers:YB_6x_SmallSolutionBottleCarrier
+    type: pylabrobot
+  description: YB_6x_SmallSolutionBottleCarrier
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+
+YB_4x_LargeSolutionBottleCarrier:
+  category:
+  - yb3
+  class:
+    module: unilabos.resources.bioyond.YB_bottle_carriers:YB_4x_LargeSolutionBottleCarrier
+    type: pylabrobot
+  description: YB_4x_LargeSolutionBottleCarrier
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+
+YB_jia_yang_tou_da_1X1_carrier:
+  category:
+  - yb3
+  class:
+    module: unilabos.resources.bioyond.YB_bottle_carriers:YB_jia_yang_tou_da_1X1_carrier
+    type: pylabrobot
+  description: YB_jia_yang_tou_da_1X1_carrier
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+
+YB_AdapterBlock:
+  category:
+  - yb3
+  class:
+    module: unilabos.resources.bioyond.YB_bottle_carriers:YB_AdapterBlock
+    type: pylabrobot
+  description: YB_AdapterBlock
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+
+YB_TipBox:
+  category:
+  - yb3
+  class:
+    module: unilabos.resources.bioyond.YB_bottle_carriers:YB_TipBox
+    type: pylabrobot
+  description: YB_TipBox
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+
+YB_ye_Bottle:
+  category:
+  - yb3
+  class:
+    module: unilabos.resources.bioyond.YB_bottles:YB_ye_Bottle
+    type: pylabrobot
+  description: YB_ye_Bottle
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+
+YB_ye_100ml_Bottle:
+  category:
+  - yb3
+  class:
+    module: unilabos.resources.bioyond.YB_bottles:YB_ye_100ml_Bottle
+    type: pylabrobot
+  description: YB_ye_100ml_Bottle
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+
+YB_gao_nian_ye_Bottle:
+  category:
+  - yb3
+  class:
+    module: unilabos.resources.bioyond.YB_bottles:YB_gao_nian_ye_Bottle
+    type: pylabrobot
+  description: YB_gao_nian_ye_Bottle
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+
+YB_jia_yang_tou_da:
+  category:
+  - yb3
+  class:
+    module: unilabos.resources.bioyond.YB_bottles:YB_jia_yang_tou_da
+    type: pylabrobot
+  description: YB_jia_yang_tou_da
   handles: []
   icon: ''
   init_param_schema: {}

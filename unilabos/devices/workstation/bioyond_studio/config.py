@@ -129,15 +129,27 @@ WAREHOUSE_MAPPING = {
             "J02": "3a19deae-2c7a-1d45-b4f8-6f866530e205",
             "J03": "3a19deae-2c7a-f237-89d9-8fe19025dee9"
         }
-    },
+    }
 }
 
 # 物料类型配置
 MATERIAL_TYPE_MAPPINGS = {
-
-    "加样头(大)": ("YB_jia_yang_tou_da_1X1_carrier", "3a190ca0-b2f6-9aeb-8067-547e72c11469"),
+    "100ml液体": ("YB_1Bottle100mlCarrier", "d37166b3-ecaa-481e-bd84-3032b795ba07"),
     "液": ("YB_1BottleCarrier", "3a190ca1-2add-2b23-f8e1-bbd348b7f790"),
-    # YB信息
+    "高粘液": ("YB_1GaoNianYeBottleCarrier", "abe8df30-563d-43d2-85e0-cabec59ddc16"),
+    "加样头(大)": ("YB_jia_yang_tou_da_1X1_carrier", "3a190ca0-b2f6-9aeb-8067-547e72c11469"),
+    "加样头(大)板": ("YB_jia_yang_tou_da_1X1_carrier", "a8e714ae-2a4e-4eb9-9614-e4c140ec3f16"),
+    "5ml分液瓶板": ("YB_6x5ml_DispensingVialCarrier", "3a192fa4-007d-ec7b-456e-2a8be7a13f23"),
+    "5ml分液瓶": ("YB_6x5ml_DispensingVialCarrier", "3a192c2a-ebb7-58a1-480d-8b3863bf74f4"),
+    "20ml分液瓶板": ("YB_6x20ml_DispensingVialCarrier", "3a192fa4-47db-3449-162a-eaf8aba57e27"),
+    "20ml分液瓶": ("YB_6x20ml_DispensingVialCarrier", "3a192c2b-19e8-f0a3-035e-041ca8ca1035"),
+    "配液瓶(小)板": ("YB_6x_SmallSolutionBottleCarrier", "3a190c8b-3284-af78-d29f-9a69463ad047"),
+    "配液瓶(小)": ("YB_6x_SmallSolutionBottleCarrier", "3a190c8c-fe8f-bf48-0dc3-97afc7f508eb"),
+    "配液瓶(大)板": ("YB_4x_LargeSolutionBottleCarrier", "53e50377-32dc-4781-b3c0-5ce45bc7dc27"),
+    "配液瓶(大)": ("YB_4x_LargeSolutionBottleCarrier", "19c52ad1-51c5-494f-8854-576f4ca9c6ca"),
+    "适配器块": ("YB_AdapterBlock", "efc3bb32-d504-4890-91c0-b64ed3ac80cf"),
+    "枪头盒": ("YB_TipBox", "3a192c2e-20f3-a44a-0334-c8301839d0b3"),
+    "枪头": ("YB_TipBox", "b6196971-1050-46da-9927-333e8dea062d"),
 }
 
 SOLID_LIQUID_MAPPINGS = {
