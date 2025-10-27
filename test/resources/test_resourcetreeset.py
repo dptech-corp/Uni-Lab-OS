@@ -1,3 +1,4 @@
+from ast import If
 import pytest
 import json
 import os
@@ -13,13 +14,8 @@ lab_registry.setup()
 
 
 type_mapping = {
-    "烧杯": ("YB_1FlaskCarrier", "3a14196b-24f2-ca49-9081-0cab8021bf1a"),
-    "试剂瓶": ("YB_1BottleCarrier", ""),
-    "样品板": ("YB_6StockCarrier", "3a14196e-b7a0-a5da-1931-35f3000281e9"),
-    "分装板": ("YB_6VialCarrier", "3a14196e-5dfe-6e21-0c79-fe2036d052c4"),
-    "样品瓶": ("YB_Solid_Stock", "3a14196a-cf7d-8aea-48d8-b9662c7dba94"),
-    "90%分装小瓶": ("YB_Solid_Vial", "3a14196c-cdcf-088d-dc7d-5cf38f0ad9ea"),
-    "10%分装小瓶": ("YB_Liquid_Vial", "3a14196c-76be-2279-4e22-7310d69aed68"),
+    "加样头(大)": ("YB_jia_yang_tou_da_1X1_carrier", "3a190ca0-b2f6-9aeb-8067-547e72c11469"),
+    "液": ("YB_1BottleCarrier", "3a190ca1-2add-2b23-f8e1-bbd348b7f790"),
 }
 
 
@@ -57,12 +53,20 @@ def bioyond_materials_liquidhandling_2() -> list[dict]:
     "bioyond_materials_reaction",
     "bioyond_materials_liquidhandling_1",
 ])
-def test_resourcetreeset_from_plr(materials_fixture, request) -> list[dict]:
-    materials = request.getfixturevalue(materials_fixture)
+def test_resourcetreeset_from_plr() -> list[dict]:
+    # 直接加载 bioyond_materials_reaction.json 文件
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    json_path = os.path.join(current_dir, "YB_materials_info.json")
+    with open(json_path, "r", encoding="utf-8") as f:
+        materials = json.load(f)
     deck = BIOYOND_PolymerReactionStation_Deck("test_deck")
     output = resource_bioyond_to_plr(materials, type_mapping=type_mapping, deck=deck)
-    print(deck.summary())
+    print(output)
+    # print(deck.summary())
 
     r = ResourceTreeSet.from_plr_resources([deck])
     print(r.dump())
     # json.dump(deck.serialize(), open("test.json", "w", encoding="utf-8"), indent=4)
+
+if __name__ == "__main__":
+    test_resourcetreeset_from_plr()

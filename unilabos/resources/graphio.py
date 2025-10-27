@@ -636,6 +636,8 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
         plr_material: ResourcePLR = initialize_resource(
             {"name": material["name"], "class": className}, resource_type=ResourcePLR
         )
+        print("plr_material:",plr_material)
+        print("code:",material.get("code", ""))
         plr_material.code = material.get("code", "") and material.get("barCode", "") or ""
         plr_material.unilabos_uuid = str(uuid.uuid4())
 

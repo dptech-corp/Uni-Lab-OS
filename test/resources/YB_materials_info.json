@@ -1,0 +1,52 @@
+[
+    {
+        "id": "3a1d377b-299d-d0f2-ced9-48257f60dfad",
+        "typeName": "加样头(大)",
+        "code": "0005-00145",
+        "barCode": "",
+        "name": "LiDFOB",
+        "quantity": 9999.0,
+        "lockQuantity": 0.0,
+        "unit": "个",
+        "status": 1,
+        "isUse": false,
+        "locations": [
+            {
+                "id": "3a19da56-1379-ff7c-1745-07e200b44ce2",
+                "whid": "3a19da56-1378-613b-29f2-871e1a287aa5",
+                "whName": "粉末加样头堆栈",
+                "code": "0005-0001",
+                "x": 1,
+                "y": 1,
+                "z": 1,
+                "quantity": 0
+            }
+        ],
+        "detail": []
+    },
+    {
+        "id": "3a1d377b-6a81-6a7e-147c-f89f6463656d",
+        "typeName": "液",
+        "code": "0006-00141",
+        "barCode": "",
+        "name": "EMC",
+        "quantity": 99999.0,
+        "lockQuantity": 0.0,
+        "unit": "g",
+        "status": 1,
+        "isUse": false,
+        "locations": [
+            {
+                "id": "3a1baa20-a7b1-c665-8b9c-d8099d07d2f6",
+                "whid": "3a1baa20-a7b0-5c19-8844-5de8924d4e78",
+                "whName": "4号手套箱内部堆栈",
+                "code": "0015-0001",
+                "x": 1,
+                "y": 1,
+                "z": 1,
+                "quantity": 0
+            }
+        ],
+        "detail": []
+    }
+]
