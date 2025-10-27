@@ -10,7 +10,6 @@ from datetime import datetime, timedelta
 import re
 import threading
 import json
-
 from urllib3 import response
 from unilabos.devices.workstation.workstation_base import WorkstationBase
 from unilabos.devices.workstation.bioyond_studio.station import BioyondWorkstation, BioyondResourceSynchronizer
@@ -19,6 +18,8 @@ from unilabos.devices.workstation.bioyond_studio.config import (
 )
 from unilabos.devices.workstation.workstation_http_service import WorkstationHTTPService
 from unilabos.utils.log import logger
+from unilabos.registry.registry import lab_registry
+
 
 def _iso_local_now_ms() -> str:
     # 文档要求：到毫秒 + Z，例如 2025-08-15T05:43:22.814Z
@@ -967,22 +968,23 @@ class BioyondCellWorkstation(BioyondWorkstation):
 
 
 if __name__ == "__main__":
+    lab_registry.setup()
     ws = BioyondCellWorkstation()
-    logger.info(ws.scheduler_stop())
+    # logger.info(ws.scheduler_stop())
+    logger.info(ws.scheduler_start())
     
-    
-    results = ws.create_materials(SOLID_LIQUID_MAPPINGS)
-    for r in results:
-        logger.info(r)
+    # results = ws.create_materials(SOLID_LIQUID_MAPPINGS)
+    # for r in results:
+        # logger.info(r)
     # 从CSV文件读取物料列表并批量创建入库
-    result = ws.create_and_inbound_materials()
+    # result = ws.create_and_inbound_materials()
     
     # 继续后续流程
-    # logger.info(ws.auto_feeding4to3()) #搬运物料到3号箱
+    logger.info(ws.auto_feeding4to3()) #搬运物料到3号箱
     # # 使用正斜杠或 Path 对象来指定文件路径
-    # excel_path = Path("unilabos\\devices\\workstation\\bioyond_studio\\bioyond_cell\\2025092701.xlsx")
-    # logger.info(ws.create_orders(excel_path))
-    # logger.info(ws.transfer_3_to_2_to_1())
+    excel_path = Path("unilabos\\devices\\workstation\\bioyond_studio\\bioyond_cell\\2025092701.xlsx")
+    logger.info(ws.create_orders(excel_path))
+    logger.info(ws.transfer_3_to_2_to_1())
 
     # logger.info(ws.transfer_1_to_2())
     # logger.info(ws.scheduler_start())

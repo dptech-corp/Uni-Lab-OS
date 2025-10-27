@@ -74,6 +74,7 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
                 type_mapping=self.workstation.bioyond_config["material_type_mappings"],
                 deck=self.workstation.deck
             )
+            print("unilab_resources:",unilab_resources)
 
             logger.info(f"从Bioyond同步了 {len(unilab_resources)} 个资源")
             return True

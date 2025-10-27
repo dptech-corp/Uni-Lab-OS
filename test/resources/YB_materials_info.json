@@ -1,0 +1,12 @@
+[
+    {'id': '3a1d2656-69bf-1ccf-fc38-85a0431ee498', 'typeName': '加样头(大)', 'code': '0005-00291', 'barCode': '', 'name': 'test', 'quantity': 1.0, 'lockQuantity': 0.0, 'unit': '个', 'status': 1, 'isUse': False, 'locations': [
+            {'id': '3a19da56-1379-20c8-5886-f7c4fbcb5733', 'whid': '3a19da56-1378-613b-29f2-871e1a287aa5', 'whName': '粉末加样头堆栈', 'code': '0005-0003', 'x': 3, 'y': 1, 'z': 1, 'quantity': 0
+            }
+        ], 'detail': []
+    },
+    {'id': '3a1d2657-d16f-a575-3506-5c029ff6810d', 'typeName': '加样头(大)', 'code': '0005-00293', 'barCode': '', 'name': 'dsfdsfd', 'quantity': 1.0, 'lockQuantity': 0.0, 'unit': '个', 'status': 1, 'isUse': False, 'locations': [
+            {'id': '3a19da56-1379-e77d-0e65-7463b238a3b9', 'whid': '3a19da56-1378-613b-29f2-871e1a287aa5', 'whName': '粉末加样头堆栈', 'code': '0005-0005', 'x': 5, 'y': 1, 'z': 1, 'quantity': 0
+            }
+        ], 'detail': []
+    }
+]
