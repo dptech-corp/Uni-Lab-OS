@@ -1,0 +1,65 @@
+YB_fen_ye_5ml_Bottle:
+  category:
+  - yb3
+  class:
+    module: unilabos.resources.bioyond.YB_bottles:YB_fen_ye_5ml_Bottle
+    type: pylabrobot
+  description: YB_fen_ye_5ml_Bottle
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+
+YB_fen_ye_20ml_Bottle:
+  category:
+  - yb3
+  class:
+    module: unilabos.resources.bioyond.YB_bottles:YB_fen_ye_20ml_Bottle
+    type: pylabrobot
+  description: YB_fen_ye_20ml_Bottle
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+
+YB_pei_ye_xiao_Bottle:
+  category:
+  - yb3
+  class:
+    module: unilabos.resources.bioyond.YB_bottles:YB_pei_ye_xiao_Bottle
+    type: pylabrobot
+  description: YB_pei_ye_xiao_Bottle
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+
+YB_pei_ye_da_Bottle:
+  category:
+  - yb3
+  class:
+    module: unilabos.resources.bioyond.YB_bottles:YB_pei_ye_da_Bottle
+    type: pylabrobot
+  description: YB_pei_ye_da_Bottle
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+
+YB_Pipette_Tip:
+  category:
+  - yb3
+  class:
+    module: unilabos.resources.bioyond.YB_bottles:YB_Pipette_Tip
+    type: pylabrobot
+  description: YB_Pipette_Tip
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+

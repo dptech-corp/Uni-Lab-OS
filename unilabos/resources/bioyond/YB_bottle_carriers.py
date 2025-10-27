@@ -3,7 +3,14 @@ from pylabrobot.resources import create_homogeneous_resources, Coordinate, Resou
 from unilabos.resources.itemized_carrier import Bottle, BottleCarrier
 from unilabos.resources.bioyond.YB_bottles import (
     YB_jia_yang_tou_da,
-    YB_ye_Bottle
+    YB_ye_Bottle,
+    YB_ye_100ml_Bottle,
+    YB_gao_nian_ye_Bottle,
+    YB_fen_ye_5ml_Bottle,
+    YB_fen_ye_20ml_Bottle,
+    YB_pei_ye_xiao_Bottle,
+    YB_pei_ye_da_Bottle,
+    YB_Pipette_Tip,
 )
 # 命名约定：试剂瓶-Bottle，烧杯-Beaker，烧瓶-Flask，小瓶-Vial
 
@@ -53,8 +60,8 @@ def BIOYOND_Electrolyte_6VialCarrier(name: str) -> BottleCarrier:
     carrier.num_items_x = 3
     carrier.num_items_y = 2
     carrier.num_items_z = 1
-    for i in range(6):
-        carrier[i] = YB_Solid_Vial(f"{name}_vial_{i+1}")
+    # for i in range(6):
+    #     carrier[i] = YB_Solid_Vial(f"{name}_vial_{i+1}")
     return carrier
 
 
@@ -91,7 +98,7 @@ def BIOYOND_Electrolyte_1BottleCarrier(name: str) -> BottleCarrier:
     carrier.num_items_x = 1
     carrier.num_items_y = 1
     carrier.num_items_z = 1
-    carrier[0] = YB_Solution_Beaker(f"{name}_beaker_1")
+    # carrier[0] = YB_Solution_Beaker(f"{name}_beaker_1")
     return carrier
 
 
@@ -141,8 +148,8 @@ def YB_6StockCarrier(name: str) -> BottleCarrier:
     carrier.num_items_y = 2
     carrier.num_items_z = 1
     ordering = ["A1", "A2", "A3", "B1", "B2", "B3"]  # 自定义顺序
-    for i in range(6):
-        carrier[i] = YB_Solid_Stock(f"{name}_vial_{ordering[i]}")
+    # for i in range(6):
+    #     carrier[i] = YB_Solid_Stock(f"{name}_vial_{ordering[i]}")
     return carrier
 
 
@@ -192,13 +199,13 @@ def YB_6VialCarrier(name: str) -> BottleCarrier:
     carrier.num_items_y = 2
     carrier.num_items_z = 1
     ordering = ["A1", "A2", "A3", "B1", "B2", "B3"]  # 自定义顺序
-    for i in range(3):
-        carrier[i] = YB_Solid_Vial(f"{name}_solidvial_{ordering[i]}")
-    for i in range(3, 6):
-        carrier[i] = YB_Liquid_Vial(f"{name}_liquidvial_{ordering[i]}")
+    # for i in range(3):
+    #     carrier[i] = YB_Solid_Vial(f"{name}_solidvial_{ordering[i]}")
+    # for i in range(3, 6):
+    #     carrier[i] = YB_Liquid_Vial(f"{name}_liquidvial_{ordering[i]}")
     return carrier
 
-"""1瓶载架 - 单个中央位置"""
+# 1瓶载架 - 单个中央位置
 def YB_1BottleCarrier(name: str) -> BottleCarrier:
     
     # 载架尺寸 (mm)
@@ -235,7 +242,80 @@ def YB_1BottleCarrier(name: str) -> BottleCarrier:
     return carrier
 
 
-"""5ml分液瓶板 - 4x2布局，8个位置"""
+# 高粘液瓶载架 - 单个中央位置
+def YB_1GaoNianYeBottleCarrier(name: str) -> BottleCarrier:
+    
+    # 载架尺寸 (mm)
+    carrier_size_x = 127.8
+    carrier_size_y = 85.5
+    carrier_size_z = 20.0
+
+    # 烧杯尺寸
+    beaker_diameter = 60.0
+
+    # 计算中央位置
+    center_x = (carrier_size_x - beaker_diameter) / 2
+    center_y = (carrier_size_y - beaker_diameter) / 2
+    center_z = 5.0
+
+    carrier = BottleCarrier(
+        name=name,
+        size_x=carrier_size_x,
+        size_y=carrier_size_y,
+        size_z=carrier_size_z,
+        sites=create_homogeneous_resources(
+            klass=ResourceHolder,
+            locations=[Coordinate(center_x, center_y, center_z)],
+            resource_size_x=beaker_diameter,
+            resource_size_y=beaker_diameter,
+            name_prefix=name,
+        ),
+        model="1GaoNianYeBottleCarrier",
+    )
+    carrier.num_items_x = 1
+    carrier.num_items_y = 1
+    carrier.num_items_z = 1
+    carrier[0] = YB_gao_nian_ye_Bottle(f"{name}_flask_1")
+    return carrier
+
+
+# 100ml液体瓶载架 - 单个中央位置
+def YB_1Bottle100mlCarrier(name: str) -> BottleCarrier:
+    
+    # 载架尺寸 (mm)
+    carrier_size_x = 127.8
+    carrier_size_y = 85.5
+    carrier_size_z = 20.0
+
+    # 烧杯尺寸
+    beaker_diameter = 60.0
+
+    # 计算中央位置
+    center_x = (carrier_size_x - beaker_diameter) / 2
+    center_y = (carrier_size_y - beaker_diameter) / 2
+    center_z = 5.0
+
+    carrier = BottleCarrier(
+        name=name,
+        size_x=carrier_size_x,
+        size_y=carrier_size_y,
+        size_z=carrier_size_z,
+        sites=create_homogeneous_resources(
+            klass=ResourceHolder,
+            locations=[Coordinate(center_x, center_y, center_z)],
+            resource_size_x=beaker_diameter,
+            resource_size_y=beaker_diameter,
+            name_prefix=name,
+        ),
+        model="1Bottle100mlCarrier",
+    )
+    carrier.num_items_x = 1
+    carrier.num_items_y = 1
+    carrier.num_items_z = 1
+    carrier[0] = YB_ye_100ml_Bottle(f"{name}_flask_1")
+    return carrier
+
+# 5ml分液瓶板 - 4x2布局，8个位置
 def YB_6x5ml_DispensingVialCarrier(name: str) -> BottleCarrier:
     
 
@@ -282,10 +362,10 @@ def YB_6x5ml_DispensingVialCarrier(name: str) -> BottleCarrier:
     carrier.num_items_z = 1
     ordering = ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4"]
     for i in range(8):
-        carrier[i] = YB_5ml_Dispensing_Vial(f"{name}_vial_{ordering[i]}")
+        carrier[i] = YB_fen_ye_5ml_Bottle(f"{name}_vial_{ordering[i]}")
     return carrier
 
-"""20ml分液瓶板 - 4x2布局，8个位置"""
+# 20ml分液瓶板 - 4x2布局，8个位置
 def YB_6x20ml_DispensingVialCarrier(name: str) -> BottleCarrier:
 
 
@@ -332,10 +412,10 @@ def YB_6x20ml_DispensingVialCarrier(name: str) -> BottleCarrier:
     carrier.num_items_z = 1
     ordering = ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4"]
     for i in range(8):
-        carrier[i] = YB_20ml_Dispensing_Vial(f"{name}_vial_{ordering[i]}")
+        carrier[i] = YB_fen_ye_20ml_Bottle(f"{name}_vial_{ordering[i]}")
     return carrier
 
-"""配液瓶(小)板 - 4x2布局，8个位置"""
+# 配液瓶(小)板 - 4x2布局，8个位置
 def YB_6x_SmallSolutionBottleCarrier(name: str) -> BottleCarrier:
     
 
@@ -382,12 +462,12 @@ def YB_6x_SmallSolutionBottleCarrier(name: str) -> BottleCarrier:
     carrier.num_items_z = 1
     ordering = ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4"]
     for i in range(8):
-        carrier[i] = YB_Small_Solution_Bottle(f"{name}_bottle_{ordering[i]}")
+        carrier[i] = YB_pei_ye_xiao_Bottle(f"{name}_bottle_{ordering[i]}")
     return carrier
 
 
+# 配液瓶(大)板 - 2x2布局，4个位置
 def YB_4x_LargeSolutionBottleCarrier(name: str) -> BottleCarrier:
-    """配液瓶(大)板 - 2x2布局，4个位置"""
 
     # 载架尺寸 (mm)
     carrier_size_x = 127.8
@@ -432,10 +512,10 @@ def YB_4x_LargeSolutionBottleCarrier(name: str) -> BottleCarrier:
     carrier.num_items_z = 1
     ordering = ["A1", "A2", "B1", "B2"]
     for i in range(4):
-        carrier[i] = YB_Large_Solution_Bottle(f"{name}_bottle_{ordering[i]}")
+        carrier[i] = YB_pei_ye_da_Bottle(f"{name}_bottle_{ordering[i]}")
     return carrier
 
-"""加样头(大)板 - 1x1布局，1个位置"""
+# 加样头(大)板 - 1x1布局，1个位置
 def YB_jia_yang_tou_da_1X1_carrier(name: str) -> BottleCarrier:
     
     # 载架尺寸 (mm)
