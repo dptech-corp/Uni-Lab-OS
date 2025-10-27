@@ -26,7 +26,7 @@ WAREHOUSE_MAPPING = {
     "粉末加样头堆栈": {
         "uuid": "",
         "site_uuids": {
-            "A01": "3a19da56-1379-20c8-5886-f7c4fbcb5733",
+            "A01": "3a19da56-1379-ff7c-1745-07e200b44ce2",
             "B01": "3a19da56-1379-2424-d751-fe6e94cef938",
             "C01": "3a19da56-1379-271c-03e3-6bdb590e395e",
             "D01": "3a19da56-1379-277f-2b1b-0d11f7cf92c6",
@@ -47,7 +47,89 @@ WAREHOUSE_MAPPING = {
             "S01": "3a19da56-1379-f924-7f68-df1fa51489f4",
             "T01": "3a19da56-1379-ff7c-1745-07e200b44ce2"
         }
-    }
+    },
+    "配液站内试剂仓库": {
+        "uuid": "",
+        "site_uuids": {
+            "A01": "3a19da43-57b5-294f-d663-154a1cc32270",
+            "B01": "3a19da43-57b5-7394-5f49-54efe2c9bef2",
+            "C01": "3a19da43-57b5-5e75-552f-8dbd0ad1075f",
+            "A02": "3a19da43-57b5-8441-db94-b4d3875a4b6c",
+            "B02": "3a19da43-57b5-3e41-c181-5119dddaf50c",
+            "C02": "3a19da43-57b5-269b-282d-fba61fe8ce96",
+            "A03": "3a19da43-57b5-7c1e-d02e-c40e8c33f8a1",
+            "B03": "3a19da43-57b5-659f-621f-1dcf3f640363",
+            "C03": "3a19da43-57b5-855a-6e71-f398e376dee1",
+        }
+    },
+    "试剂替换仓库": {
+        "uuid": "",
+        "site_uuids": {
+            "A01": "3a19da51-8f4e-30f3-ea08-4f8498e9b097",
+            "B01": "3a19da51-8f4e-1da7-beb0-80a4a01e67a8",
+            "C01": "3a19da51-8f4e-337d-2675-bfac46880b06",
+            "D01": "3a19da51-8f4e-e514-b92c-9c44dc5e489d",
+            "E01": "3a19da51-8f4e-22d1-dd5b-9774ddc80402",
+            "F01": "3a19da51-8f4e-273a-4871-dff41c29bfd9",
+            "G01": "3a19da51-8f4e-b32f-454f-74bc1a665653",
+            "H01": "3a19da51-8f4e-8c93-68c9-0b4382320f59",
+            "I01": "3a19da51-8f4e-360c-0149-291b47c6089b",
+            "J01": "3a19da51-8f4e-4152-9bca-8d64df8c1af0"
+        }
+    },
+    "自动堆栈-左": {
+        "uuid": "",
+        "site_uuids": {
+            "A01": "3a19debc-84b5-4c1c-d3a1-26830cf273ff",
+            "A02": "3a19debc-84b5-033b-b31f-6b87f7c2bf52",
+            "B01": "3a19debc-84b5-3924-172f-719ab01b125c",
+            "B02": "3a19debc-84b5-aad8-70c6-b8c6bb2d8750"
+        }
+    },
+    "自动堆栈-右": {
+        "uuid": "",
+        "site_uuids": {
+            "A01": "3a19debe-5200-7df2-1dd9-7d202f158864",
+            "A02": "3a19debe-5200-573b-6120-8b51f50e1e50",
+            "B01": "3a19debe-5200-7cd8-7666-851b0a97e309",
+            "B02": "3a19debe-5200-e6d3-96a3-baa6e3d5e484"
+        }
+    },
+    "手动堆栈": {
+        "uuid": "",
+        "site_uuids": {
+            "A01": "3a19deae-2c7a-36f5-5e41-02c5b66feaea",
+            "A02": "3a19deae-2c7a-dc6d-c41e-ef285d946cfe",
+            "A03": "3a19deae-2c7a-5876-c454-6b7e224ca927",
+            "B01": "3a19deae-2c7a-2426-6d71-e9de3cb158b1",
+            "B02": "3a19deae-2c7a-79b0-5e44-efaafd1e4cf3",
+            "B03": "3a19deae-2c7a-b9eb-f4e3-e308e0cf839a",
+            "C01": "3a19deae-2c7a-32bc-768e-556647e292f3",
+            "C02": "3a19deae-2c7a-e97a-8484-f5a4599447c4",
+            "C03": "3a19deae-2c7a-3056-6504-10dc73fbc276",
+            "D01": "3a19deae-2c7a-ffad-875e-8c4cda61d440",
+            "D02": "3a19deae-2c7a-61be-601c-b6fb5610499a",
+            "D03": "3a19deae-2c7a-c0f7-05a7-e3fe2491e560",
+            "E01": "3a19deae-2c7a-a6f4-edd1-b436a7576363",
+            "E02": "3a19deae-2c7a-4367-96dd-1ca2186f4910",
+            "E03": "3a19deae-2c7a-b163-2219-23df15200311",
+            "F01": "3a19deae-2c7a-d594-fd6a-0d20de3c7c4a",
+            "F02": "3a19deae-2c7a-a194-ea63-8b342b8d8679",
+            "F03": "3a19deae-2c7a-f7c4-12bd-425799425698",
+            "G01": "3a19deae-2c7a-0b56-72f1-8ab86e53b955",
+            "G02": "3a19deae-2c7a-204e-95ed-1f1950f28343",
+            "G03": "3a19deae-2c7a-392b-62f1-4907c66343f8",
+            "H01": "3a19deae-2c7a-5602-e876-d27aca4e3201",
+            "H02": "3a19deae-2c7a-f15c-70e0-25b58a8c9702",
+            "H03": "3a19deae-2c7a-780b-8965-2e1345f7e834",
+            "I01": "3a19deae-2c7a-8849-e172-07de14ede928",
+            "I02": "3a19deae-2c7a-4772-a37f-ff99270bafc0",
+            "I03": "3a19deae-2c7a-cce7-6e4a-25ea4a2068c4",
+            "J01": "3a19deae-2c7a-1848-de92-b5d5ed054cc6",
+            "J02": "3a19deae-2c7a-1d45-b4f8-6f866530e205",
+            "J03": "3a19deae-2c7a-f237-89d9-8fe19025dee9"
+        }
+    },
 }
 
 # 物料类型配置
@@ -88,10 +170,10 @@ SOLID_LIQUID_MAPPINGS = {
     #     "barCode": "",
     #     "name": "LiFSI",
     #     "unit": "g",
-    #     "parameters": {"Density": "1.533"},
+    #     "parameters": "",
     #     "quantity": 2,
     #     "warningQuantity": 1,
-    #     "details": [{}]
+    #     "details": []
     # },
     # "DTC": {
     #     "typeId": "3a190ca0-b2f6-9aeb-8067-547e72c11469",
@@ -99,10 +181,10 @@ SOLID_LIQUID_MAPPINGS = {
     #     "barCode": "",
     #     "name": "DTC",
     #     "unit": "g",
-    #     "parameters": {"Density": "1.533"},
+    #     "parameters": "",
     #     "quantity": 2,
     #     "warningQuantity": 1,
-    #     "details": [{}]
+    #     "details": []
     # },
     # "LiPO2F2": {
     #     "typeId": "3a190ca0-b2f6-9aeb-8067-547e72c11469",
@@ -110,10 +192,10 @@ SOLID_LIQUID_MAPPINGS = {
     #     "barCode": "",
     #     "name": "LiPO2F2",
     #     "unit": "g",
-    #     "parameters": {"Density": "1.533"},
+    #     "parameters": "",
     #     "quantity": 2,
     #     "warningQuantity": 1,
-    #     "details": [{}]
+    #     "details": []
     # },
     # 液体
     # "SA": ("BIOYOND_PolymerStation_Solid_Stock", "3a190ca0-b2f6-9aeb-8067-547e72c11469"),

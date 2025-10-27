@@ -1,7 +1,7 @@
 import pytest
 
 from unilabos.resources.bioyond.bottle_carriers import BIOYOND_Electrolyte_6VialCarrier, BIOYOND_Electrolyte_1BottleCarrier
-from unilabos.resources.bioyond.bottles import BIOYOND_PolymerStation_Solid_Vial, BIOYOND_PolymerStation_Solution_Beaker, BIOYOND_PolymerStation_Reagent_Bottle
+from unilabos.resources.bioyond.bottles import YB_Solid_Vial, YB_Solution_Beaker, YB_Reagent_Bottle
 
 
 def test_bottle_carrier() -> "BottleCarrier":
@@ -16,9 +16,9 @@ def test_bottle_carrier() -> "BottleCarrier":
     print(f"1烧杯载架: {beaker_carrier.name}, 位置数: {len(beaker_carrier.sites)}")
 
     # 创建瓶子和烧杯
-    powder_bottle = BIOYOND_PolymerStation_Solid_Vial("powder_bottle_01")
-    solution_beaker = BIOYOND_PolymerStation_Solution_Beaker("solution_beaker_01")
-    reagent_bottle = BIOYOND_PolymerStation_Reagent_Bottle("reagent_bottle_01")
+    powder_bottle = YB_Solid_Vial("powder_bottle_01")
+    solution_beaker = YB_Solution_Beaker("solution_beaker_01")
+    reagent_bottle = YB_Reagent_Bottle("reagent_bottle_01")
 
     print(f"\n创建的物料:")
     print(f"粉末瓶: {powder_bottle.name} - {powder_bottle.diameter}mm x {powder_bottle.height}mm, {powder_bottle.max_volume}μL")
