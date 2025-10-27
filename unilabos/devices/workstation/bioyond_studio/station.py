@@ -63,7 +63,7 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
                 logger.error("Bioyond API客户端未初始化")
                 return False
 
-            bioyond_data = self.bioyond_api_client.stock_material('{"typeMode": 2, "includeDetail": true}')
+            bioyond_data = self.bioyond_api_client.stock_material('{"typeMode": 1, "includeDetail": true}')
             if not bioyond_data:
                 logger.warning("从Bioyond获取的物料数据为空")
                 return False

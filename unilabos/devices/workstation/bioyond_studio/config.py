@@ -135,8 +135,8 @@ WAREHOUSE_MAPPING = {
 # 物料类型配置
 MATERIAL_TYPE_MAPPINGS = {
 
-    "加样头(大)": ("YB_jia_yang_tou_da", "3a190ca0-b2f6-9aeb-8067-547e72c11469"),
-    "加样头(大)板": ("YB_jia_yang_tou_da_1X1_carrier", "a8e714ae-2a4e-4eb9-9614-e4c140ec3f16"),
+    "加样头(大)": ("YB_jia_yang_tou_da_1X1_carrier", "3a190ca0-b2f6-9aeb-8067-547e72c11469"),
+    "液": ("YB_1BottleCarrier", "3a190ca1-2add-2b23-f8e1-bbd348b7f790"),
     # YB信息
 }
 

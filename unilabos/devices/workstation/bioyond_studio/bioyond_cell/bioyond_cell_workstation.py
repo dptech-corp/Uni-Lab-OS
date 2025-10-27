@@ -971,7 +971,7 @@ if __name__ == "__main__":
     lab_registry.setup()
     ws = BioyondCellWorkstation()
     # logger.info(ws.scheduler_stop())
-    logger.info(ws.scheduler_start())
+    # logger.info(ws.scheduler_start())
     
     # results = ws.create_materials(SOLID_LIQUID_MAPPINGS)
     # for r in results:
@@ -980,11 +980,11 @@ if __name__ == "__main__":
     # result = ws.create_and_inbound_materials()
     
     # 继续后续流程
-    logger.info(ws.auto_feeding4to3()) #搬运物料到3号箱
+    # logger.info(ws.auto_feeding4to3()) #搬运物料到3号箱
     # # 使用正斜杠或 Path 对象来指定文件路径
-    excel_path = Path("unilabos\\devices\\workstation\\bioyond_studio\\bioyond_cell\\2025092701.xlsx")
-    logger.info(ws.create_orders(excel_path))
-    logger.info(ws.transfer_3_to_2_to_1())
+    # excel_path = Path("unilabos\\devices\\workstation\\bioyond_studio\\bioyond_cell\\2025092701.xlsx")
+    # logger.info(ws.create_orders(excel_path))
+    # logger.info(ws.transfer_3_to_2_to_1())
 
     # logger.info(ws.transfer_1_to_2())
     # logger.info(ws.scheduler_start())

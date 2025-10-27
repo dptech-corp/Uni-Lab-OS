@@ -1,0 +1,25 @@
+YB_jia_yang_tou_da_1X1_carrier:
+  category:
+  - yb3
+  class:
+    module: unilabos.resources.bioyond.YB_bottle_carriers:YB_jia_yang_tou_da_1X1_carrier
+    type: pylabrobot
+  description: YB_jia_yang_tou_da_1X1_carrier
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+
+YB_1BottleCarrier:
+  category:
+  - yb3
+  class:
+    module: unilabos.resources.bioyond.YB_bottle_carriers:YB_1BottleCarrier
+    type: pylabrobot
+  description: YB_1BottleCarrier
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
