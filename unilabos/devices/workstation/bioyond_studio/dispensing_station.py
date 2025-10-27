@@ -7,7 +7,7 @@ from unilabos.devices.workstation.bioyond_studio.station import BioyondWorkstati
 
 class BioyondDispensingStation(BioyondWorkstation):
     def __init__(
-        self, 
+        self,
         config,
             # 桌子
         deck,
@@ -77,7 +77,7 @@ class BioyondDispensingStation(BioyondWorkstation):
         - hold_m_name: 库位名称，如"C01"，用于查找对应的holdMId
 
         返回: 任务创建结果
-        
+
         异常:
         - BioyondException: 各种错误情况下的统一异常
         """
@@ -85,7 +85,7 @@ class BioyondDispensingStation(BioyondWorkstation):
             # 1. 参数验证
             if not hold_m_name:
                 raise BioyondException("hold_m_name 是必填参数")
-            
+
             # 检查90%物料参数的完整性
             # 90%_1物料：如果有物料名称或目标重量，就必须有全部参数
             if percent_90_1_assign_material_name or percent_90_1_target_weigh:
@@ -93,21 +93,21 @@ class BioyondDispensingStation(BioyondWorkstation):
                     raise BioyondException("90%_1物料：如果提供了目标重量，必须同时提供物料名称")
                 if not percent_90_1_target_weigh:
                     raise BioyondException("90%_1物料：如果提供了物料名称，必须同时提供目标重量")
-            
+
             # 90%_2物料：如果有物料名称或目标重量，就必须有全部参数
             if percent_90_2_assign_material_name or percent_90_2_target_weigh:
                 if not percent_90_2_assign_material_name:
                     raise BioyondException("90%_2物料：如果提供了目标重量，必须同时提供物料名称")
                 if not percent_90_2_target_weigh:
                     raise BioyondException("90%_2物料：如果提供了物料名称，必须同时提供目标重量")
-            
+
             # 90%_3物料：如果有物料名称或目标重量，就必须有全部参数
             if percent_90_3_assign_material_name or percent_90_3_target_weigh:
                 if not percent_90_3_assign_material_name:
                     raise BioyondException("90%_3物料：如果提供了目标重量，必须同时提供物料名称")
                 if not percent_90_3_target_weigh:
                     raise BioyondException("90%_3物料：如果提供了物料名称，必须同时提供目标重量")
-            
+
             # 检查10%物料参数的完整性
             # 10%_1物料：如果有物料名称、目标重量、体积或液体物料名称中的任何一个，就必须有全部参数
             if any([percent_10_1_assign_material_name, percent_10_1_target_weigh, percent_10_1_volume, percent_10_1_liquid_material_name]):
@@ -119,7 +119,7 @@ class BioyondDispensingStation(BioyondWorkstation):
                     raise BioyondException("10%_1物料：如果提供了其他参数，必须同时提供液体体积")
                 if not percent_10_1_liquid_material_name:
                     raise BioyondException("10%_1物料：如果提供了其他参数，必须同时提供液体物料名称")
-            
+
             # 10%_2物料：如果有物料名称、目标重量、体积或液体物料名称中的任何一个，就必须有全部参数
             if any([percent_10_2_assign_material_name, percent_10_2_target_weigh, percent_10_2_volume, percent_10_2_liquid_material_name]):
                 if not percent_10_2_assign_material_name:
@@ -130,7 +130,7 @@ class BioyondDispensingStation(BioyondWorkstation):
                     raise BioyondException("10%_2物料：如果提供了其他参数，必须同时提供液体体积")
                 if not percent_10_2_liquid_material_name:
                     raise BioyondException("10%_2物料：如果提供了其他参数，必须同时提供液体物料名称")
-            
+
             # 10%_3物料：如果有物料名称、目标重量、体积或液体物料名称中的任何一个，就必须有全部参数
             if any([percent_10_3_assign_material_name, percent_10_3_target_weigh, percent_10_3_volume, percent_10_3_liquid_material_name]):
                 if not percent_10_3_assign_material_name:
@@ -141,7 +141,7 @@ class BioyondDispensingStation(BioyondWorkstation):
                     raise BioyondException("10%_3物料：如果提供了其他参数，必须同时提供液体体积")
                 if not percent_10_3_liquid_material_name:
                     raise BioyondException("10%_3物料：如果提供了其他参数，必须同时提供液体物料名称")
-            
+
             # 2. 生成任务编码和设置默认值
             order_code = "task_vial_" + str(int(datetime.now().timestamp()))
             if order_name is None:
@@ -152,7 +152,7 @@ class BioyondDispensingStation(BioyondWorkstation):
                 temperature = "40"
             if delay_time is None:
                 delay_time = "600"
-                
+
             # 3. 工作流ID
             workflow_id = "3a19310d-16b9-9d81-b109-0748e953694b"
 
@@ -160,22 +160,22 @@ class BioyondDispensingStation(BioyondWorkstation):
             material_info = self.hardware_interface.material_id_query(workflow_id)
             if not material_info:
                 raise BioyondException(f"无法查询工作流 {workflow_id} 的物料信息")
-            
+
             # 获取locations列表
             locations = material_info.get("locations", []) if isinstance(material_info, dict) else []
             if not locations:
                 raise BioyondException(f"工作流 {workflow_id} 没有找到库位信息")
-            
+
             # 查找指定名称的库位
             hold_mid = None
             for location in locations:
                 if location.get("holdMName") == hold_m_name:
                     hold_mid = location.get("holdMId")
                     break
-            
+
             if not hold_mid:
                 raise BioyondException(f"未找到库位名称为 {hold_m_name} 的库位，请检查名称是否正确")
-            
+
             extend_properties = f"{{\"{ hold_mid }\": {{}}}}"
             self.hardware_interface._logger.info(f"找到库位 {hold_m_name} 对应的holdMId: {hold_mid}")
 
@@ -271,7 +271,7 @@ class BioyondDispensingStation(BioyondWorkstation):
             result = self.hardware_interface.create_order(json_str)
             self.hardware_interface._logger.info(f"创建90%10%小瓶投料任务结果: {result}")
             return json.dumps({"suc": True})
-            
+
         except BioyondException:
             # 重新抛出BioyondException
             raise
@@ -307,7 +307,7 @@ class BioyondDispensingStation(BioyondWorkstation):
         - hold_m_name: 库位名称，如"ODA-1"，用于查找对应的holdMId
 
         返回: 任务创建结果
-        
+
         异常:
         - BioyondException: 各种错误情况下的统一异常
         """
@@ -321,8 +321,8 @@ class BioyondDispensingStation(BioyondWorkstation):
                 raise BioyondException("volume 是必填参数")
             if not hold_m_name:
                 raise BioyondException("hold_m_name 是必填参数")
-            
-            
+
+
             # 2. 生成任务编码和设置默认值
             order_code = "task_oda_" + str(int(datetime.now().timestamp()))
             if order_name is None:
@@ -333,30 +333,30 @@ class BioyondDispensingStation(BioyondWorkstation):
                 temperature = "20"
             if delay_time is None:
                 delay_time = "600"
-                
+
             # 3. 工作流ID - 二胺溶液配置工作流
             workflow_id = "3a15d4a1-3bbe-76f9-a458-292896a338f5"
-            
+
             # 4. 查询工作流对应的holdMID
             material_info = self.hardware_interface.material_id_query(workflow_id)
             if not material_info:
                 raise BioyondException(f"无法查询工作流 {workflow_id} 的物料信息")
-            
+
             # 获取locations列表
             locations = material_info.get("locations", []) if isinstance(material_info, dict) else []
             if not locations:
                 raise BioyondException(f"工作流 {workflow_id} 没有找到库位信息")
-            
+
             # 查找指定名称的库位
             hold_mid = None
             for location in locations:
                 if location.get("holdMName") == hold_m_name:
                     hold_mid = location.get("holdMId")
                     break
-            
+
             if not hold_mid:
                 raise BioyondException(f"未找到库位名称为 {hold_m_name} 的库位，请检查名称是否正确")
-            
+
             extend_properties = f"{{\"{ hold_mid }\": {{}}}}"
             self.hardware_interface._logger.info(f"找到库位 {hold_m_name} 对应的holdMId: {hold_mid}")
 
@@ -397,9 +397,9 @@ class BioyondDispensingStation(BioyondWorkstation):
             # 7. 调用create_order方法创建任务
             result = self.hardware_interface.create_order(json_str)
             self.hardware_interface._logger.info(f"创建二胺溶液配置任务结果: {result}")
-            
+
             return json.dumps({"suc": True})
-            
+
         except BioyondException:
             # 重新抛出BioyondException
             raise
@@ -409,17 +409,278 @@ class BioyondDispensingStation(BioyondWorkstation):
             self.hardware_interface._logger.error(error_msg)
             raise BioyondException(error_msg)
 
+    # 批量创建二胺溶液配置任务
+    def batch_create_diamine_solution_tasks(self,
+                                           solutions,
+                                           liquid_material_name: str = "NMP",
+                                           speed: str = None,
+                                           temperature: str = None,
+                                           delay_time: str = None) -> str:
+        """
+        批量创建二胺溶液配置任务
+
+        参数说明:
+        - solutions: 溶液列表（数组）或JSON字符串，格式如下:
+          [
+              {
+                  "name": "MDA",
+                  "order": 0,
+                  "solid_mass": 5.0,
+                  "solvent_volume": 20,
+                  ...
+              },
+              ...
+          ]
+        - liquid_material_name: 液体物料名称，默认为"NMP"
+        - speed: 搅拌速度，如果为None则使用默认值400
+        - temperature: 温度，如果为None则使用默认值20
+        - delay_time: 延迟时间，如果为None则使用默认值600
+
+        返回: JSON字符串格式的任务创建结果
+
+        异常:
+        - BioyondException: 各种错误情况下的统一异常
+        """
+        try:
+            # 参数类型转换：如果是字符串则解析为列表
+            if isinstance(solutions, str):
+                try:
+                    solutions = json.loads(solutions)
+                except json.JSONDecodeError as e:
+                    raise BioyondException(f"solutions JSON解析失败: {str(e)}")
+
+            # 参数验证
+            if not isinstance(solutions, list):
+                raise BioyondException("solutions 必须是列表类型或有效的JSON数组字符串")
+
+            if not solutions:
+                raise BioyondException("solutions 列表不能为空")
+
+            # 批量创建任务
+            results = []
+            success_count = 0
+            failed_count = 0
+
+            for idx, solution in enumerate(solutions):
+                try:
+                    # 提取参数
+                    name = solution.get("name")
+                    solid_mass = solution.get("solid_mass")
+                    solvent_volume = solution.get("solvent_volume")
+                    order = solution.get("order")
+
+                    if not all([name, solid_mass is not None, solvent_volume is not None]):
+                        self.hardware_interface._logger.warning(
+                            f"跳过第 {idx + 1} 个溶液：缺少必要参数"
+                        )
+                        results.append({
+                            "index": idx + 1,
+                            "name": name,
+                            "success": False,
+                            "error": "缺少必要参数"
+                        })
+                        failed_count += 1
+                        continue
+
+                    # 生成库位名称（直接使用物料名称）
+                    # 如果需要其他命名规则，可以在这里调整
+                    hold_m_name = name
+
+                    # 调用单个任务创建方法
+                    result = self.create_diamine_solution_task(
+                        order_name=f"二胺溶液配置-{name}",
+                        material_name=name,
+                        target_weigh=str(solid_mass),
+                        volume=str(solvent_volume),
+                        liquid_material_name=liquid_material_name,
+                        speed=speed,
+                        temperature=temperature,
+                        delay_time=delay_time,
+                        hold_m_name=hold_m_name
+                    )
+
+                    results.append({
+                        "index": idx + 1,
+                        "name": name,
+                        "success": True,
+                        "hold_m_name": hold_m_name
+                    })
+                    success_count += 1
+                    self.hardware_interface._logger.info(
+                        f"成功创建二胺溶液配置任务: {name}"
+                    )
+
+                except BioyondException as e:
+                    results.append({
+                        "index": idx + 1,
+                        "name": solution.get("name", "unknown"),
+                        "success": False,
+                        "error": str(e)
+                    })
+                    failed_count += 1
+                    self.hardware_interface._logger.error(
+                        f"创建第 {idx + 1} 个任务失败: {str(e)}"
+                    )
+                except Exception as e:
+                    results.append({
+                        "index": idx + 1,
+                        "name": solution.get("name", "unknown"),
+                        "success": False,
+                        "error": f"未知错误: {str(e)}"
+                    })
+                    failed_count += 1
+                    self.hardware_interface._logger.error(
+                        f"创建第 {idx + 1} 个任务时发生未知错误: {str(e)}"
+                    )
+
+            # 返回汇总结果
+            summary = {
+                "total": len(solutions),
+                "success": success_count,
+                "failed": failed_count,
+                "details": results
+            }
+
+            self.hardware_interface._logger.info(
+                f"批量创建二胺溶液配置任务完成: 总数={len(solutions)}, "
+                f"成功={success_count}, 失败={failed_count}"
+            )
+
+            # 返回JSON字符串格式
+            return json.dumps(summary, ensure_ascii=False)
+
+        except BioyondException:
+            raise
+        except Exception as e:
+            error_msg = f"批量创建二胺溶液配置任务时发生未预期的错误: {str(e)}"
+            self.hardware_interface._logger.error(error_msg)
+            raise BioyondException(error_msg)
+
+    # 批量创建90%10%小瓶投料任务
+    def batch_create_90_10_vial_feeding_tasks(self,
+                                              titration,
+                                              hold_m_name: str = None,
+                                              speed: str = None,
+                                              temperature: str = None,
+                                              delay_time: str = None,
+                                              liquid_material_name: str = "NMP") -> str:
+        """
+        批量创建90%10%小瓶投料任务（仅创建1个任务，但包含所有90%和10%物料）
+
+        参数说明:
+        - titration: 滴定信息的字典或JSON字符串，格式如下:
+          {
+              "name": "BTDA",
+              "main_portion": 1.9152351915461294,  # 主称固体质量(g) -> 90%物料
+              "titration_portion": 0.05923407808905555,  # 滴定固体质量(g) -> 10%物料固体
+              "titration_solvent": 3.050555021586361  # 滴定溶液体积(mL) -> 10%物料液体
+          }
+        - hold_m_name: 库位名称，如"C01"。必填参数
+        - speed: 搅拌速度，如果为None则使用默认值400
+        - temperature: 温度，如果为None则使用默认值40
+        - delay_time: 延迟时间，如果为None则使用默认值600
+        - liquid_material_name: 10%物料的液体物料名称，默认为"NMP"
+
+        返回: JSON字符串格式的任务创建结果
+
+        异常:
+        - BioyondException: 各种错误情况下的统一异常
+        """
+        try:
+            # 参数类型转换：如果是字符串则解析为字典
+            if isinstance(titration, str):
+                try:
+                    titration = json.loads(titration)
+                except json.JSONDecodeError as e:
+                    raise BioyondException(f"titration参数JSON解析失败: {str(e)}")
+
+            # 参数验证
+            if not isinstance(titration, dict):
+                raise BioyondException("titration 必须是字典类型或有效的JSON字符串")
+
+            if not hold_m_name:
+                raise BioyondException("hold_m_name 是必填参数")
+
+            if not titration:
+                raise BioyondException("titration 参数不能为空")
+
+            # 提取滴定数据
+            name = titration.get("name")
+            main_portion = titration.get("main_portion")  # 主称固体质量
+            titration_portion = titration.get("titration_portion")  # 滴定固体质量
+            titration_solvent = titration.get("titration_solvent")  # 滴定溶液体积
+
+            if not all([name, main_portion is not None, titration_portion is not None, titration_solvent is not None]):
+                raise BioyondException("titration 数据缺少必要参数")
+
+            # 将main_portion平均分成3份作为90%物料（3个小瓶）
+            portion_90 = main_portion / 3
+
+            # 调用单个任务创建方法
+            result = self.create_90_10_vial_feeding_task(
+                order_name=f"90%10%小瓶投料-{name}",
+                speed=speed,
+                temperature=temperature,
+                delay_time=delay_time,
+                # 90%物料 - 主称固体平均分成3份
+                percent_90_1_assign_material_name=name,
+                percent_90_1_target_weigh=str(round(portion_90, 6)),
+                percent_90_2_assign_material_name=name,
+                percent_90_2_target_weigh=str(round(portion_90, 6)),
+                percent_90_3_assign_material_name=name,
+                percent_90_3_target_weigh=str(round(portion_90, 6)),
+                # 10%物料 - 滴定固体 + 滴定溶剂（只使用第1个10%小瓶）
+                percent_10_1_assign_material_name=name,
+                percent_10_1_target_weigh=str(round(titration_portion, 6)),
+                percent_10_1_volume=str(round(titration_solvent, 6)),
+                percent_10_1_liquid_material_name=liquid_material_name,
+                hold_m_name=hold_m_name
+            )
+
+            summary = {
+                "success": True,
+                "hold_m_name": hold_m_name,
+                "material_name": name,
+                "90_vials": {
+                    "count": 3,
+                    "weight_per_vial": round(portion_90, 6),
+                    "total_weight": round(main_portion, 6)
+                },
+                "10_vials": {
+                    "count": 1,
+                    "solid_weight": round(titration_portion, 6),
+                    "liquid_volume": round(titration_solvent, 6)
+                }
+            }
+
+            self.hardware_interface._logger.info(
+                f"成功创建90%10%小瓶投料任务: {hold_m_name}, "
+                f"90%物料={portion_90:.6f}g×3, 10%物料={titration_portion:.6f}g+{titration_solvent:.6f}mL"
+            )
+
+            # 返回JSON字符串格式
+            return json.dumps(summary, ensure_ascii=False)
+
+        except BioyondException:
+            raise
+        except Exception as e:
+            error_msg = f"批量创建90%10%小瓶投料任务时发生未预期的错误: {str(e)}"
+            self.hardware_interface._logger.error(error_msg)
+            raise BioyondException(error_msg)
+
 
 if __name__ == "__main__":
     bioyond = BioyondDispensingStation(config={
         "api_key": "DE9BDDA0",
         "api_host": "http://192.168.1.200:44388"
     })
-    
+
+    # ============ 原有示例代码 ============
+
     # 示例1：使用material_id_query查询工作流对应的holdMID
     workflow_id_1 = "3a15d4a1-3bbe-76f9-a458-292896a338f5"  # 二胺溶液配置工作流ID
     workflow_id_2 = "3a19310d-16b9-9d81-b109-0748e953694b"  # 90%10%小瓶投料工作流ID
-    
+
     #示例2：创建二胺溶液配置任务 - ODA，指定库位名称
     # bioyond.create_diamine_solution_task(
     #         order_code="task_oda_" + str(int(datetime.now().timestamp())),
@@ -433,7 +694,7 @@ if __name__ == "__main__":
     #         delay_time="600",
     #         hold_m_name="烧杯ODA"
     #     )
-    
+
     # bioyond.create_diamine_solution_task(
     #         order_code="task_pda_" + str(int(datetime.now().timestamp())),
     #         order_name="二胺溶液配置-PDA",
@@ -446,7 +707,7 @@ if __name__ == "__main__":
     #         delay_time="600",
     #         hold_m_name="烧杯PDA-2"
     #     )
-    
+
     # bioyond.create_diamine_solution_task(
     #         order_code="task_mpda_" + str(int(datetime.now().timestamp())),
     #         order_name="二胺溶液配置-MPDA",
@@ -462,8 +723,8 @@ if __name__ == "__main__":
 
     bioyond.material_id_query("3a19310d-16b9-9d81-b109-0748e953694b")
     bioyond.material_id_query("3a15d4a1-3bbe-76f9-a458-292896a338f5")
-    
-    
+
+
     #示例4：创建90%10%小瓶投料任务
     # vial_result = bioyond.create_90_10_vial_feeding_task(
     #     order_code="task_vial_" + str(int(datetime.now().timestamp())),
@@ -487,7 +748,7 @@ if __name__ == "__main__":
     #     delay_time="1200",
     #     hold_m_name="8.4分装板-1"
     #     )
-    
+
     # vial_result = bioyond.create_90_10_vial_feeding_task(
     #     order_code="task_vial_" + str(int(datetime.now().timestamp())),
     #     order_name="90%10%小瓶投料-2",
@@ -510,7 +771,7 @@ if __name__ == "__main__":
     #     delay_time="1200",
     #     hold_m_name="8.4分装板-2"
     #     )
-    
+
     #启动调度器
     #bioyond.scheduler_start()
 
@@ -529,7 +790,7 @@ if __name__ == "__main__":
     material_data_yp = {
     "typeId": "3a14196e-b7a0-a5da-1931-35f3000281e9",
     #"code": "物料编码001",
-    #"barCode": "物料条码001", 
+    #"barCode": "物料条码001",
     "name": "8.4样品板",
     "unit": "个",
     "quantity": 1,
@@ -540,7 +801,7 @@ if __name__ == "__main__":
         "name": "BTDA-1",
         "quantity": 20,
         "x": 1,
-        "y": 1, 
+        "y": 1,
         #"unit": "单位"
         "molecular": 1,
         "Parameters":"{\"molecular\": 1}"
@@ -585,7 +846,7 @@ if __name__ == "__main__":
     material_data_yp = {
     "typeId": "3a14196e-b7a0-a5da-1931-35f3000281e9",
     #"code": "物料编码001",
-    #"barCode": "物料条码001", 
+    #"barCode": "物料条码001",
     "name": "8.7样品板",
     "unit": "个",
     "quantity": 1,
@@ -596,7 +857,7 @@ if __name__ == "__main__":
         "name": "mianfen",
         "quantity": 13,
         "x": 1,
-        "y": 1, 
+        "y": 1,
         #"unit": "单位"
         "molecular": 1,
         "Parameters":"{\"molecular\": 1}"
@@ -620,7 +881,7 @@ if __name__ == "__main__":
     material_data_fzb_1 = {
     "typeId": "3a14196e-5dfe-6e21-0c79-fe2036d052c4",
     #"code": "物料编码001",
-    #"barCode": "物料条码001", 
+    #"barCode": "物料条码001",
     "name": "8.7分装板",
     "unit": "个",
     "quantity": 1,
@@ -631,7 +892,7 @@ if __name__ == "__main__":
         "name": "10%小瓶1",
         "quantity": 1,
         "x": 1,
-        "y": 1, 
+        "y": 1,
         #"unit": "单位"
         "molecular": 1,
         "Parameters":"{\"molecular\": 1}"
@@ -642,7 +903,7 @@ if __name__ == "__main__":
         "name": "10%小瓶2",
         "quantity": 1,
         "x": 1,
-        "y": 2, 
+        "y": 2,
         #"unit": "单位"
         "molecular": 1,
         "Parameters":"{\"molecular\": 1}"
@@ -653,7 +914,7 @@ if __name__ == "__main__":
         "name": "10%小瓶3",
         "quantity": 1,
         "x": 1,
-        "y": 3, 
+        "y": 3,
         #"unit": "单位"
         "molecular": 1,
         "Parameters":"{\"molecular\": 1}"
@@ -697,7 +958,7 @@ if __name__ == "__main__":
     material_data_fzb_2 = {
     "typeId": "3a14196e-5dfe-6e21-0c79-fe2036d052c4",
     #"code": "物料编码001",
-    #"barCode": "物料条码001", 
+    #"barCode": "物料条码001",
     "name": "8.4分装板-2",
     "unit": "个",
     "quantity": 1,
@@ -708,7 +969,7 @@ if __name__ == "__main__":
         "name": "10%小瓶1",
         "quantity": 1,
         "x": 1,
-        "y": 1, 
+        "y": 1,
         #"unit": "单位"
         "molecular": 1,
         "Parameters":"{\"molecular\": 1}"
@@ -719,7 +980,7 @@ if __name__ == "__main__":
         "name": "10%小瓶2",
         "quantity": 1,
         "x": 1,
-        "y": 2, 
+        "y": 2,
         #"unit": "单位"
         "molecular": 1,
         "Parameters":"{\"molecular\": 1}"
@@ -730,7 +991,7 @@ if __name__ == "__main__":
         "name": "10%小瓶3",
         "quantity": 1,
         "x": 1,
-        "y": 3, 
+        "y": 3,
         #"unit": "单位"
         "molecular": 1,
         "Parameters":"{\"molecular\": 1}"
@@ -775,7 +1036,7 @@ if __name__ == "__main__":
     material_data_sb_oda = {
     "typeId": "3a14196b-24f2-ca49-9081-0cab8021bf1a",
     #"code": "物料编码001",
-    #"barCode": "物料条码001", 
+    #"barCode": "物料条码001",
     "name": "mianfen1",
     "unit": "个",
     "quantity": 1,
@@ -785,7 +1046,7 @@ if __name__ == "__main__":
     material_data_sb_pda_2 = {
     "typeId": "3a14196b-24f2-ca49-9081-0cab8021bf1a",
     #"code": "物料编码001",
-    #"barCode": "物料条码001", 
+    #"barCode": "物料条码001",
     "name": "mianfen2",
     "unit": "个",
     "quantity": 1,
@@ -795,7 +1056,7 @@ if __name__ == "__main__":
     # material_data_sb_mpda = {
     # "typeId": "3a14196b-24f2-ca49-9081-0cab8021bf1a",
     # #"code": "物料编码001",
-    # #"barCode": "物料条码001", 
+    # #"barCode": "物料条码001",
     # "name": "烧杯MPDA",
     # "unit": "个",
     # "quantity": 1,
