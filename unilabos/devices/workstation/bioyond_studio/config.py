@@ -130,6 +130,23 @@ WAREHOUSE_MAPPING = {
             "J03": "3a19deae-2c7a-f237-89d9-8fe19025dee9"
         }
     },
+    "4号手套箱内部堆栈": {
+        "uuid": "",
+        "site_uuids": {
+            "A01": "3a1baa20-a7b1-c665-8b9c-d8099d07d2f6",
+            "A02": "3a1baa20-a7b1-93a7-c988-f9c8ad6c58c9",
+            "A03": "3a1baa20-a7b1-00ee-f751-da9b20b6c464",
+            "A04": "3a1baa20-a7b1-4712-c37b-0b5b658ef7b9",
+            "B01": "3a1baa20-a7b1-9847-fc9c-96d604cd1a8e",
+            "B02": "3a1baa20-a7b1-4ae9-e604-0601db06249c",
+            "B03": "3a1baa20-a7b1-8329-ea75-81ca559d9ce1",
+            "B04": "3a1baa20-a7b1-89c5-d96f-36e98a8f7268",
+            "C01": "3a1baa20-a7b1-32ec-39e6-8044733839d6",
+            "C02": "3a1baa20-a7b1-b573-e426-4c86040348b2",
+            "C03": "3a1baa20-a7b1-cca7-781e-0522b729bf5d",
+            "C04": "3a1baa20-a7b1-7c98-5fd9-5855355ae4b3"
+        }
+    }
 }
 
 # 物料类型配置
