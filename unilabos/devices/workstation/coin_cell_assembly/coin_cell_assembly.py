@@ -22,7 +22,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
     def __init__(
         self,
         station_resource: CoincellDeck,
-        address: str = "192.168.1.20",
+        address: str = "172.21.32.20",
         port: str = "502",
         debug_mode: bool = True,
         *args,
