@@ -208,7 +208,8 @@ class BioyondReactionStation(BioyondWorkstation):
     def liquid_feeding_solvents(
         self,
         assign_material_name: str,
-        volume: str,
+        volume: str = None,
+        solvents = None,
         titration_type: str = "1",
         time: str = "360",
         torque_variation: int = 2,
@@ -218,12 +219,41 @@ class BioyondReactionStation(BioyondWorkstation):
 
         Args:
             assign_material_name: 物料名称
-            volume: 分液量(μL)
+            volume: 分液量(μL),直接指定体积(可选,如果提供solvents则自动计算)
+            solvents: 溶剂信息的字典或JSON字符串(可选),格式如下:
+              {
+                  "additional_solvent": 33.55092503597727,  # 溶剂体积(mL)
+                  "total_liquid_volume": 48.00916988195499
+              }
+              如果提供solvents,则从中提取additional_solvent并转换为μL
             titration_type: 是否滴定(1=否, 2=是)
             time: 观察时间(分钟)
             torque_variation: 是否观察(int类型, 1=否, 2=是)
             temperature: 温度设定(°C)
         """
+        # 处理 volume 参数:优先使用直接传入的 volume,否则从 solvents 中提取
+        if volume is None and solvents is not None:
+            # 参数类型转换:如果是字符串则解析为字典
+            if isinstance(solvents, str):
+                try:
+                    solvents = json.loads(solvents)
+                except json.JSONDecodeError as e:
+                    raise ValueError(f"solvents参数JSON解析失败: {str(e)}")
+
+            # 参数验证
+            if not isinstance(solvents, dict):
+                raise ValueError("solvents 必须是字典类型或有效的JSON字符串")
+
+            # 提取 additional_solvent 值
+            additional_solvent = solvents.get("additional_solvent")
+            if additional_solvent is None:
+                raise ValueError("solvents 中没有找到 additional_solvent 字段")
+
+            # 转换为微升(μL) - 从毫升(mL)转换
+            volume = str(float(additional_solvent) * 1000)
+        elif volume is None:
+            raise ValueError("必须提供 volume 或 solvents 参数之一")
+
         self.append_to_workflow_sequence('{"web_workflow_name": "Liquid_feeding_solvents"}')
         material_id = self.hardware_interface._get_material_id_by_name(assign_material_name)
         if material_id is None:
