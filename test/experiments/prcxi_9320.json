@@ -19,7 +19,7 @@
                 "host": "192.168.1.201",
                 "port": 9999,
                 "timeout": 10.0,
-                "axis": "Lift",
+                "axis": "Left",
                 "channel_num": 1,
                 "setup": true,
                 "debug": false,
