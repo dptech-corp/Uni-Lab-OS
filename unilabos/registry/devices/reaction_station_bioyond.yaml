@@ -4,67 +4,38 @@ reaction_station.bioyond:
   - reaction_station_bioyond
   class:
     action_value_mappings:
-      auto-append_to_workflow_sequence:
+      drip_back:
         feedback: {}
-        goal: {}
+        goal:
+          assign_material_name: assign_material_name
+          temperature: temperature
+          time: time
+          titration_type: titration_type
+          torque_variation: torque_variation
+          volume: volume
         goal_default:
-          web_workflow_name: null
+          assign_material_name: ''
+          temperature: ''
+          time: ''
+          titration_type: ''
+          torque_variation: ''
+          volume: ''
         handles: {}
-        placeholder_keys: {}
         result: {}
         schema:
-          description: ''
+          description: 滴回去
           properties:
             feedback: {}
             goal:
               properties:
-                web_workflow_name:
+                assign_material_name:
+                  description: 物料名称（不能为空）
                   type: string
-              required:
-              - web_workflow_name
-              type: object
-            result: {}
-          required:
-          - goal
-          title: append_to_workflow_sequence参数
-          type: object
-        type: UniLabJsonCommand
-      auto-clear_workflows:
-        feedback: {}
-        goal: {}
-        goal_default: {}
-        handles: {}
-        placeholder_keys: {}
-        result: {}
-        schema:
-          description: ''
-          properties:
-            feedback: {}
-            goal:
-              properties: {}
-              required: []
-              type: object
-            result: {}
-          required:
-          - goal
-          title: clear_workflows参数
-          type: object
-        type: UniLabJsonCommand
-      auto-load_bioyond_data_from_file:
-        feedback: {}
-        goal: {}
-        goal_default:
-          file_path: null
-        handles: {}
-        placeholder_keys: {}
-        result: {}
-        schema:
-          description: ''
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                file_path:
+                temperature:
+                  description: 温度设定(°C)
+                  type: string
+                time:
+                  description: 观察时间(分钟)
                   type: string
               required:
               - file_path
@@ -116,397 +87,35 @@ reaction_station.bioyond:
               properties:
                 json_str:
                   type: string
-              required:
-              - json_str
-              type: object
-            result: {}
-          required:
-          - goal
-          title: process_web_workflows参数
-          type: object
-        type: UniLabJsonCommand
-      auto-reset_workstation:
-        feedback: {}
-        goal: {}
-        goal_default: {}
-        handles: {}
-        placeholder_keys: {}
-        result: {}
-        schema:
-          description: ''
-          properties:
-            feedback: {}
-            goal:
-              properties: {}
-              required: []
-              type: object
-            result: {}
-          required:
-          - goal
-          title: reset_workstation参数
-          type: object
-        type: UniLabJsonCommand
-      auto-resource_tree_add:
-        feedback: {}
-        goal: {}
-        goal_default:
-          resources: null
-        handles: {}
-        placeholder_keys: {}
-        result: {}
-        schema:
-          description: ''
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                resources:
-                  items:
-                    type: object
-                  type: array
-              required:
-              - resources
-              type: object
-            result: {}
-          required:
-          - goal
-          title: resource_tree_add参数
-          type: object
-        type: UniLabJsonCommand
-      auto-set_workflow_sequence:
-        feedback: {}
-        goal: {}
-        goal_default:
-          json_str: null
-        handles: {}
-        placeholder_keys: {}
-        result: {}
-        schema:
-          description: ''
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                json_str:
-                  type: string
-              required:
-              - json_str
-              type: object
-            result: {}
-          required:
-          - goal
-          title: set_workflow_sequence参数
-          type: object
-        type: UniLabJsonCommand
-      auto-transfer_resource_to_another:
-        feedback: {}
-        goal: {}
-        goal_default:
-          mount_device_id: null
-          mount_resource: null
-          resource: null
-          sites: null
-        handles: {}
-        placeholder_keys:
-          mount_device_id: unilabos_devices
-          mount_resource: unilabos_resources
-          resource: unilabos_resources
-        result: {}
-        schema:
-          description: ''
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                mount_device_id:
-                  type: object
-                mount_resource:
-                  items:
-                    properties:
-                      category:
-                        type: string
-                      children:
-                        items:
-                          type: string
-                        type: array
-                      config:
-                        type: string
-                      data:
-                        type: string
-                      id:
-                        type: string
-                      name:
-                        type: string
-                      parent:
-                        type: string
-                      pose:
-                        properties:
-                          orientation:
-                            properties:
-                              w:
-                                type: number
-                              x:
-                                type: number
-                              y:
-                                type: number
-                              z:
-                                type: number
-                            required:
-                            - x
-                            - y
-                            - z
-                            - w
-                            title: orientation
-                            type: object
-                          position:
-                            properties:
-                              x:
-                                type: number
-                              y:
-                                type: number
-                              z:
-                                type: number
-                            required:
-                            - x
-                            - y
-                            - z
-                            title: position
-                            type: object
-                        required:
-                        - position
-                        - orientation
-                        title: pose
-                        type: object
-                      sample_id:
-                        type: string
-                      type:
-                        type: string
-                    required:
-                    - id
-                    - name
-                    - sample_id
-                    - children
-                    - parent
-                    - type
-                    - category
-                    - pose
-                    - config
-                    - data
-                    title: mount_resource
-                    type: object
-                  type: array
-                resource:
-                  items:
-                    properties:
-                      category:
-                        type: string
-                      children:
-                        items:
-                          type: string
-                        type: array
-                      config:
-                        type: string
-                      data:
-                        type: string
-                      id:
-                        type: string
-                      name:
-                        type: string
-                      parent:
-                        type: string
-                      pose:
-                        properties:
-                          orientation:
-                            properties:
-                              w:
-                                type: number
-                              x:
-                                type: number
-                              y:
-                                type: number
-                              z:
-                                type: number
-                            required:
-                            - x
-                            - y
-                            - z
-                            - w
-                            title: orientation
-                            type: object
-                          position:
-                            properties:
-                              x:
-                                type: number
-                              y:
-                                type: number
-                              z:
-                                type: number
-                            required:
-                            - x
-                            - y
-                            - z
-                            title: position
-                            type: object
-                        required:
-                        - position
-                        - orientation
-                        title: pose
-                        type: object
-                      sample_id:
-                        type: string
-                      type:
-                        type: string
-                    required:
-                    - id
-                    - name
-                    - sample_id
-                    - children
-                    - parent
-                    - type
-                    - category
-                    - pose
-                    - config
-                    - data
-                    title: resource
-                    type: object
-                  type: array
-                sites:
-                  items:
-                    type: string
-                  type: array
-              required:
-              - resource
-              - mount_resource
-              - sites
-              - mount_device_id
-              type: object
-            result: {}
-          required:
-          - goal
-          title: transfer_resource_to_another参数
-          type: object
-        type: UniLabJsonCommand
-      bioyond_sync:
-        feedback: {}
-        goal:
-          force_sync: force_sync
-          sync_type: sync_type
-        goal_default:
-          force_sync: false
-          sync_type: full
-        handles: {}
-        result: {}
-        schema:
-          description: 从Bioyond系统同步物料
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                force_sync:
-                  description: 是否强制同步
-                  type: boolean
-                sync_type:
-                  description: 同步类型
-                  enum:
-                  - full
-                  - incremental
-                  type: string
-              required:
-              - sync_type
-              type: object
-            result: {}
-          required:
-          - goal
-          title: bioyond_sync参数
-          type: object
-        type: UniLabJsonCommand
-      bioyond_update:
-        feedback: {}
-        goal:
-          material_ids: material_ids
-          sync_all: sync_all
-        goal_default:
-          material_ids: []
-          sync_all: true
-        handles: {}
-        result: {}
-        schema:
-          description: 将本地物料变更同步到Bioyond
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                material_ids:
-                  description: 要同步的物料ID列表
-                  items:
-                    type: string
-                  type: array
-                sync_all:
-                  description: 是否同步所有物料
-                  type: boolean
-              required:
-              - sync_all
-              type: object
-            result: {}
-          required:
-          - goal
-          title: bioyond_update参数
-          type: object
-        type: UniLabJsonCommand
-      reaction_station_drip_back:
-        feedback: {}
-        goal:
-          assign_material_name: assign_material_name
-          time: time
-          torque_variation: torque_variation
-          volume: volume
-        goal_default:
-          assign_material_name: ''
-          time: ''
-          torque_variation: ''
-          volume: ''
-        handles: {}
-        result: {}
-        schema:
-          description: 反应站滴回操作
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                assign_material_name:
-                  description: 溶剂名称
-                  type: string
-                time:
-                  description: 观察时间（单位min）
-                  type: string
-                torque_variation:
-                  description: 是否观察1否2是
-                  type: string
                 volume:
-                  description: 投料体积
+                  description: 分液公式(μL)
                   type: string
               required:
               - volume
               - assign_material_name
               - time
               - torque_variation
+              - titration_type
+              - temperature
               type: object
             result: {}
           required:
           - goal
-          title: reaction_station_drip_back参数
+          title: drip_back参数
           type: object
         type: UniLabJsonCommand
-      reaction_station_liquid_feed:
+      liquid_feeding_beaker:
         feedback: {}
         goal:
           assign_material_name: assign_material_name
+          temperature: temperature
           time: time
           titration_type: titration_type
           torque_variation: torque_variation
           volume: volume
         goal_default:
           assign_material_name: ''
+          temperature: ''
           time: ''
           titration_type: ''
           torque_variation: ''
@@ -514,40 +123,223 @@ reaction_station.bioyond:
         handles: {}
         result: {}
         schema:
-          description: 反应站液体进料操作
+          description: 液体进料烧杯
           properties:
             feedback: {}
             goal:
               properties:
                 assign_material_name:
-                  description: 溶剂名称
+                  description: 物料名称
+                  type: string
+                temperature:
+                  description: 温度设定(°C)
                   type: string
                 time:
-                  description: 观察时间（单位min）
+                  description: 观察时间(分钟)
                   type: string
                 titration_type:
-                  description: 滴定类型1否2是
+                  description: 是否滴定(1=否, 2=是)
                   type: string
                 torque_variation:
-                  description: 是否观察1否2是
+                  description: 是否观察 (1=否, 2=是)
                   type: string
                 volume:
-                  description: 投料体积
+                  description: 分液公式(μL)
                   type: string
               required:
-              - titration_type
               - volume
               - assign_material_name
               - time
               - torque_variation
+              - titration_type
+              - temperature
               type: object
             result: {}
           required:
           - goal
-          title: reaction_station_liquid_feed参数
+          title: liquid_feeding_beaker参数
           type: object
         type: UniLabJsonCommand
-      reaction_station_process_execute:
+      liquid_feeding_solvents:
+        feedback: {}
+        goal:
+          assign_material_name: assign_material_name
+          solvents: solvents
+          temperature: temperature
+          time: time
+          titration_type: titration_type
+          torque_variation: torque_variation
+          volume: volume
+        goal_default:
+          assign_material_name: ''
+          solvents: ''
+          temperature: '25.00'
+          time: '360'
+          titration_type: '1'
+          torque_variation: '2'
+          volume: ''
+        handles:
+          input:
+          - data_key: solvents
+            data_source: handle
+            data_type: object
+            handler_key: solvents
+            io_type: source
+            label: Solvents Data From Calculation Node
+        result: {}
+        schema:
+          description: 液体投料-溶剂。可以直接提供volume(μL),或通过solvents对象自动从additional_solvent(mL)计算volume。
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                assign_material_name:
+                  description: 物料名称
+                  type: string
+                solvents:
+                  description: '溶剂信息对象(可选),包含: additional_solvent(溶剂体积mL), total_liquid_volume(总液体体积mL)。如果提供,将自动计算volume'
+                  type: string
+                temperature:
+                  default: '25.00'
+                  description: 温度设定(°C),默认25.00
+                  type: string
+                time:
+                  default: '360'
+                  description: 观察时间(分钟),默认360
+                  type: string
+                titration_type:
+                  default: '1'
+                  description: 是否滴定(1=否, 2=是),默认1
+                  type: string
+                torque_variation:
+                  default: '2'
+                  description: 是否观察 (1=否, 2=是),默认2
+                  type: string
+                volume:
+                  description: 分液量(μL)。可直接提供,或通过solvents参数自动计算
+                  type: string
+              required:
+              - assign_material_name
+              type: object
+            result: {}
+          required:
+          - goal
+          title: liquid_feeding_solvents参数
+          type: object
+        type: UniLabJsonCommand
+      liquid_feeding_titration:
+        feedback: {}
+        goal:
+          assign_material_name: assign_material_name
+          temperature: temperature
+          time: time
+          titration_type: titration_type
+          torque_variation: torque_variation
+          volume_formula: volume_formula
+        goal_default:
+          assign_material_name: ''
+          temperature: ''
+          time: ''
+          titration_type: ''
+          torque_variation: ''
+          volume_formula: ''
+        handles: {}
+        result: {}
+        schema:
+          description: 液体进料(滴定)
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                assign_material_name:
+                  description: 物料名称
+                  type: string
+                temperature:
+                  description: 温度设定(°C)
+                  type: string
+                time:
+                  description: 观察时间(分钟)
+                  type: string
+                titration_type:
+                  description: 是否滴定(1=否, 2=是)
+                  type: string
+                torque_variation:
+                  description: 是否观察 (1=否, 2=是)
+                  type: string
+                volume_formula:
+                  description: 分液公式(μL)
+                  type: string
+              required:
+              - volume_formula
+              - assign_material_name
+              - time
+              - torque_variation
+              - titration_type
+              - temperature
+              type: object
+            result: {}
+          required:
+          - goal
+          title: liquid_feeding_titration参数
+          type: object
+        type: UniLabJsonCommand
+      liquid_feeding_vials_non_titration:
+        feedback: {}
+        goal:
+          assign_material_name: assign_material_name
+          temperature: temperature
+          time: time
+          titration_type: titration_type
+          torque_variation: torque_variation
+          volume_formula: volume_formula
+        goal_default:
+          assign_material_name: ''
+          temperature: ''
+          time: ''
+          titration_type: ''
+          torque_variation: ''
+          volume_formula: ''
+        handles: {}
+        result: {}
+        schema:
+          description: 液体进料小瓶(非滴定)
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                assign_material_name:
+                  description: 物料名称
+                  type: string
+                temperature:
+                  description: 温度设定(°C)
+                  type: string
+                time:
+                  description: 观察时间(分钟)
+                  type: string
+                titration_type:
+                  description: 是否滴定(1=否, 2=是)
+                  type: string
+                torque_variation:
+                  description: 是否观察 (1=否, 2=是)
+                  type: string
+                volume_formula:
+                  description: 分液公式(μL)
+                  type: string
+              required:
+              - volume_formula
+              - assign_material_name
+              - time
+              - torque_variation
+              - titration_type
+              - temperature
+              type: object
+            result: {}
+          required:
+          - goal
+          title: liquid_feeding_vials_non_titration参数
+          type: object
+        type: UniLabJsonCommand
+      process_and_execute_workflow:
         feedback: {}
         goal:
           task_name: task_name
@@ -558,7 +350,7 @@ reaction_station.bioyond:
         handles: {}
         result: {}
         schema:
-          description: 反应站流程执行
+          description: 处理并执行工作流
           properties:
             feedback: {}
             goal:
@@ -576,92 +368,10 @@ reaction_station.bioyond:
             result: {}
           required:
           - goal
-          title: reaction_station_process_execute参数
+          title: process_and_execute_workflow参数
           type: object
         type: UniLabJsonCommand
-      reaction_station_reactor_taken_out:
-        feedback: {}
-        goal:
-          order_id: order_id
-          preintake_id: preintake_id
-        goal_default:
-          order_id: ''
-          preintake_id: ''
-        handles: {}
-        result: {}
-        schema:
-          description: 反应站反应器取出操作 - 通过订单ID和预取样ID进行精确控制
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                order_id:
-                  description: 订单ID，用于标识要取出的订单
-                  type: string
-                preintake_id:
-                  description: 预取样ID，用于标识具体的取样任务
-                  type: string
-              required: []
-              type: object
-            result:
-              properties:
-                code:
-                  description: 操作结果代码（1表示成功，0表示失败）
-                  type: integer
-                return_info:
-                  description: 操作结果详细信息
-                  type: string
-              type: object
-          required:
-          - goal
-          title: reaction_station_reactor_taken_out参数
-          type: object
-        type: UniLabJsonCommand
-      reaction_station_solid_feed_vial:
-        feedback: {}
-        goal:
-          assign_material_name: assign_material_name
-          material_id: material_id
-          time: time
-          torque_variation: torque_variation
-        goal_default:
-          assign_material_name: ''
-          material_id: ''
-          time: ''
-          torque_variation: ''
-        handles: {}
-        result: {}
-        schema:
-          description: 反应站固体进料操作
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                assign_material_name:
-                  description: 固体名称_粉末加样模块-投料
-                  type: string
-                material_id:
-                  description: 固体投料类型_粉末加样模块-投料
-                  type: string
-                time:
-                  description: 观察时间_反应模块-观察搅拌结果
-                  type: string
-                torque_variation:
-                  description: 是否观察1否2是_反应模块-观察搅拌结果
-                  type: string
-              required:
-              - assign_material_name
-              - material_id
-              - time
-              - torque_variation
-              type: object
-            result: {}
-          required:
-          - goal
-          title: reaction_station_solid_feed_vial参数
-          type: object
-        type: UniLabJsonCommand
-      reaction_station_take_in:
+      reactor_taken_in:
         feedback: {}
         goal:
           assign_material_name: assign_material_name
@@ -674,7 +384,7 @@ reaction_station.bioyond:
         handles: {}
         result: {}
         schema:
-          description: 反应站取入操作
+          description: 反应器放入 - 将反应器放入工作站，配置物料名称、粘度上限和温度参数
           properties:
             feedback: {}
             goal:
@@ -683,10 +393,10 @@ reaction_station.bioyond:
                   description: 物料名称
                   type: string
                 cutoff:
-                  description: 截止参数
+                  description: 粘度上限
                   type: string
                 temperature:
-                  description: 温度
+                  description: 温度设定(°C)
                   type: string
               required:
               - cutoff
@@ -696,10 +406,88 @@ reaction_station.bioyond:
             result: {}
           required:
           - goal
-          title: reaction_station_take_in参数
+          title: reactor_taken_in参数
           type: object
         type: UniLabJsonCommand
-    module: unilabos.devices.workstation.bioyond_studio.station:BioyondWorkstation
+      reactor_taken_out:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: 反应器取出 - 从工作站中取出反应器，无需参数的简单操作
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result:
+              properties:
+                code:
+                  description: 操作结果代码(1表示成功,0表示失败)
+                  type: integer
+                return_info:
+                  description: 操作结果详细信息
+                  type: string
+              type: object
+          required:
+          - goal
+          title: reactor_taken_out参数
+          type: object
+        type: UniLabJsonCommand
+      solid_feeding_vials:
+        feedback: {}
+        goal:
+          assign_material_name: assign_material_name
+          material_id: material_id
+          temperature: temperature
+          time: time
+          torque_variation: torque_variation
+        goal_default:
+          assign_material_name: ''
+          material_id: ''
+          temperature: ''
+          time: ''
+          torque_variation: ''
+        handles: {}
+        result: {}
+        schema:
+          description: 固体进料小瓶 - 通过小瓶向反应器中添加固体物料，支持多种粉末类型(盐、面粉、BTDA)
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                assign_material_name:
+                  description: 物料名称(用于获取试剂瓶位ID)
+                  type: string
+                material_id:
+                  description: 粉末类型ID，1=盐（21分钟），2=面粉（27分钟），3=BTDA（38分钟）
+                  type: string
+                temperature:
+                  description: 温度设定(°C)
+                  type: string
+                time:
+                  description: 观察时间(分钟)
+                  type: string
+                torque_variation:
+                  description: 是否观察 (1=否, 2=是)
+                  type: string
+              required:
+              - assign_material_name
+              - material_id
+              - time
+              - torque_variation
+              - temperature
+              type: object
+            result: {}
+          required:
+          - goal
+          title: solid_feeding_vials参数
+          type: object
+        type: UniLabJsonCommand
+    module: unilabos.devices.workstation.bioyond_studio.reaction_station:BioyondReactionStation
     protocol_type: []
     status_types:
       all_workflows: dict
@@ -708,14 +496,14 @@ reaction_station.bioyond:
       workstation_status: dict
     type: python
   config_info: []
-  description: Bioyond反应站 - 专门用于化学反应操作的工作站
+  description: Bioyond反应站
   handles: []
-  icon: 反应站.webp
+  icon: reaction_station.webp
   init_param_schema:
     config:
       properties:
-        bioyond_config:
-          type: string
+        config:
+          type: object
         deck:
           type: string
       required: []

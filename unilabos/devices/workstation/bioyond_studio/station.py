@@ -4,6 +4,7 @@ Bioyond Workstation Implementation
 
 集成Bioyond物料管理的工作站示例
 """
+import time
 import traceback
 from datetime import datetime
 from typing import Dict, Any, List, Optional, Union

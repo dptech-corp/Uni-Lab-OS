@@ -285,7 +285,7 @@ class HostNode(BaseROS2DeviceNode):
 
         # 创建定时器，定期发现设备
         self._discovery_timer = self.create_timer(
-            discovery_interval, self._discovery_devices_callback, callback_group=ReentrantCallbackGroup()
+            discovery_interval, self._discovery_devices_callback, callback_group=self.callback_group
         )
 
         # 添加ping-pong相关属性
@@ -494,7 +494,7 @@ class HostNode(BaseROS2DeviceNode):
         if len(init_new_res) > 1:  # 一个物料，多个子节点
             init_new_res = [init_new_res]
         resources: List[Resource] | List[List[Resource]] = init_new_res  # initialize_resource已经返回list[dict]
-        device_ids = [device_id]
+        device_ids = [device_id.split("/")[-1]]
         bind_parent_id = [res_creation_input["parent"]]
         bind_location = [bind_locations]
         other_calling_param = [
@@ -618,7 +618,7 @@ class HostNode(BaseROS2DeviceNode):
                                 topic,
                                 lambda msg, d=device_id, p=property_name: self.property_callback(msg, d, p),
                                 1,
-                                callback_group=ReentrantCallbackGroup(),
+                                callback_group=self.callback_group,
                             )
                             # 标记为已订阅
                             self._subscribed_topics.add(topic)
@@ -829,37 +829,37 @@ class HostNode(BaseROS2DeviceNode):
     def _init_host_service(self):
         self._resource_services: Dict[str, Service] = {
             "resource_add": self.create_service(
-                ResourceAdd, "/resources/add", self._resource_add_callback, callback_group=ReentrantCallbackGroup()
+                ResourceAdd, "/resources/add", self._resource_add_callback, callback_group=self.callback_group
             ),
             "resource_get": self.create_service(
-                SerialCommand, "/resources/get", self._resource_get_callback, callback_group=ReentrantCallbackGroup()
+                SerialCommand, "/resources/get", self._resource_get_callback, callback_group=self.callback_group
             ),
             "resource_delete": self.create_service(
                 ResourceDelete,
                 "/resources/delete",
                 self._resource_delete_callback,
-                callback_group=ReentrantCallbackGroup(),
+                callback_group=self.callback_group,
             ),
             "resource_update": self.create_service(
                 ResourceUpdate,
                 "/resources/update",
                 self._resource_update_callback,
-                callback_group=ReentrantCallbackGroup(),
+                callback_group=self.callback_group,
             ),
             "resource_list": self.create_service(
-                ResourceList, "/resources/list", self._resource_list_callback, callback_group=ReentrantCallbackGroup()
+                ResourceList, "/resources/list", self._resource_list_callback, callback_group=self.callback_group
             ),
             "node_info_update": self.create_service(
                 SerialCommand,
                 "/node_info_update",
                 self._node_info_update_callback,
-                callback_group=ReentrantCallbackGroup(),
+                callback_group=self.callback_group,
             ),
             "c2s_update_resource_tree": self.create_service(
                 SerialCommand,
                 "/c2s_update_resource_tree",
                 self._resource_tree_update_callback,
-                callback_group=ReentrantCallbackGroup(),
+                callback_group=self.callback_group,
             ),
         }
 
