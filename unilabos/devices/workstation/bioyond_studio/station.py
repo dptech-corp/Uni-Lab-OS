@@ -63,60 +63,19 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
                 logger.error("Bioyond API客户端未初始化")
                 return False
 
-            # 同步所有类型的物料：耗材(0)、样品(1)和试剂(2)
-            all_bioyond_data = []
-            type_names = {0: "耗材", 1: "样品", 2: "试剂"}
-
-            for type_mode in [0, 1, 2]:  # 0=耗材, 1=样品, 2=试剂
-                logger.info(f"正在从Bioyond同步类型 {type_mode} ({type_names[type_mode]})...")
-                bioyond_data = self.bioyond_api_client.stock_material(
-                    f'{{"typeMode": {type_mode}, "includeDetail": true}}'
-                )
-                if bioyond_data:
-                    logger.info(f"  类型 {type_mode} 同步了 {len(bioyond_data)} 个物料：")
-                    for mat in bioyond_data:
-                        mat_name = mat.get("name", "未知")
-                        mat_type = mat.get("typeName", "未知")
-                        locations = mat.get("locations", [])
-                        if locations:
-                            loc = locations[0]
-                            wh_name = loc.get("whName", "未知")
-                            coords = f"x={loc.get('x')},y={loc.get('y')},z={loc.get('z')}"
-                            logger.info(f"    - {mat_name} ({mat_type}) @ {wh_name} [{coords}]")
-                        else:
-                            logger.info(f"    - {mat_name} ({mat_type}) @ 未入库")
-                    all_bioyond_data.extend(bioyond_data)
-                else:
-                    logger.warning(f"  类型 {type_mode} 没有物料数据")
-
-            if not all_bioyond_data:
+            bioyond_data = self.bioyond_api_client.stock_material('{"typeMode": 2, "includeDetail": true}')
+            if not bioyond_data:
                 logger.warning("从Bioyond获取的物料数据为空")
                 return False
 
-            logger.info(f"总共获取 {len(all_bioyond_data)} 个物料，开始转换为UniLab格式...")
-
             # 转换为UniLab格式
             unilab_resources = resource_bioyond_to_plr(
-                all_bioyond_data,
+                bioyond_data,
                 type_mapping=self.workstation.bioyond_config["material_type_mappings"],
                 deck=self.workstation.deck
             )
 
-            # 保存 Bioyond 物料ID 到每个资源对象，用于后续更新
-            for i, resource in enumerate(unilab_resources):
-                if i < len(all_bioyond_data):
-                    material_id = all_bioyond_data[i].get("id")
-                    if material_id:
-                        # ⭐ 修复：使用 unilabos_extra 字典保存 Bioyond ID
-                        extra_info = getattr(resource, "unilabos_extra", {})
-                        extra_info["material_bioyond_id"] = material_id
-                        setattr(resource, "unilabos_extra", extra_info)
-                        logger.debug(f"物料 {resource.name} 的 Bioyond ID: {material_id[:8]}...")
-
-            # ⭐ 重要：保存同步的资源列表，稍后在 post_init 中上传到云端
-            self.workstation._synced_resources = unilab_resources
-
-            logger.info(f"✅ 从Bioyond同步完成，转换后得到 {len(unilab_resources)} 个UniLab资源")
+            logger.info(f"从Bioyond同步了 {len(unilab_resources)} 个资源")
             return True
         except Exception as e:
             logger.error(f"从Bioyond同步物料数据失败: {e}")
@@ -124,26 +83,14 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
             return False
 
     def sync_to_external(self, resource: Any) -> bool:
-        """将本地物料数据变更同步到Bioyond系统
-
-        ⚠️ Bioyond物料移动的正确流程：
-        1. 出库 (outbound) - 物料被删除
-        2. 新建物料 (add_material) - 使用相同名称和属性
-        3. 入库 (inbound) - 新物料出现在新位置
-
-        Args:
-            resource: 要同步的资源（PLR格式）
-
-        Returns:
-            bool: True=成功, False=失败
-        """
+        """将本地物料数据变更同步到Bioyond系统"""
         try:
             # ✅ 跳过仓库类型的资源 - 仓库是容器，不是物料
             resource_category = getattr(resource, "category", None)
             if resource_category == "warehouse":
                 logger.debug(f"[同步→Bioyond] 跳过仓库类型资源: {resource.name} (仓库是容器，不需要同步为物料)")
                 return True
-            
+
             logger.info(f"[同步→Bioyond] 收到物料变更: {resource.name}")
 
             # 获取物料的 Bioyond ID
@@ -224,164 +171,24 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
                 logger.debug(f"可用仓库: {list(warehouse_mapping.keys())}")
                 return False
 
-            # 第2步：查询物料当前状态（仅对已有物料）
-            current_material_info = None
-            current_location_id = None
+            bioyond_material = resource_plr_to_bioyond(
+                [resource],
+                type_mapping=self.workstation.bioyond_config["material_type_mappings"],
+                warehouse_mapping=self.workstation.bioyond_config["warehouse_mapping"]
+            )[0]
 
-            if material_bioyond_id:
-                # 已有物料：查询当前状态
-                try:
-                    for type_mode in [0, 1, 2]:  # 0=耗材, 1=样品, 2=试剂
-                        stock_data = self.bioyond_api_client.stock_material(
-                            f'{{"typeMode": {type_mode}, "includeDetail": true}}'
-                        )
+            location_info = bioyond_material.pop("locations")
 
-                        for material in stock_data:
-                            if material.get("id") == material_bioyond_id:
-                                current_material_info = material  # 保存完整物料信息
-                                locations = material.get("locations", [])
-                                if locations:
-                                    loc = locations[0]
-                                    current_location_id = loc.get("id")
-                                    wh_name = loc.get("whName", "")
-                                    x, y, z = loc.get("x"), loc.get("y"), loc.get("z")
-                                    row_letter = chr(64 + x) if x else "?"
-                                    col_number = f"{y:02d}" if y else "?"
-                                    current_pos = f"{row_letter}{col_number}"
-                                    logger.info(f"[同步] 物料当前位置: {wh_name}/{current_pos} (location_id: {current_location_id[:8]}...)")
-                                break
+            material_id = self.bioyond_api_client.add_material(bioyond_material)
 
-                        if current_material_info:
-                            break
-                except Exception as e:
-                    logger.error(f"❌ 查询物料信息失败: {e}")
-                    import traceback
-                    traceback.print_exc()
-                    return False
-
-                if not current_material_info:
-                    logger.error(f"❌ 在Bioyond系统中未找到物料: {resource.name} (ID: {material_bioyond_id})")
-                    return False
-
-                # 第3步：出库（删除旧物料）
-                if current_location_id:
-                    logger.info(f"[同步] 步骤1/4: 🔻 出库物料（删除）")
-                    outbound_response = self.bioyond_api_client.material_outbound_by_id(
-                        material_bioyond_id,
-                        current_location_id,
-                        quantity=1
-                    )
-                    if outbound_response is None:
-                        logger.error(f"❌ 物料出库失败")
-                        return False
-                    logger.info(f"[同步] ✅ 物料已出库（已删除）")
-                else:
-                    logger.info(f"[同步] 物料不在库中，跳过出库步骤")
-            else:
-                # 新物料：从 resource 对象构建物料信息
-                logger.info(f"[同步] 这是新物料，将从资源对象获取属性")
-                current_material_info = {
-                    "name": resource.name,
-                    "typeName": "烧杯",  # 默认类型，稍后会根据实际情况确定
-                    "unit": "微升",
-                    "quantity": 1000.0,  # 默认容量
+            response = self.bioyond_api_client.material_inbound(material_id, location_info[0]["id"])
+            if not response:
+                return {
+                    "status": "error",
+                    "message": "Failed to inbound material"
                 }
-                logger.info(f"[同步] 新物料属性: {current_material_info}")
-
-            # 第4步：查询物料类型ID
-            logger.info(f"[同步] 步骤2/4: 🔍 查询物料类型ID")
-
-            type_name = current_material_info.get("typeName", "")
-            type_id = None
-
-            try:
-                # 直接调用API查询物料类型列表
-                response = self.bioyond_api_client.post(
-                    url=f'{self.bioyond_api_client.host}/api/lims/storage/material-types',
-                    params={
-                        'apiKey': self.bioyond_api_client.api_key,
-                        'requestTime': self.bioyond_api_client.get_current_time_iso8601(),
-                        'data': ''
-                    })
-
-                if response and response.get('code') == 1:
-                    types = response.get('data', [])
-                    for t in types:
-                        if t.get("name") == type_name:
-                            type_id = t.get("id")
-                            logger.info(f"[同步] 找到物料类型: {type_name} (ID: {type_id[:8]}...)")
-                            break
-
-                    if not type_id:
-                        logger.warning(f"[同步] 未找到物料类型 {type_name}")
-            except Exception as e:
-                logger.error(f"[同步] 查询物料类型失败: {e}")
-                import traceback
-                traceback.print_exc()
-
-            if not type_id:
-                logger.error(f"❌ 无法获取物料类型ID")
-                return False
-
-            # 第5步：新建物料（使用原物料的属性）
-            logger.info(f"[同步] 步骤3/4: ➕ 新建物料")
-
-            # 按照API文档构建参数
-            new_material_data = {
-                "typeId": type_id,
-                "name": current_material_info.get("name"),
-                "unit": current_material_info.get("unit", "微升"),
-                "quantity": current_material_info.get("quantity", 0),
-                "code": "",  # 物料编码（可选）
-                "barCode": "",  # 物料条码（可选）
-                "parameters": "",  # 参数（必填，可以为空字符串）
-                "details": []  # 孔物料信息（如果有detail字段则填充）
-            }
-
-            new_material_response = self.bioyond_api_client.add_material(new_material_data)
-
-            # add_material 可能返回字典（包含id字段）或直接返回ID字符串
-            if isinstance(new_material_response, str):
-                new_material_id = new_material_response
-            elif isinstance(new_material_response, dict) and "id" in new_material_response:
-                new_material_id = new_material_response["id"]
-            else:
-                new_material_id = None
-
-            if not new_material_id:
-                logger.error(f"❌ 新建物料失败")
-                return False
-
-            new_material_id = new_material_response["id"]
-            logger.info(f"[同步] ✅ 新物料已创建 (ID: {new_material_id[:8]}...)")
-
-            # 第5步：入库到新位置
-            logger.info(f"[同步] 步骤3/3: 📥 入库到新位置 {update_site}")
-            inbound_response = self.bioyond_api_client.material_inbound(
-                new_material_id,
-                target_location_uuid
-            )
-
-            if inbound_response is not None:
-                logger.info(f"[同步] ✅ 物料已入库到 {parent_name}/{update_site}")
-                logger.info(f"[同步] 🎉 物料移动完成！{resource.name} → {parent_name}/{update_site}")
-
-                # ⭐ 更新 resource 的 Bioyond ID 为新 ID
-                extra_info["material_bioyond_id"] = new_material_id
-                setattr(resource, "unilabos_extra", extra_info)
-
-                return True
-            else:
-                logger.error(f"❌ 物料入库到新位置失败")
-                logger.error(f"   警告：物料已出库但入库失败，需要手动在Bioyond系统中处理")
-                logger.error(f"   新物料ID: {new_material_id}")
-                return False
-
-        except Exception as e:
-            logger.error(f"[同步→Bioyond] 处理物料变更时出错: {e}")
-            import traceback
-            traceback.print_exc()
-            return False
+        except:
+            pass
 
     def handle_external_change(self, change_info: Dict[str, Any]) -> bool:
         """处理Bioyond系统的变更通知"""
@@ -446,27 +253,22 @@ class BioyondWorkstation(WorkstationBase):
 
     def post_init(self, ros_node: ROS2WorkstationNode):
         self._ros_node = ros_node
+
+        # ⭐ 上传 deck（包括所有 warehouses 及其中的物料）
+        # 注意：如果有从 Bioyond 同步的物料，它们已经被放置到 warehouse 中了
+        # 所以只需要上传 deck，物料会作为 warehouse 的 children 一起上传
+        logger.info("正在上传 deck（包括 warehouses 和物料）到云端...")
         ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
             "resources": [self.deck]
         })
 
-        # ⭐ 上传从 Bioyond 同步的物料到云端数据库
-        if hasattr(self, "_synced_resources") and self._synced_resources:
-            try:
-                logger.info(f"开始将 {len(self._synced_resources)} 个从Bioyond同步的物料上传到云端...")
-                # 调用 ROS 节点的 update_resource 方法，确保物料被上传到云端
-                ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
-                    "resources": self._synced_resources
-                })
-                logger.info("✅ 从Bioyond同步的物料已上传到云端数据库")
-                # 清理临时变量
-                self._synced_resources = []
-            except Exception as e:
-                logger.error(f"上传Bioyond同步物料到云端失败: {e}")
-                import traceback
-                traceback.print_exc()
+        # 清理临时变量（物料已经在 deck 的 warehouse children 中，不需要单独上传）
+        if hasattr(self, "_synced_resources"):
+            logger.info(f"✅ {len(self._synced_resources)} 个从Bioyond同步的物料已包含在 deck 中")
+            self._synced_resources = []
 
     def transfer_resource_to_another(self, resource: List[ResourceSlot], mount_resource: List[ResourceSlot], sites: List[str], mount_device_id: DeviceSlot):
+        time.sleep(3)
         ROS2DeviceNode.run_async_func(self._ros_node.transfer_resource_to_another, True, **{
             "plr_resources": resource,
             "target_device_id": mount_device_id,
@@ -476,25 +278,12 @@ class BioyondWorkstation(WorkstationBase):
 
     def _create_communication_module(self, config: Optional[Dict[str, Any]] = None) -> None:
         """创建Bioyond通信模块"""
-        # 如果没有提供配置，或者配置不完整，使用默认配置
-        if config is None:
-            config = {}
-
-        # 合并配置，确保所有必要的键都存在
-        self.bioyond_config = {
+        self.bioyond_config = config or {
             **API_CONFIG,
             "workflow_mappings": WORKFLOW_MAPPINGS,
             "material_type_mappings": MATERIAL_TYPE_MAPPINGS,
-            "warehouse_mapping": WAREHOUSE_MAPPING,
-            **config  # 用户配置覆盖默认配置
+            "warehouse_mapping": WAREHOUSE_MAPPING
         }
-
-        # 调试：输出配置信息
-        logger.debug(f"Bioyond 配置加载完成:")
-        logger.debug(f"  - warehouse_mapping 仓库数: {len(self.bioyond_config.get('warehouse_mapping', {}))}")
-        logger.debug(f"  - material_type_mappings 类型数: {len(self.bioyond_config.get('material_type_mappings', {}))}")
-        logger.debug(f"  - material_type_mappings 详情: {list(self.bioyond_config.get('material_type_mappings', {}).keys())}")
-        logger.debug(f"  - workflow_mappings 工作流数: {len(self.bioyond_config.get('workflow_mappings', {}))}")
 
         self.hardware_interface = BioyondV1RPC(self.bioyond_config)
 
@@ -505,28 +294,6 @@ class BioyondWorkstation(WorkstationBase):
             resources (List[ResourcePLR]): 要添加的资源列表
         """
         self.resource_synchronizer.sync_to_external(resources)
-
-    def resource_tree_update(self, resources: List[ResourcePLR]) -> None:
-        """更新资源信息并同步到Bioyond系统
-
-        Args:
-            resources (List[ResourcePLR]): 要更新的资源列表
-        """
-        try:
-            logger.info(f"开始同步 {len(resources)} 个资源的更新到Bioyond系统")
-
-            for resource in resources:
-                # 调用资源同步器将更新同步到外部系统
-                success = self.resource_synchronizer.sync_to_external(resource)
-                if success:
-                    logger.info(f"资源 {resource.name} 更新同步成功")
-                else:
-                    logger.warning(f"资源 {resource.name} 更新同步失败")
-
-        except Exception as e:
-            logger.error(f"同步资源更新到Bioyond失败: {e}")
-            import traceback
-            traceback.print_exc()
 
     @property
     def bioyond_status(self) -> Dict[str, Any]:

@@ -232,7 +232,7 @@ class BioyondReactionStation(BioyondWorkstation):
             temperature: 温度设定(°C)
         """
         # 处理 volume 参数:优先使用直接传入的 volume,否则从 solvents 中提取
-        if volume is None and solvents is not None:
+        if not volume and solvents is not None:
             # 参数类型转换:如果是字符串则解析为字典
             if isinstance(solvents, str):
                 try:
