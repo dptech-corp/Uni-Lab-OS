@@ -54,6 +54,24 @@ def bioyond_warehouse_1x4x2(name: str) -> WareHouse:
         category="warehouse",
         removed_positions=None
     )
+
+def bioyond_warehouse_reagent_stack(name: str) -> WareHouse:
+    """创建BioYond 试剂堆栈 2x4x1 (2行×4列: A1-B4)"""
+    return warehouse_factory(
+        name=name,
+        num_items_x=2,
+        num_items_y=4,
+        num_items_z=1,
+        dx=10.0,
+        dy=10.0,
+        dz=10.0,
+        item_dx=147.0,
+        item_dy=106.0,
+        item_dz=130.0,
+        category="warehouse",
+        col_offset=0,  # 从1开始: A1, A2, A3, A4, B1, B2, B3, B4
+    )
+
  # 定义benyond的堆栈
 def bioyond_warehouse_1x2x2(name: str) -> WareHouse:
     """创建BioYond 4x1x4仓库"""

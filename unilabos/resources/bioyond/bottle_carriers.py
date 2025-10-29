@@ -149,6 +149,57 @@ def BIOYOND_PolymerStation_6StockCarrier(name: str) -> BottleCarrier:
     return carrier
 
 
+def BIOYOND_PolymerStation_8StockCarrier(name: str) -> BottleCarrier:
+    """8瓶载架 - 2x4布局"""
+
+    # 载架尺寸 (mm)
+    carrier_size_x = 170.0
+    carrier_size_y = 85.5
+    carrier_size_z = 50.0
+
+    # 瓶位尺寸
+    bottle_diameter = 20.0
+    bottle_spacing_x = 42.0  # X方向间距
+    bottle_spacing_y = 35.0  # Y方向间距
+
+    # 计算起始位置 (居中排列)
+    start_x = (carrier_size_x - (4 - 1) * bottle_spacing_x - bottle_diameter) / 2
+    start_y = (carrier_size_y - (2 - 1) * bottle_spacing_y - bottle_diameter) / 2
+
+    sites = create_ordered_items_2d(
+        klass=ResourceHolder,
+        num_items_x=4,
+        num_items_y=2,
+        dx=start_x,
+        dy=start_y,
+        dz=5.0,
+        item_dx=bottle_spacing_x,
+        item_dy=bottle_spacing_y,
+
+        size_x=bottle_diameter,
+        size_y=bottle_diameter,
+        size_z=carrier_size_z,
+    )
+    for k, v in sites.items():
+        v.name = f"{name}_{v.name}"
+
+    carrier = BottleCarrier(
+        name=name,
+        size_x=carrier_size_x,
+        size_y=carrier_size_y,
+        size_z=carrier_size_z,
+        sites=sites,
+        model="BIOYOND_PolymerStation_8StockCarrier",
+    )
+    carrier.num_items_x = 4
+    carrier.num_items_y = 2
+    carrier.num_items_z = 1
+    ordering = ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4"]
+    for i in range(8):
+        carrier[i] = BIOYOND_PolymerStation_Solid_Stock(f"{name}_vial_{ordering[i]}")
+    return carrier
+
+
 def BIOYOND_PolymerStation_6VialCarrier(name: str) -> BottleCarrier:
     """6瓶载架 - 2x3布局"""
 

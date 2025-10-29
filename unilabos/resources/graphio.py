@@ -629,13 +629,25 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
     """
     plr_materials = []
 
+    # 用于跟踪同名物料的计数器
+    name_counter = {}
+
     for material in bioyond_materials:
         className = (
             type_mapping.get(material.get("typeName"), ("RegularContainer", ""))[0] if type_mapping else "RegularContainer"
         )
 
+        # 为同名物料添加唯一后缀
+        base_name = material["name"]
+        if base_name in name_counter:
+            name_counter[base_name] += 1
+            unique_name = f"{base_name}_{name_counter[base_name]}"
+        else:
+            name_counter[base_name] = 1
+            unique_name = base_name
+
         plr_material_result = initialize_resource(
-            {"name": material["name"], "class": className}, resource_type=ResourcePLR
+            {"name": unique_name, "class": className}, resource_type=ResourcePLR
         )
 
         # initialize_resource 可能返回列表或单个对象
@@ -649,25 +661,44 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
 
         # 确保 plr_material 是 ResourcePLR 实例
         if not isinstance(plr_material, ResourcePLR):
-            logger.warning(f"物料 {material['name']} 不是有效的 ResourcePLR 实例，类型: {type(plr_material)}")
+            logger.warning(f"物料 {unique_name} 不是有效的 ResourcePLR 实例，类型: {type(plr_material)}")
             continue
 
         plr_material.code = material.get("code", "") and material.get("barCode", "") or ""
         plr_material.unilabos_uuid = str(uuid.uuid4())
+
+        logger.debug(f"[转换物料] {material['name']} (ID:{material['id']}) → {unique_name} (类型:{className})")
 
         # 处理子物料（detail）
         if material.get("detail") and len(material["detail"]) > 0:
             for bottle in reversed(plr_material.children):
                 plr_material.unassign_child_resource(bottle)
             child_ids = []
+
+            # 确定detail物料的默认类型
+            # 样品板的detail通常是样品瓶
+            default_detail_type = "样品瓶" if "样品板" in material.get("typeName", "") else None
+
             for detail in material["detail"]:
                 number = (
                     (detail.get("z", 0) - 1) * plr_material.num_items_x * plr_material.num_items_y
                     + (detail.get("y", 0) - 1) * plr_material.num_items_y
                     + (detail.get("x", 0) - 1)
                 )
-                typeName = detail.get("typeName", detail.get("name", ""))
-                if typeName in type_mapping:
+
+                # 检查索引是否超出范围
+                max_index = plr_material.num_items_x * plr_material.num_items_y - 1
+                if number < 0 or number > max_index:
+                    logger.warning(
+                        f"  └─ [子物料警告] {detail['name']} 的坐标 (x={detail.get('x')}, y={detail.get('y')}, z={detail.get('z')}) "
+                        f"计算出索引 {number} 超出载架范围 [0-{max_index}] (布局: {plr_material.num_items_x}×{plr_material.num_items_y})，跳过"
+                    )
+                    continue
+
+                # detail可能没有typeName，尝试从name推断，或使用默认类型
+                typeName = detail.get("typeName", default_detail_type)
+
+                if typeName and typeName in type_mapping:
                     bottle = plr_material[number] = initialize_resource(
                         {"name": f'{detail["name"]}_{number}', "class": type_mapping[typeName][0]}, resource_type=ResourcePLR
                     )
@@ -675,6 +706,9 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
                         (detail["name"], float(detail.get("quantity", 0)) if detail.get("quantity") else 0)
                     ]
                     bottle.code = detail.get("code", "")
+                    logger.debug(f"  └─ [子物料] {detail['name']} → {plr_material.name}[{number}] (类型:{typeName})")
+                else:
+                    logger.warning(f"  └─ [子物料警告] {detail['name']} 的类型 '{typeName}' 不在mapping中，跳过")
         else:
             # 只对有 capacity 属性的容器（液体容器）处理液体追踪
             if hasattr(plr_material, 'capacity'):
@@ -686,8 +720,13 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
         plr_materials.append(plr_material)
 
         if deck and hasattr(deck, "warehouses"):
-            for loc in material.get("locations", []):
+            locations = material.get("locations", [])
+            if not locations:
+                logger.debug(f"[物料位置] {unique_name} 没有location信息，跳过warehouse放置")
+
+            for loc in locations:
                 wh_name = loc.get("whName")
+                logger.debug(f"[物料位置] {unique_name} 尝试放置到 warehouse: {wh_name} (Bioyond坐标: x={loc.get('x')}, y={loc.get('y')}, z={loc.get('z')})")
 
                 # 特殊处理: Bioyond的"堆栈1"需要映射到"堆栈1左"或"堆栈1右"
                 # 根据列号(x)判断: 1-4映射到左侧, 5-8映射到右侧
@@ -703,6 +742,7 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
 
                 if hasattr(deck, "warehouses") and wh_name in deck.warehouses:
                     warehouse = deck.warehouses[wh_name]
+                    logger.debug(f"[Warehouse匹配] 找到warehouse: {wh_name} (容量: {warehouse.capacity}, 行×列: {warehouse.num_items_x}×{warehouse.num_items_y})")
 
                     # Bioyond坐标映射 (重要！): x→行(1=A,2=B...), y→列(1=01,2=02...), z→层(通常=1)
                     # PyLabRobot warehouse是列优先存储: A01,B01,C01,D01, A02,B02,C02,D02, ...
@@ -733,9 +773,12 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
                     if 0 <= idx < warehouse.capacity:
                         if warehouse[idx] is None or isinstance(warehouse[idx], ResourceHolder):
                             warehouse[idx] = plr_material
-                            logger.debug(f"✅ 物料 {material['name']} 放置到 {wh_name}[{idx}] (Bioyond坐标: x={loc.get('x')}, y={loc.get('y')})")
+                            logger.debug(f"✅ 物料 {unique_name} 放置到 {wh_name}[{idx}] (Bioyond坐标: x={loc.get('x')}, y={loc.get('y')})")
                     else:
-                        logger.warning(f"物料 {material['name']} 的索引 {idx} 超出仓库 {wh_name} 容量 {warehouse.capacity}")
+                        logger.warning(f"❌ 物料 {unique_name} 的索引 {idx} 超出仓库 {wh_name} 容量 {warehouse.capacity}")
+                else:
+                    if wh_name:
+                        logger.warning(f"❌ 物料 {unique_name} 的warehouse '{wh_name}' 在deck中不存在。可用warehouses: {list(deck.warehouses.keys()) if hasattr(deck, 'warehouses') else '无'}")
 
     return plr_materials
 

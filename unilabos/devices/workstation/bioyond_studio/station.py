@@ -63,14 +63,28 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
                 logger.error("Bioyond API客户端未初始化")
                 return False
 
-            bioyond_data = self.bioyond_api_client.stock_material('{"typeMode": 2, "includeDetail": true}')
-            if not bioyond_data:
+            # 同时查询样品类型(typeMode=1)和试剂类型(typeMode=2)
+            all_bioyond_data = []
+
+            # 查询样品类型物料（烧杯、试剂瓶、分装板等）
+            bioyond_data_type1 = self.bioyond_api_client.stock_material('{"typeMode": 1, "includeDetail": true}')
+            if bioyond_data_type1:
+                all_bioyond_data.extend(bioyond_data_type1)
+                logger.debug(f"从Bioyond查询到 {len(bioyond_data_type1)} 个样品类型物料")
+
+            # 查询试剂类型物料（样品板、样品瓶等）
+            bioyond_data_type2 = self.bioyond_api_client.stock_material('{"typeMode": 2, "includeDetail": true}')
+            if bioyond_data_type2:
+                all_bioyond_data.extend(bioyond_data_type2)
+                logger.debug(f"从Bioyond查询到 {len(bioyond_data_type2)} 个试剂类型物料")
+
+            if not all_bioyond_data:
                 logger.warning("从Bioyond获取的物料数据为空")
                 return False
 
             # 转换为UniLab格式
             unilab_resources = resource_bioyond_to_plr(
-                bioyond_data,
+                all_bioyond_data,
                 type_mapping=self.workstation.bioyond_config["material_type_mappings"],
                 deck=self.workstation.deck
             )
