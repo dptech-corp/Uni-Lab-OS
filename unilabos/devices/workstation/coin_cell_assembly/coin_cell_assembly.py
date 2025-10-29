@@ -1,11 +1,15 @@
+      
 import csv
+import inspect
 import json
 import os
 import threading
 import time
+import types
 from datetime import datetime
 from typing import Any, Dict, Optional
-from pylabrobot.resources import Resource as PLRResource
+from functools import wraps
+from pylabrobot.resources import Deck, Resource as PLRResource
 from unilabos_msgs.msg import Resource
 from unilabos.device_comms.modbus_plc.client import ModbusTcpClient
 from unilabos.devices.workstation.workstation_base import WorkstationBase
@@ -15,12 +19,99 @@ from unilabos.devices.workstation.coin_cell_assembly.button_battery_station impo
 from unilabos.ros.nodes.base_device_node import ROS2DeviceNode, BaseROS2DeviceNode
 from unilabos.ros.nodes.presets.workstation import ROS2WorkstationNode
 from unilabos.devices.workstation.coin_cell_assembly.button_battery_station import CoincellDeck
+from unilabos.resources.graphio import convert_resources_to_type
+from unilabos.utils.log import logger
+
+
+def _ensure_modbus_slave_kw_alias(modbus_client):
+    if modbus_client is None:
+        return
+
+    method_names = [
+        "read_coils",
+        "write_coils",
+        "write_coil",
+        "read_discrete_inputs",
+        "read_holding_registers",
+        "write_register",
+        "write_registers",
+    ]
+
+    def _wrap(func):
+        signature = inspect.signature(func)
+        has_var_kwargs = any(param.kind == param.VAR_KEYWORD for param in signature.parameters.values())
+        accepts_unit = has_var_kwargs or "unit" in signature.parameters
+        accepts_slave = has_var_kwargs or "slave" in signature.parameters
+
+        @wraps(func)
+        def _wrapped(self, *args, **kwargs):
+            if "slave" in kwargs and not accepts_slave:
+                slave_value = kwargs.pop("slave")
+                if accepts_unit and "unit" not in kwargs:
+                    kwargs["unit"] = slave_value
+            if "unit" in kwargs and not accepts_unit:
+                unit_value = kwargs.pop("unit")
+                if accepts_slave and "slave" not in kwargs:
+                    kwargs["slave"] = unit_value
+            return func(self, *args, **kwargs)
+
+        _wrapped._has_slave_alias = True
+        return _wrapped
+
+    for name in method_names:
+        if not hasattr(modbus_client, name):
+            continue
+        bound_method = getattr(modbus_client, name)
+        func = getattr(bound_method, "__func__", None)
+        if func is None:
+            continue
+        if getattr(func, "_has_slave_alias", False):
+            continue
+        wrapped = _wrap(func)
+        setattr(modbus_client, name, types.MethodType(wrapped, modbus_client))
+
+
+def _coerce_station_resource_input(station_resource: Any) -> Optional[Deck]:
+    if station_resource is None:
+        return None
+
+    if isinstance(station_resource, Deck):
+        return station_resource
+
+    if isinstance(station_resource, PLRResource):
+        return station_resource if isinstance(station_resource, Deck) else None
+
+    candidates = None
+    if isinstance(station_resource, dict):
+        if "nodes" in station_resource and isinstance(station_resource["nodes"], list):
+            candidates = station_resource["nodes"]
+        else:
+            candidates = [station_resource]
+    elif isinstance(station_resource, list):
+        candidates = station_resource
+
+    if candidates is None:
+        return None
+
+    try:
+        converted = convert_resources_to_type(resources_list=candidates, resource_type=Deck)
+        if isinstance(converted, Deck):
+            return converted
+        if isinstance(converted, list):
+            for item in converted:
+                if isinstance(item, Deck):
+                    return item
+    except Exception as exc:
+        logger.warning(f"station_resource 转换 Deck 失败: {exc}")
+    return None
+
 
 #构建物料系统
 
 class CoinCellAssemblyWorkstation(WorkstationBase):
     def __init__(
         self,
+        station_resource: Optional[Any] = None,
         deck: Deck=None,
         address: str = "172.21.32.20",
         port: str = "502",
@@ -28,6 +119,16 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         *args,
         **kwargs,
     ):
+        if station_resource is None and "station_resource" in kwargs:
+            station_resource = kwargs.pop("station_resource")
+        else:
+            kwargs.pop("station_resource", None)
+
+        normalized_station_resource = _coerce_station_resource_input(station_resource)
+
+        if deck is None and isinstance(normalized_station_resource, Deck):
+            deck = normalized_station_resource
+
         super().__init__(
             #桌子
             deck=deck,
@@ -35,10 +136,34 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
             **kwargs,
         )
         self.debug_mode = debug_mode
-        self.deck = deck
+
+        self.station_resource = normalized_station_resource if isinstance(normalized_station_resource, Deck) else None
+
+        if self.deck is None:
+            self.deck = CoincellDeck(size_x=1000, size_y=1000, size_z=900)
+            self.station_resource = self.deck
+            # 创建料盘1并添加极片
+            liaopan1 = MaterialPlate(name="liaopan1", size_x=120.8, size_y=120.5, size_z=10.0, fill=True)
+            self.deck.assign_child_resource(liaopan1, Coordinate(x=0, y=0, z=0))
+            for i in range(16):
+                jipian = ElectrodeSheet(name=f"jipian1_{i}", size_x=12, size_y=12, size_z=0.1)
+                liaopan1.children[i].assign_child_resource(jipian, location=None)
+            # 创建料盘2
+            liaopan2 = MaterialPlate(name="liaopan2", size_x=120.8, size_y=120.5, size_z=10.0, fill=True)
+            self.deck.assign_child_resource(liaopan2, Coordinate(x=500, y=0, z=0))
+            # 创建电池料盘
+            liaopan3 = MaterialPlate(name="电池料盘", size_x=120.8, size_y=160.5, size_z=10.0, fill=True)
+            self.deck.assign_child_resource(liaopan3, Coordinate(x=100, y=100, z=0))
+        else:
+            if self.station_resource is None:
+                self.station_resource = self.deck
+            elif self.deck is not self.station_resource:
+                self.deck = self.station_resource
+
         """ 连接初始化 """
         modbus_client = TCPClient(addr=address, port=port)
         print("modbus_client", modbus_client)
+        _ensure_modbus_slave_kw_alias(modbus_client.client)
         if not debug_mode:
             modbus_client.client.connect()
             count = 100
@@ -62,8 +187,6 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         self.csv_export_file = None
         self.coin_num_N = 0  #已组装电池数量
         #创建一个物料台面，包含两个极片板
-        #self.deck = create_a_coin_cell_deck()
-        
         #self._ros_node.update_resource(self.deck)
         
         #ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
@@ -907,7 +1030,10 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
             ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
                 "resources": [self.station_resource]
             })
-            time.sleep(4)
+            # for i in range(40):
+            #     print(f"fun_wuliao_test 运行结束{i}")
+            #     time.sleep(1)
+            # time.sleep(40)
     # 数据读取与输出
     def func_read_data_and_output(self, file_path: str="D:\\coin_cell_data"):
         # 检查CSV导出是否正在运行，已运行则跳出，防止同时启动两个while循环
@@ -1145,8 +1271,11 @@ if __name__ == "__main__":
     #liaopan2.children[1].assign_child_resource(jipian1, location=None)
     ##print(jipian2.parent)
     
-    liaopan1 = deck.get_resource("liaopan1")
-    liaopan2 = deck.get_resource("liaopan2")
+    # 使用 Coin_Cell 对象的 deck 属性
+    deck = Coin_Cell.deck
+    
+    liaopan1 = Coin_Cell.deck.get_resource("liaopan1")
+    liaopan2 = Coin_Cell.deck.get_resource("liaopan2")
     for i in range(16):
         #找到liaopan1上每一个jipian
         jipian_linshi = liaopan1.children[i].children[0]
@@ -1172,12 +1301,14 @@ if __name__ == "__main__":
     BasicConfig.sk = "15d4f25e-3512-4f9c-9bfb-43ab85e7b561"
     from unilabos.app.web.client import http_client
 
-    resources = convert_resources_from_type([deck], [Resource])
+    resources = convert_resources_from_type([Coin_Cell.deck], [Resource])
     json.dump({"nodes": resources, "links": []}, open("button_battery_station_resources_unilab.json", "w"), indent=2)
    
     #print(resources)
     http_client.remote_addr = "https://uni-lab.test.bohrium.com/api/v1"
  
     http_client.resource_add(resources)
+
+    
 
     
