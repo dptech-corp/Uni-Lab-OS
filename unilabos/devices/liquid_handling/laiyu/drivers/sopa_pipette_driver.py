@@ -396,9 +396,15 @@ class SOPAPipette:
             response = self._send_query("Q28")
             if response and len(response) > 10:
                 # 解析响应中的枪头状态
-                status_char = response[10] if len(response) > 10 else '0'
-                self._tip_present = (status_char == '1')
-                return self._tip_present
+                if "T1" in response:
+                    self._tip_present = True
+                    return True
+                elif "T0" in response:
+                    self._tip_present = False
+                    return False
+                else:
+                    logger.error(f"获取枪头状态失败: {response}")
+                    return False
         except Exception as e:
             logger.error(f"获取枪头状态失败: {str(e)}")
 

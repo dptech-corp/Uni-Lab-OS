@@ -8,6 +8,7 @@ import time
 import pprint as pp
 from pylabrobot.liquid_handling import LiquidHandler, LiquidHandlerBackend, LiquidHandlerChatterboxBackend, Strictness
 from unilabos.devices.liquid_handling.rviz_backend import UniLiquidHandlerRvizBackend
+from unilabos.devices.liquid_handling.laiyu.backend.laiyu_v_backend import UniLiquidHandlerLaiyuBackend
 from pylabrobot.liquid_handling.liquid_handler import TipPresenceProbingMethod
 from pylabrobot.liquid_handling.standard import GripDirection
 from pylabrobot.resources import (
@@ -34,6 +35,8 @@ class LiquidHandlerMiddleware(LiquidHandler):
         if simulator:
             self._simulate_backend = UniLiquidHandlerRvizBackend(channel_num,total_height)
             self._simulate_handler = LiquidHandlerAbstract(self._simulate_backend, deck, False)
+        if hasattr(backend, "total_height"):
+            backend.total_height = total_height
         super().__init__(backend, deck)
 
     async def setup(self, **backend_kwargs):
@@ -545,9 +548,42 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
           backend: Backend to use.
           deck: Deck to use.
         """
+        backend_type = None
+        if isinstance(backend, dict) and "type" in backend:
+            backend_dict = backend.copy()
+            type_str = backend_dict.pop("type")
+            try:
+                # Try to get class from string using globals (current module), or fallback to pylabrobot or unilabos namespaces
+                backend_cls = None
+                if type_str in globals():
+                    backend_cls = globals()[type_str]
+                else:
+                    # Try resolving dotted notation, e.g. "xxx.yyy.ClassName"
+                    components = type_str.split(".")
+                    mod = None
+                    if len(components) > 1:
+                        module_name = ".".join(components[:-1])
+                        try:
+                            import importlib
+                            mod = importlib.import_module(module_name)
+                        except ImportError:
+                            mod = None
+                        if mod is not None:
+                            backend_cls = getattr(mod, components[-1], None)
+                    if backend_cls is None:
+                        # Try pylabrobot style import (if available)
+                        try:
+                            import pylabrobot
+                            backend_cls = getattr(pylabrobot, type_str, None)
+                        except Exception:
+                            backend_cls = None
+                if backend_cls is not None and isinstance(backend_cls, type):
+                    backend_type = backend_cls(**backend_dict)  # pass the rest of dict as kwargs
+            except Exception as exc:
+                raise RuntimeError(f"Failed to convert backend type '{type_str}' to class: {exc}")
         self._simulator = simulator
         self.group_info = dict()
-        super().__init__(backend, deck, simulator, channel_num,total_height)
+        super().__init__(backend_type, deck, simulator, channel_num,total_height)
 
     @classmethod
     def set_liquid(self, wells: list[Well], liquid_names: list[str], volumes: list[float]):

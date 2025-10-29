@@ -27,7 +27,7 @@ from pylabrobot.resources import Tip, Deck, Plate, Well, TipRack, Resource, Cont
 
 from unilabos.devices.liquid_handling.liquid_handler_abstract import LiquidHandlerAbstract
 from unilabos.devices.liquid_handling.rviz_backend import UniLiquidHandlerRvizBackend
-from unilabos.devices.ros_dev.liquid_handler_joint_publisher import JointStatePublisher
+from unilabos.devices.liquid_handling.laiyu.backend.laiyu_v_backend import UniLiquidHandlerLaiyuBackend
 
 
 

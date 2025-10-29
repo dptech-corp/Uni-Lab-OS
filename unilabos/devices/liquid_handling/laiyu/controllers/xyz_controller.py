@@ -55,7 +55,7 @@ class MachineConfig:
     reference_distance: Dict[str, float] = field(default_factory=lambda: {
         "x": 29,
         "y": -13,
-        "z": -73.5
+        "z": -75.5
     })
     # 安全移动参数
     safe_z_height: float = 0.0      # Z轴安全移动高度 (mm) - 液体处理工作站安全高度
@@ -118,7 +118,8 @@ class XYZController(XYZStepperController):
         
         # 坐标系统
         self.coordinate_origin = CoordinateOrigin()
-        self.origin_file = "coordinate_origin.json"
+        import os
+        self.origin_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "coordinate_origin.json")
         
         # 连接状态
         self.is_connected = False
@@ -207,6 +208,13 @@ class XYZController(XYZStepperController):
             if os.path.exists(self.origin_file):
                 with open(self.origin_file, 'r', encoding='utf-8') as f:
                     origin_data = json.load(f)
+
+                    for key, value in origin_data["machine_origin_steps"].items():
+                        origin_data["machine_origin_steps"][key] = round(self.mm_to_steps(MotorAxis[key.upper()], value), 2)
+
+                    for key, value in origin_data["work_origin_steps"].items():
+                        origin_data["work_origin_steps"][key] = round(self.mm_to_steps(MotorAxis[key.upper()], value), 2)
+
                     self.coordinate_origin = CoordinateOrigin(**origin_data)
                 logger.info("坐标原点信息加载完成")
         except Exception as e:
@@ -220,7 +228,14 @@ class XYZController(XYZStepperController):
             self.coordinate_origin.timestamp = datetime.now().isoformat()
             
             with open(self.origin_file, 'w', encoding='utf-8') as f:
-                json.dump(asdict(self.coordinate_origin), f, indent=2, ensure_ascii=False)
+                json_data = asdict(self.coordinate_origin)
+                for key, value in json_data["machine_origin_steps"].items():
+                    json_data["machine_origin_steps"][key] = round(self.steps_to_mm(MotorAxis[key.upper()], value), 2)
+
+                for key, value in json_data["work_origin_steps"].items():
+                    json_data["work_origin_steps"][key] = round(self.steps_to_mm(MotorAxis[key.upper()], value), 2)
+
+                json.dump(json_data, f, indent=2, ensure_ascii=False)
             logger.info("坐标原点信息保存完成")
         except Exception as e:
             logger.error(f"保存坐标原点失败: {e}")
@@ -255,15 +270,15 @@ class XYZController(XYZStepperController):
         
         if x is not None:
             work_steps = self.mm_to_steps(MotorAxis.X, x)
-            machine_steps['x'] = self.coordinate_origin.work_origin_steps['x'] + work_steps
+            machine_steps['x'] = self.coordinate_origin.work_origin_steps['x'] + work_steps + self.coordinate_origin.machine_origin_steps['x']
         
         if y is not None:
             work_steps = self.mm_to_steps(MotorAxis.Y, y)
-            machine_steps['y'] = self.coordinate_origin.work_origin_steps['y'] + work_steps
-            
+            machine_steps['y'] = self.coordinate_origin.work_origin_steps['y'] + work_steps + self.coordinate_origin.machine_origin_steps['y']
+
         if z is not None:
             work_steps = self.mm_to_steps(MotorAxis.Z, z)
-            machine_steps['z'] = self.coordinate_origin.work_origin_steps['z'] + work_steps
+            machine_steps['z'] = self.coordinate_origin.work_origin_steps['z'] + work_steps + self.coordinate_origin.machine_origin_steps['z']
             
         return machine_steps
     
@@ -274,7 +289,7 @@ class XYZController(XYZStepperController):
         for axis_name, steps in machine_steps.items():
             axis = MotorAxis[axis_name.upper()]
             work_origin_steps = self.coordinate_origin.work_origin_steps[axis_name]
-            relative_steps = steps - work_origin_steps
+            relative_steps = steps - work_origin_steps - self.coordinate_origin.machine_origin_steps[axis_name]
             work_coords[axis_name] = self.steps_to_mm(axis, relative_steps)
             
         return work_coords
@@ -502,10 +517,10 @@ class XYZController(XYZStepperController):
             for axis in MotorAxis:
                 axis_name = axis.name.lower()
                 current_steps = positions[axis].steps
-                self.coordinate_origin.work_origin_steps[axis_name] = current_steps + machine_steps[axis_name]
+                self.coordinate_origin.work_origin_steps[axis_name] = current_steps + machine_steps[axis_name] - self.coordinate_origin.machine_origin_steps[axis_name]
                 
-                logger.info(f"{axis.name}轴工作原点设置为: {current_steps + machine_steps[axis_name]}步 "
-                          f"({self.steps_to_mm(axis, current_steps + machine_steps[axis_name]):.2f}mm)")
+                logger.info(f"{axis.name}轴工作原点设置为: {current_steps + machine_steps[axis_name] - self.coordinate_origin.machine_origin_steps[axis_name]}步 "
+                          f"({self.steps_to_mm(axis, current_steps + machine_steps[axis_name] - self.coordinate_origin.machine_origin_steps[axis_name]):.2f}mm)")
             
             self._save_coordinate_origin()
             logger.info("工作原点设置完成")
@@ -830,6 +845,7 @@ def interactive_control(controller: XYZController):
                 if homing_success:
                     print("回零操作完成，系统已就绪")
                     # 设置当前位置为工作原点
+
                     # if controller.set_work_origin_here():
                     #     print("工作原点已设置为回零位置")
                     # else:

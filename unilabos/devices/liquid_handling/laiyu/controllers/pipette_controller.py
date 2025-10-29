@@ -8,6 +8,7 @@
 # 添加项目根目录到Python路径以解决模块导入问题
 import sys
 import os
+from tkinter import N
 
 from unilabos.devices.liquid_handling.laiyu.drivers.xyz_stepper_driver import ModbusException
 
@@ -135,8 +136,8 @@ class PipetteController:
 
         # XYZ步进电机控制器（用于运动控制）
         self.xyz_controller: Optional[XYZController] = None
-        self.xyz_port = xyz_port
-        self.xyz_connected = False
+        self.xyz_port = xyz_port if xyz_port else port
+        self.xyz_connected = True
 
         # 统计信息
         # self.tip_count = 0
@@ -181,6 +182,8 @@ class PipetteController:
                 logger.info("移液器初始化成功")
                 # 检查枪头状态
                 self._update_tip_status()
+                self.xyz_controller.home_all_axes()
+                self.xyz_controller.move_to_work_coord_safe(x=0, y=-150, z=0)
                 return True
             return False
         except Exception as e:
@@ -392,6 +395,7 @@ class PipetteController:
         Returns:
             是否成功
         """
+
         self._update_tip_status()
 
         if self.tip_status == TipStatus.NO_TIP:
@@ -652,6 +656,7 @@ class PipetteController:
 
     def get_status(self) -> Dict:
         """获取状态信息"""
+        self._update_tip_status()
         return {
             'tip_status': self.tip_status.value,
             'current_volume': self.current_volume,
@@ -692,15 +697,15 @@ if __name__ == "__main__":
         
         # 获取用户输入的连接参数
         print("\n📡 设备连接配置:")
-        port = input("请输入移液器串口端口 (默认: /dev/ttyUSB0): ").strip() or "/dev/ttyUSB0"
+        port = input("请输入移液器串口端口 (默认: /dev/ttyUSB_CH340): ").strip() or "/dev/ttyUSB_CH340"
         address_input = input("请输入移液器设备地址 (默认: 4): ").strip()
         address = int(address_input) if address_input else 4
         
         # 询问是否连接 XYZ 步进电机控制器
         xyz_enable = input("是否连接 XYZ 步进电机控制器? (y/N): ").strip().lower()
         xyz_port = None
-        if xyz_enable in ['y', 'yes']:
-            xyz_port = input("请输入 XYZ 控制器串口端口 (默认: /dev/ttyUSB1): ").strip() or "/dev/ttyUSB1"
+        if xyz_enable not in ['n', 'no']:
+            xyz_port = input("请输入 XYZ 控制器串口端口 (默认: /dev/ttyUSB_CH340): ").strip() or "/dev/ttyUSB_CH340"
         
         try:
             # 创建移液控制器实例

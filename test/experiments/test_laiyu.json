@@ -22,17 +22,17 @@
                     "name": "deck"
                 },
                 "backend": {
-                    "type": "UniLiquidHandlerRvizBackend"
-                    
+                    "type": "UniLiquidHandlerLaiyuBackend",
+                    "port": "/dev/ttyUSB_CH340"
                 },
-                "simulator": true,
-                "total_height": 300
+                "simulator": false,
+                "total_height": 232
             }
         },
         {
             "id": "deck",
             "name": "deck",
-            "sample_id": null,
+            
             "children": [
                 "tip_rack",
                 "plate_well",
@@ -64,7 +64,7 @@
         {
             "id": "tip_rack",
             "name": "tip_rack",
-            "sample_id": null,
+            
             "children": [
                 "tip_rack_A1"
             ],
@@ -102,7 +102,7 @@
         {
             "id": "tip_rack_A1",
             "name": "tip_rack_A1",
-            "sample_id": null,
+            
             "children": [],
             "parent": "tip_rack",
             "type": "container",
@@ -144,7 +144,7 @@
         {
             "id": "plate_well",
             "name": "plate_well",
-            "sample_id": null,
+            
             "children": [
                 "plate_well_A1"
             ],
@@ -155,18 +155,6 @@
                 "x": 161,
                 "y": 116,
                 "z": 48.5
-            },
-            "pose": {
-                "position_3d": {
-                    "x": 161,
-                    "y": 116,
-                    "z": 48.5
-                },
-                "rotation": {
-                    "x": 0,
-                    "y": 0,
-                    "z": 0
-                }
             },
             "config": {
                 "type": "Plate",
@@ -195,7 +183,7 @@
         {
             "id": "plate_well_A1",
             "name": "plate_well_A1",
-            "sample_id": null,
+            
             "children": [],
             "parent": "plate_well",
             "type": "device",
@@ -236,7 +224,7 @@
         {
             "id": "tube_rack",
             "name": "tube_rack",
-            "sample_id": null,
+            
             "children": [
                 "tube_rack_A1"
             ],
@@ -271,7 +259,7 @@
         {
             "id": "tube_rack_A1",
             "name": "tube_rack_A1",
-            "sample_id": null,
+            
             "children": [],
             "parent": "tube_rack",
             "type": "device",
@@ -315,7 +303,7 @@
         {
             "id": "bottle_rack",
             "name": "bottle_rack",
-            "sample_id": null,
+            
             "children": [
                 "bottle_rack_A1"
             ],
@@ -351,7 +339,7 @@
         {
             "id": "bottle_rack_A1",
             "name": "bottle_rack_A1",
-            "sample_id": null,
+            
             "children": [],
             "parent": "bottle_rack",
             "type": "device",

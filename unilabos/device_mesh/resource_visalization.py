@@ -129,9 +129,9 @@ class ResourceVisualization:
                         # if node["parent"] is not None:
                         #     new_dev.set("station_name", node["parent"]+'_')
 
-                        new_dev.set("x",str(float(node["position"]["x"])/1000))
-                        new_dev.set("y",str(float(node["position"]["y"])/1000))
-                        new_dev.set("z",str(float(node["position"]["z"])/1000))
+                        new_dev.set("x",str(float(node["position"]["position"]["x"])/1000))
+                        new_dev.set("y",str(float(node["position"]["position"]["y"])/1000))
+                        new_dev.set("z",str(float(node["position"]["position"]["z"])/1000))
                         if "rotation" in node["config"]:
                             new_dev.set("rx",str(float(node["config"]["rotation"]["x"])))
                             new_dev.set("ry",str(float(node["config"]["rotation"]["y"])))
@@ -204,7 +204,24 @@ class ResourceVisualization:
         Returns:
             LaunchDescription: launch描述对象
         """
-        moveit_configs_utils_path = Path(get_package_share_directory("moveit_configs_utils"))
+        # 检查ROS 2环境变量
+        if "AMENT_PREFIX_PATH" not in os.environ:
+            raise OSError(
+                "ROS 2环境未正确设置。需要设置 AMENT_PREFIX_PATH 环境变量。\n"
+                "请确保：\n"
+                "1. 已安装ROS 2 (推荐使用 ros-humble-desktop-full)\n"
+                "2. 已激活Conda环境: conda activate unilab\n"
+                "3. 或手动source ROS 2 setup文件: source /opt/ros/humble/setup.bash\n"
+                "4. 或者使用 --backend simple 参数跳过ROS依赖"
+            )
+
+        try:
+            moveit_configs_utils_path = Path(get_package_share_directory("moveit_configs_utils"))
+        except Exception as e:
+            raise OSError(
+                f"无法找到moveit_configs_utils包。请确保ROS 2和MoveIt 2已正确安装。\n"
+                f"原始错误: {e}"
+            )
         default_folder = moveit_configs_utils_path / "default_configs"
         planning_pattern = re.compile("^(.*)_planning.yaml$")
         pipelines = []
