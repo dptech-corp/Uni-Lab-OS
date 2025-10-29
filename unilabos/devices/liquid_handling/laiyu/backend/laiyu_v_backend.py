@@ -31,7 +31,7 @@ from unilabos_msgs.action import SendCmd
 import re
 
 from unilabos.devices.ros_dev.liquid_handler_joint_publisher import JointStatePublisher
-from unilabos.devices.liquid_handling.laiyu.controllers.pipette_controller import PipetteController
+from unilabos.devices.liquid_handling.laiyu.controllers.pipette_controller import PipetteController, TipStatus
 
 
 class UniLiquidHandlerLaiyuBackend(LiquidHandlerBackend):
@@ -79,6 +79,26 @@ class UniLiquidHandlerLaiyuBackend(LiquidHandlerBackend):
 
   def serialize(self) -> dict:
     return {**super().serialize(), "num_channels": self.num_channels}
+
+  def pipette_aspirate(self, volume: float, flow_rate: float):
+
+    self.hardware_interface.pipette.set_max_speed(flow_rate)
+    res = self.hardware_interface.pipette.aspirate(volume=volume)
+    
+    if not res:
+        self.hardware_interface.logger.error("吸取失败，当前体积: {self.hardware_interface.current_volume}")
+        return
+
+    self.hardware_interface.current_volume += volume 
+
+  def pipette_dispense(self, volume: float, flow_rate: float):
+
+    self.hardware_interface.pipette.set_max_speed(flow_rate)
+    res = self.hardware_interface.pipette.dispense(volume=volume)
+    if not res:
+        self.hardware_interface.logger.error("排液失败，当前体积: {self.hardware_interface.current_volume}")
+        return
+    self.hardware_interface.current_volume -= volume
 
   @property
   def num_channels(self) -> int:
@@ -129,6 +149,10 @@ class UniLiquidHandlerLaiyuBackend(LiquidHandlerBackend):
     y = coordinate.y + offset_xyz.y
     z = self.total_height - (coordinate.z + self.tip_length) + offset_xyz.z
     # print("moving")
+    self.hardware_interface._update_tip_status()
+    if self.hardware_interface.tip_status == TipStatus.TIP_ATTACHED:
+        print("已有枪头，无需重复拾取")
+        return
     self.hardware_interface.xyz_controller.move_to_work_coord_safe(x=x, y=-y, z=z,speed=100)
     self.hardware_interface.xyz_controller.move_to_work_coord_safe(z=self.hardware_interface.xyz_controller.machine_config.safe_z_height,speed=100)
     # self.joint_state_publisher.send_resource_action(ops[0].resource.name, x, y, z, "pick",channels=use_channels)
@@ -174,11 +198,13 @@ class UniLiquidHandlerLaiyuBackend(LiquidHandlerBackend):
     z = self.total_height - (coordinate.z + self.tip_length) + offset_xyz.z -20
     # print(x, y, z)
     # print("moving")
+    self.hardware_interface._update_tip_status()
+    if self.hardware_interface.tip_status == TipStatus.NO_TIP:
+        print("无枪头，无需丢弃")
+        return
     self.hardware_interface.xyz_controller.move_to_work_coord_safe(x=x, y=-y, z=z)
-    self.hardware_interface.xyz_controller.move_to_work_coord_safe(z=self.hardware_interface.xyz_controller.machine_config.safe_z_height)
-
-    # self.joint_state_publisher.send_resource_action(ops[0].resource.name, x, y, z, "drop_trash",channels=use_channels)
-    #   goback()
+    self.hardware_interface.eject_tip
+    self.hardware_interface.xyz_controller.move_to_work_coord_safe(z=self.hardware_interface.xyz_controller.machine_config.safe_z_height)  
 
   async def aspirate(
     self,
@@ -227,10 +253,29 @@ class UniLiquidHandlerLaiyuBackend(LiquidHandlerBackend):
     z = self.total_height - (coordinate.z + self.tip_length) + offset_xyz.z
     # print(x, y, z)
     # print("moving")
+
+    # 判断枪头是否存在
+    self.hardware_interface._update_tip_status()
+    if not self.hardware_interface.tip_status == TipStatus.TIP_ATTACHED:
+        print("无枪头，无法吸液")
+        return
+    # 判断吸液量是否超过枪头容量
+    flow_rate = backend_kwargs["flow_rate"] if "flow_rate" in backend_kwargs else 500
+    blow_out_air_volume = backend_kwargs["blow_out_air_volume"] if "blow_out_air_volume" in backend_kwargs else 0
+    if self.hardware_interface.current_volume + ops[0].volume + blow_out_air_volume > self.hardware_interface.max_volume:
+        self.hardware_interface.logger.error(f"吸液量超过枪头容量: {self.hardware_interface.current_volume + ops[0].volume} > {self.hardware_interface.max_volume}")
+        return
+
+    # 移动到吸液位置
     self.hardware_interface.xyz_controller.move_to_work_coord_safe(x=x, y=-y, z=z)
-    self.hardware_interface.aspirate()
+    self.pipette_aspirate(volume=ops[0].volume, flow_rate=flow_rate)
+
+
     self.hardware_interface.xyz_controller.move_to_work_coord_safe(z=self.hardware_interface.xyz_controller.machine_config.safe_z_height)
-    # self.joint_state_publisher.send_resource_action(ops[0].resource.name, x, y, z, "",channels=use_channels)
+    if blow_out_air_volume >0: 
+        self.pipette_aspirate(volume=blow_out_air_volume, flow_rate=flow_rate)
+
+
 
 
   async def dispense(
@@ -280,8 +325,28 @@ class UniLiquidHandlerLaiyuBackend(LiquidHandlerBackend):
     z = self.total_height - (coordinate.z + self.tip_length) + offset_xyz.z
     # print(x, y, z)
     # print("moving")
+
+    # 判断枪头是否存在
+    self.hardware_interface._update_tip_status()
+    if not self.hardware_interface.tip_status == TipStatus.TIP_ATTACHED:
+        print("无枪头，无法排液")
+        return
+    # 判断排液量是否超过枪头容量
+    flow_rate = backend_kwargs["flow_rate"] if "flow_rate" in backend_kwargs else 500
+    blow_out_air_volume = backend_kwargs["blow_out_air_volume"] if "blow_out_air_volume" in backend_kwargs else 0
+    if self.hardware_interface.current_volume - ops[0].volume - blow_out_air_volume < 0:
+        self.hardware_interface.logger.error(f"排液量超过枪头容量: {self.hardware_interface.current_volume - ops[0].volume - blow_out_air_volume} < 0")
+        return
+
+    
+    # 移动到排液位置  
     self.hardware_interface.xyz_controller.move_to_work_coord_safe(x=x, y=-y, z=z)
+    self.pipette_dispense(volume=ops[0].volume, flow_rate=flow_rate)
+
+
     self.hardware_interface.xyz_controller.move_to_work_coord_safe(z=self.hardware_interface.xyz_controller.machine_config.safe_z_height)
+    if blow_out_air_volume > 0: 
+        self.pipette_dispense(volume=blow_out_air_volume, flow_rate=flow_rate)
     # self.joint_state_publisher.send_resource_action(ops[0].resource.name, x, y, z, "",channels=use_channels)
 
   async def pick_up_tips96(self, pickup: PickupTipRack, **backend_kwargs):

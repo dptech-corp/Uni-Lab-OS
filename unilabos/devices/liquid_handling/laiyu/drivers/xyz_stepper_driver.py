@@ -208,7 +208,7 @@ class StepperMotorDriver:
         calculated_crc = self.calculate_crc(data_part)
         
         if received_crc != calculated_crc:
-            raise ModbusException("CRC校验失败")
+            raise ModbusException(f"CRC校验失败{response}")
         
         return response
     

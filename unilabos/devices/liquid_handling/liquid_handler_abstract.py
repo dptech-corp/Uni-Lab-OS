@@ -219,7 +219,6 @@ class LiquidHandlerMiddleware(LiquidHandler):
             offsets,
             liquid_height,
             blow_out_air_volume,
-            spread,
             **backend_kwargs,
         )
 
