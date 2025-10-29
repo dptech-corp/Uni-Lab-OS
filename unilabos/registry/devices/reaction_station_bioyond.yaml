@@ -4,48 +4,6 @@ reaction_station.bioyond:
   - reaction_station_bioyond
   class:
     action_value_mappings:
-      drip_back:
-        feedback: {}
-        goal:
-          assign_material_name: assign_material_name
-          temperature: temperature
-          time: time
-          titration_type: titration_type
-          torque_variation: torque_variation
-          volume: volume
-        goal_default:
-          assign_material_name: ''
-          temperature: ''
-          time: ''
-          titration_type: ''
-          torque_variation: ''
-          volume: ''
-        handles: {}
-        result: {}
-        schema:
-          description: 滴回去
-          properties:
-            feedback: {}
-            goal:
-              properties:
-                assign_material_name:
-                  description: 物料名称（不能为空）
-                  type: string
-                temperature:
-                  description: 温度设定(°C)
-                  type: string
-                time:
-                  description: 观察时间(分钟)
-                  type: string
-              required:
-              - file_path
-              type: object
-            result: {}
-          required:
-          - goal
-          title: load_bioyond_data_from_file参数
-          type: object
-        type: UniLabJsonCommand
       auto-post_init:
         feedback: {}
         goal: {}
@@ -102,6 +60,48 @@ reaction_station.bioyond:
           required:
           - goal
           title: drip_back参数
+          type: object
+        type: UniLabJsonCommand
+      drip_back:
+        feedback: {}
+        goal:
+          assign_material_name: assign_material_name
+          temperature: temperature
+          time: time
+          titration_type: titration_type
+          torque_variation: torque_variation
+          volume: volume
+        goal_default:
+          assign_material_name: ''
+          temperature: ''
+          time: ''
+          titration_type: ''
+          torque_variation: ''
+          volume: ''
+        handles: {}
+        result: {}
+        schema:
+          description: 滴回去
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                assign_material_name:
+                  description: 物料名称（不能为空）
+                  type: string
+                temperature:
+                  description: 温度设定(°C)
+                  type: string
+                time:
+                  description: 观察时间(分钟)
+                  type: string
+              required:
+              - file_path
+              type: object
+            result: {}
+          required:
+          - goal
+          title: load_bioyond_data_from_file参数
           type: object
         type: UniLabJsonCommand
       liquid_feeding_beaker:

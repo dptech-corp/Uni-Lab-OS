@@ -8,34 +8,34 @@ from typing import Any, Dict, Optional
 from pylabrobot.resources import Resource as PLRResource
 from unilabos_msgs.msg import Resource
 from unilabos.device_comms.modbus_plc.client import ModbusTcpClient
-from unilabos.devices.workstation.coin_cell_assembly.button_battery_station import MaterialHole, MaterialPlate
 from unilabos.devices.workstation.workstation_base import WorkstationBase
 from unilabos.device_comms.modbus_plc.client import TCPClient, ModbusNode, PLCWorkflow, ModbusWorkflow, WorkflowAction, BaseClient
 from unilabos.device_comms.modbus_plc.modbus import DeviceType, Base as ModbusNodeBase, DataType, WorderOrder
 from unilabos.devices.workstation.coin_cell_assembly.button_battery_station import *
 from unilabos.ros.nodes.base_device_node import ROS2DeviceNode, BaseROS2DeviceNode
 from unilabos.ros.nodes.presets.workstation import ROS2WorkstationNode
+from unilabos.devices.workstation.coin_cell_assembly.button_battery_station import CoincellDeck
 
 #构建物料系统
 
 class CoinCellAssemblyWorkstation(WorkstationBase):
     def __init__(
         self,
-        station_resource: CoincellDeck,
+        deck: Deck=None,
         address: str = "172.21.32.20",
         port: str = "502",
-        debug_mode: bool = True,
+        debug_mode: bool = False,
         *args,
         **kwargs,
     ):
         super().__init__(
             #桌子
-            station_resource=station_resource,
+            deck=deck,
             *args,
             **kwargs,
         )
         self.debug_mode = debug_mode
-        self.station_resource = station_resource
+        self.deck = deck
         """ 连接初始化 """
         modbus_client = TCPClient(addr=address, port=port)
         print("modbus_client", modbus_client)
@@ -75,7 +75,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         self._ros_node = ros_node
         #self.deck = create_a_coin_cell_deck()
         ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
-            "resources": [self.station_resource]
+            "resources": [self.deck]
         })
 
     # 批量操作在这里写
@@ -85,7 +85,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
 
     
     async def fill_plate(self):
-        plate_1: MaterialPlate = self.station_resource.children[0].children[0]
+        plate_1: MaterialPlate = self.deck.children[0].children[0]
         #plate_1
         return await self._ros_node.update_resource(plate_1)
 
@@ -342,7 +342,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
     def modify_deck_name(self, resource_name: str):
         # figure_res = self._ros_node.resource_tracker.figure_resource({"name": resource_name})
         # print(f"!!! figure_res: {type(figure_res)}")
-        self.station_resource.children[1]
+        self.deck.children[1]
         return
 
     @property
@@ -1105,8 +1105,17 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
 
 
 if __name__ == "__main__":
-    from pylabrobot.resources import Resource
-    Coin_Cell = CoinCellAssemblyWorkstation(Resource("1", 1, 1, 1), debug_mode=True)
+    # modbus_client = TCPClient(addr="172.21.32.20", port="502")
+    # # modbus_client.client.connect()
+    # nodes = BaseClient.load_csv(os.path.join(os.path.dirname(__file__), 'coin_cell_assembly_a.csv'))
+    # client  = modbus_client.register_node_list(nodes)
+    # # print("modbus_client", modbus_client)
+    # while True:
+    #     time.sleep(1)
+    #     cmd_feedback, read_err = modbus_client.use_node('COIL_SYS_AUTO_CMD').read(1)
+    #     print("modbus_client", cmd_feedback)
+    Coin_Cell = CoinCellAssemblyWorkstation()
+    print(Coin_Cell.deck)
     #Coin_Cell.func_pack_device_init()  
     #Coin_Cell.func_pack_device_auto()
     #Coin_Cell.func_pack_device_start()
@@ -1121,7 +1130,7 @@ if __name__ == "__main__":
     #print("success")
     #创建一个物料台面
 
-    deck = create_a_coin_cell_deck()
+    # deck = create_a_coin_cell_deck()
     #deck = create_a_full_coin_cell_deck()
 
 
@@ -1170,3 +1179,5 @@ if __name__ == "__main__":
     http_client.remote_addr = "https://uni-lab.test.bohrium.com/api/v1"
  
     http_client.resource_add(resources)
+
+    
