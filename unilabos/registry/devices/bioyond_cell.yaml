@@ -137,7 +137,7 @@ bioyond_cell:
           WH4_x5_y1_z1_5_quantity: 0.0
           WH4_x5_y2_z1_10_materialName: ''
           WH4_x5_y2_z1_10_quantity: 0.0
-          xlsx_path: unilabos/devices/workstation/bioyond_cell/样品导入模板.xlsx
+          xlsx_path: unilabos\devices\workstation\bioyond_studio\bioyond_cell\样品导入模板.xlsx
         handles: {}
         placeholder_keys: {}
         result: {}
@@ -463,7 +463,7 @@ bioyond_cell:
                   default: 0.0
                   type: number
                 xlsx_path:
-                  default: unilabos/devices/workstation/bioyond_cell/样品导入模板.xlsx
+                  default: unilabos\devices\workstation\bioyond_studio\bioyond_cell\样品导入模板.xlsx
                   type: string
               required: []
               type: object
@@ -496,6 +496,63 @@ bioyond_cell:
           required:
           - goal
           title: auto_feeding4to3_from_xlsx参数
+          type: object
+        type: UniLabJsonCommand
+      auto-create_and_inbound_materials:
+        feedback: {}
+        goal: {}
+        goal_default:
+          material_names: null
+          type_id: 3a190ca0-b2f6-9aeb-8067-547e72c11469
+          warehouse_name: 粉末加样头堆栈
+        handles: {}
+        placeholder_keys: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                material_names:
+                  type: string
+                type_id:
+                  default: 3a190ca0-b2f6-9aeb-8067-547e72c11469
+                  type: string
+                warehouse_name:
+                  default: 粉末加样头堆栈
+                  type: string
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: create_and_inbound_materials参数
+          type: object
+        type: UniLabJsonCommand
+      auto-create_materials:
+        feedback: {}
+        goal: {}
+        goal_default:
+          mappings: null
+        handles: {}
+        placeholder_keys: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                mappings:
+                  type: object
+              required:
+              - mappings
+              type: object
+            result: {}
+          required:
+          - goal
+          title: create_materials参数
           type: object
         type: UniLabJsonCommand
       auto-create_orders:
@@ -576,6 +633,84 @@ bioyond_cell:
           title: order_list_v2参数
           type: object
         type: UniLabJsonCommand
+      auto-process_order_finish_report:
+        feedback: {}
+        goal: {}
+        goal_default:
+          report_request: null
+          used_materials: null
+        handles: {}
+        placeholder_keys: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                report_request:
+                  type: string
+                used_materials:
+                  type: string
+              required:
+              - report_request
+              type: object
+            result: {}
+          required:
+          - goal
+          title: process_order_finish_report参数
+          type: object
+        type: UniLabJsonCommand
+      auto-process_sample_finish_report:
+        feedback: {}
+        goal: {}
+        goal_default:
+          report_request: null
+        handles: {}
+        placeholder_keys: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                report_request:
+                  type: string
+              required:
+              - report_request
+              type: object
+            result: {}
+          required:
+          - goal
+          title: process_sample_finish_report参数
+          type: object
+        type: UniLabJsonCommand
+      auto-process_step_finish_report:
+        feedback: {}
+        goal: {}
+        goal_default:
+          report_request: null
+        handles: {}
+        placeholder_keys: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                report_request:
+                  type: string
+              required:
+              - report_request
+              type: object
+            result: {}
+          required:
+          - goal
+          title: process_step_finish_report参数
+          type: object
+        type: UniLabJsonCommand
       auto-report_material_change:
         feedback: {}
         goal: {}
@@ -620,6 +755,27 @@ bioyond_cell:
           required:
           - goal
           title: scheduler_continue参数
+          type: object
+        type: UniLabJsonCommand
+      auto-scheduler_reset:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        placeholder_keys: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: scheduler_reset参数
           type: object
         type: UniLabJsonCommand
       auto-scheduler_start:
@@ -776,6 +932,62 @@ bioyond_cell:
           required:
           - goal
           title: transfer_3_to_2_to_1参数
+          type: object
+        type: UniLabJsonCommand
+      auto-update_push_ip:
+        feedback: {}
+        goal: {}
+        goal_default:
+          ip: null
+          port: null
+        handles: {}
+        placeholder_keys: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                ip:
+                  type: string
+                port:
+                  type: string
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: update_push_ip参数
+          type: object
+        type: UniLabJsonCommand
+      auto-wait_for_order_finish:
+        feedback: {}
+        goal: {}
+        goal_default:
+          order_code: null
+          timeout: 1800
+        handles: {}
+        placeholder_keys: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                order_code:
+                  type: string
+                timeout:
+                  default: 1800
+                  type: integer
+              required:
+              - order_code
+              type: object
+            result: {}
+          required:
+          - goal
+          title: wait_for_order_finish参数
           type: object
         type: UniLabJsonCommand
       auto-wait_for_transfer_task:

@@ -22,7 +22,7 @@
       ],
       "parent": null,
       "type": "device",
-      "class": "bettery_station_registry",
+      "class": "coincellassemblyworkstation_device",
       "position": {
           "x": 600,
           "y": 400,
