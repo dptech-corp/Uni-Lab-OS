@@ -86,9 +86,9 @@ class BIOYOND_PolymerPreparationStation_Deck(Deck):
             "溶液堆栈": bioyond_warehouse_1x4x4("溶液堆栈"),  # 4行×4列 (A01-D04)
         }
         self.warehouse_locations = {
-            "粉末堆栈": Coordinate(0.0, 650.0, 0.0),
-            "试剂堆栈": Coordinate(2550.0, 650.0, 0.0),
-            "溶液堆栈": Coordinate(1915.0, 900.0, 0.0),
+            "粉末堆栈": Coordinate(0.0, 450.0, 0.0),
+            "试剂堆栈": Coordinate(1850.0, 200.0, 0.0),
+            "溶液堆栈": Coordinate(2500.0, 450.0, 0.0),
         }
 
         for warehouse_name, warehouse in self.warehouses.items():

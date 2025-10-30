@@ -30,13 +30,13 @@ def BIOYOND_DispensingStation_8StockCarrier(name: str) -> BottleCarrier:
     """配液站-8孔样品板 - 2x4布局"""
 
     # 载架尺寸 (mm)
-    carrier_size_x = 170.0
+    carrier_size_x = 128.0
     carrier_size_y = 85.5
     carrier_size_z = 50.0
 
     # 瓶位尺寸
     bottle_diameter = 20.0
-    bottle_spacing_x = 42.0  # X方向间距
+    bottle_spacing_x = 30.0  # X方向间距
     bottle_spacing_y = 35.0  # Y方向间距
 
     # 计算起始位置 (居中排列)
