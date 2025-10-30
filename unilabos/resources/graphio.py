@@ -11,7 +11,7 @@ from unilabos_msgs.msg import Resource
 
 from unilabos.config.config import BasicConfig
 from unilabos.resources.container import RegularContainer
-from unilabos.resources.itemized_carrier import ItemizedCarrier
+from unilabos.resources.itemized_carrier import ItemizedCarrier, BottleCarrier
 from unilabos.ros.msgs.message_converter import convert_to_ros_msg
 from unilabos.ros.nodes.resource_tracker import (
     ResourceDictInstance,
@@ -228,7 +228,7 @@ def handle_communications(G: nx.Graph):
         if G.nodes[device_comm].get("class") == "serial":
             G.nodes[device]["config"]["port"] = device_comm
         elif G.nodes[device_comm].get("class") == "io_device":
-            print(f'!!! Modify {device}\'s io_device_port to {edata["port"][device_comm]}')
+            logger.warning(f'Modify {device}\'s io_device_port to {edata["port"][device_comm]}')
             G.nodes[device]["config"]["io_device_port"] = int(edata["port"][device_comm])
 
 
@@ -586,7 +586,7 @@ def resource_plr_to_ulab(resource_plr: "ResourcePLR", parent_name: str = None, w
         if source in replace_info:
             return replace_info[source]
         else:
-            print("转换pylabrobot的时候，出现未知类型", source)
+            logger.warning(f"转换pylabrobot的时候，出现未知类型: {source}")
             return source
 
     def resource_plr_to_ulab_inner(d: dict, all_states: dict, child=True) -> dict:
@@ -621,7 +621,7 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
 
     Args:
         bioyond_materials: bioyond 系统的物料查询结果列表
-        type_mapping: 物料类型映射字典，格式 {bioyond_type: [plr_class_name, class_uuid]}
+        type_mapping: 物料类型映射字典，格式 {model: (显示名称, UUID)} 或 {显示名称: (model, UUID)}
         location_id_mapping: 库位 ID 到名称的映射字典，格式 {location_id: location_name}
 
     Returns:
@@ -629,13 +629,29 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
     """
     plr_materials = []
 
+    # 创建反向映射: {显示名称: (model, UUID)} -> 用于从 Bioyond typeName 查找 model
+    # 如果 type_mapping 的 key 已经是显示名称,则直接使用;否则创建反向映射
+    reverse_type_mapping = {}
+    for key, value in type_mapping.items():
+        # value 可能是 tuple 或 list: (显示名称, UUID) 或 [显示名称, UUID]
+        display_name = value[0] if isinstance(value, (tuple, list)) and len(value) >= 1 else None
+        if display_name:
+            # 反向映射: {显示名称: (原始key作为model, UUID)}
+            resource_uuid = value[1] if len(value) >= 2 else ""
+            # 如果已存在该显示名称,跳过(保留第一个遇到的映射)
+            if display_name not in reverse_type_mapping:
+                reverse_type_mapping[display_name] = (key, resource_uuid)
+
+    logger.debug(f"[反向映射表] 共 {len(reverse_type_mapping)} 个条目: {list(reverse_type_mapping.keys())}")
+
+
     # 用于跟踪同名物料的计数器
     name_counter = {}
 
     for material in bioyond_materials:
-        className = (
-            type_mapping.get(material.get("typeName"), ("RegularContainer", ""))[0] if type_mapping else "RegularContainer"
-        )
+        # 从反向映射中查找: typeName(显示名称) -> (model, UUID)
+        type_info = reverse_type_mapping.get(material.get("typeName"))
+        className = type_info[0] if type_info else "RegularContainer"
 
         # 为同名物料添加唯一后缀
         base_name = material["name"]
@@ -696,11 +712,27 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
                     continue
 
                 # detail可能没有typeName，尝试从name推断，或使用默认类型
-                typeName = detail.get("typeName", default_detail_type)
+                typeName = detail.get("typeName")
 
-                if typeName and typeName in type_mapping:
+                # 如果没有typeName，尝试根据父物料类型和位置推断
+                if not typeName:
+                    if "分装板" in material.get("typeName", ""):
+                        # 分装板: 根据行(x)判断类型
+                        # 第一行(x=1)是10%分装小瓶，第二行(x=2)是90%分装小瓶
+                        x_pos = detail.get("x", 0)
+                        y_pos = detail.get("y", 0)
+                        # logger.debug(f"  └─ [推断类型] {detail['name']} 坐标(x={x_pos}, y={y_pos})")
+                        if x_pos == 1:
+                            typeName = "10%分装小瓶"
+                        elif x_pos == 2:
+                            typeName = "90%分装小瓶"
+                        # logger.debug(f"  └─ [推断结果] {detail['name']} → {typeName}")
+                    else:
+                        typeName = default_detail_type
+
+                if typeName and typeName in reverse_type_mapping:
                     bottle = plr_material[number] = initialize_resource(
-                        {"name": f'{detail["name"]}_{number}', "class": type_mapping[typeName][0]}, resource_type=ResourcePLR
+                        {"name": f'{detail["name"]}_{number}', "class": reverse_type_mapping[typeName][0]}, resource_type=ResourcePLR
                     )
                     bottle.tracker.liquids = [
                         (detail["name"], float(detail.get("quantity", 0)) if detail.get("quantity") else 0)
@@ -761,14 +793,24 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
                         idx = y - 1
                         logger.debug(f"1行warehouse {wh_name}: y={y} → idx={idx}")
                     else:
-                        # 多行warehouse: 使用列优先索引 (与Bioyond坐标系统一致)
-                        # warehouse keys顺序: A01,B01,C01,D01, A02,B02,C02,D02, ...
-                        # 索引计算: idx = (col-1) * num_rows + (row-1) + (layer-1) * (rows * cols)
+                        # 多行warehouse: 根据 layout 使用不同的索引计算
                         row_idx = x - 1  # x表示行: 转为0-based
                         col_idx = y - 1  # y表示列: 转为0-based
                         layer_idx = z - 1  # 转为0-based
-                        idx = layer_idx * (warehouse.num_items_x * warehouse.num_items_y) + col_idx * warehouse.num_items_y + row_idx
-                        logger.debug(f"多行warehouse {wh_name}: x={x}(行),y={y}(列) → row={row_idx},col={col_idx} → idx={idx}")
+
+                        # 检查 warehouse 的 layout 属性
+                        warehouse_layout = getattr(warehouse, 'layout', 'col-major')
+
+                        if warehouse_layout == "row-major":
+                            # 行优先: A01,A02,A03,A04, B01,B02,B03,B04 (试剂堆栈)
+                            # 索引计算: idx = (row) * num_cols + (col) + (layer) * (rows * cols)
+                            idx = layer_idx * (warehouse.num_items_x * warehouse.num_items_y) + row_idx * warehouse.num_items_x + col_idx
+                            logger.debug(f"行优先warehouse {wh_name}: x={x}(行),y={y}(列) → row={row_idx},col={col_idx} → idx={idx}")
+                        else:
+                            # 列优先 (默认): A01,B01,C01,D01, A02,B02,C02,D02 (粉末/溶液堆栈)
+                            # 索引计算: idx = (col) * num_rows + (row) + (layer) * (rows * cols)
+                            idx = layer_idx * (warehouse.num_items_x * warehouse.num_items_y) + col_idx * warehouse.num_items_y + row_idx
+                            logger.debug(f"列优先warehouse {wh_name}: x={x}(行),y={y}(列) → row={row_idx},col={col_idx} → idx={idx}")
 
                     if 0 <= idx < warehouse.capacity:
                         if warehouse[idx] is None or isinstance(warehouse[idx], ResourceHolder):
@@ -786,9 +828,16 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
 def resource_plr_to_bioyond(plr_resources: list[ResourcePLR], type_mapping: dict = {}, warehouse_mapping: dict = {}) -> list[dict]:
     bioyond_materials = []
     for resource in plr_resources:
-        if hasattr(resource, "capacity") and resource.capacity > 1:
+        if isinstance(resource, BottleCarrier):
+            # 获取 BottleCarrier 的类型映射
+            type_info = type_mapping.get(resource.model)
+            if not type_info:
+                logger.error(f"❌ [PLR→Bioyond] BottleCarrier 资源 '{resource.name}' 的 model '{resource.model}' 不在 type_mapping 中")
+                logger.debug(f"[PLR→Bioyond] 可用的 type_mapping 键: {list(type_mapping.keys())}")
+                raise ValueError(f"资源 model '{resource.model}' 未在 MATERIAL_TYPE_MAPPINGS 中配置")
+
             material = {
-                "typeId": type_mapping.get(resource.model)[1],
+                "typeId": type_info[1],
                 "name": resource.name,
                 "unit": "个",
                 "quantity": 1,
@@ -800,8 +849,15 @@ def resource_plr_to_bioyond(plr_resources: list[ResourcePLR], type_mapping: dict
                     site = resource.get_child_identifier(bottle)
                 else:
                     site = {"x": bottle.location.x - 1, "y": bottle.location.y - 1}
+
+                # 获取子物料的类型映射
+                bottle_type_info = type_mapping.get(bottle.model)
+                if not bottle_type_info:
+                    logger.error(f"❌ [PLR→Bioyond] 子物料 '{bottle.name}' 的 model '{bottle.model}' 不在 type_mapping 中")
+                    raise ValueError(f"子物料 model '{bottle.model}' 未在 MATERIAL_TYPE_MAPPINGS 中配置")
+
                 detail_item = {
-                    "typeId": type_mapping.get(bottle.model)[1],
+                    "typeId": bottle_type_info[1],
                     "name": bottle.name,
                     "code": bottle.code if hasattr(bottle, "code") else "",
                     "quantity": sum(qty for _, qty in bottle.tracker.liquids) if hasattr(bottle, "tracker") else 0,
@@ -812,9 +868,20 @@ def resource_plr_to_bioyond(plr_resources: list[ResourcePLR], type_mapping: dict
                 }
                 material["details"].append(detail_item)
         else:
+            # 单个瓶子(非载架)类型的资源
             bottle = resource[0] if resource.capacity > 0 else resource
+
+            # 根据 resource.model 从 type_mapping 获取正确的 typeId
+            type_info = type_mapping.get(resource.model)
+            if type_info:
+                type_id = type_info[1]
+            else:
+                # 如果找不到映射，记录警告并使用默认值
+                logger.warning(f"[PLR→Bioyond] 资源 {resource.name} 的 model '{resource.model}' 不在 type_mapping 中，使用默认烧杯类型")
+                type_id = "3a14196b-24f2-ca49-9081-0cab8021bf1a"  # 默认使用烧杯类型
+
             material = {
-                "typeId": "3a14196b-24f2-ca49-9081-0cab8021bf1a",
+                "typeId": type_id,
                 "name": resource.name if hasattr(resource, "name") else "",
                 "unit": "个",  # 修复：Bioyond API 要求 unit 字段不能为空
                 "quantity": sum(qty for _, qty in bottle.tracker.liquids) if hasattr(bottle, "tracker") else 0,
@@ -823,9 +890,6 @@ def resource_plr_to_bioyond(plr_resources: list[ResourcePLR], type_mapping: dict
 
         if resource.parent is not None and isinstance(resource.parent, ItemizedCarrier):
             site_in_parent = resource.parent.get_child_identifier(resource)
-            print(f"[DEBUG] site_in_parent: {site_in_parent}")
-            print(f"[DEBUG] resource.parent.name: {resource.parent.name}")
-            print(f"[DEBUG] warehouse_mapping keys: {list(warehouse_mapping.keys())}")
 
             material["locations"] = [
                 {
@@ -839,7 +903,6 @@ def resource_plr_to_bioyond(plr_resources: list[ResourcePLR], type_mapping: dict
                 }
             ]
 
-        print(f"material_data: {material}")
         bioyond_materials.append(material)
     return bioyond_materials
 

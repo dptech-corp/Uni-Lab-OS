@@ -149,14 +149,14 @@ BIOYOND_ReactionStation_TipBox:
   icon: ''
   init_param_schema: {}
   version: 1.0.0
-BIOYOND_ReactionStation_1FlaskCarrier:
+BIOYOND_ReactionStation_Flask:
   category:
   - bottles
   - flasks
   class:
-    module: unilabos.resources.bioyond.bottles:BIOYOND_ReactionStation_1FlaskCarrier
+    module: unilabos.resources.bioyond.bottles:BIOYOND_ReactionStation_Flask
     type: pylabrobot
-  description: 反应站-烧杯
+  description: 反应站-烧杯容器
   handles: []
   icon: ''
   init_param_schema: {}

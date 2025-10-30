@@ -65,6 +65,7 @@ def warehouse_factory(
         num_items_x = num_items_x,
         num_items_y = num_items_y,
         num_items_z = num_items_z,
+        layout=layout,  # ⭐ 传递 layout 参数到 WareHouse
         # ordered_items=ordered_items,
         # ordering=ordering,
         sites=sites,

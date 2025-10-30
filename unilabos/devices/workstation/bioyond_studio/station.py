@@ -93,7 +93,6 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
             return True
         except Exception as e:
             logger.error(f"从Bioyond同步物料数据失败: {e}")
-            traceback.print_exc()
             return False
 
     def sync_to_external(self, resource: Any) -> bool:
@@ -148,8 +147,6 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
                         # 不返回，继续执行后续的创建+入库流程
                 except Exception as e:
                     logger.error(f"查询 Bioyond 物料失败: {e}")
-                    import traceback
-                    traceback.print_exc()
                     return False
 
             # 检查是否有位置更新请求
@@ -221,17 +218,27 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
             logger.debug(f"[同步→Bioyond] Bioyond 物料数据: {bioyond_material}")
 
             location_info = bioyond_material.pop("locations", None)
-            logger.info(f"[同步→Bioyond] 库位信息: {location_info}, 类型: {type(location_info)}")
+            logger.debug(f"[同步→Bioyond] 库位信息: {location_info}, 类型: {type(location_info)}")
 
-            # 第3步：添加物料到 Bioyond 系统
-            logger.info(f"[同步→Bioyond] 📤 调用 Bioyond API 添加物料...")
-            material_id = self.bioyond_api_client.add_material(bioyond_material)
+            # 第3步：根据是否已有 Bioyond ID 决定创建还是使用现有物料
+            if material_bioyond_id:
+                # 物料已存在,直接使用现有 ID
+                material_id = material_bioyond_id
+                logger.info(f"✅ [同步→Bioyond] 使用已有物料 ID: {material_id[:8]}...")
+            else:
+                # 物料不存在,调用 API 创建新物料
+                logger.info(f"[同步→Bioyond] 📤 调用 Bioyond API 添加物料...")
+                material_id = self.bioyond_api_client.add_material(bioyond_material)
 
-            if not material_id:
-                logger.error(f"❌ [同步→Bioyond] 添加物料失败，API 返回空")
-                return False
+                if not material_id:
+                    logger.error(f"❌ [同步→Bioyond] 添加物料失败，API 返回空")
+                    return False
 
-            logger.info(f"✅ [同步→Bioyond] 物料添加成功，Bioyond ID: {material_id[:8] if isinstance(material_id, str) else material_id}...")
+                logger.info(f"✅ [同步→Bioyond] 物料添加成功，Bioyond ID: {material_id[:8]}...")
+
+                # 保存新创建的物料 ID 到资源对象
+                extra_info["material_bioyond_id"] = material_id
+                setattr(resource, "unilabos_extra", extra_info)
 
             # 第4步：物料入库前先检查目标库位是否被占用
             if location_info:
@@ -450,9 +457,11 @@ class BioyondWorkstation(WorkstationBase):
         for resource in resources:
             try:
                 # 🔍 检查资源是否已有 Bioyond ID (避免重复入库)
-                bioyond_id = getattr(resource, 'bioyond_id', None)
-                if bioyond_id:
-                    logger.info(f"⏭️ [resource_tree_add] 跳过资源 {resource.name}: 已有 Bioyond ID ({bioyond_id})")
+                extra_info = getattr(resource, "unilabos_extra", {})
+                material_bioyond_id = extra_info.get("material_bioyond_id")
+
+                if material_bioyond_id:
+                    logger.info(f"⏭️ [resource_tree_add] 跳过资源 {resource.name}: 已有 Bioyond ID ({material_bioyond_id[:8]}...)，可能由 transfer 已处理")
                     continue
 
                 logger.info(f"[resource_tree_add] 同步资源: {resource}")

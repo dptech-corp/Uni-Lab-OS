@@ -14,33 +14,37 @@
                     "api_key": "DE9BDDA0",
                     "api_host": "http://192.168.1.200:44400",
                     "material_type_mappings": {
-                        "烧杯": [
-                            "BIOYOND_DispensingStation_1FlaskCarrier",
+                        "BIOYOND_DispensingStation_1FlaskCarrier": [
+                            "烧杯",
                             "3a14196b-24f2-ca49-9081-0cab8021bf1a"
                         ],
-                        "试剂瓶": [
-                            "BIOYOND_DispensingStation_1BottleCarrier",
+                        "BIOYOND_DispensingStation_1BottleCarrier": [
+                            "试剂瓶",
                             "3a14196b-8bcf-a460-4f74-23f21ca79e72"
                         ],
-                        "分装板": [
-                            "BIOYOND_DispensingStation_6VialCarrier",
+                        "BIOYOND_DispensingStation_6VialCarrier": [
+                            "分装板",
                             "3a14196e-5dfe-6e21-0c79-fe2036d052c4"
                         ],
-                        "10%分装小瓶": [
-                            "BIOYOND_DispensingStation_Liquid_Vial",
+                        "BIOYOND_DispensingStation_Liquid_Vial": [
+                            "10%分装小瓶",
                             "3a14196c-76be-2279-4e22-7310d69aed68"
                         ],
-                        "90%分装小瓶": [
-                            "BIOYOND_DispensingStation_Solid_Vial",
+                        "BIOYOND_DispensingStation_Solid_Vial": [
+                            "90%分装小瓶",
                             "3a14196c-cdcf-088d-dc7d-5cf38f0ad9ea"
                         ],
-                        "样品板": [
-                            "BIOYOND_DispensingStation_8StockCarrier",
+                        "BIOYOND_DispensingStation_8StockCarrier": [
+                            "样品板",
                             "3a14196e-b7a0-a5da-1931-35f3000281e9"
                         ],
-                        "样品瓶": [
-                            "BIOYOND_DispensingStation_Solid_Stock",
+                        "BIOYOND_DispensingStation_Solid_Stock": [
+                            "样品瓶",
                             "3a14196a-cf7d-8aea-48d8-b9662c7dba94"
+                        ],
+                        "BIOYOND_PolymerStation_Reagent_Bottle": [
+                            "试剂瓶",
+                            "3a14196b-8bcf-a460-4f74-23f21ca79e72"
                         ]
                     }
                 },

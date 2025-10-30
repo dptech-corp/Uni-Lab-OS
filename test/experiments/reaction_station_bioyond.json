@@ -24,32 +24,32 @@
                         "Drip_back": "3a162cf9-6aac-565a-ddd7-682ba1796a4a"
                     },
                     "material_type_mappings": {
-                        "反应器": [
-                            "BIOYOND_ReactionStation_Reactor",
+                        "BIOYOND_ReactionStation_Reactor": [
+                            "反应器",
                             "3a14233b-902d-0d7b-4533-3f60f1c41c1b"
                         ],
-                        "试剂瓶": [
-                            "BIOYOND_ReactionStation_1BottleCarrier",
+                        "BIOYOND_ReactionStation_1BottleCarrier": [
+                            "试剂瓶",
                             "3a14233b-56e3-6c53-a8ab-fcaac163a9ba"
                         ],
-                        "烧杯": [
-                            "BIOYOND_ReactionStation_1FlaskCarrier",
+                        "BIOYOND_ReactionStation_1FlaskCarrier": [
+                            "烧杯",
                             "3a14233b-f0a9-ba84-eaa9-0d4718b361b6"
                         ],
-                        "样品板": [
-                            "BIOYOND_ReactionStation_6StockCarrier",
+                        "BIOYOND_ReactionStation_6StockCarrier": [
+                            "样品板",
                             "3a142339-80de-8f25-6093-1b1b1b6c322e"
                         ],
-                        "90%分装小瓶": [
-                            "BIOYOND_ReactionStation_Solid_Vial",
+                        "BIOYOND_ReactionStation_Solid_Vial": [
+                            "90%分装小瓶",
                             "3a14196c-cdcf-088d-dc7d-5cf38f0ad9ea"
                         ],
-                        "10%分装小瓶": [
-                            "BIOYOND_ReactionStation_Liquid_Vial",
+                        "BIOYOND_ReactionStation_Liquid_Vial": [
+                            "10%分装小瓶",
                             "3a14196c-76be-2279-4e22-7310d69aed68"
                         ],
-                        "枪头盒": [
-                            "BIOYOND_ReactionStation_TipBox",
+                        "BIOYOND_ReactionStation_TipBox": [
+                            "枪头盒",
                             "3a143890-9d51-60ac-6d6f-6edb43c12041"
                         ]
                     }
