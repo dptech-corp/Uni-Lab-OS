@@ -70,3 +70,93 @@ BIOYOND_PolymerStation_Reactor:
   icon: ''
   init_param_schema: {}
   version: 1.0.0
+BIOYOND_DispensingStation_Liquid_Vial:
+  category:
+  - bottles
+  class:
+    module: unilabos.resources.bioyond.bottles:BIOYOND_DispensingStation_Liquid_Vial
+    type: pylabrobot
+  description: 配液站-10%分装小瓶
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  version: 1.0.0
+BIOYOND_DispensingStation_Solid_Vial:
+  category:
+  - bottles
+  class:
+    module: unilabos.resources.bioyond.bottles:BIOYOND_DispensingStation_Solid_Vial
+    type: pylabrobot
+  description: 配液站-90%分装小瓶
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  version: 1.0.0
+BIOYOND_DispensingStation_Solid_Stock:
+  category:
+  - bottles
+  class:
+    module: unilabos.resources.bioyond.bottles:BIOYOND_DispensingStation_Solid_Stock
+    type: pylabrobot
+  description: 配液站-样品瓶
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  version: 1.0.0
+BIOYOND_ReactionStation_Reactor:
+  category:
+  - bottles
+  - reactors
+  class:
+    module: unilabos.resources.bioyond.bottles:BIOYOND_ReactionStation_Reactor
+    type: pylabrobot
+  description: 反应站-反应器
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  version: 1.0.0
+BIOYOND_ReactionStation_Liquid_Vial:
+  category:
+  - bottles
+  class:
+    module: unilabos.resources.bioyond.bottles:BIOYOND_ReactionStation_Liquid_Vial
+    type: pylabrobot
+  description: 反应站-10%分装小瓶
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  version: 1.0.0
+BIOYOND_ReactionStation_Solid_Vial:
+  category:
+  - bottles
+  class:
+    module: unilabos.resources.bioyond.bottles:BIOYOND_ReactionStation_Solid_Vial
+    type: pylabrobot
+  description: 反应站-90%分装小瓶
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  version: 1.0.0
+BIOYOND_ReactionStation_TipBox:
+  category:
+  - bottles
+  - tip_boxes
+  class:
+    module: unilabos.resources.bioyond.bottles:BIOYOND_ReactionStation_TipBox
+    type: pylabrobot
+  description: 反应站-枪头盒
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  version: 1.0.0
+BIOYOND_ReactionStation_1FlaskCarrier:
+  category:
+  - bottles
+  class:
+    module: unilabos.resources.bioyond.bottles:BIOYOND_ReactionStation_1FlaskCarrier
+    type: pylabrobot
+  description: 反应站-烧杯
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  version: 1.0.0

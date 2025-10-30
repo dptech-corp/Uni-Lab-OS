@@ -58,3 +58,87 @@ BIOYOND_PolymerStation_6VialCarrier:
   init_param_schema: {}
   registry_type: resource
   version: 1.0.0
+BIOYOND_DispensingStation_1FlaskCarrier:
+  category:
+  - bottle_carriers
+  class:
+    module: unilabos.resources.bioyond.bottle_carriers:BIOYOND_DispensingStation_1FlaskCarrier
+    type: pylabrobot
+  description: 配液站-单烧杯载架
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+BIOYOND_DispensingStation_1BottleCarrier:
+  category:
+  - bottle_carriers
+  class:
+    module: unilabos.resources.bioyond.bottle_carriers:BIOYOND_DispensingStation_1BottleCarrier
+    type: pylabrobot
+  description: 配液站-单试剂瓶载架
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+BIOYOND_DispensingStation_8StockCarrier:
+  category:
+  - bottle_carriers
+  class:
+    module: unilabos.resources.bioyond.bottle_carriers:BIOYOND_DispensingStation_8StockCarrier
+    type: pylabrobot
+  description: 配液站-8孔样品板 (2x4布局)
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+BIOYOND_DispensingStation_6VialCarrier:
+  category:
+  - bottle_carriers
+  class:
+    module: unilabos.resources.bioyond.bottle_carriers:BIOYOND_DispensingStation_6VialCarrier
+    type: pylabrobot
+  description: 配液站-6孔分装板 (2x3布局)
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+BIOYOND_ReactionStation_6StockCarrier:
+  category:
+  - bottle_carriers
+  class:
+    module: unilabos.resources.bioyond.bottle_carriers:BIOYOND_ReactionStation_6StockCarrier
+    type: pylabrobot
+  description: 反应站-6孔样品板 (2x3布局)
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+BIOYOND_ReactionStation_1BottleCarrier:
+  category:
+  - bottle_carriers
+  class:
+    module: unilabos.resources.bioyond.bottle_carriers:BIOYOND_ReactionStation_1BottleCarrier
+    type: pylabrobot
+  description: 反应站-单试剂瓶载架
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+BIOYOND_ReactionStation_1FlaskCarrier:
+  category:
+  - bottle_carriers
+  class:
+    module: unilabos.resources.bioyond.bottle_carriers:BIOYOND_ReactionStation_1FlaskCarrier
+    type: pylabrobot
+  description: 反应站-单烧杯载架
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
