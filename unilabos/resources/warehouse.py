@@ -23,6 +23,7 @@ def warehouse_factory(
     empty: bool = False,
     category: str = "warehouse",
     model: Optional[str] = None,
+    col_offset: int = 0,  # 新增：列起始偏移量，用于生成A05-D08等命名
 ):
     # 创建16个板架位 (4层 x 4位置)
     locations = []
@@ -44,9 +45,11 @@ def warehouse_factory(
         name_prefix=name,
     )
     len_x, len_y = (num_items_x, num_items_y) if num_items_z == 1 else (num_items_y, num_items_z) if num_items_x == 1 else (num_items_x, num_items_z)
-    keys = [f"{LETTERS[j]}{i + 1}" for i in range(len_x) for j in range(len_y)]
+    # 应用列偏移量，支持A05-D08等命名
+    # 使用列优先顺序生成keys (与Bioyond坐标系统一致): A01,B01,C01,D01, A02,B02,C02,D02, ...
+    keys = [f"{LETTERS[j]}{i + 1 + col_offset:02d}" for i in range(len_x) for j in range(len_y)]
     sites = {i: site for i, site in zip(keys, _sites.values())}
-    
+
     return WareHouse(
         name=name,
         size_x=dx + item_dx * num_items_x,

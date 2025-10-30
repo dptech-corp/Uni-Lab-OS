@@ -1,12 +1,27 @@
 from os import name
 from pylabrobot.resources import Deck, Coordinate, Rotation
 
-from unilabos.resources.bioyond.warehouses import bioyond_warehouse_1x4x4, bioyond_warehouse_1x4x2, bioyond_warehouse_liquid_and_lid_handling, bioyond_warehouse_1x2x2, bioyond_warehouse_1x3x3, bioyond_warehouse_10x1x1, bioyond_warehouse_3x3x1, bioyond_warehouse_3x3x1_2, bioyond_warehouse_5x1x1
+from unilabos.resources.bioyond.warehouses import (
+    bioyond_warehouse_1x4x4,
+    bioyond_warehouse_1x4x4_right,  # 新增：右侧仓库 (A05～D08)
+    bioyond_warehouse_1x4x2,
+    bioyond_warehouse_liquid_and_lid_handling,
+    bioyond_warehouse_1x2x2,
+    bioyond_warehouse_1x3x3,
+    bioyond_warehouse_10x1x1,
+    bioyond_warehouse_3x3x1,
+    bioyond_warehouse_3x3x1_2,
+    bioyond_warehouse_5x1x1,
+    bioyond_warehouse_1x8x4,
+    bioyond_warehouse_reagent_storage,
+    bioyond_warehouse_liquid_preparation,
+    bioyond_warehouse_tipbox_storage,  # 新增：Tip盒堆栈
+)
 
 
 class BIOYOND_PolymerReactionStation_Deck(Deck):
     def __init__(
-        self, 
+        self,
         name: str = "PolymerReactionStation_Deck",
         size_x: float = 2700.0,
         size_y: float = 1080.0,
@@ -20,15 +35,22 @@ class BIOYOND_PolymerReactionStation_Deck(Deck):
 
     def setup(self) -> None:
         # 添加仓库
+        # 说明: 堆栈1物理上分为左右两部分
+        #   - 堆栈1左: A01～D04 (4行×4列, 位于反应站左侧)
+        #   - 堆栈1右: A05～D08 (4行×4列, 位于反应站右侧)
         self.warehouses = {
-            "堆栈1": bioyond_warehouse_1x4x4("堆栈1"),
-            "堆栈2": bioyond_warehouse_1x4x4("堆栈2"),
-            "站内试剂存放堆栈": bioyond_warehouse_liquid_and_lid_handling("站内试剂存放堆栈"),
+            "堆栈1左": bioyond_warehouse_1x4x4("堆栈1左"),  # 左侧堆栈: A01～D04
+            "堆栈1右": bioyond_warehouse_1x4x4_right("堆栈1右"),  # 右侧堆栈: A05～D08
+            "站内试剂存放堆栈": bioyond_warehouse_reagent_storage("站内试剂存放堆栈"),  # A01～A02
+            "移液站内10%分装液体准备仓库": bioyond_warehouse_liquid_preparation("移液站内10%分装液体准备仓库"),  # A01～B04
+            "站内Tip盒堆栈": bioyond_warehouse_tipbox_storage("站内Tip盒堆栈"),  # A01～B03, 存放枪头盒
         }
         self.warehouse_locations = {
-            "堆栈1": Coordinate(0.0, 430.0, 0.0),
-            "堆栈2": Coordinate(2550.0, 430.0, 0.0),
-            "站内试剂存放堆栈": Coordinate(800.0, 475.0, 0.0),
+            "堆栈1左": Coordinate(0.0, 430.0, 0.0),  # 左侧位置
+            "堆栈1右": Coordinate(2500.0, 430.0, 0.0),  # 右侧位置
+            "站内试剂存放堆栈": Coordinate(1100.0, 475.0, 0.0),
+            "移液站内10%分装液体准备仓库": Coordinate(1500.0, 300.0, 0.0),
+            "站内Tip盒堆栈": Coordinate(1800.0, 300.0, 0.0),  # TODO: 根据实际位置调整坐标
         }
         self.warehouses["站内试剂存放堆栈"].rotation = Rotation(z=90)
 
@@ -38,7 +60,7 @@ class BIOYOND_PolymerReactionStation_Deck(Deck):
 
 class BIOYOND_PolymerPreparationStation_Deck(Deck):
     def __init__(
-        self, 
+        self,
         name: str = "PolymerPreparationStation_Deck",
         size_x: float = 2700.0,
         size_y: float = 1080.0,
@@ -70,7 +92,7 @@ class BIOYOND_PolymerPreparationStation_Deck(Deck):
 
 class BIOYOND_YB_Deck(Deck):
     def __init__(
-        self, 
+        self,
         name: str = "YB_Deck",
         size_x: float = 4150,
         size_y: float = 1400.0,
@@ -114,7 +136,7 @@ class BIOYOND_YB_Deck(Deck):
 
         for warehouse_name, warehouse in self.warehouses.items():
             self.assign_child_resource(warehouse, location=self.warehouse_locations[warehouse_name])
-            
+
 def YB_Deck(name: str) -> Deck:
     by=BIOYOND_YB_Deck(name=name)
     by.setup()
