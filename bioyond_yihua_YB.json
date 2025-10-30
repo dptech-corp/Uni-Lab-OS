@@ -17,29 +17,16 @@
     {
       "id": "BatteryStation",
       "name": "扣电组装工作站",
-      "children": [
-          "coin_cell_deck"
-      ],
+      "children": [],
       "parent": null,
       "type": "device",
       "class": "bettery_station_registry",
-      "position": {
-          "x": 600,
-          "y": 400,
-          "z": 0
-      },
       "config": {
-          "debug_mode": true,
-          "_comment": "protocol_type接外部工站固定写法字段，一般为空，deck写法也固定",
+          "debug_mode": false,
+
           "protocol_type": [],
-          "deck": {
-              "data": {
-                  "_resource_child_name": "coin_cell_deck",
-                  "_resource_type": "unilabos.devices.workstation.coin_cell_assembly.button_battery_station:CoincellDeck"
-              }
-          },
-          
-          "address": "192.168.1.20",
+          "deck": "unilabos.devices.workstation.coin_cell_assembly.button_battery_station:CoincellDeck",
+          "address": "172.21.32.20",
           "port": 502
       },
       "data": {}

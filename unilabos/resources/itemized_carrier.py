@@ -78,6 +78,7 @@ class ItemizedCarrier(ResourcePLR):
     sites: Optional[Dict[Union[int, str], Optional[ResourcePLR]]] = None,
     category: Optional[str] = "carrier",
     model: Optional[str] = None,
+    invisible_slots: Optional[str] = None,
   ):
     super().__init__(
       name=name,
@@ -89,6 +90,7 @@ class ItemizedCarrier(ResourcePLR):
     )
     self.num_items = len(sites)
     self.num_items_x, self.num_items_y, self.num_items_z = num_items_x, num_items_y, num_items_z
+    self.invisible_slots = [] if invisible_slots is None else invisible_slots
     self.layout = "z-y" if self.num_items_z > 1 and self.num_items_x == 1 else "x-z" if self.num_items_z > 1 and self.num_items_y == 1 else "x-y"
 
     if isinstance(sites, dict):
@@ -410,7 +412,7 @@ class ItemizedCarrier(ResourcePLR):
       "layout": self.layout,
       "sites": [{
         "label": str(identifier),
-        "visible": True if self[identifier] is not None else False,
+        "visible": False if identifier in self.invisible_slots else True,
         "occupied_by": self[identifier].name 
                         if isinstance(self[identifier], ResourcePLR) and not isinstance(self[identifier], ResourceHolder) else 
                         self[identifier] if isinstance(self[identifier], str) else None,
@@ -433,6 +435,7 @@ class BottleCarrier(ItemizedCarrier):
         sites: Optional[Dict[Union[int, str], ResourceHolder]] = None,
         category: str = "bottle_carrier",
         model: Optional[str] = None,
+        invisible_slots: List[str] = None,
         **kwargs,
     ):
         super().__init__(
@@ -443,4 +446,5 @@ class BottleCarrier(ItemizedCarrier):
             sites=sites,
             category=category,
             model=model,
+            invisible_slots=invisible_slots,
         )

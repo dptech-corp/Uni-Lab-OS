@@ -1,0 +1,38 @@
+{
+  "nodes": [
+    {
+      "id": "bioyond_cell_workstation",
+      "name": "配液分液工站",
+      "children": [
+      ],
+      "parent": null,
+      "type": "device",
+      "class": "bioyond_cell",
+      "config": {
+          "protocol_type": [],
+          "station_resource": {}
+      },
+      "data": {}
+  },
+  {
+      "id": "BatteryStation",
+      "name": "扣电工作站",
+      "children": [
+          "coin_cell_deck"
+      ],
+      "parent": null,
+      "type": "device",
+      "class": "bettery_station_registry",
+      "position": {
+          "x": 600,
+          "y": 400,
+          "z": 0
+      },
+      "config": {
+          "debug_mode": false,
+          "protocol_type": []
+      }
+    }
+  ],
+  "links": []
+}
