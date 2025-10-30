@@ -56,12 +56,17 @@ def bioyond_warehouse_1x4x2(name: str) -> WareHouse:
     )
 
 def bioyond_warehouse_reagent_stack(name: str) -> WareHouse:
-    """创建BioYond 试剂堆栈 2x4x1 (2行×4列: A1-B4)"""
+    """创建BioYond 试剂堆栈 2x4x1 (2行×4列: A01-A04, B01-B04)
+    
+    使用行优先排序，前端展示为:
+    A01 | A02 | A03 | A04
+    B01 | B02 | B03 | B04
+    """
     return warehouse_factory(
         name=name,
-        num_items_x=2,
-        num_items_y=4,
-        num_items_z=1,
+        num_items_x=4,  # 4列 (01-04)
+        num_items_y=2,  # 2行 (A-B)
+        num_items_z=1,  # 1层
         dx=10.0,
         dy=10.0,
         dz=10.0,
@@ -69,7 +74,8 @@ def bioyond_warehouse_reagent_stack(name: str) -> WareHouse:
         item_dy=106.0,
         item_dz=130.0,
         category="warehouse",
-        col_offset=0,  # 从1开始: A1, A2, A3, A4, B1, B2, B3, B4
+        col_offset=0,  # 从01开始
+        layout="row-major",  # ⭐ 使用行优先排序: A01,A02,A03,A04, B01,B02,B03,B04
     )
 
  # 定义benyond的堆栈
