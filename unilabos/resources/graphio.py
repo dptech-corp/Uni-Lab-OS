@@ -798,16 +798,17 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
                         col_idx = y - 1  # y表示列: 转为0-based
                         layer_idx = z - 1  # 转为0-based
 
-                        # 检查 warehouse 的 layout 属性
-                        warehouse_layout = getattr(warehouse, 'layout', 'col-major')
+                        # 检查 warehouse 的排序方式属性
+                        ordering_layout = getattr(warehouse, 'ordering_layout', 'col-major')
+                        logger.debug(f"🔍 Warehouse {wh_name} layout检测: hasattr={hasattr(warehouse, 'ordering_layout')}, ordering_layout值='{ordering_layout}', warehouse类型={type(warehouse).__name__}")
 
-                        if warehouse_layout == "row-major":
-                            # 行优先: A01,A02,A03,A04, B01,B02,B03,B04 (试剂堆栈)
+                        if ordering_layout == "row-major":
+                            # 行优先: A01,A02,A03,A04, B01,B02,B03,B04 (所有Bioyond堆栈)
                             # 索引计算: idx = (row) * num_cols + (col) + (layer) * (rows * cols)
                             idx = layer_idx * (warehouse.num_items_x * warehouse.num_items_y) + row_idx * warehouse.num_items_x + col_idx
                             logger.debug(f"行优先warehouse {wh_name}: x={x}(行),y={y}(列) → row={row_idx},col={col_idx} → idx={idx}")
                         else:
-                            # 列优先 (默认): A01,B01,C01,D01, A02,B02,C02,D02 (粉末/溶液堆栈)
+                            # 列优先 (后备): A01,B01,C01,D01, A02,B02,C02,D02
                             # 索引计算: idx = (col) * num_rows + (row) + (layer) * (rows * cols)
                             idx = layer_idx * (warehouse.num_items_x * warehouse.num_items_y) + col_idx * warehouse.num_items_y + row_idx
                             logger.debug(f"列优先warehouse {wh_name}: x={x}(行),y={y}(列) → row={row_idx},col={col_idx} → idx={idx}")
