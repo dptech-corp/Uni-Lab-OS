@@ -86,7 +86,7 @@ def bioyond_warehouse_reagent_stack(name: str) -> WareHouse:
         layout="row-major",  # ⭐ 使用行优先排序: A01,A02,A03,A04, B01,B02,B03,B04
     )
 
- # 定义benyond的堆栈
+ # 定义bioyond的堆栈
 def bioyond_warehouse_1x2x2(name: str) -> WareHouse:
     """创建BioYond 4x1x4仓库"""
     return warehouse_factory(

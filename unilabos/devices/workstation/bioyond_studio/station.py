@@ -276,6 +276,8 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
                                     logger.warning(f"⚠️ [同步→Bioyond] 库位 {update_site} 已被占用！")
                                     logger.warning(f"   占用物料: {material.get('name')} (ID: {material.get('id', '')[:8]}...)")
                                     logger.warning(f"   占用位置: code={loc.get('code')}, x={loc.get('x')}, y={loc.get('y')}")
+                                    logger.warning(f"   🔍 详细信息: location_id={loc.get('id')[:8]}..., 目标UUID={location_id[:8]}...")
+                                    logger.warning(f"   🔍 完整location数据: {loc}")
                                     break
                             if location_occupied:
                                 break

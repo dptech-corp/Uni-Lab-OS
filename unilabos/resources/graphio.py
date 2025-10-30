@@ -892,17 +892,25 @@ def resource_plr_to_bioyond(plr_resources: list[ResourcePLR], type_mapping: dict
         if resource.parent is not None and isinstance(resource.parent, ItemizedCarrier):
             site_in_parent = resource.parent.get_child_identifier(resource)
 
+            # ⚠️ 坐标系转换说明:
+            # get_child_identifier 返回: x_idx=列索引, y_idx=行索引 (0-based)
+            # Bioyond 系统要求: x=行号, y=列号 (1-based)
+            # 因此需要交换 x 和 y!
+            bioyond_x = site_in_parent["y"] + 1  # 行索引 → Bioyond的x (行号)
+            bioyond_y = site_in_parent["x"] + 1  # 列索引 → Bioyond的y (列号)
+
             material["locations"] = [
                 {
                     "id": warehouse_mapping[resource.parent.name]["site_uuids"][site_in_parent["identifier"]],
                     "whid": warehouse_mapping[resource.parent.name]["uuid"],
                     "whName": resource.parent.name,
-                    "x": site_in_parent["x"] + 1,
-                    "y": site_in_parent["y"] + 1,
+                    "x": bioyond_x,
+                    "y": bioyond_y,
                     "z": 1,
                     "quantity": 0
                 }
             ]
+            logger.debug(f"🔄 [PLR→Bioyond] 坐标转换: {resource.name} 在 {resource.parent.name}[{site_in_parent['identifier']}] → UniLab(列={site_in_parent['x']},行={site_in_parent['y']}) → Bioyond(x={bioyond_x},y={bioyond_y})")
 
         bioyond_materials.append(material)
     return bioyond_materials
