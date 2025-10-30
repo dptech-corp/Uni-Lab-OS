@@ -16,7 +16,7 @@ API_CONFIG = {
     "report_token": os.getenv("BIOYOND_REPORT_TOKEN", "CHANGE_ME_TOKEN"),
     
     # HTTP 服务配置
-    "HTTP_host": os.getenv("BIOYOND_HTTP_HOST", "172.21.33.161"),  # HTTP服务监听地址，监听计算机飞连ip地址
+    "HTTP_host": os.getenv("BIOYOND_HTTP_HOST", "172.21.32.210"),  # HTTP服务监听地址，监听计算机飞连ip地址
     "HTTP_port": int(os.getenv("BIOYOND_HTTP_PORT", "8080")),
     "debug_mode": False,# 调试模式
 }

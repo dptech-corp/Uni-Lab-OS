@@ -15,10 +15,10 @@ from unilabos.device_comms.modbus_plc.client import ModbusTcpClient
 from unilabos.devices.workstation.workstation_base import WorkstationBase
 from unilabos.device_comms.modbus_plc.client import TCPClient, ModbusNode, PLCWorkflow, ModbusWorkflow, WorkflowAction, BaseClient
 from unilabos.device_comms.modbus_plc.modbus import DeviceType, Base as ModbusNodeBase, DataType, WorderOrder
-from unilabos.devices.workstation.coin_cell_assembly.button_battery_station import *
+from unilabos.devices.workstation.coin_cell_assembly.YB_YH_materials import *
 from unilabos.ros.nodes.base_device_node import ROS2DeviceNode, BaseROS2DeviceNode
 from unilabos.ros.nodes.presets.workstation import ROS2WorkstationNode
-from unilabos.devices.workstation.coin_cell_assembly.button_battery_station import CoincellDeck
+from unilabos.devices.workstation.coin_cell_assembly.YB_YH_materials import CoincellDeck
 from unilabos.resources.graphio import convert_resources_to_type
 from unilabos.utils.log import logger
 
@@ -71,24 +71,24 @@ def _ensure_modbus_slave_kw_alias(modbus_client):
         setattr(modbus_client, name, types.MethodType(wrapped, modbus_client))
 
 
-def _coerce_station_resource_input(station_resource: Any) -> Optional[Deck]:
-    if station_resource is None:
+def _coerce_deck_input(deck: Any) -> Optional[Deck]:
+    if deck is None:
         return None
 
-    if isinstance(station_resource, Deck):
-        return station_resource
+    if isinstance(deck, Deck):
+        return deck
 
-    if isinstance(station_resource, PLRResource):
-        return station_resource if isinstance(station_resource, Deck) else None
+    if isinstance(deck, PLRResource):
+        return deck if isinstance(deck, Deck) else None
 
     candidates = None
-    if isinstance(station_resource, dict):
-        if "nodes" in station_resource and isinstance(station_resource["nodes"], list):
-            candidates = station_resource["nodes"]
+    if isinstance(deck, dict):
+        if "nodes" in deck and isinstance(deck["nodes"], list):
+            candidates = deck["nodes"]
         else:
-            candidates = [station_resource]
-    elif isinstance(station_resource, list):
-        candidates = station_resource
+            candidates = [deck]
+    elif isinstance(deck, list):
+        candidates = deck
 
     if candidates is None:
         return None
@@ -102,7 +102,7 @@ def _coerce_station_resource_input(station_resource: Any) -> Optional[Deck]:
                 if isinstance(item, Deck):
                     return item
     except Exception as exc:
-        logger.warning(f"station_resource 转换 Deck 失败: {exc}")
+        logger.warning(f"deck 转换 Deck 失败: {exc}")
     return None
 
 
@@ -111,23 +111,22 @@ def _coerce_station_resource_input(station_resource: Any) -> Optional[Deck]:
 class CoinCellAssemblyWorkstation(WorkstationBase):
     def __init__(
         self,
-        station_resource: Optional[Any] = None,
         deck: Deck=None,
-        address: str = "172.21.32.20",
+        address: str = "172.21.32.111",
         port: str = "502",
         debug_mode: bool = False,
         *args,
         **kwargs,
     ):
-        if station_resource is None and "station_resource" in kwargs:
-            station_resource = kwargs.pop("station_resource")
+        if deck is None and "deck" in kwargs:
+            deck = kwargs.pop("deck")
         else:
-            kwargs.pop("station_resource", None)
+            kwargs.pop("deck", None)
 
-        normalized_station_resource = _coerce_station_resource_input(station_resource)
+        normalized_deck = _coerce_deck_input(deck)
 
-        if deck is None and isinstance(normalized_station_resource, Deck):
-            deck = normalized_station_resource
+        if deck is None and isinstance(normalized_deck, Deck):
+            deck = normalized_deck
 
         super().__init__(
             #桌子
@@ -137,11 +136,10 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         )
         self.debug_mode = debug_mode
 
-        self.station_resource = normalized_station_resource if isinstance(normalized_station_resource, Deck) else None
+        self.deck = None
 
         if self.deck is None:
             self.deck = CoincellDeck(size_x=1000, size_y=1000, size_z=900)
-            self.station_resource = self.deck
             # 创建料盘1并添加极片
             liaopan1 = MaterialPlate(name="liaopan1", size_x=120.8, size_y=120.5, size_z=10.0, fill=True)
             self.deck.assign_child_resource(liaopan1, Coordinate(x=0, y=0, z=0))
@@ -155,10 +153,10 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
             liaopan3 = MaterialPlate(name="电池料盘", size_x=120.8, size_y=160.5, size_z=10.0, fill=True)
             self.deck.assign_child_resource(liaopan3, Coordinate(x=100, y=100, z=0))
         else:
-            if self.station_resource is None:
-                self.station_resource = self.deck
-            elif self.deck is not self.station_resource:
-                self.deck = self.station_resource
+            if self.deck is None:
+                self.deck = self.deck
+            elif self.deck is not self.deck:
+                self.deck = self.deck
 
         """ 连接初始化 """
         modbus_client = TCPClient(addr=address, port=port)
@@ -831,7 +829,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         print("data_electrolyte_code", data_electrolyte_code)
         print("data_coin_cell_code", data_coin_cell_code)
         #接收完信息后，读取完毕标志位置True
-        liaopan3 = self.station_resource.get_resource("\u7535\u6c60\u6599\u76d8")        
+        liaopan3 = self.deck.get_resource("\u7535\u6c60\u6599\u76d8")        
         #把物料解绑后放到另一盘上
         battery = ElectrodeSheet(name=f"battery_{self.coin_num_N}", size_x=14, size_y=14, size_z=2)
         battery._unilabos_state = {
@@ -844,7 +842,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         liaopan3.children[self.coin_num_N].assign_child_resource(battery, location=None)
         #print(jipian2.parent)
         ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
-            "resources": [self.station_resource]
+            "resources": [self.deck]
         })
 
 
@@ -1015,7 +1013,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
     
     def fun_wuliao_test(self) -> bool: 
         #找到data_init中构建的2个物料盘
-        liaopan3 = self.station_resource.get_resource("\u7535\u6c60\u6599\u76d8")
+        liaopan3 = self.deck.get_resource("\u7535\u6c60\u6599\u76d8")
         for i in range(16):            
             battery = ElectrodeSheet(name=f"battery_{i}", size_x=16, size_y=16, size_z=2)
             battery._unilabos_state = {
@@ -1028,7 +1026,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
             liaopan3.children[i].assign_child_resource(battery, location=None)
             
             ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
-                "resources": [self.station_resource]
+                "resources": [self.deck]
             })
             # for i in range(40):
             #     print(f"fun_wuliao_test 运行结束{i}")
@@ -1286,7 +1284,7 @@ if __name__ == "__main__":
 
 
     from unilabos.resources.graphio import resource_ulab_to_plr, convert_resources_to_type
-    #with open("./button_battery_station_resources_unilab.json", "r", encoding="utf-8") as f:
+    #with open("./button_battery_decks_unilab.json", "r", encoding="utf-8") as f:
     #    bioyond_resources_unilab = json.load(f)
     #print(f"成功读取 JSON 文件，包含 {len(bioyond_resources_unilab)} 个资源")
     #ulab_resources = convert_resources_to_type(bioyond_resources_unilab, List[PLRResource])
@@ -1302,7 +1300,7 @@ if __name__ == "__main__":
     from unilabos.app.web.client import http_client
 
     resources = convert_resources_from_type([Coin_Cell.deck], [Resource])
-    json.dump({"nodes": resources, "links": []}, open("button_battery_station_resources_unilab.json", "w"), indent=2)
+    json.dump({"nodes": resources, "links": []}, open("button_battery_decks_unilab.json", "w"), indent=2)
    
     #print(resources)
     http_client.remote_addr = "https://uni-lab.test.bohrium.com/api/v1"

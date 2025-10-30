@@ -10,7 +10,7 @@
         "\u7535\u6c60\u6599\u76d8"
       ],
       "parent": null,
-      "type": "container",
+      "type": "coin_cell_deck",
       "class": "",
       "position": {
         "x": 0,
@@ -56,7 +56,7 @@
         "liaopan1_materialhole_3_3"
       ],
       "parent": "coin_cell_deck",
-      "type": "container",
+      "type": "material_plate",
       "class": "",
       "position": {
         "x": 0,
@@ -102,11 +102,9 @@
       "id": "liaopan1_materialhole_0_0",
       "name": "liaopan1_materialhole_0_0",
       "sample_id": null,
-      "children": [
-        "jipian1_0"
-      ],
+      "children": [],
       "parent": "liaopan1",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 12.4,
@@ -132,42 +130,6 @@
         "diameter": 20,
         "depth": 10,
         "max_sheets": 1,
-        "info": null
-      }
-    },
-    {
-      "id": "jipian1_0",
-      "name": "jipian1_0",
-      "sample_id": null,
-      "children": [],
-      "parent": "liaopan1_materialhole_0_0",
-      "type": "container",
-      "class": "",
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      },
-      "config": {
-        "type": "ElectrodeSheet",
-        "size_x": 12,
-        "size_y": 12,
-        "size_z": 0.1,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "electrode_sheet",
-        "model": null,
-        "barcode": null
-      },
-      "data": {
-        "diameter": 14,
-        "thickness": 0.1,
-        "mass": 0.5,
-        "material_type": "copper",
         "info": null
       }
     },
@@ -175,11 +137,9 @@
       "id": "liaopan1_materialhole_0_1",
       "name": "liaopan1_materialhole_0_1",
       "sample_id": null,
-      "children": [
-        "jipian1_1"
-      ],
+      "children": [],
       "parent": "liaopan1",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 12.4,
@@ -205,42 +165,6 @@
         "diameter": 20,
         "depth": 10,
         "max_sheets": 1,
-        "info": null
-      }
-    },
-    {
-      "id": "jipian1_1",
-      "name": "jipian1_1",
-      "sample_id": null,
-      "children": [],
-      "parent": "liaopan1_materialhole_0_1",
-      "type": "container",
-      "class": "",
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      },
-      "config": {
-        "type": "ElectrodeSheet",
-        "size_x": 12,
-        "size_y": 12,
-        "size_z": 0.1,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "electrode_sheet",
-        "model": null,
-        "barcode": null
-      },
-      "data": {
-        "diameter": 14,
-        "thickness": 0.1,
-        "mass": 0.5,
-        "material_type": "copper",
         "info": null
       }
     },
@@ -248,11 +172,9 @@
       "id": "liaopan1_materialhole_0_2",
       "name": "liaopan1_materialhole_0_2",
       "sample_id": null,
-      "children": [
-        "jipian1_2"
-      ],
+      "children": [],
       "parent": "liaopan1",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 12.4,
@@ -278,42 +200,6 @@
         "diameter": 20,
         "depth": 10,
         "max_sheets": 1,
-        "info": null
-      }
-    },
-    {
-      "id": "jipian1_2",
-      "name": "jipian1_2",
-      "sample_id": null,
-      "children": [],
-      "parent": "liaopan1_materialhole_0_2",
-      "type": "container",
-      "class": "",
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      },
-      "config": {
-        "type": "ElectrodeSheet",
-        "size_x": 12,
-        "size_y": 12,
-        "size_z": 0.1,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "electrode_sheet",
-        "model": null,
-        "barcode": null
-      },
-      "data": {
-        "diameter": 14,
-        "thickness": 0.1,
-        "mass": 0.5,
-        "material_type": "copper",
         "info": null
       }
     },
@@ -321,11 +207,9 @@
       "id": "liaopan1_materialhole_0_3",
       "name": "liaopan1_materialhole_0_3",
       "sample_id": null,
-      "children": [
-        "jipian1_3"
-      ],
+      "children": [],
       "parent": "liaopan1",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 12.4,
@@ -355,50 +239,12 @@
       }
     },
     {
-      "id": "jipian1_3",
-      "name": "jipian1_3",
-      "sample_id": null,
-      "children": [],
-      "parent": "liaopan1_materialhole_0_3",
-      "type": "container",
-      "class": "",
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      },
-      "config": {
-        "type": "ElectrodeSheet",
-        "size_x": 12,
-        "size_y": 12,
-        "size_z": 0.1,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "electrode_sheet",
-        "model": null,
-        "barcode": null
-      },
-      "data": {
-        "diameter": 14,
-        "thickness": 0.1,
-        "mass": 0.5,
-        "material_type": "copper",
-        "info": null
-      }
-    },
-    {
       "id": "liaopan1_materialhole_1_0",
       "name": "liaopan1_materialhole_1_0",
       "sample_id": null,
-      "children": [
-        "jipian1_4"
-      ],
+      "children": [],
       "parent": "liaopan1",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 36.4,
@@ -424,42 +270,6 @@
         "diameter": 20,
         "depth": 10,
         "max_sheets": 1,
-        "info": null
-      }
-    },
-    {
-      "id": "jipian1_4",
-      "name": "jipian1_4",
-      "sample_id": null,
-      "children": [],
-      "parent": "liaopan1_materialhole_1_0",
-      "type": "container",
-      "class": "",
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      },
-      "config": {
-        "type": "ElectrodeSheet",
-        "size_x": 12,
-        "size_y": 12,
-        "size_z": 0.1,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "electrode_sheet",
-        "model": null,
-        "barcode": null
-      },
-      "data": {
-        "diameter": 14,
-        "thickness": 0.1,
-        "mass": 0.5,
-        "material_type": "copper",
         "info": null
       }
     },
@@ -467,11 +277,9 @@
       "id": "liaopan1_materialhole_1_1",
       "name": "liaopan1_materialhole_1_1",
       "sample_id": null,
-      "children": [
-        "jipian1_5"
-      ],
+      "children": [],
       "parent": "liaopan1",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 36.4,
@@ -497,42 +305,6 @@
         "diameter": 20,
         "depth": 10,
         "max_sheets": 1,
-        "info": null
-      }
-    },
-    {
-      "id": "jipian1_5",
-      "name": "jipian1_5",
-      "sample_id": null,
-      "children": [],
-      "parent": "liaopan1_materialhole_1_1",
-      "type": "container",
-      "class": "",
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      },
-      "config": {
-        "type": "ElectrodeSheet",
-        "size_x": 12,
-        "size_y": 12,
-        "size_z": 0.1,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "electrode_sheet",
-        "model": null,
-        "barcode": null
-      },
-      "data": {
-        "diameter": 14,
-        "thickness": 0.1,
-        "mass": 0.5,
-        "material_type": "copper",
         "info": null
       }
     },
@@ -540,11 +312,9 @@
       "id": "liaopan1_materialhole_1_2",
       "name": "liaopan1_materialhole_1_2",
       "sample_id": null,
-      "children": [
-        "jipian1_6"
-      ],
+      "children": [],
       "parent": "liaopan1",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 36.4,
@@ -570,42 +340,6 @@
         "diameter": 20,
         "depth": 10,
         "max_sheets": 1,
-        "info": null
-      }
-    },
-    {
-      "id": "jipian1_6",
-      "name": "jipian1_6",
-      "sample_id": null,
-      "children": [],
-      "parent": "liaopan1_materialhole_1_2",
-      "type": "container",
-      "class": "",
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      },
-      "config": {
-        "type": "ElectrodeSheet",
-        "size_x": 12,
-        "size_y": 12,
-        "size_z": 0.1,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "electrode_sheet",
-        "model": null,
-        "barcode": null
-      },
-      "data": {
-        "diameter": 14,
-        "thickness": 0.1,
-        "mass": 0.5,
-        "material_type": "copper",
         "info": null
       }
     },
@@ -613,11 +347,9 @@
       "id": "liaopan1_materialhole_1_3",
       "name": "liaopan1_materialhole_1_3",
       "sample_id": null,
-      "children": [
-        "jipian1_7"
-      ],
+      "children": [],
       "parent": "liaopan1",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 36.4,
@@ -647,50 +379,12 @@
       }
     },
     {
-      "id": "jipian1_7",
-      "name": "jipian1_7",
-      "sample_id": null,
-      "children": [],
-      "parent": "liaopan1_materialhole_1_3",
-      "type": "container",
-      "class": "",
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      },
-      "config": {
-        "type": "ElectrodeSheet",
-        "size_x": 12,
-        "size_y": 12,
-        "size_z": 0.1,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "electrode_sheet",
-        "model": null,
-        "barcode": null
-      },
-      "data": {
-        "diameter": 14,
-        "thickness": 0.1,
-        "mass": 0.5,
-        "material_type": "copper",
-        "info": null
-      }
-    },
-    {
       "id": "liaopan1_materialhole_2_0",
       "name": "liaopan1_materialhole_2_0",
       "sample_id": null,
-      "children": [
-        "jipian1_8"
-      ],
+      "children": [],
       "parent": "liaopan1",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 60.4,
@@ -716,42 +410,6 @@
         "diameter": 20,
         "depth": 10,
         "max_sheets": 1,
-        "info": null
-      }
-    },
-    {
-      "id": "jipian1_8",
-      "name": "jipian1_8",
-      "sample_id": null,
-      "children": [],
-      "parent": "liaopan1_materialhole_2_0",
-      "type": "container",
-      "class": "",
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      },
-      "config": {
-        "type": "ElectrodeSheet",
-        "size_x": 12,
-        "size_y": 12,
-        "size_z": 0.1,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "electrode_sheet",
-        "model": null,
-        "barcode": null
-      },
-      "data": {
-        "diameter": 14,
-        "thickness": 0.1,
-        "mass": 0.5,
-        "material_type": "copper",
         "info": null
       }
     },
@@ -759,11 +417,9 @@
       "id": "liaopan1_materialhole_2_1",
       "name": "liaopan1_materialhole_2_1",
       "sample_id": null,
-      "children": [
-        "jipian1_9"
-      ],
+      "children": [],
       "parent": "liaopan1",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 60.4,
@@ -793,50 +449,12 @@
       }
     },
     {
-      "id": "jipian1_9",
-      "name": "jipian1_9",
-      "sample_id": null,
-      "children": [],
-      "parent": "liaopan1_materialhole_2_1",
-      "type": "container",
-      "class": "",
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      },
-      "config": {
-        "type": "ElectrodeSheet",
-        "size_x": 12,
-        "size_y": 12,
-        "size_z": 0.1,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "electrode_sheet",
-        "model": null,
-        "barcode": null
-      },
-      "data": {
-        "diameter": 14,
-        "thickness": 0.1,
-        "mass": 0.5,
-        "material_type": "copper",
-        "info": null
-      }
-    },
-    {
       "id": "liaopan1_materialhole_2_2",
       "name": "liaopan1_materialhole_2_2",
       "sample_id": null,
-      "children": [
-        "jipian1_10"
-      ],
+      "children": [],
       "parent": "liaopan1",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 60.4,
@@ -866,50 +484,12 @@
       }
     },
     {
-      "id": "jipian1_10",
-      "name": "jipian1_10",
-      "sample_id": null,
-      "children": [],
-      "parent": "liaopan1_materialhole_2_2",
-      "type": "container",
-      "class": "",
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      },
-      "config": {
-        "type": "ElectrodeSheet",
-        "size_x": 12,
-        "size_y": 12,
-        "size_z": 0.1,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "electrode_sheet",
-        "model": null,
-        "barcode": null
-      },
-      "data": {
-        "diameter": 14,
-        "thickness": 0.1,
-        "mass": 0.5,
-        "material_type": "copper",
-        "info": null
-      }
-    },
-    {
       "id": "liaopan1_materialhole_2_3",
       "name": "liaopan1_materialhole_2_3",
       "sample_id": null,
-      "children": [
-        "jipian1_11"
-      ],
+      "children": [],
       "parent": "liaopan1",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 60.4,
@@ -939,50 +519,12 @@
       }
     },
     {
-      "id": "jipian1_11",
-      "name": "jipian1_11",
-      "sample_id": null,
-      "children": [],
-      "parent": "liaopan1_materialhole_2_3",
-      "type": "container",
-      "class": "",
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      },
-      "config": {
-        "type": "ElectrodeSheet",
-        "size_x": 12,
-        "size_y": 12,
-        "size_z": 0.1,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "electrode_sheet",
-        "model": null,
-        "barcode": null
-      },
-      "data": {
-        "diameter": 14,
-        "thickness": 0.1,
-        "mass": 0.5,
-        "material_type": "copper",
-        "info": null
-      }
-    },
-    {
       "id": "liaopan1_materialhole_3_0",
       "name": "liaopan1_materialhole_3_0",
       "sample_id": null,
-      "children": [
-        "jipian1_12"
-      ],
+      "children": [],
       "parent": "liaopan1",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 84.4,
@@ -1012,50 +554,12 @@
       }
     },
     {
-      "id": "jipian1_12",
-      "name": "jipian1_12",
-      "sample_id": null,
-      "children": [],
-      "parent": "liaopan1_materialhole_3_0",
-      "type": "container",
-      "class": "",
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      },
-      "config": {
-        "type": "ElectrodeSheet",
-        "size_x": 12,
-        "size_y": 12,
-        "size_z": 0.1,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "electrode_sheet",
-        "model": null,
-        "barcode": null
-      },
-      "data": {
-        "diameter": 14,
-        "thickness": 0.1,
-        "mass": 0.5,
-        "material_type": "copper",
-        "info": null
-      }
-    },
-    {
       "id": "liaopan1_materialhole_3_1",
       "name": "liaopan1_materialhole_3_1",
       "sample_id": null,
-      "children": [
-        "jipian1_13"
-      ],
+      "children": [],
       "parent": "liaopan1",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 84.4,
@@ -1085,50 +589,12 @@
       }
     },
     {
-      "id": "jipian1_13",
-      "name": "jipian1_13",
-      "sample_id": null,
-      "children": [],
-      "parent": "liaopan1_materialhole_3_1",
-      "type": "container",
-      "class": "",
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      },
-      "config": {
-        "type": "ElectrodeSheet",
-        "size_x": 12,
-        "size_y": 12,
-        "size_z": 0.1,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "electrode_sheet",
-        "model": null,
-        "barcode": null
-      },
-      "data": {
-        "diameter": 14,
-        "thickness": 0.1,
-        "mass": 0.5,
-        "material_type": "copper",
-        "info": null
-      }
-    },
-    {
       "id": "liaopan1_materialhole_3_2",
       "name": "liaopan1_materialhole_3_2",
       "sample_id": null,
-      "children": [
-        "jipian1_14"
-      ],
+      "children": [],
       "parent": "liaopan1",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 84.4,
@@ -1158,50 +624,12 @@
       }
     },
     {
-      "id": "jipian1_14",
-      "name": "jipian1_14",
-      "sample_id": null,
-      "children": [],
-      "parent": "liaopan1_materialhole_3_2",
-      "type": "container",
-      "class": "",
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      },
-      "config": {
-        "type": "ElectrodeSheet",
-        "size_x": 12,
-        "size_y": 12,
-        "size_z": 0.1,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "electrode_sheet",
-        "model": null,
-        "barcode": null
-      },
-      "data": {
-        "diameter": 14,
-        "thickness": 0.1,
-        "mass": 0.5,
-        "material_type": "copper",
-        "info": null
-      }
-    },
-    {
       "id": "liaopan1_materialhole_3_3",
       "name": "liaopan1_materialhole_3_3",
       "sample_id": null,
-      "children": [
-        "jipian1_15"
-      ],
+      "children": [],
       "parent": "liaopan1",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 84.4,
@@ -1227,42 +655,6 @@
         "diameter": 20,
         "depth": 10,
         "max_sheets": 1,
-        "info": null
-      }
-    },
-    {
-      "id": "jipian1_15",
-      "name": "jipian1_15",
-      "sample_id": null,
-      "children": [],
-      "parent": "liaopan1_materialhole_3_3",
-      "type": "container",
-      "class": "",
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      },
-      "config": {
-        "type": "ElectrodeSheet",
-        "size_x": 12,
-        "size_y": 12,
-        "size_z": 0.1,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "electrode_sheet",
-        "model": null,
-        "barcode": null
-      },
-      "data": {
-        "diameter": 14,
-        "thickness": 0.1,
-        "mass": 0.5,
-        "material_type": "copper",
         "info": null
       }
     },
@@ -1289,7 +681,7 @@
         "liaopan2_materialhole_3_3"
       ],
       "parent": "coin_cell_deck",
-      "type": "container",
+      "type": "material_plate",
       "class": "",
       "position": {
         "x": 500,
@@ -1335,9 +727,11 @@
       "id": "liaopan2_materialhole_0_0",
       "name": "liaopan2_materialhole_0_0",
       "sample_id": null,
-      "children": [],
+      "children": [
+        "jipian1_0"
+      ],
       "parent": "liaopan2",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 12.4,
@@ -1363,6 +757,42 @@
         "diameter": 20,
         "depth": 10,
         "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "jipian1_0",
+      "name": "jipian1_0",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_0_0",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
         "info": null
       }
     },
@@ -1370,9 +800,11 @@
       "id": "liaopan2_materialhole_0_1",
       "name": "liaopan2_materialhole_0_1",
       "sample_id": null,
-      "children": [],
+      "children": [
+        "jipian1_1"
+      ],
       "parent": "liaopan2",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 12.4,
@@ -1398,6 +830,42 @@
         "diameter": 20,
         "depth": 10,
         "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "jipian1_1",
+      "name": "jipian1_1",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_0_1",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
         "info": null
       }
     },
@@ -1405,9 +873,11 @@
       "id": "liaopan2_materialhole_0_2",
       "name": "liaopan2_materialhole_0_2",
       "sample_id": null,
-      "children": [],
+      "children": [
+        "jipian1_2"
+      ],
       "parent": "liaopan2",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 12.4,
@@ -1433,6 +903,42 @@
         "diameter": 20,
         "depth": 10,
         "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "jipian1_2",
+      "name": "jipian1_2",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_0_2",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
         "info": null
       }
     },
@@ -1440,9 +946,11 @@
       "id": "liaopan2_materialhole_0_3",
       "name": "liaopan2_materialhole_0_3",
       "sample_id": null,
-      "children": [],
+      "children": [
+        "jipian1_3"
+      ],
       "parent": "liaopan2",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 12.4,
@@ -1472,12 +980,50 @@
       }
     },
     {
+      "id": "jipian1_3",
+      "name": "jipian1_3",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_0_3",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
+        "info": null
+      }
+    },
+    {
       "id": "liaopan2_materialhole_1_0",
       "name": "liaopan2_materialhole_1_0",
       "sample_id": null,
-      "children": [],
+      "children": [
+        "jipian1_4"
+      ],
       "parent": "liaopan2",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 36.4,
@@ -1503,6 +1049,42 @@
         "diameter": 20,
         "depth": 10,
         "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "jipian1_4",
+      "name": "jipian1_4",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_1_0",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
         "info": null
       }
     },
@@ -1510,9 +1092,11 @@
       "id": "liaopan2_materialhole_1_1",
       "name": "liaopan2_materialhole_1_1",
       "sample_id": null,
-      "children": [],
+      "children": [
+        "jipian1_5"
+      ],
       "parent": "liaopan2",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 36.4,
@@ -1538,6 +1122,42 @@
         "diameter": 20,
         "depth": 10,
         "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "jipian1_5",
+      "name": "jipian1_5",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_1_1",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
         "info": null
       }
     },
@@ -1545,9 +1165,11 @@
       "id": "liaopan2_materialhole_1_2",
       "name": "liaopan2_materialhole_1_2",
       "sample_id": null,
-      "children": [],
+      "children": [
+        "jipian1_6"
+      ],
       "parent": "liaopan2",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 36.4,
@@ -1573,6 +1195,42 @@
         "diameter": 20,
         "depth": 10,
         "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "jipian1_6",
+      "name": "jipian1_6",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_1_2",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
         "info": null
       }
     },
@@ -1580,9 +1238,11 @@
       "id": "liaopan2_materialhole_1_3",
       "name": "liaopan2_materialhole_1_3",
       "sample_id": null,
-      "children": [],
+      "children": [
+        "jipian1_7"
+      ],
       "parent": "liaopan2",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 36.4,
@@ -1612,12 +1272,50 @@
       }
     },
     {
+      "id": "jipian1_7",
+      "name": "jipian1_7",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_1_3",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
+        "info": null
+      }
+    },
+    {
       "id": "liaopan2_materialhole_2_0",
       "name": "liaopan2_materialhole_2_0",
       "sample_id": null,
-      "children": [],
+      "children": [
+        "jipian1_8"
+      ],
       "parent": "liaopan2",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 60.4,
@@ -1643,6 +1341,42 @@
         "diameter": 20,
         "depth": 10,
         "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "jipian1_8",
+      "name": "jipian1_8",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_2_0",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
         "info": null
       }
     },
@@ -1650,9 +1384,11 @@
       "id": "liaopan2_materialhole_2_1",
       "name": "liaopan2_materialhole_2_1",
       "sample_id": null,
-      "children": [],
+      "children": [
+        "jipian1_9"
+      ],
       "parent": "liaopan2",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 60.4,
@@ -1682,12 +1418,50 @@
       }
     },
     {
+      "id": "jipian1_9",
+      "name": "jipian1_9",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_2_1",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
+        "info": null
+      }
+    },
+    {
       "id": "liaopan2_materialhole_2_2",
       "name": "liaopan2_materialhole_2_2",
       "sample_id": null,
-      "children": [],
+      "children": [
+        "jipian1_10"
+      ],
       "parent": "liaopan2",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 60.4,
@@ -1717,12 +1491,50 @@
       }
     },
     {
+      "id": "jipian1_10",
+      "name": "jipian1_10",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_2_2",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
+        "info": null
+      }
+    },
+    {
       "id": "liaopan2_materialhole_2_3",
       "name": "liaopan2_materialhole_2_3",
       "sample_id": null,
-      "children": [],
+      "children": [
+        "jipian1_11"
+      ],
       "parent": "liaopan2",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 60.4,
@@ -1752,12 +1564,50 @@
       }
     },
     {
+      "id": "jipian1_11",
+      "name": "jipian1_11",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_2_3",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
+        "info": null
+      }
+    },
+    {
       "id": "liaopan2_materialhole_3_0",
       "name": "liaopan2_materialhole_3_0",
       "sample_id": null,
-      "children": [],
+      "children": [
+        "jipian1_12"
+      ],
       "parent": "liaopan2",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 84.4,
@@ -1787,12 +1637,50 @@
       }
     },
     {
+      "id": "jipian1_12",
+      "name": "jipian1_12",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_3_0",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
+        "info": null
+      }
+    },
+    {
       "id": "liaopan2_materialhole_3_1",
       "name": "liaopan2_materialhole_3_1",
       "sample_id": null,
-      "children": [],
+      "children": [
+        "jipian1_13"
+      ],
       "parent": "liaopan2",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 84.4,
@@ -1822,12 +1710,50 @@
       }
     },
     {
+      "id": "jipian1_13",
+      "name": "jipian1_13",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_3_1",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
+        "info": null
+      }
+    },
+    {
       "id": "liaopan2_materialhole_3_2",
       "name": "liaopan2_materialhole_3_2",
       "sample_id": null,
-      "children": [],
+      "children": [
+        "jipian1_14"
+      ],
       "parent": "liaopan2",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 84.4,
@@ -1857,12 +1783,50 @@
       }
     },
     {
+      "id": "jipian1_14",
+      "name": "jipian1_14",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_3_2",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
+        "info": null
+      }
+    },
+    {
       "id": "liaopan2_materialhole_3_3",
       "name": "liaopan2_materialhole_3_3",
       "sample_id": null,
-      "children": [],
+      "children": [
+        "jipian1_15"
+      ],
       "parent": "liaopan2",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 84.4,
@@ -1888,6 +1852,42 @@
         "diameter": 20,
         "depth": 10,
         "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "jipian1_15",
+      "name": "jipian1_15",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_3_3",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
         "info": null
       }
     },
@@ -1914,7 +1914,7 @@
         "\u7535\u6c60\u6599\u76d8_materialhole_3_3"
       ],
       "parent": "coin_cell_deck",
-      "type": "container",
+      "type": "material_plate",
       "class": "",
       "position": {
         "x": 100,
@@ -1962,7 +1962,7 @@
       "sample_id": null,
       "children": [],
       "parent": "\u7535\u6c60\u6599\u76d8",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 12.4,
@@ -1997,7 +1997,7 @@
       "sample_id": null,
       "children": [],
       "parent": "\u7535\u6c60\u6599\u76d8",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 12.4,
@@ -2032,7 +2032,7 @@
       "sample_id": null,
       "children": [],
       "parent": "\u7535\u6c60\u6599\u76d8",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 12.4,
@@ -2067,7 +2067,7 @@
       "sample_id": null,
       "children": [],
       "parent": "\u7535\u6c60\u6599\u76d8",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 12.4,
@@ -2102,7 +2102,7 @@
       "sample_id": null,
       "children": [],
       "parent": "\u7535\u6c60\u6599\u76d8",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 36.4,
@@ -2137,7 +2137,7 @@
       "sample_id": null,
       "children": [],
       "parent": "\u7535\u6c60\u6599\u76d8",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 36.4,
@@ -2172,7 +2172,7 @@
       "sample_id": null,
       "children": [],
       "parent": "\u7535\u6c60\u6599\u76d8",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 36.4,
@@ -2207,7 +2207,7 @@
       "sample_id": null,
       "children": [],
       "parent": "\u7535\u6c60\u6599\u76d8",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 36.4,
@@ -2242,7 +2242,7 @@
       "sample_id": null,
       "children": [],
       "parent": "\u7535\u6c60\u6599\u76d8",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 60.4,
@@ -2277,7 +2277,7 @@
       "sample_id": null,
       "children": [],
       "parent": "\u7535\u6c60\u6599\u76d8",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 60.4,
@@ -2312,7 +2312,7 @@
       "sample_id": null,
       "children": [],
       "parent": "\u7535\u6c60\u6599\u76d8",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 60.4,
@@ -2347,7 +2347,7 @@
       "sample_id": null,
       "children": [],
       "parent": "\u7535\u6c60\u6599\u76d8",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 60.4,
@@ -2382,7 +2382,7 @@
       "sample_id": null,
       "children": [],
       "parent": "\u7535\u6c60\u6599\u76d8",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 84.4,
@@ -2417,7 +2417,7 @@
       "sample_id": null,
       "children": [],
       "parent": "\u7535\u6c60\u6599\u76d8",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 84.4,
@@ -2452,7 +2452,7 @@
       "sample_id": null,
       "children": [],
       "parent": "\u7535\u6c60\u6599\u76d8",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 84.4,
@@ -2487,7 +2487,7 @@
       "sample_id": null,
       "children": [],
       "parent": "\u7535\u6c60\u6599\u76d8",
-      "type": "container",
+      "type": "material_hole",
       "class": "",
       "position": {
         "x": 84.4,
