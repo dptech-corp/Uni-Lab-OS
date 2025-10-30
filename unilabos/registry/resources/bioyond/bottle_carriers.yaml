@@ -130,15 +130,3 @@ BIOYOND_ReactionStation_1BottleCarrier:
   init_param_schema: {}
   registry_type: resource
   version: 1.0.0
-BIOYOND_ReactionStation_1FlaskCarrier:
-  category:
-  - bottle_carriers
-  class:
-    module: unilabos.resources.bioyond.bottle_carriers:BIOYOND_ReactionStation_1FlaskCarrier
-    type: pylabrobot
-  description: 反应站-单烧杯载架
-  handles: []
-  icon: ''
-  init_param_schema: {}
-  registry_type: resource
-  version: 1.0.0

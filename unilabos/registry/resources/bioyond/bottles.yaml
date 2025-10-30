@@ -152,6 +152,7 @@ BIOYOND_ReactionStation_TipBox:
 BIOYOND_ReactionStation_1FlaskCarrier:
   category:
   - bottles
+  - flasks
   class:
     module: unilabos.resources.bioyond.bottles:BIOYOND_ReactionStation_1FlaskCarrier
     type: pylabrobot
