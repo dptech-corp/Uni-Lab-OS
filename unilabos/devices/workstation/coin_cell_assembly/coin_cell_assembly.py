@@ -136,27 +136,16 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         )
         self.debug_mode = debug_mode
 
-        self.deck = None
-
+        # 如果没有传入 deck，则创建标准配置的 deck
         if self.deck is None:
-            self.deck = CoincellDeck(size_x=1000, size_y=1000, size_z=900)
-            # 创建料盘1并添加极片
-            liaopan1 = MaterialPlate(name="liaopan1", size_x=120.8, size_y=120.5, size_z=10.0, fill=True)
-            self.deck.assign_child_resource(liaopan1, Coordinate(x=0, y=0, z=0))
-            for i in range(16):
-                jipian = ElectrodeSheet(name=f"jipian1_{i}", size_x=12, size_y=12, size_z=0.1)
-                liaopan1.children[i].assign_child_resource(jipian, location=None)
-            # 创建料盘2
-            liaopan2 = MaterialPlate(name="liaopan2", size_x=120.8, size_y=120.5, size_z=10.0, fill=True)
-            self.deck.assign_child_resource(liaopan2, Coordinate(x=500, y=0, z=0))
-            # 创建电池料盘
-            liaopan3 = MaterialPlate(name="电池料盘", size_x=120.8, size_y=160.5, size_z=10.0, fill=True)
-            self.deck.assign_child_resource(liaopan3, Coordinate(x=100, y=100, z=0))
+            self.deck = CoincellDeck(size_x=1000, size_y=1000, size_z=900, setup=True)
         else:
-            if self.deck is None:
-                self.deck = self.deck
-            elif self.deck is not self.deck:
-                self.deck = self.deck
+            # 如果传入了 deck 但还没有 setup，可以选择是否 setup
+            if self.deck is not None and len(self.deck.children) == 0:
+                # deck 为空，执行 setup
+                self.deck.setup()
+            # 否则使用传入的 deck（可能已经配置好了）
+            self.deck = self.deck
 
         """ 连接初始化 """
         modbus_client = TCPClient(addr=address, port=port)
@@ -1229,84 +1218,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
 
 
 if __name__ == "__main__":
-    # modbus_client = TCPClient(addr="172.21.32.20", port="502")
-    # # modbus_client.client.connect()
-    # nodes = BaseClient.load_csv(os.path.join(os.path.dirname(__file__), 'coin_cell_assembly_a.csv'))
-    # client  = modbus_client.register_node_list(nodes)
-    # # print("modbus_client", modbus_client)
-    # while True:
-    #     time.sleep(1)
-    #     cmd_feedback, read_err = modbus_client.use_node('COIL_SYS_AUTO_CMD').read(1)
-    #     print("modbus_client", cmd_feedback)
-    Coin_Cell = CoinCellAssemblyWorkstation()
-    print(Coin_Cell.deck)
-    #Coin_Cell.func_pack_device_init()  
-    #Coin_Cell.func_pack_device_auto()
-    #Coin_Cell.func_pack_device_start()
-    #Coin_Cell.func_pack_send_bottle_num(2)
-    #Coin_Cell.func_pack_send_msg_cmd(2)
-    #Coin_Cell.func_pack_get_msg_cmd()
-    #Coin_Cell.func_pack_get_msg_cmd()
-    #Coin_Cell.func_pack_send_finished_cmd()
-#
-    #Coin_Cell.func_allpack_cmd(3, 2)
-    #print(Coin_Cell.data_stack_vision_code)
-    #print("success")
-    #创建一个物料台面
-
-    # deck = create_a_coin_cell_deck()
-    #deck = create_a_full_coin_cell_deck()
-
-
-    ##在台面上找到料盘和极片
-    #liaopan1 = deck.get_resource("liaopan1")
-    #liaopan2 = deck.get_resource("liaopan2")
-    #jipian1 = liaopan1.children[1].children[0]
-##
-    #print(jipian1)
-    ##把物料解绑后放到另一盘上
-    #jipian1.parent.unassign_child_resource(jipian1)
-    #liaopan2.children[1].assign_child_resource(jipian1, location=None)
-    ##print(jipian2.parent)
-    
-    # 使用 Coin_Cell 对象的 deck 属性
-    deck = Coin_Cell.deck
-    
-    liaopan1 = Coin_Cell.deck.get_resource("liaopan1")
-    liaopan2 = Coin_Cell.deck.get_resource("liaopan2")
-    for i in range(16):
-        #找到liaopan1上每一个jipian
-        jipian_linshi = liaopan1.children[i].children[0]
-        #把物料解绑后放到另一盘上
-        print("极片:", jipian_linshi)
-        jipian_linshi.parent.unassign_child_resource(jipian_linshi)
-        liaopan2.children[i].assign_child_resource(jipian_linshi, location=None)
-
-
-    from unilabos.resources.graphio import resource_ulab_to_plr, convert_resources_to_type
-    #with open("./button_battery_decks_unilab.json", "r", encoding="utf-8") as f:
-    #    bioyond_resources_unilab = json.load(f)
-    #print(f"成功读取 JSON 文件，包含 {len(bioyond_resources_unilab)} 个资源")
-    #ulab_resources = convert_resources_to_type(bioyond_resources_unilab, List[PLRResource])
-    #print(f"转换结果类型: {type(ulab_resources)}")
-    #print(ulab_resources)
-
-
-
-    from unilabos.resources.graphio import convert_resources_from_type
-    from unilabos.config.config import BasicConfig 
-    BasicConfig.ak = "beb0c15f-2279-46a1-aba5-00eaf89aef55"
-    BasicConfig.sk = "15d4f25e-3512-4f9c-9bfb-43ab85e7b561"
-    from unilabos.app.web.client import http_client
-
-    resources = convert_resources_from_type([Coin_Cell.deck], [Resource])
-    json.dump({"nodes": resources, "links": []}, open("button_battery_decks_unilab.json", "w"), indent=2)
-   
-    #print(resources)
-    http_client.remote_addr = "https://uni-lab.test.bohrium.com/api/v1"
- 
-    http_client.resource_add(resources)
-
-    
-
-    
+    # 简单测试
+    workstation = CoinCellAssemblyWorkstation()
+    print(f"工作站创建成功: {workstation.deck.name}")
+    print(f"料盘数量: {len(workstation.deck.children)}")

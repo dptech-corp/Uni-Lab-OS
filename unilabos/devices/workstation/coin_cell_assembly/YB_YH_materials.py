@@ -396,6 +396,8 @@ class ClipMagazine(Resource):
         size_x: float,
         size_y: float,
         size_z: float,
+        hole_diameter: float = 20.0,
+        hole_depth: float = 50.0,
         hole_spacing: float = 25.0,
         max_sheets_per_hole: int = 100,
         category: str = "clip_magazine",
@@ -425,8 +427,8 @@ class ClipMagazine(Resource):
             dz=size_z - 0,
             item_dx=hole_spacing,
             item_dy=hole_spacing,
-            diameter=0,
-            depth=0,
+            diameter=hole_diameter,
+            depth=hole_depth,
         )
 
         super().__init__(
@@ -872,21 +874,23 @@ class CoincellDeck(Deck):
     def __init__(
         self,
         name: str = "coin_cell_deck",
-        size_x: float = 1620.0,  # 3.66m
-        size_y: float = 1270.0,  # 1.23m
-        size_z: float = 500.0,
+        size_x: float = 1000.0,  # 1m
+        size_y: float = 1000.0,  # 1m
+        size_z: float = 900.0,   # 0.9m
         origin: Coordinate = Coordinate(0, 0, 0),
         category: str = "coin_cell_deck",
+        setup: bool = False,  # 是否自动执行 setup
     ):
         """初始化纽扣电池组装工作站台面
 
         Args:
             name: 台面名称
-            size_x: 长度 (mm) - 3.66m
-            size_y: 宽度 (mm) - 1.23m
-            size_z: 高度 (mm)
+            size_x: 长度 (mm) - 1m
+            size_y: 宽度 (mm) - 1m
+            size_z: 高度 (mm) - 0.9m
             origin: 原点坐标
             category: 类别
+            setup: 是否自动执行 setup 配置标准布局
         """
         super().__init__(
             name=name,
@@ -896,111 +900,77 @@ class CoincellDeck(Deck):
             origin=origin,
             category=category,
         )
+        if setup:
+            self.setup()
 
-#if __name__ == "__main__":
-#    # 转移极片的测试代码
-#    deck = CoincellDeck("coin_cell_deck")
-#    ban_cao_wei = PlateSlot("ban_cao_wei", max_plates=8)
-#    deck.assign_child_resource(ban_cao_wei, Coordinate(x=0, y=0, z=0))
-#
-#    plate_1 = MaterialPlate("plate_1", 1,1,1, fill=True)
-#    for i, hole in enumerate(plate_1.children):
-#        sheet = ElectrodeSheet(f"hole_{i}_sheet_1")
-#        sheet._unilabos_state = {
-#            "diameter": 14,
-#            "info": "NMC",
-#            "mass": 5.0,
-#            "material_type": "positive_electrode",
-#            "thickness": 0.1
-#        }
-#        hole._unilabos_state = {
-#            "depth": 1.0,
-#            "diameter": 14,
-#            "info": "",
-#            "max_sheets": 1
-#        }
-#        hole.assign_child_resource(sheet, Coordinate.zero())
-#    plate_1._unilabos_state = {
-#        "hole_spacing_x": 20.0,
-#        "hole_spacing_y": 20.0,
-#        "hole_diameter": 5,
-#        "info": "这是第一块料板"
-#    }
-#    plate_1.update_locations()
-#    ban_cao_wei.assign_child_resource(plate_1, Coordinate.zero())
-#    # zi_dan_jia = ClipMagazine("zi_dan_jia", 1, 1, 1)
-#    # deck.assign_child_resource(ban_cao_wei, Coordinate(x=200, y=200, z=0))
-#
-#    from unilabos.resources.graphio import *
-#    A = tree_to_list([resource_plr_to_ulab(deck)])
-#    with open("test.json", "w") as f:
-#        json.dump(A, f)
-#
-#
-#def get_plate_with_14mm_hole(name=""):
-#    plate = MaterialPlate(name=name)
-#    for i in range(4):
-#        for j in range(4):
-#            hole = MaterialHole(f"{i+1}x{j+1}")
-#            hole._unilabos_state["diameter"] = 14
-#            hole._unilabos_state["max_sheets"] = 1
-#            plate.assign_child_resource(hole)
-#    return plate
-
-import json
-
-if __name__ == "__main__":
-    #electrode1 = BatteryPressSlot()
-    #print(electrode1.get_size_x())
-    #print(electrode1.get_size_y())
-    #print(electrode1.get_size_z())
-    #jipian = ElectrodeSheet()
-    #jipian._unilabos_state["diameter"] = 18
-    #print(jipian.serialize())
-    #print(jipian.serialize_state())
-
-    deck = CoincellDeck(size_x=1000,
-                size_y=1000,
-                size_z=900)
-
-    #liaopan =  TipBox64(name="liaopan")
-
-    #创建一个4*4的物料板
-    liaopan1 =  MaterialPlate(name="liaopan1", size_x=120.8, size_y=120.5, size_z=10.0, fill=True)
-    #把物料板放到桌子上
-    deck.assign_child_resource(liaopan1, Coordinate(x=0, y=0, z=0))
-    #创建一个极片
-    for i in range(16):
-        jipian = ElectrodeSheet(name=f"jipian1_{i}", size_x= 12, size_y=12, size_z=0.1)
-        liaopan1.children[i].assign_child_resource(jipian, location=None)
-#
-    #创建一个4*4的物料板
-    liaopan2 =  MaterialPlate(name="liaopan2", size_x=120.8, size_y=120.5, size_z=10.0, fill=True)
-    #把物料板放到桌子上
-    deck.assign_child_resource(liaopan2, Coordinate(x=500, y=0, z=0))
-
-    #创建一个4*4的物料板
-    liaopan3 =  MaterialPlate(name="电池料盘", size_x=120.8, size_y=160.5, size_z=10.0, fill=True)
-    #把物料板放到桌子上
-    deck.assign_child_resource(liaopan3, Coordinate(x=100, y=100, z=0))
+    def setup(self) -> None:
+        """设置工作站的标准布局 - 包含3个料盘"""
+        # 步骤 1: 创建所有料盘
+        self.plates = {
+            "liaopan1": MaterialPlate(
+                name="liaopan1", 
+                size_x=120.8, 
+                size_y=120.5, 
+                size_z=10.0, 
+                fill=True
+            ),
+            "liaopan2": MaterialPlate(
+                name="liaopan2", 
+                size_x=120.8, 
+                size_y=120.5, 
+                size_z=10.0, 
+                fill=True
+            ),
+            "电池料盘": MaterialPlate(
+                name="电池料盘", 
+                size_x=120.8, 
+                size_y=160.5, 
+                size_z=10.0, 
+                fill=True
+            ),
+        }
+        
+        # 步骤 2: 定义料盘在 deck 上的位置
+        # Deck 尺寸: 1000×1000mm，料盘尺寸: 120.8×120.5mm 或 120.8×160.5mm
+        self.plate_locations = {
+            "liaopan1": Coordinate(x=50, y=50, z=0),      # 左上角，留 50mm 边距
+            "liaopan2": Coordinate(x=250, y=50, z=0),     # 中间，liaopan1 右侧
+            "电池料盘": Coordinate(x=450, y=50, z=0),     # 右侧
+        }
+        
+        # 步骤 3: 将料盘分配到 deck 上
+        for plate_name, plate in self.plates.items():
+            self.assign_child_resource(
+                plate, 
+                location=self.plate_locations[plate_name]
+            )
+        
+        # 步骤 4: 为 liaopan1 添加初始极片
+        for i in range(16):
+            jipian = ElectrodeSheet(
+                name=f"jipian1_{i}", 
+                size_x=12, 
+                size_y=12, 
+                size_z=0.1
+            )
+            self.plates["liaopan1"].children[i].assign_child_resource(
+                jipian, 
+                location=None
+            )
 
 
-
-    #liaopan.children[3].assign_child_resource(jipian, location=None)
-    print(deck)
-
-
-    from unilabos.resources.graphio import convert_resources_from_type
-    from unilabos.config.config import BasicConfig 
-    BasicConfig.ak = "4d5ce6ae-7234-4639-834e-93899b9caf94"
-    BasicConfig.sk = "505d3b0a-620e-459a-9905-1efcffce382a"
-    from unilabos.app.web.client import http_client
-
-    resources = convert_resources_from_type([deck], [Resource])
-    json.dump({"nodes": resources, "links": []}, open("button_battery_station_resources_unilab.json", "w"), indent=2)
-   
-      
-    #print(resources)
-    http_client.remote_addr = "https://uni-lab.test.bohrium.com/api/v1"
- 
-    http_client.resource_add(resources)
+def create_coin_cell_deck(name: str = "coin_cell_deck", size_x: float = 1000.0, size_y: float = 1000.0, size_z: float = 900.0) -> CoincellDeck:
+    """创建并配置标准的纽扣电池组装工作站台面
+    
+    Args:
+        name: 台面名称
+        size_x: 长度 (mm)
+        size_y: 宽度 (mm)
+        size_z: 高度 (mm)
+    
+    Returns:
+        已配置好的 CoincellDeck 对象
+    """
+    deck = CoincellDeck(name=name, size_x=size_x, size_y=size_y, size_z=size_z)
+    deck.setup()
+    return deck
