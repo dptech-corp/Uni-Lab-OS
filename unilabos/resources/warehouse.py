@@ -23,7 +23,8 @@ def warehouse_factory(
     empty: bool = False,
     category: str = "warehouse",
     model: Optional[str] = None,
-    col_offset: int = 0,  # 新增：列起始偏移量，用于生成A05-D08等命名
+    col_offset: int = 0,  # 列起始偏移量，用于生成A05-D08等命名
+    layout: str = "col-major",  # 新增：排序方式，"col-major"=列优先，"row-major"=行优先
 ):
     # 创建16个板架位 (4层 x 4位置)
     locations = []
@@ -45,9 +46,15 @@ def warehouse_factory(
         name_prefix=name,
     )
     len_x, len_y = (num_items_x, num_items_y) if num_items_z == 1 else (num_items_y, num_items_z) if num_items_x == 1 else (num_items_x, num_items_z)
-    # 应用列偏移量，支持A05-D08等命名
-    # 使用列优先顺序生成keys (与Bioyond坐标系统一致): A01,B01,C01,D01, A02,B02,C02,D02, ...
-    keys = [f"{LETTERS[j]}{i + 1 + col_offset:02d}" for i in range(len_x) for j in range(len_y)]
+
+    # 根据 layout 参数生成不同的排序方式
+    if layout == "row-major":
+        # 行优先顺序: A01,A02,A03,A04, B01,B02,B03,B04 (适用于试剂堆栈等)
+        keys = [f"{LETTERS[j]}{i + 1 + col_offset:02d}" for j in range(len_y) for i in range(len_x)]
+    else:
+        # 列优先顺序 (默认): A01,B01,C01,D01, A02,B02,C02,D02 (适用于粉末/溶液堆栈等)
+        keys = [f"{LETTERS[j]}{i + 1 + col_offset:02d}" for i in range(len_x) for j in range(len_y)]
+
     sites = {i: site for i, site in zip(keys, _sites.values())}
 
     return WareHouse(

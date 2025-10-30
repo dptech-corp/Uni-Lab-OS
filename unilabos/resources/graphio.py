@@ -823,17 +823,21 @@ def resource_plr_to_bioyond(plr_resources: list[ResourcePLR], type_mapping: dict
 
         if resource.parent is not None and isinstance(resource.parent, ItemizedCarrier):
             site_in_parent = resource.parent.get_child_identifier(resource)
+            print(f"[DEBUG] site_in_parent: {site_in_parent}")
+            print(f"[DEBUG] resource.parent.name: {resource.parent.name}")
+            print(f"[DEBUG] warehouse_mapping keys: {list(warehouse_mapping.keys())}")
+
             material["locations"] = [
                 {
                     "id": warehouse_mapping[resource.parent.name]["site_uuids"][site_in_parent["identifier"]],
                     "whid": warehouse_mapping[resource.parent.name]["uuid"],
                     "whName": resource.parent.name,
-                    "x": site_in_parent["z"] + 1,
+                    "x": site_in_parent["x"] + 1,
                     "y": site_in_parent["y"] + 1,
                     "z": 1,
                     "quantity": 0
                 }
-            ],
+            ]
 
         print(f"material_data: {material}")
         bioyond_materials.append(material)

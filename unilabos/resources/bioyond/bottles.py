@@ -176,3 +176,188 @@ def BIOYOND_PolymerStation_TipBox(
             )
 
     return tip_box
+
+
+# ============================================================================
+# 配液站专用资源
+# ============================================================================
+
+def BIOYOND_DispensingStation_Liquid_Vial(
+    name: str,
+    diameter: float = 25.0,
+    height: float = 60.0,
+    max_volume: float = 30000.0,  # 30mL
+    barcode: str = None,
+) -> Bottle:
+    """配液站-10%分装小瓶"""
+    return Bottle(
+        name=name,
+        diameter=diameter,
+        height=height,
+        max_volume=max_volume,
+        barcode=barcode,
+        model="BIOYOND_DispensingStation_Liquid_Vial",
+    )
+
+
+def BIOYOND_DispensingStation_Solid_Vial(
+    name: str,
+    diameter: float = 25.0,
+    height: float = 60.0,
+    max_volume: float = 30000.0,  # 30mL
+    barcode: str = None,
+) -> Bottle:
+    """配液站-90%分装小瓶"""
+    return Bottle(
+        name=name,
+        diameter=diameter,
+        height=height,
+        max_volume=max_volume,
+        barcode=barcode,
+        model="BIOYOND_DispensingStation_Solid_Vial",
+    )
+
+
+def BIOYOND_DispensingStation_Solid_Stock(
+    name: str,
+    diameter: float = 20.0,
+    height: float = 100.0,
+    max_volume: float = 30000.0,  # 30mL
+    barcode: str = None,
+) -> Bottle:
+    """配液站-样品瓶"""
+    return Bottle(
+        name=name,
+        diameter=diameter,
+        height=height,
+        max_volume=max_volume,
+        barcode=barcode,
+        model="BIOYOND_DispensingStation_Solid_Stock",
+    )
+
+
+# ============================================================================
+# 反应站专用资源
+# ============================================================================
+
+def BIOYOND_ReactionStation_Reactor(
+    name: str,
+    diameter: float = 30.0,
+    height: float = 80.0,
+    max_volume: float = 50000.0,  # 50mL
+    barcode: str = None,
+) -> Bottle:
+    """反应站-反应器"""
+    return Bottle(
+        name=name,
+        diameter=diameter,
+        height=height,
+        max_volume=max_volume,
+        barcode=barcode,
+        model="BIOYOND_ReactionStation_Reactor",
+    )
+
+
+def BIOYOND_ReactionStation_Liquid_Vial(
+    name: str,
+    diameter: float = 25.0,
+    height: float = 60.0,
+    max_volume: float = 30000.0,  # 30mL
+    barcode: str = None,
+) -> Bottle:
+    """反应站-10%分装小瓶"""
+    return Bottle(
+        name=name,
+        diameter=diameter,
+        height=height,
+        max_volume=max_volume,
+        barcode=barcode,
+        model="BIOYOND_ReactionStation_Liquid_Vial",
+    )
+
+
+def BIOYOND_ReactionStation_Solid_Vial(
+    name: str,
+    diameter: float = 25.0,
+    height: float = 60.0,
+    max_volume: float = 30000.0,  # 30mL
+    barcode: str = None,
+) -> Bottle:
+    """反应站-90%分装小瓶"""
+    return Bottle(
+        name=name,
+        diameter=diameter,
+        height=height,
+        max_volume=max_volume,
+        barcode=barcode,
+        model="BIOYOND_ReactionStation_Solid_Vial",
+    )
+
+
+def BIOYOND_ReactionStation_TipBox(
+    name: str,
+    size_x: float = 127.76,
+    size_y: float = 85.48,
+    size_z: float = 100.0,
+    barcode: str = None,
+):
+    """反应站-枪头盒"""
+    from pylabrobot.resources import Container, Coordinate
+
+    tip_box = Container(
+        name=name,
+        size_x=size_x,
+        size_y=size_y,
+        size_z=size_z,
+        category="tip_rack",
+        model="BIOYOND_ReactionStation_TipBox",
+    )
+
+    tip_box.barcode = barcode
+    tip_box.tip_count = 24
+    tip_box.num_items_x = 6
+    tip_box.num_items_y = 4
+
+    tip_spacing_x = 9.0
+    tip_spacing_y = 9.0
+    start_x = 14.38
+    start_y = 11.24
+
+    for row in range(4):
+        for col in range(6):
+            spot_name = f"{chr(65 + row)}{col + 1}"
+            x = start_x + col * tip_spacing_x
+            y = start_y + row * tip_spacing_y
+
+            tip_spot = Container(
+                name=spot_name,
+                size_x=8.0,
+                size_y=8.0,
+                size_z=size_z - 10.0,
+                category="tip_spot",
+            )
+
+            tip_box.assign_child_resource(
+                tip_spot,
+                location=Coordinate(x=x, y=y, z=0)
+            )
+
+    return tip_box
+
+
+def BIOYOND_ReactionStation_1FlaskCarrier(
+    name: str,
+    diameter: float = 60.0,
+    height: float = 70.0,
+    max_volume: float = 200000.0,  # 200mL
+    barcode: str = None,
+) -> Bottle:
+    """反应站-烧杯"""
+    return Bottle(
+        name=name,
+        diameter=diameter,
+        height=height,
+        max_volume=max_volume,
+        barcode=barcode,
+        model="BIOYOND_ReactionStation_1FlaskCarrier",
+    )

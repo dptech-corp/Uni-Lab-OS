@@ -607,9 +607,21 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                     self.lab_logger().warning(
                         f"物料{plr_resource}请求挂载到{parent_resource}，额外参数：{additional_params}"
                     )
+
+                    # ⭐ assign 之前，需要从 resources 列表中移除
+                    # 因为资源将不再是顶级资源，而是成为 parent_resource 的子资源
+                    # 如果不移除，figure_resource 会找到两次：一次在 resources，一次在 parent 的 children
+                    resource_id = id(plr_resource)
+                    for i, r in enumerate(self.resource_tracker.resources):
+                        if id(r) == resource_id:
+                            self.resource_tracker.resources.pop(i)
+                            self.lab_logger().debug(f"从顶级资源列表中移除 {plr_resource.name}（即将成为 {parent_resource.name} 的子资源）")
+                            break
+
                     parent_resource.assign_child_resource(
                         plr_resource, location=None, **additional_params
                     )
+
                     func = getattr(self.driver_instance, "resource_tree_transfer", None)
                     if callable(func):
                         # 分别是 物料的原来父节点，当前物料的状态，物料的新父节点（此时物料已经重新assign了）
