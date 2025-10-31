@@ -766,7 +766,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
     #    self.success = True
     #    return self.success
 
-    def func_pack_send_msg_cmd(self, elec_use_num, elec_vol, assembly_type) -> bool:
+    def func_pack_send_msg_cmd(self, elec_use_num, elec_vol, assembly_type, assembly_pressure) -> bool:
         """UNILAB写参数"""    
         while (self.request_rec_msg_status) == False: 
             print("wait for request_rec_msg_status to True")
@@ -781,6 +781,9 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         time.sleep(1)
         #发送电解液组装类型
         self._unilab_send_msg_assembly_type(assembly_type)
+        time.sleep(1)
+        #发送电池压制力
+        self._unilab_send_msg_assembly_pressure(assembly_pressure)
         time.sleep(1)
         self._unilab_send_msg_succ_cmd(True)
         time.sleep(1)
@@ -895,16 +898,16 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         self.client.use_node('REG_MSG_NE_PLATE_MATRIX').write(fujipian_juzhendianwei)
         self.client.use_node('REG_MSG_SEPARATOR_PLATE_NUM').write(gemopanshu)
         self.client.use_node('REG_MSG_SEPARATOR_PLATE_MATRIX').write(gemo_juzhendianwei)
-        self.client.use_node('COIL_ALUMINUM_FOIL').write(lvbodian)
-        self.client.use_node('REG_MSG_PRESS_MODE').write(battery_pressure_mode)
+        self.client.use_node('COIL_ALUMINUM_FOIL').write(not lvbodian)
+        self.client.use_node('REG_MSG_PRESS_MODE').write(not battery_pressure_mode)
         # self.client.use_node('REG_MSG_ASSEMBLY_PRESSURE').write(battery_pressure)
         self.client.use_node('REG_MSG_BATTERY_CLEAN_IGNORE').write(battery_clean_ignore)
         self.success = True
         
         return self.success
 
-    def func_allpack_cmd(self, elec_num, elec_use_num, elec_vol:int=50, assembly_type:int=7, file_path: str="D:\\coin_cell_data") -> bool:
-        elec_num, elec_use_num, elec_vol, assembly_type = int(elec_num), int(elec_use_num), int(elec_vol), int(assembly_type)
+    def func_allpack_cmd(self, elec_num, elec_use_num, elec_vol:int=50, assembly_type:int=7, assembly_pressure:int=4200, file_path: str="D:\\coin_cell_data") -> bool:
+        elec_num, elec_use_num, elec_vol, assembly_type, assembly_pressure = int(elec_num), int(elec_use_num), int(elec_vol), int(assembly_type), int(assembly_pressure)
         summary_csv_file = os.path.join(file_path, "duandian.csv")
         # 如果断点文件存在，先读取之前的进度
         if os.path.exists(summary_csv_file):
@@ -954,7 +957,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
             print(f"开始第{last_i+i+1}瓶电解液的组装")
             #第一个循环从上次断点继续，后续循环从0开始
             j_start = last_j if i == last_i else 0
-            self.func_pack_send_msg_cmd(elec_use_num-j_start, elec_vol, assembly_type)
+            self.func_pack_send_msg_cmd(elec_use_num-j_start, elec_vol, assembly_type, assembly_pressure)
 
             for j in range(j_start, elec_use_num):
                 print(f"开始第{last_i+i+1}瓶电解液的第{j+j_start+1}个电池组装")

@@ -74,6 +74,7 @@ coincellassemblyworkstation_device:
         feedback: {}
         goal: {}
         goal_default:
+          assembly_pressure: 4200
           assembly_type: 7
           elec_num: null
           elec_use_num: null
@@ -88,6 +89,9 @@ coincellassemblyworkstation_device:
             feedback: {}
             goal:
               properties:
+                assembly_pressure:
+                  default: 4200
+                  type: integer
                 assembly_type:
                   default: 7
                   type: integer
@@ -291,6 +295,7 @@ coincellassemblyworkstation_device:
         feedback: {}
         goal: {}
         goal_default:
+          assembly_pressure: null
           assembly_type: null
           elec_use_num: null
           elec_vol: null
@@ -303,6 +308,8 @@ coincellassemblyworkstation_device:
             feedback: {}
             goal:
               properties:
+                assembly_pressure:
+                  type: string
                 assembly_type:
                   type: string
                 elec_use_num:
@@ -313,6 +320,7 @@ coincellassemblyworkstation_device:
               - elec_use_num
               - elec_vol
               - assembly_type
+              - assembly_pressure
               type: object
             result: {}
           required:
