@@ -18,6 +18,7 @@ def bioyond_warehouse_1x4x4(name: str) -> WareHouse:
     )
 
 
+
 def bioyond_warehouse_1x4x2(name: str) -> WareHouse:
     """创建BioYond 4x1x2仓库"""
     return warehouse_factory(

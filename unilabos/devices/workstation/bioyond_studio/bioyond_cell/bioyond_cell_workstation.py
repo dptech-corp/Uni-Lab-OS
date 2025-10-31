@@ -253,7 +253,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
     def auto_feeding4to3(
         self,
         # ★ 修改点：默认模板路径
-        xlsx_path: Optional[str] = "unilabos\\devices\\workstation\\bioyond_studio\\bioyond_cell\\样品导入模板.xlsx",
+        xlsx_path: Optional[str] = "/Users/calvincao/Desktop/work/uni-lab-all/Uni-Lab-OS/unilabos/devices/workstation/bioyond_studio/bioyond_cell/material_template.xlsx",
         # ---------------- WH4 - 加样头面 (Z=1, 12个点位) ----------------
         WH4_x1_y1_z1_1_materialName: str = "", WH4_x1_y1_z1_1_quantity: float = 0.0,
         WH4_x2_y1_z1_2_materialName: str = "", WH4_x2_y1_z1_2_quantity: float = 0.0,

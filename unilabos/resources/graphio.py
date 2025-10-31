@@ -535,6 +535,7 @@ def resource_ulab_to_plr(resource: dict, plr_model=False) -> "ResourcePLR":
 
     def resource_ulab_to_plr_inner(resource: dict):
         all_states[resource["name"]] = resource["data"]
+        extra = resource.pop("extra", {})
         d = {
             "name": resource["name"],
             "type": resource["type"],
@@ -575,16 +576,16 @@ def resource_plr_to_ulab(resource_plr: "ResourcePLR", parent_name: str = None, w
         replace_info = {
             "plate": "plate",
             "well": "well",
-            "tip_spot": "container",
-            "trash": "container",
+            "tip_spot": "tip_spot",
+            "trash": "trash",
             "deck": "deck",
-            "tip_rack": "container",
+            "tip_rack": "tip_rack",
         }
         if source in replace_info:
             return replace_info[source]
         else:
             print("转换pylabrobot的时候，出现未知类型", source)
-            return "container"
+            return source
 
     def resource_plr_to_ulab_inner(d: dict, all_states: dict, child=True) -> dict:
         r = {

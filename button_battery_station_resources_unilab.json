@@ -1,0 +1,2521 @@
+{
+  "nodes": [
+    {
+      "id": "coin_cell_deck",
+      "name": "coin_cell_deck",
+      "sample_id": null,
+      "children": [
+        "liaopan1",
+        "liaopan2",
+        "\u7535\u6c60\u6599\u76d8"
+      ],
+      "parent": null,
+      "type": "coin_cell_deck",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "CoincellDeck",
+        "size_x": 1000,
+        "size_y": 1000,
+        "size_z": 900,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "coin_cell_deck",
+        "barcode": null
+      },
+      "data": {}
+    },
+    {
+      "id": "liaopan1",
+      "name": "liaopan1",
+      "sample_id": null,
+      "children": [
+        "liaopan1_materialhole_0_0",
+        "liaopan1_materialhole_0_1",
+        "liaopan1_materialhole_0_2",
+        "liaopan1_materialhole_0_3",
+        "liaopan1_materialhole_1_0",
+        "liaopan1_materialhole_1_1",
+        "liaopan1_materialhole_1_2",
+        "liaopan1_materialhole_1_3",
+        "liaopan1_materialhole_2_0",
+        "liaopan1_materialhole_2_1",
+        "liaopan1_materialhole_2_2",
+        "liaopan1_materialhole_2_3",
+        "liaopan1_materialhole_3_0",
+        "liaopan1_materialhole_3_1",
+        "liaopan1_materialhole_3_2",
+        "liaopan1_materialhole_3_3"
+      ],
+      "parent": "coin_cell_deck",
+      "type": "material_plate",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "MaterialPlate",
+        "size_x": 120.8,
+        "size_y": 120.5,
+        "size_z": 10.0,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_plate",
+        "model": null,
+        "barcode": null,
+        "ordering": {
+          "A1": "liaopan1_materialhole_0_0",
+          "B1": "liaopan1_materialhole_0_1",
+          "C1": "liaopan1_materialhole_0_2",
+          "D1": "liaopan1_materialhole_0_3",
+          "A2": "liaopan1_materialhole_1_0",
+          "B2": "liaopan1_materialhole_1_1",
+          "C2": "liaopan1_materialhole_1_2",
+          "D2": "liaopan1_materialhole_1_3",
+          "A3": "liaopan1_materialhole_2_0",
+          "B3": "liaopan1_materialhole_2_1",
+          "C3": "liaopan1_materialhole_2_2",
+          "D3": "liaopan1_materialhole_2_3",
+          "A4": "liaopan1_materialhole_3_0",
+          "B4": "liaopan1_materialhole_3_1",
+          "C4": "liaopan1_materialhole_3_2",
+          "D4": "liaopan1_materialhole_3_3"
+        }
+      },
+      "data": {}
+    },
+    {
+      "id": "liaopan1_materialhole_0_0",
+      "name": "liaopan1_materialhole_0_0",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan1",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 12.4,
+        "y": 84.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan1_materialhole_0_1",
+      "name": "liaopan1_materialhole_0_1",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan1",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 12.4,
+        "y": 60.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan1_materialhole_0_2",
+      "name": "liaopan1_materialhole_0_2",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan1",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 12.4,
+        "y": 36.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan1_materialhole_0_3",
+      "name": "liaopan1_materialhole_0_3",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan1",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 12.4,
+        "y": 12.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan1_materialhole_1_0",
+      "name": "liaopan1_materialhole_1_0",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan1",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 36.4,
+        "y": 84.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan1_materialhole_1_1",
+      "name": "liaopan1_materialhole_1_1",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan1",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 36.4,
+        "y": 60.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan1_materialhole_1_2",
+      "name": "liaopan1_materialhole_1_2",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan1",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 36.4,
+        "y": 36.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan1_materialhole_1_3",
+      "name": "liaopan1_materialhole_1_3",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan1",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 36.4,
+        "y": 12.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan1_materialhole_2_0",
+      "name": "liaopan1_materialhole_2_0",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan1",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 60.4,
+        "y": 84.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan1_materialhole_2_1",
+      "name": "liaopan1_materialhole_2_1",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan1",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 60.4,
+        "y": 60.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan1_materialhole_2_2",
+      "name": "liaopan1_materialhole_2_2",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan1",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 60.4,
+        "y": 36.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan1_materialhole_2_3",
+      "name": "liaopan1_materialhole_2_3",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan1",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 60.4,
+        "y": 12.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan1_materialhole_3_0",
+      "name": "liaopan1_materialhole_3_0",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan1",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 84.4,
+        "y": 84.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan1_materialhole_3_1",
+      "name": "liaopan1_materialhole_3_1",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan1",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 84.4,
+        "y": 60.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan1_materialhole_3_2",
+      "name": "liaopan1_materialhole_3_2",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan1",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 84.4,
+        "y": 36.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan1_materialhole_3_3",
+      "name": "liaopan1_materialhole_3_3",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan1",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 84.4,
+        "y": 12.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan2",
+      "name": "liaopan2",
+      "sample_id": null,
+      "children": [
+        "liaopan2_materialhole_0_0",
+        "liaopan2_materialhole_0_1",
+        "liaopan2_materialhole_0_2",
+        "liaopan2_materialhole_0_3",
+        "liaopan2_materialhole_1_0",
+        "liaopan2_materialhole_1_1",
+        "liaopan2_materialhole_1_2",
+        "liaopan2_materialhole_1_3",
+        "liaopan2_materialhole_2_0",
+        "liaopan2_materialhole_2_1",
+        "liaopan2_materialhole_2_2",
+        "liaopan2_materialhole_2_3",
+        "liaopan2_materialhole_3_0",
+        "liaopan2_materialhole_3_1",
+        "liaopan2_materialhole_3_2",
+        "liaopan2_materialhole_3_3"
+      ],
+      "parent": "coin_cell_deck",
+      "type": "material_plate",
+      "class": "",
+      "position": {
+        "x": 500,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "MaterialPlate",
+        "size_x": 120.8,
+        "size_y": 120.5,
+        "size_z": 10.0,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_plate",
+        "model": null,
+        "barcode": null,
+        "ordering": {
+          "A1": "liaopan2_materialhole_0_0",
+          "B1": "liaopan2_materialhole_0_1",
+          "C1": "liaopan2_materialhole_0_2",
+          "D1": "liaopan2_materialhole_0_3",
+          "A2": "liaopan2_materialhole_1_0",
+          "B2": "liaopan2_materialhole_1_1",
+          "C2": "liaopan2_materialhole_1_2",
+          "D2": "liaopan2_materialhole_1_3",
+          "A3": "liaopan2_materialhole_2_0",
+          "B3": "liaopan2_materialhole_2_1",
+          "C3": "liaopan2_materialhole_2_2",
+          "D3": "liaopan2_materialhole_2_3",
+          "A4": "liaopan2_materialhole_3_0",
+          "B4": "liaopan2_materialhole_3_1",
+          "C4": "liaopan2_materialhole_3_2",
+          "D4": "liaopan2_materialhole_3_3"
+        }
+      },
+      "data": {}
+    },
+    {
+      "id": "liaopan2_materialhole_0_0",
+      "name": "liaopan2_materialhole_0_0",
+      "sample_id": null,
+      "children": [
+        "jipian1_0"
+      ],
+      "parent": "liaopan2",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 12.4,
+        "y": 84.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "jipian1_0",
+      "name": "jipian1_0",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_0_0",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan2_materialhole_0_1",
+      "name": "liaopan2_materialhole_0_1",
+      "sample_id": null,
+      "children": [
+        "jipian1_1"
+      ],
+      "parent": "liaopan2",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 12.4,
+        "y": 60.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "jipian1_1",
+      "name": "jipian1_1",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_0_1",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan2_materialhole_0_2",
+      "name": "liaopan2_materialhole_0_2",
+      "sample_id": null,
+      "children": [
+        "jipian1_2"
+      ],
+      "parent": "liaopan2",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 12.4,
+        "y": 36.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "jipian1_2",
+      "name": "jipian1_2",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_0_2",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan2_materialhole_0_3",
+      "name": "liaopan2_materialhole_0_3",
+      "sample_id": null,
+      "children": [
+        "jipian1_3"
+      ],
+      "parent": "liaopan2",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 12.4,
+        "y": 12.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "jipian1_3",
+      "name": "jipian1_3",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_0_3",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan2_materialhole_1_0",
+      "name": "liaopan2_materialhole_1_0",
+      "sample_id": null,
+      "children": [
+        "jipian1_4"
+      ],
+      "parent": "liaopan2",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 36.4,
+        "y": 84.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "jipian1_4",
+      "name": "jipian1_4",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_1_0",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan2_materialhole_1_1",
+      "name": "liaopan2_materialhole_1_1",
+      "sample_id": null,
+      "children": [
+        "jipian1_5"
+      ],
+      "parent": "liaopan2",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 36.4,
+        "y": 60.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "jipian1_5",
+      "name": "jipian1_5",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_1_1",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan2_materialhole_1_2",
+      "name": "liaopan2_materialhole_1_2",
+      "sample_id": null,
+      "children": [
+        "jipian1_6"
+      ],
+      "parent": "liaopan2",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 36.4,
+        "y": 36.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "jipian1_6",
+      "name": "jipian1_6",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_1_2",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan2_materialhole_1_3",
+      "name": "liaopan2_materialhole_1_3",
+      "sample_id": null,
+      "children": [
+        "jipian1_7"
+      ],
+      "parent": "liaopan2",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 36.4,
+        "y": 12.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "jipian1_7",
+      "name": "jipian1_7",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_1_3",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan2_materialhole_2_0",
+      "name": "liaopan2_materialhole_2_0",
+      "sample_id": null,
+      "children": [
+        "jipian1_8"
+      ],
+      "parent": "liaopan2",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 60.4,
+        "y": 84.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "jipian1_8",
+      "name": "jipian1_8",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_2_0",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan2_materialhole_2_1",
+      "name": "liaopan2_materialhole_2_1",
+      "sample_id": null,
+      "children": [
+        "jipian1_9"
+      ],
+      "parent": "liaopan2",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 60.4,
+        "y": 60.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "jipian1_9",
+      "name": "jipian1_9",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_2_1",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan2_materialhole_2_2",
+      "name": "liaopan2_materialhole_2_2",
+      "sample_id": null,
+      "children": [
+        "jipian1_10"
+      ],
+      "parent": "liaopan2",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 60.4,
+        "y": 36.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "jipian1_10",
+      "name": "jipian1_10",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_2_2",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan2_materialhole_2_3",
+      "name": "liaopan2_materialhole_2_3",
+      "sample_id": null,
+      "children": [
+        "jipian1_11"
+      ],
+      "parent": "liaopan2",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 60.4,
+        "y": 12.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "jipian1_11",
+      "name": "jipian1_11",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_2_3",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan2_materialhole_3_0",
+      "name": "liaopan2_materialhole_3_0",
+      "sample_id": null,
+      "children": [
+        "jipian1_12"
+      ],
+      "parent": "liaopan2",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 84.4,
+        "y": 84.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "jipian1_12",
+      "name": "jipian1_12",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_3_0",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan2_materialhole_3_1",
+      "name": "liaopan2_materialhole_3_1",
+      "sample_id": null,
+      "children": [
+        "jipian1_13"
+      ],
+      "parent": "liaopan2",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 84.4,
+        "y": 60.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "jipian1_13",
+      "name": "jipian1_13",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_3_1",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan2_materialhole_3_2",
+      "name": "liaopan2_materialhole_3_2",
+      "sample_id": null,
+      "children": [
+        "jipian1_14"
+      ],
+      "parent": "liaopan2",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 84.4,
+        "y": 36.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "jipian1_14",
+      "name": "jipian1_14",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_3_2",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
+        "info": null
+      }
+    },
+    {
+      "id": "liaopan2_materialhole_3_3",
+      "name": "liaopan2_materialhole_3_3",
+      "sample_id": null,
+      "children": [
+        "jipian1_15"
+      ],
+      "parent": "liaopan2",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 84.4,
+        "y": 12.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "jipian1_15",
+      "name": "jipian1_15",
+      "sample_id": null,
+      "children": [],
+      "parent": "liaopan2_materialhole_3_3",
+      "type": "electrode_sheet",
+      "class": "",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "ElectrodeSheet",
+        "size_x": 12,
+        "size_y": 12,
+        "size_z": 0.1,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "electrode_sheet",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 14,
+        "thickness": 0.1,
+        "mass": 0.5,
+        "material_type": "copper",
+        "info": null
+      }
+    },
+    {
+      "id": "\u7535\u6c60\u6599\u76d8",
+      "name": "\u7535\u6c60\u6599\u76d8",
+      "sample_id": null,
+      "children": [
+        "\u7535\u6c60\u6599\u76d8_materialhole_0_0",
+        "\u7535\u6c60\u6599\u76d8_materialhole_0_1",
+        "\u7535\u6c60\u6599\u76d8_materialhole_0_2",
+        "\u7535\u6c60\u6599\u76d8_materialhole_0_3",
+        "\u7535\u6c60\u6599\u76d8_materialhole_1_0",
+        "\u7535\u6c60\u6599\u76d8_materialhole_1_1",
+        "\u7535\u6c60\u6599\u76d8_materialhole_1_2",
+        "\u7535\u6c60\u6599\u76d8_materialhole_1_3",
+        "\u7535\u6c60\u6599\u76d8_materialhole_2_0",
+        "\u7535\u6c60\u6599\u76d8_materialhole_2_1",
+        "\u7535\u6c60\u6599\u76d8_materialhole_2_2",
+        "\u7535\u6c60\u6599\u76d8_materialhole_2_3",
+        "\u7535\u6c60\u6599\u76d8_materialhole_3_0",
+        "\u7535\u6c60\u6599\u76d8_materialhole_3_1",
+        "\u7535\u6c60\u6599\u76d8_materialhole_3_2",
+        "\u7535\u6c60\u6599\u76d8_materialhole_3_3"
+      ],
+      "parent": "coin_cell_deck",
+      "type": "material_plate",
+      "class": "",
+      "position": {
+        "x": 100,
+        "y": 100,
+        "z": 0
+      },
+      "config": {
+        "type": "MaterialPlate",
+        "size_x": 120.8,
+        "size_y": 160.5,
+        "size_z": 10.0,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_plate",
+        "model": null,
+        "barcode": null,
+        "ordering": {
+          "A1": "\u7535\u6c60\u6599\u76d8_materialhole_0_0",
+          "B1": "\u7535\u6c60\u6599\u76d8_materialhole_0_1",
+          "C1": "\u7535\u6c60\u6599\u76d8_materialhole_0_2",
+          "D1": "\u7535\u6c60\u6599\u76d8_materialhole_0_3",
+          "A2": "\u7535\u6c60\u6599\u76d8_materialhole_1_0",
+          "B2": "\u7535\u6c60\u6599\u76d8_materialhole_1_1",
+          "C2": "\u7535\u6c60\u6599\u76d8_materialhole_1_2",
+          "D2": "\u7535\u6c60\u6599\u76d8_materialhole_1_3",
+          "A3": "\u7535\u6c60\u6599\u76d8_materialhole_2_0",
+          "B3": "\u7535\u6c60\u6599\u76d8_materialhole_2_1",
+          "C3": "\u7535\u6c60\u6599\u76d8_materialhole_2_2",
+          "D3": "\u7535\u6c60\u6599\u76d8_materialhole_2_3",
+          "A4": "\u7535\u6c60\u6599\u76d8_materialhole_3_0",
+          "B4": "\u7535\u6c60\u6599\u76d8_materialhole_3_1",
+          "C4": "\u7535\u6c60\u6599\u76d8_materialhole_3_2",
+          "D4": "\u7535\u6c60\u6599\u76d8_materialhole_3_3"
+        }
+      },
+      "data": {}
+    },
+    {
+      "id": "\u7535\u6c60\u6599\u76d8_materialhole_0_0",
+      "name": "\u7535\u6c60\u6599\u76d8_materialhole_0_0",
+      "sample_id": null,
+      "children": [],
+      "parent": "\u7535\u6c60\u6599\u76d8",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 12.4,
+        "y": 104.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "\u7535\u6c60\u6599\u76d8_materialhole_0_1",
+      "name": "\u7535\u6c60\u6599\u76d8_materialhole_0_1",
+      "sample_id": null,
+      "children": [],
+      "parent": "\u7535\u6c60\u6599\u76d8",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 12.4,
+        "y": 80.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "\u7535\u6c60\u6599\u76d8_materialhole_0_2",
+      "name": "\u7535\u6c60\u6599\u76d8_materialhole_0_2",
+      "sample_id": null,
+      "children": [],
+      "parent": "\u7535\u6c60\u6599\u76d8",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 12.4,
+        "y": 56.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "\u7535\u6c60\u6599\u76d8_materialhole_0_3",
+      "name": "\u7535\u6c60\u6599\u76d8_materialhole_0_3",
+      "sample_id": null,
+      "children": [],
+      "parent": "\u7535\u6c60\u6599\u76d8",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 12.4,
+        "y": 32.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "\u7535\u6c60\u6599\u76d8_materialhole_1_0",
+      "name": "\u7535\u6c60\u6599\u76d8_materialhole_1_0",
+      "sample_id": null,
+      "children": [],
+      "parent": "\u7535\u6c60\u6599\u76d8",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 36.4,
+        "y": 104.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "\u7535\u6c60\u6599\u76d8_materialhole_1_1",
+      "name": "\u7535\u6c60\u6599\u76d8_materialhole_1_1",
+      "sample_id": null,
+      "children": [],
+      "parent": "\u7535\u6c60\u6599\u76d8",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 36.4,
+        "y": 80.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "\u7535\u6c60\u6599\u76d8_materialhole_1_2",
+      "name": "\u7535\u6c60\u6599\u76d8_materialhole_1_2",
+      "sample_id": null,
+      "children": [],
+      "parent": "\u7535\u6c60\u6599\u76d8",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 36.4,
+        "y": 56.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "\u7535\u6c60\u6599\u76d8_materialhole_1_3",
+      "name": "\u7535\u6c60\u6599\u76d8_materialhole_1_3",
+      "sample_id": null,
+      "children": [],
+      "parent": "\u7535\u6c60\u6599\u76d8",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 36.4,
+        "y": 32.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "\u7535\u6c60\u6599\u76d8_materialhole_2_0",
+      "name": "\u7535\u6c60\u6599\u76d8_materialhole_2_0",
+      "sample_id": null,
+      "children": [],
+      "parent": "\u7535\u6c60\u6599\u76d8",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 60.4,
+        "y": 104.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "\u7535\u6c60\u6599\u76d8_materialhole_2_1",
+      "name": "\u7535\u6c60\u6599\u76d8_materialhole_2_1",
+      "sample_id": null,
+      "children": [],
+      "parent": "\u7535\u6c60\u6599\u76d8",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 60.4,
+        "y": 80.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "\u7535\u6c60\u6599\u76d8_materialhole_2_2",
+      "name": "\u7535\u6c60\u6599\u76d8_materialhole_2_2",
+      "sample_id": null,
+      "children": [],
+      "parent": "\u7535\u6c60\u6599\u76d8",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 60.4,
+        "y": 56.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "\u7535\u6c60\u6599\u76d8_materialhole_2_3",
+      "name": "\u7535\u6c60\u6599\u76d8_materialhole_2_3",
+      "sample_id": null,
+      "children": [],
+      "parent": "\u7535\u6c60\u6599\u76d8",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 60.4,
+        "y": 32.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "\u7535\u6c60\u6599\u76d8_materialhole_3_0",
+      "name": "\u7535\u6c60\u6599\u76d8_materialhole_3_0",
+      "sample_id": null,
+      "children": [],
+      "parent": "\u7535\u6c60\u6599\u76d8",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 84.4,
+        "y": 104.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "\u7535\u6c60\u6599\u76d8_materialhole_3_1",
+      "name": "\u7535\u6c60\u6599\u76d8_materialhole_3_1",
+      "sample_id": null,
+      "children": [],
+      "parent": "\u7535\u6c60\u6599\u76d8",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 84.4,
+        "y": 80.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "\u7535\u6c60\u6599\u76d8_materialhole_3_2",
+      "name": "\u7535\u6c60\u6599\u76d8_materialhole_3_2",
+      "sample_id": null,
+      "children": [],
+      "parent": "\u7535\u6c60\u6599\u76d8",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 84.4,
+        "y": 56.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    },
+    {
+      "id": "\u7535\u6c60\u6599\u76d8_materialhole_3_3",
+      "name": "\u7535\u6c60\u6599\u76d8_materialhole_3_3",
+      "sample_id": null,
+      "children": [],
+      "parent": "\u7535\u6c60\u6599\u76d8",
+      "type": "material_hole",
+      "class": "",
+      "position": {
+        "x": 84.4,
+        "y": 32.25,
+        "z": 10.0
+      },
+      "config": {
+        "type": "MaterialHole",
+        "size_x": 16,
+        "size_y": 16,
+        "size_z": 16,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "material_hole",
+        "model": null,
+        "barcode": null
+      },
+      "data": {
+        "diameter": 20,
+        "depth": 10,
+        "max_sheets": 1,
+        "info": null
+      }
+    }
+  ],
+  "links": []
+}
