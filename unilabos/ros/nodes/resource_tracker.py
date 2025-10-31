@@ -1070,7 +1070,7 @@ class DeviceNodeResourceTracker(object):
                 break
 
         if not removed:
-            logger.warning(f"尝试移除不存在的资源: {resource}")
+            logger.warning(f"尝试移除不存在/非根节点的资源: {resource}")
             return False
 
         # 递归清除uuid映射
