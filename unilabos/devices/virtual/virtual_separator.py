@@ -2,9 +2,13 @@ import asyncio
 import logging
 from typing import Dict, Any, Optional
 
+from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode
+
 
 class VirtualSeparator:
     """Virtual separator device for SeparateProtocol testing"""
+    
+    _ros_node: BaseROS2DeviceNode
 
     def __init__(self, device_id: Optional[str] = None, config: Optional[Dict[str, Any]] = None, **kwargs):
         # 处理可能的不同调用方式
@@ -35,6 +39,9 @@ class VirtualSeparator:
         for key, value in kwargs.items():
             if key not in skip_keys and not hasattr(self, key):
                 setattr(self, key, value)
+    
+    def post_init(self, ros_node: BaseROS2DeviceNode):
+        self._ros_node = ros_node
 
     async def initialize(self) -> bool:
         """Initialize virtual separator"""
@@ -119,14 +126,14 @@ class VirtualSeparator:
         for repeat in range(repeats):
             # 搅拌阶段
             for progress in range(0, 51, 10):
-                await asyncio.sleep(simulation_time / (repeats * 10))
+                await self._ros_node.sleep(simulation_time / (repeats * 10))
                 overall_progress = ((repeat * 100) + (progress * 0.5)) / repeats
                 self.data["progress"] = overall_progress
                 self.data["message"] = f"第{repeat+1}次分离 - 搅拌中 ({progress}%)"
 
             # 静置分相阶段
             for progress in range(50, 101, 10):
-                await asyncio.sleep(simulation_time / (repeats * 10))
+                await self._ros_node.sleep(simulation_time / (repeats * 10))
                 overall_progress = ((repeat * 100) + (progress * 0.5)) / repeats
                 self.data["progress"] = overall_progress
                 self.data["message"] = f"第{repeat+1}次分离 - 静置分相中 ({progress}%)"

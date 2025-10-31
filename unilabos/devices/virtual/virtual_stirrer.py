@@ -3,8 +3,12 @@ import logging
 import time as time_module
 from typing import Dict, Any
 
+from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode
+
 class VirtualStirrer:
     """Virtual stirrer device for StirProtocol testing - 功能完整版 🌪️"""
+    
+    _ros_node: BaseROS2DeviceNode
     
     def __init__(self, device_id: str = None, config: Dict[str, Any] = None, **kwargs):
         # 处理可能的不同调用方式
@@ -33,6 +37,9 @@ class VirtualStirrer:
         
         print(f"🌪️ === 虚拟搅拌器 {self.device_id} 已创建 === ✨")
         print(f"🔧 速度范围: {self._min_speed} ~ {self._max_speed} RPM | 📱 端口: {self.port}")
+    
+    def post_init(self, ros_node: BaseROS2DeviceNode):
+        self._ros_node = ros_node
     
     async def initialize(self) -> bool:
         """Initialize virtual stirrer 🚀"""
@@ -134,7 +141,7 @@ class VirtualStirrer:
             if remaining <= 0:
                 break
             
-            await asyncio.sleep(1.0)
+            await self._ros_node.sleep(1.0)
         
         self.logger.info(f"✅ 搅拌阶段完成! 🌪️ {stir_speed} RPM × {stir_time}s")
         
@@ -176,7 +183,7 @@ class VirtualStirrer:
                 if remaining <= 0:
                     break
                 
-                await asyncio.sleep(1.0)
+                await self._ros_node.sleep(1.0)
             
             self.logger.info(f"✅ 沉降阶段完成! 🛑 静置 {settling_time}s")
         
