@@ -968,7 +968,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
             logger.error(f"✗ 执行失败: {e}")
             return {"success": False, "error": str(e)}
 
-def create_material(
+    def create_material(
         self,
         material_name: str,
         type_id: str,
@@ -985,8 +985,7 @@ def create_material(
             包含创建结果、物料ID以及入库结果的字典。
         """
         material_name = (material_name or "").strip()
-        if not material_name:
-            raise ValueError("material_name 不能为空")
+
         resolved_type_id = (type_id or "").strip()
         # 优先从 SOLID_LIQUID_MAPPINGS 中获取模板数据
         template = SOLID_LIQUID_MAPPINGS.get(material_name)
@@ -1082,14 +1081,68 @@ def create_material(
         }
 
 
-# --------------------------------
+    def create_sample(
+        self,
+        name: str,
+        board_type: str,
+        bottle_type: str,
+        location_code: str
+    ) -> Dict[str, Any]:
+        """创建配液板物料并自动入库。
+        Args:
+            material_name: 物料名称，支持 "5ml分液瓶板"/"5ml分液瓶"、"配液瓶(小)板"/"配液瓶(小)"。
+            quantity: 主物料与明细的数量，默认 1。
+            location_code: 库位编号，例如 "A01"，将自动映射为 "手动堆栈" 下的 UUID。
+        """
+        carrier_type_id = MATERIAL_TYPE_MAPPINGS[board_type][1]
+        bottle_type_id  = MATERIAL_TYPE_MAPPINGS[bottle_type][1]
+        location_id = WAREHOUSE_MAPPING["手动堆栈"]["site_uuids"][location_code]
+
+        # 新建小瓶
+        details = []
+        for y in range(1, 5):
+            for x in range(1, 3):
+                details.append({
+                    "typeId": bottle_type_id,
+                    "code": "",
+                    "name": str(bottle_type) + str(x) + str(y),
+                    "quantity": "1",
+                    "x": x,
+                    "y": y,
+                    "z": 1,
+                    "unit": "个",
+                    "parameters": json.dumps({"unit": "个"}, ensure_ascii=False),
+                })
+
+        data = {
+                "typeId": carrier_type_id,
+                "code": "",
+                "barCode": "",
+                "name": name,
+                "unit": "块",
+                "parameters": json.dumps({"unit": "块"}, ensure_ascii=False),
+                "quantity": "1",
+                "details": details,
+            }
+        # print("xxx:",data)
+        create_result = self._post_lims("/api/lims/storage/material", data)
+        sample_uuid = create_result.get("data")
+
+        final_result = self._post_lims("/api/lims/storage/inbound", {
+            "materialId": sample_uuid,
+            "locationId": location_id,
+        })
+        return final_result
+
+
 
 
 if __name__ == "__main__":
     lab_registry.setup()
     ws = BioyondCellWorkstation()
+    ws.create_sample(name="test", board_type="配液瓶(小)板", bottle_type="配液瓶(小)", location_code="B01")
     # logger.info(ws.scheduler_stop())
-    logger.info(ws.scheduler_start())
+    # logger.info(ws.scheduler_start())
     
     # results = ws.create_materials(SOLID_LIQUID_MAPPINGS)
     # for r in results:
@@ -1098,11 +1151,11 @@ if __name__ == "__main__":
     # result = ws.create_and_inbound_materials()
     
     # 继续后续流程
-    logger.info(ws.auto_feeding4to3()) #搬运物料到3号箱
-    # # 使用正斜杠或 Path 对象来指定文件路径
-    excel_path = Path("unilabos\\devices\\workstation\\bioyond_studio\\bioyond_cell\\2025092701.xlsx")
-    logger.info(ws.create_orders(excel_path))
-    logger.info(ws.transfer_3_to_2_to_1())
+    # logger.info(ws.auto_feeding4to3()) #搬运物料到3号箱
+    # # # 使用正斜杠或 Path 对象来指定文件路径
+    # excel_path = Path("unilabos\\devices\\workstation\\bioyond_studio\\bioyond_cell\\2025092701.xlsx")
+    # logger.info(ws.create_orders(excel_path))
+    # logger.info(ws.transfer_3_to_2_to_1())
 
     # logger.info(ws.transfer_1_to_2())
     # logger.info(ws.scheduler_start())
