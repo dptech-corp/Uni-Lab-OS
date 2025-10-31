@@ -638,6 +638,147 @@ class BaseROS2DeviceNode(Node, Generic[T]):
         - remove: 从资源树中移除资源
         """
         from pylabrobot.resources.resource import Resource as ResourcePLR
+
+        def _handle_add(
+            plr_resources: List[ResourcePLR], tree_set: ResourceTreeSet, additional_add_params: Dict[str, Any]
+        ) -> Dict[str, Any]:
+            """
+            处理资源添加操作的内部函数
+
+            Args:
+                plr_resources: PLR资源列表
+                tree_set: 资源树集合
+                additional_add_params: 额外的添加参数
+
+            Returns:
+                操作结果字典
+            """
+            for plr_resource, tree in zip(plr_resources, tree_set.trees):
+                self.resource_tracker.add_resource(plr_resource)
+                self.transfer_to_new_resource(plr_resource, tree, additional_add_params)
+
+            func = getattr(self.driver_instance, "resource_tree_add", None)
+            if callable(func):
+                func(plr_resources)
+
+            return {"success": True, "action": "add"}
+
+        def _handle_remove(resources_uuid: List[str]) -> Dict[str, Any]:
+            """
+            处理资源移除操作的内部函数
+
+            Args:
+                resources_uuid: 要移除的资源UUID列表
+
+            Returns:
+                操作结果字典，包含移除的资源列表
+            """
+            found_resources: List[List[Union[ResourcePLR, dict]]] = self.resource_tracker.figure_resource(
+                [{"uuid": uid} for uid in resources_uuid], try_mode=True
+            )
+            found_plr_resources = []
+            other_plr_resources = []
+
+            for found_resource in found_resources:
+                for resource in found_resource:
+                    if issubclass(resource.__class__, ResourcePLR):
+                        found_plr_resources.append(resource)
+                    else:
+                        other_plr_resources.append(resource)
+
+            # 调用driver的remove回调
+            func = getattr(self.driver_instance, "resource_tree_remove", None)
+            if callable(func):
+                func(found_plr_resources)
+
+            # 从parent卸载并从tracker移除
+            for plr_resource in found_plr_resources:
+                if plr_resource.parent is not None:
+                    plr_resource.parent.unassign_child_resource(plr_resource)
+                self.resource_tracker.remove_resource(plr_resource)
+                self.lab_logger().info(f"移除物料 {plr_resource} 及其子节点")
+
+            for other_plr_resource in other_plr_resources:
+                self.resource_tracker.remove_resource(other_plr_resource)
+                self.lab_logger().info(f"移除物料 {other_plr_resource} 及其子节点")
+
+            return {
+                "success": True,
+                "action": "remove",
+                "removed_plr": found_plr_resources,
+                "removed_other": other_plr_resources,
+            }
+
+        def _handle_update(
+            plr_resources: List[ResourcePLR], tree_set: ResourceTreeSet, additional_add_params: Dict[str, Any]
+        ) -> Dict[str, Any]:
+            """
+            处理资源更新操作的内部函数
+
+            Args:
+                plr_resources: PLR资源列表（包含新状态）
+                tree_set: 资源树集合
+                additional_add_params: 额外的参数
+
+            Returns:
+                操作结果字典
+            """
+            for plr_resource, tree in zip(plr_resources, tree_set.trees):
+                states = plr_resource.serialize_all_state()
+                original_instance: ResourcePLR = self.resource_tracker.figure_resource(
+                    {"uuid": tree.root_node.res_content.uuid}, try_mode=False
+                )
+
+                # Update操作中包含改名：需要先remove再add
+                if original_instance.name != plr_resource.name:
+                    old_name = original_instance.name
+                    new_name = plr_resource.name
+                    self.lab_logger().info(f"物料改名操作：{old_name} -> {new_name}")
+
+                    # 收集所有相关的uuid（包括子节点）
+                    all_uuids = self.resource_tracker.loop_gather_uuid(original_instance)
+                    _handle_remove(all_uuids)
+                    original_instance.name = new_name
+                    _handle_add([original_instance], tree_set, additional_add_params)
+
+                    self.lab_logger().info(f"物料改名完成：{old_name} -> {new_name}")
+                    continue
+
+                # 常规更新：不涉及改名
+                original_parent_resource = original_instance.parent
+                original_parent_resource_uuid = getattr(original_parent_resource, "unilabos_uuid", None)
+                target_parent_resource_uuid = tree.root_node.res_content.uuid_parent
+
+                self.lab_logger().info(
+                    f"物料{original_instance} 原始父节点{original_parent_resource_uuid} "
+                    f"目标父节点{target_parent_resource_uuid} 更新"
+                )
+
+                # 更新extra
+                if getattr(plr_resource, "unilabos_extra", None) is not None:
+                    original_instance.unilabos_extra = getattr(plr_resource, "unilabos_extra")  # type: ignore  # noqa: E501
+
+                # 如果父节点变化，需要重新挂载
+                if (
+                    original_parent_resource_uuid != target_parent_resource_uuid
+                    and original_parent_resource is not None
+                ):
+                    self.transfer_to_new_resource(original_instance, tree, additional_add_params)
+
+                # 加载状态
+                original_instance.load_all_state(states)
+                child_count = len(original_instance.get_all_children())
+                self.lab_logger().info(
+                    f"更新了资源属性 {plr_resource}[{tree.root_node.res_content.uuid}] " f"及其子节点 {child_count} 个"
+                )
+
+            # 调用driver的update回调
+            func = getattr(self.driver_instance, "resource_tree_update", None)
+            if callable(func):
+                func(plr_resources)
+
+            return {"success": True, "action": "update"}
+
         try:
             data = json.loads(req.command)
             results = []
@@ -664,68 +805,20 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                     tree_set = ResourceTreeSet.from_raw_list(raw_nodes)
                 try:
                     if action == "add":
-                        # 添加资源到资源跟踪器
+                        if tree_set is None:
+                            raise ValueError("tree_set不能为None")
                         plr_resources = tree_set.to_plr_resources()
-                        for plr_resource, tree in zip(plr_resources, tree_set.trees):
-                            self.resource_tracker.add_resource(plr_resource)
-                            self.transfer_to_new_resource(plr_resource, tree, additional_add_params)
-                        func = getattr(self.driver_instance, "resource_tree_add", None)
-                        if callable(func):
-                            func(plr_resources)
-                            results.append({"success": True, "action": "add"})
+                        result = _handle_add(plr_resources, tree_set, additional_add_params)
+                        results.append(result)
                     elif action == "update":
-                        # 更新资源
+                        if tree_set is None:
+                            raise ValueError("tree_set不能为None")
                         plr_resources = tree_set.to_plr_resources()
-                        for plr_resource, tree in zip(plr_resources, tree_set.trees):
-                            states = plr_resource.serialize_all_state()
-                            original_instance: ResourcePLR = self.resource_tracker.figure_resource(
-                                {"uuid": tree.root_node.res_content.uuid}, try_mode=False
-                            )
-                            original_parent_resource = original_instance.parent
-                            original_parent_resource_uuid = getattr(original_parent_resource, "unilabos_uuid", None)
-                            target_parent_resource_uuid = tree.root_node.res_content.uuid_parent
-                            self.lab_logger().info(
-                                f"物料{original_instance} 原始父节点{original_parent_resource_uuid} 目标父节点{target_parent_resource_uuid} 更新"
-                            )
-                            # todo: 对extra进行update
-                            if getattr(plr_resource, "unilabos_extra", None) is not None:
-                                original_instance.unilabos_extra = getattr(plr_resource, "unilabos_extra")
-                            if original_parent_resource_uuid != target_parent_resource_uuid and original_parent_resource is not None:
-                                self.transfer_to_new_resource(original_instance, tree, additional_add_params)
-                            original_instance.load_all_state(states)
-                            self.lab_logger().info(
-                                f"更新了资源属性 {plr_resource}[{tree.root_node.res_content.uuid}] 及其子节点 {len(original_instance.get_all_children())} 个"
-                            )
-
-                        func = getattr(self.driver_instance, "resource_tree_update", None)
-                        if callable(func):
-                            func(plr_resources)
-                            results.append({"success": True, "action": "update"})
+                        result = _handle_update(plr_resources, tree_set, additional_add_params)
+                        results.append(result)
                     elif action == "remove":
-                        # 移除资源
-                        found_resources: List[List[Union[ResourcePLR, dict]]] = self.resource_tracker.figure_resource(
-                            [{"uuid": uid} for uid in resources_uuid], try_mode=True
-                        )
-                        found_plr_resources = []
-                        other_plr_resources = []
-                        for found_resource in found_resources:
-                            for resource in found_resource:
-                                if issubclass(resource.__class__, ResourcePLR):
-                                    found_plr_resources.append(resource)
-                                else:
-                                    other_plr_resources.append(resource)
-                        func = getattr(self.driver_instance, "resource_tree_remove", None)
-                        if callable(func):
-                            func(found_plr_resources)
-                        for plr_resource in found_plr_resources:
-                            if plr_resource.parent is not None:
-                                plr_resource.parent.unassign_child_resource(plr_resource)
-                            self.resource_tracker.remove_resource(plr_resource)
-                            self.lab_logger().info(f"移除物料 {plr_resource} 及其子节点")
-                        for other_plr_resource in other_plr_resources:
-                            self.resource_tracker.remove_resource(other_plr_resource)
-                            self.lab_logger().info(f"移除物料 {other_plr_resource} 及其子节点")
-                        results.append({"success": True, "action": "remove"})
+                        result = _handle_remove(resources_uuid)
+                        results.append(result)
                 except Exception as e:
                     error_msg = f"Error processing {action} operation: {str(e)}"
                     self.lab_logger().error(f"[Resource Tree Update] {error_msg}")
@@ -1004,9 +1097,14 @@ class BaseROS2DeviceNode(Node, Generic[T]):
 
                             # 通过资源跟踪器获取本地实例
                             final_resources = queried_resources if is_sequence else queried_resources[0]
-                            final_resources = self.resource_tracker.figure_resource({"name": final_resources.name}, try_mode=False) if not is_sequence else [
-                                self.resource_tracker.figure_resource({"name": res.name}, try_mode=False) for res in queried_resources
-                            ]
+                            final_resources = (
+                                self.resource_tracker.figure_resource({"name": final_resources.name}, try_mode=False)
+                                if not is_sequence
+                                else [
+                                    self.resource_tracker.figure_resource({"name": res.name}, try_mode=False)
+                                    for res in queried_resources
+                                ]
+                            )
                             action_kwargs[k] = final_resources
 
                         except Exception as e:
@@ -1227,6 +1325,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             raise JsonCommandInitError(
                 f"执行动作时JSON缺少function_name或function_args: {ex}\n原JSON: {string}\n{traceback.format_exc()}"
             )
+
     def _convert_resource_sync(self, resource_data: Dict[str, Any]):
         """同步转换资源数据为实例"""
         # 创建资源查询请求
