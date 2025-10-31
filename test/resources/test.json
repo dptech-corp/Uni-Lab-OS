@@ -1,0 +1,191 @@
+{
+    "data": [
+        {
+            "orderCode": "BSO2025103100006",
+            "orderName": "DP20250927001",
+            "errorMessage": null,
+            "usedMaterials": [
+                {
+                    "id": "3a1d4b13-25a6-cfb2-7315-159f14b32425",
+                    "destinationType": "TempOrder",
+                    "destinationId": "3a1d4b13-23cb-63e5-10df-6a1d38335163",
+                    "materialId": "3a1d4b13-2467-e64d-d8bc-3957fb6e3240",
+                    "materialName": "适配器块",
+                    "materialCode": "0018-00065",
+                    "quantity": "1块",
+                    "materialTypeId": "efc3bb32-d504-4890-91c0-b64ed3ac80cf",
+                    "materialTypeCode": "0018",
+                    "materialTypeMode": "Consumables",
+                    "materialTypeName": "适配器块",
+                    "locationId": "3a1abd46-18fe-1f56-6ced-a1f7fe08e36c",
+                    "locationCode": "0014-0001",
+                    "locationShowName": "0014-0001"
+                },
+                {
+                    "id": "3a1d4b13-2420-8cfe-17f1-5f77a6ff6dc3",
+                    "destinationType": "TempOrder",
+                    "destinationId": "3a1d4b13-23cb-63e5-10df-6a1d38335163",
+                    "materialId": "3a1d4b11-e448-bf90-d0bd-b20758425370",
+                    "materialName": "test1",
+                    "materialCode": "0001-00063",
+                    "quantity": "1块",
+                    "materialTypeId": "3a190c8b-3284-af78-d29f-9a69463ad047",
+                    "materialTypeCode": "0001",
+                    "materialTypeMode": "Sample",
+                    "materialTypeName": "配液瓶(小)板",
+                    "locationId": "3a19deae-2c7a-2426-6d71-e9de3cb158b1",
+                    "locationCode": "4",
+                    "locationShowName": "4"
+                },
+                {
+                    "id": "3a1d4b13-2420-73a1-2b4d-7bf6dd993c36",
+                    "destinationType": "TempOrder",
+                    "destinationId": "3a1d4b13-23cb-63e5-10df-6a1d38335163",
+                    "materialId": "3a1d4b11-e448-fea3-8291-0b66ecd06d72",
+                    "materialName": "test1",
+                    "materialCode": "0002-00282",
+                    "quantity": "1块",
+                    "materialTypeId": "3a190c8c-fe8f-bf48-0dc3-97afc7f508eb",
+                    "materialTypeCode": "0002",
+                    "materialTypeMode": "Sample",
+                    "materialTypeName": "配液瓶(小)",
+                    "locationId": "3a19deae-2c7a-2426-6d71-e9de3cb158b1",
+                    "locationCode": "4-1/1",
+                    "locationShowName": "4-1/1"
+                },
+                {
+                    "id": "3a1d4b13-2420-e45f-192d-639887ad73b7",
+                    "destinationType": "TempOrder",
+                    "destinationId": "3a1d4b13-23cb-63e5-10df-6a1d38335163",
+                    "materialId": "3a1d4b12-67fc-5f91-13ed-c223d0155399",
+                    "materialName": "test2",
+                    "materialCode": "0010-00059",
+                    "quantity": "1块",
+                    "materialTypeId": "3a192fa4-007d-ec7b-456e-2a8be7a13f23",
+                    "materialTypeCode": "0010",
+                    "materialTypeMode": "Sample",
+                    "materialTypeName": "5ml分液瓶板",
+                    "locationId": "3a19deae-2c7a-79b0-5e44-efaafd1e4cf3",
+                    "locationCode": "5",
+                    "locationShowName": "5"
+                },
+                {
+                    "id": "3a1d4b13-2420-c052-93cc-002f0aae79fc",
+                    "destinationType": "TempOrder",
+                    "destinationId": "3a1d4b13-23cb-63e5-10df-6a1d38335163",
+                    "materialId": "3a1d4b12-67fc-60f7-1129-3d1ef2a2d1f8",
+                    "materialName": "test2",
+                    "materialCode": "0007-00211",
+                    "quantity": "1块",
+                    "materialTypeId": "3a192c2a-ebb7-58a1-480d-8b3863bf74f4",
+                    "materialTypeCode": "0007",
+                    "materialTypeMode": "Sample",
+                    "materialTypeName": "5ml分液瓶",
+                    "locationId": "3a19deae-2c7a-79b0-5e44-efaafd1e4cf3",
+                    "locationCode": "5-1/1",
+                    "locationShowName": "5-1/1"
+                }
+            ]
+        },
+        {
+            "orderCode": "BSO2025103100007",
+            "orderName": "DP20250927002",
+            "errorMessage": null,
+            "usedMaterials": [
+                {
+                    "id": "3a1d4b13-264b-aca7-9e97-ab4df186d5c2",
+                    "destinationType": "TempOrder",
+                    "destinationId": "3a1d4b13-260c-9239-5c8a-ecb6fd96dc86",
+                    "materialId": "3a1d4b13-2467-e64d-d8bc-3957fb6e3240",
+                    "materialName": "适配器块",
+                    "materialCode": "0018-00065",
+                    "quantity": "1块",
+                    "materialTypeId": "efc3bb32-d504-4890-91c0-b64ed3ac80cf",
+                    "materialTypeCode": "0018",
+                    "materialTypeMode": "Consumables",
+                    "materialTypeName": "适配器块",
+                    "locationId": "3a1abd46-18fe-1f56-6ced-a1f7fe08e36c",
+                    "locationCode": "0014-0001",
+                    "locationShowName": "0014-0001"
+                },
+                {
+                    "id": "3a1d4b13-263e-873e-1331-7e668b411e98",
+                    "destinationType": "TempOrder",
+                    "destinationId": "3a1d4b13-260c-9239-5c8a-ecb6fd96dc86",
+                    "materialId": "3a1d4b11-e448-bf90-d0bd-b20758425370",
+                    "materialName": "test1",
+                    "materialCode": "0001-00063",
+                    "quantity": "1块",
+                    "materialTypeId": "3a190c8b-3284-af78-d29f-9a69463ad047",
+                    "materialTypeCode": "0001",
+                    "materialTypeMode": "Sample",
+                    "materialTypeName": "配液瓶(小)板",
+                    "locationId": "3a19deae-2c7a-2426-6d71-e9de3cb158b1",
+                    "locationCode": "4",
+                    "locationShowName": "4"
+                },
+                {
+                    "id": "3a1d4b13-263e-7884-d9e0-b010478b7448",
+                    "destinationType": "TempOrder",
+                    "destinationId": "3a1d4b13-260c-9239-5c8a-ecb6fd96dc86",
+                    "materialId": "3a1d4b11-e448-82e0-6a64-6230ee1bf0a9",
+                    "materialName": "test1",
+                    "materialCode": "0002-00283",
+                    "quantity": "1块",
+                    "materialTypeId": "3a190c8c-fe8f-bf48-0dc3-97afc7f508eb",
+                    "materialTypeCode": "0002",
+                    "materialTypeMode": "Sample",
+                    "materialTypeName": "配液瓶(小)",
+                    "locationId": "3a19deae-2c7a-2426-6d71-e9de3cb158b1",
+                    "locationCode": "4-1/2",
+                    "locationShowName": "4-1/2"
+                },
+                {
+                    "id": "3a1d4b13-263e-6e99-b513-66047191643f",
+                    "destinationType": "TempOrder",
+                    "destinationId": "3a1d4b13-260c-9239-5c8a-ecb6fd96dc86",
+                    "materialId": "3a1d4b12-67fc-5f91-13ed-c223d0155399",
+                    "materialName": "test2",
+                    "materialCode": "0010-00059",
+                    "quantity": "1块",
+                    "materialTypeId": "3a192fa4-007d-ec7b-456e-2a8be7a13f23",
+                    "materialTypeCode": "0010",
+                    "materialTypeMode": "Sample",
+                    "materialTypeName": "5ml分液瓶板",
+                    "locationId": "3a19deae-2c7a-79b0-5e44-efaafd1e4cf3",
+                    "locationCode": "5",
+                    "locationShowName": "5"
+                },
+                {
+                    "id": "3a1d4b13-263e-5b21-2c41-53e4ea7fe947",
+                    "destinationType": "TempOrder",
+                    "destinationId": "3a1d4b13-260c-9239-5c8a-ecb6fd96dc86",
+                    "materialId": "3a1d4b12-67fc-131a-82ff-87e9e7708f9f",
+                    "materialName": "test2",
+                    "materialCode": "0007-00212",
+                    "quantity": "1块",
+                    "materialTypeId": "3a192c2a-ebb7-58a1-480d-8b3863bf74f4",
+                    "materialTypeCode": "0007",
+                    "materialTypeMode": "Sample",
+                    "materialTypeName": "5ml分液瓶",
+                    "locationId": "3a19deae-2c7a-79b0-5e44-efaafd1e4cf3",
+                    "locationCode": "5-1/2",
+                    "locationShowName": "5-1/2"
+                }
+            ]
+        }
+    ],
+    "code": 1,
+    "message": "",
+    "timestamp": 1761891208109
+}
+
+25-10-31 [14:27:52,203] [ERROR] 从Bioyond同步物料数据失败: 'BottleCarrier' object has no attribute 'tracker' [sync_from_external:83] [unilabos.utils.log.station]
+Traceback (most recent call last):
+  File "C:\ML\GitHub\Uni-Lab-OS\unilabos\devices\workstation\bioyond_studio\station.py", line 73, in sync_from_external
+    unilab_resources = resource_bioyond_to_plr(
+                       ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\ML\GitHub\Uni-Lab-OS\unilabos\resources\graphio.py", line 661, in resource_bioyond_to_plr
+    bottle.tracker.liquids = [
+    ^^^^^^^^^^^^^^
+AttributeError: 'BottleCarrier' object has no attribute 'tracker'
