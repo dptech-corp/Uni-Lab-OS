@@ -2,7 +2,7 @@ import traceback
 import uuid
 from pydantic import BaseModel, field_serializer, field_validator
 from pydantic import Field
-from typing import List, Tuple, Any, Dict, Literal, Optional, cast, TYPE_CHECKING
+from typing import List, Tuple, Any, Dict, Literal, Optional, cast, TYPE_CHECKING, Union
 
 from unilabos.utils.log import logger
 
@@ -933,7 +933,7 @@ class DeviceNodeResourceTracker(object):
         """
         递归遍历资源树，更新所有节点的uuid
 
-        Args:0
+        Args:
             resource: 资源对象（可以是dict或实例）
             uuid_map: uuid映射字典，{old_uuid: new_uuid}
 
@@ -957,6 +957,27 @@ class DeviceNodeResourceTracker(object):
             return replaced
 
         return self._traverse_and_process(resource, process)
+
+    def loop_gather_uuid(self, resource) -> List[str]:
+        """
+        递归遍历资源树，收集所有节点的uuid
+
+        Args:
+            resource: 资源对象（可以是dict或实例）
+
+        Returns:
+            收集到的uuid列表
+        """
+        uuid_list = []
+
+        def process(res):
+            current_uuid = self._get_resource_attr(res, "uuid", "unilabos_uuid")
+            if current_uuid:
+                uuid_list.append(current_uuid)
+            return 0
+
+        self._traverse_and_process(resource, process)
+        return uuid_list
 
     def _collect_uuid_mapping(self, resource):
         """
@@ -1077,7 +1098,9 @@ class DeviceNodeResourceTracker(object):
         self.uuid_to_resources.clear()
         self.resource2parent_resource.clear()
 
-    def figure_resource(self, query_resource, try_mode=False):
+    def figure_resource(
+        self, query_resource: Union[List[Union[dict, "PLRResource"]], dict, "PLRResource"], try_mode=False
+    ) -> Union[List[Union[dict, "PLRResource", List[Union[dict, "PLRResource"]]]], dict, "PLRResource"]:
         if isinstance(query_resource, list):
             return [self.figure_resource(r, try_mode) for r in query_resource]
         elif (
