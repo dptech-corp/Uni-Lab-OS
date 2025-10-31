@@ -705,8 +705,8 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             return {
                 "success": True,
                 "action": "remove",
-                "removed_plr": found_plr_resources,
-                "removed_other": other_plr_resources,
+                # "removed_plr": found_plr_resources,
+                # "removed_other": other_plr_resources,
             }
 
         def _handle_update(
@@ -736,13 +736,11 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                     self.lab_logger().info(f"物料改名操作：{old_name} -> {new_name}")
 
                     # 收集所有相关的uuid（包括子节点）
-                    all_uuids = self.resource_tracker.loop_gather_uuid(original_instance)
-                    _handle_remove(all_uuids)
+                    _handle_remove([original_instance.unilabos_uuid])
                     original_instance.name = new_name
                     _handle_add([original_instance], tree_set, additional_add_params)
 
                     self.lab_logger().info(f"物料改名完成：{old_name} -> {new_name}")
-                    continue
 
                 # 常规更新：不涉及改名
                 original_parent_resource = original_instance.parent
@@ -827,7 +825,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
 
             # 返回处理结果
             result_json = {"results": results, "total": len(data)}
-            res.response = json.dumps(result_json, ensure_ascii=False)
+            res.response = json.dumps(result_json, ensure_ascii=False, cls=TypeEncoder)
             self.lab_logger().info(f"[Resource Tree Update] Completed processing {len(data)} operations")
 
         except json.JSONDecodeError as e:

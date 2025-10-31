@@ -165,29 +165,16 @@ class HostNode(BaseROS2DeviceNode):
                     # resources_config 的 root node 是
                     # # 创建反向映射：new_uuid -> old_uuid
                     # reverse_uuid_mapping = {new_uuid: old_uuid for old_uuid, new_uuid in uuid_mapping.items()}
-                    # for tree in resources_config.trees:
-                    #     node = tree.root_node
-                    #     if node.res_content.type == "device":
-                    #         if node.res_content.id == "host_node":
-                    #             continue
-                    #         # slave节点走c2s更新接口，拿到add自行update uuid
-                    #         device_tracker = self.devices_instances[node.res_content.id].resource_tracker
-                    #         old_uuid = reverse_uuid_mapping.get(node.res_content.uuid)
-                    #         if old_uuid:
-                    #             # 找到旧UUID，使用UUID查找
-                    #             resource_instance = device_tracker.uuid_to_resources.get(old_uuid)
-                    #         else:
-                    #             # 未找到旧UUID，使用name查找
-                    #             resource_instance = device_tracker.figure_resource(
-                    #                 {"name": node.res_content.name}
-                    #             )
-                    #         device_tracker.loop_update_uuid(resource_instance, uuid_mapping)
-                    #     else:
-                    #         try:
-                    #             for plr_resource in ResourceTreeSet([tree]).to_plr_resources():
-                    #                 self.resource_tracker.add_resource(plr_resource)
-                    #         except Exception as ex:
-                    #             self.lab_logger().warning("[Host Node-Resource] 根节点物料序列化失败！")
+                    for tree in resources_config.trees:
+                        node = tree.root_node
+                        if node.res_content.type == "device":
+                            continue
+                        else:
+                            try:
+                                for plr_resource in ResourceTreeSet([tree]).to_plr_resources():
+                                    self._resource_tracker.add_resource(plr_resource)
+                            except Exception as ex:
+                                self.lab_logger().warning(f"[Host Node-Resource] 根节点物料{tree}序列化失败！")
         except Exception as ex:
             logger.error(f"[Host Node-Resource] 添加物料出错！\n{traceback.format_exc()}")
         # 初始化Node基类，传递空参数覆盖列表
