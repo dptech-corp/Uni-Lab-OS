@@ -1,0 +1,114 @@
+[
+    {
+        "id": "3a1d4b7e-4bdc-16bf-7169-f60350d03c7e",
+        "typeName": "配液瓶(小)板",
+        "code": "0001-00088",
+        "barCode": "",
+        "name": "test1",
+        "quantity": 1.0,
+        "lockQuantity": 0.0,
+        "unit": "块",
+        "status": 1,
+        "isUse": false,
+        "locations": [
+            {
+                "id": "3a19deae-2c7a-2426-6d71-e9de3cb158b1",
+                "whid": "3a19deae-2c79-05a3-9c76-8e6760424841",
+                "whName": "手动堆栈",
+                "code": "4",
+                "x": 2,
+                "y": 1,
+                "z": 1,
+                "quantity": 0
+            }
+        ],
+        "detail": [
+            {
+                "id": "3a1d4b7e-4bdc-12e8-4d26-dddc77b03f63",
+                "detailMaterialId": "3a1d4b7e-4bdc-4e9e-8a3c-e9ba4a26457e",
+                "code": null,
+                "name": "test1",
+                "quantity": "1",
+                "lockQuantity": "0",
+                "unit": "块",
+                "x": 1,
+                "y": 2,
+                "z": 1,
+                "associateId": null,
+                "typeName": "配液瓶(小)",
+                "typeId": "3a190c8c-fe8f-bf48-0dc3-97afc7f508eb"
+            },
+            {
+                "id": "3a1d4b7e-4bdc-35b6-22d4-e6f3235e1c27",
+                "detailMaterialId": "3a1d4b7e-4bdc-ce0f-1fbb-b88de76fce98",
+                "code": null,
+                "name": "test1",
+                "quantity": "1",
+                "lockQuantity": "0",
+                "unit": "块",
+                "x": 1,
+                "y": 1,
+                "z": 1,
+                "associateId": null,
+                "typeName": "配液瓶(小)",
+                "typeId": "3a190c8c-fe8f-bf48-0dc3-97afc7f508eb"
+            }
+        ]
+    },
+    {
+        "id": "3a1d4b7e-ee61-ae87-9cd0-31c7e6621b18",
+        "typeName": "5ml分液瓶板",
+        "code": "0010-00089",
+        "barCode": "",
+        "name": "test2",
+        "quantity": 1.0,
+        "lockQuantity": 0.0,
+        "unit": "块",
+        "status": 1,
+        "isUse": false,
+        "locations": [
+            {
+                "id": "3a19deae-2c7a-79b0-5e44-efaafd1e4cf3",
+                "whid": "3a19deae-2c79-05a3-9c76-8e6760424841",
+                "whName": "手动堆栈",
+                "code": "5",
+                "x": 2,
+                "y": 2,
+                "z": 1,
+                "quantity": 0
+            }
+        ],
+        "detail": [
+            {
+                "id": "3a1d4b7e-ee61-8fb3-9a39-2c2841c3c8d0",
+                "detailMaterialId": "3a1d4b7e-ee61-305c-fe30-2620017ca1bd",
+                "code": null,
+                "name": "test2",
+                "quantity": "1",
+                "lockQuantity": "0",
+                "unit": "块",
+                "x": 1,
+                "y": 1,
+                "z": 1,
+                "associateId": null,
+                "typeName": "5ml分液瓶",
+                "typeId": "3a192c2a-ebb7-58a1-480d-8b3863bf74f4"
+            },
+            {
+                "id": "3a1d4b7e-ee61-ef5f-a7d1-f9399a4d3145",
+                "detailMaterialId": "3a1d4b7e-ee61-2f1d-6969-202ad3cbe226",
+                "code": null,
+                "name": "test2",
+                "quantity": "1",
+                "lockQuantity": "0",
+                "unit": "块",
+                "x": 1,
+                "y": 2,
+                "z": 1,
+                "associateId": null,
+                "typeName": "5ml分液瓶",
+                "typeId": "3a192c2a-ebb7-58a1-480d-8b3863bf74f4"
+            }
+        ]
+    }
+]
