@@ -892,12 +892,25 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         self.success = True
         return self.success
 
+    def qiming_coin_cell_code(self, fujipian_panshu:int, fujipian_juzhendianwei:int=0, gemopanshu:int=0, gemo_juzhendianwei:int=0, lvbodian:bool=True, battery_pressure_mode:bool=True, battery_pressure:int=4000, battery_clean_ignore:bool=False) -> bool:
+        self.success = False
+        self.client.use_node('REG_MSG_NE_PLATE_NUM').write(fujipian_panshu)
+        self.client.use_node('REG_MSG_NE_PLATE_MATRIX').write(fujipian_juzhendianwei)
+        self.client.use_node('REG_MSG_SEPARATOR_PLATE_NUM').write(gemopanshu)
+        self.client.use_node('REG_MSG_SEPARATOR_PLATE_MATRIX').write(gemo_juzhendianwei)
+        self.client.use_node('COIL_ALUMINUM_FOIL').write(not lvbodian)
+        self.client.use_node('REG_MSG_PRESS_MODE').write(not battery_pressure_mode)
+        # self.client.use_node('REG_MSG_ASSEMBLY_PRESSURE').write(battery_pressure)
+        self.client.use_node('REG_MSG_BATTERY_CLEAN_IGNORE').write(battery_clean_ignore)
+        self.success = True
+        
+        return self.success
 
-
-    def func_allpack_cmd(self, elec_num, elec_use_num, elec_vol:int=50, assembly_type:int=7, assembly_pressure:int=4200, file_path: str="D:\\coin_cell_data") -> bool:
+    def func_allpack_cmd(self, elec_num, elec_use_num, elec_vol:int=50, assembly_type:int=7, assembly_pressure:int=4200, file_path: str="C:\\Users\\67484\\Desktop") -> bool:
         elec_num, elec_use_num, elec_vol, assembly_type, assembly_pressure = int(elec_num), int(elec_use_num), int(elec_vol), int(assembly_type), int(assembly_pressure)
         summary_csv_file = os.path.join(file_path, "duandian.csv")
         # 如果断点文件存在，先读取之前的进度
+        
         if os.path.exists(summary_csv_file):
             read_status_flag = True
             with open(summary_csv_file, 'r', newline='', encoding='utf-8') as csvfile:
@@ -1217,8 +1230,10 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
     '''
 
 
+
 if __name__ == "__main__":
     # 简单测试
     workstation = CoinCellAssemblyWorkstation()
+    workstation.qiming_coin_cell_code(fujipian_panshu=1, fujipian_juzhendianwei=2, gemopanshu=3, gemo_juzhendianwei=4, lvbodian=False, battery_pressure_mode=False, battery_pressure=4200, battery_clean_ignore=False)
     print(f"工作站创建成功: {workstation.deck.name}")
     print(f"料盘数量: {len(workstation.deck.children)}")

@@ -8,7 +8,8 @@ import os
 # BioyondCellWorkstation 默认配置（包含所有必需参数）
 API_CONFIG = {
     # API 连接配置
-    "api_host": os.getenv("BIOYOND_API_HOST", "http://172.16.10.169:44388"),
+    # "api_host": os.getenv("BIOYOND_API_HOST", "http://172.21.32.65:44389"),#实机
+    "api_host": os.getenv("BIOYOND_API_HOST", "http://172.16.10.169:44388"),# 仿真机
     "api_key": os.getenv("BIOYOND_API_KEY", "8A819E5C"),
     "timeout": int(os.getenv("BIOYOND_TIMEOUT", "30")),
     

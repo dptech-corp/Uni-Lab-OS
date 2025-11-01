@@ -112,7 +112,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
 
         return {"status": "received"}
 
-    def wait_for_order_finish(self, order_code: str, timeout: int = 1800) -> Dict[str, Any]:
+    def wait_for_order_finish(self, order_code: str, timeout: int = 36000) -> Dict[str, Any]:
         """
         等待指定 orderCode 的 /report/order_finish 报送。
         Args:
@@ -253,7 +253,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
     def auto_feeding4to3(
         self,
         # ★ 修改点：默认模板路径
-        xlsx_path: Optional[str] = "unilabos\\devices\\workstation\\bioyond_studio\\bioyond_cell\\样品导入模板.xlsx",
+        xlsx_path: Optional[str] = "C:/ML/GitHub/Uni-Lab-OS/unilabos/devices/workstation/bioyond_studio/bioyond_cell/material_template.xlsx",
         # ---------------- WH4 - 加样头面 (Z=1, 12个点位) ----------------
         WH4_x1_y1_z1_1_materialName: str = "", WH4_x1_y1_z1_1_quantity: float = 0.0,
         WH4_x2_y1_z1_2_materialName: str = "", WH4_x2_y1_z1_2_quantity: float = 0.0,
@@ -391,73 +391,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
           # 等待完成报送
         result = self.wait_for_order_finish(order_code)
         return result
-
-
-
-    # 3.30 自动化上料(老版本)
-    def auto_feeding4to3_from_xlsx(self, xlsx_path: str) -> Dict[str, Any]:
-        """
-        根据固定模板解析 Excel：
-        - 四号手套箱加样头面 (2-13行, 3-7列)
-        - 四号手套箱原液瓶面 (15-23行, 3-9列)        
-        - 三号手套箱人工堆栈 (26-40行, 3-7列)
-        """
-        path = Path(xlsx_path)
-        if not path.exists():
-            raise FileNotFoundError(f"未找到 Excel 文件：{path}")
-
-        try:
-            df = pd.read_excel(path, sheet_name=0, header=None, engine="openpyxl")
-        except Exception as e:
-            raise RuntimeError(f"读取 Excel 失败：{e}")
-
-        items: List[Dict[str, Any]] = []
-
-        # 四号手套箱 - 加样头面（2-13行, 3-7列）
-        for _, row in df.iloc[1:13, 2:7].iterrows():
-            item = {
-                "sourceWHName": "四号手套箱堆栈",
-                "posX": int(row[2]),
-                "posY": int(row[3]),
-                "posZ": int(row[4]),
-                "materialName": str(row[5]).strip() if pd.notna(row[5]) else "",
-                "quantity": float(row[6]) if pd.notna(row[6]) else 0.0,
-            }
-            if item["materialName"]:
-                items.append(item)
-
-        # 四号手套箱 - 原液瓶面（15-23行, 3-9列）
-        for _, row in df.iloc[14:23, 2:9].iterrows():
-            item = {
-                "sourceWHName": "四号手套箱堆栈",
-                "posX": int(row[2]),
-                "posY": int(row[3]),
-                "posZ": int(row[4]),
-                "materialName": str(row[5]).strip() if pd.notna(row[5]) else "",
-                "quantity": float(row[6]) if pd.notna(row[6]) else 0.0,
-                "materialType": str(row[7]).strip() if pd.notna(row[7]) else "",
-                "targetWH": str(row[8]).strip() if pd.notna(row[8]) else "",
-            }
-            if item["materialName"]:
-                items.append(item)
-
-        # 三号手套箱人工堆栈（26-40行, 3-7列）
-        for _, row in df.iloc[25:40, 2:7].iterrows():
-            item = {
-                "sourceWHName": "三号手套箱人工堆栈",
-                "posX": int(row[2]),
-                "posY": int(row[3]),
-                "posZ": int(row[4]),
-                "materialType": str(row[5]).strip() if pd.notna(row[5]) else "",
-                "materialId": str(row[6]).strip() if pd.notna(row[6]) else "",
-                "quantity": 1  # 默认数量1
-            }
-            if item["materialId"] or item["materialType"]:
-                items.append(item)
-
-        response = self._post_lims("/api/lims/order/auto-feeding4to3", items)
-        self._wait_for_response_orders(response, "auto_feeding4to3_from_xlsx")
-        return response
+    
 
     def auto_batch_outbound_from_xlsx(self, xlsx_path: str) -> Dict[str, Any]:
         """
@@ -523,7 +457,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
             })
 
         response = self._post_lims("/api/lims/storage/auto-batch-out-bound", items)
-        self._wait_for_response_orders(response, "auto_batch_outbound_from_xlsx")
+        self.wait_for_response_orders(response, "auto_batch_outbound_from_xlsx")
         return response
 
     # 2.14 新建实验
@@ -630,7 +564,12 @@ class BioyondCellWorkstation(BioyondWorkstation):
         response = self._post_lims("/api/lims/order/orders", orders)
         print(response)
         # 等待任务报送成功
-        order_code = response.get("data", {}).get("orderCode")
+        data_list = response.get("data", [])
+        if data_list:
+            order_code = data_list[0].get("orderCode")
+        else:
+            order_code = None
+
         if not order_code:
             logger.error("上料任务未返回有效 orderCode！")
             return response
@@ -963,13 +902,179 @@ class BioyondCellWorkstation(BioyondWorkstation):
             logger.error(f"✗ 执行失败: {e}")
             return {"success": False, "error": str(e)}
 
+    def create_material(
+        self,
+        material_name: str,
+        type_id: str,
+        warehouse_name: str,
+        location_name_or_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """创建单个物料并可选入库。
+        Args:
+            material_name: 物料名称（会优先匹配配置模板）。
+            type_id: 物料类型 ID（若为空则尝试从配置推断）。
+            warehouse_name: 需要入库的仓库名称；若为空则仅创建不入库。
+            location_name_or_id: 具体库位名称（如 A01）或库位 UUID，由用户指定。
+        Returns:
+            包含创建结果、物料ID以及入库结果的字典。
+        """
+        material_name = (material_name or "").strip()
 
-# --------------------------------
+        resolved_type_id = (type_id or "").strip()
+        # 优先从 SOLID_LIQUID_MAPPINGS 中获取模板数据
+        template = SOLID_LIQUID_MAPPINGS.get(material_name)
+        if not template:
+            raise ValueError(f"在配置中未找到物料 {material_name} 的模板，请检查 SOLID_LIQUID_MAPPINGS。")
+        material_data: Dict[str, Any]
+        material_data = deepcopy(template)
+        # 最终确保 typeId 为调用方传入的值
+        if resolved_type_id:
+            material_data["typeId"] = resolved_type_id
+        material_data["name"] = material_name
+        # 生成唯一编码
+        def _generate_code(prefix: str) -> str:
+            normalized = re.sub(r"\W+", "_", prefix)
+            normalized = normalized.strip("_") or "material"
+            return f"{normalized}_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        if not material_data.get("code"):
+            material_data["code"] = _generate_code(material_name)
+        if not material_data.get("barCode"):
+            material_data["barCode"] = ""
+        # 处理数量字段类型
+        def _to_number(value: Any, default: float = 0.0) -> float:
+            try:
+                if value is None:
+                    return default
+                if isinstance(value, (int, float)):
+                    return float(value)
+                if isinstance(value, str) and value.strip() == "":
+                    return default
+                return float(value)
+            except (TypeError, ValueError):
+                return default
+        material_data["quantity"] = _to_number(material_data.get("quantity"), 1.0)
+        material_data["warningQuantity"] = _to_number(material_data.get("warningQuantity"), 0.0)
+        unit = material_data.get("unit") or "个"
+        material_data["unit"] = unit
+        if not material_data.get("parameters"):
+            material_data["parameters"] = json.dumps({"unit": unit}, ensure_ascii=False)
+        # 补充子物料信息
+        details = material_data.get("details") or []
+        if not isinstance(details, list):
+            logger.warning("details 字段不是列表，已忽略。")
+            details = []
+        else:
+            for idx, detail in enumerate(details, start=1):
+                if not isinstance(detail, dict):
+                    continue
+                if not detail.get("code"):
+                    detail["code"] = f"{material_data['code']}_{idx:02d}"
+                if not detail.get("name"):
+                    detail["name"] = f"{material_name}_detail_{idx:02d}"
+                if not detail.get("unit"):
+                    detail["unit"] = unit
+                if not detail.get("parameters"):
+                    detail["parameters"] = json.dumps({"unit": detail.get("unit", unit)}, ensure_ascii=False)
+                if "quantity" in detail:
+                    detail["quantity"] = _to_number(detail.get("quantity"), 1.0)
+        material_data["details"] = details
+        create_result = self._post_lims("/api/lims/storage/material", material_data)
+        # 解析创建结果中的物料 ID
+        material_id: Optional[str] = None
+        if isinstance(create_result, dict):
+            data_field = create_result.get("data")
+            if isinstance(data_field, str):
+                material_id = data_field
+            elif isinstance(data_field, dict):
+                material_id = data_field.get("id") or data_field.get("materialId")
+        inbound_result: Optional[Dict[str, Any]] = None
+        location_id: Optional[str] = None
+        # 按用户指定位置入库
+        if warehouse_name and material_id and location_name_or_id:
+            try:
+                location_ids, position_names = self._load_warehouse_locations(warehouse_name)
+                position_to_id = {name: loc_id for name, loc_id in zip(position_names, location_ids)}
+                target_location_id = position_to_id.get(location_name_or_id, location_name_or_id)
+                if target_location_id:
+                    location_id = target_location_id
+                    inbound_result = self.storage_inbound(material_id, target_location_id)
+                else:
+                    inbound_result = {"error": f"未找到匹配的库位: {location_name_or_id}"}
+            except Exception as exc:
+                logger.error(f"获取仓库 {warehouse_name} 位置失败: {exc}")
+                inbound_result = {"error": str(exc)}
+        return {
+            "success": bool(isinstance(create_result, dict) and create_result.get("code") == 1 and material_id),
+            "material_name": material_name,
+            "material_id": material_id,
+            "warehouse": warehouse_name,
+            "location_id": location_id,
+            "location_name_or_id": location_name_or_id,
+            "create_result": create_result,
+            "inbound_result": inbound_result,
+        }
+
+
+    def create_sample(
+        self,
+        name: str,
+        board_type: str,
+        bottle_type: str,
+        location_code: str
+    ) -> Dict[str, Any]:
+        """创建配液板物料并自动入库。
+        Args:
+            material_name: 物料名称，支持 "5ml分液瓶板"/"5ml分液瓶"、"配液瓶(小)板"/"配液瓶(小)"。
+            quantity: 主物料与明细的数量，默认 1。
+            location_code: 库位编号，例如 "A01"，将自动映射为 "手动堆栈" 下的 UUID。
+        """
+        carrier_type_id = MATERIAL_TYPE_MAPPINGS[board_type][1]
+        bottle_type_id  = MATERIAL_TYPE_MAPPINGS[bottle_type][1]
+        location_id = WAREHOUSE_MAPPING["手动堆栈"]["site_uuids"][location_code]
+
+        # 新建小瓶
+        details = []
+        for y in range(1, 5):
+            for x in range(1, 3):
+                details.append({
+                    "typeId": bottle_type_id,
+                    "code": "",
+                    "name": str(bottle_type) + str(x) + str(y),
+                    "quantity": "1",
+                    "x": x,
+                    "y": y,
+                    "z": 1,
+                    "unit": "个",
+                    "parameters": json.dumps({"unit": "个"}, ensure_ascii=False),
+                })
+
+        data = {
+                "typeId": carrier_type_id,
+                "code": "",
+                "barCode": "",
+                "name": name,
+                "unit": "块",
+                "parameters": json.dumps({"unit": "块"}, ensure_ascii=False),
+                "quantity": "1",
+                "details": details,
+            }
+        # print("xxx:",data)
+        create_result = self._post_lims("/api/lims/storage/material", data)
+        sample_uuid = create_result.get("data")
+
+        final_result = self._post_lims("/api/lims/storage/inbound", {
+            "materialId": sample_uuid,
+            "locationId": location_id,
+        })
+        return final_result
+
+
 
 
 if __name__ == "__main__":
     lab_registry.setup()
     ws = BioyondCellWorkstation()
+    ws.create_sample(name="test", board_type="配液瓶(小)板", bottle_type="配液瓶(小)", location_code="B01")
     # logger.info(ws.scheduler_stop())
     # logger.info(ws.scheduler_start())
     
@@ -980,8 +1085,8 @@ if __name__ == "__main__":
     # result = ws.create_and_inbound_materials()
     
     # 继续后续流程
-    # logger.info(ws.auto_feeding4to3()) #搬运物料到3号箱
-    # # 使用正斜杠或 Path 对象来指定文件路径
+    logger.info(ws.auto_feeding4to3()) #搬运物料到3号箱
+    # # # 使用正斜杠或 Path 对象来指定文件路径
     # excel_path = Path("unilabos\\devices\\workstation\\bioyond_studio\\bioyond_cell\\2025092701.xlsx")
     # logger.info(ws.create_orders(excel_path))
     # logger.info(ws.transfer_3_to_2_to_1())
