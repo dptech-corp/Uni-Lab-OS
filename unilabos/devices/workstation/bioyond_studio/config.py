@@ -17,7 +17,7 @@ API_CONFIG = {
     "report_token": os.getenv("BIOYOND_REPORT_TOKEN", "CHANGE_ME_TOKEN"),
     
     # HTTP 服务配置
-    "HTTP_host": os.getenv("BIOYOND_HTTP_HOST", "172.21.33.30"),  # HTTP服务监听地址，监听计算机飞连ip地址
+    "HTTP_host": os.getenv("BIOYOND_HTTP_HOST", "172.21.32.83"),  # HTTP服务监听地址，监听计算机飞连ip地址
     "HTTP_port": int(os.getenv("BIOYOND_HTTP_PORT", "8080")),
     "debug_mode": False,# 调试模式
 }
@@ -160,9 +160,9 @@ MATERIAL_TYPE_MAPPINGS = {
     "5ml分液瓶板": ("YB_6x5ml_DispensingVialCarrier", "3a192fa4-007d-ec7b-456e-2a8be7a13f23"),
     "5ml分液瓶": ("YB_fen_ye_5ml_Bottle", "3a192c2a-ebb7-58a1-480d-8b3863bf74f4"),
     "20ml分液瓶板": ("YB_6x20ml_DispensingVialCarrier", "3a192fa4-47db-3449-162a-eaf8aba57e27"),
-    "20ml分液瓶": ("YB_fen_ye_20ml_Bottler", "3a192c2b-19e8-f0a3-035e-041ca8ca1035"),
+    "20ml分液瓶": ("YB_fen_ye_20ml_Bottle", "3a192c2b-19e8-f0a3-035e-041ca8ca1035"),
     "配液瓶(小)板": ("YB_6x_SmallSolutionBottleCarrier", "3a190c8b-3284-af78-d29f-9a69463ad047"),
-    "配液瓶(小)": ("YB_pei_ye_xiao_Bottler", "3a190c8c-fe8f-bf48-0dc3-97afc7f508eb"),
+    "配液瓶(小)": ("YB_pei_ye_xiao_Bottle", "3a190c8c-fe8f-bf48-0dc3-97afc7f508eb"),
     "配液瓶(大)板": ("YB_4x_LargeSolutionBottleCarrier", "53e50377-32dc-4781-b3c0-5ce45bc7dc27"),
     "配液瓶(大)": ("YB_pei_ye_da_Bottle", "19c52ad1-51c5-494f-8854-576f4ca9c6ca"),
     "适配器块": ("YB_AdapterBlock", "efc3bb32-d504-4890-91c0-b64ed3ac80cf"),

@@ -8,7 +8,7 @@ from unilabos.resources.itemized_carrier import ItemizedCarrier, ResourcePLR
 LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 
-def warehouse_factory(
+def YB_warehouse_factory(
     name: str,
     num_items_x: int = 1,
     num_items_y: int = 4,
@@ -44,7 +44,8 @@ def warehouse_factory(
         name_prefix=name,
     )
     len_x, len_y = (num_items_x, num_items_y) if num_items_z == 1 else (num_items_y, num_items_z) if num_items_x == 1 else (num_items_x, num_items_z)
-    keys = [f"{LETTERS[j]}{i + 1}" for i in range(len_x) for j in range(len_y)]
+
+    keys = [f"{LETTERS[len_y-1-j]}{str(i+1).zfill(2)}" for j in range(len_y) for i in range(len_x)]
     sites = {i: site for i, site in zip(keys, _sites.values())}
     
     return WareHouse(
