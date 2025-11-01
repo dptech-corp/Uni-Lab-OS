@@ -112,7 +112,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
 
         return {"status": "received"}
 
-    def wait_for_order_finish(self, order_code: str, timeout: int = 1800) -> Dict[str, Any]:
+    def wait_for_order_finish(self, order_code: str, timeout: int = 36000) -> Dict[str, Any]:
         """
         等待指定 orderCode 的 /report/order_finish 报送。
         Args:
@@ -253,7 +253,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
     def auto_feeding4to3(
         self,
         # ★ 修改点：默认模板路径
-        xlsx_path: Optional[str] = "unilabos\\devices\\workstation\\bioyond_studio\\bioyond_cell\\material_template.xlsx",
+        xlsx_path: Optional[str] = "C:/ML/GitHub/Uni-Lab-OS/unilabos/devices/workstation/bioyond_studio/bioyond_cell/material_template.xlsx",
         # ---------------- WH4 - 加样头面 (Z=1, 12个点位) ----------------
         WH4_x1_y1_z1_1_materialName: str = "", WH4_x1_y1_z1_1_quantity: float = 0.0,
         WH4_x2_y1_z1_2_materialName: str = "", WH4_x2_y1_z1_2_quantity: float = 0.0,
@@ -391,73 +391,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
           # 等待完成报送
         result = self.wait_for_order_finish(order_code)
         return result
-
-
-
-    # 3.30 自动化上料(老版本)
-    def auto_feeding4to3_from_xlsx(self, xlsx_path: str) -> Dict[str, Any]:
-        """
-        根据固定模板解析 Excel：
-        - 四号手套箱加样头面 (2-13行, 3-7列)
-        - 四号手套箱原液瓶面 (15-23行, 3-9列)        
-        - 三号手套箱人工堆栈 (26-40行, 3-7列)
-        """
-        path = Path(xlsx_path)
-        if not path.exists():
-            raise FileNotFoundError(f"未找到 Excel 文件：{path}")
-
-        try:
-            df = pd.read_excel(path, sheet_name=0, header=None, engine="openpyxl")
-        except Exception as e:
-            raise RuntimeError(f"读取 Excel 失败：{e}")
-
-        items: List[Dict[str, Any]] = []
-
-        # 四号手套箱 - 加样头面（2-13行, 3-7列）
-        for _, row in df.iloc[1:13, 2:7].iterrows():
-            item = {
-                "sourceWHName": "四号手套箱堆栈",
-                "posX": int(row[2]),
-                "posY": int(row[3]),
-                "posZ": int(row[4]),
-                "materialName": str(row[5]).strip() if pd.notna(row[5]) else "",
-                "quantity": float(row[6]) if pd.notna(row[6]) else 0.0,
-            }
-            if item["materialName"]:
-                items.append(item)
-
-        # 四号手套箱 - 原液瓶面（15-23行, 3-9列）
-        for _, row in df.iloc[14:23, 2:9].iterrows():
-            item = {
-                "sourceWHName": "四号手套箱堆栈",
-                "posX": int(row[2]),
-                "posY": int(row[3]),
-                "posZ": int(row[4]),
-                "materialName": str(row[5]).strip() if pd.notna(row[5]) else "",
-                "quantity": float(row[6]) if pd.notna(row[6]) else 0.0,
-                "materialType": str(row[7]).strip() if pd.notna(row[7]) else "",
-                "targetWH": str(row[8]).strip() if pd.notna(row[8]) else "",
-            }
-            if item["materialName"]:
-                items.append(item)
-
-        # 三号手套箱人工堆栈（26-40行, 3-7列）
-        for _, row in df.iloc[25:40, 2:7].iterrows():
-            item = {
-                "sourceWHName": "三号手套箱人工堆栈",
-                "posX": int(row[2]),
-                "posY": int(row[3]),
-                "posZ": int(row[4]),
-                "materialType": str(row[5]).strip() if pd.notna(row[5]) else "",
-                "materialId": str(row[6]).strip() if pd.notna(row[6]) else "",
-                "quantity": 1  # 默认数量1
-            }
-            if item["materialId"] or item["materialType"]:
-                items.append(item)
-
-        response = self._post_lims("/api/lims/order/auto-feeding4to3", items)
-        self._wait_for_response_orders(response, "auto_feeding4to3_from_xlsx")
-        return response
+    
 
     def auto_batch_outbound_from_xlsx(self, xlsx_path: str) -> Dict[str, Any]:
         """
@@ -523,7 +457,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
             })
 
         response = self._post_lims("/api/lims/storage/auto-batch-out-bound", items)
-        self._wait_for_response_orders(response, "auto_batch_outbound_from_xlsx")
+        self.wait_for_response_orders(response, "auto_batch_outbound_from_xlsx")
         return response
 
     # 2.14 新建实验
@@ -1151,7 +1085,7 @@ if __name__ == "__main__":
     # result = ws.create_and_inbound_materials()
     
     # 继续后续流程
-    # logger.info(ws.auto_feeding4to3()) #搬运物料到3号箱
+    logger.info(ws.auto_feeding4to3()) #搬运物料到3号箱
     # # # 使用正斜杠或 Path 对象来指定文件路径
     # excel_path = Path("unilabos\\devices\\workstation\\bioyond_studio\\bioyond_cell\\2025092701.xlsx")
     # logger.info(ws.create_orders(excel_path))

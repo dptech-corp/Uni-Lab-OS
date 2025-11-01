@@ -137,7 +137,7 @@ bioyond_cell:
           WH4_x5_y1_z1_5_quantity: 0.0
           WH4_x5_y2_z1_10_materialName: ''
           WH4_x5_y2_z1_10_quantity: 0.0
-          xlsx_path: unilabos\devices\workstation\bioyond_studio\bioyond_cell\样品导入模板.xlsx
+          xlsx_path: unilabos\devices\workstation\bioyond_studio\bioyond_cell\material_template.xlsx
         handles: {}
         placeholder_keys: {}
         result: {}
@@ -463,7 +463,7 @@ bioyond_cell:
                   default: 0.0
                   type: number
                 xlsx_path:
-                  default: unilabos\devices\workstation\bioyond_studio\bioyond_cell\样品导入模板.xlsx
+                  default: unilabos\devices\workstation\bioyond_studio\bioyond_cell\material_template.xlsx
                   type: string
               required: []
               type: object
@@ -530,6 +530,42 @@ bioyond_cell:
           title: create_and_inbound_materials参数
           type: object
         type: UniLabJsonCommand
+      auto-create_material:
+        feedback: {}
+        goal: {}
+        goal_default:
+          location_name_or_id: null
+          material_name: null
+          type_id: null
+          warehouse_name: null
+        handles: {}
+        placeholder_keys: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                location_name_or_id:
+                  type: string
+                material_name:
+                  type: string
+                type_id:
+                  type: string
+                warehouse_name:
+                  type: string
+              required:
+              - material_name
+              - type_id
+              - warehouse_name
+              type: object
+            result: {}
+          required:
+          - goal
+          title: create_material参数
+          type: object
+        type: UniLabJsonCommand
       auto-create_materials:
         feedback: {}
         goal: {}
@@ -578,6 +614,43 @@ bioyond_cell:
           required:
           - goal
           title: create_orders参数
+          type: object
+        type: UniLabJsonCommand
+      auto-create_sample:
+        feedback: {}
+        goal: {}
+        goal_default:
+          board_type: null
+          bottle_type: null
+          location_code: null
+          name: null
+        handles: {}
+        placeholder_keys: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                board_type:
+                  type: string
+                bottle_type:
+                  type: string
+                location_code:
+                  type: string
+                name:
+                  type: string
+              required:
+              - name
+              - board_type
+              - bottle_type
+              - location_code
+              type: object
+            result: {}
+          required:
+          - goal
+          title: create_sample参数
           type: object
         type: UniLabJsonCommand
       auto-order_list_v2:
