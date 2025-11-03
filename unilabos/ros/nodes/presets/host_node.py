@@ -18,7 +18,8 @@ from unilabos_msgs.srv import (
     ResourceDelete,
     ResourceUpdate,
     ResourceList,
-    SerialCommand, ResourceGet,
+    SerialCommand,
+    ResourceGet,
 )  # type: ignore
 from unilabos_msgs.srv._serial_command import SerialCommand_Request, SerialCommand_Response
 from unique_identifier_msgs.msg import UUID
