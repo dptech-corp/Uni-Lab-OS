@@ -11,7 +11,6 @@ import re
 import threading
 import json
 from urllib3 import response
-from unilabos.devices.workstation.workstation_base import WorkstationBase
 from unilabos.devices.workstation.bioyond_studio.station import BioyondWorkstation, BioyondResourceSynchronizer
 from unilabos.devices.workstation.bioyond_studio.config import (
     API_CONFIG, MATERIAL_TYPE_MAPPINGS, WAREHOUSE_MAPPING, SOLID_LIQUID_MAPPINGS
@@ -19,7 +18,6 @@ from unilabos.devices.workstation.bioyond_studio.config import (
 from unilabos.devices.workstation.workstation_http_service import WorkstationHTTPService
 from unilabos.utils.log import logger
 from unilabos.registry.registry import lab_registry
-
 
 def _iso_local_now_ms() -> str:
     # 文档要求：到毫秒 + Z，例如 2025-08-15T05:43:22.814Z
@@ -36,29 +34,25 @@ class BioyondCellWorkstation(BioyondWorkstation):
     查询实验(2.5/2.6) → 3-2-1 转运(2.32) → 样品/废料取出(2.28)
     """
 
-    def __init__(
-        self,
-        bioyond_config: Optional[Dict[str, Any]] = None,
-        station_resource: Optional[Dict[str, Any]] = None,
-        *args, **kwargs,
-        ):
+    def __init__(self, config: dict = None, deck=None, protocol_type=None, **kwargs):
 
         # 使用统一配置，支持自定义覆盖, 从 config.py 加载完整配置
-        self.bioyond_config = bioyond_config or  {
+        self.bioyond_config ={
             **API_CONFIG,
             "material_type_mappings": MATERIAL_TYPE_MAPPINGS,
-            "warehouse_mapping": WAREHOUSE_MAPPING
+            "warehouse_mapping": WAREHOUSE_MAPPING,
+            "debug_mode": False
     }
           
             # "material_type_mappings": MATERIAL_TYPE_MAPPINGS
             # "warehouse_mapping": WAREHOUSE_MAPPING
-
-        print(self.bioyond_config)
+        if deck is None and config:
+            deck = config.get('deck')
+        # print(self.bioyond_config)
         self.debug_mode = self.bioyond_config["debug_mode"]
         self.http_service_started = self.debug_mode
-        deck = kwargs.pop("deck", None)
-        self.device_id = kwargs.pop("device_id", "bioyond_cell_workstation")
-        super().__init__(bioyond_config=self.bioyond_config, deck=deck, station_resource=station_resource, *args, **kwargs)
+        self._device_id = "bioyond_cell_workstation"  # 默认值，后续会从_ros_node获取
+        super().__init__(bioyond_config=config, deck=deck)
         self.update_push_ip() #直接修改奔耀端的报送ip地址
         logger.info("已更新奔耀端推送 IP 地址")
 
@@ -71,6 +65,13 @@ class BioyondCellWorkstation(BioyondWorkstation):
         self.last_order_status = None
         self.last_order_code = None
         logger.info(f"Bioyond工作站初始化完成 (debug_mode={self.debug_mode})")
+
+    @property
+    def device_id(self):
+        """获取设备ID，优先从_ros_node获取，否则返回默认值"""
+        if hasattr(self, '_ros_node') and self._ros_node is not None:
+            return getattr(self._ros_node, 'device_id', self._device_id)
+        return self._device_id
 
     def _start_http_service(self):
         """启动 HTTP 服务"""
@@ -1074,7 +1075,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
 if __name__ == "__main__":
     lab_registry.setup()
     ws = BioyondCellWorkstation()
-    ws.create_sample(name="test", board_type="配液瓶(小)板", bottle_type="配液瓶(小)", location_code="B01")
+    # ws.create_sample(name="test", board_type="配液瓶(小)板", bottle_type="配液瓶(小)", location_code="B01")
     # logger.info(ws.scheduler_stop())
     # logger.info(ws.scheduler_start())
     
@@ -1085,7 +1086,7 @@ if __name__ == "__main__":
     # result = ws.create_and_inbound_materials()
     
     # 继续后续流程
-    logger.info(ws.auto_feeding4to3()) #搬运物料到3号箱
+    # logger.info(ws.auto_feeding4to3()) #搬运物料到3号箱
     # # # 使用正斜杠或 Path 对象来指定文件路径
     # excel_path = Path("unilabos\\devices\\workstation\\bioyond_studio\\bioyond_cell\\2025092701.xlsx")
     # logger.info(ws.create_orders(excel_path))

@@ -1,4 +1,5 @@
 from os import name
+from pickle import TRUE
 from pylabrobot.resources import Deck, Coordinate, Rotation
 
 from unilabos.resources.bioyond.YB_warehouses import bioyond_warehouse_1x4x4, bioyond_warehouse_1x4x2, bioyond_warehouse_liquid_and_lid_handling, bioyond_warehouse_1x2x2, bioyond_warehouse_1x3x3, bioyond_warehouse_10x1x1, bioyond_warehouse_3x3x1, bioyond_warehouse_3x3x1_2, bioyond_warehouse_5x1x1, bioyond_warehouse_20x1x1, bioyond_warehouse_2x2x1, bioyond_warehouse_3x5x1
@@ -71,7 +72,7 @@ class BIOYOND_PolymerPreparationStation_Deck(Deck):
 class BIOYOND_YB_Deck(Deck):
     def __init__(
         self, 
-        name: str = "YB_Deck",
+        name: str = "YB_Bioyond_Deck",
         size_x: float = 4150,
         size_y: float = 1400.0,
         size_z: float = 2670.0,
@@ -107,10 +108,10 @@ class BIOYOND_YB_Deck(Deck):
         for warehouse_name, warehouse in self.warehouses.items():
             self.assign_child_resource(warehouse, location=self.warehouse_locations[warehouse_name])
             
-def YB_Deck(name: str) -> Deck:
-    by=BIOYOND_YB_Deck(name=name)
-    by.setup()
-    return by
+# def YB_Deck(name: str) -> Deck:
+# #     by=BIOYOND_YB_Deck(name=name)
+# #     by.setup()
+#     return None
 
 
 

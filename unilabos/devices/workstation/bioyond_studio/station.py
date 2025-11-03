@@ -21,7 +21,6 @@ from unilabos.ros.nodes.base_device_node import ROS2DeviceNode, BaseROS2DeviceNo
 from unilabos.ros.nodes.presets.workstation import ROS2WorkstationNode
 from pylabrobot.resources.resource import Resource as ResourcePLR
 
-from unilabos.resources.bioyond.decks import YB_Deck
 from unilabos.devices.workstation.bioyond_studio.config import (
     API_CONFIG, WORKFLOW_MAPPINGS, MATERIAL_TYPE_MAPPINGS, WAREHOUSE_MAPPING
 )
@@ -64,7 +63,7 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
                 logger.error("Bioyond API客户端未初始化")
                 return False
 
-            bioyond_data = self.bioyond_api_client.stock_material('{"typeMode": 1, "includeDetail": true}')
+            bioyond_data = self.bioyond_api_client.stock_material('{"typeMode": 2, "includeDetail": true}')
             if not bioyond_data:
                 logger.warning("从Bioyond获取的物料数据为空")
                 return False
@@ -138,7 +137,7 @@ class BioyondWorkstation(WorkstationBase):
         # 初始化父类
         super().__init__(
             # 桌子
-            deck=YB_Deck("YB_Deck14"),
+            deck=deck,
             *args,
             **kwargs,
         )
