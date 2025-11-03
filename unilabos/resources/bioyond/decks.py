@@ -89,9 +89,11 @@ class BIOYOND_YB_Deck(Deck):
             "自动堆栈-右": bioyond_warehouse_2x2x1("自动堆栈-右"),
             "手动堆栈-左": bioyond_warehouse_3x5x1("手动堆栈-左"),
             "手动堆栈-右": bioyond_warehouse_3x5x1("手动堆栈-右"),
-            "粉末加样头堆栈": bioyond_warehouse_20x1x1("粉末加样头堆栈"),
+            "粉末加样头堆栈-左": bioyond_warehouse_10x1x1("粉末加样头堆栈-左"),
+            "粉末加样头堆栈-右": bioyond_warehouse_10x1x1("粉末加样头堆栈-右"),
             "配液站内试剂仓库": bioyond_warehouse_3x3x1("配液站内试剂仓库"),
-            "试剂替换仓库": bioyond_warehouse_10x1x1("试剂替换仓库"),
+            "试剂替换仓库-左": bioyond_warehouse_5x1x1("试剂替换仓库-左"),
+            "试剂替换仓库-右": bioyond_warehouse_5x1x1("试剂替换仓库-右"),
         }
         # warehouse 的位置
         self.warehouse_locations = {
@@ -99,9 +101,11 @@ class BIOYOND_YB_Deck(Deck):
             "自动堆栈-右": Coordinate(4160.0, 158.0, 0.0),
             "手动堆栈-左": Coordinate(-400.0, 877.0, 0.0),
             "手动堆栈-右": Coordinate(4160.0, 877.0, 0.0),
-            "粉末加样头堆栈": Coordinate(385.0, 1300.0, 0.0),
-            "配液站内试剂仓库": Coordinate(1164.0, 676.0, 0.0),
-            "试剂替换仓库": Coordinate(2717.0, 676.0, 0.0),
+            "粉末加样头堆栈-左": Coordinate(415.0, 1301.0, 0.0),
+            "粉末加样头堆栈-右": Coordinate(2200.0, 1304.0, 0.0),
+            "配液站内试剂仓库": Coordinate(2162.0, 337.0, 0.0),
+            "试剂替换仓库-左": Coordinate(1173.0, 702.0, 0.0),
+            "试剂替换仓库-右": Coordinate(2721.0, 739.0, 0.0),
         }
 
         for warehouse_name, warehouse in self.warehouses.items():
