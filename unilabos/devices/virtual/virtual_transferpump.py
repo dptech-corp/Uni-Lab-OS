@@ -4,6 +4,8 @@ from enum import Enum
 from typing import Union, Optional
 import logging
 
+from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode
+
 
 class VirtualPumpMode(Enum):
     Normal = 0
@@ -13,6 +15,8 @@ class VirtualPumpMode(Enum):
 
 class VirtualTransferPump:
     """虚拟转移泵类 - 模拟泵的基本功能，无需实际硬件 🚰"""
+    
+    _ros_node: BaseROS2DeviceNode
     
     def __init__(self, device_id: str = None, config: dict = None, **kwargs):
         """
@@ -52,6 +56,9 @@ class VirtualTransferPump:
         print(f"🚰 === 虚拟转移泵 {self.device_id} 已创建 === ✨")
         print(f"💨 快速模式: {'启用' if self._fast_mode else '禁用'} | 移动时间: {self._fast_move_time}s | 喷射时间: {self._fast_dispense_time}s")
         print(f"📊 最大容量: {self.max_volume}mL | 端口: {self.port}")
+    
+    def post_init(self, ros_node: BaseROS2DeviceNode):
+        self._ros_node = ros_node
     
     async def initialize(self) -> bool:
         """初始化虚拟泵 🚀"""
@@ -104,7 +111,7 @@ class VirtualTransferPump:
     async def _simulate_operation(self, duration: float):
         """模拟操作延时 ⏱️"""
         self._status = "Busy"
-        await asyncio.sleep(duration)
+        await self._ros_node.sleep(duration)
         self._status = "Idle"
     
     def _calculate_duration(self, volume: float, velocity: float = None) -> float:
@@ -223,7 +230,7 @@ class VirtualTransferPump:
                     
                     # 等待一小步时间
                     if i < steps and step_duration > 0:
-                        await asyncio.sleep(step_duration)
+                        await self._ros_node.sleep(step_duration)
             else:
                 # 移动距离很小，直接完成
                 self._position = target_position
@@ -341,7 +348,7 @@ class VirtualTransferPump:
         
         # 短暂停顿
         self.logger.debug("⏸️ 短暂停顿...")
-        await asyncio.sleep(0.1)
+        await self._ros_node.sleep(0.1)
         
         # 排液
         await self.dispense(volume, dispense_velocity)
