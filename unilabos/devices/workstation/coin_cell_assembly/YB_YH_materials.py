@@ -1248,10 +1248,9 @@ class CoincellDeck(Deck):
             position_spacing=35.0,
             orientation="vertical",
         )
-        self.assign_child_resource(bottle_rack_6x2, Coordinate(x=1659.0, y=869.0, z=0))
-        
-        # 电解液回收位 - 6x2布局
-        bottle_rack_6x2_2 = BottleRack(
+        self.assign_child_resource(bottle_rack_6x2, Coordinate(x=300, y=300, z=0))
+        # 电解液回收位6x2
+        bottle_rack_2x6_2 = BottleRack(
             name="bottle_rack_6x2_2",
             size_x=120.0,
             size_y=250.0,
