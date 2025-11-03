@@ -1154,31 +1154,37 @@ class CoincellDeck(Deck):
     def setup(self) -> None:
         """设置工作站的标准布局 - 包含子弹夹、料盘、瓶架等完整配置"""
         # ====================================== 子弹夹 ============================================
-        # 铝箔（1）
+        # 铝箔（1个洞位）
         lvbo_zip = ClipMagazine_one("lvbo_zip", 80, 80, 10)
-        self.assign_child_resource(lvbo_zip, Coordinate(x=1400, y=50, z=0))
-        #正极（234）
+        self.assign_child_resource(lvbo_zip, Coordinate(x=2737.0, y=301.0, z=0))
+        
+        # 正极片（4个洞位，2x2布局）
         zhengji_zip = ClipMagazine_four("zhengji_zip", 80, 80, 10)
-        self.assign_child_resource(zhengji_zip, Coordinate(x=1400, y=50, z=0))
-        #2 正极壳
+        self.assign_child_resource(zhengji_zip, Coordinate(x=2799.0, y=356.0, z=0))
+        
+        # 正极壳（4个洞位，2x2布局）
         zhengjike_zip = ClipMagazine_four("zhengjike_zip", 80, 80, 10)
-        self.assign_child_resource(zhengjike_zip, Coordinate(x=1600, y=200, z=0))
-        # 垫片
+        self.assign_child_resource(zhengjike_zip, Coordinate(x=2586.0, y=1143.0, z=0))
+        
+        # 垫片（2个洞位，1x2布局）
         danpian_zip = ClipMagazine_two("danpian_zip", 80, 80, 10)
-        self.assign_child_resource(danpian_zip, Coordinate(x=1500, y=200, z=0))
-        #2 负极壳
+        self.assign_child_resource(danpian_zip, Coordinate(x=2690.0, y=1141.0, z=0))
+        
+        # 负极壳（4个洞位，2x2布局）
         fujike_zip = ClipMagazine_four("fujike_zip", 80, 80, 10)
-        self.assign_child_resource(fujike_zip, Coordinate(x=1600, y=200, z=0))
-        # 弹片
-        tanpian_zip = ClipMagazine_two("tantanpian_zippian", 80, 80, 10)
-        self.assign_child_resource(tanpian_zip, Coordinate(x=1500, y=300, z=0))
-        #3成品弹夹
+        self.assign_child_resource(fujike_zip, Coordinate(x=2492.0, y=1144.0, z=0))
+        
+        # 弹片（2个洞位，1x2布局）
+        tanpian_zip = ClipMagazine_two("tanpian_zip", 80, 80, 10)
+        self.assign_child_resource(tanpian_zip, Coordinate(x=2492.0, y=1139.0, z=0))
+        
+        # 成品弹夹（6个洞位，3x2布局）
         chengpindanjia_zip = ClipMagazine("chengpindanjia_zip", 80, 80, 10)
-        self.assign_child_resource(chengpindanjia_zip, Coordinate(x=1500, y=200, z=0))
+        self.assign_child_resource(chengpindanjia_zip, Coordinate(x=3112.0, y=1295.0, z=0))
         
         # 为子弹夹添加极片
         for i in range(1):  # ClipMagazine_one 有1个洞位
-            lvbo = ElectrodeSheet(name=f"lvbo{i}", size_x=12, size_y=12, size_z=0.1)
+            lvbo = ElectrodeSheet(name=f"lvbo_{i}", size_x=12, size_y=12, size_z=0.1)
             lvbo_zip.children[i].assign_child_resource(lvbo, location=None)
         for i in range(4):  # ClipMagazine_four 有4个洞位
             zhengji = ElectrodeSheet(name=f"zhengji_{i}", size_x=12, size_y=12, size_z=0.1)
@@ -1201,22 +1207,24 @@ class CoincellDeck(Deck):
 
         
         # ====================================== 物料板 ============================================
-        # 创建6个4*4的物料板（料盘carrier）
+        # 创建物料板（料盘carrier）- 4x4布局
+        # 负极料盘
         fujiliaopan = MaterialPlate(name="fujiliaopan", size_x=120, size_y=100, size_z=10.0, fill=True)
-        self.assign_child_resource(fujiliaopan, Coordinate(x=1010, y=50, z=0))
-        for i in range(8):
+        self.assign_child_resource(fujiliaopan, Coordinate(x=2107.0, y=304.0, z=0))
+        for i in range(16):
             fujipian = ElectrodeSheet(name=f"{fujiliaopan.name}_jipian_{i}", size_x=12, size_y=12, size_z=0.1)
             fujiliaopan.children[i].assign_child_resource(fujipian, location=None)
 
+        # 隔膜料盘
         gemoliaopan = MaterialPlate(name="gemoliaopan", size_x=120, size_y=100, size_z=10.0, fill=True)
-        self.assign_child_resource(gemoliaopan, Coordinate(x=1130, y=50, z=0))
-        for i in range(8):
+        self.assign_child_resource(gemoliaopan, Coordinate(x=2107.0, y=146.0, z=0))
+        for i in range(16):
             gemopian = ElectrodeSheet(name=f"{gemoliaopan.name}_jipian_{i}", size_x=12, size_y=12, size_z=0.1)
             gemoliaopan.children[i].assign_child_resource(gemopian, location=None)
 
         # ====================================== 瓶架、移液枪 ============================================
         # 在台面上放置 3x4 瓶架、6x2 瓶架 与 64孔移液枪头盒
-        # 奔耀上料5ml分液瓶小板
+        # 奔耀上料5ml分液瓶小板 - 2x4布局
         bottle_rack_2x4 = BottleRack(
             name="bottle_rack_3x4",
             size_x=210.0,
@@ -1227,8 +1235,9 @@ class CoincellDeck(Deck):
             position_spacing=35.0,
             orientation="vertical",
         )
-        self.assign_child_resource(bottle_rack_2x4, Coordinate(x=100, y=200, z=0))
-        # 电解液缓存位6x2
+        self.assign_child_resource(bottle_rack_2x4, Coordinate(x=1542.0, y=717.0, z=0))
+        
+        # 电解液缓存位 - 6x2布局
         bottle_rack_6x2 = BottleRack(
             name="bottle_rack_6x2",
             size_x=120.0,
@@ -1251,7 +1260,7 @@ class CoincellDeck(Deck):
             position_spacing=35.0,
             orientation="vertical",
         )
-        self.assign_child_resource(bottle_rack_2x6_2, Coordinate(x=430, y=300, z=0))
+        self.assign_child_resource(bottle_rack_6x2_2, Coordinate(x=1765.0, y=869.0, z=0))
 
         # 将 ElectrodeSheet 放满 3x4 与 6x2 的所有孔位
         for idx in range(bottle_rack_2x4.num_items_x * bottle_rack_2x4.num_items_y):
@@ -1263,10 +1272,10 @@ class CoincellDeck(Deck):
             bottle_rack_6x2.assign_child_resource(sheet, index=idx)
 
         tip_box = TipBox64(name="tip_box_64")
-        self.assign_child_resource(tip_box, Coordinate(x=300, y=100, z=0))
+        self.assign_child_resource(tip_box, Coordinate(x=1938.0, y=743.0, z=0))
 
         waste_tip_box = WasteTipBox(name="waste_tip_box")
-        self.assign_child_resource(waste_tip_box, Coordinate(x=300, y=200, z=0))
+        self.assign_child_resource(waste_tip_box, Coordinate(x=1960.0, y=639.0, z=0))
 
 
 
