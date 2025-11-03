@@ -17,7 +17,7 @@ API_CONFIG = {
     "report_token": os.getenv("BIOYOND_REPORT_TOKEN", "CHANGE_ME_TOKEN"),
     
     # HTTP 服务配置
-    "HTTP_host": os.getenv("BIOYOND_HTTP_HOST", "172.21.32.83"),  # HTTP服务监听地址，监听计算机飞连ip地址
+    "HTTP_host": os.getenv("BIOYOND_HTTP_HOST", "172.21.32.91"),  # HTTP服务监听地址，监听计算机飞连ip地址
     "HTTP_port": int(os.getenv("BIOYOND_HTTP_PORT", "8080")),
     "debug_mode": False,# 调试模式
 }
@@ -237,8 +237,8 @@ MATERIAL_TYPE_MAPPINGS = {
     "100ml液体": ("YB_1Bottle100mlCarrier", "d37166b3-ecaa-481e-bd84-3032b795ba07"),
     "液": ("YB_1BottleCarrier", "3a190ca1-2add-2b23-f8e1-bbd348b7f790"),
     "高粘液": ("YB_1GaoNianYeBottleCarrier", "abe8df30-563d-43d2-85e0-cabec59ddc16"),
-    "加样头(大)": ("YB_jia_yang_tou_da", "3a190ca0-b2f6-9aeb-8067-547e72c11469"),
-    "加样头(大)板": ("YB_jia_yang_tou_da_1X1_carrier", "a8e714ae-2a4e-4eb9-9614-e4c140ec3f16"),
+    "加样头(大)": ("YB_jia_yang_tou_da_1X1_carrier", "3a190ca0-b2f6-9aeb-8067-547e72c11469"),
+    # "加样头(大)板": ("YB_jia_yang_tou_da_1X1_carrier", "a8e714ae-2a4e-4eb9-9614-e4c140ec3f16"),
     "5ml分液瓶板": ("YB_6x5ml_DispensingVialCarrier", "3a192fa4-007d-ec7b-456e-2a8be7a13f23"),
     "5ml分液瓶": ("YB_fen_ye_5ml_Bottle", "3a192c2a-ebb7-58a1-480d-8b3863bf74f4"),
     "20ml分液瓶板": ("YB_6x20ml_DispensingVialCarrier", "3a192fa4-47db-3449-162a-eaf8aba57e27"),
