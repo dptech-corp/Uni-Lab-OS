@@ -30,6 +30,7 @@ from pylabrobot.liquid_handling.standard import (
 from pylabrobot.resources import Tip, Deck, Plate, Well, TipRack, Resource, Container, Coordinate, TipSpot, Trash
 
 from unilabos.devices.liquid_handling.liquid_handler_abstract import LiquidHandlerAbstract
+from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode
 
 
 class PRCXIError(RuntimeError):
@@ -162,6 +163,10 @@ class PRCXI9300Handler(LiquidHandlerAbstract):
             tablets_info, host, port, timeout, channel_num, axis, setup, debug, matrix_id, is_9320
         )
         super().__init__(backend=self._unilabos_backend, deck=deck, simulator=simulator, channel_num=channel_num)
+
+    def post_init(self, ros_node: BaseROS2DeviceNode):
+        super().post_init(ros_node)
+        self._unilabos_backend.post_init(ros_node)
 
     def set_liquid(self, wells: list[Well], liquid_names: list[str], volumes: list[float]):
         return super().set_liquid(wells, liquid_names, volumes)
@@ -425,6 +430,7 @@ class PRCXI9300Backend(LiquidHandlerBackend):
 
     _num_channels = 8  # 默认通道数为 8
     _is_reset_ok = False
+    _ros_node: BaseROS2DeviceNode
 
     @property
     def is_reset_ok(self) -> bool:
@@ -456,6 +462,9 @@ class PRCXI9300Backend(LiquidHandlerBackend):
         self._num_channels = channel_num
         self._execute_setup = setup
         self.debug = debug
+
+    def post_init(self, ros_node: BaseROS2DeviceNode):
+        self._ros_node = ros_node
 
     def create_protocol(self, protocol_name):
         self.protocol_name = protocol_name
@@ -501,7 +510,7 @@ class PRCXI9300Backend(LiquidHandlerBackend):
                 self.api_client.call("IAutomation", "Reset")
                 while not self.is_reset_ok:
                     print("Waiting for PRCXI9300 to reset...")
-                    await asyncio.sleep(1)
+                    await self._ros_node.sleep(1)
                 print("PRCXI9300 reset successfully.")
         except ConnectionRefusedError as e:
             raise RuntimeError(
@@ -534,7 +543,9 @@ class PRCXI9300Backend(LiquidHandlerBackend):
             tipspot_index = tipspot.parent.children.index(tipspot)
             tip_columns.append(tipspot_index // 8)
         if len(set(tip_columns)) != 1:
-            raise ValueError("All pickups must be from the same tip column. Found different columns: " + str(tip_columns))
+            raise ValueError(
+                "All pickups must be from the same tip column. Found different columns: " + str(tip_columns)
+            )
         PlateNo = plate_indexes[0] + 1
         hole_col = tip_columns[0] + 1
         hole_row = 1
@@ -1110,12 +1121,15 @@ class PRCXI9300Api:
             "LiquidDispensingMethod": liquid_method,
         }
 
+
 class DefaultLayout:
 
     def __init__(self, product_name: str = "PRCXI9300"):
         self.labresource = {}
         if product_name not in ["PRCXI9300", "PRCXI9320"]:
-            raise ValueError(f"Unsupported product_name: {product_name}. Only 'PRCXI9300' and 'PRCXI9320' are supported.")
+            raise ValueError(
+                f"Unsupported product_name: {product_name}. Only 'PRCXI9300' and 'PRCXI9320' are supported."
+            )
 
         if product_name == "PRCXI9300":
             self.rows = 2
@@ -1130,25 +1144,93 @@ class DefaultLayout:
             self.layout = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
             self.trash_slot = 16
             self.waste_liquid_slot = 12
-            self.default_layout =  {"MatrixId":f"{time.time()}","MatrixName":f"{time.time()}","MatrixCount":16,"WorkTablets":
-            [{"Number": 1, "Code": "T1", "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0}},
-  {"Number": 2, "Code": "T2", "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0}},
-  {"Number": 3, "Code": "T3", "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0}},
-  {"Number": 4, "Code": "T4", "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0}},
-  {"Number": 5, "Code": "T5", "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0}},
-  {"Number": 6, "Code": "T6", "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0}},
-  {"Number": 7, "Code": "T7", "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0}},
-  {"Number": 8, "Code": "T8", "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0}},
-  {"Number": 9, "Code": "T9", "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0}},
-  {"Number": 10, "Code": "T10", "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0}},
-  {"Number": 11, "Code": "T11", "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0}},
-  {"Number": 12, "Code": "T12", "Material": {"uuid": "730067cf07ae43849ddf4034299030e9", "materialEnum": 0}},  # 这个设置成废液槽，用储液槽表示
-  {"Number": 13, "Code": "T13", "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0}},
-  {"Number": 14, "Code": "T14", "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0}},
-  {"Number": 15, "Code": "T15", "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0}},
-  {"Number": 16, "Code": "T16", "Material": {"uuid": "730067cf07ae43849ddf4034299030e9", "materialEnum": 0}} # 这个设置成垃圾桶，用储液槽表示
-]
-}
+            self.default_layout = {
+                "MatrixId": f"{time.time()}",
+                "MatrixName": f"{time.time()}",
+                "MatrixCount": 16,
+                "WorkTablets": [
+                    {
+                        "Number": 1,
+                        "Code": "T1",
+                        "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0},
+                    },
+                    {
+                        "Number": 2,
+                        "Code": "T2",
+                        "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0},
+                    },
+                    {
+                        "Number": 3,
+                        "Code": "T3",
+                        "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0},
+                    },
+                    {
+                        "Number": 4,
+                        "Code": "T4",
+                        "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0},
+                    },
+                    {
+                        "Number": 5,
+                        "Code": "T5",
+                        "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0},
+                    },
+                    {
+                        "Number": 6,
+                        "Code": "T6",
+                        "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0},
+                    },
+                    {
+                        "Number": 7,
+                        "Code": "T7",
+                        "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0},
+                    },
+                    {
+                        "Number": 8,
+                        "Code": "T8",
+                        "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0},
+                    },
+                    {
+                        "Number": 9,
+                        "Code": "T9",
+                        "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0},
+                    },
+                    {
+                        "Number": 10,
+                        "Code": "T10",
+                        "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0},
+                    },
+                    {
+                        "Number": 11,
+                        "Code": "T11",
+                        "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0},
+                    },
+                    {
+                        "Number": 12,
+                        "Code": "T12",
+                        "Material": {"uuid": "730067cf07ae43849ddf4034299030e9", "materialEnum": 0},
+                    },  # 这个设置成废液槽，用储液槽表示
+                    {
+                        "Number": 13,
+                        "Code": "T13",
+                        "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0},
+                    },
+                    {
+                        "Number": 14,
+                        "Code": "T14",
+                        "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0},
+                    },
+                    {
+                        "Number": 15,
+                        "Code": "T15",
+                        "Material": {"uuid": "57b1e4711e9e4a32b529f3132fc5931f", "materialEnum": 0},
+                    },
+                    {
+                        "Number": 16,
+                        "Code": "T16",
+                        "Material": {"uuid": "730067cf07ae43849ddf4034299030e9", "materialEnum": 0},
+                    },  # 这个设置成垃圾桶，用储液槽表示
+                ],
+            }
 
     def get_layout(self) -> Dict[str, Any]:
         return {
@@ -1156,7 +1238,7 @@ class DefaultLayout:
             "columns": self.columns,
             "layout": self.layout,
             "trash_slot": self.trash_slot,
-            "waste_liquid_slot": self.waste_liquid_slot
+            "waste_liquid_slot": self.waste_liquid_slot,
         }
 
     def get_trash_slot(self) -> int:
@@ -1179,17 +1261,19 @@ class DefaultLayout:
         reserved_positions = {12, 16}
         available_positions = [i for i in range(1, 17) if i not in reserved_positions]
 
-            # 计算总需求
+        # 计算总需求
         total_needed = sum(count for _, _, count in needs)
         if total_needed > len(available_positions):
-            raise ValueError(f"需要 {total_needed} 个位置，但只有 {len(available_positions)} 个可用位置（排除位置12和16）")
+            raise ValueError(
+                f"需要 {total_needed} 个位置，但只有 {len(available_positions)} 个可用位置（排除位置12和16）"
+            )
 
             # 依次分配位置
         current_pos = 0
         for reagent_name, material_name, count in needs:
 
-            material_uuid = self.labresource[material_name]['uuid']
-            material_enum = self.labresource[material_name]['materialEnum']
+            material_uuid = self.labresource[material_name]["uuid"]
+            material_enum = self.labresource[material_name]["materialEnum"]
 
             for _ in range(count):
                 if current_pos >= len(available_positions):
@@ -1197,15 +1281,16 @@ class DefaultLayout:
 
                 position = available_positions[current_pos]
                 # 找到对应的tablet并更新
-                for tablet in self.default_layout['WorkTablets']:
-                    if tablet['Number'] == position:
-                        tablet['Material']['uuid'] = material_uuid
-                        tablet['Material']['materialEnum'] = material_enum
-                        layout_list.append(dict(reagent_name=reagent_name, material_name=material_name, positions=position))
+                for tablet in self.default_layout["WorkTablets"]:
+                    if tablet["Number"] == position:
+                        tablet["Material"]["uuid"] = material_uuid
+                        tablet["Material"]["materialEnum"] = material_enum
+                        layout_list.append(
+                            dict(reagent_name=reagent_name, material_name=material_name, positions=position)
+                        )
                         break
                 current_pos += 1
         return self.default_layout, layout_list
-
 
 
 if __name__ == "__main__":
@@ -1303,10 +1388,7 @@ if __name__ == "__main__":
 
     # # # plate2.set_well_liquids(plate_2_liquids)
 
-
-
-
-    # handler = PRCXI9300Handler(deck=deck, host="10.181.214.132", port=9999, 
+    # handler = PRCXI9300Handler(deck=deck, host="10.181.214.132", port=9999,
     #                            timeout=10.0, setup=False, debug=False,
     #                            simulator=True,
     #                            matrix_id="71593",
@@ -1392,10 +1474,7 @@ if __name__ == "__main__":
     # # input("Press Enter to continue...")  # Wait for user input before proceeding
     # # print("PRCXI9300Handler initialized with deck and host settings.")
 
-
-
-### 9320 ###
-
+    ### 9320 ###
 
     deck = PRCXI9300Deck(name="PRCXI_Deck", size_x=100, size_y=100, size_z=100)
 
@@ -1413,12 +1492,15 @@ if __name__ == "__main__":
         new_plate: PRCXI9300Container = PRCXI9300Container.deserialize(well_containers)
         return new_plate
 
-    def get_tip_rack(name: str, child_prefix: str="tip") -> PRCXI9300Container:
+    def get_tip_rack(name: str, child_prefix: str = "tip") -> PRCXI9300Container:
         tip_racks = opentrons_96_tiprack_10ul(name).serialize()
         tip_rack = PRCXI9300Container(
-            name=name, size_x=50, size_y=50, size_z=10, category="tip_rack", ordering=collections.OrderedDict({
-                k: f"{child_prefix}_{k}" for k, v in tip_racks["ordering"].items()
-            })
+            name=name,
+            size_x=50,
+            size_y=50,
+            size_z=10,
+            category="tip_rack",
+            ordering=collections.OrderedDict({k: f"{child_prefix}_{k}" for k, v in tip_racks["ordering"].items()}),
         )
         tip_rack_serialized = tip_rack.serialize()
         tip_rack_serialized["parent_name"] = deck.name
@@ -1630,6 +1712,7 @@ if __name__ == "__main__":
     )
     backend: PRCXI9300Backend = handler.backend
     from pylabrobot.resources import set_volume_tracking
+
     set_volume_tracking(enabled=True)
     # res = backend.api_client.get_all_materials()
     asyncio.run(handler.setup())  # Initialize the handler and setup the connection
@@ -1641,10 +1724,10 @@ if __name__ == "__main__":
 
     for well in plate13.get_all_items():
         # well_pos = well.name.split("_")[1]       # 走一行
-        # if well_pos.startswith("A"):             
-        if well.name.startswith("PlateT13"):       # 走整个Plate
+        # if well_pos.startswith("A"):
+        if well.name.startswith("PlateT13"):  # 走整个Plate
             asyncio.run(handler.dispense([well], [0.01], [0]))
-        
+
     # asyncio.run(handler.dispense([plate10.get_item("H12")], [1], [0]))
     # asyncio.run(handler.dispense([plate13.get_item("A1")], [1], [0]))
     # asyncio.run(handler.dispense([plate14.get_item("C5")], [1], [0]))
@@ -1653,25 +1736,24 @@ if __name__ == "__main__":
     asyncio.run(handler.run_protocol())
     time.sleep(5)
     os._exit(0)
-# 第一种情景：一个孔往多个孔加液
+    # 第一种情景：一个孔往多个孔加液
     # plate_2_liquids = handler.set_group("water", [plate2.children[0]], [300])
     # plate5_liquids = handler.set_group("master_mix", plate5.children[:23], [100]*23)
-# 第二个情景：多个孔往多个孔加液(但是个数得对应)
-    plate_2_liquids = handler.set_group("water", plate2.children[:23], [300]*23)
-    plate5_liquids = handler.set_group("master_mix", plate5.children[:23], [100]*23)
+    # 第二个情景：多个孔往多个孔加液(但是个数得对应)
+    plate_2_liquids = handler.set_group("water", plate2.children[:23], [300] * 23)
+    plate5_liquids = handler.set_group("master_mix", plate5.children[:23], [100] * 23)
 
     # plate11.set_well_liquids([("Water", 100) if (i % 8 == 0 and i // 8 < 6) else (None, 100) for i in range(96)])  # Set liquids for every 8 wells in plate8
 
     # plate11.set_well_liquids([("Water", 100) if (i % 8 == 0 and i // 8 < 6) else (None, 100) for i in range(96)])  # Set liquids for every 8 wells in plate8
 
-#     A = tree_to_list([resource_plr_to_ulab(deck)])
-#     # with open("deck.json", "w", encoding="utf-8") as f:
-#     #     json.dump(A, f, indent=4, ensure_ascii=False)
+    #     A = tree_to_list([resource_plr_to_ulab(deck)])
+    #     # with open("deck.json", "w", encoding="utf-8") as f:
+    #     #     json.dump(A, f, indent=4, ensure_ascii=False)
 
-#     print(plate11.get_well(0).tracker.get_used_volume())
-     # Initialize the backend and setup the connection
+    #     print(plate11.get_well(0).tracker.get_used_volume())
+    # Initialize the backend and setup the connection
     asyncio.run(handler.transfer_group("water", "master_mix", 10))  # Reset tip tracking
-
 
     # asyncio.run(handler.pick_up_tips([plate8.children[8]],[0]))
     # print(plate8.children[8])
@@ -1686,121 +1768,118 @@ if __name__ == "__main__":
     # print(plate1.children[0])
     # asyncio.run(handler.discard_tips([0]))
 
-#     asyncio.run(handler.add_liquid(
-#     asp_vols=[10]*7,
-#     dis_vols=[10]*7,
-#     reagent_sources=plate11.children[:7],
-#     targets=plate1.children[2:9],
-#     use_channels=[0],
-#     flow_rates=[None] * 7,
-#     offsets=[Coordinate(0, 0, 0)] * 7,
-#     liquid_height=[None] * 7,
-#     blow_out_air_volume=[None] * 2,
-#     delays=None,
-#     mix_time=3,
-#     mix_vol=5,
-#     spread="custom",
-# ))
+    #     asyncio.run(handler.add_liquid(
+    #     asp_vols=[10]*7,
+    #     dis_vols=[10]*7,
+    #     reagent_sources=plate11.children[:7],
+    #     targets=plate1.children[2:9],
+    #     use_channels=[0],
+    #     flow_rates=[None] * 7,
+    #     offsets=[Coordinate(0, 0, 0)] * 7,
+    #     liquid_height=[None] * 7,
+    #     blow_out_air_volume=[None] * 2,
+    #     delays=None,
+    #     mix_time=3,
+    #     mix_vol=5,
+    #     spread="custom",
+    # ))
 
     # asyncio.run(handler.run_protocol())  # Run the protocol
 
+    # # #     asyncio.run(handler.transfer_liquid(
+    # # #     asp_vols=[10]*2,
+    # # #     dis_vols=[10]*2,
+    # # #     sources=plate11.children[:2],
+    # # #     targets=plate11.children[-2:],
+    # # #     use_channels=[0],
+    # # #     offsets=[Coordinate(0, 0, 0)] * 4,
+    # # #     liquid_height=[None] * 2,
+    # # #     blow_out_air_volume=[None] * 2,
+    # # #     delays=None,
+    # # #     mix_times=3,
+    # # #     mix_vol=5,
+    # # #     spread="wide",
+    # # #     tip_racks=[plate8]
+    # # # ))
 
+    # # #     asyncio.run(handler.remove_liquid(
+    # # #     vols=[10]*2,
+    # # #     sources=plate11.children[:2],
+    # # #     waste_liquid=plate11.children[43],
+    # # #     use_channels=[0],
+    # # #     offsets=[Coordinate(0, 0, 0)] * 4,
+    # # #     liquid_height=[None] * 2,
+    # # #     blow_out_air_volume=[None] * 2,
+    # # #     delays=None,
+    # # #     spread="wide"
+    # # # ))
+    # #     asyncio.run(handler.run_protocol())
 
+    # #     # asyncio.run(handler.discard_tips())
+    # #     # asyncio.run(handler.mix(well_containers.children[:8
+    # #     # ], mix_time=3, mix_vol=50, height_to_bottom=0.5, offsets=Coordinate(0, 0, 0), mix_rate=100))
+    # #     #print(json.dumps(handler._unilabos_backend.steps_todo_list, indent=2))  # Print matrix info
 
-# # #     asyncio.run(handler.transfer_liquid(
-# # #     asp_vols=[10]*2,
-# # #     dis_vols=[10]*2,
-# # #     sources=plate11.children[:2],
-# # #     targets=plate11.children[-2:],
-# # #     use_channels=[0],
-# # #     offsets=[Coordinate(0, 0, 0)] * 4,
-# # #     liquid_height=[None] * 2,
-# # #     blow_out_air_volume=[None] * 2,
-# # #     delays=None,
-# # #     mix_times=3,
-# # #     mix_vol=5,
-# # #     spread="wide",
-# # #     tip_racks=[plate8]
-# # # ))
+    # #     # asyncio.run(handler.remove_liquid(
+    # #     #     vols=[100]*16,
+    # #     #     sources=well_containers.children[-16:],
+    # #     #     waste_liquid=well_containers.children[:16], # 这个有些奇怪，但是好像也只能这么写
+    # #     #     use_channels=[0, 1, 2, 3, 4, 5, 6, 7],
+    # #     #     flow_rates=[None] * 32,
+    # #     #     offsets=[Coordinate(0, 0, 0)] * 32,
+    # #     #     liquid_height=[None] * 32,
+    # #     #     blow_out_air_volume=[None] * 32,
+    # #     #     spread="wide",
+    # #     # ))
+    # #     # asyncio.run(handler.transfer_liquid(
+    # #     #     asp_vols=[100]*16,
+    # #     #     dis_vols=[100]*16,
+    # #     #     tip_racks=[tip_rack],
+    # #     #     sources=well_containers.children[-16:],
+    # #     #     targets=well_containers.children[:16],
+    # #     #     use_channels=[0, 1, 2, 3, 4, 5, 6, 7],
+    # #     #     offsets=[Coordinate(0, 0, 0)] * 32,
+    # #     #     asp_flow_rates=[None] * 16,
+    # #     #     dis_flow_rates=[None] * 16,
+    # #     #     liquid_height=[None] * 32,
+    # #     #     blow_out_air_volume=[None] * 32,
+    # #     #     mix_times=3,
+    # #     #     mix_vol=50,
+    # #     #     spread="wide",
+    # #     # ))
+    #       # print(json.dumps(handler._unilabos_backend.steps_todo_list, indent=2))  # Print matrix info
+    # #     # input("pick_up_tips add step")
+    # asyncio.run(handler.run_protocol())  # Run the protocol
+    # #     # input("Running protocol...")
+    # #     # input("Press Enter to continue...")  # Wait for user input before proceeding
+    # #     # print("PRCXI9300Handler initialized with deck and host settings.")
 
-# # #     asyncio.run(handler.remove_liquid(
-# # #     vols=[10]*2,
-# # #     sources=plate11.children[:2],
-# # #     waste_liquid=plate11.children[43],
-# # #     use_channels=[0],
-# # #     offsets=[Coordinate(0, 0, 0)] * 4,
-# # #     liquid_height=[None] * 2,
-# # #     blow_out_air_volume=[None] * 2,
-# # #     delays=None,
-# # #     spread="wide"
-# # # ))
-# #     asyncio.run(handler.run_protocol())
+    # 一些推荐版位组合的测试样例：
 
-# #     # asyncio.run(handler.discard_tips())
-# #     # asyncio.run(handler.mix(well_containers.children[:8
-# #     # ], mix_time=3, mix_vol=50, height_to_bottom=0.5, offsets=Coordinate(0, 0, 0), mix_rate=100))
-# #     #print(json.dumps(handler._unilabos_backend.steps_todo_list, indent=2))  # Print matrix info
-
-
-# #     # asyncio.run(handler.remove_liquid(
-# #     #     vols=[100]*16,
-# #     #     sources=well_containers.children[-16:],
-# #     #     waste_liquid=well_containers.children[:16], # 这个有些奇怪，但是好像也只能这么写
-# #     #     use_channels=[0, 1, 2, 3, 4, 5, 6, 7],
-# #     #     flow_rates=[None] * 32,
-# #     #     offsets=[Coordinate(0, 0, 0)] * 32,
-# #     #     liquid_height=[None] * 32,
-# #     #     blow_out_air_volume=[None] * 32,
-# #     #     spread="wide",
-# #     # ))
-# #     # asyncio.run(handler.transfer_liquid(
-# #     #     asp_vols=[100]*16,
-# #     #     dis_vols=[100]*16,
-# #     #     tip_racks=[tip_rack],
-# #     #     sources=well_containers.children[-16:],
-# #     #     targets=well_containers.children[:16],
-# #     #     use_channels=[0, 1, 2, 3, 4, 5, 6, 7],
-# #     #     offsets=[Coordinate(0, 0, 0)] * 32,
-# #     #     asp_flow_rates=[None] * 16,
-# #     #     dis_flow_rates=[None] * 16,
-# #     #     liquid_height=[None] * 32,
-# #     #     blow_out_air_volume=[None] * 32,
-# #     #     mix_times=3,
-# #     #     mix_vol=50,
-# #     #     spread="wide",
-# #     # ))
-#       # print(json.dumps(handler._unilabos_backend.steps_todo_list, indent=2))  # Print matrix info
-# #     # input("pick_up_tips add step")
-     #asyncio.run(handler.run_protocol())  # Run the protocol
-# #     # input("Running protocol...")
-# #     # input("Press Enter to continue...")  # Wait for user input before proceeding
-# #     # print("PRCXI9300Handler initialized with deck and host settings.")
-
-
-# 一些推荐版位组合的测试样例：
-
-# 一些推荐版位组合的测试样例：
-
-
+    # 一些推荐版位组合的测试样例：
 
     with open("prcxi_material.json", "r") as f:
         material_info = json.load(f)
 
     layout = DefaultLayout("PRCXI9320")
     layout.add_lab_resource(material_info)
-    MatrixLayout_1, dict_1 = layout.recommend_layout([
-        ("reagent_1", "96 细胞培养皿", 3),
-        ("reagent_2", "12道储液槽", 1),
-        ("reagent_3", "200μL Tip头", 7),
-        ("reagent_4", "10μL加长 Tip头", 1),
-    ])
+    MatrixLayout_1, dict_1 = layout.recommend_layout(
+        [
+            ("reagent_1", "96 细胞培养皿", 3),
+            ("reagent_2", "12道储液槽", 1),
+            ("reagent_3", "200μL Tip头", 7),
+            ("reagent_4", "10μL加长 Tip头", 1),
+        ]
+    )
     print(dict_1)
-    MatrixLayout_2, dict_2 = layout.recommend_layout([
-        ("reagent_1", "96深孔板", 4),
-        ("reagent_2", "12道储液槽", 1),
-        ("reagent_3", "200μL Tip头", 1),
-        ("reagent_4", "10μL加长 Tip头", 1),
-    ])
+    MatrixLayout_2, dict_2 = layout.recommend_layout(
+        [
+            ("reagent_1", "96深孔板", 4),
+            ("reagent_2", "12道储液槽", 1),
+            ("reagent_3", "200μL Tip头", 1),
+            ("reagent_4", "10μL加长 Tip头", 1),
+        ]
+    )
 
 # with open("prcxi_material.json", "r") as f:
 #     material_info = json.load(f)

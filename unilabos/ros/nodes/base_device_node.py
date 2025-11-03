@@ -53,7 +53,7 @@ from unilabos.ros.nodes.resource_tracker import (
 )
 from unilabos.ros.x.rclpyx import get_event_loop
 from unilabos.ros.utils.driver_creator import WorkstationNodeCreator, PyLabRobotCreator, DeviceClassCreator
-from rclpy.task import Task
+from rclpy.task import Task, Future
 from unilabos.utils.import_manager import default_manager
 from unilabos.utils.log import info, debug, warning, error, critical, logger, trace
 from unilabos.utils.type_check import get_type_class, TypeEncoder, get_result_info_str
@@ -554,6 +554,15 @@ class BaseROS2DeviceNode(Node, Generic[T]):
         self.register_device()
         rclpy.get_global_executor().add_node(self)
         self.lab_logger().debug(f"ROS节点初始化完成")
+
+    async def sleep(self, rel_time: float, callback_group=None):
+        if callback_group is None:
+            callback_group = self.callback_group
+        await ROS2DeviceNode.async_wait_for(self, rel_time, callback_group)
+
+    @classmethod
+    async def create_task(cls, func, trace_error=True, **kwargs) -> Task:
+        return ROS2DeviceNode.run_async_func(func, trace_error, **kwargs)
 
     async def update_resource(self, resources: List["ResourcePLR"]):
         r = SerialCommand.Request()
@@ -1398,6 +1407,14 @@ class ROS2DeviceNode:
         if trace_error:
             future.add_done_callback(_handle_future_exception)
         return future
+
+    @classmethod
+    async def async_wait_for(cls, node: Node, wait_time: float, callback_group=None):
+        future = Future()
+        timer = node.create_timer(wait_time, lambda : future.set_result(None), callback_group=callback_group, clock=node.get_clock())
+        await future
+        timer.cancel()
+        node.destroy_timer(timer)
 
     @property
     def driver_instance(self):

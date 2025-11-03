@@ -8,6 +8,8 @@ import serial.tools.list_ports
 from serial import Serial
 from serial.serialutil import SerialException
 
+from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode
+
 
 class RunzeSyringePumpMode(Enum):
     Normal = 0
@@ -77,6 +79,8 @@ class RunzeSyringePumpInfo:
 
 
 class RunzeSyringePumpAsync:
+    _ros_node: BaseROS2DeviceNode
+    
     def __init__(self, port: str, address: str = "1", volume: float = 25000, mode: RunzeSyringePumpMode = None):
         self.port = port
         self.address = address
@@ -101,6 +105,9 @@ class RunzeSyringePumpAsync:
         self._read_task: Optional[Task[None]] = None
         self._run_future: Optional[Future[Any]] = None
         self._run_lock = Lock()
+    
+    def post_init(self, ros_node: BaseROS2DeviceNode):
+        self._ros_node = ros_node
     
     def _adjust_total_steps(self):
         self.total_steps = 6000 if self.mode == RunzeSyringePumpMode.Normal else 48000
@@ -182,7 +189,7 @@ class RunzeSyringePumpAsync:
             try:
                 await self._query(command)
                 while True:
-                    await asyncio.sleep(0.5)  # Wait for 0.5 seconds before polling again
+                    await self._ros_node.sleep(0.5)  # Wait for 0.5 seconds before polling again
                     
                     status = await self.query_device_status()
                     if status == '`':
@@ -364,7 +371,7 @@ class RunzeSyringePumpAsync:
         if self._read_task:
             raise RunzeSyringePumpConnectionError
 
-        self._read_task = asyncio.create_task(self._read_loop())
+        self._read_task = self._ros_node.create_task(self._read_loop())
 
         try:
             await self.query_device_status()
