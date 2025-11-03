@@ -14,6 +14,7 @@
       },
       "data": {}
   },
+
   {
       "id": "BatteryStation",
       "name": "扣电工作站",
@@ -24,8 +25,8 @@
       "type": "device",
       "class": "coincellassemblyworkstation_device",
       "position": {
-          "x": 600,
-          "y": 400,
+          "x": -600,
+          "y": -400,
           "z": 0
       },
       "config": {

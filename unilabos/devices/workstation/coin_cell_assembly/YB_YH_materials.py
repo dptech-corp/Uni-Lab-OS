@@ -986,10 +986,10 @@ class CoincellDeck(Deck):
     def __init__(
         self,
         name: str = "coin_cell_deck",
-        size_x: float = 1000.0,  # 1m
-        size_y: float = 1000.0,  # 1m
-        size_z: float = 900.0,   # 0.9m
-        origin: Coordinate = Coordinate(0, 0, 0),
+        size_x: float = 3650.0,  # 1m
+        size_y: float = 1550.0,  # 1m
+        size_z: float = 2100.0,   # 0.9m
+        origin: Coordinate = Coordinate(-4000, 2000, 0),
         category: str = "coin_cell_deck",
         setup: bool = False,  # 是否自动执行 setup
     ):
