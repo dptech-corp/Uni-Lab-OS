@@ -147,7 +147,89 @@ WAREHOUSE_MAPPING = {
             "C03": "3a1baa20-a7b1-cca7-781e-0522b729bf5d",
             "C04": "3a1baa20-a7b1-7c98-5fd9-5855355ae4b3"
         }
+    },
+    "大分液瓶堆栈": {
+        "uuid": "",
+        "site_uuids": {
+            "A01": "3a19da3d-4f3d-bcac-2932-7542041e10e0",
+            "A02": "3a19da3d-4f3d-4d75-38ac-fb58ad0687c3",
+            "A03": "3a19da3d-4f3d-b25e-f2b1-85342a5b7eae",
+            "B01": "3a19da3d-4f3d-fd3e-058a-2733a0925767",
+            "B02": "3a19da3d-4f3d-37bd-a944-c391ad56857f",
+            "B03": "3a19da3d-4f3d-e353-7862-c6d1d4bc667f",
+            "C01": "3a19da3d-4f3d-9519-5da7-76179c958e70",
+            "C02": "3a19da3d-4f3d-b586-d7ed-9ec244f6f937",
+            "C03": "3a19da3d-4f3d-5061-249b-35dfef732811"
+        }
+    },
+    "小分液瓶堆栈": {
+        "uuid": "",
+        "site_uuids": {
+            "C03": "3a19da40-55bf-8943-d20d-a8b3ea0d16c0"
+        }
+    },
+    "站内Tip头盒堆栈": {
+        "uuid": "",
+        "site_uuids": {
+            "A01": "3a19deab-d5cc-be1e-5c37-4e9e5a664388",
+            "A02": "3a19deab-d5cc-b394-8141-27cb3853e8ea",
+            "B01": "3a19deab-d5cc-4dca-596e-ca7414d5f501",
+            "B02": "3a19deab-d5cc-9bc0-442b-12d9d59aa62a",
+            "C01": "3a19deab-d5cc-2eaf-b6a4-f0d54e4f1246",
+            "C02": "3a19deab-d5cc-d9f4-25df-b8018c372bc7"
+        }
+    },
+    "配液站内配液大板仓库(无需提前上料)": {
+        "uuid": "",
+        "site_uuids": {
+            "A01": "3a1a21dc-06af-3915-9cb9-80a9dc42f386"
+        }
+    },
+    "配液站内配液小板仓库(无需以前入料)": {
+        "uuid": "",
+        "site_uuids": {
+            "A01": "3a1a21de-8e8b-7938-2d06-858b36c10e31"
+        }
+    },
+    "移液站内大瓶板仓库(无需提前如料)": {
+        "uuid": "",
+        "site_uuids": {
+            "A01": "3a1a224c-c727-fa62-1f2b-0037a84b9fca"
+        }
+    },
+    "移液站内小瓶板仓库(无需提前入料)": {
+        "uuid": "",
+        "site_uuids": {
+            "A01": "3a1a224d-ed49-710c-a9c3-3fc61d479cbb"
+        }
+    },
+    "适配器位仓库": {
+        "uuid": "",
+        "site_uuids": {
+            "A01": "3a1abd46-18fe-1f56-6ced-a1f7fe08e36c"
+        }
+    },
+    "1号2号手套箱交接堆栈": {
+        "uuid": "",
+        "site_uuids": {
+            "A01": "3a1baa49-7f77-35aa-60b1-e55a45d065fa"
+        }
+    },
+    "2号手套箱内部堆栈": {
+        "uuid": "",
+        "site_uuids": {
+            "A01": "3a1baa4b-393e-9f86-3921-7a18b0a8e371",
+            "A02": "3a1baa4b-393e-9425-928b-ee0f6f679d44",
+            "A03": "3a1baa4b-393e-0baf-632b-59dfdc931a3a",
+            "B01": "3a1baa4b-393e-f8aa-c8a9-956f3132f05c",
+            "B02": "3a1baa4b-393e-ef05-42f6-53f4c6e89d70",
+            "B03": "3a1baa4b-393e-c07b-a924-a9f0dfda9711",
+            "C01": "3a1baa4b-393e-4c2b-821a-16a7fe025c48",
+            "C02": "3a1baa4b-393e-2eaf-61a1-9063c832d5a2",
+            "C03": "3a1baa4b-393e-034e-8e28-8626d934a85f"
+        }
     }
+    
 }
 
 # 物料类型配置
