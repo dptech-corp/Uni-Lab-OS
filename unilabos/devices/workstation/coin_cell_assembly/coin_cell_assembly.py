@@ -138,7 +138,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
 
         # 如果没有传入 deck，则创建标准配置的 deck
         if self.deck is None:
-            self.deck = CoincellDeck(size_x=1000, size_y=1000, size_z=900, origin=Coordinate(-100, -100, 0),setup=True)
+            self.deck = CoincellDeck(size_x=3650, size_y=1550, size_z=2100, origin=Coordinate(-2000, 100, 0),setup=True)
         else:
             # 如果传入了 deck 但还没有 setup，可以选择是否 setup
             if self.deck is not None and len(self.deck.children) == 0:

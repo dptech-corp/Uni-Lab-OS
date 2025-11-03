@@ -1156,46 +1156,46 @@ class CoincellDeck(Deck):
         # ====================================== 子弹夹 ============================================
         # 铝箔（1）
         lvbo_zip = ClipMagazine_one("lvbo_zip", 80, 80, 10)
-        self.assign_child_resource(CoincellDeck, Coordinate(x=1400, y=50, z=0))
+        self.assign_child_resource(lvbo_zip, Coordinate(x=1400, y=50, z=0))
         #正极（234）
         zhengji_zip = ClipMagazine_four("zhengji_zip", 80, 80, 10)
-        self.assign_child_resource(CoincellDeck, Coordinate(x=1400, y=50, z=0))
+        self.assign_child_resource(zhengji_zip, Coordinate(x=1400, y=50, z=0))
         #2 正极壳
         zhengjike_zip = ClipMagazine_four("zhengjike_zip", 80, 80, 10)
-        self.assign_child_resource(CoincellDeck, Coordinate(x=1600, y=200, z=0))
+        self.assign_child_resource(zhengjike_zip, Coordinate(x=1600, y=200, z=0))
         # 垫片
         danpian_zip = ClipMagazine_two("danpian_zip", 80, 80, 10)
-        self.assign_child_resource(CoincellDeck, Coordinate(x=1500, y=200, z=0))
+        self.assign_child_resource(danpian_zip, Coordinate(x=1500, y=200, z=0))
         #2 负极壳
-        zhengjike_zip = ClipMagazine_four("zhengjike_zip", 80, 80, 10)
-        self.assign_child_resource(CoincellDeck, Coordinate(x=1600, y=200, z=0))
+        fujike_zip = ClipMagazine_four("fujike_zip", 80, 80, 10)
+        self.assign_child_resource(fujike_zip, Coordinate(x=1600, y=200, z=0))
         # 弹片
         tanpian_zip = ClipMagazine_two("tantanpian_zippian", 80, 80, 10)
-        self.assign_child_resource(CoincellDeck, Coordinate(x=1500, y=300, z=0))
+        self.assign_child_resource(tanpian_zip, Coordinate(x=1500, y=300, z=0))
         #3成品弹夹
         chengpindanjia_zip = ClipMagazine("chengpindanjia_zip", 80, 80, 10)
-        self.assign_child_resource(CoincellDeck, Coordinate(x=1500, y=200, z=0))
+        self.assign_child_resource(chengpindanjia_zip, Coordinate(x=1500, y=200, z=0))
         
         # 为子弹夹添加极片
-        for i in range(10):
+        for i in range(1):  # ClipMagazine_one 有1个洞位
             lvbo = ElectrodeSheet(name=f"lvbo{i}", size_x=12, size_y=12, size_z=0.1)
             lvbo_zip.children[i].assign_child_resource(lvbo, location=None)
-        for i in range(10):
+        for i in range(4):  # ClipMagazine_four 有4个洞位
             zhengji = ElectrodeSheet(name=f"zhengji_{i}", size_x=12, size_y=12, size_z=0.1)
             zhengji_zip.children[i].assign_child_resource(zhengji, location=None)
-        for i in range(10):
+        for i in range(4):  # ClipMagazine_four 有4个洞位
             zhengjike = ElectrodeSheet(name=f"zhengjike_{i}", size_x=12, size_y=12, size_z=0.1)
             zhengjike_zip.children[i].assign_child_resource(zhengjike, location=None)
-        for i in range(10):
+        for i in range(2):  # ClipMagazine_two 有2个洞位
             danpian = ElectrodeSheet(name=f"danpian_{i}", size_x=12, size_y=12, size_z=0.1)
             danpian_zip.children[i].assign_child_resource(danpian, location=None)
-        for i in range(10):
-            zhengjike = ElectrodeSheet(name=f"zhengjike_{i}", size_x=12, size_y=12, size_z=0.1)
-            zhengjike_zip.children[i].assign_child_resource(zhengjike, location=None)
-        for i in range(10):
+        for i in range(4):  # ClipMagazine_four 有4个洞位
+            fujike = ElectrodeSheet(name=f"fujike_{i}", size_x=12, size_y=12, size_z=0.1)
+            fujike_zip.children[i].assign_child_resource(fujike, location=None)
+        for i in range(2):  # ClipMagazine_two 有2个洞位
             tanpian = ElectrodeSheet(name=f"tanpian_{i}", size_x=12, size_y=12, size_z=0.1)
             tanpian_zip.children[i].assign_child_resource(tanpian, location=None)
-        for i in range(10):
+        for i in range(6):  # ClipMagazine 有6个洞位
             chengpindanjia = ElectrodeSheet(name=f"chengpindanjia_{i}", size_x=12, size_y=12, size_z=0.1)
             chengpindanjia_zip.children[i].assign_child_resource(chengpindanjia, location=None)
 
@@ -1203,13 +1203,13 @@ class CoincellDeck(Deck):
         # ====================================== 物料板 ============================================
         # 创建6个4*4的物料板（料盘carrier）
         fujiliaopan = MaterialPlate(name="fujiliaopan", size_x=120, size_y=100, size_z=10.0, fill=True)
-        self.assign_child_resource(CoincellDeck, Coordinate(x=1010, y=50, z=0))
+        self.assign_child_resource(fujiliaopan, Coordinate(x=1010, y=50, z=0))
         for i in range(8):
             fujipian = ElectrodeSheet(name=f"{fujiliaopan.name}_jipian_{i}", size_x=12, size_y=12, size_z=0.1)
             fujiliaopan.children[i].assign_child_resource(fujipian, location=None)
 
         gemoliaopan = MaterialPlate(name="gemoliaopan", size_x=120, size_y=100, size_z=10.0, fill=True)
-        self.assign_child_resource(CoincellDeck, Coordinate(x=1130, y=50, z=0))
+        self.assign_child_resource(gemoliaopan, Coordinate(x=1130, y=50, z=0))
         for i in range(8):
             gemopian = ElectrodeSheet(name=f"{gemoliaopan.name}_jipian_{i}", size_x=12, size_y=12, size_z=0.1)
             gemoliaopan.children[i].assign_child_resource(gemopian, location=None)
@@ -1228,26 +1228,26 @@ class CoincellDeck(Deck):
             orientation="vertical",
         )
         self.assign_child_resource(bottle_rack_2x4, Coordinate(x=100, y=200, z=0))
-        # 电解液缓存位2x6
-        bottle_rack_2x6 = BottleRack(
+        # 电解液缓存位6x2
+        bottle_rack_6x2 = BottleRack(
             name="bottle_rack_6x2",
             size_x=120.0,
             size_y=250.0,
             size_z=100.0,
-            num_items_x=2,
-            num_items_y=6,
+            num_items_x=6,
+            num_items_y=2,
             position_spacing=35.0,
             orientation="vertical",
         )
         self.assign_child_resource(bottle_rack_2x6, Coordinate(x=300, y=300, z=0))
-        # 电解液回收位2x6
+        # 电解液回收位6x2
         bottle_rack_2x6_2 = BottleRack(
             name="bottle_rack_6x2_2",
             size_x=120.0,
             size_y=250.0,
             size_z=100.0,
-            num_items_x=2,
-            num_items_y=6,
+            num_items_x=6,
+            num_items_y=2,
             position_spacing=35.0,
             orientation="vertical",
         )
