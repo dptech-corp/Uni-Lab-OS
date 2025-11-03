@@ -2,6 +2,8 @@ import time
 import asyncio
 from pydantic import BaseModel
 
+from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode
+
 
 class Point3D(BaseModel):
     x: float
@@ -14,9 +16,14 @@ def d(a: Point3D, b: Point3D) -> float:
 
 
 class MockCNCAsync:
+    _ros_node: BaseROS2DeviceNode["MockCNCAsync"]
+
     def __init__(self):
         self._position: Point3D = Point3D(x=0.0, y=0.0, z=0.0)
         self._status = "Idle"
+
+    def post_create(self, ros_node):
+        self._ros_node = ros_node
     
     @property
     def position(self) -> Point3D:
@@ -38,5 +45,5 @@ class MockCNCAsync:
             self._position.x = current_pos.x + (position.x - current_pos.x) / 20 * (i+1)
             self._position.y = current_pos.y + (position.y - current_pos.y) / 20 * (i+1)
             self._position.z = current_pos.z + (position.z - current_pos.z) / 20 * (i+1)
-            await asyncio.sleep(move_time / 20)
+            await self._ros_node.sleep(move_time / 20)
         self._status = "Idle"

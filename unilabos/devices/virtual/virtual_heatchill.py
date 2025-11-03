@@ -3,8 +3,12 @@ import logging
 import time as time_module  # 重命名time模块，避免与参数冲突
 from typing import Dict, Any
 
+from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode
+
 class VirtualHeatChill:
     """Virtual heat chill device for HeatChillProtocol testing 🌡️"""
+    
+    _ros_node: BaseROS2DeviceNode
     
     def __init__(self, device_id: str = None, config: Dict[str, Any] = None, **kwargs):
         # 处理可能的不同调用方式
@@ -34,6 +38,9 @@ class VirtualHeatChill:
         
         print(f"🌡️ === 虚拟温控设备 {self.device_id} 已创建 === ✨")
         print(f"🔥 温度范围: {self._min_temp}°C ~ {self._max_temp}°C | 🌪️ 最大搅拌: {self._max_stir_speed} RPM")
+    
+    def post_init(self, ros_node: BaseROS2DeviceNode):
+        self._ros_node = ros_node
     
     async def initialize(self) -> bool:
         """Initialize virtual heat chill 🚀"""
@@ -177,7 +184,7 @@ class VirtualHeatChill:
                 break
             
             # 等待1秒后再次检查
-            await asyncio.sleep(1.0)
+            await self._ros_node.sleep(1.0)
         
         # 操作完成
         final_stir_info = f" | 🌪️ 搅拌: {stir_speed} RPM" if stir else ""
