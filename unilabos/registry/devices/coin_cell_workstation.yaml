@@ -502,7 +502,7 @@ coincellassemblyworkstation_device:
   config_info: []
   description: ''
   handles: []
-  icon: ''
+  icon: coin_cell_assembly_picture.webp
   init_param_schema:
     config:
       properties:
