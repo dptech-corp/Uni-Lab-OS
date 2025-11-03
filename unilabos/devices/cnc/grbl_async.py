@@ -12,6 +12,7 @@ from serial import Serial
 from serial.serialutil import SerialException
 
 from unilabos.messages import Point3D
+from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode
 
 
 class GrblCNCConnectionError(Exception):
@@ -32,6 +33,7 @@ class GrblCNCInfo:
 class GrblCNCAsync:
     _status: str = "Offline"
     _position: Point3D = Point3D(x=0.0, y=0.0, z=0.0)
+    _ros_node: BaseROS2DeviceNode
     
     def __init__(self, port: str, address: str = "1", limits: tuple[int, int, int, int, int, int] = (-150, 150, -200, 0, 0, 60)):
         self.port = port
@@ -57,6 +59,9 @@ class GrblCNCAsync:
         self._read_extra_line = False
         self._run_future: Optional[Future[Any]] = None
         self._run_lock = Lock()
+    
+    def post_init(self, ros_node: BaseROS2DeviceNode):
+        self._ros_node = ros_node
     
     def _read_all(self):
         data = self._serial.read_until(b"\n")
@@ -148,7 +153,7 @@ class GrblCNCAsync:
             try:
                 await self._query(command)
                 while True:
-                    await asyncio.sleep(0.2)  # Wait for 0.5 seconds before polling again
+                    await self._ros_node.sleep(0.2)  # Wait for 0.5 seconds before polling again
                     
                     status = await self.get_status()
                     if "Idle" in status:
@@ -214,7 +219,7 @@ class GrblCNCAsync:
             self._pose_number = i
             self.pose_number_remaining = len(points) - i
             await self.set_position(point)
-            await asyncio.sleep(0.5)
+            await self._ros_node.sleep(0.5)
         self._step_number = -1
 
     async def stop_operation(self):
@@ -235,7 +240,7 @@ class GrblCNCAsync:
     async def open(self):
         if self._read_task:
             raise GrblCNCConnectionError
-        self._read_task = asyncio.create_task(self._read_loop())
+        self._read_task = self._ros_node.create_task(self._read_loop())
 
         try:
             await self.get_status()
