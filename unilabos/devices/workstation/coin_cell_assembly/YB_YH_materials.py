@@ -1239,7 +1239,7 @@ class CoincellDeck(Deck):
             position_spacing=35.0,
             orientation="vertical",
         )
-        self.assign_child_resource(bottle_rack_2x6, Coordinate(x=300, y=300, z=0))
+        self.assign_child_resource(bottle_rack_6x2, Coordinate(x=300, y=300, z=0))
         # 电解液回收位6x2
         bottle_rack_2x6_2 = BottleRack(
             name="bottle_rack_6x2_2",
@@ -1258,9 +1258,9 @@ class CoincellDeck(Deck):
             sheet = ElectrodeSheet(name=f"sheet_3x4_{idx}", size_x=12, size_y=12, size_z=0.1)
             bottle_rack_2x4.assign_child_resource(sheet, index=idx)
 
-        for idx in range(bottle_rack_2x6.num_items_x * bottle_rack_2x6.num_items_y):
+        for idx in range(bottle_rack_6x2.num_items_x * bottle_rack_6x2.num_items_y):
             sheet = ElectrodeSheet(name=f"sheet_6x2_{idx}", size_x=12, size_y=12, size_z=0.1)
-            bottle_rack_2x6.assign_child_resource(sheet, index=idx)
+            bottle_rack_6x2.assign_child_resource(sheet, index=idx)
 
         tip_box = TipBox64(name="tip_box_64")
         self.assign_child_resource(tip_box, Coordinate(x=300, y=100, z=0))
