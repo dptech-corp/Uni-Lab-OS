@@ -22,13 +22,13 @@ BIOYOND_PolymerReactionStation_Deck:
   init_param_schema: {}
   registry_type: resource
   version: 1.0.0
-YB_Deck16:
+BIOYOND_YB_Deck:
   category:
   - deck
   class:
-    module: unilabos.resources.bioyond.decks:YB_Deck
+    module: unilabos.resources.bioyond.decks:BIOYOND_YB_Deck
     type: pylabrobot
-  description: BIOYOND PolymerReactionStation Deck
+  description: BIOYOND_YB_Deck
   handles: []
   icon: 配液站.webp
   init_param_schema: {}

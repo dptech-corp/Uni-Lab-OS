@@ -3,34 +3,64 @@
     {
       "id": "bioyond_cell_workstation",
       "name": "配液分液工站",
-      "children": [
-      ],
       "parent": null,
+      "children": [
+        "YB_Bioyond_Deck"
+      ],
       "type": "device",
       "class": "bioyond_cell",
       "config": {
-          "protocol_type": [],
-          "station_resource": {}
+        "deck": {
+          "data": {
+            "_resource_child_name": "YB_Bioyond_Deck",
+            "_resource_type": "unilabos.resources.bioyond.decks:BIOYOND_YB_Deck"
+          }
+        },
+        "protocol_type": []
       },
       "data": {}
-  },
-  {
+    },
+    {
+      "id": "YB_Bioyond_Deck",
+      "name": "YB_Bioyond_Deck",
+      "children": [],
+      "parent": "bioyond_cell_workstation",
+      "type": "deck",
+      "class": "BIOYOND_YB_Deck",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "BIOYOND_YB_Deck",
+        "setup": true,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        }
+      },
+      "data": {}
+    },
+    {
       "id": "BatteryStation",
       "name": "扣电工作站",
       "children": [
-          "coin_cell_deck"
+        "coin_cell_deck"
       ],
       "parent": null,
       "type": "device",
       "class": "coincellassemblyworkstation_device",
       "position": {
-          "x": 600,
-          "y": 400,
-          "z": 0
+        "x": 600,
+        "y": 400,
+        "z": 0
       },
       "config": {
-          "debug_mode": false,
-          "protocol_type": []
+        "debug_mode": false,
+        "protocol_type": []
       }
     }
   ],
