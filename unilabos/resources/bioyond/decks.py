@@ -2,7 +2,7 @@ from os import name
 from pickle import TRUE
 from pylabrobot.resources import Deck, Coordinate, Rotation
 
-from unilabos.resources.bioyond.warehouses import bioyond_warehouse_1x4x4, bioyond_warehouse_1x4x2, bioyond_warehouse_liquid_and_lid_handling, bioyond_warehouse_1x2x2, bioyond_warehouse_1x3x3, bioyond_warehouse_10x1x1, bioyond_warehouse_3x3x1, bioyond_warehouse_3x3x1_2, bioyond_warehouse_5x1x1
+from unilabos.resources.bioyond.YB_warehouses import bioyond_warehouse_1x4x4, bioyond_warehouse_1x4x2, bioyond_warehouse_liquid_and_lid_handling, bioyond_warehouse_1x2x2, bioyond_warehouse_1x3x3, bioyond_warehouse_10x1x1, bioyond_warehouse_3x3x1, bioyond_warehouse_3x3x1_2, bioyond_warehouse_5x1x1, bioyond_warehouse_20x1x1, bioyond_warehouse_2x2x1, bioyond_warehouse_3x5x1
 
 
 class BIOYOND_PolymerReactionStation_Deck(Deck):
