@@ -72,7 +72,7 @@ class BIOYOND_PolymerPreparationStation_Deck(Deck):
 class BIOYOND_YB_Deck(Deck):
     def __init__(
         self, 
-        name: str = "YB_Bioyond_Deck",
+        name: str = "YB_Deck",
         size_x: float = 4150,
         size_y: float = 1400.0,
         size_z: float = 2670.0,
@@ -107,7 +107,7 @@ class BIOYOND_YB_Deck(Deck):
 
         for warehouse_name, warehouse in self.warehouses.items():
             self.assign_child_resource(warehouse, location=self.warehouse_locations[warehouse_name])
-            
+           
 # def YB_Deck(name: str) -> Deck:
 # #     by=BIOYOND_YB_Deck(name=name)
 # #     by.setup()
