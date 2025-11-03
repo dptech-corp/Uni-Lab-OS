@@ -4,6 +4,7 @@ bioyond_cell:
   class:
     action_value_mappings:
       auto-auto_batch_outbound_from_xlsx:
+        display_name: 批量导入上料
         feedback: {}
         goal: {}
         goal_default:
