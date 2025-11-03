@@ -79,7 +79,7 @@ coincellassemblyworkstation_device:
           elec_num: null
           elec_use_num: null
           elec_vol: 50
-          file_path: D:\coin_cell_data
+          file_path: C:\Users\67484\Desktop
         handles: {}
         placeholder_keys: {}
         result: {}
@@ -103,7 +103,7 @@ coincellassemblyworkstation_device:
                   default: 50
                   type: integer
                 file_path:
-                  default: D:\coin_cell_data
+                  default: C:\Users\67484\Desktop
                   type: string
               required:
               - elec_num

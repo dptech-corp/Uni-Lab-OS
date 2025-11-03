@@ -172,6 +172,8 @@ class BioyondWorkstation(WorkstationBase):
 
     def post_init(self, ros_node: ROS2WorkstationNode):
         self._ros_node = ros_node
+        print("~~~",self._ros_node)
+        print("deck",self.deck)
         ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
             "resources": [self.deck]
         })
