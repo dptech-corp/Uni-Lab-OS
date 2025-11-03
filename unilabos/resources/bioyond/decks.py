@@ -2,7 +2,7 @@ from os import name
 from pickle import TRUE
 from pylabrobot.resources import Deck, Coordinate, Rotation
 
-from unilabos.resources.bioyond.warehouses import bioyond_warehouse_1x4x4, bioyond_warehouse_1x4x2, bioyond_warehouse_liquid_and_lid_handling, bioyond_warehouse_1x2x2, bioyond_warehouse_1x3x3, bioyond_warehouse_10x1x1, bioyond_warehouse_3x3x1, bioyond_warehouse_3x3x1_2, bioyond_warehouse_5x1x1
+from unilabos.resources.bioyond.YB_warehouses import bioyond_warehouse_1x4x4, bioyond_warehouse_1x4x2, bioyond_warehouse_liquid_and_lid_handling, bioyond_warehouse_1x2x2, bioyond_warehouse_1x3x3, bioyond_warehouse_10x1x1, bioyond_warehouse_3x3x1, bioyond_warehouse_3x3x1_2, bioyond_warehouse_5x1x1, bioyond_warehouse_20x1x1, bioyond_warehouse_2x2x1, bioyond_warehouse_3x5x1
 
 
 class BIOYOND_PolymerReactionStation_Deck(Deck):
@@ -86,31 +86,23 @@ class BIOYOND_YB_Deck(Deck):
     def setup(self) -> None:
         # 添加仓库
         self.warehouses = {
-            "321窗口": bioyond_warehouse_1x2x2("321窗口"),
-            "43窗口": bioyond_warehouse_1x2x2("43窗口"),
-            "手动传递窗左": bioyond_warehouse_1x3x3("手动传递窗左"),
-            "手动传递窗右": bioyond_warehouse_1x3x3("手动传递窗右"),
-            "加样头堆栈左": bioyond_warehouse_10x1x1("加样头堆栈左"),
-            "加样头堆栈右": bioyond_warehouse_10x1x1("加样头堆栈右"),
-
-            "15ml配液堆栈左": bioyond_warehouse_3x3x1("15ml配液堆栈左"),
-            "母液加样右": bioyond_warehouse_3x3x1_2("母液加样右"),
-            "大瓶母液堆栈左": bioyond_warehouse_5x1x1("大瓶母液堆栈左"),
-            "大瓶母液堆栈右": bioyond_warehouse_5x1x1("大瓶母液堆栈右"),
+            "自动堆栈-左": bioyond_warehouse_2x2x1("自动堆栈-左"),
+            "自动堆栈-右": bioyond_warehouse_2x2x1("自动堆栈-右"),
+            "手动堆栈-左": bioyond_warehouse_3x5x1("手动堆栈-左"),
+            "手动堆栈-右": bioyond_warehouse_3x5x1("手动堆栈-右"),
+            "粉末加样头堆栈": bioyond_warehouse_20x1x1("粉末加样头堆栈"),
+            "配液站内试剂仓库": bioyond_warehouse_3x3x1("配液站内试剂仓库"),
+            "试剂替换仓库": bioyond_warehouse_10x1x1("试剂替换仓库"),
         }
         # warehouse 的位置
         self.warehouse_locations = {
-            "321窗口": Coordinate(-150.0, 158.0, 0.0),
-            "43窗口": Coordinate(4160.0, 158.0, 0.0),
-            "手动传递窗左": Coordinate(-150.0, 877.0, 0.0),
-            "手动传递窗右": Coordinate(4160.0, 877.0, 0.0),
-            "加样头堆栈左": Coordinate(385.0, 1300.0, 0.0),
-            "加样头堆栈右": Coordinate(2187.0, 1300.0, 0.0),
-
-            "15ml配液堆栈左": Coordinate(749.0, 355.0, 0.0),
-            "母液加样右": Coordinate(2152.0, 333.0, 0.0),
-            "大瓶母液堆栈左": Coordinate(1164.0, 676.0, 0.0),
-            "大瓶母液堆栈右": Coordinate(2717.0, 676.0, 0.0),
+            "自动堆栈-左": Coordinate(-300.0, 158.0, 0.0),
+            "自动堆栈-右": Coordinate(4160.0, 158.0, 0.0),
+            "手动堆栈-左": Coordinate(-400.0, 877.0, 0.0),
+            "手动堆栈-右": Coordinate(4160.0, 877.0, 0.0),
+            "粉末加样头堆栈": Coordinate(385.0, 1300.0, 0.0),
+            "配液站内试剂仓库": Coordinate(1164.0, 676.0, 0.0),
+            "试剂替换仓库": Coordinate(2717.0, 676.0, 0.0),
         }
 
         for warehouse_name, warehouse in self.warehouses.items():
