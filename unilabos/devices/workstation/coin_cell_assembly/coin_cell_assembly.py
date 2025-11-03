@@ -149,7 +149,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
 
         """ 连接初始化 """
         modbus_client = TCPClient(addr=address, port=port)
-        print("modbus_client", modbus_client)
+        logger.debug(f"创建 Modbus 客户端: {modbus_client}")
         _ensure_modbus_slave_kw_alias(modbus_client.client)
         if not debug_mode:
             modbus_client.client.connect()
@@ -602,11 +602,11 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         try:
             # 尝试不同的字节序读取
             code_little, read_err = self.client.use_node('REG_DATA_COIN_CELL_CODE').read(10, word_order=WorderOrder.LITTLE)
-            print(code_little)
+            # logger.debug(f"读取电池二维码原始数据: {code_little}")
             clean_code = code_little[-8:][::-1]
             return clean_code
         except Exception as e:
-            print(f"读取电池二维码失败: {e}")
+            logger.error(f"读取电池二维码失败: {e}")
             return "N/A"
 
 
@@ -615,11 +615,11 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         try:
             # 尝试不同的字节序读取
             code_little, read_err = self.client.use_node('REG_DATA_ELECTROLYTE_CODE').read(10, word_order=WorderOrder.LITTLE)
-            print(code_little)
+            # logger.debug(f"读取电解液二维码原始数据: {code_little}")
             clean_code = code_little[-8:][::-1]
             return clean_code
         except Exception as e:
-            print(f"读取电解液二维码失败: {e}")
+            logger.error(f"读取电解液二维码失败: {e}")
             return "N/A"
 
     # ===================== 环境监控区 ======================
@@ -809,14 +809,14 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         data_coin_num = self.data_coin_num
         data_electrolyte_code = self.data_electrolyte_code
         data_coin_cell_code = self.data_coin_cell_code
-        print("data_open_circuit_voltage", data_open_circuit_voltage)
-        print("data_pole_weight", data_pole_weight)
-        print("data_assembly_time", data_assembly_time)
-        print("data_assembly_pressure", data_assembly_pressure)
-        print("data_electrolyte_volume", data_electrolyte_volume)
-        print("data_coin_num", data_coin_num)
-        print("data_electrolyte_code", data_electrolyte_code)
-        print("data_coin_cell_code", data_coin_cell_code)
+        logger.debug(f"data_open_circuit_voltage: {data_open_circuit_voltage}")
+        logger.debug(f"data_pole_weight: {data_pole_weight}")
+        logger.debug(f"data_assembly_time: {data_assembly_time}")
+        logger.debug(f"data_assembly_pressure: {data_assembly_pressure}")
+        logger.debug(f"data_electrolyte_volume: {data_electrolyte_volume}")
+        logger.debug(f"data_coin_num: {data_coin_num}")
+        logger.debug(f"data_electrolyte_code: {data_electrolyte_code}")
+        logger.debug(f"data_coin_cell_code: {data_coin_cell_code}")
         #接收完信息后，读取完毕标志位置True
         liaopan3 = self.deck.get_resource("\u7535\u6c60\u6599\u76d8")        
         #把物料解绑后放到另一盘上
