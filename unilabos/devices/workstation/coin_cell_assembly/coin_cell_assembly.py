@@ -109,44 +109,23 @@ def _coerce_deck_input(deck: Any) -> Optional[Deck]:
 #构建物料系统
 
 class CoinCellAssemblyWorkstation(WorkstationBase):
-    def __init__(
-        self,
-        deck: Deck=None,
-        address: str = "172.21.33.176",
-        port: str = "502",
-        debug_mode: bool = False,
+    def __init__(self, 
+        config: dict = None, 
+        deck=None, 
+            address: str = "172.21.33.176",
+            port: str = "502",
+            debug_mode: bool = False,
         *args,
-        **kwargs,
-    ):
-        if deck is None and "deck" in kwargs:
-            deck = kwargs.pop("deck")
-        else:
-            kwargs.pop("deck", None)
+        **kwargs):
 
-        normalized_deck = _coerce_deck_input(deck)
-
-        if deck is None and isinstance(normalized_deck, Deck):
-            deck = normalized_deck
-
-        super().__init__(
-            #桌子
-            deck=deck,
-            *args,
-            **kwargs,
-        )
+        if deck is None and config:
+            deck = config.get('deck')
+        else :
+            logger.info("没有传入依华deck，检查启动json文件")
+        super().__init__(deck=deck, *args, **kwargs,)
         self.debug_mode = debug_mode
 
-        # 如果没有传入 deck，则创建标准配置的 deck
-        if self.deck is None:
-            self.deck = CoincellDeck(size_x=3650, size_y=1550, size_z=2100, origin=Coordinate(-2000, 100, 0),setup=True)
-        else:
-            # 如果传入了 deck 但还没有 setup，可以选择是否 setup
-            if self.deck is not None and len(self.deck.children) == 0:
-                # deck 为空，执行 setup
-                self.deck.setup()
-            # 否则使用传入的 deck（可能已经配置好了）
-            self.deck = self.deck
-
+ 
         """ 连接初始化 """
         modbus_client = TCPClient(addr=address, port=port)
         logger.debug(f"创建 Modbus 客户端: {modbus_client}")
@@ -173,12 +152,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         self.csv_export_running = False
         self.csv_export_file = None
         self.coin_num_N = 0  #已组装电池数量
-        #创建一个物料台面，包含两个极片板
-        #self._ros_node.update_resource(self.deck)
-        
-        #ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
-        #    "resources": [self.deck]
-        #})
+
 
     
     def post_init(self, ros_node: ROS2WorkstationNode):
