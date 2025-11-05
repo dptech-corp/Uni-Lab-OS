@@ -473,10 +473,174 @@ class BioyondWorkstation(WorkstationBase):
                 import traceback
                 traceback.print_exc()
 
+    def resource_tree_remove(self, resources: List[ResourcePLR]) -> None:
+        """处理资源删除时的同步（出库操作）
+
+        当 UniLab 前端删除物料时，需要将删除操作同步到 Bioyond 系统（出库）
+
+        Args:
+            resources: 要删除的资源列表
+        """
+        logger.info(f"[resource_tree_remove] 收到 {len(resources)} 个资源的移除请求（出库操作）")
+
+        # ⭐ 关键优化：先找出所有的顶层容器（BottleCarrier），只对它们进行出库
+        # 因为在 Bioyond 中，容器（如分装板 1105-12）是一个完整的物料
+        # 里面的小瓶子是它的 detail 字段，不需要单独出库
+
+        top_level_resources = []
+        child_resource_names = set()
+
+        # 第一步：识别所有子资源的名称
+        for resource in resources:
+            resource_category = getattr(resource, "category", None)
+            if resource_category == "bottle_carrier":
+                children = list(resource.children) if hasattr(resource, 'children') else []
+                for child in children:
+                    child_resource_names.add(child.name)
+
+        # 第二步：筛选出顶层资源（不是任何容器的子资源）
+        for resource in resources:
+            resource_category = getattr(resource, "category", None)
+
+            # 跳过仓库类型的资源
+            if resource_category == "warehouse":
+                logger.debug(f"[resource_tree_remove] 跳过仓库类型资源: {resource.name}")
+                continue
+
+            # 如果是容器，它就是顶层资源
+            if resource_category == "bottle_carrier":
+                top_level_resources.append(resource)
+                logger.info(f"[resource_tree_remove] 识别到顶层容器资源: {resource.name}")
+            # 如果不是任何容器的子资源，它也是顶层资源
+            elif resource.name not in child_resource_names:
+                top_level_resources.append(resource)
+                logger.info(f"[resource_tree_remove] 识别到顶层独立资源: {resource.name}")
+            else:
+                logger.debug(f"[resource_tree_remove] 跳过子资源（将随容器一起出库）: {resource.name}")
+
+        logger.info(f"[resource_tree_remove] 实际需要处理的顶层资源: {len(top_level_resources)} 个")
+
+        # 第三步：对每个顶层资源执行出库操作
+        for resource in top_level_resources:
+            try:
+                self._outbound_single_resource(resource)
+            except Exception as e:
+                logger.error(f"❌ [resource_tree_remove] 处理资源 {resource.name} 出库失败: {e}")
+                import traceback
+                traceback.print_exc()
+
+        logger.info(f"[resource_tree_remove] 资源移除（出库）操作完成")
+
+    def _outbound_single_resource(self, resource: ResourcePLR) -> bool:
+        """对单个资源执行 Bioyond 出库操作
+
+        Args:
+            resource: 要出库的资源
+
+        Returns:
+            bool: 出库是否成功
+        """
+        try:
+            logger.info(f"[resource_tree_remove] 🎯 开始处理资源出库: {resource.name}")
+
+            # 获取资源的 Bioyond ID
+            extra_info = getattr(resource, "unilabos_extra", {})
+            material_bioyond_id = extra_info.get("material_bioyond_id")
+
+            if not material_bioyond_id:
+                # 如果没有 Bioyond ID，尝试按名称查询
+                logger.info(f"[resource_tree_remove] 资源 {resource.name} 没有保存 Bioyond ID，尝试查询...")
+
+                # 直接使用资源名称查询（不去除后缀）
+                logger.info(f"[resource_tree_remove] 查询 Bioyond 系统中的物料: {resource.name}")
+
+                # 查询所有类型的物料：0=耗材, 1=样品, 2=试剂
+                all_materials = []
+                for type_mode in [0, 1, 2]:
+                    query_params = json.dumps({
+                        "typeMode": type_mode,
+                        "filter": resource.name,  # 直接使用资源名称
+                        "includeDetail": True
+                    })
+                    materials = self.hardware_interface.stock_material(query_params)
+                    if materials:
+                        all_materials.extend(materials)
+
+                # 精确匹配物料名称
+                matched_material = None
+                for mat in all_materials:
+                    if mat.get("name") == resource.name:
+                        matched_material = mat
+                        material_bioyond_id = mat.get("id")
+                        logger.info(f"✅ [resource_tree_remove] 找到物料 {resource.name} 的 Bioyond ID: {material_bioyond_id[:8]}...")
+                        break
+
+                if not matched_material:
+                    logger.warning(f"⚠️ [resource_tree_remove] Bioyond 系统中未找到物料: {resource.name}")
+                    logger.info(f"[resource_tree_remove] 该物料可能尚未入库或已被删除，跳过出库操作")
+                    return True
+
+            # 获取物料当前所在的库位信息
+            logger.info(f"[resource_tree_remove] 📍 查询物料 {resource.name} 的库位信息...")
+
+            # 重新查询物料详情以获取最新的库位信息
+            all_materials_type1 = self.hardware_interface.stock_material('{"typeMode": 1, "includeDetail": true}')
+            all_materials_type2 = self.hardware_interface.stock_material('{"typeMode": 2, "includeDetail": true}')
+            all_materials_type0 = self.hardware_interface.stock_material('{"typeMode": 0, "includeDetail": true}')
+            all_materials = (all_materials_type0 or []) + (all_materials_type1 or []) + (all_materials_type2 or [])
+
+            location_id = None
+            current_quantity = 0
+
+            for material in all_materials:
+                if material.get("id") == material_bioyond_id:
+                    locations = material.get("locations", [])
+                    if locations:
+                        # 取第一个库位
+                        location = locations[0]
+                        location_id = location.get("id")
+                        current_quantity = location.get("quantity", 1)
+                        logger.info(f"📍 [resource_tree_remove] 物料 {resource.name} 位于库位:")
+                        logger.info(f"   - 库位代码: {location.get('code')}")
+                        logger.info(f"   - 仓库名称: {location.get('whName')}")
+                        logger.info(f"   - 数量: {current_quantity}")
+                        logger.info(f"   - 库位ID: {location_id[:8]}...")
+                        break
+                    else:
+                        logger.warning(f"⚠️ [resource_tree_remove] 物料 {resource.name} 没有库位信息，可能尚未入库")
+                        return True
+
+            if not location_id:
+                logger.warning(f"⚠️ [resource_tree_remove] 无法获取物料 {resource.name} 的库位信息，跳过出库")
+                return False
+
+            # 调用 Bioyond 出库 API
+            logger.info(f"[resource_tree_remove] 📤 调用 Bioyond API 出库物料 {resource.name}...")
+            logger.info(f"   参数: material_id={material_bioyond_id[:8]}..., location_id={location_id[:8]}..., quantity={current_quantity}")
+
+            response = self.hardware_interface.material_outbound_by_id(
+                material_id=material_bioyond_id,
+                location_id=location_id,
+                quantity=current_quantity
+            )
+
+            if response is not None:
+                logger.info(f"✅ [resource_tree_remove] 物料 {resource.name} 成功从 Bioyond 系统出库")
+                return True
+            else:
+                logger.error(f"❌ [resource_tree_remove] 物料 {resource.name} 出库失败，API 返回空")
+                return False
+
+        except Exception as e:
+            logger.error(f"❌ [resource_tree_remove] 物料 {resource.name} 出库时发生异常: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
+
     def resource_tree_transfer(self, old_parent: Optional[ResourcePLR], resource: ResourcePLR, new_parent: ResourcePLR) -> None:
         """处理资源在设备间迁移时的同步
 
-        当资源从一个设备迁移到 BioyondWorkstation 时，需要同步到 Bioyond 系统
+        当资源从一个设备迁移到 BioyondWorkstation 时,需要同步到 Bioyond 系统
 
         Args:
             old_parent: 资源的原父节点（可能为 None）
