@@ -678,7 +678,7 @@ class BioyondV1RPC(BaseRequest):
     def scheduler_pause(self) -> int:
         """描述：暂停调度器"""
         response = self.post(
-            url=f'{self.host}/api/lims/scheduler/scheduler-pause',
+            url=f'{self.host}/api/lims/scheduler/pause',
             params={
                 "apiKey": self.api_key,
                 "requestTime": self.get_current_time_iso8601(),
@@ -689,8 +689,9 @@ class BioyondV1RPC(BaseRequest):
         return response.get("code", 0)
 
     def scheduler_continue(self) -> int:
+        """描述：继续调度器"""
         response = self.post(
-            url=f'{self.host}/api/lims/scheduler/scheduler-continue',
+            url=f'{self.host}/api/lims/scheduler/continue',
             params={
                 "apiKey": self.api_key,
                 "requestTime": self.get_current_time_iso8601(),
@@ -703,7 +704,7 @@ class BioyondV1RPC(BaseRequest):
     def scheduler_stop(self) -> int:
         """描述：停止调度器"""
         response = self.post(
-            url=f'{self.host}/api/lims/scheduler/scheduler-stop',
+            url=f'{self.host}/api/lims/scheduler/stop',
             params={
                 "apiKey": self.api_key,
                 "requestTime": self.get_current_time_iso8601(),
@@ -714,9 +715,9 @@ class BioyondV1RPC(BaseRequest):
         return response.get("code", 0)
 
     def scheduler_reset(self) -> int:
-        """描述：重置调度器"""
+        """描述：复位调度器"""
         response = self.post(
-            url=f'{self.host}/api/lims/scheduler/scheduler-reset',
+            url=f'{self.host}/api/lims/scheduler/reset',
             params={
                 "apiKey": self.api_key,
                 "requestTime": self.get_current_time_iso8601(),
