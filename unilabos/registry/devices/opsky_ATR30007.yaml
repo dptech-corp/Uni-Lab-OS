@@ -1,0 +1,86 @@
+opsky_ATR30007:
+  category:
+  - characterization_optic
+  - opsky_ATR30007
+  class:
+    action_value_mappings:
+      auto-run_once:
+        feedback: {}
+        goal: {}
+        goal_default:
+          integration_time: '5000'
+          laser_power: '200'
+          norm_max: '1.0'
+          normalize: 'true'
+          save_csv: 'true'
+          save_plot: 'true'
+        handles: {}
+        result: {}
+        schema:
+          description: 执行一次站控-扫码-拉曼流程的大函数入口，参数以字符串形式传入。
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                integration_time:
+                  default: '5000'
+                  type: string
+                laser_power:
+                  default: '200'
+                  type: string
+                norm_max:
+                  default: '1.0'
+                  type: string
+                normalize:
+                  default: 'true'
+                  type: string
+                save_csv:
+                  default: 'true'
+                  type: string
+                save_plot:
+                  default: 'true'
+                  type: string
+              required: []
+              type: object
+            result: {}
+          required: []
+          title: run_once 参数
+          type: object
+        type: UniLabJsonCommand
+    module: unilabos.devices.opsky_Raman.opsky_ATR30007:opsky_ATR30007
+    status_types: {}
+    type: python
+  config_info: []
+  description: OPSKY ATR30007 光纤拉曼模块，提供单一入口大函数以执行一次完整流程。
+  handles: []
+  icon: ''
+  init_param_schema:
+    config:
+      properties:
+        plc_ip:
+          default: 192.168.1.88
+          type: string
+        plc_port:
+          default: 502
+          type: integer
+        robot_ip:
+          default: 192.168.1.200
+          type: string
+        robot_port:
+          default: 502
+          type: integer
+        scan_csv_file:
+          default: scan_results.csv
+          type: string
+      required:
+      - plc_ip
+      - plc_port
+      - robot_ip
+      - robot_port
+      - scan_csv_file
+      type: object
+    data:
+      properties: {}
+      required: []
+      type: object
+  version: 1.0.0
