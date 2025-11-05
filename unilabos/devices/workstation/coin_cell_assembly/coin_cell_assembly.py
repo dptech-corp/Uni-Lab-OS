@@ -112,19 +112,18 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
     def __init__(self, 
         config: dict = None, 
         deck=None, 
-            address: str = "172.21.33.176",
-            port: str = "502",
-            debug_mode: bool = False,
+        address: str = "172.21.33.176",
+        port: str = "502",
+        debug_mode: bool = False,
         *args,
         **kwargs):
 
         if deck is None and config:
             deck = config.get('deck')
-        else :
+        if deck is None:
             logger.info("没有传入依华deck，检查启动json文件")
         super().__init__(deck=deck, *args, **kwargs,)
         self.debug_mode = debug_mode
-
  
         """ 连接初始化 """
         modbus_client = TCPClient(addr=address, port=port)
@@ -140,12 +139,14 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
                 time.sleep(2)
             if not modbus_client.client.is_socket_open():
                 raise ValueError('modbus tcp connection failed')
+            self.nodes = BaseClient.load_csv(os.path.join(os.path.dirname(__file__), 'coin_cell_assembly_a.csv'))
+            self.client = modbus_client.register_node_list(self.nodes)
         else:
             print("测试模式，跳过连接")
+            self.nodes, self.client = None, None
 
         """ 工站的配置 """
-        self.nodes = BaseClient.load_csv(os.path.join(os.path.dirname(__file__), 'coin_cell_assembly_a.csv'))
-        self.client  = modbus_client.register_node_list(self.nodes)
+
         self.success = False
         self.allow_data_read = False  #允许读取函数运行标志位
         self.csv_export_thread = None
@@ -153,8 +154,6 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         self.csv_export_file = None
         self.coin_num_N = 0  #已组装电池数量
 
-
-    
     def post_init(self, ros_node: ROS2WorkstationNode):
         self._ros_node = ros_node
         #self.deck = create_a_coin_cell_deck()

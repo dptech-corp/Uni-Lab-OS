@@ -16,6 +16,7 @@ from unilabos.devices.workstation.bioyond_studio.config import (
     API_CONFIG, MATERIAL_TYPE_MAPPINGS, WAREHOUSE_MAPPING, SOLID_LIQUID_MAPPINGS
 )
 from unilabos.devices.workstation.workstation_http_service import WorkstationHTTPService
+from unilabos.resources.bioyond.decks import BIOYOND_YB_Deck
 from unilabos.utils.log import logger
 from unilabos.registry.registry import lab_registry
 
@@ -1074,16 +1075,11 @@ class BioyondCellWorkstation(BioyondWorkstation):
 
 if __name__ == "__main__":
     lab_registry.setup()
-    ws = BioyondCellWorkstation()
+    deck = BIOYOND_YB_Deck(setup=True)
+    ws = BioyondCellWorkstation(deck=deck)
     # ws.create_sample(name="test", board_type="配液瓶(小)板", bottle_type="配液瓶(小)", location_code="B01")
     # logger.info(ws.scheduler_stop())
     # logger.info(ws.scheduler_start())
-    
-    # results = ws.create_materials(SOLID_LIQUID_MAPPINGS)
-    # for r in results:
-        # logger.info(r)
-    # 从CSV文件读取物料列表并批量创建入库
-    # result = ws.create_and_inbound_materials()
     
     # 继续后续流程
     # logger.info(ws.auto_feeding4to3()) #搬运物料到3号箱

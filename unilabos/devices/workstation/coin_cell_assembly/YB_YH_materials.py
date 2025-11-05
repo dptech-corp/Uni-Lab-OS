@@ -18,6 +18,9 @@ from pylabrobot.resources.tip_rack import TipRack, TipSpot
 from pylabrobot.resources.trash import Trash
 from pylabrobot.resources.utils import create_ordered_items_2d
 
+from unilabos.resources.battery.magazine import MagazineHolder_1, MagazineHolder_2, MagazineHolder_4, MagazineHolder_6
+from unilabos.resources.battery.bottle_carriers import YIHUA_Electrolyte_12VialCarrier
+
 
 class ElectrodeSheetState(TypedDict):
     diameter: float  # 直径 (mm)
@@ -163,7 +166,6 @@ class MaterialHole(Resource):
     # 根据children的编号取物料对象。
     def get_electrode_sheet_info(self, index: int) -> ElectrodeSheet:
         return self.children[index]
-
 
 
 class MaterialPlateState(TypedDict):
@@ -327,132 +329,6 @@ class PlateSlot(ResourceStack):
         }
 
 
-class ClipMagazineHole(Container):
-    """子弹夹洞位类"""
-
-    def __init__(
-        self,
-        name: str,
-        diameter: float,
-        depth: float,
-        max_sheets: int = 100,
-        category: str = "clip_magazine_hole",
-    ):
-        """初始化子弹夹洞位
-
-        Args:
-            name: 洞位名称
-            diameter: 洞直径 (mm)
-            depth: 洞深度 (mm)
-            max_sheets: 最大极片数量
-            category: 类别
-        """
-        super().__init__(
-            name=name,
-            size_x=diameter,
-            size_y=diameter,
-            size_z=depth,
-            category=category,
-        )
-        self.diameter = diameter
-        self.depth = depth
-        self.max_sheets = max_sheets
-        self._sheets: List[ElectrodeSheet] = []
-
-    def can_add_sheet(self, sheet: ElectrodeSheet) -> bool:
-        """检查是否可以添加极片"""
-        return (len(self._sheets) < self.max_sheets and
-                sheet.diameter <= self.diameter)
-
-    def add_sheet(self, sheet: ElectrodeSheet) -> None:
-        """添加极片"""
-        if not self.can_add_sheet(sheet):
-            raise ValueError(f"无法向洞位 {self.name} 添加极片")
-        self._sheets.append(sheet)
-
-    def take_sheet(self) -> ElectrodeSheet:
-        """取出极片"""
-        if len(self._sheets) == 0:
-            raise ValueError(f"洞位 {self.name} 没有极片")
-        return self._sheets.pop()
-
-    def get_sheet_count(self) -> int:
-        """获取极片数量"""
-        return len(self._sheets)
-
-    def serialize_state(self) -> Dict[str, Any]:
-        return {
-            "sheet_count": len(self._sheets),
-            "sheets": [sheet.serialize() for sheet in self._sheets],
-        }
-
-# TODO: 这个要改
-class ClipMagazine(ItemizedResource[ClipMagazineHole]):
-    """子弹夹类 - 有6个洞位，每个洞位放多个极片"""
-    children: List[ClipMagazineHole]
-    def __init__(
-        self,
-        name: str,
-        size_x: float,
-        size_y: float,
-        size_z: float,
-        hole_diameter: float = 14.0,
-        hole_depth: float = 10.0,
-        hole_spacing: float = 25.0,
-        max_sheets_per_hole: int = 100,
-        category: str = "clip_magazine",
-        model: Optional[str] = None,
-    ):
-        """初始化子弹夹
-
-        Args:
-            name: 子弹夹名称
-            size_x: 长度 (mm)
-            size_y: 宽度 (mm)
-            size_z: 高度 (mm)
-            hole_diameter: 洞直径 (mm)
-            hole_depth: 洞深度 (mm)
-            hole_spacing: 洞位间距 (mm)
-            max_sheets_per_hole: 每个洞位最大极片数量
-            category: 类别
-            model: 型号
-        """
-        # 创建6个洞位，排成2x3布局
-        holes = create_ordered_items_2d(
-            klass=ClipMagazineHole,
-            num_items_x=3,
-            num_items_y=2,
-            dx=(size_x - 2 * hole_spacing) / 2,  # 居中
-            dy=(size_y - hole_spacing) / 2,     # 居中
-            dz=size_z - 0,
-            item_dx=hole_spacing,
-            item_dy=hole_spacing,
-            diameter=hole_diameter,
-            depth=hole_depth,
-        )
-
-        super().__init__(
-            name=name,
-            size_x=size_x,
-            size_y=size_y,
-            size_z=size_z,
-            ordered_items=holes,
-            category=category,
-            model=model,
-        )
-
-        # 保存洞位的直径和深度
-        self.hole_diameter = hole_diameter
-        self.hole_depth = hole_depth
-        self.max_sheets_per_hole = max_sheets_per_hole
-
-    def serialize(self) -> dict:
-        return {
-            **super().serialize(),
-            "hole_diameter": self.hole_diameter,
-            "hole_depth": self.hole_depth,
-            "max_sheets_per_hole": self.max_sheets_per_hole,
-        }
 #是一种类型注解，不用self
 class BatteryState(TypedDict):
     """电池状态字典"""
@@ -595,75 +471,53 @@ class BatteryPressSlot(Resource):
     def get_battery_info(self, index: int) -> Battery:
         return self.children[0]
 
-# TODO:这个移液枪架子看一下从哪继承
-class TipBox64State(TypedDict):
-    """电池状态字典"""
-    tip_diameter: float = 5.0
-    tip_length: float = 50.0
-    with_tips: bool = True
 
-class TipBox64(TipRack):
-    """64孔枪头盒类"""
-
-    children: List[TipSpot] = []
-    def __init__(
-        self,
+def TipBox64(
         name: str,
         size_x: float = 127.8,
         size_y: float = 85.5,
         size_z: float = 60.0,
         category: str = "tip_box_64",
         model: Optional[str] = None,
-    ):
-        """初始化64孔枪头盒
+):
+    """64孔枪头盒类"""
+    from pylabrobot.resources.tip import Tip
 
-        Args:
-            name: 枪头盒名称
-            size_x: 长度 (mm)
-            size_y: 宽度 (mm)
-            size_z: 高度 (mm)
-            tip_diameter: 枪头直径 (mm)
-            tip_length: 枪头长度 (mm)
-            category: 类别
-            model: 型号
-            with_tips: 是否带枪头
-        """
-        from pylabrobot.resources.tip import Tip
-
-        # 创建8x8=64个枪头位
-        def make_tip():
-            return Tip(
-                has_filter=False,
-                total_tip_length=20.0,
-                maximal_volume=1000,  # 1mL
-                fitting_depth=8.0,
-            )
-
-        tip_spots = create_ordered_items_2d(
-            klass=TipSpot,
-            num_items_x=8,
-            num_items_y=8,
-            dx=8.0,
-            dy=8.0,
-            dz=0.0,
-            item_dx=9.0,
-            item_dy=9.0,
-            size_x=10,
-            size_y=10,
-            size_z=0.0,
-            make_tip=make_tip,
+    # 创建8x8=64个枪头位
+    def make_tip():
+        return Tip(
+            has_filter=False,
+            total_tip_length=20.0,
+            maximal_volume=1000,  # 1mL
+            fitting_depth=8.0,
         )
-        self._unilabos_state: WasteTipBoxstate = WasteTipBoxstate()
-        super().__init__(
-            name=name,
-            size_x=size_x,
-            size_y=size_y,
-            size_z=size_z,
-            ordered_items=tip_spots,
-            category=category,
-            model=model,
-            with_tips=True,
-        )
+
+    tip_spots = create_ordered_items_2d(
+        klass=TipSpot,
+        num_items_x=12,
+        num_items_y=8,
+        dx=8.0,
+        dy=8.0,
+        dz=0.0,
+        item_dx=9.0,
+        item_dy=9.0,
+        size_x=10,
+        size_y=10,
+        size_z=0.0,
+        make_tip=make_tip,
+    )
+    idx_available = list(range(0, 32)) + list(range(64, 96))
+    tip_spots_available = {k: v for i, (k, v) in enumerate(tip_spots.items()) if i in idx_available}
+    return TipRack(
+        name=name,
+        size_x=size_x,
+        size_y=size_y,
+        size_z=size_z,
+        ordered_items=tip_spots_available,
+        category=category,
+        model=model,
+        with_tips=True,
+    )
 
 
 
@@ -682,8 +536,12 @@ class WasteTipBox(Trash):
         size_x: float = 127.8,
         size_y: float = 85.5,
         size_z: float = 60.0,
-        category: str = "waste_tip_box",
-        model: Optional[str] = None,
+        material_z_thickness=0,
+        max_volume=float("inf"),
+        category="trash",
+        model=None,
+        compute_volume_from_height=None,
+        compute_height_from_volume=None,
     ):
         """初始化废枪头盒
 
@@ -733,389 +591,6 @@ class WasteTipBox(Trash):
         return data
 
 
-class BottleRackState(TypedDict):
-    """     bottle_diameter: 瓶子直径 (mm)
-            bottle_height: 瓶子高度 (mm)
-            position_spacing: 位置间距 (mm)"""
-    bottle_diameter: float
-    bottle_height: float
-    name_to_index: dict
-
-
-
-class BottleRack(Resource):
-    """瓶架类 - 12个待配位置+12个已配位置"""
-    children: List[Resource] = []
-
-    def __init__(
-            self,
-            name: str,
-            size_x: float,
-            size_y: float,
-            size_z: float,
-            category: str = "bottle_rack",
-            model: Optional[str] = None,
-            num_items_x: int = 2,
-            num_items_y: int = 4,
-            position_spacing: float = 35.0,
-            orientation: str = "horizontal",
-            padding_x: float = 20.0,
-            padding_y: float = 20.0,
-    ):
-        """初始化瓶架
-
-        Args:
-            name: 瓶架名称
-            size_x: 长度 (mm)
-            size_y: 宽度 (mm)
-            size_z: 高度 (mm)
-            category: 类别
-            model: 型号
-        """
-        super().__init__(
-            name=name,
-            size_x=size_x,
-            size_y=size_y,
-            size_z=size_z,
-            category=category,
-            model=model,
-        )
-        # 初始化状态
-        self._unilabos_state: BottleRackState = BottleRackState(
-            bottle_diameter=30.0,
-            bottle_height=100.0,
-            position_spacing=position_spacing,
-            name_to_index={},
-        )
-        # 基于网格生成瓶位坐标映射（居中摆放）
-        # 使用内边距，避免点跑到容器外（前端渲染不按mm等比缩放时更稳妥）
-        origin_x = padding_x
-        origin_y = padding_y
-        self.index_to_pos = {}
-        for j in range(num_items_y):
-            for i in range(num_items_x):
-                idx = j * num_items_x + i
-                if orientation == "vertical":
-                    # 纵向：沿 y 方向优先排列
-                    self.index_to_pos[idx] = Coordinate(
-                        x=origin_x + j * position_spacing,
-                        y=origin_y + i * position_spacing,
-                        z=0,
-                    )
-                else:
-                    # 横向（默认）：沿 x 方向优先排列
-                    self.index_to_pos[idx] = Coordinate(
-                        x=origin_x + i * position_spacing,
-                        y=origin_y + j * position_spacing,
-                        z=0,
-                    )
-        self.name_to_index = {}
-        self.name_to_pos = {}
-        self.num_items_x = num_items_x
-        self.num_items_y = num_items_y
-        self.orientation = orientation
-        self.padding_x = padding_x
-        self.padding_y = padding_y
-
-    def load_state(self, state: Dict[str, Any]) -> None:
-        """格式不变"""
-        super().load_state(state)
-        self._unilabos_state = state
-
-    def serialize_state(self) -> Dict[str, Dict[str, Any]]:
-        """格式不变"""
-        data = super().serialize_state()
-        data.update(
-            self._unilabos_state)  # Container自身的信息，云端物料将保存这一data，本地也通过这里的data进行读写，当前类用来表示这个物料的长宽高大小的属性，而data（state用来表示物料的内容，细节等）
-        return data
-
-    # TODO: 这里有些问题要重新写一下
-    def assign_child_resource_old(self, resource: Resource, location=Coordinate.zero(), reassign=True):
-        capacity = self.num_items_x * self.num_items_y
-        assert len(self.children) < capacity, "瓶架已满，无法添加更多瓶子"
-        index = len(self.children)
-        location = self.index_to_pos.get(index, Coordinate.zero())
-        self.name_to_pos[resource.name] = location
-        self.name_to_index[resource.name] = index
-        return super().assign_child_resource(resource, location, reassign)
-
-    def assign_child_resource(self, resource: Resource, index: int):
-        capacity = self.num_items_x * self.num_items_y
-        assert 0 <= index < capacity, "无效的瓶子索引"
-        self.name_to_index[resource.name] = index
-        location = self.index_to_pos[index]
-        return super().assign_child_resource(resource, location)
-
-    def unassign_child_resource(self, resource: Bottle):
-        super().unassign_child_resource(resource)
-        self.index_to_pos.pop(self.name_to_index.pop(resource.name, None), None)
-
-    def serialize(self) -> dict:
-        return {
-            **super().serialize(),
-            "num_items_x": self.num_items_x,
-            "num_items_y": self.num_items_y,
-            "position_spacing": self._unilabos_state.get("position_spacing", 35.0),
-            "orientation": self.orientation,
-            "padding_x": self.padding_x,
-            "padding_y": self.padding_y,
-        }
-
-class BottleState(TypedDict):
-    diameter: float
-    height: float
-    electrolyte_name: str
-    electrolyte_volume: float
-    max_volume: float
-
-class Bottle(Resource):
-    """瓶子类 - 容纳电解液"""
-
-    def __init__(
-        self,
-        name: str,
-        category: str = "bottle",
-    ):
-        """初始化瓶子
-
-        Args:
-            name: 瓶子名称
-            diameter: 直径 (mm)
-            height: 高度 (mm)
-            max_volume: 最大体积 (μL)
-            barcode: 二维码
-            category: 类别
-            model: 型号
-        """
-        super().__init__(
-            name=name,
-            size_x=1,
-            size_y=1,
-            size_z=1,
-            category=category,
-        )
-        self._unilabos_state: BottleState = BottleState()
-    
-    def aspirate_electrolyte(self, volume: float) -> bool:
-        current_volume = self._unilabos_state["electrolyte_volume"]
-        assert current_volume > volume, f"Cannot aspirate {volume}μL, only {current_volume}μL available."
-        self._unilabos_state["electrolyte_volume"] -= volume
-        return True
-
-    def load_state(self, state: Dict[str, Any]) -> None:
-        """格式不变"""
-        super().load_state(state)
-        self._unilabos_state = state
-
-    def serialize_state(self) -> Dict[str, Dict[str, Any]]:
-        """格式不变"""
-        data = super().serialize_state()
-        data.update(self._unilabos_state)  # Container自身的信息，云端物料将保存这一data，本地也通过这里的data进行读写，当前类用来表示这个物料的长宽高大小的属性，而data（state用来表示物料的内容，细节等）
-        return data
-
-class ClipMagazine_four(ItemizedResource[ClipMagazineHole]):
-    """子弹夹类 - 有4个洞位，每个洞位放多个极片"""
-    children: List[ClipMagazineHole]
-    def __init__(
-        self,
-        name: str,
-        size_x: float,
-        size_y: float,
-        size_z: float,
-        hole_diameter: float = 14.0,
-        hole_depth: float = 10.0,
-        hole_spacing: float = 25.0,
-        max_sheets_per_hole: int = 100,
-        category: str = "clip_magazine_four",
-        model: Optional[str] = None,
-    ):
-        """初始化子弹夹
-
-        Args:
-            name: 子弹夹名称
-            size_x: 长度 (mm)
-            size_y: 宽度 (mm)
-            size_z: 高度 (mm)
-            hole_diameter: 洞直径 (mm)
-            hole_depth: 洞深度 (mm)
-            hole_spacing: 洞位间距 (mm)
-            max_sheets_per_hole: 每个洞位最大极片数量
-            category: 类别
-            model: 型号
-        """
-        # 创建4个洞位，排成2x2布局
-        holes = create_ordered_items_2d(
-            klass=ClipMagazineHole,
-            num_items_x=2,
-            num_items_y=2,
-            dx=(size_x - 2 * hole_spacing) / 2,  # 居中
-            dy=(size_y - hole_spacing) / 2,     # 居中
-            dz=size_z - 0,
-            item_dx=hole_spacing,
-            item_dy=hole_spacing,
-            diameter=hole_diameter,
-            depth=hole_depth,
-        )
-
-        super().__init__(
-            name=name,
-            size_x=size_x,
-            size_y=size_y,
-            size_z=size_z,
-            ordered_items=holes,
-            category=category,
-            model=model,
-        )
-
-        # 保存洞位的直径和深度
-        self.hole_diameter = hole_diameter
-        self.hole_depth = hole_depth
-        self.max_sheets_per_hole = max_sheets_per_hole
-    
-
-    def serialize(self) -> dict:
-        return {
-            **super().serialize(),
-            "hole_diameter": self.hole_diameter,
-            "hole_depth": self.hole_depth,
-            "max_sheets_per_hole": self.max_sheets_per_hole,
-        }
-
-class ClipMagazine_two(ItemizedResource[ClipMagazineHole]):
-    """子弹夹类 - 有2个洞位，每个洞位放多个极片"""
-    children: List[ClipMagazineHole]
-    def __init__(
-        self,
-        name: str,
-        size_x: float,
-        size_y: float,
-        size_z: float,
-        hole_diameter: float = 14.0,
-        hole_depth: float = 10.0,
-        hole_spacing: float = 25.0,
-        max_sheets_per_hole: int = 100,
-        category: str = "clip_magazine_four",
-        model: Optional[str] = None,
-    ):
-        """初始化子弹夹
-
-        Args:
-            name: 子弹夹名称
-            size_x: 长度 (mm)
-            size_y: 宽度 (mm)
-            size_z: 高度 (mm)
-            hole_diameter: 洞直径 (mm)
-            hole_depth: 洞深度 (mm)
-            hole_spacing: 洞位间距 (mm)
-            max_sheets_per_hole: 每个洞位最大极片数量
-            category: 类别
-            model: 型号
-        """
-        # 创建4个洞位，排成2x2布局
-        holes = create_ordered_items_2d(
-            klass=ClipMagazineHole,
-            num_items_x=1,
-            num_items_y=2,
-            dx=(size_x - 2 * hole_spacing) / 2,  # 居中
-            dy=(size_y - hole_spacing) / 2,     # 居中
-            dz=size_z - 0,
-            item_dx=hole_spacing,
-            item_dy=hole_spacing,
-            diameter=hole_diameter,
-            depth=hole_depth,
-        )
-
-        super().__init__(
-            name=name,
-            size_x=size_x,
-            size_y=size_y,
-            size_z=size_z,
-            ordered_items=holes,
-            category=category,
-            model=model,
-        )
-
-        # 保存洞位的直径和深度
-        self.hole_diameter = hole_diameter
-        self.hole_depth = hole_depth
-        self.max_sheets_per_hole = max_sheets_per_hole
-    
-
-    def serialize(self) -> dict:
-        return {
-            **super().serialize(),
-            "hole_diameter": self.hole_diameter,
-            "hole_depth": self.hole_depth,
-            "max_sheets_per_hole": self.max_sheets_per_hole,
-        }
-class ClipMagazine_one(ItemizedResource[ClipMagazineHole]):
-    """子弹夹类 - 有1个洞位，每个洞位放多个极片"""
-    children: List[ClipMagazineHole]
-    def __init__(
-        self,
-        name: str,
-        size_x: float,
-        size_y: float,
-        size_z: float,
-        hole_diameter: float = 14.0,
-        hole_depth: float = 10.0,
-        hole_spacing: float = 25.0,
-        max_sheets_per_hole: int = 100,
-        category: str = "clip_magazine_four",
-        model: Optional[str] = None,
-    ):
-        """初始化子弹夹
-
-        Args:
-            name: 子弹夹名称
-            size_x: 长度 (mm)
-            size_y: 宽度 (mm)
-            size_z: 高度 (mm)
-            hole_diameter: 洞直径 (mm)
-            hole_depth: 洞深度 (mm)
-            hole_spacing: 洞位间距 (mm)
-            max_sheets_per_hole: 每个洞位最大极片数量
-            category: 类别
-            model: 型号
-        """
-        # 创建4个洞位，排成2x2布局
-        holes = create_ordered_items_2d(
-            klass=ClipMagazineHole,
-            num_items_x=1,
-            num_items_y=1,
-            dx=(size_x - 2 * hole_spacing) / 2,  # 居中
-            dy=(size_y - hole_spacing) / 2,     # 居中
-            dz=size_z - 0,
-            item_dx=hole_spacing,
-            item_dy=hole_spacing,
-            diameter=hole_diameter,
-            depth=hole_depth,
-        )
-
-        super().__init__(
-            name=name,
-            size_x=size_x,
-            size_y=size_y,
-            size_z=size_z,
-            ordered_items=holes,
-            category=category,
-            model=model,
-        )
-
-        # 保存洞位的直径和深度
-        self.hole_diameter = hole_diameter
-        self.hole_depth = hole_depth
-        self.max_sheets_per_hole = max_sheets_per_hole
-    
-
-    def serialize(self) -> dict:
-        return {
-            **super().serialize(),
-            "hole_diameter": self.hole_diameter,
-            "hole_depth": self.hole_depth,
-            "max_sheets_per_hole": self.max_sheets_per_hole,
-        }        
-
 class CoincellDeck(Deck):
     """纽扣电池组装工作站台面类"""
 
@@ -1155,128 +630,101 @@ class CoincellDeck(Deck):
         """设置工作站的标准布局 - 包含子弹夹、料盘、瓶架等完整配置"""
         # ====================================== 子弹夹 ============================================
         # 铝箔（1个洞位）
-        lvbo_zip = ClipMagazine_one("lvbo_zip", 80, 80, 10)
+        lvbo_zip = MagazineHolder_1("铝箔弹夹", 80, 80, 10)
         self.assign_child_resource(lvbo_zip, Coordinate(x=2737.0, y=301.0, z=0))
         
         # 正极片（4个洞位，2x2布局）
-        zhengji_zip = ClipMagazine_four("zhengji_zip", 80, 80, 10)
+        zhengji_zip = MagazineHolder_4("正极弹夹", 80, 80, 10)
         self.assign_child_resource(zhengji_zip, Coordinate(x=2799.0, y=356.0, z=0))
         
         # 正极壳（4个洞位，2x2布局）
-        zhengjike_zip = ClipMagazine_four("zhengjike_zip", 80, 80, 10)
+        zhengjike_zip = MagazineHolder_4("正极壳弹夹", 80, 80, 10)
         self.assign_child_resource(zhengjike_zip, Coordinate(x=2586.0, y=1143.0, z=0))
         
         # 垫片（2个洞位，1x2布局）
-        danpian_zip = ClipMagazine_two("danpian_zip", 80, 80, 10)
+        danpian_zip = MagazineHolder_2("垫片弹夹", 80, 80, 10)
         self.assign_child_resource(danpian_zip, Coordinate(x=2690.0, y=1141.0, z=0))
         
         # 负极壳（4个洞位，2x2布局）
-        fujike_zip = ClipMagazine_four("fujike_zip", 80, 80, 10)
+        fujike_zip = MagazineHolder_4("负极壳弹夹", 80, 80, 10)
         self.assign_child_resource(fujike_zip, Coordinate(x=2492.0, y=1144.0, z=0))
         
         # 弹片（2个洞位，1x2布局）
-        tanpian_zip = ClipMagazine_two("tanpian_zip", 80, 80, 10)
+        tanpian_zip = MagazineHolder_2("弹片弹夹", 80, 80, 10)
         self.assign_child_resource(tanpian_zip, Coordinate(x=2492.0, y=1139.0, z=0))
         
         # 成品弹夹（6个洞位，3x2布局）
-        chengpindanjia_zip = ClipMagazine("chengpindanjia_zip", 80, 80, 10)
+        chengpindanjia_zip = MagazineHolder_6("成品弹夹", 80, 80, 10)
         self.assign_child_resource(chengpindanjia_zip, Coordinate(x=3112.0, y=1295.0, z=0))
         
         # 为子弹夹添加极片
-        for i in range(1):  # ClipMagazine_one 有1个洞位
-            lvbo = ElectrodeSheet(name=f"lvbo_{i}", size_x=12, size_y=12, size_z=0.1)
+        for i in range(1):  # MagazineHolder_1 有1个洞位
+            lvbo = ElectrodeSheet(name=f"铝箔_{i}", size_x=12, size_y=12, size_z=0.1)
             lvbo_zip.children[i].assign_child_resource(lvbo, location=None)
-        for i in range(4):  # ClipMagazine_four 有4个洞位
-            zhengji = ElectrodeSheet(name=f"zhengji_{i}", size_x=12, size_y=12, size_z=0.1)
+        for i in range(4):  # MagazineHolder_4 有4个洞位
+            zhengji = ElectrodeSheet(name=f"正极_{i}", size_x=12, size_y=12, size_z=0.1)
             zhengji_zip.children[i].assign_child_resource(zhengji, location=None)
-        for i in range(4):  # ClipMagazine_four 有4个洞位
-            zhengjike = ElectrodeSheet(name=f"zhengjike_{i}", size_x=12, size_y=12, size_z=0.1)
+        for i in range(4):  # MagazineHolder_4 有4个洞位
+            zhengjike = ElectrodeSheet(name=f"正极壳_{i}", size_x=12, size_y=12, size_z=0.1)
             zhengjike_zip.children[i].assign_child_resource(zhengjike, location=None)
-        for i in range(2):  # ClipMagazine_two 有2个洞位
-            danpian = ElectrodeSheet(name=f"danpian_{i}", size_x=12, size_y=12, size_z=0.1)
+        for i in range(2):  # MagazineHolder_2 有2个洞位
+            danpian = ElectrodeSheet(name=f"垫片_{i}", size_x=12, size_y=12, size_z=0.1)
             danpian_zip.children[i].assign_child_resource(danpian, location=None)
-        for i in range(4):  # ClipMagazine_four 有4个洞位
-            fujike = ElectrodeSheet(name=f"fujike_{i}", size_x=12, size_y=12, size_z=0.1)
+        for i in range(4):  # MagazineHolder_4 有4个洞位
+            fujike = ElectrodeSheet(name=f"负极壳_{i}", size_x=12, size_y=12, size_z=0.1)
             fujike_zip.children[i].assign_child_resource(fujike, location=None)
-        for i in range(2):  # ClipMagazine_two 有2个洞位
-            tanpian = ElectrodeSheet(name=f"tanpian_{i}", size_x=12, size_y=12, size_z=0.1)
+        for i in range(2):  # MagazineHolder_2 有2个洞位
+            tanpian = ElectrodeSheet(name=f"弹片_{i}", size_x=12, size_y=12, size_z=0.1)
             tanpian_zip.children[i].assign_child_resource(tanpian, location=None)
-        for i in range(6):  # ClipMagazine 有6个洞位
-            chengpindanjia = ElectrodeSheet(name=f"chengpindanjia_{i}", size_x=12, size_y=12, size_z=0.1)
-            chengpindanjia_zip.children[i].assign_child_resource(chengpindanjia, location=None)
+        # for i in range(6):  # MagazineHolder_6 有6个洞位
+        #     chengpindanjia = ElectrodeSheet(name=f"成品弹夹_{i}", size_x=12, size_y=12, size_z=0.1)
+        #     chengpindanjia_zip.children[i].assign_child_resource(chengpindanjia, location=None)
 
         
         # ====================================== 物料板 ============================================
         # 创建物料板（料盘carrier）- 4x4布局
         # 负极料盘
-        fujiliaopan = MaterialPlate(name="fujiliaopan", size_x=120, size_y=100, size_z=10.0, fill=True)
+        fujiliaopan = MaterialPlate(name="负极料盘", size_x=120, size_y=100, size_z=10.0, fill=True)
         self.assign_child_resource(fujiliaopan, Coordinate(x=2107.0, y=304.0, z=0))
-        for i in range(16):
-            fujipian = ElectrodeSheet(name=f"{fujiliaopan.name}_jipian_{i}", size_x=12, size_y=12, size_z=0.1)
-            fujiliaopan.children[i].assign_child_resource(fujipian, location=None)
+        # for i in range(16):
+        #     fujipian = ElectrodeSheet(name=f"{fujiliaopan.name}_jipian_{i}", size_x=12, size_y=12, size_z=0.1)
+        #     fujiliaopan.children[i].assign_child_resource(fujipian, location=None)
 
         # 隔膜料盘
-        gemoliaopan = MaterialPlate(name="gemoliaopan", size_x=120, size_y=100, size_z=10.0, fill=True)
+        gemoliaopan = MaterialPlate(name="隔膜料盘", size_x=120, size_y=100, size_z=10.0, fill=True)
         self.assign_child_resource(gemoliaopan, Coordinate(x=2107.0, y=146.0, z=0))
-        for i in range(16):
-            gemopian = ElectrodeSheet(name=f"{gemoliaopan.name}_jipian_{i}", size_x=12, size_y=12, size_z=0.1)
-            gemoliaopan.children[i].assign_child_resource(gemopian, location=None)
+        # for i in range(16):
+        #     gemopian = ElectrodeSheet(name=f"{gemoliaopan.name}_jipian_{i}", size_x=12, size_y=12, size_z=0.1)
+        #     gemoliaopan.children[i].assign_child_resource(gemopian, location=None)
 
         # ====================================== 瓶架、移液枪 ============================================
         # 在台面上放置 3x4 瓶架、6x2 瓶架 与 64孔移液枪头盒
-        # 奔耀上料5ml分液瓶小板 - 2x4布局
-        bottle_rack_2x4 = BottleRack(
-            name="bottle_rack_3x4",
-            size_x=210.0,
-            size_y=140.0,
-            size_z=100.0,
-            num_items_x=2,
-            num_items_y=4,
-            position_spacing=35.0,
-            orientation="vertical",
-        )
-        self.assign_child_resource(bottle_rack_2x4, Coordinate(x=1542.0, y=717.0, z=0))
+        # 奔耀上料5ml分液瓶小板 - 由奔曜跨站转运而来，不单独写
+        
+        # bottle_rack_3x4 = BottleRack(
+        #     name="bottle_rack_3x4",
+        #     size_x=210.0,
+        #     size_y=140.0,
+        #     size_z=100.0,
+        #     num_items_x=2,
+        #     num_items_y=4,
+        #     position_spacing=35.0,
+        #     orientation="vertical",
+        # )
+        # self.assign_child_resource(bottle_rack_3x4, Coordinate(x=1542.0, y=717.0, z=0))
         
         # 电解液缓存位 - 6x2布局
-        bottle_rack_6x2 = BottleRack(
-            name="bottle_rack_6x2",
-            size_x=120.0,
-            size_y=250.0,
-            size_z=100.0,
-            num_items_x=6,
-            num_items_y=2,
-            position_spacing=35.0,
-            orientation="vertical",
-        )
+        bottle_rack_6x2 = YIHUA_Electrolyte_12VialCarrier(name="bottle_rack_6x2")
         self.assign_child_resource(bottle_rack_6x2, Coordinate(x=300, y=300, z=0))
         # 电解液回收位6x2
-        bottle_rack_2x6_2 = BottleRack(
-            name="bottle_rack_6x2_2",
-            size_x=120.0,
-            size_y=250.0,
-            size_z=100.0,
-            num_items_x=6,
-            num_items_y=2,
-            position_spacing=35.0,
-            orientation="vertical",
-        )
+        bottle_rack_6x2_2 = YIHUA_Electrolyte_12VialCarrier(name="bottle_rack_6x2_2")
         self.assign_child_resource(bottle_rack_6x2_2, Coordinate(x=1765.0, y=869.0, z=0))
-
-        # 将 ElectrodeSheet 放满 3x4 与 6x2 的所有孔位
-        for idx in range(bottle_rack_2x4.num_items_x * bottle_rack_2x4.num_items_y):
-            sheet = ElectrodeSheet(name=f"sheet_3x4_{idx}", size_x=12, size_y=12, size_z=0.1)
-            bottle_rack_2x4.assign_child_resource(sheet, index=idx)
-
-        for idx in range(bottle_rack_6x2.num_items_x * bottle_rack_6x2.num_items_y):
-            sheet = ElectrodeSheet(name=f"sheet_6x2_{idx}", size_x=12, size_y=12, size_z=0.1)
-            bottle_rack_6x2.assign_child_resource(sheet, index=idx)
 
         tip_box = TipBox64(name="tip_box_64")
         self.assign_child_resource(tip_box, Coordinate(x=1938.0, y=743.0, z=0))
 
         waste_tip_box = WasteTipBox(name="waste_tip_box")
         self.assign_child_resource(waste_tip_box, Coordinate(x=1960.0, y=639.0, z=0))
-
 
 
 if __name__ == "__main__":

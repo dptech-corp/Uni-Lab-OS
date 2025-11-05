@@ -46,6 +46,3 @@ CoincellDeck:
   init_param_schema: {}
   registry_type: resource
   version: 1.0.0
-
-
-
