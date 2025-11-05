@@ -828,6 +828,16 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
 
 def resource_plr_to_bioyond(plr_resources: list[ResourcePLR], type_mapping: dict = {}, warehouse_mapping: dict = {}) -> list[dict]:
     bioyond_materials = []
+
+    # 定义不需要发送details的载架类型（这些载架自带试剂瓶/烧杯，不需要作为子物料发送）
+    CARRIERS_WITHOUT_DETAILS = {
+        "BIOYOND_DispensingStation_1BottleCarrier",  # 配液站-单试剂瓶载架
+        "BIOYOND_DispensingStation_1FlaskCarrier",   # 配液站-单烧杯载架
+        "BIOYOND_ReactionStation_1BottleCarrier",    # 反应站-单试剂瓶载架
+        "BIOYOND_ReactionStation_1FlaskCarrier",     # 反应站-单烧杯载架
+        "BIOYOND_PolymerStation_1FlaskCarrier",      # 聚合站-单烧杯载架（兼容）
+    }
+
     for resource in plr_resources:
         if isinstance(resource, BottleCarrier):
             # 获取 BottleCarrier 的类型映射
@@ -845,29 +855,75 @@ def resource_plr_to_bioyond(plr_resources: list[ResourcePLR], type_mapping: dict
                 "details": [],
                 "Parameters": "{}"
             }
-            for bottle in resource.children:
-                if isinstance(resource, ItemizedCarrier):
-                    site = resource.get_child_identifier(bottle)
-                else:
-                    site = {"x": bottle.location.x - 1, "y": bottle.location.y - 1}
 
-                # 获取子物料的类型映射
-                bottle_type_info = type_mapping.get(bottle.model)
-                if not bottle_type_info:
-                    logger.error(f"❌ [PLR→Bioyond] 子物料 '{bottle.name}' 的 model '{bottle.model}' 不在 type_mapping 中")
-                    raise ValueError(f"子物料 model '{bottle.model}' 未在 MATERIAL_TYPE_MAPPINGS 中配置")
+            # 如果是自带试剂瓶的载架类型，不处理子物料（details留空）
+            if resource.model in CARRIERS_WITHOUT_DETAILS:
+                logger.info(f"[PLR→Bioyond] 载架 '{resource.name}' (model: {resource.model}) 自带试剂瓶，不添加 details")
+            else:
+                # 处理其他载架类型的子物料
+                for bottle in resource.children:
+                    if isinstance(resource, ItemizedCarrier):
+                        # 🔧 [FIX] 从瓶子名称中提取标识符(如 "vial_A1" -> "A1")
+                        # 而不是使用 get_child_identifier(bottle),因为 resource.children
+                        # 的迭代顺序可能与预期的标识符顺序不匹配
+                        bottle_identifier = None
+                        if "_" in bottle.name:
+                            # 提取最后一个下划线后的部分作为标识符
+                            bottle_identifier = bottle.name.split("_")[-1]
 
-                detail_item = {
-                    "typeId": bottle_type_info[1],
-                    "name": bottle.name,
-                    "code": bottle.code if hasattr(bottle, "code") else "",
-                    "quantity": sum(qty for _, qty in bottle.tracker.liquids) if hasattr(bottle, "tracker") else 0,
-                    "x": site["x"] + 1,
-                    "y": site["y"] + 1,
-                    "molecular": 1,
-                    "Parameters": json.dumps({"molecular": 1})
-                }
-                material["details"].append(detail_item)
+                        if bottle_identifier:
+                            # 使用提取的标识符直接解析坐标
+                            # _parse_identifier_to_indices 返回 (x, y, z) 元组
+                            x_idx, y_idx, z_idx = resource._parse_identifier_to_indices(bottle_identifier, 0)
+                            site = {"x": x_idx, "y": y_idx, "z": z_idx, "identifier": bottle_identifier}
+                        else:
+                            # 如果无法提取标识符,回退到原始方法
+                            site = resource.get_child_identifier(bottle)
+                    else:
+                        site = {"x": bottle.location.x - 1, "y": bottle.location.y - 1, "identifier": ""}
+
+                    # 获取子物料的类型映射
+                    bottle_type_info = type_mapping.get(bottle.model)
+                    if not bottle_type_info:
+                        logger.error(f"❌ [PLR→Bioyond] 子物料 '{bottle.name}' 的 model '{bottle.model}' 不在 type_mapping 中")
+                        raise ValueError(f"子物料 model '{bottle.model}' 未在 MATERIAL_TYPE_MAPPINGS 中配置")
+
+                    # ⚠️ 坐标系转换说明:
+                    # _parse_identifier_to_indices 返回: x=列索引, y=行索引 (0-based)
+                    # Bioyond 系统要求: x=行号, y=列号 (1-based)
+                    # 因此需要交换 x 和 y!
+                    bioyond_x = site["y"] + 1  # 行索引 → Bioyond的x (行号)
+                    bioyond_y = site["x"] + 1  # 列索引 → Bioyond的y (列号)
+
+                    # 🐛 调试日志
+                    logger.debug(f"🔍 [PLR→Bioyond] detail转换: {bottle.name} → PLR(x={site['x']},y={site['y']},id={site.get('identifier','?')}) → Bioyond(x={bioyond_x},y={bioyond_y})")
+
+                    # 🔥 提取物料名称：从 tracker.liquids 中获取第一个液体的名称（去除PLR系统添加的后缀）
+                    # tracker.liquids 格式: [(物料名称, 数量), ...]
+                    material_name = bottle_type_info[0]  # 默认使用类型名称（如"样品瓶"）
+                    if hasattr(bottle, "tracker") and bottle.tracker.liquids:
+                        # 如果有液体，使用液体的名称
+                        first_liquid_name = bottle.tracker.liquids[0][0]
+                        # 去除PLR系统为了唯一性添加的后缀（如 "_0", "_1" 等）
+                        if "_" in first_liquid_name and first_liquid_name.split("_")[-1].isdigit():
+                            material_name = "_".join(first_liquid_name.split("_")[:-1])
+                        else:
+                            material_name = first_liquid_name
+                        logger.debug(f"  💧 [物料名称] {bottle.name} 液体: {first_liquid_name} → 转换为: {material_name}")
+                    else:
+                        logger.debug(f"  📭 [物料名称] {bottle.name} 无液体，使用类型名: {material_name}")
+
+                    detail_item = {
+                        "typeId": bottle_type_info[1],
+                        "name": material_name,  # 使用物料名称（如"9090"），而不是类型名称（"样品瓶"）
+                        "code": bottle.code if hasattr(bottle, "code") else "",
+                        "quantity": sum(qty for _, qty in bottle.tracker.liquids) if hasattr(bottle, "tracker") else 0,
+                        "x": bioyond_x,
+                        "y": bioyond_y,
+                        "molecular": 1,
+                        "Parameters": json.dumps({"molecular": 1})
+                    }
+                    material["details"].append(detail_item)
         else:
             # 单个瓶子(非载架)类型的资源
             bottle = resource[0] if resource.capacity > 0 else resource
@@ -881,9 +937,23 @@ def resource_plr_to_bioyond(plr_resources: list[ResourcePLR], type_mapping: dict
                 logger.warning(f"[PLR→Bioyond] 资源 {resource.name} 的 model '{resource.model}' 不在 type_mapping 中，使用默认烧杯类型")
                 type_id = "3a14196b-24f2-ca49-9081-0cab8021bf1a"  # 默认使用烧杯类型
 
+            # 🔥 提取物料名称：优先使用液体名称，否则使用资源名称
+            material_name = resource.name if hasattr(resource, "name") else ""
+            if hasattr(bottle, "tracker") and bottle.tracker.liquids:
+                # 如果有液体，使用液体的名称
+                first_liquid_name = bottle.tracker.liquids[0][0]
+                # 去除PLR系统为了唯一性添加的后缀（如 "_0", "_1" 等）
+                if "_" in first_liquid_name and first_liquid_name.split("_")[-1].isdigit():
+                    material_name = "_".join(first_liquid_name.split("_")[:-1])
+                else:
+                    material_name = first_liquid_name
+                logger.debug(f"  💧 [单瓶物料] {resource.name} 液体: {first_liquid_name} → 转换为: {material_name}")
+            else:
+                logger.debug(f"  📭 [单瓶物料] {resource.name} 无液体，使用资源名: {material_name}")
+
             material = {
                 "typeId": type_id,
-                "name": resource.name if hasattr(resource, "name") else "",
+                "name": material_name,  # 使用物料名称而不是资源名称
                 "unit": "个",  # 修复：Bioyond API 要求 unit 字段不能为空
                 "quantity": sum(qty for _, qty in bottle.tracker.liquids) if hasattr(bottle, "tracker") else 0,
                 "Parameters": "{}"

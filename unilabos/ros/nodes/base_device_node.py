@@ -803,7 +803,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                     ].call_async(
                         SerialCommand.Request(
                             command=json.dumps(
-                                {"data": {"data": resources_uuid, "with_children": False}, "action": "get"}
+                                {"data": {"data": resources_uuid, "with_children": True}, "action": "get"}
                             )
                         )
                     )  # type: ignore

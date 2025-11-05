@@ -357,14 +357,15 @@ def BIOYOND_PolymerStation_6VialCarrier(name: str) -> BottleCarrier:
 
 
 def BIOYOND_PolymerStation_1BottleCarrier(name: str) -> BottleCarrier:
-    """[已弃用] 请根据实际工作站选择 BIOYOND_DispensingStation_1BottleCarrier 或 BIOYOND_ReactionStation_1BottleCarrier"""
-    # 默认返回配液站版本以保持向后兼容
+    """[已弃用] 请使用 BIOYOND_DispensingStation_1BottleCarrier"""
     return BIOYOND_DispensingStation_1BottleCarrier(name)
 
 
 def BIOYOND_PolymerStation_1FlaskCarrier(name: str) -> BottleCarrier:
-    """[已弃用] 请使用 BIOYOND_DispensingStation_1FlaskCarrier"""
-    return BIOYOND_DispensingStation_1FlaskCarrier(name)
+    """[已弃用] 请根据实际工作站选择 BIOYOND_DispensingStation_1FlaskCarrier 或 BIOYOND_ReactionStation_1FlaskCarrier"""
+    # 默认返回配液站版本以保持向后兼容
+    return BIOYOND_DispensingStation_1FlaskCarrier(name) # 配液站版本
+    # return BIOYOND_ReactionStation_1FlaskCarrier(name)  # 反应站版本
 
 
 # ============================================================================
