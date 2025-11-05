@@ -412,8 +412,7 @@ class ItemizedCarrier(ResourcePLR):
       "layout": self.layout,
       "sites": [{
         "label": str(identifier),
-        # "visible": False if identifier in self.invisible_slots else True,
-        "visible": False if self[identifier] is not None else True, ## 隐藏已占用的槽位
+        "visible": False if identifier in self.invisible_slots else True,
         "occupied_by": self[identifier].name
                         if isinstance(self[identifier], ResourcePLR) and not isinstance(self[identifier], ResourceHolder) else
                         self[identifier] if isinstance(self[identifier], str) else None,
