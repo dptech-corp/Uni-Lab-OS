@@ -543,23 +543,30 @@ class BioyondWorkstation(WorkstationBase):
         try:
             logger.info(f"[resource_tree_remove] 🎯 开始处理资源出库: {resource.name}")
 
-            # 获取资源的 Bioyond ID
+            # 获取资源的 Bioyond 信息
             extra_info = getattr(resource, "unilabos_extra", {})
             material_bioyond_id = extra_info.get("material_bioyond_id")
+            material_bioyond_name = extra_info.get("material_bioyond_name")  # ⭐ 原始 Bioyond 名称
 
-            if not material_bioyond_id:
+            # ⭐ 优先使用保存的 Bioyond ID，避免重复查询
+            if material_bioyond_id:
+                logger.info(f"✅ [resource_tree_remove] 从资源中获取到 Bioyond ID: {material_bioyond_id[:8]}...")
+                if material_bioyond_name and material_bioyond_name != resource.name:
+                    logger.info(f"   原始 Bioyond 名称: {material_bioyond_name} (当前名称: {resource.name})")
+            else:
                 # 如果没有 Bioyond ID，尝试按名称查询
                 logger.info(f"[resource_tree_remove] 资源 {resource.name} 没有保存 Bioyond ID，尝试查询...")
 
-                # 直接使用资源名称查询（不去除后缀）
-                logger.info(f"[resource_tree_remove] 查询 Bioyond 系统中的物料: {resource.name}")
+                # ⭐ 优先使用保存的原始 Bioyond 名称，如果没有则使用当前名称
+                query_name = material_bioyond_name if material_bioyond_name else resource.name
+                logger.info(f"[resource_tree_remove] 查询 Bioyond 系统中的物料: {query_name}")
 
                 # 查询所有类型的物料：0=耗材, 1=样品, 2=试剂
                 all_materials = []
                 for type_mode in [0, 1, 2]:
                     query_params = json.dumps({
                         "typeMode": type_mode,
-                        "filter": resource.name,  # 直接使用资源名称
+                        "filter": query_name,  # ⭐ 使用原始 Bioyond 名称查询
                         "includeDetail": True
                     })
                     materials = self.hardware_interface.stock_material(query_params)
@@ -569,19 +576,19 @@ class BioyondWorkstation(WorkstationBase):
                 # 精确匹配物料名称
                 matched_material = None
                 for mat in all_materials:
-                    if mat.get("name") == resource.name:
+                    if mat.get("name") == query_name:
                         matched_material = mat
                         material_bioyond_id = mat.get("id")
-                        logger.info(f"✅ [resource_tree_remove] 找到物料 {resource.name} 的 Bioyond ID: {material_bioyond_id[:8]}...")
+                        logger.info(f"✅ [resource_tree_remove] 找到物料 {query_name} 的 Bioyond ID: {material_bioyond_id[:8]}...")
                         break
 
                 if not matched_material:
-                    logger.warning(f"⚠️ [resource_tree_remove] Bioyond 系统中未找到物料: {resource.name}")
+                    logger.warning(f"⚠️ [resource_tree_remove] Bioyond 系统中未找到物料: {query_name}")
                     logger.info(f"[resource_tree_remove] 该物料可能尚未入库或已被删除，跳过出库操作")
                     return True
 
             # 获取物料当前所在的库位信息
-            logger.info(f"[resource_tree_remove] 📍 查询物料 {resource.name} 的库位信息...")
+            logger.info(f"[resource_tree_remove] 📍 查询物料的库位信息...")
 
             # 重新查询物料详情以获取最新的库位信息
             all_materials_type1 = self.hardware_interface.stock_material('{"typeMode": 1, "includeDetail": true}')
@@ -600,23 +607,28 @@ class BioyondWorkstation(WorkstationBase):
                         location = locations[0]
                         location_id = location.get("id")
                         current_quantity = location.get("quantity", 1)
-                        logger.info(f"📍 [resource_tree_remove] 物料 {resource.name} 位于库位:")
+                        logger.info(f"📍 [resource_tree_remove] 物料位于库位:")
                         logger.info(f"   - 库位代码: {location.get('code')}")
                         logger.info(f"   - 仓库名称: {location.get('whName')}")
                         logger.info(f"   - 数量: {current_quantity}")
                         logger.info(f"   - 库位ID: {location_id[:8]}...")
                         break
                     else:
-                        logger.warning(f"⚠️ [resource_tree_remove] 物料 {resource.name} 没有库位信息，可能尚未入库")
+                        logger.warning(f"⚠️ [resource_tree_remove] 物料没有库位信息，可能尚未入库")
                         return True
 
             if not location_id:
-                logger.warning(f"⚠️ [resource_tree_remove] 无法获取物料 {resource.name} 的库位信息，跳过出库")
+                logger.warning(f"⚠️ [resource_tree_remove] 无法获取物料的库位信息，跳过出库")
                 return False
 
             # 调用 Bioyond 出库 API
-            logger.info(f"[resource_tree_remove] 📤 调用 Bioyond API 出库物料 {resource.name}...")
-            logger.info(f"   参数: material_id={material_bioyond_id[:8]}..., location_id={location_id[:8]}..., quantity={current_quantity}")
+            logger.info(f"[resource_tree_remove] 📤 调用 Bioyond API 出库物料...")
+            logger.info(f"   UniLab 名称: {resource.name}")
+            if material_bioyond_name and material_bioyond_name != resource.name:
+                logger.info(f"   Bioyond 名称: {material_bioyond_name}")
+            logger.info(f"   物料ID: {material_bioyond_id[:8]}...")
+            logger.info(f"   库位ID: {location_id[:8]}...")
+            logger.info(f"   出库数量: {current_quantity}")
 
             response = self.hardware_interface.material_outbound_by_id(
                 material_id=material_bioyond_id,
@@ -625,10 +637,10 @@ class BioyondWorkstation(WorkstationBase):
             )
 
             if response is not None:
-                logger.info(f"✅ [resource_tree_remove] 物料 {resource.name} 成功从 Bioyond 系统出库")
+                logger.info(f"✅ [resource_tree_remove] 物料成功从 Bioyond 系统出库")
                 return True
             else:
-                logger.error(f"❌ [resource_tree_remove] 物料 {resource.name} 出库失败，API 返回空")
+                logger.error(f"❌ [resource_tree_remove] 物料出库失败，API 返回空")
                 return False
 
         except Exception as e:

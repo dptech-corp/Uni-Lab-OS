@@ -683,6 +683,13 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
         plr_material.code = material.get("code", "") and material.get("barCode", "") or ""
         plr_material.unilabos_uuid = str(uuid.uuid4())
 
+        # ⭐ 保存 Bioyond 原始信息到 unilabos_extra（用于出库时查询）
+        plr_material.unilabos_extra = {
+            "material_bioyond_id": material.get("id"),           # Bioyond 物料 UUID
+            "material_bioyond_name": material.get("name"),       # Bioyond 原始名称（如 "MDA"）
+            "material_bioyond_type": material.get("typeName"),   # Bioyond 物料类型名称
+        }
+
         logger.debug(f"[转换物料] {material['name']} (ID:{material['id']}) → {unique_name} (类型:{className})")
 
         # 处理子物料（detail）
