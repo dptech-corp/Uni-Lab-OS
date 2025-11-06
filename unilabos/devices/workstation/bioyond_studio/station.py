@@ -110,44 +110,45 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
             extra_info = getattr(resource, "unilabos_extra", {})
             material_bioyond_id = extra_info.get("material_bioyond_id")
 
-            # ⭐ 如果没有 Bioyond ID，尝试从 Bioyond 系统中按名称查询
+            # 🔥 查询所有物料，用于获取物料当前位置等信息
+            existing_materials = []
+            try:
+                import json
+                logger.info(f"[同步→Bioyond] 查询 Bioyond 系统中的所有物料...")
+                all_materials = []
+
+                for type_mode in [0, 1, 2]:  # 0=耗材, 1=样品, 2=试剂
+                    query_params = json.dumps({
+                        "typeMode": type_mode,
+                        "filter": "",
+                        "includeDetail": True
+                    })
+                    materials = self.bioyond_api_client.stock_material(query_params)
+                    if materials:
+                        all_materials.extend(materials)
+
+                existing_materials = all_materials
+                logger.info(f"[同步→Bioyond] 查询到 {len(all_materials)} 个物料")
+            except Exception as e:
+                logger.error(f"查询 Bioyond 物料失败: {e}")
+                return False
+
+            # ⭐ 如果没有 Bioyond ID，尝试从查询结果中按名称匹配
             if not material_bioyond_id:
                 logger.warning(f"[同步→Bioyond] 物料 {resource.name} 没有 Bioyond ID，尝试按名称查询...")
-                try:
-                    # 查询所有类型的物料：0=耗材, 1=样品, 2=试剂
-                    import json
-                    all_materials = []
+                for mat in existing_materials:
+                    if mat.get("name") == resource.name:
+                        material_bioyond_id = mat.get("id")
+                        mat_type = mat.get("typeName", "未知")
+                        logger.info(f"✅ 找到物料 {resource.name} ({mat_type}) 的 Bioyond ID: {material_bioyond_id[:8]}...")
+                        # 保存 ID 到资源对象
+                        extra_info["material_bioyond_id"] = material_bioyond_id
+                        setattr(resource, "unilabos_extra", extra_info)
+                        break
 
-                    for type_mode in [0, 1, 2]:
-                        query_params = json.dumps({
-                            "typeMode": type_mode,
-                            "filter": "",   # 空字符串表示查询所有
-                            "includeDetail": True
-                        })
-                        materials = self.bioyond_api_client.stock_material(query_params)
-                        if materials:
-                            all_materials.extend(materials)
-
-                    logger.info(f"[同步→Bioyond] 查询到 {len(all_materials)} 个物料")
-
-                    # 按名称匹配
-                    for mat in all_materials:
-                        if mat.get("name") == resource.name:
-                            material_bioyond_id = mat.get("id")
-                            mat_type = mat.get("typeName", "未知")
-                            logger.info(f"✅ 找到物料 {resource.name} ({mat_type}) 的 Bioyond ID: {material_bioyond_id[:8]}...")
-                            # 保存 ID 到资源对象
-                            extra_info["material_bioyond_id"] = material_bioyond_id
-                            setattr(resource, "unilabos_extra", extra_info)
-                            break
-
-                    if not material_bioyond_id:
-                        logger.warning(f"⚠️ 在 Bioyond 系统中未找到名为 {resource.name} 的物料")
-                        logger.info(f"[同步→Bioyond] 这是一个新物料，将创建并入库到 Bioyond 系统")
-                        # 不返回，继续执行后续的创建+入库流程
-                except Exception as e:
-                    logger.error(f"查询 Bioyond 物料失败: {e}")
-                    return False
+                if not material_bioyond_id:
+                    logger.warning(f"⚠️ 在 Bioyond 系统中未找到名为 {resource.name} 的物料")
+                    logger.info(f"[同步→Bioyond] 这是一个新物料，将创建并入库到 Bioyond 系统")
 
             # 检查是否有位置更新请求
             update_site = extra_info.get("update_resource_site")
@@ -168,29 +169,47 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
             from .config import WAREHOUSE_MAPPING
             warehouse_mapping = WAREHOUSE_MAPPING
 
-            # 确定目标仓库名称（优先使用 resource.parent.name）
+            # 确定目标仓库名称
             parent_name = None
             target_location_uuid = None
+            current_warehouse = None
 
-            # 如果资源有父节点，优先使用父节点名称
-            if resource.parent is not None:
-                parent_name = resource.parent.name
-                logger.info(f"[同步→Bioyond] 从资源父节点获取仓库名称: {parent_name}")
+            # 🔥 优先级1: 从 Bioyond 查询结果中获取物料当前所在的仓库
+            if material_bioyond_id:
+                for mat in existing_materials:
+                    if mat.get("name") == resource.name or mat.get("id") == material_bioyond_id:
+                        locations = mat.get("locations", [])
+                        if locations and len(locations) > 0:
+                            current_warehouse = locations[0].get("whName")
+                            logger.info(f"[同步→Bioyond] 💡 物料当前位于 Bioyond 仓库: {current_warehouse}")
+                        break
 
-                # 检查该仓库是否在配置中
-                if parent_name in warehouse_mapping:
-                    site_uuids = warehouse_mapping[parent_name].get("site_uuids", {})
+                # 优先在当前仓库中查找目标库位
+                if current_warehouse and current_warehouse in warehouse_mapping:
+                    site_uuids = warehouse_mapping[current_warehouse].get("site_uuids", {})
                     if update_site in site_uuids:
+                        parent_name = current_warehouse
                         target_location_uuid = site_uuids[update_site]
-                        logger.info(f"[同步→Bioyond] 目标仓库: {parent_name}/{update_site}")
+                        logger.info(f"[同步→Bioyond] ✅ 在当前仓库找到目标库位: {parent_name}/{update_site}")
                         logger.info(f"[同步→Bioyond] 目标库位UUID: {target_location_uuid[:8]}...")
                     else:
-                        logger.warning(f"⚠️ [同步→Bioyond] 仓库 {parent_name} 中没有库位 {update_site}")
-                else:
-                    logger.warning(f"⚠️ [同步→Bioyond] 仓库 {parent_name} 未在 WAREHOUSE_MAPPING 中配置")
-                    parent_name = None
+                        logger.warning(f"⚠️ [同步→Bioyond] 当前仓库 {current_warehouse} 中没有库位 {update_site}，将搜索其他仓库")
 
-            # 如果没有找到，则遍历所有仓库查找
+            # 🔥 优先级2: 检查 PLR 父节点名称
+            if not parent_name or not target_location_uuid:
+                if resource.parent is not None:
+                    parent_name_candidate = resource.parent.name
+                    logger.info(f"[同步→Bioyond] 从 PLR 父节点获取仓库名称: {parent_name_candidate}")
+
+                    if parent_name_candidate in warehouse_mapping:
+                        site_uuids = warehouse_mapping[parent_name_candidate].get("site_uuids", {})
+                        if update_site in site_uuids:
+                            parent_name = parent_name_candidate
+                            target_location_uuid = site_uuids[update_site]
+                            logger.info(f"[同步→Bioyond] ✅ 在父节点仓库找到目标库位: {parent_name}/{update_site}")
+                            logger.info(f"[同步→Bioyond] 目标库位UUID: {target_location_uuid[:8]}...")
+
+            # 🔥 优先级3: 遍历所有仓库查找（兜底方案）
             if not parent_name or not target_location_uuid:
                 logger.info(f"[同步→Bioyond] 从所有仓库中查找库位 {update_site}...")
                 for warehouse_name, warehouse_info in warehouse_mapping.items():
@@ -198,7 +217,7 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
                     if update_site in site_uuids:
                         parent_name = warehouse_name
                         target_location_uuid = site_uuids[update_site]
-                        logger.info(f"[同步→Bioyond] 目标仓库: {parent_name}/{update_site}")
+                        logger.warning(f"[同步→Bioyond] ⚠️ 在其他仓库找到目标库位: {parent_name}/{update_site}")
                         logger.info(f"[同步→Bioyond] 目标库位UUID: {target_location_uuid[:8]}...")
                         break
 
@@ -215,9 +234,24 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
                 warehouse_mapping=self.workstation.bioyond_config["warehouse_mapping"]
             )[0]
 
+            logger.info(f"[同步→Bioyond] 🔧 准备覆盖locations字段，目标仓库: {parent_name}, 库位: {update_site}, UUID: {target_location_uuid[:8]}...")
+
+            # 🔥 强制覆盖 locations 信息，使用正确的目标库位 UUID
+            # resource_plr_to_bioyond 可能会生成错误的仓库信息，这里直接覆盖
+            bioyond_material["locations"] = [{
+                "id": target_location_uuid,
+                "whid": "",
+                "whName": parent_name,
+                "x": ord(update_site[0]) - ord('A') + 1,  # A→1, B→2, ...
+                "y": int(update_site[1:]),  # 01→1, 02→2, ...
+                "z": 1,
+                "quantity": 0
+            }]
+            logger.info(f"[同步→Bioyond] ✅ 已覆盖库位信息: {parent_name}/{update_site} (UUID: {target_location_uuid[:8]}...)")
+
             logger.debug(f"[同步→Bioyond] Bioyond 物料数据: {bioyond_material}")
 
-            location_info = bioyond_material.pop("locations", None)
+            location_info = bioyond_material.get("locations")
             logger.debug(f"[同步→Bioyond] 库位信息: {location_info}, 类型: {type(location_info)}")
 
             # 第3步：根据是否已有 Bioyond ID 决定创建还是使用现有物料
@@ -267,8 +301,14 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
                         location_occupied = False
                         occupying_material = None
 
+                        # 同时检查当前物料是否在其他位置（需要先出库）
+                        current_material_location = None
+                        current_location_uuid = None
+
                         for material in all_materials:
                             locations = material.get("locations", [])
+
+                            # 检查目标库位占用情况
                             for loc in locations:
                                 if loc.get("id") == location_id:
                                     location_occupied = True
@@ -279,12 +319,19 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
                                     logger.warning(f"   🔍 详细信息: location_id={loc.get('id')[:8]}..., 目标UUID={location_id[:8]}...")
                                     logger.warning(f"   🔍 完整location数据: {loc}")
                                     break
+
+                            # 检查当前物料是否在其他位置
+                            if material.get("id") == material_id and locations:
+                                current_material_location = locations[0]
+                                current_location_uuid = current_material_location.get("id")
+                                logger.info(f"📍 [同步→Bioyond] 物料当前位置: {current_material_location.get('whName')}/{current_material_location.get('code')} (UUID: {current_location_uuid[:8]}...)")
+
                             if location_occupied:
                                 break
 
                         if location_occupied:
-                            # 如果是同一个物料（名称相同），说明已经入库过了，跳过
-                            if occupying_material and occupying_material.get("name") == resource.name:
+                            # 如果是同一个物料（ID相同），说明已经在目标位置了，跳过
+                            if occupying_material and occupying_material.get("id") == material_id:
                                 logger.info(f"✅ [同步→Bioyond] 物料 {resource.name} 已经在库位 {update_site}，跳过重复入库")
                                 return True
                             else:
@@ -295,6 +342,28 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
 
                     except Exception as e:
                         logger.warning(f"⚠️ [同步→Bioyond] 检查库位状态时发生异常: {e}，继续尝试入库...")
+
+                    # 🔧 如果物料当前在其他位置，先出库再入库
+                    if current_location_uuid and current_location_uuid != location_id:
+                        logger.info(f"[同步→Bioyond] 🚚 物料需要移动，先从当前位置出库...")
+                        logger.info(f"   当前位置 UUID: {current_location_uuid[:8]}...")
+                        logger.info(f"   目标位置 UUID: {location_id[:8]}...")
+
+                        try:
+                            # 获取物料数量用于出库
+                            material_quantity = current_material_location.get("totalNumber", 1)
+                            logger.info(f"   出库数量: {material_quantity}")
+
+                            # 调用出库 API
+                            outbound_response = self.bioyond_api_client.material_outbound_by_id(
+                                material_id,
+                                current_location_uuid,
+                                material_quantity
+                            )
+                            logger.info(f"✅ [同步→Bioyond] 物料从 {current_material_location.get('code')} 出库成功")
+                        except Exception as e:
+                            logger.error(f"❌ [同步→Bioyond] 物料出库失败: {e}")
+                            return False
 
                     # 执行入库
                     logger.info(f"[同步→Bioyond] 📥 调用 Bioyond API 物料入库...")
@@ -677,6 +746,37 @@ class BioyondWorkstation(WorkstationBase):
             logger.error(f"❌ [resource_tree_transfer] 资源 {resource.name} 同步异常: {e}")
             import traceback
             traceback.print_exc()
+
+    def resource_tree_update(self, resources: List[ResourcePLR]) -> None:
+        """处理资源更新时的同步（位置移动、属性修改等）
+
+        当 UniLab 前端更新物料信息时（如修改位置），需要将更新操作同步到 Bioyond 系统
+
+        Args:
+            resources: 要更新的资源列表
+        """
+        logger.info(f"[resource_tree_update] 开始同步 {len(resources)} 个资源更新到 Bioyond 系统")
+
+        for resource in resources:
+            try:
+                logger.info(f"[resource_tree_update] 同步资源更新: {resource.name}")
+
+                # 调用同步器的 sync_to_external 方法
+                # 该方法会检查 unilabos_extra 中的 update_resource_site 字段
+                # 如果存在，会执行位置移动操作
+                result = self.resource_synchronizer.sync_to_external(resource)
+
+                if result:
+                    logger.info(f"✅ [resource_tree_update] 资源 {resource.name} 成功同步到 Bioyond 系统")
+                else:
+                    logger.warning(f"⚠️ [resource_tree_update] 资源 {resource.name} 同步到 Bioyond 系统失败")
+
+            except Exception as e:
+                logger.error(f"❌ [resource_tree_update] 同步资源 {resource.name} 时发生异常: {e}")
+                import traceback
+                traceback.print_exc()
+
+        logger.info(f"[resource_tree_update] 资源更新同步完成")
 
     @property
     def bioyond_status(self) -> Dict[str, Any]:

@@ -870,22 +870,45 @@ def resource_plr_to_bioyond(plr_resources: list[ResourcePLR], type_mapping: dict
                 # 处理其他载架类型的子物料
                 for bottle in resource.children:
                     if isinstance(resource, ItemizedCarrier):
-                        # 🔧 [FIX] 从瓶子名称中提取标识符(如 "vial_A1" -> "A1")
-                        # 而不是使用 get_child_identifier(bottle),因为 resource.children
-                        # 的迭代顺序可能与预期的标识符顺序不匹配
-                        bottle_identifier = None
-                        if "_" in bottle.name:
-                            # 提取最后一个下划线后的部分作为标识符
-                            bottle_identifier = bottle.name.split("_")[-1]
+                        # ⭐ 优化：直接使用 get_child_identifier 获取真实的子物料坐标
+                        # 这个方法会遍历 resource.children 找到 bottle 对象的实际位置
+                        site = resource.get_child_identifier(bottle)
 
-                        if bottle_identifier:
-                            # 使用提取的标识符直接解析坐标
-                            # _parse_identifier_to_indices 返回 (x, y, z) 元组
-                            x_idx, y_idx, z_idx = resource._parse_identifier_to_indices(bottle_identifier, 0)
-                            site = {"x": x_idx, "y": y_idx, "z": z_idx, "identifier": bottle_identifier}
-                        else:
-                            # 如果无法提取标识符,回退到原始方法
-                            site = resource.get_child_identifier(bottle)
+                        # 🔧 如果 get_child_identifier 失败或返回无效坐标 (0,0)
+                        # 这通常发生在子物料名称使用纯数字后缀时（如 "BTDA_0", "BTDA_4"）
+                        if not site or (site.get("x") == 0 and site.get("y") == 0):
+                            # 方法1: 尝试从名称中提取标识符并解析
+                            bottle_identifier = None
+                            if "_" in bottle.name:
+                                bottle_identifier = bottle.name.split("_")[-1]
+
+                            # 只有非纯数字标识符才尝试解析（如 "A1", "B2"）
+                            if bottle_identifier and not bottle_identifier.isdigit():
+                                try:
+                                    x_idx, y_idx, z_idx = resource._parse_identifier_to_indices(bottle_identifier, 0)
+                                    site = {"x": x_idx, "y": y_idx, "z": z_idx, "identifier": bottle_identifier}
+                                    logger.debug(f"  🔧 [坐标修正-方法1] 从名称 {bottle.name} 解析标识符 {bottle_identifier} → ({x_idx}, {y_idx})")
+                                except Exception as e:
+                                    logger.warning(f"  ⚠️ [坐标解析] 标识符 {bottle_identifier} 解析失败: {e}")
+
+                            # 方法2: 如果方法1失败，使用线性索引反推坐标
+                            if not site or (site.get("x") == 0 and site.get("y") == 0):
+                                # 找到bottle在children中的索引位置
+                                try:
+                                    # 遍历所有槽位找到bottle的实际位置
+                                    for idx in range(resource.num_items_x * resource.num_items_y):
+                                        if resource[idx] is bottle:
+                                            # 根据载架布局计算行列坐标
+                                            # ItemizedCarrier 默认是列优先布局 (A1,B1,C1,D1, A2,B2,C2,D2...)
+                                            col_idx = idx // resource.num_items_y  # 列索引 (0-based)
+                                            row_idx = idx % resource.num_items_y   # 行索引 (0-based)
+                                            site = {"x": col_idx, "y": row_idx, "z": 0, "identifier": str(idx)}
+                                            logger.debug(f"  🔧 [坐标修正-方法2] {bottle.name} 在索引 {idx} → 列={col_idx}, 行={row_idx}")
+                                            break
+                                except Exception as e:
+                                    logger.error(f"  ❌ [坐标计算失败] {bottle.name}: {e}")
+                                    # 最后的兜底：使用 (0,0)
+                                    site = {"x": 0, "y": 0, "z": 0, "identifier": ""}
                     else:
                         site = {"x": bottle.location.x - 1, "y": bottle.location.y - 1, "identifier": ""}
 
@@ -966,7 +989,56 @@ def resource_plr_to_bioyond(plr_resources: list[ResourcePLR], type_mapping: dict
                 "Parameters": "{}"
             }
 
-        if resource.parent is not None and isinstance(resource.parent, ItemizedCarrier):
+        # ⭐ 处理 locations 信息
+        # 优先级: update_resource_site (位置更新请求) > 当前 parent 位置
+        extra_info = getattr(resource, "unilabos_extra", {})
+        update_site = extra_info.get("update_resource_site")
+
+        if update_site:
+            # 情况1: 有明确的位置更新请求 (如从 A02 移动到 A03)
+            # 需要从 warehouse_mapping 中查找目标库位的 UUID
+            logger.debug(f"🔄 [PLR→Bioyond] 检测到位置更新请求: {resource.name} → {update_site}")
+
+            # 遍历所有仓库查找目标库位
+            target_warehouse_name = None
+            target_location_uuid = None
+
+            for warehouse_name, warehouse_info in warehouse_mapping.items():
+                site_uuids = warehouse_info.get("site_uuids", {})
+                if update_site in site_uuids:
+                    target_warehouse_name = warehouse_name
+                    target_location_uuid = site_uuids[update_site]
+                    break
+
+            if target_warehouse_name and target_location_uuid:
+                # 从库位代码解析坐标 (如 "A03" -> x=1, y=3)
+                # A=1, B=2, C=3, D=4...
+                # 01=1, 02=2, 03=3...
+                try:
+                    row_letter = update_site[0]  # 'A', 'B', 'C', 'D'
+                    col_number = int(update_site[1:])  # '01', '02', '03'...
+                    bioyond_x = ord(row_letter) - ord('A') + 1  # A→1, B→2, C→3, D→4
+                    bioyond_y = col_number  # 01→1, 02→2, 03→3
+
+                    material["locations"] = [
+                        {
+                            "id": target_location_uuid,
+                            "whid": warehouse_mapping[target_warehouse_name].get("uuid", ""),
+                            "whName": target_warehouse_name,
+                            "x": bioyond_x,
+                            "y": bioyond_y,
+                            "z": 1,
+                            "quantity": 0
+                        }
+                    ]
+                    logger.debug(f"✅ [PLR→Bioyond] 位置更新: {resource.name} → {target_warehouse_name}/{update_site} (x={bioyond_x}, y={bioyond_y})")
+                except Exception as e:
+                    logger.error(f"❌ [PLR→Bioyond] 解析库位代码失败: {update_site}, 错误: {e}")
+            else:
+                logger.warning(f"⚠️ [PLR→Bioyond] 未找到库位 {update_site} 的配置")
+
+        elif resource.parent is not None and isinstance(resource.parent, ItemizedCarrier):
+            # 情况2: 使用当前 parent 位置
             site_in_parent = resource.parent.get_child_identifier(resource)
 
             # ⚠️ 坐标系转换说明:
