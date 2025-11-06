@@ -846,7 +846,7 @@ def resource_plr_to_bioyond(plr_resources: list[ResourcePLR], type_mapping: dict
     }
 
     for resource in plr_resources:
-        if isinstance(resource, BottleCarrier):
+        if isinstance(resource, BottleCarrier) and resource.capacity > 1:
             # 获取 BottleCarrier 的类型映射
             type_info = type_mapping.get(resource.model)
             if not type_info:
@@ -933,7 +933,7 @@ def resource_plr_to_bioyond(plr_resources: list[ResourcePLR], type_mapping: dict
                     material["details"].append(detail_item)
         else:
             # 单个瓶子(非载架)类型的资源
-            bottle = resource[0] if resource.capacity > 0 else resource
+            bottle = resource[0] if hasattr(resource, "capacity") and resource.capacity > 0 else resource
 
             # 根据 resource.model 从 type_mapping 获取正确的 typeId
             type_info = type_mapping.get(resource.model)
