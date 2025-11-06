@@ -71,7 +71,7 @@ def BIOYOND_DispensingStation_8StockCarrier(name: str) -> BottleCarrier:
     carrier.num_items_x = 4
     carrier.num_items_y = 2
     carrier.num_items_z = 1
-    ordering = ["A1", "A2", "A3", "A4", "B1", "B2", "B3", "B4"]
+    ordering = ["A1", "B1", "A2", "B2", "A3", "B3", "A4", "B4"]
     for i in range(8):
         carrier[i] = BIOYOND_DispensingStation_Solid_Stock(f"{name}_vial_{ordering[i]}")
     return carrier
@@ -122,11 +122,11 @@ def BIOYOND_DispensingStation_6VialCarrier(name: str) -> BottleCarrier:
     carrier.num_items_x = 3
     carrier.num_items_y = 2
     carrier.num_items_z = 1
-    ordering = ["A1", "A2", "A3", "B1", "B2", "B3"]
+    ordering = ["A1", "B1", "A2", "B2", "A3", "B3"]
     # 第一排使用Liquid_Vial (10%分装小瓶), 第二排使用Solid_Vial (90%分装小瓶)
-    for i in range(3):
+    for i in [0, 2, 4]:
         carrier[i] = BIOYOND_DispensingStation_Liquid_Vial(f"{name}_vial_{ordering[i]}")
-    for i in range(3, 6):
+    for i in [1, 3, 5]:
         carrier[i] = BIOYOND_DispensingStation_Solid_Vial(f"{name}_vial_{ordering[i]}")
     return carrier
 
