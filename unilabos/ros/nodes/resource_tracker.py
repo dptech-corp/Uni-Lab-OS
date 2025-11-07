@@ -999,7 +999,7 @@ class DeviceNodeResourceTracker(object):
 
         self._traverse_and_process(resource, process)
 
-    def _remove_uuid_mapping(self, resource):
+    def _remove_uuid_mapping(self, resource) -> int:
         """
         递归清除资源的 uuid 映射
 
@@ -1012,9 +1012,10 @@ class DeviceNodeResourceTracker(object):
             if current_uuid and current_uuid in self.uuid_to_resources:
                 self.uuid_to_resources.pop(current_uuid)
                 logger.debug(f"移除资源UUID映射: {current_uuid} -> {res}")
+                return 1
             return 0
 
-        self._traverse_and_process(resource, process)
+        return self._traverse_and_process(resource, process)
 
     def parent_resource(self, resource):
         if id(resource) in self.resource2parent_resource:
@@ -1069,12 +1070,11 @@ class DeviceNodeResourceTracker(object):
                 removed = True
                 break
 
-        if not removed:
-            logger.warning(f"尝试移除不存在/非根节点的资源: {resource}")
-            return False
-
         # 递归清除uuid映射
-        self._remove_uuid_mapping(resource)
+        count = self._remove_uuid_mapping(resource)
+        if not count:
+            logger.warning(f"尝试移除不存在的资源: {resource}")
+            return False
 
         # 清除 resource2parent_resource 中与该资源相关的映射
         # 需要清除：1) 该资源作为 key 的映射 2) 该资源作为 value 的映射
