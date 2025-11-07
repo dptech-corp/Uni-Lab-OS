@@ -864,11 +864,10 @@ class HostNode(BaseROS2DeviceNode):
         success = False
         uuid_mapping = {}
         if len(self.bridges) > 0:
-            from unilabos.app.web.client import HTTPClient
+            from unilabos.app.web.client import HTTPClient, http_client
 
-            client: HTTPClient = self.bridges[-1]
             resource_start_time = time.time()
-            uuid_mapping = client.resource_tree_add(resource_tree_set, mount_uuid, first_add)
+            uuid_mapping = http_client.resource_tree_add(resource_tree_set, mount_uuid, first_add)
             success = True
             resource_end_time = time.time()
             self.lab_logger().info(
@@ -976,9 +975,10 @@ class HostNode(BaseROS2DeviceNode):
         """
         更新节点信息回调
         """
-        self.lab_logger().info(f"[Host Node] Node info update request received: {request}")
+        # self.lab_logger().info(f"[Host Node] Node info update request received: {request}")
         try:
             from unilabos.app.communication import get_communication_client
+            from unilabos.app.web.client import HTTPClient, http_client
 
             info = json.loads(request.command)
             if "SYNC_SLAVE_NODE_INFO" in info:
@@ -987,10 +987,10 @@ class HostNode(BaseROS2DeviceNode):
                 edge_device_id = info["edge_device_id"]
                 self.device_machine_names[edge_device_id] = machine_name
             else:
-                comm_client = get_communication_client()
-                registry_config = info["registry_config"]
-                for device_config in registry_config:
-                    comm_client.publish_registry(device_config["id"], device_config)
+                devices_config = info.pop("devices_config")
+                registry_config = info.pop("registry_config")
+                if registry_config:
+                    http_client.resource_registry({"resources": registry_config})
             self.lab_logger().debug(f"[Host Node] Node info update: {info}")
             response.response = "OK"
         except Exception as e:
@@ -1016,10 +1016,9 @@ class HostNode(BaseROS2DeviceNode):
 
         success = False
         if len(self.bridges) > 0:  # 边的提交待定
-            from unilabos.app.web.client import HTTPClient
+            from unilabos.app.web.client import HTTPClient, http_client
 
-            client: HTTPClient = self.bridges[-1]
-            r = client.resource_add(add_schema(resources))
+            r = http_client.resource_add(add_schema(resources))
             success = bool(r)
 
         response.success = success
