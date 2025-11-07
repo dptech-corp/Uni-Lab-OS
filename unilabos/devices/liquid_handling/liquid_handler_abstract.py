@@ -1,11 +1,11 @@
 from __future__ import annotations
-import re
-import traceback
-from typing import List, Sequence, Optional, Literal, Union, Iterator, Dict, Any, Callable, Set, cast
-from collections import Counter
+
 import asyncio
 import time
-import pprint as pp
+import traceback
+from collections import Counter
+from typing import List, Sequence, Optional, Literal, Union, Iterator, Dict, Any, Callable, Set, cast
+
 from pylabrobot.liquid_handling import LiquidHandler, LiquidHandlerBackend, LiquidHandlerChatterboxBackend, Strictness
 from pylabrobot.liquid_handling.liquid_handler import TipPresenceProbingMethod
 from pylabrobot.liquid_handling.standard import GripDirection
