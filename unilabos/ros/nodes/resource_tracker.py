@@ -894,7 +894,7 @@ class DeviceNodeResourceTracker(object):
                 new_uuid = name_to_uuid_map[resource_name]
                 self.set_resource_uuid(res, new_uuid)
                 self.uuid_to_resources[new_uuid] = res
-                logger.debug(f"设置资源UUID: {resource_name} -> {new_uuid}")
+                logger.trace(f"设置资源UUID: {resource_name} -> {new_uuid}")
                 return 1
             return 0
 
@@ -917,7 +917,8 @@ class DeviceNodeResourceTracker(object):
             if resource_name and resource_name in name_to_extra_map:
                 extra = name_to_extra_map[resource_name]
                 self.set_resource_extra(res, extra)
-                logger.debug(f"设置资源Extra: {resource_name} -> {extra}")
+                if len(extra):
+                    logger.debug(f"设置资源Extra: {resource_name} -> {extra}")
                 return 1
             return 0
 
@@ -986,9 +987,10 @@ class DeviceNodeResourceTracker(object):
             if current_uuid:
                 old = self.uuid_to_resources.get(current_uuid)
                 self.uuid_to_resources[current_uuid] = res
-                logger.debug(
+                logger.trace(
                     f"收集资源UUID映射: {current_uuid} -> {res} {'' if old is None else f'(覆盖旧值: {old})'}"
                 )
+                return 1
             return 0
 
         self._traverse_and_process(resource, process)
