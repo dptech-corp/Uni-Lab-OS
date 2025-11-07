@@ -1007,7 +1007,7 @@ class DeviceNodeResourceTracker(object):
             current_uuid = self._get_resource_attr(res, "uuid", "unilabos_uuid")
             if current_uuid and current_uuid in self.uuid_to_resources:
                 self.uuid_to_resources.pop(current_uuid)
-                logger.debug(f"移除资源UUID映射: {current_uuid} -> {res}")
+                logger.trace(f"移除资源UUID映射: {current_uuid} -> {res}")
                 return 1
             return 0
 

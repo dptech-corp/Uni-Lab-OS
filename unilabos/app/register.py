@@ -1,11 +1,12 @@
 import json
 import time
+from typing import Optional, Tuple, Dict, Any
 
 from unilabos.utils.log import logger
 from unilabos.utils.type_check import TypeEncoder
 
 
-def register_devices_and_resources(lab_registry):
+def register_devices_and_resources(lab_registry, gather_only=False) -> Optional[Tuple[Dict[str, Any], Dict[str, Any]]]:
     """
     注册设备和资源到服务器（仅支持HTTP）
     """
@@ -28,6 +29,8 @@ def register_devices_and_resources(lab_registry):
         resources_to_register[resource_info["id"]] = resource_info
         logger.debug(f"[UniLab Register] 收集资源: {resource_info['id']}")
 
+    if gather_only:
+        return devices_to_register, resources_to_register
     # 注册设备
     if devices_to_register:
         try:
