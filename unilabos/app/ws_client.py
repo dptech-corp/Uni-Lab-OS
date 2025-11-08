@@ -421,8 +421,7 @@ class MessageProcessor:
                     ssl_context = ssl_module.create_default_context()
 
                 ws_logger = logging.getLogger("websockets.client")
-                # ws_logger.setLevel(logging.INFO)
-                ws_logger.setLevel(logging.WARNING)  # 只显示警告和错误
+                # 日志级别已在 unilabos.utils.log 中统一配置为 WARNING
 
                 async with websockets.connect(
                     self.websocket_url,
@@ -1198,7 +1197,7 @@ class WebSocketClient(BaseCommunicationClient):
             },
         }
         self.message_processor.send_message(message)
-        logger.debug(f"[WebSocketClient] Device status published: {device_id}.{property_name}")
+        logger.trace(f"[WebSocketClient] Device status published: {device_id}.{property_name}")
 
     def publish_job_status(
         self, feedback_data: dict, item: QueueItem, status: str, return_info: Optional[dict] = None
