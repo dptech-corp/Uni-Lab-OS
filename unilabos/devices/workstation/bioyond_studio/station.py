@@ -177,7 +177,18 @@ class BioyondWorkstation(WorkstationBase):
         ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
             "resources": [self.deck]
         })
-
+    def resource_tree_transfer(self, old_parent: ResourcePLR, plr_resource: ResourcePLR, parent_resource: ResourcePLR):
+        # ROS2DeviceNode.run_async_func(self._ros_node.resource_tree_transfer, True, **{
+        #     "old_parent": old_parent,
+        #     "plr_resource": plr_resource,
+        #     "parent_resource": parent_resource,
+        # })
+        print("resource_tree_transfer", plr_resource, parent_resource)
+        if hasattr(plr_resource, "unilabos_data") and plr_resource.unilabos_data:
+            if "update_resource_site" in plr_resource.unilabos_data:
+                site = plr_resource.unilabos_data["update_resource_site"]
+                return
+        self.lab_logger().warning(f"无库位的上料，不处理，{plr_resource} 挂载到 {parent_resource}")
     def transfer_resource_to_another(self, resource: List[ResourceSlot], mount_resource: List[ResourceSlot], sites: List[str], mount_device_id: DeviceSlot):
         ROS2DeviceNode.run_async_func(self._ros_node.transfer_resource_to_another, True, **{
             "plr_resources": resource,

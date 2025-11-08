@@ -87,7 +87,7 @@ def YB_fen_ye_5ml_Bottle(
         height=height,
         max_volume=max_volume,
         barcode=barcode,
-        model="Separation_Bottle_5ml",
+        model="YB_fen_ye_5ml_Bottle",
     )
 
 """20ml分液瓶"""
