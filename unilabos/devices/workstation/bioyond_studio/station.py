@@ -63,8 +63,14 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
                 logger.error("Bioyond API客户端未初始化")
                 return False
 
-            # 同时查询样品类型(typeMode=1)和试剂类型(typeMode=2)
+            # 同时查询耗材类型(typeMode=0)、样品类型(typeMode=1)和试剂类型(typeMode=2)
             all_bioyond_data = []
+
+            # 查询耗材类型物料（例如：枪头盒）
+            bioyond_data_type0 = self.bioyond_api_client.stock_material('{"typeMode": 0, "includeDetail": true}')
+            if bioyond_data_type0:
+                all_bioyond_data.extend(bioyond_data_type0)
+                logger.debug(f"从Bioyond查询到 {len(bioyond_data_type0)} 个耗材类型物料")
 
             # 查询样品类型物料（烧杯、试剂瓶、分装板等）
             bioyond_data_type1 = self.bioyond_api_client.stock_material('{"typeMode": 1, "includeDetail": true}')
@@ -228,10 +234,15 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
 
             # 第2步：转换为 Bioyond 格式
             logger.info(f"[同步→Bioyond] 🔄 转换物料为 Bioyond 格式...")
+
+            # 导入物料默认参数配置
+            from .config import MATERIAL_DEFAULT_PARAMETERS
+
             bioyond_material = resource_plr_to_bioyond(
                 [resource],
                 type_mapping=self.workstation.bioyond_config["material_type_mappings"],
-                warehouse_mapping=self.workstation.bioyond_config["warehouse_mapping"]
+                warehouse_mapping=self.workstation.bioyond_config["warehouse_mapping"],
+                material_params=MATERIAL_DEFAULT_PARAMETERS
             )[0]
 
             logger.info(f"[同步→Bioyond] 🔧 准备覆盖locations字段，目标仓库: {parent_name}, 库位: {update_site}, UUID: {target_location_uuid[:8]}...")

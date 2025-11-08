@@ -49,9 +49,9 @@ class BIOYOND_PolymerReactionStation_Deck(Deck):
         self.warehouse_locations = {
             "堆栈1左": Coordinate(0.0, 430.0, 0.0),  # 左侧位置
             "堆栈1右": Coordinate(2500.0, 430.0, 0.0),  # 右侧位置
-            "站内试剂存放堆栈": Coordinate(1100.0, 475.0, 0.0),
-            "移液站内10%分装液体准备仓库": Coordinate(1500.0, 300.0, 0.0),
-            "站内Tip盒堆栈": Coordinate(1800.0, 300.0, 0.0),  # TODO: 根据实际位置调整坐标
+            "站内试剂存放堆栈": Coordinate(640.0, 480.0, 0.0),
+            "移液站内10%分装液体准备仓库": Coordinate(1200.0, 600.0, 0.0),
+            "站内Tip盒堆栈": Coordinate(300.0, 150.0, 0.0),
         }
         self.warehouses["站内试剂存放堆栈"].rotation = Rotation(z=90)
 

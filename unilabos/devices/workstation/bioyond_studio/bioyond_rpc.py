@@ -735,7 +735,7 @@ class BioyondV1RPC(BaseRequest):
             print("正在加载材料列表缓存...")
 
             # 加载所有类型的材料：耗材(0)、样品(1)、试剂(2)
-            material_types = [1, 2]
+            material_types = [0, 1, 2]
 
             for type_mode in material_types:
                 print(f"正在加载类型 {type_mode} 的材料...")

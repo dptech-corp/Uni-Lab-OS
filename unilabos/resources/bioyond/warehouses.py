@@ -42,6 +42,7 @@ def bioyond_warehouse_1x4x4_right(name: str) -> WareHouse:
         item_dz=130.0,
         category="warehouse",
         col_offset=4,  # 从05开始: A05, A06, A07, A08
+        layout="row-major",  # ⭐ 改为行优先排序
     )
 
 

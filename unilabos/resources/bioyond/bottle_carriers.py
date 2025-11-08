@@ -1,33 +1,92 @@
 from pylabrobot.resources import create_homogeneous_resources, Coordinate, ResourceHolder, create_ordered_items_2d
 
-from unilabos.resources.itemized_carrier import Bottle, BottleCarrier
+from unilabos.resources.itemized_carrier import BottleCarrier
 from unilabos.resources.bioyond.bottles import (
     BIOYOND_PolymerStation_Solid_Stock,
     BIOYOND_PolymerStation_Solid_Vial,
     BIOYOND_PolymerStation_Liquid_Vial,
     BIOYOND_PolymerStation_Solution_Beaker,
     BIOYOND_PolymerStation_Reagent_Bottle,
-    # 配液站专用
-    BIOYOND_DispensingStation_Solid_Stock,
-    BIOYOND_DispensingStation_Solid_Vial,
-    BIOYOND_DispensingStation_Liquid_Vial,
-    BIOYOND_DispensingStation_Reagent_Bottle,
-    # 反应站专用
-    BIOYOND_ReactionStation_Reactor,
-    BIOYOND_ReactionStation_Solid_Vial,
-    BIOYOND_ReactionStation_Liquid_Vial,
-    BIOYOND_ReactionStation_Reagent_Bottle,
-    BIOYOND_ReactionStation_Flask,
+    BIOYOND_PolymerStation_Flask,
 )
 # 命名约定：试剂瓶-Bottle，烧杯-Beaker，烧瓶-Flask,小瓶-Vial
 
 
 # ============================================================================
-# 配液站（DispensingStation）载体定义
+# 聚合站（PolymerStation）载体定义（统一入口）
 # ============================================================================
 
-def BIOYOND_DispensingStation_8StockCarrier(name: str) -> BottleCarrier:
-    """配液站-8孔样品板 - 2x4布局"""
+def BIOYOND_PolymerStation_6StockCarrier(name: str) -> BottleCarrier:
+    """聚合站-6孔样品板 - 2x3布局
+
+    参数:
+    - name: 载架名称前缀
+
+    说明:
+    - 统一站点命名为 PolymerStation，使用 PolymerStation 的 Vial 资源类
+    - 第一排使用 Liquid_Vial（10% 分装小瓶），第二排使用 Solid_Vial（90% 分装小瓶）
+    """
+
+    # 载架尺寸 (mm)
+    carrier_size_x = 127.8
+    carrier_size_y = 85.5
+    carrier_size_z = 50.0
+
+    # 瓶位尺寸
+    bottle_diameter = 20.0
+    bottle_spacing_x = 42.0  # X方向间距
+    bottle_spacing_y = 35.0  # Y方向间距
+
+    # 计算起始位置 (居中排列)
+    start_x = (carrier_size_x - (3 - 1) * bottle_spacing_x - bottle_diameter) / 2
+    start_y = (carrier_size_y - (2 - 1) * bottle_spacing_y - bottle_diameter) / 2
+
+    sites = create_ordered_items_2d(
+        klass=ResourceHolder,
+        num_items_x=3,
+        num_items_y=2,
+        dx=start_x,
+        dy=start_y,
+        dz=5.0,
+        item_dx=bottle_spacing_x,
+        item_dy=bottle_spacing_y,
+
+        size_x=bottle_diameter,
+        size_y=bottle_diameter,
+        size_z=carrier_size_z,
+    )
+    for k, v in sites.items():
+        v.name = f"{name}_{v.name}"
+
+    carrier = BottleCarrier(
+        name=name,
+        size_x=carrier_size_x,
+        size_y=carrier_size_y,
+        size_z=carrier_size_z,
+        sites=sites,
+        model="BIOYOND_PolymerStation_6StockCarrier",
+    )
+    carrier.num_items_x = 3
+    carrier.num_items_y = 2
+    carrier.num_items_z = 1
+    ordering = ["A1", "B1", "A2", "B2", "A3", "B3"]  # 自定义顺序
+    # 第一排使用 Liquid_Vial，第二排使用 Solid_Vial
+    for i in range(3):
+        carrier[i] = BIOYOND_PolymerStation_Liquid_Vial(f"{name}_vial_{ordering[i]}")
+    for i in range(3, 6):
+        carrier[i] = BIOYOND_PolymerStation_Solid_Vial(f"{name}_vial_{ordering[i]}")
+    return carrier
+
+
+def BIOYOND_PolymerStation_8StockCarrier(name: str) -> BottleCarrier:
+    """聚合站-8孔样品板 - 2x4布局
+
+    参数:
+    - name: 载架名称前缀
+
+    说明:
+    - 统一站点命名为 PolymerStation，使用 PolymerStation 的 Solid_Stock 资源类
+    """
 
     # 载架尺寸 (mm)
     carrier_size_x = 128.0
@@ -66,306 +125,99 @@ def BIOYOND_DispensingStation_8StockCarrier(name: str) -> BottleCarrier:
         size_y=carrier_size_y,
         size_z=carrier_size_z,
         sites=sites,
-        model="BIOYOND_DispensingStation_8StockCarrier",
+        model="BIOYOND_PolymerStation_8StockCarrier",
     )
     carrier.num_items_x = 4
     carrier.num_items_y = 2
     carrier.num_items_z = 1
     ordering = ["A1", "B1", "A2", "B2", "A3", "B3", "A4", "B4"]
     for i in range(8):
-        carrier[i] = BIOYOND_DispensingStation_Solid_Stock(f"{name}_vial_{ordering[i]}")
+        carrier[i] = BIOYOND_PolymerStation_Solid_Stock(f"{name}_vial_{ordering[i]}")
     return carrier
-
-
-def BIOYOND_DispensingStation_6VialCarrier(name: str) -> BottleCarrier:
-    """配液站-6孔分装板 - 2x3布局"""
-
-    # 载架尺寸 (mm)
-    carrier_size_x = 128.0
-    carrier_size_y = 85.5
-    carrier_size_z = 50.0
-
-    # 瓶位尺寸
-    bottle_diameter = 20.0
-    bottle_spacing_x = 42.0  # X方向间距
-    bottle_spacing_y = 35.0  # Y方向间距
-
-    # 计算起始位置 (居中排列)
-    start_x = (carrier_size_x - (3 - 1) * bottle_spacing_x - bottle_diameter) / 2
-    start_y = (carrier_size_y - (2 - 1) * bottle_spacing_y - bottle_diameter) / 2
-
-    sites = create_ordered_items_2d(
-        klass=ResourceHolder,
-        num_items_x=3,
-        num_items_y=2,
-        dx=start_x,
-        dy=start_y,
-        dz=5.0,
-        item_dx=bottle_spacing_x,
-        item_dy=bottle_spacing_y,
-
-        size_x=bottle_diameter,
-        size_y=bottle_diameter,
-        size_z=carrier_size_z,
-    )
-    for k, v in sites.items():
-        v.name = f"{name}_{v.name}"
-
-    carrier = BottleCarrier(
-        name=name,
-        size_x=carrier_size_x,
-        size_y=carrier_size_y,
-        size_z=carrier_size_z,
-        sites=sites,
-        model="BIOYOND_DispensingStation_6VialCarrier",
-    )
-    carrier.num_items_x = 3
-    carrier.num_items_y = 2
-    carrier.num_items_z = 1
-    ordering = ["A1", "B1", "A2", "B2", "A3", "B3"]
-    # 第一排使用Liquid_Vial (10%分装小瓶), 第二排使用Solid_Vial (90%分装小瓶)
-    for i in [0, 2, 4]:
-        carrier[i] = BIOYOND_DispensingStation_Liquid_Vial(f"{name}_vial_{ordering[i]}")
-    for i in [1, 3, 5]:
-        carrier[i] = BIOYOND_DispensingStation_Solid_Vial(f"{name}_vial_{ordering[i]}")
-    return carrier
-
-
-def BIOYOND_DispensingStation_1BottleCarrier(name: str) -> BottleCarrier:
-    """配液站-单试剂瓶载架"""
-
-    # 载架尺寸 (mm)
-    carrier_size_x = 127.8
-    carrier_size_y = 85.5
-    carrier_size_z = 20.0
-
-    # 烧杯尺寸
-    beaker_diameter = 60.0
-
-    # 计算中央位置
-    center_x = (carrier_size_x - beaker_diameter) / 2
-    center_y = (carrier_size_y - beaker_diameter) / 2
-    center_z = 5.0
-
-    carrier = BottleCarrier(
-        name=name,
-        size_x=carrier_size_x,
-        size_y=carrier_size_y,
-        size_z=carrier_size_z,
-        sites=create_homogeneous_resources(
-            klass=ResourceHolder,
-            locations=[Coordinate(center_x, center_y, center_z)],
-            resource_size_x=beaker_diameter,
-            resource_size_y=beaker_diameter,
-            name_prefix=name,
-        ),
-        model="BIOYOND_DispensingStation_1BottleCarrier",
-    )
-    carrier.num_items_x = 1
-    carrier.num_items_y = 1
-    carrier.num_items_z = 1
-    carrier[0] = BIOYOND_DispensingStation_Reagent_Bottle(f"{name}_flask_1")
-    return carrier
-
-
-def BIOYOND_DispensingStation_1FlaskCarrier(name: str) -> BottleCarrier:
-    """配液站-单烧杯载架"""
-
-    # 载架尺寸 (mm)
-    carrier_size_x = 127.8
-    carrier_size_y = 85.5
-    carrier_size_z = 20.0
-
-    # 烧杯尺寸
-    beaker_diameter = 70.0
-
-    # 计算中央位置
-    center_x = (carrier_size_x - beaker_diameter) / 2
-    center_y = (carrier_size_y - beaker_diameter) / 2
-    center_z = 5.0
-
-    carrier = BottleCarrier(
-        name=name,
-        size_x=carrier_size_x,
-        size_y=carrier_size_y,
-        size_z=carrier_size_z,
-        sites=create_homogeneous_resources(
-            klass=ResourceHolder,
-            locations=[Coordinate(center_x, center_y, center_z)],
-            resource_size_x=beaker_diameter,
-            resource_size_y=beaker_diameter,
-            name_prefix=name,
-        ),
-        model="BIOYOND_DispensingStation_1FlaskCarrier",
-    )
-    carrier.num_items_x = 1
-    carrier.num_items_y = 1
-    carrier.num_items_z = 1
-    carrier[0] = BIOYOND_DispensingStation_Reagent_Bottle(f"{name}_bottle_1")
-    return carrier
-
-
-# ============================================================================
-# 反应站（ReactionStation）载体定义
-# ============================================================================
-
-def BIOYOND_ReactionStation_6StockCarrier(name: str) -> BottleCarrier:
-    """反应站-6孔样品板 - 2x3布局"""
-
-    # 载架尺寸 (mm)
-    carrier_size_x = 127.8
-    carrier_size_y = 85.5
-    carrier_size_z = 50.0
-
-    # 瓶位尺寸
-    bottle_diameter = 20.0
-    bottle_spacing_x = 42.0  # X方向间距
-    bottle_spacing_y = 35.0  # Y方向间距
-
-    # 计算起始位置 (居中排列)
-    start_x = (carrier_size_x - (3 - 1) * bottle_spacing_x - bottle_diameter) / 2
-    start_y = (carrier_size_y - (2 - 1) * bottle_spacing_y - bottle_diameter) / 2
-
-    sites = create_ordered_items_2d(
-        klass=ResourceHolder,
-        num_items_x=3,
-        num_items_y=2,
-        dx=start_x,
-        dy=start_y,
-        dz=5.0,
-        item_dx=bottle_spacing_x,
-        item_dy=bottle_spacing_y,
-
-        size_x=bottle_diameter,
-        size_y=bottle_diameter,
-        size_z=carrier_size_z,
-    )
-    for k, v in sites.items():
-        v.name = f"{name}_{v.name}"
-
-    carrier = BottleCarrier(
-        name=name,
-        size_x=carrier_size_x,
-        size_y=carrier_size_y,
-        size_z=carrier_size_z,
-        sites=sites,
-        model="BIOYOND_ReactionStation_6StockCarrier",
-    )
-    carrier.num_items_x = 3
-    carrier.num_items_y = 2
-    carrier.num_items_z = 1
-    ordering = ["A1", "A2", "A3", "B1", "B2", "B3"]  # 自定义顺序
-    # 反应站6孔板: 第一排使用Liquid_Vial (10%分装小瓶), 第二排使用Solid_Vial (90%分装小瓶)
-    for i in range(3):
-        carrier[i] = BIOYOND_ReactionStation_Liquid_Vial(f"{name}_vial_{ordering[i]}")
-    for i in range(3, 6):
-        carrier[i] = BIOYOND_ReactionStation_Solid_Vial(f"{name}_vial_{ordering[i]}")
-    return carrier
-
-
-def BIOYOND_ReactionStation_1BottleCarrier(name: str) -> BottleCarrier:
-    """反应站-单试剂瓶载架"""
-
-    # 载架尺寸 (mm)
-    carrier_size_x = 127.8
-    carrier_size_y = 85.5
-    carrier_size_z = 20.0
-
-    # 烧杯尺寸
-    beaker_diameter = 60.0
-
-    # 计算中央位置
-    center_x = (carrier_size_x - beaker_diameter) / 2
-    center_y = (carrier_size_y - beaker_diameter) / 2
-    center_z = 5.0
-
-    carrier = BottleCarrier(
-        name=name,
-        size_x=carrier_size_x,
-        size_y=carrier_size_y,
-        size_z=carrier_size_z,
-        sites=create_homogeneous_resources(
-            klass=ResourceHolder,
-            locations=[Coordinate(center_x, center_y, center_z)],
-            resource_size_x=beaker_diameter,
-            resource_size_y=beaker_diameter,
-            name_prefix=name,
-        ),
-        model="BIOYOND_ReactionStation_1BottleCarrier",
-    )
-    carrier.num_items_x = 1
-    carrier.num_items_y = 1
-    carrier.num_items_z = 1
-    carrier[0] = BIOYOND_ReactionStation_Reagent_Bottle(f"{name}_flask_1")
-    return carrier
-
-
-def BIOYOND_ReactionStation_1FlaskCarrier(name: str) -> BottleCarrier:
-    """反应站-单烧杯载架"""
-
-    # 载架尺寸 (mm)
-    carrier_size_x = 127.8
-    carrier_size_y = 85.5
-    carrier_size_z = 20.0
-
-    # 烧杯尺寸
-    beaker_diameter = 60.0
-
-    # 计算中央位置
-    center_x = (carrier_size_x - beaker_diameter) / 2
-    center_y = (carrier_size_y - beaker_diameter) / 2
-    center_z = 5.0
-
-    carrier = BottleCarrier(
-        name=name,
-        size_x=carrier_size_x,
-        size_y=carrier_size_y,
-        size_z=carrier_size_z,
-        sites=create_homogeneous_resources(
-            klass=ResourceHolder,
-            locations=[Coordinate(center_x, center_y, center_z)],
-            resource_size_x=beaker_diameter,
-            resource_size_y=beaker_diameter,
-            name_prefix=name,
-        ),
-        model="BIOYOND_ReactionStation_1FlaskCarrier",
-    )
-    carrier.num_items_x = 1
-    carrier.num_items_y = 1
-    carrier.num_items_z = 1
-    carrier[0] = BIOYOND_ReactionStation_Flask(f"{name}_flask_1")
-    return carrier
-
-
-# ============================================================================
-# 聚合站（PolymerStation）载体定义 - 向后兼容
-# ============================================================================
-
-def BIOYOND_PolymerStation_6StockCarrier(name: str) -> BottleCarrier:
-    """[已弃用] 请使用 BIOYOND_ReactionStation_6StockCarrier"""
-    return BIOYOND_ReactionStation_6StockCarrier(name)
-
-
-def BIOYOND_PolymerStation_8StockCarrier(name: str) -> BottleCarrier:
-    """[已弃用] 请使用 BIOYOND_DispensingStation_8StockCarrier"""
-    return BIOYOND_DispensingStation_8StockCarrier(name)
-
-
-def BIOYOND_PolymerStation_6VialCarrier(name: str) -> BottleCarrier:
-    """[已弃用] 请使用 BIOYOND_DispensingStation_6VialCarrier"""
-    return BIOYOND_DispensingStation_6VialCarrier(name)
 
 
 def BIOYOND_PolymerStation_1BottleCarrier(name: str) -> BottleCarrier:
-    """[已弃用] 请使用 BIOYOND_DispensingStation_1BottleCarrier"""
-    return BIOYOND_DispensingStation_1BottleCarrier(name)
+    """聚合站-单试剂瓶载架
+
+    参数:
+    - name: 载架名称前缀
+    """
+
+    # 载架尺寸 (mm)
+    carrier_size_x = 127.8
+    carrier_size_y = 85.5
+    carrier_size_z = 20.0
+
+    # 烧杯/试剂瓶占位尺寸（使用圆形占位）
+    beaker_diameter = 60.0
+
+    # 计算中央位置
+    center_x = (carrier_size_x - beaker_diameter) / 2
+    center_y = (carrier_size_y - beaker_diameter) / 2
+    center_z = 5.0
+
+    carrier = BottleCarrier(
+        name=name,
+        size_x=carrier_size_x,
+        size_y=carrier_size_y,
+        size_z=carrier_size_z,
+        sites=create_homogeneous_resources(
+            klass=ResourceHolder,
+            locations=[Coordinate(center_x, center_y, center_z)],
+            resource_size_x=beaker_diameter,
+            resource_size_y=beaker_diameter,
+            name_prefix=name,
+        ),
+        model="BIOYOND_PolymerStation_1BottleCarrier",
+    )
+    carrier.num_items_x = 1
+    carrier.num_items_y = 1
+    carrier.num_items_z = 1
+    # 统一后缀采用 "flask_1" 命名（可按需调整）
+    carrier[0] = BIOYOND_PolymerStation_Reagent_Bottle(f"{name}_flask_1")
+    return carrier
 
 
 def BIOYOND_PolymerStation_1FlaskCarrier(name: str) -> BottleCarrier:
-    """[已弃用] 请根据实际工作站选择 BIOYOND_DispensingStation_1FlaskCarrier 或 BIOYOND_ReactionStation_1FlaskCarrier"""
-    # 默认返回配液站版本以保持向后兼容
-    return BIOYOND_DispensingStation_1FlaskCarrier(name) # 配液站版本
-    # return BIOYOND_ReactionStation_1FlaskCarrier(name)  # 反应站版本
+    """聚合站-单烧杯载架
+
+    说明:
+    - 使用 BIOYOND_PolymerStation_Flask 资源类
+    - 载架命名与 model 统一为 PolymerStation
+    """
+
+    # 载架尺寸 (mm)
+    carrier_size_x = 127.8
+    carrier_size_y = 85.5
+    carrier_size_z = 20.0
+
+    # 烧杯尺寸
+    beaker_diameter = 60.0
+
+    # 计算中央位置
+    center_x = (carrier_size_x - beaker_diameter) / 2
+    center_y = (carrier_size_y - beaker_diameter) / 2
+    center_z = 5.0
+
+    carrier = BottleCarrier(
+        name=name,
+        size_x=carrier_size_x,
+        size_y=carrier_size_y,
+        size_z=carrier_size_z,
+        sites=create_homogeneous_resources(
+            klass=ResourceHolder,
+            locations=[Coordinate(center_x, center_y, center_z)],
+            resource_size_x=beaker_diameter,
+            resource_size_y=beaker_diameter,
+            name_prefix=name,
+        ),
+        model="BIOYOND_PolymerStation_1FlaskCarrier",
+    )
+    carrier.num_items_x = 1
+    carrier.num_items_y = 1
+    carrier.num_items_z = 1
+    carrier[0] = BIOYOND_PolymerStation_Flask(f"{name}_flask_1")
+    return carrier
 
 
 # ============================================================================

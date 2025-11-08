@@ -833,16 +833,26 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
     return plr_materials
 
 
-def resource_plr_to_bioyond(plr_resources: list[ResourcePLR], type_mapping: dict = {}, warehouse_mapping: dict = {}) -> list[dict]:
+def resource_plr_to_bioyond(plr_resources: list[ResourcePLR], type_mapping: dict = {}, warehouse_mapping: dict = {}, material_params: dict = {}) -> list[dict]:
+    """
+    将 PyLabRobot 资源转换为 Bioyond 格式
+
+    Args:
+        plr_resources: PyLabRobot 资源列表
+        type_mapping: 物料类型映射字典
+        warehouse_mapping: 仓库映射字典
+        material_params: 物料默认参数字典 (格式: {物料名称: {参数字典}})
+
+    Returns:
+        Bioyond 格式的物料列表
+    """
     bioyond_materials = []
 
-    # 定义不需要发送details的载架类型（这些载架自带试剂瓶/烧杯，不需要作为子物料发送）
+    # 定义不需要发送 details 的载架类型
+    # 说明：这些载架上自带试剂瓶或烧杯，作为整体物料上传即可，不需要在 details 中重复上传子物料
     CARRIERS_WITHOUT_DETAILS = {
-        "BIOYOND_DispensingStation_1BottleCarrier",  # 配液站-单试剂瓶载架
-        "BIOYOND_DispensingStation_1FlaskCarrier",   # 配液站-单烧杯载架
-        "BIOYOND_ReactionStation_1BottleCarrier",    # 反应站-单试剂瓶载架
-        "BIOYOND_ReactionStation_1FlaskCarrier",     # 反应站-单烧杯载架
-        "BIOYOND_PolymerStation_1FlaskCarrier",      # 聚合站-单烧杯载架（兼容）
+        "BIOYOND_PolymerStation_1BottleCarrier",  # 聚合站-单试剂瓶载架
+        "BIOYOND_PolymerStation_1FlaskCarrier",   # 聚合站-单烧杯载架
     }
 
     for resource in plr_resources:
@@ -981,12 +991,31 @@ def resource_plr_to_bioyond(plr_resources: list[ResourcePLR], type_mapping: dict
             else:
                 logger.debug(f"  📭 [单瓶物料] {resource.name} 无液体，使用资源名: {material_name}")
 
+            # 🎯 处理物料默认参数和单位
+            # 检查是否有该物料名称的默认参数配置
+            default_unit = "个"  # 默认单位
+            material_parameters = {}
+
+            if material_name in material_params:
+                params_config = material_params[material_name].copy()
+
+                # 提取 unit 字段（如果有）
+                if "unit" in params_config:
+                    default_unit = params_config.pop("unit")  # 从参数中移除，放到外层
+
+                # 剩余的字段放入 Parameters
+                material_parameters = params_config
+                logger.debug(f"  🔧 [物料参数] 为 {material_name} 应用配置: unit={default_unit}, parameters={material_parameters}")
+
+            # 转换为 JSON 字符串
+            parameters_json = json.dumps(material_parameters) if material_parameters else "{}"
+
             material = {
                 "typeId": type_id,
                 "name": material_name,  # 使用物料名称而不是资源名称
-                "unit": "个",  # 修复：Bioyond API 要求 unit 字段不能为空
+                "unit": default_unit,  # 使用配置的单位或默认单位
                 "quantity": sum(qty for _, qty in bottle.tracker.liquids) if hasattr(bottle, "tracker") else 0,
-                "Parameters": "{}"
+                "Parameters": parameters_json
             }
 
         # ⭐ 处理 locations 信息

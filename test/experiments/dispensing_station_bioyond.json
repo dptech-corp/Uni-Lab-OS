@@ -12,7 +12,7 @@
             "config": {
                 "config": {
                     "api_key": "DE9BDDA0",
-                    "api_host": "http://192.168.1.200:44400",
+                    "api_host": "http://192.168.1.200:44388",
                     "material_type_mappings": {
                         "BIOYOND_DispensingStation_1FlaskCarrier": [
                             "烧杯",
