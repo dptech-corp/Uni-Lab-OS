@@ -15,9 +15,9 @@ lab_registry.setup()
 
 
 type_mapping = {
-    "加样头(大)": ("YB_jia_yang_tou_da_1X1_carrier", "3a190ca0-b2f6-9aeb-8067-547e72c11469"),
+    "加样头(大)": ("YB_jia_yang_tou_da", "3a190ca0-b2f6-9aeb-8067-547e72c11469"),
     "液": ("YB_1BottleCarrier", "3a190ca1-2add-2b23-f8e1-bbd348b7f790"),
-    "配液瓶(小)板": ("YB_6x_SmallSolutionBottleCarrier", "3a190c8b-3284-af78-d29f-9a69463ad047"),
+    "配液瓶(小)板": ("YB_peiyepingxiaoban", "3a190c8b-3284-af78-d29f-9a69463ad047"),
     "配液瓶(小)": ("YB_pei_ye_xiao_Bottler", "3a190c8c-fe8f-bf48-0dc3-97afc7f508eb"),
 }
 
