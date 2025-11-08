@@ -421,7 +421,8 @@ class MessageProcessor:
                     ssl_context = ssl_module.create_default_context()
 
                 ws_logger = logging.getLogger("websockets.client")
-                ws_logger.setLevel(logging.INFO)
+                # ws_logger.setLevel(logging.INFO)
+                ws_logger.setLevel(logging.WARNING)  # 只显示警告和错误
 
                 async with websockets.connect(
                     self.websocket_url,

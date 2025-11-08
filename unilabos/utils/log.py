@@ -191,6 +191,13 @@ def configure_logger(loglevel=None):
 
     # 添加处理器到根日志记录器
     root_logger.addHandler(console_handler)
+    
+    # 降低第三方库的日志级别，避免过多输出
+    # pymodbus 库的日志太详细，设置为 WARNING
+    logging.getLogger('pymodbus').setLevel(TRACE_LEVEL)
+    logging.getLogger('pymodbus.logging').setLevel(TRACE_LEVEL)
+    logging.getLogger('pymodbus.logging.base').setLevel(TRACE_LEVEL)
+    logging.getLogger('pymodbus.logging.decoders').setLevel(TRACE_LEVEL)
 
 
 # 配置日志系统
