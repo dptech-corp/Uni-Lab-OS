@@ -18,70 +18,11 @@ from pylabrobot.resources.tip_rack import TipRack, TipSpot
 from pylabrobot.resources.trash import Trash
 from pylabrobot.resources.utils import create_ordered_items_2d
 
-from unilabos.resources.battery.magazine import MagazineHolder_1, MagazineHolder_2, MagazineHolder_4, MagazineHolder_6
+from unilabos.resources.battery.magazine import MagazineHolder_4_Cathode, MagazineHolder_6_Cathode, MagazineHolder_6_Anode, MagazineHolder_6_Battery
 from unilabos.resources.battery.bottle_carriers import YIHUA_Electrolyte_12VialCarrier
 
 
-class ElectrodeSheetState(TypedDict):
-    diameter: float  # 直径 (mm)
-    thickness: float  # 厚度 (mm)
-    mass: float  # 质量 (g)
-    material_type: str  # 材料类型（正极、负极、隔膜、弹片、垫片、铝箔等）
-    height: float
-    electrolyte_name: str
-    data_electrolyte_code: str
-    open_circuit_voltage: float
-    assembly_pressure: float
-    electrolyte_volume: float
 
-    info: Optional[str]  # 附加信息
-
-class ElectrodeSheet(Resource):
-    """极片类 - 包含正负极片、隔膜、弹片、垫片、铝箔等所有片状材料"""
-
-    def __init__(
-        self,
-        name: str = "极片",
-        size_x=10,
-        size_y=10,
-        size_z=10,
-        category: str = "electrode_sheet",
-        model: Optional[str] = None,
-    ):
-        """初始化极片
-
-        Args:
-            name: 极片名称
-            category: 类别
-            model: 型号
-        """
-        super().__init__(
-            name=name,
-            size_x=size_x,
-            size_y=size_y,
-            size_z=size_z,
-            category=category,
-            model=model,
-        )
-        self._unilabos_state: ElectrodeSheetState = ElectrodeSheetState(
-            diameter=14,
-            thickness=0.1,
-            mass=0.5,
-            material_type="copper",
-            info=None
-        )
-
-    # TODO: 这个还要不要？给self._unilabos_state赋值的？
-    def load_state(self, state: Dict[str, Any]) -> None:
-        """格式不变"""
-        super().load_state(state)
-        self._unilabos_state = state
-    #序列化
-    def serialize_state(self) -> Dict[str, Dict[str, Any]]:
-        """格式不变"""
-        data = super().serialize_state()
-        data.update(self._unilabos_state)  # Container自身的信息，云端物料将保存这一data，本地也通过这里的data进行读写，当前类用来表示这个物料的长宽高大小的属性，而data（state用来表示物料的内容，细节等）
-        return data
 
 # TODO: 这个应该只能放一个极片
 class MaterialHoleState(TypedDict):
@@ -477,13 +418,13 @@ def TipBox64(
         size_x: float = 127.8,
         size_y: float = 85.5,
         size_z: float = 60.0,
-        category: str = "tip_box_64",
+        category: str = "tip_rack",
         model: Optional[str] = None,
 ):
     """64孔枪头盒类"""
     from pylabrobot.resources.tip import Tip
 
-    # 创建8x8=64个枪头位
+    # 创建12x8=96个枪头位
     def make_tip():
         return Tip(
             has_filter=False,
@@ -508,17 +449,19 @@ def TipBox64(
     )
     idx_available = list(range(0, 32)) + list(range(64, 96))
     tip_spots_available = {k: v for i, (k, v) in enumerate(tip_spots.items()) if i in idx_available}
-    return TipRack(
+    tip_rack = TipRack(
         name=name,
         size_x=size_x,
         size_y=size_y,
         size_z=size_z,
-        ordered_items=tip_spots_available,
+        # ordered_items=tip_spots_available,
+        ordered_items=tip_spots,
         category=category,
         model=model,
-        with_tips=True,
+        with_tips=False,
     )
-
+    tip_rack.set_tip_state([True]*32 + [False]*32 + [True]*32)  # 前32和后32个有枪头，中间32个无枪头
+    return tip_rack
 
 
 class WasteTipBoxstate(TypedDict):
@@ -629,57 +572,22 @@ class CoincellDeck(Deck):
     def setup(self) -> None:
         """设置工作站的标准布局 - 包含子弹夹、料盘、瓶架等完整配置"""
         # ====================================== 子弹夹 ============================================
-        # 铝箔（1个洞位）
-        lvbo_zip = MagazineHolder_1("铝箔弹夹", 80, 80, 10)
-        self.assign_child_resource(lvbo_zip, Coordinate(x=2737.0, y=301.0, z=0))
         
         # 正极片（4个洞位，2x2布局）
-        zhengji_zip = MagazineHolder_4("正极弹夹", 80, 80, 10)
+        zhengji_zip = MagazineHolder_4_Cathode("正极&铝箔弹夹")
         self.assign_child_resource(zhengji_zip, Coordinate(x=2799.0, y=356.0, z=0))
         
-        # 正极壳（4个洞位，2x2布局）
-        zhengjike_zip = MagazineHolder_4("正极壳弹夹", 80, 80, 10)
+        # 正极壳、平垫片（6个洞位，2x2+2布局）
+        zhengjike_zip = MagazineHolder_6_Cathode("正极壳&平垫片弹夹")
         self.assign_child_resource(zhengjike_zip, Coordinate(x=2586.0, y=1143.0, z=0))
         
-        # 垫片（2个洞位，1x2布局）
-        danpian_zip = MagazineHolder_2("垫片弹夹", 80, 80, 10)
-        self.assign_child_resource(danpian_zip, Coordinate(x=2690.0, y=1141.0, z=0))
-        
-        # 负极壳（4个洞位，2x2布局）
-        fujike_zip = MagazineHolder_4("负极壳弹夹", 80, 80, 10)
+        # 负极壳、弹垫片（6个洞位，2x2+2布局）
+        fujike_zip = MagazineHolder_6_Anode("负极壳&弹垫片弹夹")
         self.assign_child_resource(fujike_zip, Coordinate(x=2492.0, y=1144.0, z=0))
         
-        # 弹片（2个洞位，1x2布局）
-        tanpian_zip = MagazineHolder_2("弹片弹夹", 80, 80, 10)
-        self.assign_child_resource(tanpian_zip, Coordinate(x=2492.0, y=1139.0, z=0))
-        
         # 成品弹夹（6个洞位，3x2布局）
-        chengpindanjia_zip = MagazineHolder_6("成品弹夹", 80, 80, 10)
+        chengpindanjia_zip = MagazineHolder_6_Battery("成品弹夹")
         self.assign_child_resource(chengpindanjia_zip, Coordinate(x=3112.0, y=1295.0, z=0))
-        
-        # 为子弹夹添加极片
-        for i in range(1):  # MagazineHolder_1 有1个洞位
-            lvbo = ElectrodeSheet(name=f"铝箔_{i}", size_x=12, size_y=12, size_z=0.1)
-            lvbo_zip.children[i].assign_child_resource(lvbo, location=None)
-        for i in range(4):  # MagazineHolder_4 有4个洞位
-            zhengji = ElectrodeSheet(name=f"正极_{i}", size_x=12, size_y=12, size_z=0.1)
-            zhengji_zip.children[i].assign_child_resource(zhengji, location=None)
-        for i in range(4):  # MagazineHolder_4 有4个洞位
-            zhengjike = ElectrodeSheet(name=f"正极壳_{i}", size_x=12, size_y=12, size_z=0.1)
-            zhengjike_zip.children[i].assign_child_resource(zhengjike, location=None)
-        for i in range(2):  # MagazineHolder_2 有2个洞位
-            danpian = ElectrodeSheet(name=f"垫片_{i}", size_x=12, size_y=12, size_z=0.1)
-            danpian_zip.children[i].assign_child_resource(danpian, location=None)
-        for i in range(4):  # MagazineHolder_4 有4个洞位
-            fujike = ElectrodeSheet(name=f"负极壳_{i}", size_x=12, size_y=12, size_z=0.1)
-            fujike_zip.children[i].assign_child_resource(fujike, location=None)
-        for i in range(2):  # MagazineHolder_2 有2个洞位
-            tanpian = ElectrodeSheet(name=f"弹片_{i}", size_x=12, size_y=12, size_z=0.1)
-            tanpian_zip.children[i].assign_child_resource(tanpian, location=None)
-        # for i in range(6):  # MagazineHolder_6 有6个洞位
-        #     chengpindanjia = ElectrodeSheet(name=f"成品弹夹_{i}", size_x=12, size_y=12, size_z=0.1)
-        #     chengpindanjia_zip.children[i].assign_child_resource(chengpindanjia, location=None)
-
         
         # ====================================== 物料板 ============================================
         # 创建物料板（料盘carrier）- 4x4布局
@@ -699,7 +607,7 @@ class CoincellDeck(Deck):
 
         # ====================================== 瓶架、移液枪 ============================================
         # 在台面上放置 3x4 瓶架、6x2 瓶架 与 64孔移液枪头盒
-        # 奔耀上料5ml分液瓶小板 - 由奔曜跨站转运而来，不单独写
+        # 奔耀上料5ml分液瓶小板 - 由奔曜跨站转运而来，不单独写，但是这里应该有一个堆栈用于摆放分液瓶小板
         
         # bottle_rack_3x4 = BottleRack(
         #     name="bottle_rack_3x4",

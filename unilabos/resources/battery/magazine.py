@@ -1,9 +1,17 @@
-from typing import Dict, List, Optional, OrderedDict, Union
+from typing import Dict, List, Optional, OrderedDict, Union, Callable
 import math
 
 from pylabrobot.resources.coordinate import Coordinate
 from pylabrobot.resources import Resource, ResourceStack, ItemizedResource
 from pylabrobot.resources.carrier import create_homogeneous_resources
+
+from unilabos.resources.battery.electrode_sheet import (
+    PositiveCan, PositiveElectrode,
+    NegativeCan, NegativeElectrode,
+    SpringWasher, FlatWasher,
+    AluminumFoil,
+    Battery
+)
 
 
 class Magazine(ResourceStack):
@@ -31,6 +39,18 @@ class Magazine(ResourceStack):
             resources=resources,
         )
         self.max_sheets = max_sheets
+
+    @property
+    def size_x(self) -> float:
+        return self.get_size_x()
+
+    @property
+    def size_y(self) -> float:
+        return self.get_size_y()
+
+    @property
+    def size_z(self) -> float:
+        return self.get_size_z()
 
 
 class MagazineHolder(ItemizedResource):
@@ -98,6 +118,7 @@ def magazine_factory(
     size_y: float,
     size_z: float,
     locations: List[Coordinate],
+    klasses: Optional[List[Callable[[str], str]]] = None,
     hole_diameter: float = 14.0,
     hole_depth: float = 10.0,
     max_sheets_per_hole: int = 100,
@@ -112,12 +133,17 @@ def magazine_factory(
         size_y: 宽度 (mm)
         size_z: 高度 (mm)
         locations: 洞位坐标列表
+        klasses: 每个洞位中极片的类列表
         hole_diameter: 洞直径 (mm)
         hole_depth: 洞深度 (mm)
         max_sheets_per_hole: 每个洞位最大极片数量
         category: 类别
         model: 型号
     """
+    for loc in locations:
+        loc.x -= hole_diameter / 2
+        loc.y -= hole_diameter / 2
+
     # 创建洞位
     _sites = create_homogeneous_resources(
         klass=Magazine,
@@ -132,7 +158,7 @@ def magazine_factory(
     keys = [f"A{i+1}" for i in range(len(locations))]
     sites = dict(zip(keys, _sites.values()))
     
-    return MagazineHolder(
+    holder = MagazineHolder(
         name=name,
         size_x=size_x,
         size_y=size_y,
@@ -145,18 +171,143 @@ def magazine_factory(
         model=model,
     )
 
+    if klasses is not None:
+        for i, klass in enumerate(klasses):
+            hole_key = keys[i]
+            hole = holder.children[i]
+            for j in reversed(range(max_sheets_per_hole)):
+                item_name = f"{hole_key}_sheet{j+1}"
+                item = klass(name=item_name)
+                hole.assign_child_resource(item)
+    return holder
 
-def MagazineHolder_4(
+
+def MagazineHolder_6_Cathode(
     name: str,
     size_x: float = 80.0,
     size_y: float = 80.0,
-    size_z: float = 10.0,
+    size_z: float = 40.0,
     hole_diameter: float = 14.0,
     hole_depth: float = 10.0,
-    hole_spacing: float = 25.0,
+    hole_spacing: float = 20.0,
     max_sheets_per_hole: int = 100,
 ) -> MagazineHolder:
+    """创建6孔子弹夹 - 六边形排布"""
+    center_x = size_x / 2
+    center_y = size_y / 2
+
+    locations = []
+
+    # 周围6个孔，按六边形排布
+    for i in range(6):
+        angle = i * 60 * math.pi / 180  # 每60度一个孔
+        x = center_x + hole_spacing * math.cos(angle)
+        y = center_y + hole_spacing * math.sin(angle)
+        locations.append(Coordinate(x, y, size_z - hole_depth))
+
+    return magazine_factory(
+        name=name,
+        size_x=size_x,
+        size_y=size_y,
+        size_z=size_z,
+        locations=locations,
+        klasses=[FlatWasher, PositiveCan, PositiveCan, FlatWasher, PositiveCan, PositiveCan],
+        hole_diameter=hole_diameter,
+        hole_depth=hole_depth,
+        max_sheets_per_hole=max_sheets_per_hole,
+        category="magazine_holder",
+        model="MagazineHolder_6_Cathode",
+    )
+
+
+def MagazineHolder_6_Anode(
+    name: str,
+    size_x: float = 80.0,
+    size_y: float = 80.0,
+    size_z: float = 40.0,
+    hole_diameter: float = 14.0,
+    hole_depth: float = 10.0,
+    hole_spacing: float = 20.0,
+    max_sheets_per_hole: int = 100,
+) -> MagazineHolder:
+    """创建6孔子弹夹 - 六边形排布"""
+    center_x = size_x / 2
+    center_y = size_y / 2
+
+    locations = []
+
+    # 周围6个孔，按六边形排布
+    for i in range(6):
+        angle = i * 60 * math.pi / 180  # 每60度一个孔
+        x = center_x + hole_spacing * math.cos(angle)
+        y = center_y + hole_spacing * math.sin(angle)
+        locations.append(Coordinate(x, y, size_z - hole_depth))
+
+    return magazine_factory(
+        name=name,
+        size_x=size_x,
+        size_y=size_y,
+        size_z=size_z,
+        locations=locations,
+        klasses=[SpringWasher, NegativeCan, NegativeCan, SpringWasher, NegativeCan, NegativeCan],
+        hole_diameter=hole_diameter,
+        hole_depth=hole_depth,
+        max_sheets_per_hole=max_sheets_per_hole,
+        category="magazine_holder",
+        model="MagazineHolder_6_Anode",
+    )
+
+
+def MagazineHolder_6_Battery(
+    name: str,
+    size_x: float = 80.0,
+    size_y: float = 80.0,
+    size_z: float = 40.0,
+    hole_diameter: float = 14.0,
+    hole_depth: float = 10.0,
+    hole_spacing: float = 20.0,
+    max_sheets_per_hole: int = 100,
+) -> MagazineHolder:
+    """创建6孔子弹夹 - 六边形排布"""
+    center_x = size_x / 2
+    center_y = size_y / 2
+
+    locations = []
+
+    # 周围6个孔，按六边形排布
+    for i in range(6):
+        angle = i * 60 * math.pi / 180  # 每60度一个孔
+        x = center_x + hole_spacing * math.cos(angle)
+        y = center_y + hole_spacing * math.sin(angle)
+        locations.append(Coordinate(x, y, size_z - hole_depth))
+
+    return magazine_factory(
+        name=name,
+        size_x=size_x,
+        size_y=size_y,
+        size_z=size_z,
+        locations=locations,
+        klasses=None, # 初始化时，不放入装好的电池
+        hole_diameter=hole_diameter,
+        hole_depth=hole_depth,
+        max_sheets_per_hole=max_sheets_per_hole,
+        category="magazine_holder",
+        model="MagazineHolder_6_Battery",
+    )
+
+
+def MagazineHolder_4_Cathode(
+    name: str,
+) -> MagazineHolder:
     """创建4孔子弹夹 - 正方形四角排布"""
+    size_x: float = 80.0
+    size_y: float = 80.0
+    size_z: float = 10.0
+    hole_diameter: float = 14.0
+    hole_depth: float = 10.0
+    hole_spacing: float = 25.0
+    max_sheets_per_hole: int = 100
+
     # 计算4个洞位的坐标（正方形四角排布）
     center_x = size_x / 2
     center_y = size_y / 2
@@ -175,110 +326,10 @@ def MagazineHolder_4(
         size_y=size_y,
         size_z=size_z,
         locations=locations,
+        klasses=[AluminumFoil, PositiveElectrode, PositiveElectrode, PositiveElectrode],
         hole_diameter=hole_diameter,
         hole_depth=hole_depth,
         max_sheets_per_hole=max_sheets_per_hole,
-        category="clip_magazine_four",
-    )
-
-
-def MagazineHolder_2(
-    name: str,
-    size_x: float = 80.0,
-    size_y: float = 80.0,
-    size_z: float = 10.0,
-    hole_diameter: float = 14.0,
-    hole_depth: float = 10.0,
-    hole_spacing: float = 25.0,
-    max_sheets_per_hole: int = 100,
-) -> MagazineHolder:
-    """创建2孔子弹夹 - 竖向排布"""
-    # 计算2个洞位的坐标（竖向排布）
-    center_x = size_x / 2
-    center_y = size_y / 2
-    offset = hole_spacing / 2
-    
-    locations = [
-        Coordinate(center_x, center_y - offset, size_z - hole_depth),  # 下方
-        Coordinate(center_x, center_y + offset, size_z - hole_depth),  # 上方
-    ]
-    
-    return magazine_factory(
-        name=name,
-        size_x=size_x,
-        size_y=size_y,
-        size_z=size_z,
-        locations=locations,
-        hole_diameter=hole_diameter,
-        hole_depth=hole_depth,
-        max_sheets_per_hole=max_sheets_per_hole,
-        category="clip_magazine_two",
-    )
-
-
-def MagazineHolder_1(
-    name: str,
-    size_x: float = 80.0,
-    size_y: float = 80.0,
-    size_z: float = 10.0,
-    hole_diameter: float = 14.0,
-    hole_depth: float = 10.0,
-    max_sheets_per_hole: int = 100,
-) -> MagazineHolder:
-    """创建1孔子弹夹 - 中心单孔"""
-    # 计算1个洞位的坐标（中心位置）
-    center_x = size_x / 2
-    center_y = size_y / 2
-    
-    locations = [
-        Coordinate(center_x, center_y, size_z - hole_depth),  # 中心
-    ]
-    
-    return magazine_factory(
-        name=name,
-        size_x=size_x,
-        size_y=size_y,
-        size_z=size_z,
-        locations=locations,
-        hole_diameter=hole_diameter,
-        hole_depth=hole_depth,
-        max_sheets_per_hole=max_sheets_per_hole,
-        category="clip_magazine_one",
-    )
-
-
-def MagazineHolder_6(
-    name: str,
-    size_x: float = 80.0,
-    size_y: float = 80.0,
-    size_z: float = 40.0,
-    hole_diameter: float = 14.0,
-    hole_depth: float = 10.0,
-    hole_spacing: float = 20.0,
-    max_sheets_per_hole: int = 100,
-) -> MagazineHolder:
-    """创建6孔子弹夹 - 六边形排布"""
-    # 计算6个洞位的坐标（六边形排布：中心1个，周围5个）
-    center_x = size_x / 2
-    center_y = size_y / 2
-    
-    locations = []
-    
-    # 周围6个孔，按六边形排布
-    for i in range(6):
-        angle = i * 60 * math.pi / 180  # 每60度一个孔
-        x = center_x + hole_spacing * math.cos(angle)
-        y = center_y + hole_spacing * math.sin(angle)
-        locations.append(Coordinate(x, y, size_z - hole_depth))
-    
-    return magazine_factory(
-        name=name,
-        size_x=size_x,
-        size_y=size_y,
-        size_z=size_z,
-        locations=locations,
-        hole_diameter=hole_diameter,
-        hole_depth=hole_depth,
-        max_sheets_per_hole=max_sheets_per_hole,
-        category="clip_magazine_six",
+        category="magazine_holder",
+        model="MagazineHolder_4_Cathode",
     )
