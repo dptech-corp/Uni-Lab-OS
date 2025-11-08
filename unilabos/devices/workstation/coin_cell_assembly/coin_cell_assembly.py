@@ -112,7 +112,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
     def __init__(
         self,
         deck: Deck=None,
-        address: str = "172.21.33.176",
+        address: str = "172.16.28.102",
         port: str = "502",
         debug_mode: bool = False,
         *args,
@@ -165,7 +165,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
             print("测试模式，跳过连接")
 
         """ 工站的配置 """
-        self.nodes = BaseClient.load_csv(os.path.join(os.path.dirname(__file__), 'coin_cell_assembly_a.csv'))
+        self.nodes = BaseClient.load_csv(os.path.join(os.path.dirname(__file__), 'coin_cell_assembly_1105.csv'))
         self.client  = modbus_client.register_node_list(self.nodes)
         self.success = False
         self.allow_data_read = False  #允许读取函数运行标志位
@@ -906,7 +906,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         
         return self.success
 
-    def func_allpack_cmd(self, elec_num, elec_use_num, elec_vol:int=50, assembly_type:int=7, assembly_pressure:int=4200, file_path: str="C:\\Users\\67484\\Desktop") -> bool:
+    def func_allpack_cmd(self, elec_num, elec_use_num, elec_vol:int=50, assembly_type:int=7, assembly_pressure:int=4200, file_path: str="/Users/sml/work") -> bool:
         elec_num, elec_use_num, elec_vol, assembly_type, assembly_pressure = int(elec_num), int(elec_use_num), int(elec_vol), int(assembly_type), int(assembly_pressure)
         summary_csv_file = os.path.join(file_path, "duandian.csv")
         # 如果断点文件存在，先读取之前的进度

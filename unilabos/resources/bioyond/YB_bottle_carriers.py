@@ -233,7 +233,7 @@ def YB_1BottleCarrier(name: str) -> BottleCarrier:
             resource_size_y=beaker_diameter,
             name_prefix=name,
         ),
-        model="1BottleCarrier",
+        model="YB_1BottleCarrier",
     )
     carrier.num_items_x = 1
     carrier.num_items_y = 1
@@ -270,7 +270,7 @@ def YB_1GaoNianYeBottleCarrier(name: str) -> BottleCarrier:
             resource_size_y=beaker_diameter,
             name_prefix=name,
         ),
-        model="1GaoNianYeBottleCarrier",
+        model="YB_1GaoNianYeBottleCarrier",
     )
     carrier.num_items_x = 1
     carrier.num_items_y = 1
@@ -307,7 +307,7 @@ def YB_1Bottle100mlCarrier(name: str) -> BottleCarrier:
             resource_size_y=beaker_diameter,
             name_prefix=name,
         ),
-        model="1Bottle100mlCarrier",
+        model="YB_1Bottle100mlCarrier",
     )
     carrier.num_items_x = 1
     carrier.num_items_y = 1
@@ -355,7 +355,7 @@ def YB_6x5ml_DispensingVialCarrier(name: str) -> BottleCarrier:
         size_y=carrier_size_y,
         size_z=carrier_size_z,
         sites=sites,
-        model="6x5ml_DispensingVialCarrier",
+        model="YB_6x5ml_DispensingVialCarrier",
     )
     carrier.num_items_x = 4
     carrier.num_items_y = 2
@@ -405,7 +405,7 @@ def YB_6x20ml_DispensingVialCarrier(name: str) -> BottleCarrier:
         size_y=carrier_size_y,
         size_z=carrier_size_z,
         sites=sites,
-        model="6x20ml_DispensingVialCarrier",
+        model="YB_6x20ml_DispensingVialCarrier",
     )
     carrier.num_items_x = 4
     carrier.num_items_y = 2
@@ -455,7 +455,7 @@ def YB_6x_SmallSolutionBottleCarrier(name: str) -> BottleCarrier:
         size_y=carrier_size_y,
         size_z=carrier_size_z,
         sites=sites,
-        model="6x_SmallSolutionBottleCarrier",
+        model="YB_6x_SmallSolutionBottleCarrier",
     )
     carrier.num_items_x = 4
     carrier.num_items_y = 2
@@ -505,7 +505,7 @@ def YB_4x_LargeSolutionBottleCarrier(name: str) -> BottleCarrier:
         size_y=carrier_size_y,
         size_z=carrier_size_z,
         sites=sites,
-        model="4x_LargeSolutionBottleCarrier",
+        model="YB_4x_LargeSolutionBottleCarrier",
     )
     carrier.num_items_x = 2
     carrier.num_items_y = 2
@@ -554,7 +554,7 @@ def YB_jia_yang_tou_da_1X1_carrier(name: str) -> BottleCarrier:
         size_y=carrier_size_y,
         size_z=carrier_size_z,
         sites=sites,
-        model="6x_LargeDispenseHeadCarrier",
+        model="YB_6x_LargeDispenseHeadCarrier",
     )
     carrier.num_items_x = 1
     carrier.num_items_y = 1
@@ -591,7 +591,7 @@ def YB_AdapterBlock(name: str) -> BottleCarrier:
             resource_size_y=adapter_diameter,
             name_prefix=name,
         ),
-        model="AdapterBlock",
+        model="YB_AdapterBlock",
     )
     carrier.num_items_x = 1
     carrier.num_items_y = 1
@@ -639,7 +639,7 @@ def YB_TipBox(name: str) -> BottleCarrier:
         size_y=carrier_size_y,
         size_z=carrier_size_z,
         sites=sites,
-        model="TipBox",
+        model="YB_TipBox",
     )
     carrier.num_items_x = 12
     carrier.num_items_y = 8

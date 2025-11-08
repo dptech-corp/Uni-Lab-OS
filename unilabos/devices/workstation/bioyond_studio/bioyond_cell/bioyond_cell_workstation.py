@@ -3,6 +3,7 @@ from cgi import print_arguments
 from doctest import debug
 from typing import Dict, Any, List, Optional
 import requests
+from pylabrobot.resources.resource import Resource as ResourcePLR
 from pathlib import Path
 import pandas as pd
 import time
@@ -254,7 +255,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
     def auto_feeding4to3(
         self,
         # ★ 修改点：默认模板路径
-        xlsx_path: Optional[str] = "C:/ML/GitHub/Uni-Lab-OS/unilabos/devices/workstation/bioyond_studio/bioyond_cell/material_template.xlsx",
+        xlsx_path: Optional[str] = "/Users/sml/work/Unilab/Uni-Lab-OS/unilabos/devices/workstation/bioyond_studio/bioyond_cell/material_template.xlsx",
         # ---------------- WH4 - 加样头面 (Z=1, 12个点位) ----------------
         WH4_x1_y1_z1_1_materialName: str = "", WH4_x1_y1_z1_1_quantity: float = 0.0,
         WH4_x2_y1_z1_2_materialName: str = "", WH4_x2_y1_z1_2_quantity: float = 0.0,
@@ -306,7 +307,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
 
         # ---------- 模式 1: Excel 导入 ----------
         if xlsx_path:
-            path = Path(xlsx_path)
+            path = Path(__file__).parent / Path(xlsx_path)
             if path.exists():   # ★ 修改点：路径存在才加载
                 try:
                     df = pd.read_excel(path, sheet_name=0, header=None, engine="openpyxl")
@@ -471,14 +472,23 @@ class BioyondCellWorkstation(BioyondWorkstation):
         - totalMass 自动计算为所有物料质量之和
         - createTime 缺失或为空时自动填充为当前日期（YYYY/M/D）
         """
-        path = Path(xlsx_path)
+        default_path = Path("/Users/sml/work/Unilab/Uni-Lab-OS/unilabos/devices/workstation/bioyond_studio/bioyond_cell/2025092701.xlsx")
+        path = Path(xlsx_path) if xlsx_path else default_path
+        print(f"[create_orders] 使用 Excel 路径: {path}")
+        if path != default_path:
+            print("[create_orders] 来源: 调用方传入自定义路径")
+        else:
+            print("[create_orders] 来源: 使用默认模板路径")
+
         if not path.exists():
+            print(f"[create_orders] ⚠️ Excel 文件不存在: {path}")
             raise FileNotFoundError(f"未找到 Excel 文件：{path}")
 
         try:
             df = pd.read_excel(path, sheet_name=0, engine="openpyxl")
         except Exception as e:
             raise RuntimeError(f"读取 Excel 失败：{e}")
+        print(f"[create_orders] Excel 读取成功，行数: {len(df)}, 列: {list(df.columns)}")
 
         # 列名容错：返回可选列名，找不到则返回 None
         def _pick(col_names: List[str]) -> Optional[str]:
@@ -495,9 +505,20 @@ class BioyondCellWorkstation(BioyondWorkstation):
         col_pouch = _pick(["软包组装分液体积", "pouchCellInfo"])
         col_cond = _pick(["电导测试分液体积", "conductivityInfo"])
         col_cond_cnt = _pick(["电导测试分液瓶数", "conductivityBottleCount"])
+        print("[create_orders] 列匹配结果:", {
+            "order_name": col_order_name,
+            "create_time": col_create_time,
+            "bottle_type": col_bottle_type,
+            "mix_time": col_mix_time,
+            "load": col_load,
+            "pouch": col_pouch,
+            "conductivity": col_cond,
+            "conductivity_bottle_count": col_cond_cnt,
+        })
 
         # 物料列：所有以 (g) 结尾
         material_cols = [c for c in df.columns if isinstance(c, str) and c.endswith("(g)")]
+        print(f"[create_orders] 识别到的物料列: {material_cols}")
         if not material_cols:
             raise KeyError("未发现任何以“(g)”结尾的物料列，请检查表头。")
 
@@ -545,6 +566,9 @@ class BioyondCellWorkstation(BioyondWorkstation):
                 if mass > 0:
                     mats.append({"name": mcol.replace("(g)", ""), "mass": mass})
                     total_mass += mass
+                else:
+                    if mass < 0:
+                        print(f"[create_orders] 第 {idx+1} 行物料 {mcol} 数值为负数: {mass}")
 
             order_data = {
                 "batchId": batch_id,
@@ -559,11 +583,22 @@ class BioyondCellWorkstation(BioyondWorkstation):
                 "materialInfos": mats,
                 "totalMass": round(total_mass, 4)  # 自动汇总
             }
+            print(f"[create_orders] 第 {idx+1} 行解析结果: orderName={order_data['orderName']}, "
+                  f"loadShedding={order_data['loadSheddingInfo']}, pouchCell={order_data['pouchCellInfo']}, "
+                  f"conductivity={order_data['conductivityInfo']}, totalMass={order_data['totalMass']}, "
+                  f"material_count={len(mats)}")
+
+            if order_data["totalMass"] <= 0:
+                print(f"[create_orders] ⚠️ 第 {idx+1} 行总质量 <= 0，可能导致 LIMS 校验失败")
+            if not mats:
+                print(f"[create_orders] ⚠️ 第 {idx+1} 行未找到有效物料")
+
             orders.append(order_data)
 
 
+        print(f"[create_orders] 即将提交订单数量: {len(orders)}")
         response = self._post_lims("/api/lims/order/orders", orders)
-        print(response)
+        print(f"[create_orders] 接口返回: {response}")
         # 等待任务报送成功
         data_list = response.get("data", [])
         if data_list:
@@ -1014,7 +1049,35 @@ class BioyondCellWorkstation(BioyondWorkstation):
             "create_result": create_result,
             "inbound_result": inbound_result,
         }
+    def resource_tree_transfer(self, old_parent: ResourcePLR, plr_resource: ResourcePLR, parent_resource: ResourcePLR):
+        # ROS2DeviceNode.run_async_func(self._ros_node.resource_tree_transfer, True, **{
+        #     "old_parent": old_parent,
+        #     "plr_resource": plr_resource,
+        #     "parent_resource": parent_resource,
+        # })
+        print("resource_tree_transfer", plr_resource, parent_resource)
+        if hasattr(plr_resource, "unilabos_extra") and plr_resource.unilabos_extra:
+            if "update_resource_site" in plr_resource.unilabos_extra:
+                site = plr_resource.unilabos_extra["update_resource_site"]
+                plr_model = plr_resource.model
+                board_type = None
+                for key, (moudle_name,moudle_uuid) in MATERIAL_TYPE_MAPPINGS.items():
+                    if plr_model == moudle_name:
+                        board_type = key
+                        break
+                if board_type is None:
+                    pass
+                bottle1 = plr_resource.children[0]
 
+                bottle_moudle = bottle1.model
+                bottle_type = None
+                for key, (moudle_name, moudle_uuid) in MATERIAL_TYPE_MAPPINGS.items():
+                    if bottle_moudle == moudle_name:
+                        bottle_type = key
+                        break
+                self.create_sample(plr_resource.name, board_type,bottle_type,site)
+                return
+        self.lab_logger().warning(f"无库位的上料，不处理，{plr_resource} 挂载到 {parent_resource}")
 
     def create_sample(
         self,
