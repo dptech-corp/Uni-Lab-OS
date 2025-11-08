@@ -15,7 +15,7 @@ def YB_jia_yang_tou_da(
         height=height,
         max_volume=max_volume,
         barcode=barcode,
-        model="Solid_Stock",
+        model="YB_jia_yang_tou_da_1X1_carrier",
     )
 
 """液1x1"""
@@ -51,7 +51,7 @@ def YB_ye_100ml_Bottle(
         height=height,
         max_volume=max_volume,
         barcode=barcode,
-        model="Liquid_Bottle_100ml",
+        model="YB_1Bottle100mlCarrier",
     )
 
 """高粘液"""
@@ -105,7 +105,7 @@ def YB_fen_ye_20ml_Bottle(
         height=height,
         max_volume=max_volume,
         barcode=barcode,
-        model="Separation_Bottle_20ml",
+        model="YB_fen_ye_20ml_Bottle",
     )
 
 """配液瓶(小)"""
@@ -123,7 +123,7 @@ def YB_pei_ye_xiao_Bottle(
         height=height,
         max_volume=max_volume,
         barcode=barcode,
-        model="Mixing_Bottle_Small",
+        model="YB_pei_ye_xiao_Bottle",
     )
 
 """配液瓶(大)"""
@@ -141,7 +141,7 @@ def YB_pei_ye_da_Bottle(
         height=height,
         max_volume=max_volume,
         barcode=barcode,
-        model="Mixing_Bottle_Large",
+        model="YB_pei_ye_da_Bottle",
     )
 
 """枪头"""
@@ -159,5 +159,5 @@ def YB_Pipette_Tip(
         height=height,
         max_volume=max_volume,
         barcode=barcode,
-        model="Pipette_Tip",
+        model="YB_Pipette_Tip",
     )    
