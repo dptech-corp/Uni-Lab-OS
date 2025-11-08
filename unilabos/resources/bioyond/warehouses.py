@@ -261,6 +261,8 @@ def bioyond_warehouse_liquid_preparation(name: str) -> WareHouse:
         item_dy=96.0,
         item_dz=120.0,
         category="warehouse",
+        col_offset=0,
+        layout="row-major",
     )
 
 
@@ -278,4 +280,6 @@ def bioyond_warehouse_tipbox_storage(name: str) -> WareHouse:
         item_dy=96.0,
         item_dz=120.0,
         category="warehouse",
+        col_offset=0,
+        layout="row-major",
     )
