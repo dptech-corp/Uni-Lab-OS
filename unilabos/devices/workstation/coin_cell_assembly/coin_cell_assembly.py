@@ -139,7 +139,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
                 time.sleep(2)
             if not modbus_client.client.is_socket_open():
                 raise ValueError('modbus tcp connection failed')
-            self.nodes = BaseClient.load_csv(os.path.join(os.path.dirname(__file__), 'coin_cell_assembly_a.csv'))
+            self.nodes = BaseClient.load_csv(os.path.join(os.path.dirname(__file__), 'coin_cell_assembly_1105.csv'))
             self.client = modbus_client.register_node_list(self.nodes)
         else:
             print("测试模式，跳过连接")
@@ -791,7 +791,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         logger.debug(f"data_electrolyte_code: {data_electrolyte_code}")
         logger.debug(f"data_coin_cell_code: {data_coin_cell_code}")
         #接收完信息后，读取完毕标志位置True
-        liaopan3 = self.deck.get_resource("\u7535\u6c60\u6599\u76d8")        
+        liaopan3 = self.deck.get_resource("chengpindanjia")        
         #把物料解绑后放到另一盘上
         battery = ElectrodeSheet(name=f"battery_{self.coin_num_N}", size_x=14, size_y=14, size_z=2)
         battery._unilabos_state = {
@@ -1206,7 +1206,13 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
 
 if __name__ == "__main__":
     # 简单测试
-    workstation = CoinCellAssemblyWorkstation()
-    workstation.qiming_coin_cell_code(fujipian_panshu=1, fujipian_juzhendianwei=2, gemopanshu=3, gemo_juzhendianwei=4, lvbodian=False, battery_pressure_mode=False, battery_pressure=4200, battery_clean_ignore=False)
-    print(f"工作站创建成功: {workstation.deck.name}")
-    print(f"料盘数量: {len(workstation.deck.children)}")
+    workstation = CoinCellAssemblyWorkstation(deck=CoincellDeck(setup=True, name="coin_cell_deck"))
+    # workstation.qiming_coin_cell_code(fujipian_panshu=1, fujipian_juzhendianwei=2, gemopanshu=3, gemo_juzhendianwei=4, lvbodian=False, battery_pressure_mode=False, battery_pressure=4200, battery_clean_ignore=False)
+    # print(f"工作站创建成功: {workstation.deck.name}")
+    # print(f"料盘数量: {len(workstation.deck.children)}")
+    workstation.func_pack_device_init()
+    workstation.func_pack_device_auto()
+    workstation.func_pack_device_start()
+    workstation.func_pack_send_bottle_num(16)
+    workstation.func_allpack_cmd(elec_num=16, elec_use_num=16, elec_vol=50, assembly_type=7, assembly_pressure=4200, file_path="/Users/calvincao/Desktop/work/Uni-Lab-OS-hhm")
+    
