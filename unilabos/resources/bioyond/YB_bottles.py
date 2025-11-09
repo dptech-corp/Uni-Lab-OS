@@ -33,7 +33,7 @@ def YB_ye_Bottle(
         height=height,
         max_volume=max_volume,
         barcode=barcode,
-        model="Liquid_Bottle",
+        model="YB_ye_Bottle",
     )
 
 """100ml液体"""

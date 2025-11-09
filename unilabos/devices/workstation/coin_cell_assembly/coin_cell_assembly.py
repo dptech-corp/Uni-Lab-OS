@@ -112,7 +112,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
     def __init__(self, 
         config: dict = None, 
         deck=None, 
-        address: str = "172.21.33.176",
+        address: str = "172.16.28.102",
         port: str = "502",
         debug_mode: bool = False,
         *args,

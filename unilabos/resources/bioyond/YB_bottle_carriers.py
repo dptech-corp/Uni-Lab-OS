@@ -206,7 +206,7 @@ def YB_6VialCarrier(name: str) -> BottleCarrier:
     return carrier
 
 # 1瓶载架 - 单个中央位置
-def YB_1BottleCarrier(name: str) -> BottleCarrier:
+def YB_ye(name: str) -> BottleCarrier:
     
     # 载架尺寸 (mm)
     carrier_size_x = 127.8
@@ -233,7 +233,7 @@ def YB_1BottleCarrier(name: str) -> BottleCarrier:
             resource_size_y=beaker_diameter,
             name_prefix=name,
         ),
-        model="YB_1BottleCarrier",
+        model="YB_ye",
     )
     carrier.num_items_x = 1
     carrier.num_items_y = 1

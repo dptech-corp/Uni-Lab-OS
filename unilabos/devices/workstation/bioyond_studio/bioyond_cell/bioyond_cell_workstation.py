@@ -595,7 +595,8 @@ class BioyondCellWorkstation(BioyondWorkstation):
                 print(f"[create_orders] ⚠️ 第 {idx+1} 行未找到有效物料")
 
             orders.append(order_data)
-
+        print("================================================")
+        print("orders:", orders)
 
         print(f"[create_orders] 即将提交订单数量: {len(orders)}")
         response = self._post_lims("/api/lims/order/orders", orders)

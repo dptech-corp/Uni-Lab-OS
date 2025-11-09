@@ -63,3 +63,29 @@ YB_pei_ye_xiao_Bottle:
   init_param_schema: {}
   registry_type: resource
   version: 1.0.0
+YB_jia_yang_tou_da:
+  category:
+  - yb3
+  - YB_bottle
+  class:
+    module: unilabos.resources.bioyond.YB_bottles:YB_jia_yang_tou_da
+    type: pylabrobot
+  description: YB_jia_yang_tou_da
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+YB_ye_Bottle:
+  category:
+  - yb3
+  - YB_bottle_carriers
+  class:
+    module: unilabos.resources.bioyond.YB_bottles:YB_ye_Bottle
+    type: pylabrobot
+  description: YB_ye_Bottle
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
