@@ -109,44 +109,22 @@ def _coerce_deck_input(deck: Any) -> Optional[Deck]:
 #构建物料系统
 
 class CoinCellAssemblyWorkstation(WorkstationBase):
-    def __init__(
-        self,
-        deck: Deck=None,
-        address: str = "172.16.28.102",
+    def __init__(self, 
+        config: dict = None, 
+        deck=None, 
+        address: str = "172.21.33.176",
         port: str = "502",
         debug_mode: bool = False,
         *args,
-        **kwargs,
-    ):
-        if deck is None and "deck" in kwargs:
-            deck = kwargs.pop("deck")
-        else:
-            kwargs.pop("deck", None)
+        **kwargs):
 
-        normalized_deck = _coerce_deck_input(deck)
-
-        if deck is None and isinstance(normalized_deck, Deck):
-            deck = normalized_deck
-
-        super().__init__(
-            #桌子
-            deck=deck,
-            *args,
-            **kwargs,
-        )
+        if deck is None and config:
+            deck = config.get('deck')
+        if deck is None:
+            logger.info("没有传入依华deck，检查启动json文件")
+        super().__init__(deck=deck, *args, **kwargs,)
         self.debug_mode = debug_mode
-
-        # 如果没有传入 deck，则创建标准配置的 deck
-        if self.deck is None:
-            self.deck = CoincellDeck(size_x=1000, size_y=1000, size_z=900, origin=Coordinate(-800, 0, 0),setup=True)
-        else:
-            # 如果传入了 deck 但还没有 setup，可以选择是否 setup
-            if self.deck is not None and len(self.deck.children) == 0:
-                # deck 为空，执行 setup
-                self.deck.setup()
-            # 否则使用传入的 deck（可能已经配置好了）
-            self.deck = self.deck
-
+ 
         """ 连接初始化 """
         modbus_client = TCPClient(addr=address, port=port)
         logger.debug(f"创建 Modbus 客户端: {modbus_client}")
@@ -161,26 +139,21 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
                 time.sleep(2)
             if not modbus_client.client.is_socket_open():
                 raise ValueError('modbus tcp connection failed')
+            self.nodes = BaseClient.load_csv(os.path.join(os.path.dirname(__file__), 'coin_cell_assembly_a.csv'))
+            self.client = modbus_client.register_node_list(self.nodes)
         else:
             print("测试模式，跳过连接")
+            self.nodes, self.client = None, None
 
         """ 工站的配置 """
-        self.nodes = BaseClient.load_csv(os.path.join(os.path.dirname(__file__), 'coin_cell_assembly_1105.csv'))
-        self.client  = modbus_client.register_node_list(self.nodes)
+
         self.success = False
         self.allow_data_read = False  #允许读取函数运行标志位
         self.csv_export_thread = None
         self.csv_export_running = False
         self.csv_export_file = None
         self.coin_num_N = 0  #已组装电池数量
-        #创建一个物料台面，包含两个极片板
-        #self._ros_node.update_resource(self.deck)
-        
-        #ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
-        #    "resources": [self.deck]
-        #})
 
-    
     def post_init(self, ros_node: ROS2WorkstationNode):
         self._ros_node = ros_node
         #self.deck = create_a_coin_cell_deck()

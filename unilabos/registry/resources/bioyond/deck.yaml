@@ -34,3 +34,15 @@ BIOYOND_YB_Deck:
   init_param_schema: {}
   registry_type: resource
   version: 1.0.0
+CoincellDeck:
+  category:
+  - deck
+  class:
+    module: unilabos.devices.workstation.coin_cell_assembly.YB_YH_materials:CoincellDeck
+    type: pylabrobot
+  description: CoincellDeck
+  handles: []
+  icon: yihua.webp
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
