@@ -636,5 +636,5 @@ class CoincellDeck(Deck):
 
 
 if __name__ == "__main__":
-    deck = CoincellDeck(setup=True)
+    deck = create_coin_cell_deck()
     print(deck)

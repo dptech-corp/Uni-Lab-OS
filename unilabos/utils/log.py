@@ -191,8 +191,19 @@ def configure_logger(loglevel=None):
 
     # 添加处理器到根日志记录器
     root_logger.addHandler(console_handler)
-    logging.getLogger("asyncio").setLevel(logging.INFO)
-    logging.getLogger("urllib3").setLevel(logging.INFO)
+    
+    # 降低第三方库的日志级别，避免过多输出
+    # pymodbus 库的日志太详细，设置为 WARNING
+    logging.getLogger('pymodbus').setLevel(logging.WARNING)
+    logging.getLogger('pymodbus.logging').setLevel(logging.WARNING)
+    logging.getLogger('pymodbus.logging.base').setLevel(logging.WARNING)
+    logging.getLogger('pymodbus.logging.decoders').setLevel(logging.WARNING)
+    
+    # websockets 库的日志输出较多，设置为 WARNING
+    logging.getLogger('websockets').setLevel(logging.WARNING)
+    logging.getLogger('websockets.client').setLevel(logging.WARNING)
+    logging.getLogger('websockets.server').setLevel(logging.WARNING)
+
 
 # 配置日志系统
 configure_logger()

@@ -8,8 +8,8 @@ import os
 # BioyondCellWorkstation 默认配置（包含所有必需参数）
 API_CONFIG = {
     # API 连接配置
-    # "api_host": os.getenv("BIOYOND_API_HOST", "http://172.21.32.65:44389"),#实机
-    "api_host": os.getenv("BIOYOND_API_HOST", "http://172.16.10.169:44388"),# 仿真机
+    "api_host": os.getenv("BIOYOND_API_HOST", "http://172.16.1.143:44389"),#实机
+    # "api_host": os.getenv("BIOYOND_API_HOST", "http://172.16.7.149:44388"),# 仿真机
     "api_key": os.getenv("BIOYOND_API_KEY", "8A819E5C"),
     "timeout": int(os.getenv("BIOYOND_TIMEOUT", "30")),
     
@@ -17,7 +17,7 @@ API_CONFIG = {
     "report_token": os.getenv("BIOYOND_REPORT_TOKEN", "CHANGE_ME_TOKEN"),
     
     # HTTP 服务配置
-    "HTTP_host": os.getenv("BIOYOND_HTTP_HOST", "172.21.32.115"),  # HTTP服务监听地址，监听计算机飞连ip地址
+    "HTTP_host": os.getenv("BIOYOND_HTTP_HOST", "172.16.2.140"),  # HTTP服务监听地址，监听计算机飞连ip地址
     "HTTP_port": int(os.getenv("BIOYOND_HTTP_PORT", "8080")),
     "debug_mode": False,# 调试模式
 }
@@ -234,22 +234,22 @@ WAREHOUSE_MAPPING = {
 
 # 物料类型配置
 MATERIAL_TYPE_MAPPINGS = {
-    "100ml液体": ("YB_1Bottle100mlCarrier", "d37166b3-ecaa-481e-bd84-3032b795ba07"),
-    "液": ("YB_1BottleCarrier", "3a190ca1-2add-2b23-f8e1-bbd348b7f790"),
-    "高粘液": ("YB_1GaoNianYeBottleCarrier", "abe8df30-563d-43d2-85e0-cabec59ddc16"),
-    "加样头(大)": ("YB_jia_yang_tou_da_1X1_carrier", "3a190ca0-b2f6-9aeb-8067-547e72c11469"),
-    # "加样头(大)板": ("YB_jia_yang_tou_da_1X1_carrier", "a8e714ae-2a4e-4eb9-9614-e4c140ec3f16"),
-    "5ml分液瓶板": ("YB_6x5ml_DispensingVialCarrier", "3a192fa4-007d-ec7b-456e-2a8be7a13f23"),
-    "5ml分液瓶": ("YB_fen_ye_5ml_Bottle", "3a192c2a-ebb7-58a1-480d-8b3863bf74f4"),
-    "20ml分液瓶板": ("YB_6x20ml_DispensingVialCarrier", "3a192fa4-47db-3449-162a-eaf8aba57e27"),
-    "20ml分液瓶": ("YB_fen_ye_20ml_Bottle", "3a192c2b-19e8-f0a3-035e-041ca8ca1035"),
-    "配液瓶(小)板": ("YB_6x_SmallSolutionBottleCarrier", "3a190c8b-3284-af78-d29f-9a69463ad047"),
+    "100ml液体": ("YB_100ml_yeti", "d37166b3-ecaa-481e-bd84-3032b795ba07"),
+    "液": ("YB_ye", "3a190ca1-2add-2b23-f8e1-bbd348b7f790"),
+    "高粘液": ("YB_gaonianye", "abe8df30-563d-43d2-85e0-cabec59ddc16"),
+    "加样头(大)": ("YB_jia_yang_tou_da", "3a190ca0-b2f6-9aeb-8067-547e72c11469"),
+    # "加样头(大)板": ("YB_jia_yang_tou_da", "a8e714ae-2a4e-4eb9-9614-e4c140ec3f16"),
+    "5ml分液瓶板": ("YB_5ml_fenyepingban", "3a192fa4-007d-ec7b-456e-2a8be7a13f23"),
+    "5ml分液瓶": ("YB_5ml_fenyeping", "3a192c2a-ebb7-58a1-480d-8b3863bf74f4"),
+    "20ml分液瓶板": ("YB_20ml_fenyepingban", "3a192fa4-47db-3449-162a-eaf8aba57e27"),
+    "20ml分液瓶": ("YB_20ml_fenyeping", "3a192c2b-19e8-f0a3-035e-041ca8ca1035"),
+    "配液瓶(小)板": ("YB_peiyepingxiaoban", "3a190c8b-3284-af78-d29f-9a69463ad047"),
     "配液瓶(小)": ("YB_pei_ye_xiao_Bottle", "3a190c8c-fe8f-bf48-0dc3-97afc7f508eb"),
-    "配液瓶(大)板": ("YB_4x_LargeSolutionBottleCarrier", "53e50377-32dc-4781-b3c0-5ce45bc7dc27"),
+    "配液瓶(大)板": ("YB_peiyepingdaban", "53e50377-32dc-4781-b3c0-5ce45bc7dc27"),
     "配液瓶(大)": ("YB_pei_ye_da_Bottle", "19c52ad1-51c5-494f-8854-576f4ca9c6ca"),
-    "适配器块": ("YB_AdapterBlock", "efc3bb32-d504-4890-91c0-b64ed3ac80cf"),
-    "枪头盒": ("YB_TipBox", "3a192c2e-20f3-a44a-0334-c8301839d0b3"),
-    "枪头": ("YB_Pipette_Tip", "b6196971-1050-46da-9927-333e8dea062d"),
+    "适配器块": ("YB_shi_pei_qi_kuai", "efc3bb32-d504-4890-91c0-b64ed3ac80cf"),
+    "枪头盒": ("YB_qiang_tou_he", "3a192c2e-20f3-a44a-0334-c8301839d0b3"),
+    "枪头": ("YB_qiang_tou", "b6196971-1050-46da-9927-333e8dea062d"),
 }
 
 SOLID_LIQUID_MAPPINGS = {
