@@ -11,19 +11,19 @@ YB_100ml_yeti:
   init_param_schema: {}
   registry_type: resource
   version: 1.0.0
-YB_1BottleCarrier:
-  category:
-  - yb3
-  - YB_bottle_carriers
-  class:
-    module: unilabos.resources.bioyond.YB_bottle_carriers:YB_1BottleCarrier
-    type: pylabrobot
-  description: YB_1BottleCarrier
-  handles: []
-  icon: ''
-  init_param_schema: {}
-  registry_type: resource
-  version: 1.0.0
+# YB_1BottleCarrier:
+#   category:
+#   - yb3
+#   - YB_bottle_carriers
+#   class:
+#     module: unilabos.resources.bioyond.YB_bottle_carriers:YB_1BottleCarrier
+#     type: pylabrobot
+#   description: YB_1BottleCarrier
+#   handles: []
+#   icon: ''
+#   init_param_schema: {}
+#   registry_type: resource
+#   version: 1.0.0
 YB_gaonianye:
   category:
   - yb3
@@ -154,19 +154,19 @@ YB_gao_nian_ye_Bottle:
   init_param_schema: {}
   registry_type: resource
   version: 1.0.0
-YB_jia_yang_tou_da:
-  category:
-  - yb3
-  - YB_bottle_carriers
-  class:
-    module: unilabos.resources.bioyond.YB_bottles:YB_jia_yang_tou_da
-    type: pylabrobot
-  description: YB_jia_yang_tou_da
-  handles: []
-  icon: ''
-  init_param_schema: {}
-  registry_type: resource
-  version: 1.0.0
+# YB_jia_yang_tou_da:
+#   category:
+#   - yb3
+#   - YB_bottle_carriers
+#   class:
+#     module: unilabos.resources.bioyond.YB_bottles:YB_jia_yang_tou_da
+#     type: pylabrobot
+#   description: YB_jia_yang_tou_da
+#   handles: []
+#   icon: ''
+#   init_param_schema: {}
+#   registry_type: resource
+#   version: 1.0.0
 YB_jia_yang_tou_da_Carrier:
   category:
   - yb3
@@ -193,14 +193,14 @@ YB_ye_100ml_Bottle:
   init_param_schema: {}
   registry_type: resource
   version: 1.0.0
-YB_ye_Bottle:
+YB_ye:
   category:
   - yb3
   - YB_bottle_carriers
   class:
-    module: unilabos.resources.bioyond.YB_bottles:YB_ye_Bottle
+    module: unilabos.resources.bioyond.YB_bottle_carriers:YB_ye
     type: pylabrobot
-  description: YB_ye_Bottle
+  description: YB_ye_Bottle_Carrier
   handles: []
   icon: ''
   init_param_schema: {}

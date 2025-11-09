@@ -237,7 +237,7 @@ MATERIAL_TYPE_MAPPINGS = {
     "100ml液体": ("YB_100ml_yeti", "d37166b3-ecaa-481e-bd84-3032b795ba07"),
     "液": ("YB_ye", "3a190ca1-2add-2b23-f8e1-bbd348b7f790"),
     "高粘液": ("YB_gaonianye", "abe8df30-563d-43d2-85e0-cabec59ddc16"),
-    "加样头(大)": ("YB_jia_yang_tou_da", "3a190ca0-b2f6-9aeb-8067-547e72c11469"),
+    "加样头(大)": ("YB_jia_yang_tou_da_Carrier", "3a190ca0-b2f6-9aeb-8067-547e72c11469"),
     # "加样头(大)板": ("YB_jia_yang_tou_da", "a8e714ae-2a4e-4eb9-9614-e4c140ec3f16"),
     "5ml分液瓶板": ("YB_5ml_fenyepingban", "3a192fa4-007d-ec7b-456e-2a8be7a13f23"),
     "5ml分液瓶": ("YB_5ml_fenyeping", "3a192c2a-ebb7-58a1-480d-8b3863bf74f4"),
