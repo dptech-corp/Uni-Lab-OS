@@ -1075,7 +1075,12 @@ class BioyondCellWorkstation(BioyondWorkstation):
                     if bottle_moudle == moudle_name:
                         bottle_type = key
                         break
-                self.create_sample(plr_resource.name, board_type,bottle_type,site)
+                
+                # 从 parent_resource 获取仓库名称
+                warehouse_name = parent_resource.name if parent_resource else "手动堆栈"
+                logger.info(f"拖拽上料: {plr_resource.name} -> {warehouse_name} / {site}")
+                
+                self.create_sample(plr_resource.name, board_type, bottle_type, site, warehouse_name)
                 return
         self.lab_logger().warning(f"无库位的上料，不处理，{plr_resource} 挂载到 {parent_resource}")
 
@@ -1084,17 +1089,31 @@ class BioyondCellWorkstation(BioyondWorkstation):
         name: str,
         board_type: str,
         bottle_type: str,
-        location_code: str
+        location_code: str,
+        warehouse_name: str = "手动堆栈"
     ) -> Dict[str, Any]:
         """创建配液板物料并自动入库。
         Args:
-            material_name: 物料名称，支持 "5ml分液瓶板"/"5ml分液瓶"、"配液瓶(小)板"/"配液瓶(小)"。
-            quantity: 主物料与明细的数量，默认 1。
-            location_code: 库位编号，例如 "A01"，将自动映射为 "手动堆栈" 下的 UUID。
+            name: 物料名称
+            board_type: 板类型，如 "5ml分液瓶板"、"配液瓶(小)板"
+            bottle_type: 瓶类型，如 "5ml分液瓶"、"配液瓶(小)"
+            location_code: 库位编号，例如 "A01"
+            warehouse_name: 仓库名称，默认为 "手动堆栈"，支持 "自动堆栈-左"、"自动堆栈-右" 等
         """
         carrier_type_id = MATERIAL_TYPE_MAPPINGS[board_type][1]
         bottle_type_id  = MATERIAL_TYPE_MAPPINGS[bottle_type][1]
-        location_id = WAREHOUSE_MAPPING["手动堆栈"]["site_uuids"][location_code]
+        
+        # 从指定仓库获取库位UUID
+        if warehouse_name not in WAREHOUSE_MAPPING:
+            logger.error(f"未找到仓库: {warehouse_name}，回退到手动堆栈")
+            warehouse_name = "手动堆栈"
+        
+        if location_code not in WAREHOUSE_MAPPING[warehouse_name]["site_uuids"]:
+            logger.error(f"仓库 {warehouse_name} 中未找到库位 {location_code}")
+            raise ValueError(f"库位 {location_code} 在仓库 {warehouse_name} 中不存在")
+        
+        location_id = WAREHOUSE_MAPPING[warehouse_name]["site_uuids"][location_code]
+        logger.info(f"创建样品入库: {name} -> {warehouse_name}/{location_code} (UUID: {location_id})")
 
         # 新建小瓶
         details = []
