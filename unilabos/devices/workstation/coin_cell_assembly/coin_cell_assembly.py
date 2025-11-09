@@ -791,7 +791,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         logger.debug(f"data_electrolyte_code: {data_electrolyte_code}")
         logger.debug(f"data_coin_cell_code: {data_coin_cell_code}")
         #接收完信息后，读取完毕标志位置True
-        liaopan3 = self.deck.get_resource("chengpindanjia")        
+        liaopan3 = self.deck.get_resource("成品弹夹")        
         #把物料解绑后放到另一盘上
         battery = ElectrodeSheet(name=f"battery_{self.coin_num_N}", size_x=14, size_y=14, size_z=2)
         battery._unilabos_state = {
