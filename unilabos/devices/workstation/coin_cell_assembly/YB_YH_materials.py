@@ -20,7 +20,7 @@ from pylabrobot.resources.utils import create_ordered_items_2d
 
 from unilabos.resources.battery.magazine import MagazineHolder_4_Cathode, MagazineHolder_6_Cathode, MagazineHolder_6_Anode, MagazineHolder_6_Battery
 from unilabos.resources.battery.bottle_carriers import YIHUA_Electrolyte_12VialCarrier
-from unilabos.resources.battery.electrodesheet import ElectrodeSheet
+from unilabos.resources.battery.electrode_sheet import ElectrodeSheet
 
 
 
