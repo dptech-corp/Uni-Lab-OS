@@ -79,7 +79,7 @@ coincellassemblyworkstation_device:
           elec_num: null
           elec_use_num: null
           elec_vol: 50
-          file_path: C:\Users\67484\Desktop
+          file_path: /Users/sml/work
         handles: {}
         placeholder_keys: {}
         result: {}
@@ -103,7 +103,7 @@ coincellassemblyworkstation_device:
                   default: 50
                   type: integer
                 file_path:
-                  default: C:\Users\67484\Desktop
+                  default: /Users/sml/work
                   type: string
               required:
               - elec_num
@@ -332,7 +332,7 @@ coincellassemblyworkstation_device:
         feedback: {}
         goal: {}
         goal_default:
-          file_path: D:\coin_cell_data
+          file_path: /Users/sml/work
         handles: {}
         placeholder_keys: {}
         result: {}
@@ -343,7 +343,7 @@ coincellassemblyworkstation_device:
             goal:
               properties:
                 file_path:
-                  default: D:\coin_cell_data
+                  default: /Users/sml/work
                   type: string
               required: []
               type: object
@@ -507,13 +507,15 @@ coincellassemblyworkstation_device:
     config:
       properties:
         address:
-          default: 172.21.32.111
+          default: 172.16.28.102
           type: string
+        config:
+          type: object
         debug_mode:
           default: false
           type: boolean
         deck:
-          type: object
+          type: string
         port:
           default: '502'
           type: string

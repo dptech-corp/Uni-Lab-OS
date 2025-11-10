@@ -1,16 +1,3 @@
-YB_qiang_tou:
-  category:
-  - yb3
-  - YB_bottle
-  class:
-    module: unilabos.resources.bioyond.YB_bottles:YB_qiang_tou
-    type: pylabrobot
-  description: YB_qiang_tou
-  handles: []
-  icon: ''
-  init_param_schema: {}
-  registry_type: resource
-  version: 1.0.0
 YB_20ml_fenyeping:
   category:
   - yb3
@@ -32,6 +19,19 @@ YB_5ml_fenyeping:
     module: unilabos.resources.bioyond.YB_bottles:YB_5ml_fenyeping
     type: pylabrobot
   description: YB_5ml_fenyeping
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  registry_type: resource
+  version: 1.0.0
+YB_jia_yang_tou_da:
+  category:
+  - yb3
+  - YB_bottle
+  class:
+    module: unilabos.resources.bioyond.YB_bottles:YB_jia_yang_tou_da
+    type: pylabrobot
+  description: YB_jia_yang_tou_da
   handles: []
   icon: ''
   init_param_schema: {}
@@ -63,14 +63,14 @@ YB_pei_ye_xiao_Bottle:
   init_param_schema: {}
   registry_type: resource
   version: 1.0.0
-YB_jia_yang_tou_da:
+YB_qiang_tou:
   category:
   - yb3
   - YB_bottle
   class:
-    module: unilabos.resources.bioyond.YB_bottles:YB_jia_yang_tou_da
+    module: unilabos.resources.bioyond.YB_bottles:YB_qiang_tou
     type: pylabrobot
-  description: YB_jia_yang_tou_da
+  description: YB_qiang_tou
   handles: []
   icon: ''
   init_param_schema: {}
@@ -80,6 +80,7 @@ YB_ye_Bottle:
   category:
   - yb3
   - YB_bottle_carriers
+  - YB_bottle
   class:
     module: unilabos.resources.bioyond.YB_bottles:YB_ye_Bottle
     type: pylabrobot
