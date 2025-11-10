@@ -95,13 +95,13 @@ class BIOYOND_YB_Deck(Deck):
         }
         # warehouse 的位置
         self.warehouse_locations = {
-            "自动堆栈-左": Coordinate(-300.0, 158.0, 0.0),
-            "自动堆栈-右": Coordinate(4160.0, 158.0, 0.0),
-            "手动堆栈-左": Coordinate(-400.0, 877.0, 0.0),
-            "手动堆栈-右": Coordinate(4160.0, 877.0, 0.0),
+            "自动堆栈-左": Coordinate(-100.3, 171.5, 0.0),
+            "自动堆栈-右": Coordinate(3960.1, 155.9, 0.0),
+            "手动堆栈-左": Coordinate(-213.3, 804.4, 0.0),
+            "手动堆栈-右": Coordinate(3960.1, 807.6, 0.0),
             "粉末加样头堆栈": Coordinate(415.0, 1301.0, 0.0),
-            "配液站内试剂仓库": Coordinate(2162.0, 337.0, 0.0),
-            "试剂替换仓库": Coordinate(1173.0, 702.0, 0.0),
+            "配液站内试剂仓库": Coordinate(2162.0, 437.0, 0.0),
+            "试剂替换仓库": Coordinate(1173.0, 802.0, 0.0),
         }
 
         for warehouse_name, warehouse in self.warehouses.items():
