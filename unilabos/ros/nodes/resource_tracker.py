@@ -848,15 +848,13 @@ class DeviceNodeResourceTracker(object):
             extra: extra字典值
         """
         if isinstance(resource, dict):
-            # ⭐ 修复：合并extra而不是覆盖
-            current_extra = resource.get("extra", {})
-            current_extra.update(extra)
-            resource["extra"] = current_extra
+            c_extra = resource.get("extra", {})
+            c_extra.update(extra)
+            resource["extra"] = c_extra
         else:
-            # ⭐ 修复：合并unilabos_extra而不是覆盖
-            current_extra = getattr(resource, "unilabos_extra", {})
-            current_extra.update(extra)
-            setattr(resource, "unilabos_extra", current_extra)
+            c_extra = getattr(resource, "unilabos_extra", {})
+            c_extra.update(extra)
+            setattr(resource, "unilabos_extra", c_extra)
 
     def _traverse_and_process(self, resource, process_func) -> int:
         """
