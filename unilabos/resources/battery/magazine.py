@@ -52,6 +52,15 @@ class Magazine(ResourceStack):
     def size_z(self) -> float:
         return self.get_size_z()
 
+    def serialize(self) -> dict:
+        return {
+            **super().serialize(),
+            "size_x": self.size_x,
+            "size_y": self.size_y,
+            "size_z": self.size_z,
+            "max_sheets": self.max_sheets,
+        }
+
 
 class MagazineHolder(ItemizedResource):
     """子弹夹类 - 有多个洞位，每个洞位放多个极片"""

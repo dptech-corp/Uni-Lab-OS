@@ -1114,7 +1114,7 @@ bioyond_cell:
   config_info: []
   description: ''
   handles: []
-  icon: ''
+  icon: benyao2.webp
   init_param_schema:
     config:
       properties:
