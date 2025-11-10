@@ -17,7 +17,7 @@ class RegularContainer(Container):
             kwargs["size_z"] = 0
         self.kwargs = kwargs
         self.state = {}
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, category="container", **kwargs)
 
     def load_state(self, state: Dict[str, Any]):
         self.state = state

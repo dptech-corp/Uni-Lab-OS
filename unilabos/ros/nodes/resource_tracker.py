@@ -60,7 +60,7 @@ class ResourceDict(BaseModel):
     icon: str = Field(description="Resource icon", default="")
     parent_uuid: Optional["str"] = Field(description="Parent resource uuid", default=None)  # 先设定parent_uuid
     parent: Optional["ResourceDict"] = Field(description="Parent resource object", default=None, exclude=True)
-    type: Literal["device"] | str = Field(description="Resource type")
+    type: Union[Literal["device"], str] = Field(description="Resource type")
     klass: str = Field(alias="class", description="Resource class name")
     position: ResourceDictPosition = Field(description="Resource position", default_factory=ResourceDictPosition)
     pose: ResourceDictPosition = Field(description="Resource position", default_factory=ResourceDictPosition)
