@@ -139,7 +139,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
                 time.sleep(2)
             if not modbus_client.client.is_socket_open():
                 raise ValueError('modbus tcp connection failed')
-            self.nodes = BaseClient.load_csv(os.path.join(os.path.dirname(__file__), 'coin_cell_assembly_1105.csv'))
+            self.nodes = BaseClient.load_csv(os.path.join(os.path.dirname(__file__), 'coin_cell_assembly_a.csv'))
             self.client = modbus_client.register_node_list(self.nodes)
         else:
             print("测试模式，跳过连接")
@@ -1008,7 +1008,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
             #     time.sleep(1)
             # time.sleep(40)
     # 数据读取与输出
-    def func_read_data_and_output(self, file_path: str="D:\\coin_cell_data"):
+    def func_read_data_and_output(self, file_path: str="/Users/sml/work"):
         # 检查CSV导出是否正在运行，已运行则跳出，防止同时启动两个while循环
         if self.csv_export_running:
             return False, "读取已在运行中"
