@@ -256,7 +256,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
     def auto_feeding4to3(
         self,
         # ★ 修改点：默认模板路径
-        xlsx_path: Optional[str] = "/Users/sml/work/Unilab/Uni-Lab-OS/unilabos/devices/workstation/bioyond_studio/bioyond_cell/material_template.xlsx",
+        xlsx_path: Optional[str] = "/Users/calvincao/Desktop/work/uni-lab-all/Uni-Lab-OS/unilabos/devices/workstation/bioyond_studio/bioyond_cell/material_template.xlsx",
         # ---------------- WH4 - 加样头面 (Z=1, 12个点位) ----------------
         WH4_x1_y1_z1_1_materialName: str = "", WH4_x1_y1_z1_1_quantity: float = 0.0,
         WH4_x2_y1_z1_2_materialName: str = "", WH4_x2_y1_z1_2_quantity: float = 0.0,
@@ -323,6 +323,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
                             "posX": int(row[2]), "posY": int(row[3]), "posZ": int(row[4]),
                             "materialName": str(row[5]).strip(),
                             "quantity": float(row[6]) if pd.notna(row[6]) else 0.0,
+                            "temperature": 0,
                         })
                 # 四号手套箱原液瓶面
                 for _, row in df.iloc[14:23, 2:9].iterrows():
@@ -334,6 +335,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
                             "quantity": float(row[6]) if pd.notna(row[6]) else 0.0,
                             "materialType": str(row[7]).strip() if pd.notna(row[7]) else "",
                             "targetWH": str(row[8]).strip() if pd.notna(row[8]) else "",
+                            "temperature": 0,
                         })
                 # 三号手套箱人工堆栈
                 for _, row in df.iloc[25:40, 2:7].iterrows():
@@ -343,11 +345,12 @@ class BioyondCellWorkstation(BioyondWorkstation):
                             "posX": int(row[2]), "posY": int(row[3]), "posZ": int(row[4]),
                             "materialType": str(row[5]).strip() if pd.notna(row[5]) else "",
                             "materialId": str(row[6]).strip() if pd.notna(row[6]) else "",
-                            "quantity": 1
+                            "quantity": 1,
+                            "temperature": 0,
                         })
             else:
                 logger.warning(f"未找到 Excel 文件 {xlsx_path}，自动切换到手动参数模式。")
-
+        # TODO: 温度下面手动模式没改，上面的改了
         # ---------- 模式 2: 手动填写 ----------
         if not items:
             params = locals()
@@ -473,7 +476,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
         - totalMass 自动计算为所有物料质量之和
         - createTime 缺失或为空时自动填充为当前日期（YYYY/M/D）
         """
-        default_path = Path("/Users/sml/work/Unilab/Uni-Lab-OS/unilabos/devices/workstation/bioyond_studio/bioyond_cell/2025092701.xlsx")
+        default_path = Path("/Users/calvincao/Desktop/work/uni-lab-all/Uni-Lab-OS/unilabos/devices/workstation/bioyond_studio/bioyond_cell/2025092701.xlsx")
         path = Path(xlsx_path) if xlsx_path else default_path
         print(f"[create_orders] 使用 Excel 路径: {path}")
         if path != default_path:
@@ -1160,20 +1163,23 @@ if __name__ == "__main__":
     lab_registry.setup()
     deck = BIOYOND_YB_Deck(setup=True)
     ws = BioyondCellWorkstation(deck=deck)
-    # ws.create_sample(name="test", board_type="配液瓶(小)板", bottle_type="配液瓶(小)", location_code="B01")
-    # logger.info(ws.scheduler_stop())
+    # ws.update_push_ip() #直接修改奔耀端的报送ip地址
+    # ws.create_sample(name="配液瓶", board_type="配液瓶(小)板", bottle_type="配液瓶(小)", location_code="E01")
+    # ws.create_sample(name="分液瓶", board_type="5ml分液瓶板", bottle_type="5ml分液瓶", location_code="D01")
+
+    # # logger.info(ws.scheduler_stop())
     # logger.info(ws.scheduler_start())
     
-    # 继续后续流程
     # logger.info(ws.auto_feeding4to3()) #搬运物料到3号箱
-    # # # 使用正斜杠或 Path 对象来指定文件路径
-    # excel_path = Path("unilabos\\devices\\workstation\\bioyond_studio\\bioyond_cell\\2025092701.xlsx")
+    # 使用正斜杠或 Path 对象来指定文件路径
+    # excel_path = Path("/Users/calvincao/Desktop/work/uni-lab-all/Uni-Lab-OS/unilabos/devices/workstation/bioyond_studio/bioyond_cell/2025092701.xlsx")
     # logger.info(ws.create_orders(excel_path))
     # logger.info(ws.transfer_3_to_2_to_1())
-
     # logger.info(ws.transfer_1_to_2())
-    # logger.info(ws.scheduler_start())
 
+    # 1. location code
+    # 2. 实验文件
+    # 3. material template file
 
     while True:
         time.sleep(1)
