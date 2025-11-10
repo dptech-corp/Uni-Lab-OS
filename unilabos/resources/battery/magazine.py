@@ -55,9 +55,9 @@ class Magazine(ResourceStack):
     def serialize(self) -> dict:
         return {
             **super().serialize(),
-            "size_x": self.size_x,
-            "size_y": self.size_y,
-            "size_z": self.size_z,
+            "size_x": self.size_x or 10.0,
+            "size_y": self.size_y or 10.0,
+            "size_z": self.size_z or 10.0,
             "max_sheets": self.max_sheets,
         }
 
