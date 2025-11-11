@@ -436,6 +436,144 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
             logger.error(f"处理Bioyond变更通知失败: {e}")
             return False
 
+    def _create_material_only(self, resource: Any) -> Optional[str]:
+        """只创建物料到 Bioyond 系统（不入库）
+
+        Transfer 阶段使用：只调用 add_material API 创建物料记录
+
+        Args:
+            resource: 要创建的资源对象
+
+        Returns:
+            str: 创建成功返回 Bioyond 物料 ID，失败返回 None
+        """
+        try:
+            # 跳过仓库类型的资源
+            resource_category = getattr(resource, "category", None)
+            if resource_category == "warehouse":
+                logger.debug(f"[创建物料] 跳过仓库类型资源: {resource.name}")
+                return None
+
+            logger.info(f"[创建物料] 开始创建物料: {resource.name}")
+
+            # 检查是否已经有 Bioyond ID
+            extra_info = getattr(resource, "unilabos_extra", {})
+            material_bioyond_id = extra_info.get("material_bioyond_id")
+
+            if material_bioyond_id:
+                logger.info(f"[创建物料] 物料 {resource.name} 已存在 (ID: {material_bioyond_id[:8]}...)，跳过创建")
+                return material_bioyond_id
+
+            # 转换为 Bioyond 格式
+            from .config import MATERIAL_DEFAULT_PARAMETERS
+
+            bioyond_material = resource_plr_to_bioyond(
+                [resource],
+                type_mapping=self.workstation.bioyond_config["material_type_mappings"],
+                warehouse_mapping=self.workstation.bioyond_config["warehouse_mapping"],
+                material_params=MATERIAL_DEFAULT_PARAMETERS
+            )[0]
+
+            # ⚠️ 关键：创建物料时不设置 locations，让 Bioyond 系统暂不分配库位
+            # locations 字段在后续的入库操作中才会指定
+            bioyond_material.pop("locations", None)
+
+            logger.info(f"[创建物料] 调用 Bioyond API 创建物料（不指定库位）...")
+            material_id = self.bioyond_api_client.add_material(bioyond_material)
+
+            if not material_id:
+                logger.error(f"[创建物料] 创建物料失败，API 返回空")
+                return None
+
+            logger.info(f"✅ [创建物料] 物料创建成功，ID: {material_id[:8]}...")
+
+            # 保存 Bioyond ID 到资源对象
+            extra_info["material_bioyond_id"] = material_id
+            setattr(resource, "unilabos_extra", extra_info)
+
+            return material_id
+
+        except Exception as e:
+            logger.error(f"❌ [创建物料] 创建物料 {resource.name} 时发生异常: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+
+    def _inbound_material_only(self, resource: Any, material_id: str) -> bool:
+        """只执行物料入库操作（物料已存在于 Bioyond 系统）
+
+        Add 阶段使用：调用 material_inbound API 将物料入库到指定库位
+
+        Args:
+            resource: 要入库的资源对象
+            material_id: Bioyond 物料 ID
+
+        Returns:
+            bool: 入库成功返回 True，失败返回 False
+        """
+        try:
+            logger.info(f"[物料入库] 开始入库物料: {resource.name} (ID: {material_id[:8]}...)")
+
+            # 获取目标库位信息
+            extra_info = getattr(resource, "unilabos_extra", {})
+            update_site = extra_info.get("update_resource_site")
+
+            if not update_site:
+                logger.warning(f"[物料入库] 物料 {resource.name} 没有指定目标库位，跳过入库")
+                return True
+
+            logger.info(f"[物料入库] 目标库位: {update_site}")
+
+            # 获取仓库配置和目标库位 UUID
+            from .config import WAREHOUSE_MAPPING
+            warehouse_mapping = WAREHOUSE_MAPPING
+
+            parent_name = None
+            target_location_uuid = None
+
+            # 查找目标库位的 UUID
+            if resource.parent is not None:
+                parent_name_candidate = resource.parent.name
+                if parent_name_candidate in warehouse_mapping:
+                    site_uuids = warehouse_mapping[parent_name_candidate].get("site_uuids", {})
+                    if update_site in site_uuids:
+                        parent_name = parent_name_candidate
+                        target_location_uuid = site_uuids[update_site]
+                        logger.info(f"[物料入库] 从父节点找到库位: {parent_name}/{update_site}")
+
+            # 兜底：遍历所有仓库查找
+            if not target_location_uuid:
+                for warehouse_name, warehouse_info in warehouse_mapping.items():
+                    site_uuids = warehouse_info.get("site_uuids", {})
+                    if update_site in site_uuids:
+                        parent_name = warehouse_name
+                        target_location_uuid = site_uuids[update_site]
+                        logger.info(f"[物料入库] 从所有仓库找到库位: {parent_name}/{update_site}")
+                        break
+
+            if not target_location_uuid:
+                logger.error(f"❌ [物料入库] 库位 {update_site} 未在配置中找到")
+                return False
+
+            logger.info(f"[物料入库] 库位 UUID: {target_location_uuid[:8]}...")
+
+            # 调用入库 API
+            logger.info(f"[物料入库] 调用 Bioyond API 执行入库...")
+            response = self.bioyond_api_client.material_inbound(material_id, target_location_uuid)
+
+            if response is not None:
+                logger.info(f"✅ [物料入库] 物料 {resource.name} 成功入库到 {update_site}")
+                return True
+            else:
+                logger.error(f"❌ [物料入库] 物料入库失败")
+                return False
+
+        except Exception as e:
+            logger.error(f"❌ [物料入库] 入库物料 {resource.name} 时发生异常: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
+
 
 class BioyondWorkstation(WorkstationBase):
     """Bioyond工作站
@@ -538,16 +676,21 @@ class BioyondWorkstation(WorkstationBase):
         logger.info(f"[resource_tree_add] 开始同步 {len(resources)} 个资源到 Bioyond 系统")
         for resource in resources:
             try:
-                # 🔍 检查资源是否已有 Bioyond ID (避免重复入库)
+                # 🔍 检查资源是否已有 Bioyond ID
                 extra_info = getattr(resource, "unilabos_extra", {})
                 material_bioyond_id = extra_info.get("material_bioyond_id")
 
                 if material_bioyond_id:
-                    logger.info(f"⏭️ [resource_tree_add] 跳过资源 {resource.name}: 已有 Bioyond ID ({material_bioyond_id[:8]}...)，可能由 transfer 已处理")
-                    continue
+                    # ⭐ 已有 Bioyond ID，说明 transfer 已经创建了物料
+                    # 现在只需要执行入库操作
+                    logger.info(f"✅ [resource_tree_add] 物料 {resource.name} 已有 Bioyond ID ({material_bioyond_id[:8]}...)，执行入库操作")
+                    self.resource_synchronizer._inbound_material_only(resource, material_bioyond_id)
+                else:
+                    # ⚠️ 没有 Bioyond ID，说明是直接添加的物料（兜底逻辑）
+                    # 需要先创建再入库
+                    logger.info(f"⚠️ [resource_tree_add] 物料 {resource.name} 无 Bioyond ID，执行创建+入库操作")
+                    self.resource_synchronizer.sync_to_external(resource)
 
-                logger.info(f"[resource_tree_add] 同步资源: {resource}")
-                self.resource_synchronizer.sync_to_external(resource)
             except Exception as e:
                 logger.error(f"[resource_tree_add] 同步资源失败 {resource}: {e}")
                 import traceback
@@ -732,7 +875,8 @@ class BioyondWorkstation(WorkstationBase):
     def resource_tree_transfer(self, old_parent: Optional[ResourcePLR], resource: ResourcePLR, new_parent: ResourcePLR) -> None:
         """处理资源在设备间迁移时的同步
 
-        当资源从一个设备迁移到 BioyondWorkstation 时,需要同步到 Bioyond 系统
+        当资源从一个设备迁移到 BioyondWorkstation 时,只创建物料（不入库）
+        入库操作由后续的 resource_tree_add 完成
 
         Args:
             old_parent: 资源的原父节点（可能为 None）
@@ -744,17 +888,17 @@ class BioyondWorkstation(WorkstationBase):
         logger.info(f"  新父节点: {new_parent.name}")
 
         try:
-            # 同步资源到 Bioyond 系统
-            logger.info(f"[resource_tree_transfer] 开始同步资源 {resource.name} 到 Bioyond 系统")
-            result = self.resource_synchronizer.sync_to_external(resource)
+            # ⭐ Transfer 阶段：只创建物料到 Bioyond 系统，不执行入库
+            logger.info(f"[resource_tree_transfer] 开始创建物料 {resource.name} 到 Bioyond 系统（不入库）")
+            result = self.resource_synchronizer._create_material_only(resource)
 
             if result:
-                logger.info(f"✅ [resource_tree_transfer] 资源 {resource.name} 成功同步到 Bioyond 系统")
+                logger.info(f"✅ [resource_tree_transfer] 物料 {resource.name} 创建成功，Bioyond ID: {result[:8]}...")
             else:
-                logger.warning(f"⚠️ [resource_tree_transfer] 资源 {resource.name} 同步到 Bioyond 系统失败")
+                logger.warning(f"⚠️ [resource_tree_transfer] 物料 {resource.name} 创建失败")
 
         except Exception as e:
-            logger.error(f"❌ [resource_tree_transfer] 资源 {resource.name} 同步异常: {e}")
+            logger.error(f"❌ [resource_tree_transfer] 资源 {resource.name} 创建异常: {e}")
             import traceback
             traceback.print_exc()
 
@@ -797,40 +941,26 @@ class BioyondWorkstation(WorkstationBase):
 
         Returns:
             Dict[str, Any]: Bioyond 系统的状态信息
+                - 连接成功时返回 {"connected": True}
+                - 连接失败时返回 {"connected": False, "error": "错误信息"}
         """
         try:
-            # 基础状态信息
-            status = {
-            }
+            # 检查硬件接口是否存在
+            if not self.hardware_interface:
+                return {"connected": False, "error": "hardware_interface not initialized"}
 
-            # 如果有反应站接口，获取调度器状态
-            if self.hardware_interface:
-                try:
-                    scheduler_status = self.hardware_interface.scheduler_status()
-                    status["scheduler"] = scheduler_status
-                except Exception as e:
-                    logger.warning(f"获取调度器状态失败: {e}")
-                    status["scheduler"] = {"error": str(e)}
+            # 尝试获取调度器状态来验证连接
+            scheduler_status = self.hardware_interface.scheduler_status()
 
-            # 添加物料缓存信息
-            if self.hardware_interface:
-                try:
-                    available_materials = self.hardware_interface.get_available_materials()
-                    status["material_cache_count"] = len(available_materials)
-                except Exception as e:
-                    logger.warning(f"获取物料缓存失败: {e}")
-                    status["material_cache_count"] = 0
-
-            return status
+            # 如果能成功获取状态，说明连接正常
+            if scheduler_status:
+                return {"connected": True}
+            else:
+                return {"connected": False, "error": "scheduler_status returned None"}
 
         except Exception as e:
-            logger.error(f"获取Bioyond状态失败: {e}")
-            return {
-                "status": "error",
-                "message": str(e),
-                "station_type": getattr(self, 'station_type', 'unknown'),
-                "station_name": getattr(self, 'station_name', 'unknown')
-            }
+            logger.warning(f"获取Bioyond状态失败: {e}")
+            return {"connected": False, "error": str(e)}
 
     # ==================== 工作流合并与参数设置 API ====================
 
