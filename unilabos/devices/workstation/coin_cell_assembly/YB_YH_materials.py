@@ -540,10 +540,10 @@ class CoincellDeck(Deck):
     def __init__(
         self,
         name: str = "coin_cell_deck",
-        size_x: float = 3650.0,  # 1m
-        size_y: float = 1550.0,  # 1m
-        size_z: float = 2100.0,   # 0.9m
-        origin: Coordinate = Coordinate(-4000, 2000, 0),
+        size_x: float = 1450.0,  # 1m
+        size_y: float = 1450.0,  # 1m
+        size_z: float = 100.0,   # 0.9m
+        origin: Coordinate = Coordinate(-2200, 0, 0),
         category: str = "coin_cell_deck",
         setup: bool = False,  # 是否自动执行 setup
     ):
@@ -560,11 +560,10 @@ class CoincellDeck(Deck):
         """
         super().__init__(
             name=name,
-            size_x=size_x,
-            size_y=size_y,
-            size_z=size_z,
+            size_x=1450.0,
+            size_y=1450.0,
+            size_z=100.0,
             origin=origin,
-            category=category,
         )
         if setup:
             self.setup()
@@ -575,32 +574,32 @@ class CoincellDeck(Deck):
         
         # 正极片（4个洞位，2x2布局）
         zhengji_zip = MagazineHolder_4_Cathode("正极&铝箔弹夹")
-        self.assign_child_resource(zhengji_zip, Coordinate(x=2799.0, y=356.0, z=0))
+        self.assign_child_resource(zhengji_zip, Coordinate(x=402.0, y=830.0, z=0))
         
         # 正极壳、平垫片（6个洞位，2x2+2布局）
         zhengjike_zip = MagazineHolder_6_Cathode("正极壳&平垫片弹夹")
-        self.assign_child_resource(zhengjike_zip, Coordinate(x=2586.0, y=1143.0, z=0))
+        self.assign_child_resource(zhengjike_zip, Coordinate(x=566.0, y=272.0, z=0))
         
         # 负极壳、弹垫片（6个洞位，2x2+2布局）
         fujike_zip = MagazineHolder_6_Anode("负极壳&弹垫片弹夹")
-        self.assign_child_resource(fujike_zip, Coordinate(x=2492.0, y=1144.0, z=0))
+        self.assign_child_resource(fujike_zip, Coordinate(x=474.0, y=276.0, z=0))
         
         # 成品弹夹（6个洞位，3x2布局）
         chengpindanjia_zip = MagazineHolder_6_Battery("成品弹夹")
-        self.assign_child_resource(chengpindanjia_zip, Coordinate(x=3112.0, y=1295.0, z=0))
+        self.assign_child_resource(chengpindanjia_zip, Coordinate(x=260.0, y=156.0, z=0))
         
         # ====================================== 物料板 ============================================
         # 创建物料板（料盘carrier）- 4x4布局
         # 负极料盘
         fujiliaopan = MaterialPlate(name="负极料盘", size_x=120, size_y=100, size_z=10.0, fill=True)
-        self.assign_child_resource(fujiliaopan, Coordinate(x=2107.0, y=304.0, z=0))
+        self.assign_child_resource(fujiliaopan, Coordinate(x=708.0, y=794.0, z=0))
         # for i in range(16):
         #     fujipian = ElectrodeSheet(name=f"{fujiliaopan.name}_jipian_{i}", size_x=12, size_y=12, size_z=0.1)
         #     fujiliaopan.children[i].assign_child_resource(fujipian, location=None)
 
         # 隔膜料盘
         gemoliaopan = MaterialPlate(name="隔膜料盘", size_x=120, size_y=100, size_z=10.0, fill=True)
-        self.assign_child_resource(gemoliaopan, Coordinate(x=2107.0, y=146.0, z=0))
+        self.assign_child_resource(gemoliaopan, Coordinate(x=718.0, y=918.0, z=0))
         # for i in range(16):
         #     gemopian = ElectrodeSheet(name=f"{gemoliaopan.name}_jipian_{i}", size_x=12, size_y=12, size_z=0.1)
         #     gemoliaopan.children[i].assign_child_resource(gemopian, location=None)
@@ -623,16 +622,16 @@ class CoincellDeck(Deck):
         
         # 电解液缓存位 - 6x2布局
         bottle_rack_6x2 = YIHUA_Electrolyte_12VialCarrier(name="bottle_rack_6x2")
-        self.assign_child_resource(bottle_rack_6x2, Coordinate(x=300, y=300, z=0))
+        self.assign_child_resource(bottle_rack_6x2, Coordinate(x=1050.0, y=358.0, z=0))
         # 电解液回收位6x2
         bottle_rack_6x2_2 = YIHUA_Electrolyte_12VialCarrier(name="bottle_rack_6x2_2")
-        self.assign_child_resource(bottle_rack_6x2_2, Coordinate(x=1765.0, y=869.0, z=0))
+        self.assign_child_resource(bottle_rack_6x2_2, Coordinate(x=914.0, y=358.0, z=0))
 
         tip_box = TipBox64(name="tip_box_64")
-        self.assign_child_resource(tip_box, Coordinate(x=1938.0, y=743.0, z=0))
+        self.assign_child_resource(tip_box, Coordinate(x=782.0, y=514.0, z=0))
 
         waste_tip_box = WasteTipBox(name="waste_tip_box")
-        self.assign_child_resource(waste_tip_box, Coordinate(x=1960.0, y=639.0, z=0))
+        self.assign_child_resource(waste_tip_box, Coordinate(x=778.0, y=622.0, z=0))
 
 
 if __name__ == "__main__":

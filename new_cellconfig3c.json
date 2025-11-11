@@ -1,3 +1,4 @@
+      
 {
   "nodes": [
     {
@@ -53,11 +54,6 @@
       ],
       "type": "device",
       "class":"coincellassemblyworkstation_device",
-      "position": {
-        "x": -600,
-        "y": -400,
-        "z": 0
-      },
       "config": {
         "deck": {
           "data": {
@@ -66,6 +62,14 @@
           }
         },
         "protocol_type": []
+      },
+      "position": {
+        "size": {"height": 1450, "width": 1450, "depth": 2100},
+        "position": {
+          "x": -1500,
+          "y": 0,
+          "z": 0
+        }
       }
     },
     {
@@ -75,11 +79,6 @@
       "parent": "BatteryStation",
       "type": "deck",
       "class": "CoincellDeck",
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      },
       "config": {
         "type": "CoincellDeck",
         "setup": true,
@@ -95,3 +94,5 @@
   ],
   "links": []
 }
+
+    
