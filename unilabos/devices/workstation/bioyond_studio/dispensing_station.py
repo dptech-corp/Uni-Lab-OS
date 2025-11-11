@@ -270,7 +270,13 @@ class BioyondDispensingStation(BioyondWorkstation):
             # 7. 调用create_order方法创建任务
             result = self.hardware_interface.create_order(json_str)
             self.hardware_interface._logger.info(f"创建90%10%小瓶投料任务结果: {result}")
-            return json.dumps({"suc": True})
+
+            # 返回成功结果和构建的JSON数据
+            return json.dumps({
+                "suc": True,
+                "result": result,
+                "order_params": order_data
+            })
 
         except BioyondException:
             # 重新抛出BioyondException
@@ -398,7 +404,12 @@ class BioyondDispensingStation(BioyondWorkstation):
             result = self.hardware_interface.create_order(json_str)
             self.hardware_interface._logger.info(f"创建二胺溶液配置任务结果: {result}")
 
-            return json.dumps({"suc": True})
+            # 返回成功结果和构建的JSON数据
+            return json.dumps({
+                "suc": True,
+                "result": result,
+                "order_params": order_data
+            })
 
         except BioyondException:
             # 重新抛出BioyondException
@@ -499,11 +510,16 @@ class BioyondDispensingStation(BioyondWorkstation):
                         hold_m_name=hold_m_name
                     )
 
+                    # 解析返回结果以获取order_params
+                    result_data = json.loads(result) if isinstance(result, str) else result
+                    order_params = result_data.get("order_params", {})
+
                     results.append({
                         "index": idx + 1,
                         "name": name,
                         "success": True,
-                        "hold_m_name": hold_m_name
+                        "hold_m_name": hold_m_name,
+                        "order_params": order_params
                     })
                     success_count += 1
                     self.hardware_interface._logger.info(
@@ -637,6 +653,10 @@ class BioyondDispensingStation(BioyondWorkstation):
                 hold_m_name=hold_m_name
             )
 
+            # 解析返回结果以获取order_params
+            result_data = json.loads(result) if isinstance(result, str) else result
+            order_params = result_data.get("order_params", {})
+
             summary = {
                 "success": True,
                 "hold_m_name": hold_m_name,
@@ -650,7 +670,8 @@ class BioyondDispensingStation(BioyondWorkstation):
                     "count": 1,
                     "solid_weight": round(titration_portion, 6),
                     "liquid_volume": round(titration_solvent, 6)
-                }
+                },
+                "order_params": order_params
             }
 
             self.hardware_interface._logger.info(
