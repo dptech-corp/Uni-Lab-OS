@@ -535,6 +535,7 @@ def resource_ulab_to_plr(resource: dict, plr_model=False) -> "ResourcePLR":
 
     def resource_ulab_to_plr_inner(resource: dict):
         all_states[resource["name"]] = resource["data"]
+        extra = resource.pop("extra", {})
         d = {
             "name": resource["name"],
             "type": resource["type"],
@@ -575,16 +576,18 @@ def resource_plr_to_ulab(resource_plr: "ResourcePLR", parent_name: str = None, w
         replace_info = {
             "plate": "plate",
             "well": "well",
-            "tip_spot": "container",
-            "trash": "container",
+            "tip_spot": "tip_spot",
+            "trash": "trash",
             "deck": "deck",
-            "tip_rack": "container",
+            "tip_rack": "tip_rack",
+            "warehouse": "warehouse",
+            "container": "container",
         }
         if source in replace_info:
             return replace_info[source]
         else:
             print("转换pylabrobot的时候，出现未知类型", source)
-            return "container"
+            return source
 
     def resource_plr_to_ulab_inner(d: dict, all_states: dict, child=True) -> dict:
         r = {
@@ -631,9 +634,24 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
             type_mapping.get(material.get("typeName"), ("RegularContainer", ""))[0] if type_mapping else "RegularContainer"
         )
 
-        plr_material: ResourcePLR = initialize_resource(
+        plr_material_result = initialize_resource(
             {"name": material["name"], "class": className}, resource_type=ResourcePLR
         )
+
+        # initialize_resource 可能返回列表或单个对象
+        if isinstance(plr_material_result, list):
+            if len(plr_material_result) == 0:
+                logger.warning(f"物料 {material['name']} 初始化失败，跳过")
+                continue
+            plr_material = plr_material_result[0]
+        else:
+            plr_material = plr_material_result
+
+        # 确保 plr_material 是 ResourcePLR 实例
+        if not isinstance(plr_material, ResourcePLR):
+            logger.warning(f"物料 {material['name']} 不是有效的 ResourcePLR 实例，类型: {type(plr_material)}")
+            continue
+
         plr_material.code = material.get("code", "") and material.get("barCode", "") or ""
         plr_material.unilabos_uuid = str(uuid.uuid4())
 
@@ -658,25 +676,66 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
                     ]
                     bottle.code = detail.get("code", "")
         else:
-            bottle = plr_material[0] if plr_material.capacity > 0 else plr_material
-            bottle.tracker.liquids = [
-                (material["name"], float(material.get("quantity", 0)) if material.get("quantity") else 0)
-            ]
+            # 只对有 capacity 属性的容器（液体容器）处理液体追踪
+            if hasattr(plr_material, 'capacity'):
+                bottle = plr_material[0] if plr_material.capacity > 0 else plr_material
+                bottle.tracker.liquids = [
+                    (material["name"], float(material.get("quantity", 0)) if material.get("quantity") else 0)
+                ]
 
         plr_materials.append(plr_material)
 
         if deck and hasattr(deck, "warehouses"):
             for loc in material.get("locations", []):
-                if hasattr(deck, "warehouses") and loc.get("whName") in deck.warehouses:
-                    warehouse = deck.warehouses[loc["whName"]]
-                    idx = (
-                        (loc.get("y", 0) - 1) * warehouse.num_items_x * warehouse.num_items_y
-                        + (loc.get("x", 0) - 1) * warehouse.num_items_x
-                        + (loc.get("z", 0) - 1)
-                    )
+                wh_name = loc.get("whName")
+
+                # 特殊处理: Bioyond的"堆栈1"需要映射到"堆栈1左"或"堆栈1右"
+                # 根据列号(x)判断: 1-4映射到左侧, 5-8映射到右侧
+                if wh_name == "堆栈1":
+                    x_val = loc.get("x", 1)
+                    if 1 <= x_val <= 4:
+                        wh_name = "堆栈1左"
+                    elif 5 <= x_val <= 8:
+                        wh_name = "堆栈1右"
+                    else:
+                        logger.warning(f"物料 {material['name']} 的列号 x={x_val} 超出范围，无法映射到堆栈1左或堆栈1右")
+                        continue
+
+                if hasattr(deck, "warehouses") and wh_name in deck.warehouses:
+                    warehouse = deck.warehouses[wh_name]
+
+                    # Bioyond坐标映射 (重要！): x→行(1=A,2=B...), y→列(1=01,2=02...), z→层(通常=1)
+                    # PyLabRobot warehouse是列优先存储: A01,B01,C01,D01, A02,B02,C02,D02, ...
+                    x = loc.get("x", 1)  # 行号 (1-based: 1=A, 2=B, 3=C, 4=D)
+                    y = loc.get("y", 1)  # 列号 (1-based: 1=01, 2=02, 3=03...)
+                    z = loc.get("z", 1)  # 层号 (1-based, 通常为1)
+
+                    # 如果是右侧堆栈，需要调整列号 (5→1, 6→2, 7→3, 8→4)
+                    if wh_name == "堆栈1右":
+                        y = y - 4  # 将5-8映射到1-4
+
+                    # 特殊处理：对于1行×N列的横向warehouse（如站内试剂存放堆栈）
+                    # Bioyond的y坐标表示线性位置序号，而不是列号
+                    if warehouse.num_items_y == 1:
+                        # 1行warehouse: 直接用y作为线性索引
+                        idx = y - 1
+                        logger.debug(f"1行warehouse {wh_name}: y={y} → idx={idx}")
+                    else:
+                        # 多行warehouse: 使用列优先索引 (与Bioyond坐标系统一致)
+                        # warehouse keys顺序: A01,B01,C01,D01, A02,B02,C02,D02, ...
+                        # 索引计算: idx = (col-1) * num_rows + (row-1) + (layer-1) * (rows * cols)
+                        row_idx = x - 1  # x表示行: 转为0-based
+                        col_idx = y - 1  # y表示列: 转为0-based
+                        layer_idx = z - 1  # 转为0-based
+                        idx = layer_idx * (warehouse.num_items_x * warehouse.num_items_y) + col_idx * warehouse.num_items_y + row_idx
+                        logger.debug(f"多行warehouse {wh_name}: x={x}(行),y={y}(列) → row={row_idx},col={col_idx} → idx={idx}")
+
                     if 0 <= idx < warehouse.capacity:
                         if warehouse[idx] is None or isinstance(warehouse[idx], ResourceHolder):
                             warehouse[idx] = plr_material
+                            logger.debug(f"✅ 物料 {material['name']} 放置到 {wh_name}[{idx}] (Bioyond坐标: x={loc.get('x')}, y={loc.get('y')})")
+                    else:
+                        logger.warning(f"物料 {material['name']} 的索引 {idx} 超出仓库 {wh_name} 容量 {warehouse.capacity}")
 
     return plr_materials
 
@@ -713,8 +772,8 @@ def resource_plr_to_bioyond(plr_resources: list[ResourcePLR], type_mapping: dict
             bottle = resource[0] if resource.capacity > 0 else resource
             material = {
                 "typeId": "3a14196b-24f2-ca49-9081-0cab8021bf1a",
-                "name": resource.get("name", ""),
-                "unit": "",
+                "name": resource.name if hasattr(resource, "name") else "",
+                "unit": "个",  # 修复：Bioyond API 要求 unit 字段不能为空
                 "quantity": sum(qty for _, qty in bottle.tracker.liquids) if hasattr(bottle, "tracker") else 0,
                 "Parameters": "{}"
             }
@@ -758,6 +817,8 @@ def initialize_resource(resource_config: dict, resource_type: Any = None) -> Uni
     elif type(resource_class_config) == str:
         # Allow special resource class names to be used
         if resource_class_config not in lab_registry.resource_type_registry:
+            logger.warning(f"❌ 类 {resource_class_config} 不在 registry 中，返回原始配置")
+            logger.debug(f"   可用的类: {list(lab_registry.resource_type_registry.keys())[:10]}...")
             return [resource_config]
         # If the resource class is a string, look up the class in the
         # resource_type_registry and import it
@@ -772,11 +833,12 @@ def initialize_resource(resource_config: dict, resource_type: Any = None) -> Uni
         if resource_class_config["type"] == "pylabrobot":
             resource_plr = RESOURCE(name=resource_config["name"])
             if resource_type != ResourcePLR:
-                r = resource_plr_to_ulab(resource_plr=resource_plr, parent_name=resource_config.get("parent", None))
-                # r = resource_plr_to_ulab(resource_plr=resource_plr)
-                if resource_config.get("position") is not None:
-                    r["position"] = resource_config["position"]
-                r = tree_to_list([r])
+                tree_sets = ResourceTreeSet.from_plr_resources([resource_plr])
+                # r = resource_plr_to_ulab(resource_plr=resource_plr, parent_name=resource_config.get("parent", None))
+                # # r = resource_plr_to_ulab(resource_plr=resource_plr)
+                # if resource_config.get("position") is not None:
+                #     r["position"] = resource_config["position"]
+                r = tree_sets.dump()
             else:
                 r = resource_plr
         elif resource_class_config["type"] == "unilabos":

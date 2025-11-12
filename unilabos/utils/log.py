@@ -191,7 +191,8 @@ def configure_logger(loglevel=None):
 
     # 添加处理器到根日志记录器
     root_logger.addHandler(console_handler)
-
+    logging.getLogger("asyncio").setLevel(logging.INFO)
+    logging.getLogger("urllib3").setLevel(logging.INFO)
 
 # 配置日志系统
 configure_logger()

@@ -58,8 +58,8 @@ class BioyondReactionStation(BioyondWorkstation):
 
         Args:
             assign_material_name: 物料名称（不能为空）
-            cutoff: 截止值/通量配置（需为有效数字字符串，默认 "900000"）
-            temperature: 温度上限（°C，范围：-50.00 至 100.00）
+            cutoff: 粘度上限（需为有效数字字符串，默认 "900000"）
+            temperature: 温度设定（°C，范围：-50.00 至 100.00）
 
         Returns:
             str: JSON 字符串，格式为 {"suc": True}
@@ -113,11 +113,11 @@ class BioyondReactionStation(BioyondWorkstation):
         """固体进料小瓶
 
         Args:
-            material_id: 粉末类型ID
+            material_id: 粉末类型ID，1=盐（21分钟），2=面粉（27分钟），3=BTDA（38分钟）
             time: 观察时间(分钟)
-            torque_variation: 是否观察扭矩变化(int类型, 1=否, 2=是)
+            torque_variation: 是否观察(int类型, 1=否, 2=是)
             assign_material_name: 物料名称(用于获取试剂瓶位ID)
-            temperature: 温度上限(°C)
+            temperature: 温度设定(°C)
         """
         self.append_to_workflow_sequence('{"web_workflow_name": "Solid_feeding_vials"}')
         material_id_m = self.hardware_interface._get_material_id_by_name(assign_material_name) if assign_material_name else None
@@ -165,9 +165,9 @@ class BioyondReactionStation(BioyondWorkstation):
         Args:
             volume_formula: 分液公式(μL)
             assign_material_name: 物料名称
-            titration_type: 是否滴定(1=滴定, 其他=非滴定)
+            titration_type: 是否滴定(1=否, 2=是)
             time: 观察时间(分钟)
-            torque_variation: 是否观察扭矩变化(int类型, 1=否, 2=是)
+            torque_variation: 是否观察(int类型, 1=否, 2=是)
             temperature: 温度(°C)
         """
         self.append_to_workflow_sequence('{"web_workflow_name": "Liquid_feeding_vials(non-titration)"}')
@@ -208,7 +208,8 @@ class BioyondReactionStation(BioyondWorkstation):
     def liquid_feeding_solvents(
         self,
         assign_material_name: str,
-        volume: str,
+        volume: str = None,
+        solvents = None,
         titration_type: str = "1",
         time: str = "360",
         torque_variation: int = 2,
@@ -218,12 +219,41 @@ class BioyondReactionStation(BioyondWorkstation):
 
         Args:
             assign_material_name: 物料名称
-            volume: 分液量(μL)
-            titration_type: 是否滴定
+            volume: 分液量(μL),直接指定体积(可选,如果提供solvents则自动计算)
+            solvents: 溶剂信息的字典或JSON字符串(可选),格式如下:
+              {
+                  "additional_solvent": 33.55092503597727,  # 溶剂体积(mL)
+                  "total_liquid_volume": 48.00916988195499
+              }
+              如果提供solvents,则从中提取additional_solvent并转换为μL
+            titration_type: 是否滴定(1=否, 2=是)
             time: 观察时间(分钟)
-            torque_variation: 是否观察扭矩变化(int类型, 1=否, 2=是)
-            temperature: 温度上限(°C)
+            torque_variation: 是否观察(int类型, 1=否, 2=是)
+            temperature: 温度设定(°C)
         """
+        # 处理 volume 参数:优先使用直接传入的 volume,否则从 solvents 中提取
+        if not volume and solvents is not None:
+            # 参数类型转换:如果是字符串则解析为字典
+            if isinstance(solvents, str):
+                try:
+                    solvents = json.loads(solvents)
+                except json.JSONDecodeError as e:
+                    raise ValueError(f"solvents参数JSON解析失败: {str(e)}")
+
+            # 参数验证
+            if not isinstance(solvents, dict):
+                raise ValueError("solvents 必须是字典类型或有效的JSON字符串")
+
+            # 提取 additional_solvent 值
+            additional_solvent = solvents.get("additional_solvent")
+            if additional_solvent is None:
+                raise ValueError("solvents 中没有找到 additional_solvent 字段")
+
+            # 转换为微升(μL) - 从毫升(mL)转换
+            volume = str(float(additional_solvent) * 1000)
+        elif volume is None:
+            raise ValueError("必须提供 volume 或 solvents 参数之一")
+
         self.append_to_workflow_sequence('{"web_workflow_name": "Liquid_feeding_solvents"}')
         material_id = self.hardware_interface._get_material_id_by_name(assign_material_name)
         if material_id is None:
@@ -273,9 +303,9 @@ class BioyondReactionStation(BioyondWorkstation):
         Args:
             volume_formula: 分液公式(μL)
             assign_material_name: 物料名称
-            titration_type: 是否滴定
+            titration_type: 是否滴定(1=否, 2=是)
             time: 观察时间(分钟)
-            torque_variation: 是否观察扭矩变化(int类型, 1=否, 2=是)
+            torque_variation: 是否观察(int类型, 1=否, 2=是)
             temperature: 温度(°C)
         """
         self.append_to_workflow_sequence('{"web_workflow_name": "Liquid_feeding(titration)"}')
@@ -328,9 +358,9 @@ class BioyondReactionStation(BioyondWorkstation):
             volume: 分液量(μL)
             assign_material_name: 物料名称(试剂瓶位)
             time: 观察时间(分钟)
-            torque_variation: 是否观察扭矩变化(int类型, 1=否, 2=是)
-            titration_type: 是否滴定
-            temperature: 温度上限(°C)
+            torque_variation: 是否观察(int类型, 1=否, 2=是)
+            titration_type: 是否滴定(1=否, 2=是)
+            temperature: 温度设定(°C)
         """
         self.append_to_workflow_sequence('{"web_workflow_name": "liquid_feeding_beaker"}')
         material_id = self.hardware_interface._get_material_id_by_name(assign_material_name)
@@ -381,9 +411,9 @@ class BioyondReactionStation(BioyondWorkstation):
         Args:
             assign_material_name: 物料名称(液体种类)
             volume: 分液量(μL)
-            titration_type: 是否滴定
+            titration_type: 是否滴定(1=否, 2=是)
             time: 观察时间(分钟)
-            torque_variation: 是否观察扭矩变化(int类型, 1=否, 2=是)
+            torque_variation: 是否观察(int类型, 1=否, 2=是)
             temperature: 温度(°C)
         """
         self.append_to_workflow_sequence('{"web_workflow_name": "drip_back"}')
@@ -605,7 +635,8 @@ class BioyondReactionStation(BioyondWorkstation):
                         total_params += 1
                         step_parameters[step_id][action_name].append({
                             "Key": param_key,
-                            "DisplayValue": param_value
+                            "DisplayValue": param_value,
+                            "Value": param_value
                         })
                         successful_params += 1
                         # print(f"         ✓ {param_key} = {param_value}")
