@@ -629,22 +629,15 @@ class BioyondDispensingStation(BioyondWorkstation):
             if not all([name, main_portion is not None, titration_portion is not None, titration_solvent is not None]):
                 raise BioyondException("titration 数据缺少必要参数")
 
-            # 将main_portion平均分成3份作为90%物料（3个小瓶）
-            portion_90 = main_portion / 3
-
             # 调用单个任务创建方法
             result = self.create_90_10_vial_feeding_task(
                 order_name=f"90%10%小瓶投料-{name}",
                 speed=speed,
                 temperature=temperature,
                 delay_time=delay_time,
-                # 90%物料 - 主称固体平均分成3份
+                # 90%物料 - 主称固体直接使用main_portion
                 percent_90_1_assign_material_name=name,
-                percent_90_1_target_weigh=str(round(portion_90, 6)),
-                percent_90_2_assign_material_name=name,
-                percent_90_2_target_weigh=str(round(portion_90, 6)),
-                percent_90_3_assign_material_name=name,
-                percent_90_3_target_weigh=str(round(portion_90, 6)),
+                percent_90_1_target_weigh=str(round(main_portion, 6)),
                 # 10%物料 - 滴定固体 + 滴定溶剂（只使用第1个10%小瓶）
                 percent_10_1_assign_material_name=name,
                 percent_10_1_target_weigh=str(round(titration_portion, 6)),
@@ -662,8 +655,8 @@ class BioyondDispensingStation(BioyondWorkstation):
                 "hold_m_name": hold_m_name,
                 "material_name": name,
                 "90_vials": {
-                    "count": 3,
-                    "weight_per_vial": round(portion_90, 6),
+                    "count": 1,
+                    "weight_per_vial": round(main_portion, 6),
                     "total_weight": round(main_portion, 6)
                 },
                 "10_vials": {
@@ -676,7 +669,7 @@ class BioyondDispensingStation(BioyondWorkstation):
 
             self.hardware_interface._logger.info(
                 f"成功创建90%10%小瓶投料任务: {hold_m_name}, "
-                f"90%物料={portion_90:.6f}g×3, 10%物料={titration_portion:.6f}g+{titration_solvent:.6f}mL"
+                f"90%物料={main_portion:.6f}g, 10%物料={titration_portion:.6f}g+{titration_solvent:.6f}mL"
             )
 
             # 返回JSON字符串格式
