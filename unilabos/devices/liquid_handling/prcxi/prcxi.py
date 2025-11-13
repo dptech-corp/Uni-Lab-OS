@@ -145,6 +145,7 @@ class PRCXI9300Handler(LiquidHandlerAbstract):
         setup=True,
         debug=False,
         simulator=False,
+        step_mode=False,
         matrix_id="",
         is_9320=False,
     ):
@@ -158,6 +159,11 @@ class PRCXI9300Handler(LiquidHandlerAbstract):
                 )
         if is_9320:
             print("当前设备是9320")
+        if step_mode:
+            if is_9320:
+                self.step_mode = step_mode
+            else:
+                print("9300设备不支持 单点动作模式")
         self._unilabos_backend = PRCXI9300Backend(
             tablets_info, host, port, timeout, channel_num, axis, setup, debug, matrix_id, is_9320
         )
@@ -344,6 +350,10 @@ class PRCXI9300Handler(LiquidHandlerAbstract):
         offsets: Optional[List[Coordinate]] = None,
         **backend_kwargs,
     ):
+        if self.step_mode:
+            await self.create_protocol(f"单点动作{time.time()}")
+            await super().pick_up_tips(tip_spots, use_channels, offsets, **backend_kwargs)
+            await self.run_protocol()
         return await super().pick_up_tips(tip_spots, use_channels, offsets, **backend_kwargs)
 
     async def aspirate(
@@ -1694,7 +1704,43 @@ if __name__ == "__main__":
 
     A = tree_to_list([resource_plr_to_ulab(deck)])
     with open("deck.json", "w", encoding="utf-8") as f:
-        json.dump(A, f, indent=4, ensure_ascii=False)
+        A.insert(0, {
+            "id": "PRCXI",
+            "name": "PRCXI",
+            "parent": None,
+            "type": "device",
+            "class": "liquid_handler.prcxi",
+            "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+            },
+            "config": {
+                "deck": {
+                    "_resource_child_name": "PRCXI_Deck",
+                    "_resource_type": "unilabos.devices.liquid_handling.prcxi.prcxi:PRCXI9300Deck"
+                },
+                "host": "192.168.0.121",
+                "port": 9999,
+                "timeout": 10.0,
+                "axis": "Right",
+                "channel_num": 1,
+                "setup": False,
+                "debug": True,
+                "simulator": True,
+                "matrix_id": "5de524d0-3f95-406c-86dd-f83626ebc7cb",
+                "is_9320": True
+            },
+            "data": {},
+            "children": [
+                "PRCXI_Deck"
+            ]
+        })
+        A[1]["parent"] = "PRCXI"
+        json.dump({
+            "nodes": A,
+            "links": []
+        }, f, indent=4, ensure_ascii=False)
 
     handler = PRCXI9300Handler(
         deck=deck,
@@ -1735,6 +1781,12 @@ if __name__ == "__main__":
     asyncio.run(handler.run_protocol())
     time.sleep(5)
     os._exit(0)
+
+
+    prcxi_api = PRCXI9300Api(host="192.168.0.121", port=9999)
+    prcxi_api.list_matrices()
+    prcxi_api.get_all_materials()
+
     # 第一种情景：一个孔往多个孔加液
     # plate_2_liquids = handler.set_group("water", [plate2.children[0]], [300])
     # plate5_liquids = handler.set_group("master_mix", plate5.children[:23], [100]*23)
