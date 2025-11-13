@@ -29,8 +29,23 @@ bioyond_dispensing_station:
             handler_key: titration
             io_type: source
             label: Titration Data From Calculation Node
+          output:
+          - data_key: order_code
+            data_source: handle
+            data_type: string
+            handler_key: task_order_code
+            io_type: sink
+            label: Task Order Code
+          - data_key: order_id
+            data_source: handle
+            data_type: string
+            handler_key: task_order_id
+            io_type: sink
+            label: Task Order ID
         result:
           return_info: return_info
+          order_code: order_code
+          order_id: order_id
         schema:
           description: 批量创建90%10%小瓶投料任务。从计算节点接收titration数据,包含物料名称、主称固体质量、滴定固体质量和滴定溶剂体积。
           properties:
@@ -71,9 +86,17 @@ bioyond_dispensing_station:
               type: object
             result:
               properties:
+                order_code:
+                  description: 任务编码，如 task_vial_1762939132
+                  type: string
+                order_id:
+                  description: 任务ID（UUID），如 3a1d8989-303b-aa49-72bc-efe68e66a62d
+                  type: string
                 return_info:
                   type: string
               required:
+              - order_code
+              - order_id
               - return_info
               title: BatchCreate9010VialFeedingTasks_Result
               type: object
@@ -104,8 +127,23 @@ bioyond_dispensing_station:
             handler_key: solutions
             io_type: source
             label: Solution Data From Python
+          output:
+          - data_key: order_codes
+            data_source: handle
+            data_type: string
+            handler_key: TASK_ORDER_CODES
+            io_type: sink
+            label: Task Order Codes List
+          - data_key: order_ids
+            data_source: handle
+            data_type: string
+            handler_key: TASK_ORDER_IDS
+            io_type: sink
+            label: Task Order IDs
         result:
           return_info: return_info
+          order_codes: order_codes
+          order_ids: order_ids
         schema:
           description: 批量创建二胺溶液配置任务。自动为多个二胺样品创建溶液配置任务，每个任务包含固体物料称量、溶剂添加、搅拌混合等步骤。
           properties:
@@ -144,10 +182,18 @@ bioyond_dispensing_station:
               type: object
             result:
               properties:
+                order_codes:
+                  description: 任务编码列表，JSON数组格式
+                  type: string
+                order_ids:
+                  description: 任务ID列表，JSON数组格式
+                  type: string
                 return_info:
                   description: 批量任务创建结果汇总，JSON格式包含总数、成功数、失败数及每个任务的详细信息
                   type: string
               required:
+              - order_codes
+              - order_ids
               - return_info
               title: BatchCreateDiamineSolutionTasks_Result
               type: object
@@ -382,6 +428,165 @@ bioyond_dispensing_station:
           title: DispenStationSolnPrep
           type: object
         type: DispenStationSolnPrep
+      wait_for_multiple_orders_and_get_reports:
+        feedback: {}
+        goal:
+          check_interval: check_interval
+          order_codes: order_codes
+          order_ids: order_ids
+          timeout: timeout
+        goal_default:
+          check_interval: '10'
+          order_codes: ''
+          order_ids: ''
+          timeout: '7200'
+        handles:
+          input:
+          - data_key: order_codes
+            data_source: handle
+            data_type: string
+            handler_key: TASK_ORDER_CODES
+            io_type: source
+            label: Task Order Codes Array From Batch Creation
+          - data_key: order_ids
+            data_source: handle
+            data_type: string
+            handler_key: TASK_ORDER_IDS
+            io_type: source
+            label: Task Order IDs Array From Batch Creation
+          output:
+          - data_key: return_info
+            data_source: handle
+            data_type: object
+            handler_key: batch_reports_result
+            io_type: sink
+            label: Batch Order Completion Reports
+        result:
+          return_info: return_info
+        schema:
+          description: 同时等待多个任务完成并获取所有实验报告。适用于批量创建任务后需要等待所有任务完成的场景，会并行监控所有任务状态并返回每个任务的报告。
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: WaitForMultipleOrdersAndGetReports_Feedback
+              type: object
+            goal:
+              properties:
+                check_interval:
+                  default: '10'
+                  description: 检查任务状态的时间间隔（秒），默认每10秒检查一次所有待完成任务
+                  type: string
+                order_codes:
+                  description: '任务编码列表，JSON数组格式，如: ["task_vial_1", "task_vial_2"]，通常从batch_create任务的输出获取'
+                  type: string
+                order_ids:
+                  description: '任务ID列表，JSON数组格式，如: ["uuid1", "uuid2"]，通常从batch_create任务的输出获取'
+                  type: string
+                timeout:
+                  default: '7200'
+                  description: 等待超时时间（秒），默认7200秒（2小时）。超过此时间未完成的任务将标记为timeout
+                  type: string
+              required:
+              - order_codes
+              - order_ids
+              title: WaitForMultipleOrdersAndGetReports_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  description: 'JSON格式的批量任务完成信息，包含: total(总数), completed(成功数), timeout(超时数),
+                    error(错误数), elapsed_time(总耗时), reports(报告数组，每个元素包含order_code,
+                    order_id, status, completion_status, report, elapsed_time)'
+                  type: string
+              required:
+              - return_info
+              title: WaitForMultipleOrdersAndGetReports_Result
+              type: object
+          required:
+          - goal
+          title: WaitForMultipleOrdersAndGetReports
+          type: object
+        type: UniLabJsonCommand
+      wait_for_order_completion_and_get_report:
+        feedback: {}
+        goal:
+          check_interval: check_interval
+          order_code: order_code
+          order_id: order_id
+          timeout: timeout
+        goal_default:
+          check_interval: '10'
+          order_code: ''
+          order_id: ''
+          timeout: '7200'
+        handles:
+          input:
+          - data_key: order_code
+            data_source: handle
+            data_type: string
+            handler_key: task_order_code
+            io_type: source
+            label: Task Order Code From Creation
+          - data_key: order_id
+            data_source: handle
+            data_type: string
+            handler_key: task_order_id
+            io_type: source
+            label: Task Order ID From Creation
+          output:
+          - data_key: return_info
+            data_source: handle
+            data_type: object
+            handler_key: report_result
+            io_type: sink
+            label: Order Completion Report
+        result:
+          return_info: return_info
+        schema:
+          description: 等待任务完成并获取实验报告。监控指定orderCode的任务状态，任务完成后自动调用order_report查询并返回实验报告。
+          properties:
+            feedback:
+              properties: {}
+              required: []
+              title: WaitForOrderCompletionAndGetReport_Feedback
+              type: object
+            goal:
+              properties:
+                check_interval:
+                  default: '10'
+                  description: 检查任务状态的时间间隔（秒），默认每10秒检查一次
+                  type: string
+                order_code:
+                  description: 任务编码，如 task_vial_1762936190，由create任务时生成并返回
+                  type: string
+                order_id:
+                  description: 任务ID（UUID），如 3a1d895c-4d39-d504-1398-18f5a40bac1e，由create任务时从API返回结果中提取
+                  type: string
+                timeout:
+                  default: '7200'
+                  description: 等待超时时间（秒），默认7200秒（2小时）。超过此时间任务仍未完成将抛出异常
+                  type: string
+              required:
+              - order_code
+              - order_id
+              title: WaitForOrderCompletionAndGetReport_Goal
+              type: object
+            result:
+              properties:
+                return_info:
+                  description: 'JSON格式的任务完成信息和实验报告，包含: order_code, order_id, status(completed/timeout/error),
+                    completion_status(30:完成/-11:异常停止/-12:人工停止), report(实验报告数据), elapsed_time(等待时长)'
+                  type: string
+              required:
+              - return_info
+              title: WaitForOrderCompletionAndGetReport_Result
+              type: object
+          required:
+          - goal
+          title: WaitForOrderCompletionAndGetReport
+          type: object
+        type: UniLabJsonCommand
     module: unilabos.devices.workstation.bioyond_studio.dispensing_station:BioyondDispensingStation
     status_types: {}
     type: python
