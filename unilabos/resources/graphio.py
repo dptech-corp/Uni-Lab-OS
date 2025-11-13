@@ -866,11 +866,13 @@ def resource_plr_to_bioyond(plr_resources: list[ResourcePLR], type_mapping: dict
 
             material = {
                 "typeId": type_info[1],
+                "code": "",
+                "barCode": "",
                 "name": resource.name,
                 "unit": "个",
                 "quantity": 1,
                 "details": [],
-                "Parameters": "{}"
+                "Parameters": "{}"  # API 实际要求的字段（必需）
             }
 
             # 如果是自带试剂瓶的载架类型，不处理子物料（details留空）
@@ -955,13 +957,14 @@ def resource_plr_to_bioyond(plr_resources: list[ResourcePLR], type_mapping: dict
 
                     detail_item = {
                         "typeId": bottle_type_info[1],
-                        "name": material_name,  # 使用物料名称（如"9090"），而不是类型名称（"样品瓶"）
                         "code": bottle.code if hasattr(bottle, "code") else "",
+                        "name": material_name,  # 使用物料名称（如"9090"），而不是类型名称（"样品瓶"）
                         "quantity": sum(qty for _, qty in bottle.tracker.liquids) if hasattr(bottle, "tracker") else 0,
                         "x": bioyond_x,
                         "y": bioyond_y,
-                        "molecular": 1,
-                        "Parameters": json.dumps({"molecular": 1})
+                        "z": 1,
+                        "unit": "微升",
+                        "Parameters": "{}"  # API 实际要求的字段（必需）
                     }
                     material["details"].append(detail_item)
         else:
@@ -1012,10 +1015,12 @@ def resource_plr_to_bioyond(plr_resources: list[ResourcePLR], type_mapping: dict
 
             material = {
                 "typeId": type_id,
+                "code": "",
+                "barCode": "",
                 "name": material_name,  # 使用物料名称而不是资源名称
                 "unit": default_unit,  # 使用配置的单位或默认单位
                 "quantity": sum(qty for _, qty in bottle.tracker.liquids) if hasattr(bottle, "tracker") else 0,
-                "Parameters": parameters_json
+                "Parameters": parameters_json  # API 实际要求的字段（必需）
             }
 
         # ⭐ 处理 locations 信息

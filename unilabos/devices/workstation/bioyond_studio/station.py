@@ -22,8 +22,9 @@ from unilabos.ros.nodes.presets.workstation import ROS2WorkstationNode
 from pylabrobot.resources.resource import Resource as ResourcePLR
 
 from unilabos.devices.workstation.bioyond_studio.config import (
-    API_CONFIG, WORKFLOW_MAPPINGS, MATERIAL_TYPE_MAPPINGS, WAREHOUSE_MAPPING
+    API_CONFIG, WORKFLOW_MAPPINGS, MATERIAL_TYPE_MAPPINGS, WAREHOUSE_MAPPING, HTTP_SERVICE_CONFIG
 )
+from unilabos.devices.workstation.workstation_http_service import WorkstationHTTPService
 
 
 class BioyondResourceSynchronizer(ResourceSynchronizer):
@@ -622,10 +623,44 @@ class BioyondWorkstation(WorkstationBase):
 
         if "workflow_mappings" in bioyond_config:
             self._set_workflow_mappings(bioyond_config["workflow_mappings"])
+
+        # 准备 HTTP 报送接收服务配置（延迟到 post_init 启动）
+        # 从 bioyond_config 中获取，如果没有则使用 HTTP_SERVICE_CONFIG 的默认值
+        self._http_service_config = {
+            "host": bioyond_config.get("http_service_host", HTTP_SERVICE_CONFIG["http_service_host"]),
+            "port": bioyond_config.get("http_service_port", HTTP_SERVICE_CONFIG["http_service_port"])
+        }
+        self.http_service = None  # 将在 post_init 中启动
+
         logger.info(f"Bioyond工作站初始化完成")
+
+    def __del__(self):
+        """析构函数：清理资源，停止 HTTP 服务"""
+        try:
+            if hasattr(self, 'http_service') and self.http_service is not None:
+                logger.info("正在停止 HTTP 报送服务...")
+                self.http_service.stop()
+        except Exception as e:
+            logger.error(f"停止 HTTP 服务时发生错误: {e}")
 
     def post_init(self, ros_node: ROS2WorkstationNode):
         self._ros_node = ros_node
+
+        # 启动 HTTP 报送接收服务（现在 device_id 已可用）
+        if hasattr(self, '_http_service_config'):
+            try:
+                self.http_service = WorkstationHTTPService(
+                    workstation_instance=self,
+                    host=self._http_service_config["host"],
+                    port=self._http_service_config["port"]
+                )
+                self.http_service.start()
+                logger.info(f"Bioyond工作站HTTP报送服务已启动: {self.http_service.service_url}")
+            except Exception as e:
+                logger.error(f"启动HTTP报送服务失败: {e}")
+                import traceback
+                traceback.print_exc()
+                self.http_service = None
 
         # ⭐ 上传 deck（包括所有 warehouses 及其中的物料）
         # 注意：如果有从 Bioyond 同步的物料，它们已经被放置到 warehouse 中了
@@ -1156,6 +1191,180 @@ class BioyondWorkstation(WorkstationBase):
                 "message": error_msg,
                 "action": "reset_workstation"
             }
+
+    # ==================== HTTP 报送处理方法 ====================
+
+    def process_step_finish_report(self, report_request) -> Dict[str, Any]:
+        """处理步骤完成报送
+
+        Args:
+            report_request: WorkstationReportRequest 对象，包含步骤完成信息
+
+        Returns:
+            Dict[str, Any]: 处理结果
+        """
+        try:
+            data = report_request.data
+            logger.info(f"[步骤完成报送] 订单: {data.get('orderCode')}, 步骤: {data.get('stepName')}")
+            logger.info(f"  样品ID: {data.get('sampleId')}")
+            logger.info(f"  开始时间: {data.get('startTime')}")
+            logger.info(f"  结束时间: {data.get('endTime')}")
+
+            # TODO: 根据实际业务需求处理步骤完成逻辑
+            # 例如：更新数据库、触发后续流程等
+
+            return {
+                "processed": True,
+                "step_id": data.get('stepId'),
+                "timestamp": datetime.now().isoformat()
+            }
+
+        except Exception as e:
+            logger.error(f"处理步骤完成报送失败: {e}")
+            return {"processed": False, "error": str(e)}
+
+    def process_sample_finish_report(self, report_request) -> Dict[str, Any]:
+        """处理通量完成报送
+
+        Args:
+            report_request: WorkstationReportRequest 对象，包含通量完成信息
+
+        Returns:
+            Dict[str, Any]: 处理结果
+        """
+        try:
+            data = report_request.data
+            status_names = {
+                "0": "待生产", "2": "进样", "10": "开始",
+                "20": "完成", "-2": "异常停止", "-3": "人工停止"
+            }
+            status_desc = status_names.get(str(data.get('status')), f"状态{data.get('status')}")
+
+            logger.info(f"[通量完成报送] 订单: {data.get('orderCode')}, 样品: {data.get('sampleId')}")
+            logger.info(f"  状态: {status_desc}")
+            logger.info(f"  开始时间: {data.get('startTime')}")
+            logger.info(f"  结束时间: {data.get('endTime')}")
+
+            # TODO: 根据实际业务需求处理通量完成逻辑
+
+            return {
+                "processed": True,
+                "sample_id": data.get('sampleId'),
+                "status": data.get('status'),
+                "timestamp": datetime.now().isoformat()
+            }
+
+        except Exception as e:
+            logger.error(f"处理通量完成报送失败: {e}")
+            return {"processed": False, "error": str(e)}
+
+    def process_order_finish_report(self, report_request, used_materials: List) -> Dict[str, Any]:
+        """处理任务完成报送
+
+        Args:
+            report_request: WorkstationReportRequest 对象，包含任务完成信息
+            used_materials: 物料使用记录列表
+
+        Returns:
+            Dict[str, Any]: 处理结果
+        """
+        try:
+            data = report_request.data
+            status_names = {"30": "完成", "-11": "异常停止", "-12": "人工停止"}
+            status_desc = status_names.get(str(data.get('status')), f"状态{data.get('status')}")
+
+            logger.info(f"[任务完成报送] 订单: {data.get('orderCode')} - {data.get('orderName')}")
+            logger.info(f"  状态: {status_desc}")
+            logger.info(f"  开始时间: {data.get('startTime')}")
+            logger.info(f"  结束时间: {data.get('endTime')}")
+            logger.info(f"  使用物料数量: {len(used_materials)}")
+
+            # 记录物料使用情况
+            for material in used_materials:
+                logger.debug(f"  物料: {material.materialId}, 用量: {material.usedQuantity}")
+
+            # TODO: 根据实际业务需求处理任务完成逻辑
+            # 例如：更新物料库存、生成报表等
+
+            return {
+                "processed": True,
+                "order_code": data.get('orderCode'),
+                "status": data.get('status'),
+                "materials_count": len(used_materials),
+                "timestamp": datetime.now().isoformat()
+            }
+
+        except Exception as e:
+            logger.error(f"处理任务完成报送失败: {e}")
+            return {"processed": False, "error": str(e)}
+
+    def process_material_change_report(self, report_data: Dict[str, Any]) -> Dict[str, Any]:
+        """处理物料变更报送
+
+        Args:
+            report_data: 物料变更数据
+
+        Returns:
+            Dict[str, Any]: 处理结果
+        """
+        try:
+            logger.info(f"[物料变更报送] 工作站: {report_data.get('workstation_id')}")
+            logger.info(f"  资源ID: {report_data.get('resource_id')}")
+            logger.info(f"  变更类型: {report_data.get('change_type')}")
+            logger.info(f"  时间戳: {report_data.get('timestamp')}")
+
+            # TODO: 根据实际业务需求处理物料变更逻辑
+            # 例如：同步到资源树、更新Bioyond系统等
+
+            return {
+                "processed": True,
+                "resource_id": report_data.get('resource_id'),
+                "change_type": report_data.get('change_type'),
+                "timestamp": datetime.now().isoformat()
+            }
+
+        except Exception as e:
+            logger.error(f"处理物料变更报送失败: {e}")
+            return {"processed": False, "error": str(e)}
+
+    def handle_external_error(self, error_data: Dict[str, Any]) -> Dict[str, Any]:
+        """处理错误处理报送
+
+        Args:
+            error_data: 错误数据（可能是奔曜格式或标准格式）
+
+        Returns:
+            Dict[str, Any]: 处理结果
+        """
+        try:
+            # 检查是否为奔曜格式
+            if 'task' in error_data and 'code' in error_data:
+                # 奔曜格式
+                logger.error(f"[错误处理报送-奔曜] 任务: {error_data.get('task')}")
+                logger.error(f"  错误代码: {error_data.get('code')}")
+                logger.error(f"  错误信息: {error_data.get('message', '无')}")
+                error_type = "bioyond_error"
+            else:
+                # 标准格式
+                logger.error(f"[错误处理报送] 工作站: {error_data.get('workstation_id')}")
+                logger.error(f"  错误类型: {error_data.get('error_type')}")
+                logger.error(f"  错误信息: {error_data.get('error_message')}")
+                error_type = error_data.get('error_type', 'unknown')
+
+            # TODO: 根据实际业务需求处理错误
+            # 例如：记录日志、发送告警、触发恢复流程等
+
+            return {
+                "handled": True,
+                "error_type": error_type,
+                "timestamp": datetime.now().isoformat()
+            }
+
+        except Exception as e:
+            logger.error(f"处理错误报送失败: {e}")
+            return {"handled": False, "error": str(e)}
+
+    # ==================== 文件加载与其他功能 ====================
 
     def load_bioyond_data_from_file(self, file_path: str) -> bool:
         """从文件加载Bioyond数据（用于测试）"""
