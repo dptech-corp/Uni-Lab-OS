@@ -501,7 +501,7 @@ class BioyondV1RPC(BaseRequest):
             return {}
 
         response = self.post(
-            url=f'{self.host}/api/lims/order/order-report',
+            url=f'{self.host}/api/lims/order/project-order-report',
             params={
                 "apiKey": self.api_key,
                 "requestTime": self.get_current_time_iso8601(),
