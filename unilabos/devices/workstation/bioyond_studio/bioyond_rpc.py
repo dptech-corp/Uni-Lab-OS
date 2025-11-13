@@ -233,7 +233,7 @@ class BioyondV1RPC(BaseRequest):
         return response.get("data", {})
 
     def material_outbound(self, material_id: str, location_name: str, quantity: int) -> dict:
-        """指定库位出库物料"""
+        """指定库位出库物料（通过库位名称）"""
         location_id = LOCATION_MAPPING.get(location_name, location_name)
 
         params = {
@@ -251,7 +251,36 @@ class BioyondV1RPC(BaseRequest):
             })
 
         if not response or response['code'] != 1:
-            return {}
+            return None
+        return response
+
+    def material_outbound_by_id(self, material_id: str, location_id: str, quantity: int) -> dict:
+        """指定库位出库物料（直接使用location_id）
+
+        Args:
+            material_id: 物料ID
+            location_id: 库位ID（不是库位名称，是UUID）
+            quantity: 数量
+
+        Returns:
+            dict: API响应，失败返回None
+        """
+        params = {
+            "materialId": material_id,
+            "locationId": location_id,
+            "quantity": quantity
+        }
+
+        response = self.post(
+            url=f'{self.host}/api/lims/storage/outbound',
+            params={
+                "apiKey": self.api_key,
+                "requestTime": self.get_current_time_iso8601(),
+                "data": params
+            })
+
+        if not response or response['code'] != 1:
+            return None
         return response
 
     # ==================== 工作流查询相关接口 ====================
@@ -334,8 +363,8 @@ class BioyondV1RPC(BaseRequest):
                                 for j, param in enumerate(params):
                                     if not isinstance(param, dict):
                                         workflow_errors.append(f"步骤 {step_id} 模块 {module_name} 参数 {j} 必须是字典类型")
-                                    elif "key" not in param or "value" not in param:
-                                        workflow_errors.append(f"步骤 {step_id} 模块 {module_name} 参数 {j} 必须包含 key 和 value")
+                                    elif "Key" not in param or "DisplayValue" not in param:
+                                        workflow_errors.append(f"步骤 {step_id} 模块 {module_name} 参数 {j} 必须包含 Key 和 DisplayValue")
 
                 if workflow_errors:
                     validation_errors.append({
@@ -703,20 +732,35 @@ class BioyondV1RPC(BaseRequest):
         """预加载材料列表到缓存中"""
         try:
             print("正在加载材料列表缓存...")
-            stock_query = '{"typeMode": 2, "includeDetail": true}'
-            stock_result = self.stock_material(stock_query)
 
-            if isinstance(stock_result, str):
-                stock_data = json.loads(stock_result)
-            else:
-                stock_data = stock_result
+            # 加载所有类型的材料：耗材(0)、样品(1)、试剂(2)
+            material_types = [1, 2]
 
-            materials = stock_data
-            for material in materials:
-                material_name = material.get("name")
-                material_id = material.get("id")
-                if material_name and material_id:
-                    self.material_cache[material_name] = material_id
+            for type_mode in material_types:
+                print(f"正在加载类型 {type_mode} 的材料...")
+                stock_query = f'{{"typeMode": {type_mode}, "includeDetail": true}}'
+                stock_result = self.stock_material(stock_query)
+
+                if isinstance(stock_result, str):
+                    stock_data = json.loads(stock_result)
+                else:
+                    stock_data = stock_result
+
+                materials = stock_data
+                for material in materials:
+                    material_name = material.get("name")
+                    material_id = material.get("id")
+                    if material_name and material_id:
+                        self.material_cache[material_name] = material_id
+
+                    # 处理样品板等容器中的detail材料
+                    detail_materials = material.get("detail", [])
+                    for detail_material in detail_materials:
+                        detail_name = detail_material.get("name")
+                        detail_id = detail_material.get("detailMaterialId")
+                        if detail_name and detail_id:
+                            self.material_cache[detail_name] = detail_id
+                            print(f"加载detail材料: {detail_name} -> ID: {detail_id}")
 
             print(f"材料列表缓存加载完成，共加载 {len(self.material_cache)} 个材料")
 

@@ -1,56 +1,18 @@
 ## 简单单变量动作函数
 
+
 ### `SendCmd`
 
 ```{literalinclude} ../../unilabos_msgs/action/SendCmd.action
 :language: yaml
 ```
 
----
-
-### `StrSingleInput`
-
-```{literalinclude} ../../unilabos_msgs/action/StrSingleInput.action
-:language: yaml
-```
-
----
-
-### `IntSingleInput`
-
-```{literalinclude} ../../unilabos_msgs/action/IntSingleInput.action
-:language: yaml
-```
-
----
-
-### `FloatSingleInput`
-
-```{literalinclude} ../../unilabos_msgs/action/FloatSingleInput.action
-:language: yaml
-```
-
----
-
-### `Point3DSeparateInput`
-
-```{literalinclude} ../../unilabos_msgs/action/Point3DSeparateInput.action
-:language: yaml
-```
-
----
-
-### `Wait`
-
-```{literalinclude} ../../unilabos_msgs/action/Wait.action
-:language: yaml
-```
-
----
-
+----
 ## 常量有机化学操作
 
 Uni-Lab 常量有机化学指令集多数来自 [XDL](https://croningroup.gitlab.io/chemputer/xdl/standard/full_steps_specification.html#)，包含有机合成实验中常见的操作，如加热、搅拌、冷却等。
+
+
 
 ### `Clean`
 
@@ -58,31 +20,7 @@ Uni-Lab 常量有机化学指令集多数来自 [XDL](https://croningroup.gitlab
 :language: yaml
 ```
 
----
-
-### `EvacuateAndRefill`
-
-```{literalinclude} ../../unilabos_msgs/action/EvacuateAndRefill.action
-:language: yaml
-```
-
----
-
-### `Evaporate`
-
-```{literalinclude} ../../unilabos_msgs/action/Evaporate.action
-:language: yaml
-```
-
----
-
-### `HeatChill`
-
-```{literalinclude} ../../unilabos_msgs/action/HeatChill.action
-:language: yaml
-```
-
----
+----
 
 ### `HeatChillStart`
 
@@ -90,7 +28,7 @@ Uni-Lab 常量有机化学指令集多数来自 [XDL](https://croningroup.gitlab
 :language: yaml
 ```
 
----
+----
 
 ### `HeatChillStop`
 
@@ -98,7 +36,7 @@ Uni-Lab 常量有机化学指令集多数来自 [XDL](https://croningroup.gitlab
 :language: yaml
 ```
 
----
+----
 
 ### `PumpTransfer`
 
@@ -106,195 +44,12 @@ Uni-Lab 常量有机化学指令集多数来自 [XDL](https://croningroup.gitlab
 :language: yaml
 ```
 
----
-
-### `Separate`
-
-```{literalinclude} ../../unilabos_msgs/action/Separate.action
-:language: yaml
-```
-
----
-
-### `Stir`
-
-```{literalinclude} ../../unilabos_msgs/action/Stir.action
-:language: yaml
-```
-
----
-
-### `Add`
-
-```{literalinclude} ../../unilabos_msgs/action/Add.action
-:language: yaml
-```
-
----
-
-### `AddSolid`
-
-```{literalinclude} ../../unilabos_msgs/action/AddSolid.action
-:language: yaml
-```
-
----
-
-### `AdjustPH`
-
-```{literalinclude} ../../unilabos_msgs/action/AdjustPH.action
-:language: yaml
-```
-
----
-
-### `Centrifuge`
-
-```{literalinclude} ../../unilabos_msgs/action/Centrifuge.action
-:language: yaml
-```
-
----
-
-### `CleanVessel`
-
-```{literalinclude} ../../unilabos_msgs/action/CleanVessel.action
-:language: yaml
-```
-
----
-
-### `Crystallize`
-
-```{literalinclude} ../../unilabos_msgs/action/Crystallize.action
-:language: yaml
-```
-
----
-
-### `Dissolve`
-
-```{literalinclude} ../../unilabos_msgs/action/Dissolve.action
-:language: yaml
-```
-
----
-
-### `Dry`
-
-```{literalinclude} ../../unilabos_msgs/action/Dry.action
-:language: yaml
-```
-
----
-
-### `Filter`
-
-```{literalinclude} ../../unilabos_msgs/action/Filter.action
-:language: yaml
-```
-
----
-
-### `FilterThrough`
-
-```{literalinclude} ../../unilabos_msgs/action/FilterThrough.action
-:language: yaml
-```
-
----
-
-### `Hydrogenate`
-
-```{literalinclude} ../../unilabos_msgs/action/Hydrogenate.action
-:language: yaml
-```
-
----
-
-### `Purge`
-
-```{literalinclude} ../../unilabos_msgs/action/Purge.action
-:language: yaml
-```
-
----
-
-### `Recrystallize`
-
-```{literalinclude} ../../unilabos_msgs/action/Recrystallize.action
-:language: yaml
-```
-
----
-
-### `RunColumn`
-
-```{literalinclude} ../../unilabos_msgs/action/RunColumn.action
-:language: yaml
-```
-
----
-
-### `StartPurge`
-
-```{literalinclude} ../../unilabos_msgs/action/StartPurge.action
-:language: yaml
-```
-
----
-
-### `StartStir`
-
-```{literalinclude} ../../unilabos_msgs/action/StartStir.action
-:language: yaml
-```
-
----
-
-### `StopPurge`
-
-```{literalinclude} ../../unilabos_msgs/action/StopPurge.action
-:language: yaml
-```
-
----
-
-### `StopStir`
-
-```{literalinclude} ../../unilabos_msgs/action/StopStir.action
-:language: yaml
-```
-
----
-
-### `Transfer`
-
-```{literalinclude} ../../unilabos_msgs/action/Transfer.action
-:language: yaml
-```
-
----
-
-### `WashSolid`
-
-```{literalinclude} ../../unilabos_msgs/action/WashSolid.action
-:language: yaml
-```
-
----
-
+----
 ## 移液工作站及相关生物自动化设备操作
 
 Uni-Lab 生物操作指令集多数来自 [PyLabRobot](https://docs.pylabrobot.org/user_guide/index.html)，包含生物实验中常见的操作，如移液、混匀、离心等。
 
-### `LiquidHandlerAspirate`
 
-```{literalinclude} ../../unilabos_msgs/action/LiquidHandlerAspirate.action
-:language: yaml
-```
-
----
 
 ### `LiquidHandlerDiscardTips`
 
@@ -302,15 +57,7 @@ Uni-Lab 生物操作指令集多数来自 [PyLabRobot](https://docs.pylabrobot.o
 :language: yaml
 ```
 
----
-
-### `LiquidHandlerDispense`
-
-```{literalinclude} ../../unilabos_msgs/action/LiquidHandlerDispense.action
-:language: yaml
-```
-
----
+----
 
 ### `LiquidHandlerDropTips`
 
@@ -318,7 +65,7 @@ Uni-Lab 生物操作指令集多数来自 [PyLabRobot](https://docs.pylabrobot.o
 :language: yaml
 ```
 
----
+----
 
 ### `LiquidHandlerDropTips96`
 
@@ -326,7 +73,7 @@ Uni-Lab 生物操作指令集多数来自 [PyLabRobot](https://docs.pylabrobot.o
 :language: yaml
 ```
 
----
+----
 
 ### `LiquidHandlerMoveLid`
 
@@ -334,7 +81,7 @@ Uni-Lab 生物操作指令集多数来自 [PyLabRobot](https://docs.pylabrobot.o
 :language: yaml
 ```
 
----
+----
 
 ### `LiquidHandlerMovePlate`
 
@@ -342,7 +89,7 @@ Uni-Lab 生物操作指令集多数来自 [PyLabRobot](https://docs.pylabrobot.o
 :language: yaml
 ```
 
----
+----
 
 ### `LiquidHandlerMoveResource`
 
@@ -350,7 +97,7 @@ Uni-Lab 生物操作指令集多数来自 [PyLabRobot](https://docs.pylabrobot.o
 :language: yaml
 ```
 
----
+----
 
 ### `LiquidHandlerPickUpTips`
 
@@ -358,7 +105,7 @@ Uni-Lab 生物操作指令集多数来自 [PyLabRobot](https://docs.pylabrobot.o
 :language: yaml
 ```
 
----
+----
 
 ### `LiquidHandlerPickUpTips96`
 
@@ -366,7 +113,7 @@ Uni-Lab 生物操作指令集多数来自 [PyLabRobot](https://docs.pylabrobot.o
 :language: yaml
 ```
 
----
+----
 
 ### `LiquidHandlerReturnTips`
 
@@ -374,7 +121,7 @@ Uni-Lab 生物操作指令集多数来自 [PyLabRobot](https://docs.pylabrobot.o
 :language: yaml
 ```
 
----
+----
 
 ### `LiquidHandlerReturnTips96`
 
@@ -382,7 +129,7 @@ Uni-Lab 生物操作指令集多数来自 [PyLabRobot](https://docs.pylabrobot.o
 :language: yaml
 ```
 
----
+----
 
 ### `LiquidHandlerStamp`
 
@@ -390,121 +137,9 @@ Uni-Lab 生物操作指令集多数来自 [PyLabRobot](https://docs.pylabrobot.o
 :language: yaml
 ```
 
----
-
-### `LiquidHandlerTransfer`
-
-```{literalinclude} ../../unilabos_msgs/action/LiquidHandlerTransfer.action
-:language: yaml
-```
-
----
-
-### `LiquidHandlerAdd`
-
-```{literalinclude} ../../unilabos_msgs/action/LiquidHandlerAdd.action
-:language: yaml
-```
-
----
-
-### `LiquidHandlerIncubateBiomek`
-
-```{literalinclude} ../../unilabos_msgs/action/LiquidHandlerIncubateBiomek.action
-:language: yaml
-```
-
----
-
-### `LiquidHandlerMix`
-
-```{literalinclude} ../../unilabos_msgs/action/LiquidHandlerMix.action
-:language: yaml
-```
-
----
-
-### `LiquidHandlerMoveBiomek`
-
-```{literalinclude} ../../unilabos_msgs/action/LiquidHandlerMoveBiomek.action
-:language: yaml
-```
-
----
-
-### `LiquidHandlerMoveTo`
-
-```{literalinclude} ../../unilabos_msgs/action/LiquidHandlerMoveTo.action
-:language: yaml
-```
-
----
-
-### `LiquidHandlerOscillateBiomek`
-
-```{literalinclude} ../../unilabos_msgs/action/LiquidHandlerOscillateBiomek.action
-:language: yaml
-```
-
----
-
-### `LiquidHandlerProtocolCreation`
-
-```{literalinclude} ../../unilabos_msgs/action/LiquidHandlerProtocolCreation.action
-:language: yaml
-```
-
----
-
-### `LiquidHandlerRemove`
-
-```{literalinclude} ../../unilabos_msgs/action/LiquidHandlerRemove.action
-:language: yaml
-```
-
----
-
-### `LiquidHandlerSetGroup`
-
-```{literalinclude} ../../unilabos_msgs/action/LiquidHandlerSetGroup.action
-:language: yaml
-```
-
----
-
-### `LiquidHandlerSetLiquid`
-
-```{literalinclude} ../../unilabos_msgs/action/LiquidHandlerSetLiquid.action
-:language: yaml
-```
-
----
-
-### `LiquidHandlerSetTipRack`
-
-```{literalinclude} ../../unilabos_msgs/action/LiquidHandlerSetTipRack.action
-:language: yaml
-```
-
----
-
-### `LiquidHandlerTransferBiomek`
-
-```{literalinclude} ../../unilabos_msgs/action/LiquidHandlerTransferBiomek.action
-:language: yaml
-```
-
----
-
-### `LiquidHandlerTransferGroup`
-
-```{literalinclude} ../../unilabos_msgs/action/LiquidHandlerTransferGroup.action
-:language: yaml
-```
-
----
-
+----
 ## 多工作站及小车运行、物料转移
+
 
 ### `AGVTransfer`
 
@@ -512,7 +147,7 @@ Uni-Lab 生物操作指令集多数来自 [PyLabRobot](https://docs.pylabrobot.o
 :language: yaml
 ```
 
----
+----
 
 ### `WorkStationRun`
 
@@ -520,63 +155,11 @@ Uni-Lab 生物操作指令集多数来自 [PyLabRobot](https://docs.pylabrobot.o
 :language: yaml
 ```
 
----
-
-### `ResetHandling`
-
-```{literalinclude} ../../unilabos_msgs/action/ResetHandling.action
-:language: yaml
-```
-
----
-
-### `ResourceCreateFromOuter`
-
-```{literalinclude} ../../unilabos_msgs/action/ResourceCreateFromOuter.action
-:language: yaml
-```
-
----
-
-### `ResourceCreateFromOuterEasy`
-
-```{literalinclude} ../../unilabos_msgs/action/ResourceCreateFromOuterEasy.action
-:language: yaml
-```
-
----
-
-### `SetPumpPosition`
-
-```{literalinclude} ../../unilabos_msgs/action/SetPumpPosition.action
-:language: yaml
-```
-
----
-
-## 固体分配与处理设备操作
-
-### `SolidDispenseAddPowderTube`
-
-```{literalinclude} ../../unilabos_msgs/action/SolidDispenseAddPowderTube.action
-:language: yaml
-```
-
----
-
-## 其他设备操作
-
-### `EmptyIn`
-
-```{literalinclude} ../../unilabos_msgs/action/EmptyIn.action
-:language: yaml
-```
-
----
-
+----
 ## 机械臂、夹爪等机器人设备
 
 Uni-Lab 机械臂、机器人、夹爪和导航指令集沿用 ROS2 的 `control_msgs` 和 `nav2_msgs`：
+
 
 ### `FollowJointTrajectory`
 
@@ -645,8 +228,7 @@ trajectory_msgs/MultiDOFJointTrajectoryPoint multi_dof_error
 
 ```
 
----
-
+----
 ### `GripperCommand`
 
 ```yaml
@@ -664,19 +246,42 @@ bool reached_goal # True iff the gripper position has reached the commanded setp
 
 ```
 
----
-
+----
 ### `JointTrajectory`
 
 ```yaml
 trajectory_msgs/JointTrajectory trajectory
 ---
-
 ---
+
 ```
 
----
+----
+### `ParallelGripperCommand`
 
+```yaml
+# Parallel grippers refer to an end effector where two opposing fingers grasp an object from opposite sides.
+sensor_msgs/JointState command
+# name: the name(s) of the joint this command is requesting
+# position: desired position of each gripper joint (radians or meters)
+# velocity: (optional, not used if empty) max velocity of the joint allowed while moving (radians or meters / second)
+# effort: (optional, not used if empty) max effort of the joint allowed while moving (Newtons or Newton-meters)
+---
+sensor_msgs/JointState state # The current gripper state.
+# position of each joint (radians or meters)
+# optional: velocity of each joint (radians or meters / second)
+# optional: effort of each joint (Newtons or Newton-meters)
+bool stalled      # True if the gripper is exerting max effort and not moving
+bool reached_goal # True if the gripper position has reached the commanded setpoint
+---
+sensor_msgs/JointState state # The current gripper state.
+# position of each joint (radians or meters)
+# optional: velocity of each joint (radians or meters / second)
+# optional: effort of each joint (Newtons or Newton-meters)
+
+```
+
+----
 ### `PointHead`
 
 ```yaml
@@ -686,13 +291,12 @@ string pointing_frame
 builtin_interfaces/Duration min_duration
 float64 max_velocity
 ---
-
 ---
 float64 pointing_angle_error
+
 ```
 
----
-
+----
 ### `SingleJointPosition`
 
 ```yaml
@@ -700,16 +304,15 @@ float64 position
 builtin_interfaces/Duration min_duration
 float64 max_velocity
 ---
-
 ---
 std_msgs/Header header
 float64 position
 float64 velocity
 float64 error
+
 ```
 
----
-
+----
 ### `AssistedTeleop`
 
 ```yaml
@@ -721,10 +324,10 @@ builtin_interfaces/Duration total_elapsed_time
 ---
 #feedback
 builtin_interfaces/Duration current_teleop_duration
+
 ```
 
----
-
+----
 ### `BackUp`
 
 ```yaml
@@ -738,10 +341,10 @@ builtin_interfaces/Duration total_elapsed_time
 ---
 #feedback definition
 float32 distance_traveled
+
 ```
 
----
-
+----
 ### `ComputePathThroughPoses`
 
 ```yaml
@@ -756,10 +359,10 @@ nav_msgs/Path path
 builtin_interfaces/Duration planning_time
 ---
 #feedback definition
+
 ```
 
----
-
+----
 ### `ComputePathToPose`
 
 ```yaml
@@ -774,10 +377,10 @@ nav_msgs/Path path
 builtin_interfaces/Duration planning_time
 ---
 #feedback definition
+
 ```
 
----
-
+----
 ### `DriveOnHeading`
 
 ```yaml
@@ -791,10 +394,10 @@ builtin_interfaces/Duration total_elapsed_time
 ---
 #feedback definition
 float32 distance_traveled
+
 ```
 
----
-
+----
 ### `DummyBehavior`
 
 ```yaml
@@ -805,10 +408,10 @@ std_msgs/String command
 builtin_interfaces/Duration total_elapsed_time
 ---
 #feedback definition
+
 ```
 
----
-
+----
 ### `FollowPath`
 
 ```yaml
@@ -823,10 +426,10 @@ std_msgs/Empty result
 #feedback definition
 float32 distance_to_goal
 float32 speed
+
 ```
 
----
-
+----
 ### `FollowWaypoints`
 
 ```yaml
@@ -838,10 +441,10 @@ int32[] missed_waypoints
 ---
 #feedback definition
 uint32 current_waypoint
+
 ```
 
----
-
+----
 ### `NavigateThroughPoses`
 
 ```yaml
@@ -859,10 +462,10 @@ builtin_interfaces/Duration estimated_time_remaining
 int16 number_of_recoveries
 float32 distance_remaining
 int16 number_of_poses_remaining
+
 ```
 
----
-
+----
 ### `NavigateToPose`
 
 ```yaml
@@ -879,10 +482,10 @@ builtin_interfaces/Duration navigation_time
 builtin_interfaces/Duration estimated_time_remaining
 int16 number_of_recoveries
 float32 distance_remaining
+
 ```
 
----
-
+----
 ### `SmoothPath`
 
 ```yaml
@@ -898,10 +501,10 @@ builtin_interfaces/Duration smoothing_duration
 bool was_completed
 ---
 #feedback definition
+
 ```
 
----
-
+----
 ### `Spin`
 
 ```yaml
@@ -914,10 +517,10 @@ builtin_interfaces/Duration total_elapsed_time
 ---
 #feedback definition
 float32 angular_distance_traveled
+
 ```
 
----
-
+----
 ### `Wait`
 
 ```yaml
@@ -929,6 +532,7 @@ builtin_interfaces/Duration total_elapsed_time
 ---
 #feedback definition
 builtin_interfaces/Duration time_left
+
 ```
 
----
+----

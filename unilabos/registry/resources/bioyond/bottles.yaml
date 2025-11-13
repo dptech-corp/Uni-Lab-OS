@@ -48,3 +48,25 @@ BIOYOND_PolymerStation_Solution_Beaker:
   icon: ''
   init_param_schema: {}
   version: 1.0.0
+BIOYOND_PolymerStation_TipBox:
+  category:
+  - bottles
+  - tip_boxes
+  class:
+    module: unilabos.resources.bioyond.bottles:BIOYOND_PolymerStation_TipBox
+    type: pylabrobot
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  version: 1.0.0
+BIOYOND_PolymerStation_Reactor:
+  category:
+  - bottles
+  - reactors
+  class:
+    module: unilabos.resources.bioyond.bottles:BIOYOND_PolymerStation_Reactor
+    type: pylabrobot
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  version: 1.0.0

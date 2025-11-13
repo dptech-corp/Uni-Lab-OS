@@ -356,7 +356,7 @@ def main():
 
     if BasicConfig.upload_registry:
         # 设备注册到服务端 - 需要 ak 和 sk
-        if args_dict.get("ak") and args_dict.get("sk"):
+        if BasicConfig.ak and BasicConfig.sk:
             print_status("开始注册设备到服务端...", "info")
             try:
                 register_devices_and_resources(lab_registry)
@@ -375,22 +375,23 @@ def main():
 
     args_dict["bridges"] = []
 
-    # 获取通信客户端（仅支持WebSocket）
-    comm_client = get_communication_client()
-
-    if "websocket" in args_dict["app_bridges"]:
-        args_dict["bridges"].append(comm_client)
     if "fastapi" in args_dict["app_bridges"]:
         args_dict["bridges"].append(http_client)
-    if "websocket" in args_dict["app_bridges"]:
+    # 获取通信客户端（仅支持WebSocket）
+    if BasicConfig.is_host_mode:
+        comm_client = get_communication_client()
+        if "websocket" in args_dict["app_bridges"]:
+            args_dict["bridges"].append(comm_client)
+            def _exit(signum, frame):
+                comm_client.stop()
+                sys.exit(0)
 
-        def _exit(signum, frame):
-            comm_client.stop()
-            sys.exit(0)
+            signal.signal(signal.SIGINT, _exit)
+            signal.signal(signal.SIGTERM, _exit)
+            comm_client.start()
+    else:
+        print_status("SlaveMode跳过Websocket连接")
 
-        signal.signal(signal.SIGINT, _exit)
-        signal.signal(signal.SIGTERM, _exit)
-        comm_client.start()
     args_dict["resources_mesh_config"] = {}
     args_dict["resources_edge_config"] = resource_edge_info
     # web visiualize 2D

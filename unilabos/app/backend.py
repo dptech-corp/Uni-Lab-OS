@@ -13,7 +13,7 @@ def start_backend(
     graph=None,
     controllers_config: dict = {},
     bridges=[],
-    without_host: bool = False,
+    is_slave: bool = False,
     visual: str = "None",
     resources_mesh_config: dict = {},
     **kwargs,
@@ -32,7 +32,7 @@ def start_backend(
         raise ValueError(f"Unsupported backend: {backend}")
 
     backend_thread = threading.Thread(
-        target=main if not without_host else slave,
+        target=main if not is_slave else slave,
         args=(
             devices_config,
             resources_config,

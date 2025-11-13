@@ -2,7 +2,7 @@ import traceback
 import uuid
 from pydantic import BaseModel, field_serializer, field_validator
 from pydantic import Field
-from typing import List, Tuple, Any, Dict, Literal, Optional, cast, TYPE_CHECKING
+from typing import List, Tuple, Any, Dict, Literal, Optional, cast, TYPE_CHECKING, Union
 
 from unilabos.utils.log import logger
 
@@ -32,7 +32,7 @@ class ResourceDictPositionObject(BaseModel):
 class ResourceDictPosition(BaseModel):
     size: ResourceDictPositionSize = Field(description="Resource size", default_factory=ResourceDictPositionSize)
     scale: ResourceDictPositionScale = Field(description="Resource scale", default_factory=ResourceDictPositionScale)
-    layout: Literal["2d"] = Field(description="Resource layout", default="2d")
+    layout: Literal["2d", "x-y", "z-y", "x-z"] = Field(description="Resource layout", default="x-y")
     position: ResourceDictPositionObject = Field(
         description="Resource position", default_factory=ResourceDictPositionObject
     )
@@ -42,6 +42,9 @@ class ResourceDictPosition(BaseModel):
     rotation: ResourceDictPositionObject = Field(
         description="Resource rotation", default_factory=ResourceDictPositionObject
     )
+    cross_section_type: Literal["rectangle", "circle", "rounded_rectangle"] = Field(
+        description="Cross section type", default="rectangle"
+    )
 
 
 # 统一的资源字典模型，parent 自动序列化为 parent_uuid，children 不序列化
@@ -50,16 +53,20 @@ class ResourceDict(BaseModel):
     uuid: str = Field(description="Resource UUID")
     name: str = Field(description="Resource name")
     description: str = Field(description="Resource description", default="")
-    resource_schema: Dict[str, Any] = Field(description="Resource schema", default_factory=dict, serialization_alias="schema", validation_alias="schema")
+    resource_schema: Dict[str, Any] = Field(
+        description="Resource schema", default_factory=dict, serialization_alias="schema", validation_alias="schema"
+    )
     model: Dict[str, Any] = Field(description="Resource model", default_factory=dict)
     icon: str = Field(description="Resource icon", default="")
     parent_uuid: Optional["str"] = Field(description="Parent resource uuid", default=None)  # 先设定parent_uuid
     parent: Optional["ResourceDict"] = Field(description="Parent resource object", default=None, exclude=True)
-    type: Literal["device"] | str = Field(description="Resource type")
+    type: Union[Literal["device"], str] = Field(description="Resource type")
     klass: str = Field(alias="class", description="Resource class name")
     position: ResourceDictPosition = Field(description="Resource position", default_factory=ResourceDictPosition)
+    pose: ResourceDictPosition = Field(description="Resource position", default_factory=ResourceDictPosition)
     config: Dict[str, Any] = Field(description="Resource configuration")
     data: Dict[str, Any] = Field(description="Resource data")
+    extra: Dict[str, Any] = Field(description="Extra data")
 
     @field_serializer("parent_uuid")
     def _serialize_parent(self, parent_uuid: Optional["ResourceDict"]):
@@ -136,6 +143,10 @@ class ResourceDictInstance(object):
             content["config"] = {}
         if not content.get("data"):
             content["data"] = {}
+        if not content.get("extra"):  # MagicCode
+            content["extra"] = {}
+        if "pose" not in content:
+            content["pose"] = content.get("position", {})
         return ResourceDictInstance(ResourceDict.model_validate(content))
 
     def get_nested_dict(self) -> Dict[str, Any]:
@@ -307,28 +318,51 @@ class ResourceTreeSet(object):
                 "plate": "plate",
                 "well": "well",
                 "deck": "deck",
+                "tip_rack": "tip_rack",
+                "tip_spot": "tip_spot",
+                "tube": "tube",
+                "bottle_carrier": "bottle_carrier",
             }
             if source in replace_info:
                 return replace_info[source]
             else:
                 print("转换pylabrobot的时候，出现未知类型", source)
-                return "container"
+                return source
 
-        def build_uuid_mapping(res: "PLRResource", uuid_list: list):
-            """递归构建uuid映射字典"""
+        def build_uuid_mapping(res: "PLRResource", uuid_list: list, parent_uuid: Optional[str] = None):
+            """递归构建uuid和extra映射字典，返回(current_uuid, parent_uuid, extra)元组列表"""
             uid = getattr(res, "unilabos_uuid", "")
             if not uid:
                 uid = str(uuid.uuid4())
                 res.unilabos_uuid = uid
                 logger.warning(f"{res}没有uuid，请设置后再传入，默认填充{uid}！\n{traceback.format_exc()}")
-            uuid_list.append(uid)
+
+            # 获取unilabos_extra，默认为空字典
+            extra = getattr(res, "unilabos_extra", {})
+
+            uuid_list.append((uid, parent_uuid, extra))
             for child in res.children:
-                build_uuid_mapping(child, uuid_list)
+                build_uuid_mapping(child, uuid_list, uid)
 
         def resource_plr_inner(
             d: dict, parent_resource: Optional[ResourceDict], states: dict, uuids: list
         ) -> ResourceDictInstance:
-            current_uuid = uuids.pop(0)
+            current_uuid, parent_uuid, extra = uuids.pop(0)
+
+            raw_pos = (
+                {"x": d["location"]["x"], "y": d["location"]["y"], "z": d["location"]["z"]}
+                if d["location"]
+                else {"x": 0, "y": 0, "z": 0}
+            )
+            pos = {
+                "size": {"width": d["size_x"], "height": d["size_y"], "depth": d["size_z"]},
+                "scale": {"x": 1.0, "y": 1.0, "z": 1.0},
+                "layout": d.get("layout", "x-y"),
+                "position": raw_pos,
+                "position3d": raw_pos,
+                "rotation": d["rotation"],
+                "cross_section_type": d.get("cross_section_type", "rectangle"),
+            }
 
             # 先构建当前节点的字典（不包含children）
             r_dict = {
@@ -336,15 +370,30 @@ class ResourceTreeSet(object):
                 "uuid": current_uuid,
                 "name": d["name"],
                 "parent": parent_resource,  # 直接传入 ResourceDict 对象
+                "parent_uuid": parent_uuid,  # 使用 parent_uuid 而不是 parent 对象
                 "type": replace_plr_type(d.get("category", "")),
                 "class": d.get("class", ""),
-                "position": (
-                    {"x": d["location"]["x"], "y": d["location"]["y"], "z": d["location"]["z"]}
-                    if d["location"]
-                    else {"x": 0, "y": 0, "z": 0}
-                ),
-                "config": {k: v for k, v in d.items() if k not in ["name", "children", "parent_name", "location"]},
+                "position": pos,
+                "pose": pos,
+                "config": {
+                    k: v
+                    for k, v in d.items()
+                    if k
+                    not in [
+                        "name",
+                        "children",
+                        "parent_name",
+                        "location",
+                        "rotation",
+                        "size_x",
+                        "size_y",
+                        "size_z",
+                        "cross_section_type",
+                        "bottom_type",
+                    ]
+                },
                 "data": states[d["name"]],
+                "extra": extra,
             }
 
             # 先转换为 ResourceDictInstance，获取其中的 ResourceDict
@@ -362,7 +411,7 @@ class ResourceTreeSet(object):
         for resource in resources:
             # 构建uuid列表
             uuid_list = []
-            build_uuid_mapping(resource, uuid_list)
+            build_uuid_mapping(resource, uuid_list, getattr(resource.parent, "unilabos_uuid", None))
 
             serialized_data = resource.serialize()
             all_states = resource.serialize_all_state()
@@ -385,14 +434,15 @@ class ResourceTreeSet(object):
         import inspect
 
         # 类型映射
-        TYPE_MAP = {"plate": "Plate", "well": "Well", "deck": "Deck"}
+        TYPE_MAP = {"plate": "Plate", "well": "Well", "deck": "Deck", "container": "RegularContainer"}
 
-        def collect_node_data(node: ResourceDictInstance, name_to_uuid: dict, all_states: dict):
-            """一次遍历收集 name_to_uuid 和 all_states"""
+        def collect_node_data(node: ResourceDictInstance, name_to_uuid: dict, all_states: dict, name_to_extra: dict):
+            """一次遍历收集 name_to_uuid, all_states 和 name_to_extra"""
             name_to_uuid[node.res_content.name] = node.res_content.uuid
             all_states[node.res_content.name] = node.res_content.data
+            name_to_extra[node.res_content.name] = node.res_content.extra
             for child in node.children:
-                collect_node_data(child, name_to_uuid, all_states)
+                collect_node_data(child, name_to_uuid, all_states, name_to_extra)
 
         def node_to_plr_dict(node: ResourceDictInstance, has_model: bool):
             """转换节点为 PLR 字典格式"""
@@ -402,6 +452,7 @@ class ResourceTreeSet(object):
                 logger.warning(f"未知类型 {res.type}")
 
             d = {
+                **res.config,
                 "name": res.name,
                 "type": res.config.get("type", plr_type),
                 "size_x": res.config.get("size_x", 0),
@@ -417,33 +468,35 @@ class ResourceTreeSet(object):
                 "category": res.config.get("category", plr_type),
                 "children": [node_to_plr_dict(child, has_model) for child in node.children],
                 "parent_name": res.parent_instance_name,
-                **res.config,
             }
             if has_model:
                 d["model"] = res.config.get("model", None)
             return d
 
         plr_resources = []
-        trees = []
         tracker = DeviceNodeResourceTracker()
 
         for tree in self.trees:
             name_to_uuid: Dict[str, str] = {}
             all_states: Dict[str, Any] = {}
-            collect_node_data(tree.root_node, name_to_uuid, all_states)
+            name_to_extra: Dict[str, dict] = {}
+            collect_node_data(tree.root_node, name_to_uuid, all_states, name_to_extra)
             has_model = tree.root_node.res_content.type != "deck"
             plr_dict = node_to_plr_dict(tree.root_node, has_model)
             try:
                 sub_cls = find_subclass(plr_dict["type"], PLRResource)
                 if sub_cls is None:
-                    raise ValueError(f"无法找到类型 {plr_dict['type']} 对应的 PLR 资源类。原始信息：{tree.root_node.res_content}")
+                    raise ValueError(
+                        f"无法找到类型 {plr_dict['type']} 对应的 PLR 资源类。原始信息：{tree.root_node.res_content}"
+                    )
                 spec = inspect.signature(sub_cls)
                 if "category" not in spec.parameters:
                     plr_dict.pop("category", None)
                 plr_resource = sub_cls.deserialize(plr_dict, allow_marshal=True)
                 plr_resource.load_all_state(all_states)
-                # 使用 DeviceNodeResourceTracker 设置 UUID
+                # 使用 DeviceNodeResourceTracker 设置 UUID 和 Extra
                 tracker.loop_set_uuid(plr_resource, name_to_uuid)
+                tracker.loop_set_extra(plr_resource, name_to_extra)
                 plr_resources.append(plr_resource)
 
             except Exception as e:
@@ -785,6 +838,24 @@ class DeviceNodeResourceTracker(object):
         else:
             setattr(resource, "unilabos_uuid", new_uuid)
 
+    @staticmethod
+    def set_resource_extra(resource, extra: dict):
+        """
+        设置资源的 extra，统一处理 dict 和 instance 两种类型
+
+        Args:
+            resource: 资源对象（dict或实例）
+            extra: extra字典值
+        """
+        if isinstance(resource, dict):
+            c_extra = resource.get("extra", {})
+            c_extra.update(extra)
+            resource["extra"] = c_extra
+        else:
+            c_extra = getattr(resource, "unilabos_extra", {})
+            c_extra.update(extra)
+            setattr(resource, "unilabos_extra", c_extra)
+
     def _traverse_and_process(self, resource, process_func) -> int:
         """
         递归遍历资源树，对每个节点执行处理函数
@@ -827,7 +898,31 @@ class DeviceNodeResourceTracker(object):
                 new_uuid = name_to_uuid_map[resource_name]
                 self.set_resource_uuid(res, new_uuid)
                 self.uuid_to_resources[new_uuid] = res
-                logger.debug(f"设置资源UUID: {resource_name} -> {new_uuid}")
+                logger.trace(f"设置资源UUID: {resource_name} -> {new_uuid}")
+                return 1
+            return 0
+
+        return self._traverse_and_process(resource, process)
+
+    def loop_set_extra(self, resource, name_to_extra_map: Dict[str, dict]) -> int:
+        """
+        递归遍历资源树，根据 name 设置所有节点的 extra
+
+        Args:
+            resource: 资源对象（可以是dict或实例）
+            name_to_extra_map: name到extra的映射字典，{name: extra}
+
+        Returns:
+            更新的资源数量
+        """
+
+        def process(res):
+            resource_name = self._get_resource_attr(res, "name")
+            if resource_name and resource_name in name_to_extra_map:
+                extra = name_to_extra_map[resource_name]
+                self.set_resource_extra(res, extra)
+                if len(extra):
+                    logger.debug(f"设置资源Extra: {resource_name} -> {extra}")
                 return 1
             return 0
 
@@ -837,7 +932,7 @@ class DeviceNodeResourceTracker(object):
         """
         递归遍历资源树，更新所有节点的uuid
 
-        Args:0
+        Args:
             resource: 资源对象（可以是dict或实例）
             uuid_map: uuid映射字典，{old_uuid: new_uuid}
 
@@ -862,6 +957,27 @@ class DeviceNodeResourceTracker(object):
 
         return self._traverse_and_process(resource, process)
 
+    def loop_gather_uuid(self, resource) -> List[str]:
+        """
+        递归遍历资源树，收集所有节点的uuid
+
+        Args:
+            resource: 资源对象（可以是dict或实例）
+
+        Returns:
+            收集到的uuid列表
+        """
+        uuid_list = []
+
+        def process(res):
+            current_uuid = self._get_resource_attr(res, "uuid", "unilabos_uuid")
+            if current_uuid:
+                uuid_list.append(current_uuid)
+            return 0
+
+        self._traverse_and_process(resource, process)
+        return uuid_list
+
     def _collect_uuid_mapping(self, resource):
         """
         递归收集资源的 uuid 映射到 uuid_to_resources
@@ -875,12 +991,15 @@ class DeviceNodeResourceTracker(object):
             if current_uuid:
                 old = self.uuid_to_resources.get(current_uuid)
                 self.uuid_to_resources[current_uuid] = res
-                logger.debug(f"收集资源UUID映射: {current_uuid} -> {res} {'' if old is None else f'(覆盖旧值: {old})'}")
+                logger.trace(
+                    f"收集资源UUID映射: {current_uuid} -> {res} {'' if old is None else f'(覆盖旧值: {old})'}"
+                )
+                return 1
             return 0
 
         self._traverse_and_process(resource, process)
 
-    def _remove_uuid_mapping(self, resource):
+    def _remove_uuid_mapping(self, resource) -> int:
         """
         递归清除资源的 uuid 映射
 
@@ -892,10 +1011,11 @@ class DeviceNodeResourceTracker(object):
             current_uuid = self._get_resource_attr(res, "uuid", "unilabos_uuid")
             if current_uuid and current_uuid in self.uuid_to_resources:
                 self.uuid_to_resources.pop(current_uuid)
-                logger.debug(f"移除资源UUID映射: {current_uuid} -> {res}")
+                logger.trace(f"移除资源UUID映射: {current_uuid} -> {res}")
+                return 1
             return 0
 
-        self._traverse_and_process(resource, process)
+        return self._traverse_and_process(resource, process)
 
     def parent_resource(self, resource):
         if id(resource) in self.resource2parent_resource:
@@ -950,12 +1070,11 @@ class DeviceNodeResourceTracker(object):
                 removed = True
                 break
 
-        if not removed:
+        # 递归清除uuid映射
+        count = self._remove_uuid_mapping(resource)
+        if not count:
             logger.warning(f"尝试移除不存在的资源: {resource}")
             return False
-
-        # 递归清除uuid映射
-        self._remove_uuid_mapping(resource)
 
         # 清除 resource2parent_resource 中与该资源相关的映射
         # 需要清除：1) 该资源作为 key 的映射 2) 该资源作为 value 的映射
@@ -979,7 +1098,9 @@ class DeviceNodeResourceTracker(object):
         self.uuid_to_resources.clear()
         self.resource2parent_resource.clear()
 
-    def figure_resource(self, query_resource, try_mode=False):
+    def figure_resource(
+        self, query_resource: Union[List[Union[dict, "PLRResource"]], dict, "PLRResource"], try_mode=False
+    ) -> Union[List[Union[dict, "PLRResource", List[Union[dict, "PLRResource"]]]], dict, "PLRResource"]:
         if isinstance(query_resource, list):
             return [self.figure_resource(r, try_mode) for r in query_resource]
         elif (
