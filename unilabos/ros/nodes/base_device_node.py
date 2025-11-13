@@ -466,8 +466,9 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                 contain_model = not isinstance(resource, Deck)
                 if isinstance(resource, ResourcePLR):
                     # resources.list()
-                    resources_tree = dict_to_tree(copy.deepcopy({r["id"]: r for r in resources}))
-                    plr_instance = resource_ulab_to_plr(resources_tree[0], contain_model)
+                    plr_instance = ResourceTreeSet.from_raw_list(resources).to_plr_resources()[0]
+                    # resources_tree = dict_to_tree(copy.deepcopy({r["id"]: r for r in resources}))
+                    # plr_instance = resource_ulab_to_plr(resources_tree[0], contain_model)
 
                     if isinstance(plr_instance, Plate):
                         empty_liquid_info_in = [(None, 0)] * plr_instance.num_items
