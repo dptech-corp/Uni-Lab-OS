@@ -29,11 +29,12 @@ from pylabrobot.resources import (
 
 
 class LiquidHandlerMiddleware(LiquidHandler):
-    def __init__(self, backend: LiquidHandlerBackend, deck: Deck, simulator: bool = False, channel_num: int = 8,total_height: float = 310):
+    def __init__(self, backend: LiquidHandlerBackend, deck: Deck, simulator: bool = False, channel_num: int = 8, total_height: float = 310, **kwargs):
         self._simulator = simulator
         self.channel_num = channel_num
+        joint_config = kwargs.get("joint_config", None)
         if simulator:
-            self._simulate_backend = UniLiquidHandlerRvizBackend(channel_num,total_height)
+            self._simulate_backend = UniLiquidHandlerRvizBackend(channel_num,total_height, joint_config=joint_config, lh_device_id = deck.name)
             self._simulate_handler = LiquidHandlerAbstract(self._simulate_backend, deck, False)
         if hasattr(backend, "total_height"):
             backend.total_height = total_height
@@ -580,9 +581,11 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
                     backend_type = backend_cls(**backend_dict)  # pass the rest of dict as kwargs
             except Exception as exc:
                 raise RuntimeError(f"Failed to convert backend type '{type_str}' to class: {exc}")
+        else:
+            backend_type = backend
         self._simulator = simulator
         self.group_info = dict()
-        super().__init__(backend_type, deck, simulator, channel_num,total_height)
+        super().__init__(backend_type, deck, simulator, channel_num,total_height,**backend_kwargs)
 
     @classmethod
     def set_liquid(self, wells: list[Well], liquid_names: list[str], volumes: list[float]):
