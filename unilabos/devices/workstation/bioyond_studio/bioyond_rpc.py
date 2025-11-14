@@ -218,7 +218,8 @@ class BioyondV1RPC(BaseRequest):
             else:
                 print(f"[ERROR] 物料入库失败: API 无响应")
             return {}
-        return response.get("data", {})
+        # 入库成功时，即使没有 data 字段，也返回成功标识
+        return response.get("data") or {"success": True}
 
     def delete_material(self, material_id: str) -> dict:
         """
