@@ -4019,8 +4019,7 @@ liquid_handler:
           mix_liquid_height: 0.0
           mix_rate: 0
           mix_stage: ''
-          mix_times:
-          - 0
+          mix_times: 0
           mix_vol: 0
           none_keys:
           - ''
@@ -4176,11 +4175,9 @@ liquid_handler:
                 mix_stage:
                   type: string
                 mix_times:
-                  items:
-                    maximum: 2147483647
-                    minimum: -2147483648
-                    type: integer
-                  type: array
+                  maximum: 2147483647
+                  minimum: -2147483648
+                  type: integer
                 mix_vol:
                   maximum: 2147483647
                   minimum: -2147483648
@@ -4500,6 +4497,9 @@ liquid_handler:
         simulator:
           default: false
           type: boolean
+        total_height:
+          default: 310
+          type: number
       required:
       - backend
       - deck
@@ -5040,8 +5040,7 @@ liquid_handler.biomek:
           mix_liquid_height: 0.0
           mix_rate: 0
           mix_stage: ''
-          mix_times:
-          - 0
+          mix_times: 0
           mix_vol: 0
           none_keys:
           - ''
@@ -5184,11 +5183,9 @@ liquid_handler.biomek:
                 mix_stage:
                   type: string
                 mix_times:
-                  items:
-                    maximum: 2147483647
-                    minimum: -2147483648
-                    type: integer
-                  type: array
+                  maximum: 2147483647
+                  minimum: -2147483648
+                  type: integer
                 mix_vol:
                   maximum: 2147483647
                   minimum: -2147483648
@@ -6064,6 +6061,102 @@ liquid_handler.laiyu:
           title: LiquidHandlerAspirate
           type: object
         type: LiquidHandlerAspirate
+      auto-transfer_liquid:
+        feedback: {}
+        goal: {}
+        goal_default:
+          asp_flow_rates: null
+          asp_vols: null
+          blow_out_air_volume: null
+          delays: null
+          dis_flow_rates: null
+          dis_vols: null
+          is_96_well: false
+          liquid_height: null
+          mix_liquid_height: null
+          mix_rate: null
+          mix_stage: none
+          mix_times: null
+          mix_vol: null
+          none_keys: []
+          offsets: null
+          sources: null
+          spread: wide
+          targets: null
+          tip_racks: null
+          touch_tip: false
+          use_channels: null
+        handles: {}
+        placeholder_keys: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                asp_flow_rates:
+                  type: string
+                asp_vols:
+                  type: string
+                blow_out_air_volume:
+                  type: string
+                delays:
+                  type: string
+                dis_flow_rates:
+                  type: string
+                dis_vols:
+                  type: string
+                is_96_well:
+                  default: false
+                  type: boolean
+                liquid_height:
+                  type: string
+                mix_liquid_height:
+                  type: string
+                mix_rate:
+                  type: string
+                mix_stage:
+                  default: none
+                  type: string
+                mix_times:
+                  type: string
+                mix_vol:
+                  type: string
+                none_keys:
+                  default: []
+                  items:
+                    type: string
+                  type: array
+                offsets:
+                  type: string
+                sources:
+                  type: string
+                spread:
+                  default: wide
+                  type: string
+                targets:
+                  type: string
+                tip_racks:
+                  type: string
+                touch_tip:
+                  default: false
+                  type: boolean
+                use_channels:
+                  type: string
+              required:
+              - sources
+              - targets
+              - tip_racks
+              - asp_vols
+              - dis_vols
+              type: object
+            result: {}
+          required:
+          - goal
+          title: transfer_liquid参数
+          type: object
+        type: UniLabJsonCommandAsync
       dispense:
         feedback: {}
         goal:
@@ -6799,28 +6892,28 @@ liquid_handler.laiyu:
     config:
       properties:
         channel_num:
-          default: 8
+          default: 1
           type: string
         deck:
           type: object
         host:
+          default: 127.0.0.1
           type: string
         port:
+          default: 9999
           type: integer
         simulator:
-          default: false
+          default: true
           type: string
         timeout:
+          default: 10.0
           type: number
       required:
       - deck
       type: object
     data:
-      properties:
-        support_touch_tip:
-          type: boolean
-      required:
-      - support_touch_tip
+      properties: {}
+      required: []
       type: object
   version: 1.0.0
 liquid_handler.prcxi:
@@ -9171,8 +9264,7 @@ liquid_handler.prcxi:
           mix_liquid_height: 0.0
           mix_rate: 0
           mix_stage: ''
-          mix_times:
-          - 0
+          mix_times: 0
           mix_vol: 0
           none_keys:
           - ''
@@ -9301,11 +9393,9 @@ liquid_handler.prcxi:
                 mix_stage:
                   type: string
                 mix_times:
-                  items:
-                    maximum: 2147483647
-                    minimum: -2147483648
-                    type: integer
-                  type: array
+                  maximum: 2147483647
+                  minimum: -2147483648
+                  type: integer
                 mix_vol:
                   maximum: 2147483647
                   minimum: -2147483648
