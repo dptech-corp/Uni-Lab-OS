@@ -345,7 +345,7 @@ class BioyondReactionStation(BioyondWorkstation):
 
     def liquid_feeding_beaker(
         self,
-        volume: str = "35000",
+        volume: str = "350",
         assign_material_name: str = "BAPP",
         time: str = "0",
         torque_variation: int = 1,
@@ -355,7 +355,7 @@ class BioyondReactionStation(BioyondWorkstation):
         """液体进料烧杯
 
         Args:
-            volume: 分液量(μL)
+            volume: 分液质量(g)
             assign_material_name: 物料名称(试剂瓶位)
             time: 观察时间(分钟)
             torque_variation: 是否观察(int类型, 1=否, 2=是)
@@ -580,7 +580,14 @@ class BioyondReactionStation(BioyondWorkstation):
         # print(f"\n✅ 任务创建成功: {result}")
         # print(f"\n✅ 任务创建成功")
         print(f"{'='*60}\n")
-        return json.dumps({"success": True, "result": result})
+        
+        # 返回结果，包含合并后的工作流数据和订单参数
+        return json.dumps({
+            "success": True, 
+            "result": result,
+            "merged_workflow": merged_workflow,
+            "order_params": order_params
+        })
 
     def _build_workflows_with_parameters(self, workflows_result: list) -> list:
         """

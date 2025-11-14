@@ -5,7 +5,6 @@ import json
 import threading
 import time
 import traceback
-import uuid
 from typing import get_type_hints, TypeVar, Generic, Dict, Any, Type, TypedDict, Optional, List, TYPE_CHECKING, Union
 
 from concurrent.futures import ThreadPoolExecutor
@@ -39,7 +38,6 @@ from unilabos.ros.msgs.message_converter import (
 )
 from unilabos_msgs.srv import (
     ResourceAdd,
-    ResourceGet,
     ResourceDelete,
     ResourceUpdate,
     ResourceList,
@@ -49,7 +47,8 @@ from unilabos_msgs.msg import Resource  # type: ignore
 
 from unilabos.ros.nodes.resource_tracker import (
     DeviceNodeResourceTracker,
-    ResourceTreeSet, ResourceTreeInstance,
+    ResourceTreeSet,
+    ResourceTreeInstance,
 )
 from unilabos.ros.x.rclpyx import get_event_loop
 from unilabos.ros.utils.driver_creator import WorkstationNodeCreator, PyLabRobotCreator, DeviceClassCreator
@@ -340,10 +339,16 @@ class BaseROS2DeviceNode(Node, Generic[T]):
         self._resource_clients: Dict[str, Client] = {
             "resource_add": self.create_client(ResourceAdd, "/resources/add", callback_group=self.callback_group),
             "resource_get": self.create_client(SerialCommand, "/resources/get", callback_group=self.callback_group),
-            "resource_delete": self.create_client(ResourceDelete, "/resources/delete", callback_group=self.callback_group),
-            "resource_update": self.create_client(ResourceUpdate, "/resources/update", callback_group=self.callback_group),
+            "resource_delete": self.create_client(
+                ResourceDelete, "/resources/delete", callback_group=self.callback_group
+            ),
+            "resource_update": self.create_client(
+                ResourceUpdate, "/resources/update", callback_group=self.callback_group
+            ),
             "resource_list": self.create_client(ResourceList, "/resources/list", callback_group=self.callback_group),
-            "c2s_update_resource_tree": self.create_client(SerialCommand, "/c2s_update_resource_tree", callback_group=self.callback_group),
+            "c2s_update_resource_tree": self.create_client(
+                SerialCommand, "/c2s_update_resource_tree", callback_group=self.callback_group
+            ),
         }
 
         def re_register_device(req, res):
@@ -583,7 +588,9 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             self.lab_logger().error(traceback.format_exc())
         self.lab_logger().debug(f"资源更新结果: {response}")
 
-    def transfer_to_new_resource(self, plr_resource: "ResourcePLR", tree: ResourceTreeInstance, additional_add_params: Dict[str, Any]):
+    def transfer_to_new_resource(
+        self, plr_resource: "ResourcePLR", tree: ResourceTreeInstance, additional_add_params: Dict[str, Any]
+    ):
         parent_uuid = tree.root_node.res_content.parent_uuid
         if parent_uuid:
             parent_resource: ResourcePLR = self.resource_tracker.uuid_to_resources.get(parent_uuid)
@@ -610,16 +617,26 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                     old_parent = plr_resource.parent
                     if old_parent is not None:
                         # plr并不支持同一个deck的加载和卸载
-                        self.lab_logger().warning(
-                            f"物料{plr_resource}请求从{old_parent}卸载"
-                        )
+                        self.lab_logger().warning(f"物料{plr_resource}请求从{old_parent}卸载")
                         old_parent.unassign_child_resource(plr_resource)
                     self.lab_logger().warning(
                         f"物料{plr_resource}请求挂载到{parent_resource}，额外参数：{additional_params}"
                     )
-                    parent_resource.assign_child_resource(
-                        plr_resource, location=None, **additional_params
-                    )
+
+                    # ⭐ assign 之前，需要从 resources 列表中移除
+                    # 因为资源将不再是顶级资源，而是成为 parent_resource 的子资源
+                    # 如果不移除，figure_resource 会找到两次：一次在 resources，一次在 parent 的 children
+                    resource_id = id(plr_resource)
+                    for i, r in enumerate(self.resource_tracker.resources):
+                        if id(r) == resource_id:
+                            self.resource_tracker.resources.pop(i)
+                            self.lab_logger().debug(
+                                f"从顶级资源列表中移除 {plr_resource.name}（即将成为 {parent_resource.name} 的子资源）"
+                            )
+                            break
+
+                    parent_resource.assign_child_resource(plr_resource, location=None, **additional_params)
+
                     func = getattr(self.driver_instance, "resource_tree_transfer", None)
                     if callable(func):
                         # 分别是 物料的原来父节点，当前物料的状态，物料的新父节点（此时物料已经重新assign了）
@@ -1080,7 +1097,13 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                             queried_resources = []
                             for resource_data in resource_inputs:
                                 r = SerialCommand.Request()
-                                r.command = json.dumps({"id": resource_data["id"], "uuid": resource_data.get("uuid", None), "with_children": True})
+                                r.command = json.dumps(
+                                    {
+                                        "id": resource_data["id"],
+                                        "uuid": resource_data.get("uuid", None),
+                                        "with_children": True,
+                                    }
+                                )
                                 # 发送请求并等待响应
                                 response: SerialCommand_Response = await self._resource_clients[
                                     "resource_get"
