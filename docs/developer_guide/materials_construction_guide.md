@@ -282,7 +282,7 @@ def YB_pei_ye_xiao_Bottle(
     diameter: float = 35.0,         # 瓶子直径 (mm)
     height: float = 60.0,           # 瓶子高度 (mm)
     max_volume: float = 30000.0,    # 最大容量 (μL) - 30mL
-    barcode: str = None,            # 条码（可选）
+    barcode: str = None,            # 条码
 ) -> Bottle:
     """创建配液瓶(小)
   
@@ -302,14 +302,14 @@ def YB_pei_ye_xiao_Bottle(
         height=height,
         max_volume=max_volume,
         barcode=barcode,
-        model="YB_pei_ye_xiao_Bottle",    # 瓶子型号标识
+        model="YB_pei_ye_xiao_Bottle",    
     )
 
 def YB_ye_Bottle(
     name: str,
     diameter: float = 40.0,
     height: float = 70.0,
-    max_volume: float = 50000.0,    # 50mL
+    max_volume: float = 50000.0,    # 最大容量
     barcode: str = None,
 ) -> Bottle:
     """创建液体瓶"""
@@ -346,14 +346,14 @@ def YB_ye_Bottle(
 ```yaml
 BIOYOND_YB_Deck:
   category:
-    - deck                          # 物料类别
+    - deck                          # 前端显示的分类存放
   class:
-    module: unilabos.resources.bioyond.decks:BIOYOND_YB_Deck  # 类的模块路径
-    type: pylabrobot               # 框架类型
+    module: unilabos.resources.bioyond.decks:BIOYOND_YB_Deck  # 定义桌子的类的路径
+    type: pylabrobot              
   description: BIOYOND_YB_Deck     # 描述信息
-  handles: []                      # 处理器列表（通常为空）
+  handles: []                     
   icon: 配液站.webp               # 图标文件
-  init_param_schema: {}           # 初始化参数模式（可为空）
+  init_param_schema: {}         
   registry_type: resource         # 注册类型
   version: 1.0.0                  # 版本号
 ```
@@ -363,14 +363,14 @@ BIOYOND_YB_Deck:
 ```yaml
 YB_peiyepingxiaoban:
   category:
-    - yb3                          # 产品系列
-    - YB_bottle_carriers          # 载具类别
+    - yb3                          
+    - YB_bottle_carriers          
   class:
     module: unilabos.resources.bioyond.YB_bottle_carriers:YB_peiyepingxiaoban
     type: pylabrobot
-  description: YB_peiyepingxiaoban  # 配液瓶(小)板
+  description: YB_peiyepingxiaoban  
   handles: []
-  icon: ''                         # 图标（可为空）
+  icon: ''                      
   init_param_schema: {}
   registry_type: resource
   version: 1.0.0
@@ -381,12 +381,12 @@ YB_peiyepingxiaoban:
 ```yaml
 YB_pei_ye_xiao_Bottle:
   category:
-    - yb3                          # 产品系列
-    - YB_bottle                   # 瓶子类别
+    - yb3                          
+    - YB_bottle                 
   class:
     module: unilabos.resources.bioyond.YB_bottles:YB_pei_ye_xiao_Bottle
     type: pylabrobot
-  description: YB_pei_ye_xiao_Bottle  # 配液瓶(小)
+  description: YB_pei_ye_xiao_Bottle
   handles: []
   icon: ''
   init_param_schema: {}
