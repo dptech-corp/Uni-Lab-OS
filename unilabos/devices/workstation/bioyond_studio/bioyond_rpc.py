@@ -212,6 +212,11 @@ class BioyondV1RPC(BaseRequest):
             })
 
         if not response or response['code'] != 1:
+            if response:
+                error_msg = response.get('message', '未知错误')
+                print(f"[ERROR] 物料入库失败: code={response.get('code')}, message={error_msg}")
+            else:
+                print(f"[ERROR] 物料入库失败: API 无响应")
             return {}
         return response.get("data", {})
 

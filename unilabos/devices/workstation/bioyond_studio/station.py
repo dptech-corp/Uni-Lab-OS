@@ -562,11 +562,11 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
             logger.info(f"[物料入库] 调用 Bioyond API 执行入库...")
             response = self.bioyond_api_client.material_inbound(material_id, target_location_uuid)
 
-            if response is not None:
+            if response:  # 空字典 {} 表示失败，非空字典表示成功
                 logger.info(f"✅ [物料入库] 物料 {resource.name} 成功入库到 {update_site}")
                 return True
             else:
-                logger.error(f"❌ [物料入库] 物料入库失败")
+                logger.error(f"❌ [物料入库] 物料入库失败，API返回空响应或失败")
                 return False
 
         except Exception as e:
