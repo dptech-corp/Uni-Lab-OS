@@ -8,6 +8,7 @@ xrd_d7mate:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: 安全关闭与XRD D7-Mate设备的TCP连接，释放网络资源。
@@ -28,6 +29,7 @@ xrd_d7mate:
         goal: {}
         goal_default: {}
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: 与XRD D7-Mate设备建立TCP连接，配置超时参数。
@@ -49,6 +51,7 @@ xrd_d7mate:
         goal_default:
           ros_node: null
         handles: {}
+        placeholder_keys: {}
         result: {}
         schema:
           description: ''
@@ -65,6 +68,31 @@ xrd_d7mate:
           required:
           - goal
           title: post_init参数
+          type: object
+        type: UniLabJsonCommand
+      auto-start_from_string:
+        feedback: {}
+        goal: {}
+        goal_default:
+          params: null
+        handles: {}
+        placeholder_keys: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                params:
+                  type: string
+              required:
+              - params
+              type: object
+            result: {}
+          required:
+          - goal
+          title: start_from_string参数
           type: object
         type: UniLabJsonCommand
       get_current_acquire_data:
@@ -530,7 +558,11 @@ xrd_d7mate:
           type: object
         type: UniLabJsonCommand
     module: unilabos.devices.xrd_d7mate.xrd_d7mate:XRDClient
-    status_types: {}
+    status_types:
+      current_acquire_data: dict
+      sample_down: dict
+      sample_request: dict
+      sample_status: dict
     type: python
   config_info: []
   description: XRD D7-Mate X射线衍射分析设备，通过TCP通信实现远程控制与状态监控，支持自动模式控制、上样流程、数据获取、下样流程和高压电源控制等功能。
@@ -551,7 +583,19 @@ xrd_d7mate:
       required: []
       type: object
     data:
-      properties: {}
-      required: []
+      properties:
+        current_acquire_data:
+          type: object
+        sample_down:
+          type: object
+        sample_request:
+          type: object
+        sample_status:
+          type: object
+      required:
+      - sample_request
+      - current_acquire_data
+      - sample_status
+      - sample_down
       type: object
   version: 1.0.0
