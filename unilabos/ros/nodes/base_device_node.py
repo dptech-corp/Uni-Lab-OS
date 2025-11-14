@@ -52,7 +52,7 @@ from unilabos.ros.nodes.resource_tracker import (
 )
 from unilabos.ros.x.rclpyx import get_event_loop
 from unilabos.ros.utils.driver_creator import WorkstationNodeCreator, PyLabRobotCreator, DeviceClassCreator
-from unilabos.utils.async_util import run_async_func
+from rclpy.task import Task, Future
 from unilabos.utils.import_manager import default_manager
 from unilabos.utils.log import info, debug, warning, error, critical, logger, trace
 from unilabos.utils.type_check import get_type_class, TypeEncoder, get_result_info_str
@@ -471,8 +471,9 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                 contain_model = not isinstance(resource, Deck)
                 if isinstance(resource, ResourcePLR):
                     # resources.list()
-                    resources_tree = dict_to_tree(copy.deepcopy({r["id"]: r for r in resources}))
-                    plr_instance = resource_ulab_to_plr(resources_tree[0], contain_model)
+                    plr_instance = ResourceTreeSet.from_raw_list(resources).to_plr_resources()[0]
+                    # resources_tree = dict_to_tree(copy.deepcopy({r["id"]: r for r in resources}))
+                    # plr_instance = resource_ulab_to_plr(resources_tree[0], contain_model)
 
                     if isinstance(plr_instance, Plate):
                         empty_liquid_info_in = [(None, 0)] * plr_instance.num_items
@@ -559,6 +560,15 @@ class BaseROS2DeviceNode(Node, Generic[T]):
         self.register_device()
         rclpy.get_global_executor().add_node(self)
         self.lab_logger().debug(f"ROS节点初始化完成")
+
+    async def sleep(self, rel_time: float, callback_group=None):
+        if callback_group is None:
+            callback_group = self.callback_group
+        await ROS2DeviceNode.async_wait_for(self, rel_time, callback_group)
+
+    @classmethod
+    async def create_task(cls, func, trace_error=True, **kwargs) -> Task:
+        return ROS2DeviceNode.run_async_func(func, trace_error, **kwargs)
 
     async def update_resource(self, resources: List["ResourcePLR"]):
         r = SerialCommand.Request()
@@ -803,7 +813,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                     ].call_async(
                         SerialCommand.Request(
                             command=json.dumps(
-                                {"data": {"data": resources_uuid, "with_children": True}, "action": "get"}
+                                {"data": {"data": resources_uuid, "with_children": True if action == "add" else False}, "action": "get"}
                             )
                         )
                     )  # type: ignore
@@ -1505,18 +1515,27 @@ class ROS2DeviceNode:
     它不继承设备类，而是通过代理模式访问设备类的属性和方法。
     """
 
-    # 类变量，用于循环管理
-    _loop = None
-    _loop_running = False
-    _loop_thread = None
+    @classmethod
+    def run_async_func(cls, func, trace_error=True, **kwargs) -> Task:
+        def _handle_future_exception(fut):
+            try:
+                fut.result()
+            except Exception as e:
+                error(f"异步任务 {func.__name__} 报错了")
+                error(traceback.format_exc())
+
+        future = rclpy.get_global_executor().create_task(func(**kwargs))
+        if trace_error:
+            future.add_done_callback(_handle_future_exception)
+        return future
 
     @classmethod
-    def get_loop(cls):
-        return cls._loop
-
-    @classmethod
-    def run_async_func(cls, func, trace_error=True, **kwargs):
-        return run_async_func(func, loop=cls._loop, trace_error=trace_error, **kwargs)
+    async def async_wait_for(cls, node: Node, wait_time: float, callback_group=None):
+        future = Future()
+        timer = node.create_timer(wait_time, lambda : future.set_result(None), callback_group=callback_group, clock=node.get_clock())
+        await future
+        timer.cancel()
+        node.destroy_timer(timer)
 
     @property
     def driver_instance(self):
@@ -1556,11 +1575,6 @@ class ROS2DeviceNode:
             print_publish: 是否打印发布信息
             driver_is_ros:
         """
-        # 在初始化时检查循环状态
-        if ROS2DeviceNode._loop_running and ROS2DeviceNode._loop_thread is not None:
-            pass
-        elif ROS2DeviceNode._loop_thread is None:
-            self._start_loop()
 
         # 保存设备类是否支持异步上下文
         self._has_async_context = hasattr(driver_class, "__aenter__") and hasattr(driver_class, "__aexit__")
@@ -1576,6 +1590,7 @@ class ROS2DeviceNode:
             or driver_class.__name__ == "LiquidHandlerAbstract"
             or driver_class.__name__ == "LiquidHandlerBiomek"
             or driver_class.__name__ == "PRCXI9300Handler"
+            or driver_class.__name__ == "TransformXYZHandler"
         )
 
         # 创建设备类实例
@@ -1648,17 +1663,6 @@ class ROS2DeviceNode:
                 self.driver_instance.post_init(self._ros_node)  # type: ignore
             except Exception as e:
                 self._ros_node.lab_logger().error(f"设备后初始化失败: {e}")
-
-    def _start_loop(self):
-        def run_event_loop():
-            loop = asyncio.new_event_loop()
-            ROS2DeviceNode._loop = loop
-            asyncio.set_event_loop(loop)
-            loop.run_forever()
-
-        ROS2DeviceNode._loop_thread = threading.Thread(target=run_event_loop, daemon=True, name="ROS2DeviceNodeLoop")
-        ROS2DeviceNode._loop_thread.start()
-        logger.info(f"循环线程已启动")
 
 
 class DeviceInfoType(TypedDict):

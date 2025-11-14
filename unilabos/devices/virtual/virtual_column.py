@@ -2,8 +2,12 @@ import asyncio
 import logging
 from typing import Dict, Any, Optional
 
+from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode
+
 class VirtualColumn:
     """Virtual column device for RunColumn protocol 🏛️"""
+    
+    _ros_node: BaseROS2DeviceNode
     
     def __init__(self, device_id: str = None, config: Dict[str, Any] = None, **kwargs):
         # 处理可能的不同调用方式
@@ -27,6 +31,9 @@ class VirtualColumn:
         
         print(f"🏛️ === 虚拟色谱柱 {self.device_id} 已创建 === ✨")
         print(f"📏 柱参数: 流速={self._max_flow_rate}mL/min | 长度={self._column_length}cm | 直径={self._column_diameter}cm 🔬")
+    
+    def post_init(self, ros_node: BaseROS2DeviceNode):
+        self._ros_node = ros_node
     
     async def initialize(self) -> bool:
         """Initialize virtual column 🚀"""
@@ -101,7 +108,7 @@ class VirtualColumn:
         step_time = separation_time / steps
         
         for i in range(steps):
-            await asyncio.sleep(step_time)
+            await self._ros_node.sleep(step_time)
             
             progress = (i + 1) / steps * 100
             volume_processed = (i + 1) * 5.0  # 假设每步处理5mL

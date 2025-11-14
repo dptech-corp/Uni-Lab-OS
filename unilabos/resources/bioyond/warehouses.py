@@ -18,9 +18,9 @@ def bioyond_warehouse_1x4x4(name: str) -> WareHouse:
         dx=10.0,
         dy=10.0,
         dz=10.0,
-        item_dx=147.0,
-        item_dy=106.0,
-        item_dz=130.0,
+        item_dx=137.0,
+        item_dy=96.0,
+        item_dz=120.0,
         category="warehouse",
         col_offset=0,  # 从01开始: A01, A02, A03, A04
         layout="row-major",  # ⭐ 改为行优先排序

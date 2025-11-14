@@ -3,7 +3,8 @@
 """
 
 import asyncio
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, List
+from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode
 
 
 class SmartPumpController:
@@ -13,6 +14,8 @@ class SmartPumpController:
     支持多种泵送模式，具有高精度流量控制和自动校准功能。
     适用于实验室自动化系统中的液体处理任务。
     """
+
+    _ros_node: BaseROS2DeviceNode
 
     def __init__(self, device_id: str = "smart_pump_01", port: str = "/dev/ttyUSB0"):
         """
@@ -29,6 +32,9 @@ class SmartPumpController:
         self.total_volume_pumped = 0.0
         self.calibration_factor = 1.0
         self.pump_mode = "continuous"  # continuous, volume, rate
+
+    def post_init(self, ros_node: BaseROS2DeviceNode):
+        self._ros_node = ros_node
 
     def connect_device(self, timeout: int = 10) -> bool:
         """
@@ -90,7 +96,7 @@ class SmartPumpController:
         pump_time = (volume / flow_rate) * 60  # 转换为秒
 
         self.current_flow_rate = flow_rate
-        await asyncio.sleep(min(pump_time, 3.0))  # 模拟泵送过程
+        await self._ros_node.sleep(min(pump_time, 3.0))  # 模拟泵送过程
 
         self.total_volume_pumped += volume
         self.current_flow_rate = 0.0
@@ -170,6 +176,8 @@ class AdvancedTemperatureController:
     适用于需要精确温度控制的化学反应和材料处理过程。
     """
 
+    _ros_node: BaseROS2DeviceNode
+
     def __init__(self, controller_id: str = "temp_controller_01"):
         """
         初始化温度控制器
@@ -184,6 +192,9 @@ class AdvancedTemperatureController:
         self.is_cooling = False
         self.pid_enabled = True
         self.temperature_history: List[Dict] = []
+
+    def post_init(self, ros_node: BaseROS2DeviceNode):
+        self._ros_node = ros_node
 
     def set_target_temperature(self, temperature: float, rate: float = 10.0) -> bool:
         """
@@ -238,7 +249,7 @@ class AdvancedTemperatureController:
                 }
             )
 
-            await asyncio.sleep(step_time)
+            await self._ros_node.sleep(step_time)
 
             # 保持历史记录不超过100条
             if len(self.temperature_history) > 100:
@@ -330,6 +341,8 @@ class MultiChannelAnalyzer:
     常用于光谱分析、电化学测量等应用场景。
     """
 
+    _ros_node: BaseROS2DeviceNode
+
     def __init__(self, analyzer_id: str = "analyzer_01", channels: int = 8):
         """
         初始化多通道分析仪
@@ -343,6 +356,9 @@ class MultiChannelAnalyzer:
         self.channel_data = {i: {"value": 0.0, "unit": "V", "enabled": True} for i in range(channels)}
         self.is_measuring = False
         self.sample_rate = 1000  # Hz
+
+    def post_init(self, ros_node: BaseROS2DeviceNode):
+        self._ros_node = ros_node
 
     def configure_channel(self, channel: int, enabled: bool = True, unit: str = "V") -> bool:
         """
@@ -376,7 +392,7 @@ class MultiChannelAnalyzer:
 
         # 模拟数据采集
         measurements = []
-        for second in range(duration):
+        for _ in range(duration):
             timestamp = asyncio.get_event_loop().time()
             frame_data = {}
 
@@ -391,7 +407,7 @@ class MultiChannelAnalyzer:
 
             measurements.append({"timestamp": timestamp, "data": frame_data})
 
-            await asyncio.sleep(1.0)  # 每秒采集一次
+            await self._ros_node.sleep(1.0)  # 每秒采集一次
 
         self.is_measuring = False
 
@@ -465,6 +481,8 @@ class AutomatedDispenser:
     集成称重功能，确保分配精度和重现性。
     """
 
+    _ros_node: BaseROS2DeviceNode
+
     def __init__(self, dispenser_id: str = "dispenser_01"):
         """
         初始化自动分配器
@@ -478,6 +496,9 @@ class AutomatedDispenser:
         self.dispensed_total = 0.0
         self.container_capacity = 1000.0  # mL
         self.precision_mode = True
+
+    def post_init(self, ros_node: BaseROS2DeviceNode):
+        self._ros_node = ros_node
 
     def move_to_position(self, x: float, y: float, z: float) -> bool:
         """
@@ -517,7 +538,7 @@ class AutomatedDispenser:
         if viscosity == "high":
             dispense_time *= 2  # 高粘度液体需要更长时间
 
-        await asyncio.sleep(min(dispense_time, 5.0))  # 最多等待5秒
+        await self._ros_node.sleep(min(dispense_time, 5.0))  # 最多等待5秒
 
         self.dispensed_total += volume
 
