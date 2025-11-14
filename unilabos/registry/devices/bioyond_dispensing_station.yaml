@@ -5,6 +5,35 @@ bioyond_dispensing_station:
   - bioyond_dispensing_station
   class:
     action_value_mappings:
+      auto-process_order_finish_report:
+        feedback: {}
+        goal: {}
+        goal_default:
+          report_request: null
+          used_materials: null
+        handles: {}
+        placeholder_keys: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                report_request:
+                  type: string
+                used_materials:
+                  type: string
+              required:
+              - report_request
+              - used_materials
+              type: object
+            result: {}
+          required:
+          - goal
+          title: process_order_finish_report参数
+          type: object
+        type: UniLabJsonCommand
       batch_create_90_10_vial_feeding_tasks:
         feedback: {}
         goal:

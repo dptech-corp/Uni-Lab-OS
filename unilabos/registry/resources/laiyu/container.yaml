@@ -1,39 +1,7 @@
-tube_container:
-  category:
-  - resource_container
-  class:
-    module: unilabos.devices.resource_container.container:TubeRackContainer
-    type: python
-  description: 96孔板
-  handles: []
-  icon: ''
-  init_param_schema: {}
-  model:
-    children_mesh: tube/meshes/tube.stl
-    children_mesh_path: https://uni-lab.oss-cn-zhangjiakou.aliyuncs.com/uni-lab/resources/tube/modal.xacro
-    children_mesh_tf:
-    - 0.017
-    - 0.017
-    - 0
-    - 0
-    - 0
-    - 0
-    mesh: tube_container/meshes/tube_container.stl
-    path: https://uni-lab.oss-cn-zhangjiakou.aliyuncs.com/uni-lab/resources/tube_container/modal.xacro
-    mesh_tf:
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    type: resource
-  registry_type: resource
-  version: 1.0.0
-
 bottle_container:
   category:
   - resource_container
+  - container
   class:
     module: unilabos.devices.resource_container.container:BottleRackContainer
     type: python
@@ -52,7 +20,6 @@ bottle_container:
     - 0
     - 0
     mesh: bottle_container/meshes/bottle_container.stl
-    path: https://uni-lab.oss-cn-zhangjiakou.aliyuncs.com/uni-lab/resources/bottle_container/modal.xacro
     mesh_tf:
     - 0
     - 0
@@ -60,6 +27,40 @@ bottle_container:
     - 0
     - 0
     - 0
+    path: https://uni-lab.oss-cn-zhangjiakou.aliyuncs.com/uni-lab/resources/bottle_container/modal.xacro
+    type: resource
+  registry_type: resource
+  version: 1.0.0
+tube_container:
+  category:
+  - resource_container
+  - container
+  class:
+    module: unilabos.devices.resource_container.container:TubeRackContainer
+    type: python
+  description: 96孔板
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  model:
+    children_mesh: tube/meshes/tube.stl
+    children_mesh_path: https://uni-lab.oss-cn-zhangjiakou.aliyuncs.com/uni-lab/resources/tube/modal.xacro
+    children_mesh_tf:
+    - 0.017
+    - 0.017
+    - 0
+    - 0
+    - 0
+    - 0
+    mesh: tube_container/meshes/tube_container.stl
+    mesh_tf:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    path: https://uni-lab.oss-cn-zhangjiakou.aliyuncs.com/uni-lab/resources/tube_container/modal.xacro
     type: resource
   registry_type: resource
   version: 1.0.0

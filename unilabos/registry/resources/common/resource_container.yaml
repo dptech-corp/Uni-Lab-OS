@@ -31,7 +31,6 @@ hplc_plate:
   init_param_schema: {}
   model:
     mesh: hplc_plate/meshes/hplc_plate.stl
-    path: https://uni-lab.oss-cn-zhangjiakou.aliyuncs.com/uni-lab/resources/hplc_plate/modal.xacro
     mesh_tf:
     - 0
     - 0
@@ -39,6 +38,7 @@ hplc_plate:
     - 0
     - 0
     - 3.1416
+    path: https://uni-lab.oss-cn-zhangjiakou.aliyuncs.com/uni-lab/resources/hplc_plate/modal.xacro
     type: resource
   registry_type: resource
   version: 1.0.0
@@ -91,6 +91,29 @@ plate:
   init_param_schema: {}
   registry_type: resource
   version: 1.0.0
+plate_96:
+  category:
+  - resource_container
+  class:
+    module: unilabos.devices.resource_container.container:PlateContainer
+    type: python
+  description: 96孔板
+  handles: []
+  icon: ''
+  init_param_schema: {}
+  model:
+    mesh: plate_96/meshes/plate_96.stl
+    mesh_tf:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    path: https://uni-lab.oss-cn-zhangjiakou.aliyuncs.com/uni-lab/resources/plate_96/modal.xacro
+    type: resource
+  registry_type: resource
+  version: 1.0.0
 plate_96_high:
   category:
   - resource_container
@@ -103,7 +126,6 @@ plate_96_high:
   init_param_schema: {}
   model:
     mesh: plate_96_high/meshes/plate_96_high.stl
-    path: https://uni-lab.oss-cn-zhangjiakou.aliyuncs.com/uni-lab/resources/plate_96_high/modal.xacro
     mesh_tf:
     - 0
     - 0.086
@@ -111,6 +133,7 @@ plate_96_high:
     - 1.5708
     - 0
     - 1.5708
+    path: https://uni-lab.oss-cn-zhangjiakou.aliyuncs.com/uni-lab/resources/plate_96_high/modal.xacro
     type: resource
   registry_type: resource
   version: 1.0.0
@@ -163,7 +186,6 @@ tiprack_96_high:
     - 0
     - 0
     mesh: tiprack_96_high/meshes/tiprack_96_high.stl
-    path: https://uni-lab.oss-cn-zhangjiakou.aliyuncs.com/uni-lab/resources/tiprack_96_high/modal.xacro
     mesh_tf:
     - 0
     - 0.086
@@ -171,10 +193,10 @@ tiprack_96_high:
     - 1.5708
     - 0
     - 1.5708
+    path: https://uni-lab.oss-cn-zhangjiakou.aliyuncs.com/uni-lab/resources/tiprack_96_high/modal.xacro
     type: resource
   registry_type: resource
   version: 1.0.0
-
 tiprack_box:
   category:
   - resource_container
@@ -196,38 +218,14 @@ tiprack_box:
     - 0
     - 0
     mesh: tiprack_box/meshes/tiprack_box.stl
+    mesh_tf:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
     path: https://uni-lab.oss-cn-zhangjiakou.aliyuncs.com/uni-lab/resources/tiprack_box/modal.xacro
-    mesh_tf:
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    type: resource
-  registry_type: resource
-  version: 1.0.0
-
-plate_96:
-  category:
-  - resource_container
-  class:
-    module: unilabos.devices.resource_container.container:PlateContainer
-    type: python
-  description: 96孔板
-  handles: []
-  icon: ''
-  init_param_schema: {}
-  model:
-    mesh: plate_96/meshes/plate_96.stl
-    path: https://uni-lab.oss-cn-zhangjiakou.aliyuncs.com/uni-lab/resources/plate_96/modal.xacro
-    mesh_tf:
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
-    - 0
     type: resource
   registry_type: resource
   version: 1.0.0
