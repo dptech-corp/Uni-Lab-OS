@@ -24,7 +24,8 @@ def BIOYOND_PolymerStation_6StockCarrier(name: str) -> BottleCarrier:
 
     说明:
     - 统一站点命名为 PolymerStation，使用 PolymerStation 的 Vial 资源类
-    - 第一排使用 Liquid_Vial（10% 分装小瓶），第二排使用 Solid_Vial（90% 分装小瓶）
+    - A行（PLR y=0，对应 Bioyond 位置A01~A03）使用 Liquid_Vial（10% 分装小瓶）
+    - B行（PLR y=1，对应 Bioyond 位置B01~B03）使用 Solid_Vial（90% 分装小瓶）
     """
 
     # 载架尺寸 (mm)
@@ -69,12 +70,24 @@ def BIOYOND_PolymerStation_6StockCarrier(name: str) -> BottleCarrier:
     carrier.num_items_x = 3
     carrier.num_items_y = 2
     carrier.num_items_z = 1
-    ordering = ["A1", "B1", "A2", "B2", "A3", "B3"]  # 自定义顺序
-    # 第一排使用 Liquid_Vial，第二排使用 Solid_Vial
-    for i in range(3):
-        carrier[i] = BIOYOND_PolymerStation_Liquid_Vial(f"{name}_vial_{ordering[i]}")
-    for i in range(3, 6):
-        carrier[i] = BIOYOND_PolymerStation_Solid_Vial(f"{name}_vial_{ordering[i]}")
+
+    # 布局说明：
+    # - num_items_x=3, num_items_y=2 表示 3列×2行
+    # - create_ordered_items_2d 按先y后x的顺序创建(列优先)
+    # - 索引顺序: 0=A1(x=0,y=0), 1=B1(x=0,y=1), 2=A2(x=1,y=0), 3=B2(x=1,y=1), 4=A3(x=2,y=0), 5=B3(x=2,y=1)
+    #
+    # Bioyond坐标映射: PLR(x,y) → Bioyond(y+1,x+1)
+    # - A行(PLR y=0) → Bioyond x=1 → 10%分装小瓶
+    # - B行(PLR y=1) → Bioyond x=2 → 90%分装小瓶
+
+    ordering = ["A1", "B1", "A2", "B2", "A3", "B3"]
+    for col in range(3):  # 3列
+        for row in range(2):  # 2行
+            idx = col * 2 + row  # 计算索引: 列优先顺序
+            if row == 0:  # A行 (PLR y=0 → Bioyond x=1)
+                carrier[idx] = BIOYOND_PolymerStation_Liquid_Vial(f"{ordering[idx]}")
+            else:  # B行 (PLR y=1 → Bioyond x=2)
+                carrier[idx] = BIOYOND_PolymerStation_Solid_Vial(f"{ordering[idx]}")
     return carrier
 
 
