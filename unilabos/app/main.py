@@ -419,7 +419,23 @@ def main():
             )
             server_thread.start()
             asyncio.set_event_loop(asyncio.new_event_loop())
-            resource_visualization.start()
+            try:
+                resource_visualization.start()
+            except OSError as e:
+                if "AMENT_PREFIX_PATH" in str(e):
+                    print_status(
+                        f"ROS 2环境未正确设置，跳过3D可视化启动。错误详情: {e}",
+                        "warning"
+                    )
+                    print_status(
+                        "建议解决方案：\n"
+                        "1. 激活Conda环境: conda activate unilab\n"
+                        "2. 或使用 --backend simple 参数\n"
+                        "3. 或使用 --visual disable 参数禁用可视化",
+                        "info"
+                    )
+                else:
+                    raise
             while True:
                 time.sleep(1)
         else:
