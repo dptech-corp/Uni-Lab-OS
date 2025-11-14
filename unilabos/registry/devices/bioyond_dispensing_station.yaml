@@ -394,8 +394,11 @@ bioyond_dispensing_station:
       properties:
         config:
           type: string
+        deck:
+          type: string
       required:
       - config
+      - deck
       type: object
     data:
       properties: {}
