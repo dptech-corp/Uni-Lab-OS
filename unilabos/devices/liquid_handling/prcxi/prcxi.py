@@ -160,6 +160,8 @@ class PRCXI9300Handler(LiquidHandlerAbstract):
                 )
         if is_9320:
             print("当前设备是9320")
+        # 始终初始化 step_mode 属性
+        self.step_mode = False
         if step_mode:
             if is_9320:
                 self.step_mode = step_mode
