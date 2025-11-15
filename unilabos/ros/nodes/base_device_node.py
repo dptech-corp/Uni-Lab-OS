@@ -588,6 +588,61 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             self.lab_logger().error(traceback.format_exc())
         self.lab_logger().debug(f"资源更新结果: {response}")
 
+    async def get_resource(self, resources_uuid: List[str], with_children: bool = True) -> ResourceTreeSet:
+        """
+        根据资源UUID列表获取资源树
+
+        Args:
+            resources_uuid: 资源UUID列表
+            with_children: 是否包含子节点，默认为True
+
+        Returns:
+            ResourceTreeSet: 资源树集合
+        """
+        response: SerialCommand.Response = await self._resource_clients["c2s_update_resource_tree"].call_async(
+            SerialCommand.Request(
+                command=json.dumps(
+                    {
+                        "data": {"data": resources_uuid, "with_children": with_children},
+                        "action": "get",
+                    }
+                )
+            )
+        )  # type: ignore
+        raw_nodes = json.loads(response.response)
+        tree_set = ResourceTreeSet.from_raw_list(raw_nodes)
+        self.lab_logger().debug(f"获取资源结果: {len(tree_set.trees)} 个资源树")
+        return tree_set
+
+    async def get_resource_with_dir(self, resource_id: str, with_children: bool = True) -> "ResourcePLR":
+        """
+        根据资源ID获取单个资源实例
+
+        Args:
+            resource_ids: 资源ID字符串
+            with_children: 是否包含子节点，默认为True
+
+        Returns:
+            ResourcePLR: PLR资源实例
+        """
+        r = SerialCommand.Request()
+        r.command = json.dumps(
+            {
+                "id": resource_id,
+                "uuid": None,
+                "with_children": with_children,
+            }
+        )
+        # 发送请求并等待响应
+        response: SerialCommand_Response = await self._resource_clients["resource_get"].call_async(r)
+        raw_data = json.loads(response.response)
+
+        # 转换为 PLR 资源
+        tree_set = ResourceTreeSet.from_raw_list(raw_data)
+        plr_resource = tree_set.to_plr_resources()[0]
+        self.lab_logger().debug(f"获取资源 {resource_id} 成功")
+        return plr_resource
+
     def transfer_to_new_resource(
         self, plr_resource: "ResourcePLR", tree: ResourceTreeInstance, additional_add_params: Dict[str, Any]
     ):
@@ -808,17 +863,9 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                 )
                 tree_set = None
                 if action in ["add", "update"]:
-                    response: SerialCommand.Response = await self._resource_clients[
-                        "c2s_update_resource_tree"
-                    ].call_async(
-                        SerialCommand.Request(
-                            command=json.dumps(
-                                {"data": {"data": resources_uuid, "with_children": True if action == "add" else False}, "action": "get"}
-                            )
-                        )
-                    )  # type: ignore
-                    raw_nodes = json.loads(response.response)
-                    tree_set = ResourceTreeSet.from_raw_list(raw_nodes)
+                    tree_set = await self.get_resource(
+                        resources_uuid=resources_uuid, with_children=True if action == "add" else False
+                    )
                 try:
                     if action == "add":
                         if tree_set is None:
@@ -1096,23 +1143,9 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                             # 批量查询资源
                             queried_resources = []
                             for resource_data in resource_inputs:
-                                r = SerialCommand.Request()
-                                r.command = json.dumps(
-                                    {
-                                        "id": resource_data["id"],
-                                        "uuid": resource_data.get("uuid", None),
-                                        "with_children": True,
-                                    }
+                                plr_resource = await self.get_resource_with_dir(
+                                    resource_ids=resource_data["id"], with_children=True
                                 )
-                                # 发送请求并等待响应
-                                response: SerialCommand_Response = await self._resource_clients[
-                                    "resource_get"
-                                ].call_async(r)
-                                raw_data = json.loads(response.response)
-
-                                # 转换为 PLR 资源
-                                tree_set = ResourceTreeSet.from_raw_list(raw_data)
-                                plr_resource = tree_set.to_plr_resources()[0]
                                 queried_resources.append(plr_resource)
 
                             self.lab_logger().debug(f"资源查询结果: 共 {len(queried_resources)} 个资源")
@@ -1352,12 +1385,18 @@ class BaseROS2DeviceNode(Node, Generic[T]):
         """同步转换资源数据为实例"""
         # 创建资源查询请求
         r = SerialCommand.Request()
-        r.command = json.dumps({"id": resource_data["id"], "with_children": True})
+        r.command = json.dumps(
+            {
+                "id": resource_data.get("id", None),
+                "uuid": resource_data.get("uuid", None),
+                "with_children": True,
+            }
+        )
 
         # 同步调用资源查询服务
         future = self._resource_clients["resource_get"].call_async(r)
 
-        # 等待结果（使用while循环，每次sleep 0.5秒，最多等待5秒）
+        # 等待结果（使用while循环，每次sleep 0.05秒，最多等待30秒）
         timeout = 30.0
         elapsed = 0.0
         while not future.done() and elapsed < timeout:
@@ -1365,16 +1404,16 @@ class BaseROS2DeviceNode(Node, Generic[T]):
             elapsed += 0.05
 
         if not future.done():
-            raise Exception(f"资源查询超时: {resource_data['id']}")
+            raise Exception(f"资源查询超时: {resource_data}")
 
         response = future.result()
         if response is None:
-            raise Exception(f"资源查询返回空结果: {resource_data['id']}")
+            raise Exception(f"资源查询返回空结果: {resource_data}")
 
-        current_resources = json.loads(response.response)
+        raw_data = json.loads(response.response)
 
         # 转换为 PLR 资源
-        tree_set = ResourceTreeSet.from_raw_list(current_resources)
+        tree_set = ResourceTreeSet.from_raw_list(raw_data)
         plr_resource = tree_set.to_plr_resources()[0]
 
         # 通过资源跟踪器获取本地实例
@@ -1459,17 +1498,8 @@ class BaseROS2DeviceNode(Node, Generic[T]):
 
     async def _convert_resource_async(self, resource_data: Dict[str, Any]):
         """异步转换资源数据为实例"""
-        # 创建资源查询请求
-        r = SerialCommand.Request()
-        r.command = json.dumps({"id": resource_data["id"], "with_children": True})
-
-        # 异步调用资源查询服务
-        response: SerialCommand_Response = await self._resource_clients["resource_get"].call_async(r)
-        current_resources = json.loads(response.response)
-
-        # 转换为 PLR 资源
-        tree_set = ResourceTreeSet.from_raw_list(current_resources)
-        plr_resource = tree_set.to_plr_resources()[0]
+        # 使用封装的get_resource_with_dir方法获取PLR资源
+        plr_resource = await self.get_resource_with_dir(resource_ids=resource_data["id"], with_children=True)
 
         # 通过资源跟踪器获取本地实例
         res = self.resource_tracker.figure_resource(plr_resource, try_mode=True)
@@ -1532,7 +1562,9 @@ class ROS2DeviceNode:
     @classmethod
     async def async_wait_for(cls, node: Node, wait_time: float, callback_group=None):
         future = Future()
-        timer = node.create_timer(wait_time, lambda : future.set_result(None), callback_group=callback_group, clock=node.get_clock())
+        timer = node.create_timer(
+            wait_time, lambda: future.set_result(None), callback_group=callback_group, clock=node.get_clock()
+        )
         await future
         timer.cancel()
         node.destroy_timer(timer)
