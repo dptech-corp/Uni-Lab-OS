@@ -1085,6 +1085,235 @@ class BioyondDispensingStation(BioyondWorkstation):
             self.hardware_interface._logger.error(f"处理任务完成报送失败: {e}")
             return {"processed": False, "error": str(e)}
 
+    def transfer_materials_to_reaction_station(
+        self,
+        target_device_id: str,
+        transfer_groups: list
+    ) -> dict:
+        """
+        将配液站完成的物料转移到指定反应站的堆栈库位
+        支持多组转移任务,每组包含物料名称、目标堆栈和目标库位
+
+        Args:
+            target_device_id: 目标反应站设备ID(所有转移组使用同一个设备)
+            transfer_groups: 转移任务组列表,每组包含:
+                - materials: 物料名称(字符串,将通过RPC查询)
+                - target_stack: 目标堆栈名称(如"堆栈1左")
+                - target_sites: 目标库位(如"A01")
+
+        Returns:
+            dict: 转移结果
+                {
+                    "success": bool,
+                    "total_groups": int,
+                    "successful_groups": int,
+                    "failed_groups": int,
+                    "target_device_id": str,
+                    "details": [...]
+                }
+        """
+        try:
+            # 验证参数
+            if not target_device_id:
+                raise ValueError("目标设备ID不能为空")
+
+            if not transfer_groups:
+                raise ValueError("转移任务组列表不能为空")
+
+            if not isinstance(transfer_groups, list):
+                raise ValueError("transfer_groups必须是列表类型")
+
+            # 标准化设备ID格式: 确保以 /devices/ 开头
+            if not target_device_id.startswith("/devices/"):
+                if target_device_id.startswith("/"):
+                    target_device_id = f"/devices{target_device_id}"
+                else:
+                    target_device_id = f"/devices/{target_device_id}"
+            
+            self.hardware_interface._logger.info(
+                f"目标设备ID标准化为: {target_device_id}"
+            )
+
+            self.hardware_interface._logger.info(
+                f"开始执行批量物料转移: {len(transfer_groups)}组任务 -> {target_device_id}"
+            )
+
+            from .config import WAREHOUSE_MAPPING
+            results = []
+            successful_count = 0
+            failed_count = 0
+
+            for idx, group in enumerate(transfer_groups, 1):
+                try:
+                    # 提取参数
+                    material_name = group.get("materials", "")
+                    target_stack = group.get("target_stack", "")
+                    target_sites = group.get("target_sites", "")
+
+                    # 验证必填参数
+                    if not material_name:
+                        raise ValueError(f"第{idx}组: 物料名称不能为空")
+                    if not target_stack:
+                        raise ValueError(f"第{idx}组: 目标堆栈不能为空")
+                    if not target_sites:
+                        raise ValueError(f"第{idx}组: 目标库位不能为空")
+
+                    self.hardware_interface._logger.info(
+                        f"处理第{idx}组转移: {material_name} -> "
+                        f"{target_device_id}/{target_stack}/{target_sites}"
+                    )
+
+                    # 通过物料名称从deck获取ResourcePLR对象
+                    try:
+                        material_resource = self.deck.get_resource(material_name)
+                        if not material_resource:
+                            raise ValueError(f"在deck中未找到物料: {material_name}")
+
+                        self.hardware_interface._logger.info(
+                            f"从deck获取到物料 {material_name}: {material_resource}"
+                        )
+                    except Exception as e:
+                        raise ValueError(
+                            f"获取物料 {material_name} 失败: {str(e)}，请确认物料已正确加载到deck中"
+                        )
+
+                    # 验证目标堆栈是否存在
+                    if target_stack not in WAREHOUSE_MAPPING:
+                        raise ValueError(
+                            f"未知的堆栈名称: {target_stack}，"
+                            f"可选值: {list(WAREHOUSE_MAPPING.keys())}"
+                        )
+
+                    # 验证库位是否有效
+                    stack_sites = WAREHOUSE_MAPPING[target_stack].get("site_uuids", {})
+                    if target_sites not in stack_sites:
+                        raise ValueError(
+                            f"库位 {target_sites} 不存在于堆栈 {target_stack} 中，"
+                            f"可选库位: {list(stack_sites.keys())}"
+                        )
+
+                    # 调用父类的 transfer_resource_to_another 方法
+                    # 传入ResourcePLR对象
+                    self.transfer_resource_to_another(
+                        resource=[material_resource],
+                        mount_resource=[],
+                        sites=[target_sites],
+                        mount_device_id=target_device_id
+                    )
+
+                    # 等待异步任务完成(临时方案)
+                    import time
+                    time.sleep(5)
+
+                    self.hardware_interface._logger.info(
+                        f"第{idx}组转移成功: {material_name} -> "
+                        f"{target_device_id}/{target_stack}/{target_sites}"
+                    )
+
+                    successful_count += 1
+                    results.append({
+                        "group_index": idx,
+                        "success": True,
+                        "material_name": material_name,
+                        "target_stack": target_stack,
+                        "target_site": target_sites,
+                        "message": "转移成功"
+                    })
+
+                except Exception as e:
+                    error_msg = f"第{idx}组转移失败: {str(e)}"
+                    self.hardware_interface._logger.error(error_msg)
+                    failed_count += 1
+                    results.append({
+                        "group_index": idx,
+                        "success": False,
+                        "material_name": group.get("materials", ""),
+                        "error": str(e)
+                    })
+
+            # 返回汇总结果
+            return {
+                "success": failed_count == 0,
+                "total_groups": len(transfer_groups),
+                "successful_groups": successful_count,
+                "failed_groups": failed_count,
+                "target_device_id": target_device_id,
+                "details": results,
+                "message": f"完成 {len(transfer_groups)} 组转移任务到 {target_device_id}: "
+                          f"{successful_count} 成功, {failed_count} 失败"
+            }
+
+        except Exception as e:
+            error_msg = f"批量转移物料失败: {str(e)}"
+            self.hardware_interface._logger.error(error_msg)
+            return {
+                "success": False,
+                "total_groups": len(transfer_groups) if transfer_groups else 0,
+                "successful_groups": 0,
+                "failed_groups": len(transfer_groups) if transfer_groups else 0,
+                "target_device_id": target_device_id if target_device_id else "",
+                "error": error_msg
+            }
+
+    def query_resource_by_name(self, material_name: str):
+        """
+        通过物料名称查询资源对象(适用于Bioyond系统)
+
+        Args:
+            material_name: 物料名称
+
+        Returns:
+            物料ID或None
+        """
+        try:
+            # Bioyond系统使用material_cache存储物料信息
+            if not hasattr(self.hardware_interface, 'material_cache'):
+                self.hardware_interface._logger.error(
+                    "hardware_interface没有material_cache属性"
+                )
+                return None
+
+            material_cache = self.hardware_interface.material_cache
+
+            self.hardware_interface._logger.info(
+                f"查询物料 '{material_name}', 缓存中共有 {len(material_cache)} 个物料"
+            )
+
+            # 调试: 打印前几个物料信息
+            if material_cache:
+                cache_items = list(material_cache.items())[:5]
+                for name, material_id in cache_items:
+                    self.hardware_interface._logger.debug(
+                        f"缓存物料: name={name}, id={material_id}"
+                    )
+
+            # 直接从缓存中查找
+            if material_name in material_cache:
+                material_id = material_cache[material_name]
+                self.hardware_interface._logger.info(
+                    f"找到物料: {material_name} -> ID: {material_id}"
+                )
+                return material_id
+
+            self.hardware_interface._logger.warning(
+                f"未找到物料: {material_name} (缓存中无此物料)"
+            )
+
+            # 打印所有可用物料名称供参考
+            available_materials = list(material_cache.keys())
+            if available_materials:
+                self.hardware_interface._logger.info(
+                    f"可用物料列表(前10个): {available_materials[:10]}"
+                )
+
+            return None
+
+        except Exception as e:
+            self.hardware_interface._logger.error(
+                f"查询物料失败 {material_name}: {str(e)}"
+            )
+            return None
+
 
 if __name__ == "__main__":
     bioyond = BioyondDispensingStation(config={
