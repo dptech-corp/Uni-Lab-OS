@@ -779,8 +779,38 @@ class BioyondDispensingStation(BioyondWorkstation):
             self.hardware_interface._logger.error(error_msg)
             raise BioyondException(error_msg)
 
+    def _extract_actuals_from_report(self, report) -> Dict[str, Any]:
+        data = report.get('data') if isinstance(report, dict) else None
+        actual_target_weigh = None
+        actual_volume = None
+        if data:
+            extra = data.get('extraProperties') or {}
+            if isinstance(extra, dict):
+                for v in extra.values():
+                    obj = None
+                    try:
+                        obj = json.loads(v) if isinstance(v, str) else v
+                    except Exception:
+                        obj = None
+                    if isinstance(obj, dict):
+                        tw = obj.get('targetWeigh')
+                        vol = obj.get('volume')
+                        if tw is not None:
+                            try:
+                                actual_target_weigh = float(tw)
+                            except Exception:
+                                pass
+                        if vol is not None:
+                            try:
+                                actual_volume = float(vol)
+                            except Exception:
+                                pass
+        return {
+            'actualTargetWeigh': actual_target_weigh,
+            'actualVolume': actual_volume
+        }
 
-
+    # 等待多个任务完成并获取实验报告
     def wait_for_multiple_orders_and_get_reports(self,
                                                   batch_create_result: str = None,
                                                   timeout: int = 7200,
@@ -902,6 +932,7 @@ class BioyondDispensingStation(BioyondWorkstation):
                             "status": "timeout",
                             "completion_status": None,
                             "report": None,
+                            "extracted": None,
                             "elapsed_time": elapsed_time
                         })
 
@@ -940,6 +971,7 @@ class BioyondDispensingStation(BioyondWorkstation):
                                 "status": "completed",
                                 "completion_status": completion_info.get('status'),
                                 "report": report,
+                                "extracted": self._extract_actuals_from_report(report),
                                 "elapsed_time": elapsed_time
                             })
 
@@ -959,6 +991,7 @@ class BioyondDispensingStation(BioyondWorkstation):
                                 "status": "error",
                                 "completion_status": completion_info.get('status'),
                                 "report": None,
+                                "extracted": None,
                                 "error": str(e),
                                 "elapsed_time": elapsed_time
                             })
