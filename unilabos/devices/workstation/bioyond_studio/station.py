@@ -9,6 +9,7 @@ import traceback
 from datetime import datetime
 from typing import Dict, Any, List, Optional, Union
 import json
+from pathlib import Path
 
 from unilabos.devices.workstation.workstation_base import WorkstationBase, ResourceSynchronizer
 from unilabos.devices.workstation.bioyond_studio.bioyond_rpc import BioyondV1RPC
@@ -19,6 +20,7 @@ from unilabos.resources.graphio import resource_bioyond_to_plr, resource_plr_to_
 
 from unilabos.ros.nodes.base_device_node import ROS2DeviceNode, BaseROS2DeviceNode
 from unilabos.ros.nodes.presets.workstation import ROS2WorkstationNode
+from unilabos.ros.msgs.message_converter import convert_to_ros_msg, Float64, String
 from pylabrobot.resources.resource import Resource as ResourcePLR
 
 from unilabos.devices.workstation.bioyond_studio.config import (
@@ -676,13 +678,13 @@ class BioyondWorkstation(WorkstationBase):
             self._synced_resources = []
 
     def transfer_resource_to_another(self, resource: List[ResourceSlot], mount_resource: List[ResourceSlot], sites: List[str], mount_device_id: DeviceSlot):
-        time.sleep(3)
-        ROS2DeviceNode.run_async_func(self._ros_node.transfer_resource_to_another, True, **{
+        future = ROS2DeviceNode.run_async_func(self._ros_node.transfer_resource_to_another, True, **{
             "plr_resources": resource,
             "target_device_id": mount_device_id,
             "target_resources": mount_resource,
             "sites": sites,
         })
+        return future
 
     def _create_communication_module(self, config: Optional[Dict[str, Any]] = None) -> None:
         """创建Bioyond通信模块"""
@@ -1326,6 +1328,7 @@ class BioyondWorkstation(WorkstationBase):
         except Exception as e:
             logger.error(f"处理物料变更报送失败: {e}")
             return {"processed": False, "error": str(e)}
+
 
     def handle_external_error(self, error_data: Dict[str, Any]) -> Dict[str, Any]:
         """处理错误处理报送

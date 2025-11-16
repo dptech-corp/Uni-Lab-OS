@@ -22,6 +22,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse
 from dataclasses import dataclass, asdict
 from datetime import datetime
+from pathlib import Path
 
 from unilabos.utils.log import logger
 
@@ -76,6 +77,14 @@ class WorkstationHTTPHandler(BaseHTTPRequestHandler):
 
             logger.info(f"收到工作站报送: {endpoint} - {request_data.get('token', 'unknown')}")
 
+            try:
+                payload_for_log = {"method": "POST", **request_data}
+                self._save_raw_request(endpoint, payload_for_log)
+                if hasattr(self.workstation, '_reports_received_count'):
+                    self.workstation._reports_received_count += 1
+            except Exception:
+                pass
+
             # 统一的报送端点路由（基于LIMS协议规范）
             if endpoint == '/report/step_finish':
                 response = self._handle_step_finish_report(request_data)
@@ -90,6 +99,8 @@ class WorkstationHTTPHandler(BaseHTTPRequestHandler):
                 response = self._handle_material_change_report(request_data)
             elif endpoint == '/report/error_handling':
                 response = self._handle_error_handling_report(request_data)
+            elif endpoint == '/report/temperature-cutoff':
+                response = self._handle_temperature_cutoff_report(request_data)
             # 保留LIMS协议端点以兼容现有系统
             elif endpoint == '/LIMS/step_finish':
                 response = self._handle_step_finish_report(request_data)
@@ -107,7 +118,8 @@ class WorkstationHTTPHandler(BaseHTTPRequestHandler):
                         "/report/order_finish",
                         "/report/batch_update",
                         "/report/material_change",
-                        "/report/error_handling"
+                        "/report/error_handling",
+                        "/report/temperature-cutoff"
                     ]}
                 )
 
@@ -127,6 +139,11 @@ class WorkstationHTTPHandler(BaseHTTPRequestHandler):
         try:
             parsed_path = urlparse(self.path)
             endpoint = parsed_path.path
+
+            try:
+                self._save_raw_request(endpoint, {"method": "GET"})
+            except Exception:
+                pass
 
             if endpoint == '/status':
                 response = self._handle_status_check()
@@ -317,6 +334,50 @@ class WorkstationHTTPHandler(BaseHTTPRequestHandler):
                 success=False,
                 message=f"任务完成报送处理失败: {str(e)}"
             )
+
+    def _handle_temperature_cutoff_report(self, request_data: Dict[str, Any]) -> HttpResponse:
+        try:
+            required_fields = ['token', 'request_time', 'data']
+            if missing := [f for f in required_fields if f not in request_data]:
+                return HttpResponse(success=False, message=f"缺少必要字段: {', '.join(missing)}")
+
+            data = request_data['data']
+            metrics = [
+                'frameCode',
+                'generateTime',
+                'targetTemperature',
+                'settingTemperature',
+                'inTemperature',
+                'outTemperature',
+                'pt100Temperature',
+                'sensorAverageTemperature',
+                'speed',
+                'force',
+                'viscosity',
+                'averageViscosity'
+            ]
+            if miss := [f for f in metrics if f not in data]:
+                return HttpResponse(success=False, message=f"data字段缺少必要内容: {', '.join(miss)}")
+
+            report_request = WorkstationReportRequest(
+                token=request_data['token'],
+                request_time=request_data['request_time'],
+                data=data
+            )
+
+            result = {}
+            if hasattr(self.workstation, 'process_temperature_cutoff_report'):
+                result = self.workstation.process_temperature_cutoff_report(report_request)
+
+            return HttpResponse(
+                success=True,
+                message=f"温度/粘度报送已处理: 帧{data['frameCode']}",
+                acknowledgment_id=f"TEMP_CUTOFF_{int(time.time()*1000)}_{data['frameCode']}",
+                data=result
+            )
+        except Exception as e:
+            logger.error(f"处理温度/粘度报送失败: {e}\n{traceback.format_exc()}")
+            return HttpResponse(success=False, message=f"温度/粘度报送处理失败: {str(e)}")
 
     def _handle_batch_update_report(self, request_data: Dict[str, Any]) -> HttpResponse:
         """处理批量报送"""
@@ -510,6 +571,7 @@ class WorkstationHTTPHandler(BaseHTTPRequestHandler):
                         "POST /report/batch_update",
                         "POST /report/material_change",
                         "POST /report/error_handling",
+                        "POST /report/temperature-cutoff",
                         "GET /status",
                         "GET /health"
                     ]
@@ -547,6 +609,22 @@ class WorkstationHTTPHandler(BaseHTTPRequestHandler):
         """重写日志方法"""
         logger.debug(f"HTTP请求: {format % args}")
 
+    def _save_raw_request(self, endpoint: str, request_data: Dict[str, Any]) -> None:
+        try:
+            base_dir = Path(__file__).resolve().parents[3] / "unilabos_data" / "http_reports"
+            base_dir.mkdir(parents=True, exist_ok=True)
+            log_path = getattr(self.workstation, "_http_log_path", None)
+            log_file = Path(log_path) if log_path else (base_dir / f"http_{int(time.time()*1000)}.log")
+            payload = {
+                "endpoint": endpoint,
+                "received_at": datetime.now().isoformat(),
+                "body": request_data
+            }
+            with open(log_file, "a", encoding="utf-8") as f:
+                f.write(json.dumps(payload, ensure_ascii=False) + "\n")
+        except Exception:
+            pass
+
 
 class WorkstationHTTPService:
     """工作站HTTP服务"""
@@ -572,6 +650,10 @@ class WorkstationHTTPService:
 
             # 创建HTTP服务器
             self.server = HTTPServer((self.host, self.port), handler_factory)
+            base_dir = Path(__file__).resolve().parents[3] / "unilabos_data" / "http_reports"
+            base_dir.mkdir(parents=True, exist_ok=True)
+            session_log = base_dir / f"http_{int(time.time()*1000)}.log"
+            setattr(self.workstation, "_http_log_path", str(session_log))
 
             # 安全地获取 device_id 用于线程命名
             device_id = "unknown"
@@ -599,6 +681,7 @@ class WorkstationHTTPService:
             logger.info("扩展报送端点:")
             logger.info("  - POST /report/material_change # 物料变更报送")
             logger.info("  - POST /report/error_handling  # 错误处理报送")
+            logger.info("  - POST /report/temperature-cutoff # 温度/粘度报送")
             logger.info("兼容端点:")
             logger.info("  - POST /LIMS/step_finish      # 兼容LIMS步骤完成")
             logger.info("  - POST /LIMS/preintake_finish # 兼容LIMS通量完成")
@@ -700,6 +783,9 @@ if __name__ == "__main__":
         def handle_external_error(self, error_data):
             return {"handled": True}
 
+        def process_temperature_cutoff_report(self, report_request):
+            return {"processed": True, "metrics": report_request.data}
+
     workstation = BioyondWorkstation()
     http_service = WorkstationHTTPService(workstation)
 
@@ -723,4 +809,3 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"服务器运行错误: {e}")
         http_service.stop()
-

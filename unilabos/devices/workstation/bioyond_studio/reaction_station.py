@@ -2,7 +2,10 @@ import json
 import time
 import requests
 from typing import List, Dict, Any
+from pathlib import Path
+from datetime import datetime
 from unilabos.devices.workstation.bioyond_studio.station import BioyondWorkstation
+from unilabos.ros.msgs.message_converter import convert_to_ros_msg, Float64, String
 from unilabos.devices.workstation.bioyond_studio.config import (
     WORKFLOW_STEP_IDS,
     WORKFLOW_TO_SECTION_MAP,
@@ -37,6 +40,17 @@ class BioyondReactionStation(BioyondWorkstation):
 
         print(f"BioyondReactionStation初始化完成 - workflow_mappings: {self.workflow_mappings}")
         print(f"workflow_mappings长度: {len(self.workflow_mappings)}")
+
+        self.in_temperature = 0.0
+        self.out_temperature = 0.0
+        self.pt100_temperature = 0.0
+        self.sensor_average_temperature = 0.0
+        self.target_temperature = 0.0
+        self.setting_temperature = 0.0
+        self.viscosity = 0.0
+        self.average_viscosity = 0.0
+        self.speed = 0.0
+        self.force = 0.0
 
     # ==================== 工作流方法 ====================
 
@@ -513,6 +527,94 @@ class BioyondReactionStation(BioyondWorkstation):
         }
         print(f"[DEBUG] 返回结果: {result}")
         return result
+
+    def process_temperature_cutoff_report(self, report_request) -> Dict[str, Any]:
+        try:
+            data = report_request.data
+            def _f(v):
+                try:
+                    return float(v)
+                except Exception:
+                    return 0.0
+            self.target_temperature = _f(data.get("targetTemperature"))
+            self.setting_temperature = _f(data.get("settingTemperature"))
+            self.in_temperature = _f(data.get("inTemperature"))
+            self.out_temperature = _f(data.get("outTemperature"))
+            self.pt100_temperature = _f(data.get("pt100Temperature"))
+            self.sensor_average_temperature = _f(data.get("sensorAverageTemperature"))
+            self.speed = _f(data.get("speed"))
+            self.force = _f(data.get("force"))
+            self.viscosity = _f(data.get("viscosity"))
+            self.average_viscosity = _f(data.get("averageViscosity"))
+
+            try:
+                if hasattr(self, "_ros_node") and self._ros_node is not None:
+                    props = [
+                        "in_temperature","out_temperature","pt100_temperature","sensor_average_temperature",
+                        "target_temperature","setting_temperature","viscosity","average_viscosity",
+                        "speed","force"
+                    ]
+                    for name in props:
+                        pub = self._ros_node._property_publishers.get(name)
+                        if pub:
+                            pub.publish_property()
+            except Exception:
+                pass
+            event = {
+                "frameCode": data.get("frameCode"),
+                "generateTime": data.get("generateTime"),
+                "targetTemperature": data.get("targetTemperature"),
+                "settingTemperature": data.get("settingTemperature"),
+                "inTemperature": data.get("inTemperature"),
+                "outTemperature": data.get("outTemperature"),
+                "pt100Temperature": data.get("pt100Temperature"),
+                "sensorAverageTemperature": data.get("sensorAverageTemperature"),
+                "speed": data.get("speed"),
+                "force": data.get("force"),
+                "viscosity": data.get("viscosity"),
+                "averageViscosity": data.get("averageViscosity"),
+                "request_time": report_request.request_time,
+                "timestamp": datetime.now().isoformat(),
+            }
+
+            base_dir = Path(__file__).resolve().parents[3] / "unilabos_data"
+            base_dir.mkdir(parents=True, exist_ok=True)
+            out_file = base_dir / "temperature_cutoff_events.json"
+            try:
+                existing = json.loads(out_file.read_text(encoding="utf-8")) if out_file.exists() else []
+                if not isinstance(existing, list):
+                    existing = []
+            except Exception:
+                existing = []
+            existing.append(event)
+            out_file.write_text(json.dumps(existing, ensure_ascii=False, indent=2), encoding="utf-8")
+
+            if hasattr(self, "_ros_node") and self._ros_node is not None:
+                ns = self._ros_node.namespace
+                topics = {
+                    "targetTemperature": f"{ns}/metrics/temperature_cutoff/target_temperature",
+                    "settingTemperature": f"{ns}/metrics/temperature_cutoff/setting_temperature",
+                    "inTemperature": f"{ns}/metrics/temperature_cutoff/in_temperature",
+                    "outTemperature": f"{ns}/metrics/temperature_cutoff/out_temperature",
+                    "pt100Temperature": f"{ns}/metrics/temperature_cutoff/pt100_temperature",
+                    "sensorAverageTemperature": f"{ns}/metrics/temperature_cutoff/sensor_average_temperature",
+                    "speed": f"{ns}/metrics/temperature_cutoff/speed",
+                    "force": f"{ns}/metrics/temperature_cutoff/force",
+                    "viscosity": f"{ns}/metrics/temperature_cutoff/viscosity",
+                    "averageViscosity": f"{ns}/metrics/temperature_cutoff/average_viscosity",
+                }
+                for k, t in topics.items():
+                    v = data.get(k)
+                    if v is not None:
+                        pub = self._ros_node.create_publisher(Float64, t, 10)
+                        pub.publish(convert_to_ros_msg(Float64, float(v)))
+
+                evt_pub = self._ros_node.create_publisher(String, f"{ns}/events/temperature_cutoff", 10)
+                evt_pub.publish(convert_to_ros_msg(String, json.dumps(event, ensure_ascii=False)))
+
+            return {"processed": True, "frame": data.get("frameCode")}
+        except Exception as e:
+            return {"processed": False, "error": str(e)}
 
     def wait_for_multiple_orders_and_get_reports(self, batch_create_result: str = None, timeout: int = 7200, check_interval: int = 10) -> Dict[str, Any]:
         try:

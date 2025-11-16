@@ -525,7 +525,17 @@ reaction_station.bioyond:
     protocol_type: []
     status_types:
       all_workflows: dict
+      average_viscosity: float
       bioyond_status: dict
+      force: float
+      in_temperature: float
+      out_temperature: float
+      pt100_temperature: float
+      sensor_average_temperature: float
+      setting_temperature: float
+      speed: float
+      target_temperature: float
+      viscosity: float
       workstation_status: dict
     type: python
   config_info: []
