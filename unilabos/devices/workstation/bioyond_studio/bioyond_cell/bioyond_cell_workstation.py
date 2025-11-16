@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 import re
 import threading
 import json
+from copy import deepcopy
 from urllib3 import response
 from unilabos.devices.workstation.bioyond_studio.station import BioyondWorkstation, BioyondResourceSynchronizer
 from unilabos.devices.workstation.bioyond_studio.config import (
@@ -547,6 +548,14 @@ class BioyondCellWorkstation(BioyondWorkstation):
             except Exception:
                 return default
 
+        def _as_float(val, default=0.0) -> float:
+            try:
+                if pd.isna(val):
+                    return default
+                return float(val)
+            except Exception:
+                return default
+
         def _as_str(val, default="") -> str:
             if val is None or (isinstance(val, float) and pd.isna(val)):
                 return default
@@ -580,9 +589,9 @@ class BioyondCellWorkstation(BioyondWorkstation):
                 "createTime": _to_ymd_slash(row[col_create_time]) if col_create_time else _to_ymd_slash(None),
                 "bottleType": _as_str(row[col_bottle_type], default="配液小瓶") if col_bottle_type else "配液小瓶",
                 "mixTime": _as_int(row[col_mix_time]) if col_mix_time else 0,
-                "loadSheddingInfo": _as_int(row[col_load]) if col_load else 0,
-                "pouchCellInfo": _as_int(row[col_pouch]) if col_pouch else 0,
-                "conductivityInfo": _as_int(row[col_cond]) if col_cond else 0,
+                "loadSheddingInfo": _as_float(row[col_load]) if col_load else 0.0,
+                "pouchCellInfo": _as_float(row[col_pouch]) if col_pouch else 0,
+                "conductivityInfo": _as_float(row[col_cond]) if col_cond else 0,
                 "conductivityBottleCount": _as_int(row[col_cond_cnt]) if col_cond_cnt else 0,
                 "materialInfos": mats,
                 "totalMass": round(total_mass, 4)  # 自动汇总
