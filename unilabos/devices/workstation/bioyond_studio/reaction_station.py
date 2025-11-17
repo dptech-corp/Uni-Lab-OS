@@ -14,6 +14,37 @@ from unilabos.devices.workstation.bioyond_studio.config import (
 from unilabos.devices.workstation.bioyond_studio.config import API_CONFIG
 
 
+class BioyondReactor:
+    def __init__(self, config: dict = None, deck=None, protocol_type=None, **kwargs):
+        self.in_temperature = 0.0
+        self.out_temperature = 0.0
+        self.pt100_temperature = 0.0
+        self.sensor_average_temperature = 0.0
+        self.target_temperature = 0.0
+        self.setting_temperature = 0.0
+        self.viscosity = 0.0
+        self.average_viscosity = 0.0
+        self.speed = 0.0
+        self.force = 0.0
+
+    def update_metrics(self, payload: Dict[str, Any]):
+        def _f(v):
+            try:
+                return float(v)
+            except Exception:
+                return 0.0
+        self.target_temperature = _f(payload.get("targetTemperature"))
+        self.setting_temperature = _f(payload.get("settingTemperature"))
+        self.in_temperature = _f(payload.get("inTemperature"))
+        self.out_temperature = _f(payload.get("outTemperature"))
+        self.pt100_temperature = _f(payload.get("pt100Temperature"))
+        self.sensor_average_temperature = _f(payload.get("sensorAverageTemperature"))
+        self.speed = _f(payload.get("speed"))
+        self.force = _f(payload.get("force"))
+        self.viscosity = _f(payload.get("viscosity"))
+        self.average_viscosity = _f(payload.get("averageViscosity"))
+
+
 class BioyondReactionStation(BioyondWorkstation):
     """Bioyond反应站类
 
@@ -51,6 +82,8 @@ class BioyondReactionStation(BioyondWorkstation):
         self.average_viscosity = 0.0
         self.speed = 0.0
         self.force = 0.0
+
+        self._frame_to_reactor_id = {1: "reactor_1", 2: "reactor_2", 3: "reactor_3", 4: "reactor_4", 5: "reactor_5"}
 
     # ==================== 工作流方法 ====================
 
@@ -558,6 +591,21 @@ class BioyondReactionStation(BioyondWorkstation):
                         pub = self._ros_node._property_publishers.get(name)
                         if pub:
                             pub.publish_property()
+                    frame = data.get("frameCode")
+                    reactor_id = None
+                    try:
+                        reactor_id = self._frame_to_reactor_id.get(int(frame))
+                    except Exception:
+                        reactor_id = None
+                    if reactor_id and hasattr(self._ros_node, "sub_devices"):
+                        child = self._ros_node.sub_devices.get(reactor_id)
+                        if child and hasattr(child, "driver_instance"):
+                            child.driver_instance.update_metrics(data)
+                            pubs = getattr(child.ros_node_instance, "_property_publishers", {})
+                            for name in props:
+                                p = pubs.get(name)
+                                if p:
+                                    p.publish_property()
             except Exception:
                 pass
             event = {
@@ -575,6 +623,7 @@ class BioyondReactionStation(BioyondWorkstation):
                 "averageViscosity": data.get("averageViscosity"),
                 "request_time": report_request.request_time,
                 "timestamp": datetime.now().isoformat(),
+                "reactor_id": self._frame_to_reactor_id.get(int(data.get("frameCode", 0))) if str(data.get("frameCode", "")).isdigit() else None,
             }
 
             base_dir = Path(__file__).resolve().parents[3] / "unilabos_data"
