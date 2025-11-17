@@ -212,8 +212,14 @@ class BioyondV1RPC(BaseRequest):
             })
 
         if not response or response['code'] != 1:
+            if response:
+                error_msg = response.get('message', '未知错误')
+                print(f"[ERROR] 物料入库失败: code={response.get('code')}, message={error_msg}")
+            else:
+                print(f"[ERROR] 物料入库失败: API 无响应")
             return {}
-        return response.get("data", {})
+        # 入库成功时，即使没有 data 字段，也返回成功标识
+        return response.get("data") or {"success": True}
 
     def delete_material(self, material_id: str) -> dict:
         """
@@ -501,7 +507,7 @@ class BioyondV1RPC(BaseRequest):
             return {}
 
         response = self.post(
-            url=f'{self.host}/api/lims/order/order-report',
+            url=f'{self.host}/api/lims/order/project-order-report',
             params={
                 "apiKey": self.api_key,
                 "requestTime": self.get_current_time_iso8601(),
@@ -678,7 +684,7 @@ class BioyondV1RPC(BaseRequest):
     def scheduler_pause(self) -> int:
         """描述：暂停调度器"""
         response = self.post(
-            url=f'{self.host}/api/lims/scheduler/scheduler-pause',
+            url=f'{self.host}/api/lims/scheduler/pause',
             params={
                 "apiKey": self.api_key,
                 "requestTime": self.get_current_time_iso8601(),
@@ -689,8 +695,9 @@ class BioyondV1RPC(BaseRequest):
         return response.get("code", 0)
 
     def scheduler_continue(self) -> int:
+        """描述：继续调度器"""
         response = self.post(
-            url=f'{self.host}/api/lims/scheduler/scheduler-continue',
+            url=f'{self.host}/api/lims/scheduler/continue',
             params={
                 "apiKey": self.api_key,
                 "requestTime": self.get_current_time_iso8601(),
@@ -703,7 +710,7 @@ class BioyondV1RPC(BaseRequest):
     def scheduler_stop(self) -> int:
         """描述：停止调度器"""
         response = self.post(
-            url=f'{self.host}/api/lims/scheduler/scheduler-stop',
+            url=f'{self.host}/api/lims/scheduler/stop',
             params={
                 "apiKey": self.api_key,
                 "requestTime": self.get_current_time_iso8601(),
@@ -714,9 +721,9 @@ class BioyondV1RPC(BaseRequest):
         return response.get("code", 0)
 
     def scheduler_reset(self) -> int:
-        """描述：重置调度器"""
+        """描述：复位调度器"""
         response = self.post(
-            url=f'{self.host}/api/lims/scheduler/scheduler-reset',
+            url=f'{self.host}/api/lims/scheduler/reset',
             params={
                 "apiKey": self.api_key,
                 "requestTime": self.get_current_time_iso8601(),
@@ -734,7 +741,7 @@ class BioyondV1RPC(BaseRequest):
             print("正在加载材料列表缓存...")
 
             # 加载所有类型的材料：耗材(0)、样品(1)、试剂(2)
-            material_types = [1, 2]
+            material_types = [0, 1, 2]
 
             for type_mode in material_types:
                 print(f"正在加载类型 {type_mode} 的材料...")

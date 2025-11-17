@@ -135,6 +135,7 @@ nest_96_wellplate_100ul_pcr_full_skirt:
     - -1.5708
     - 0
     - 1.5708
+    path: https://uni-lab.oss-cn-zhangjiakou.aliyuncs.com/uni-lab/resources/tecan_nested_tip_rack/modal.xacro
     type: resource
   registry_type: resource
   version: 1.0.0
@@ -170,6 +171,7 @@ nest_96_wellplate_2ml_deep:
     - -1.5708
     - 0
     - 1.5708
+    path: https://uni-lab.oss-cn-zhangjiakou.aliyuncs.com/uni-lab/resources/tecan_nested_tip_rack/modal.xacro
     type: resource
   registry_type: resource
   version: 1.0.0
