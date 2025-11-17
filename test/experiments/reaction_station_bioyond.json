@@ -5,10 +5,16 @@
             "name": "reaction_station_bioyond",
             "parent": null,
             "children": [
-                "Bioyond_Deck"
+                "Bioyond_Deck",
+                "reactor_1",
+                "reactor_2",
+                "reactor_3",
+                "reactor_4",
+                "reactor_5"
             ],
             "type": "device",
             "class": "reaction_station.bioyond",
+            "position": {"x": 0, "y": 3800, "z": 0},
             "config": {
                 "config": {
                     "api_key": "DE9BDDA0",
@@ -62,6 +68,61 @@
                 },
                 "protocol_type": []
             },
+            "data": {}
+        },
+        {
+            "id": "reactor_1",
+            "name": "reactor_1",
+            "children": [],
+            "parent": "reaction_station_bioyond",
+            "type": "device",
+            "class": "reaction_station.reactor",
+            "position": {"x": 1150, "y": 380, "z": 0},
+            "config": {},
+            "data": {}
+        },
+        {
+            "id": "reactor_2",
+            "name": "reactor_2",
+            "children": [],
+            "parent": "reaction_station_bioyond",
+            "type": "device",
+            "class": "reaction_station.reactor",
+            "position": {"x": 1365, "y": 380, "z": 0},
+            "config": {},
+            "data": {}
+        },
+        {
+            "id": "reactor_3",
+            "name": "reactor_3",
+            "children": [],
+            "parent": "reaction_station_bioyond",
+            "type": "device",
+            "class": "reaction_station.reactor",
+            "position": {"x": 1580, "y": 380, "z": 0},
+            "config": {},
+            "data": {}
+        },
+        {
+            "id": "reactor_4",
+            "name": "reactor_4",
+            "children": [],
+            "parent": "reaction_station_bioyond",
+            "type": "device",
+            "class": "reaction_station.reactor",
+            "position": {"x": 1790, "y": 380, "z": 0},
+            "config": {},
+            "data": {}
+        },
+        {
+            "id": "reactor_5",
+            "name": "reactor_5",
+            "children": [],
+            "parent": "reaction_station_bioyond",
+            "type": "device",
+            "class": "reaction_station.reactor",
+            "position": {"x": 2010, "y": 380, "z": 0},
+            "config": {},
             "data": {}
         },
         {

@@ -565,3 +565,58 @@ reaction_station.bioyond:
       - workstation_status
       type: object
   version: 1.0.0
+reaction_station.reactor:
+  category:
+  - reactor
+  - reaction_station_bioyond
+  class:
+    action_value_mappings: {}
+    module: unilabos.devices.workstation.bioyond_studio.reaction_station:BioyondReactor
+    status_types:
+      average_viscosity: float
+      force: float
+      in_temperature: float
+      out_temperature: float
+      pt100_temperature: float
+      sensor_average_temperature: float
+      setting_temperature: float
+      speed: float
+      target_temperature: float
+      viscosity: float
+    type: python
+  config_info: []
+  description: 反应站子设备-反应器
+  handles: []
+  icon: reaction_station.webp
+  init_param_schema:
+    config:
+      properties:
+        config:
+          type: object
+      required: []
+      type: object
+    data:
+      properties:
+        average_viscosity:
+          type: number
+        force:
+          type: number
+        in_temperature:
+          type: number
+        out_temperature:
+          type: number
+        pt100_temperature:
+          type: number
+        sensor_average_temperature:
+          type: number
+        setting_temperature:
+          type: number
+        speed:
+          type: number
+        target_temperature:
+          type: number
+        viscosity:
+          type: number
+      required: []
+      type: object
+  version: 1.0.0
