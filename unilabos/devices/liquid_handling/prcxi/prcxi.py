@@ -160,6 +160,8 @@ class PRCXI9300Handler(LiquidHandlerAbstract):
                 )
         if is_9320:
             print("当前设备是9320")
+        # 始终初始化 step_mode 属性
+        self.step_mode = False
         if step_mode:
             if is_9320:
                 self.step_mode = step_mode
@@ -517,10 +519,26 @@ class PRCXI9300Backend(LiquidHandlerBackend):
         await super().setup()
         try:
             if self._execute_setup:
+                # 先获取错误代码
+                error_code = self.api_client.get_error_code()
+                if error_code:
+                    print(f"PRCXI9300 error code detected: {error_code}")
+                
+                # 清除错误代码
+                self.api_client.clear_error_code()
+                print("PRCXI9300 error code cleared.")
+                
+                # 执行重置
+                print("Starting PRCXI9300 reset...")
                 self.api_client.call("IAutomation", "Reset")
+                
+                # 检查重置状态并等待完成
                 while not self.is_reset_ok:
                     print("Waiting for PRCXI9300 to reset...")
-                    await self._ros_node.sleep(1)
+                    if hasattr(self, '_ros_node') and self._ros_node is not None:
+                        await self._ros_node.sleep(1)
+                    else:
+                        await asyncio.sleep(1)
                 print("PRCXI9300 reset successfully.")
         except ConnectionRefusedError as e:
             raise RuntimeError(
