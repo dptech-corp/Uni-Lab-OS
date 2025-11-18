@@ -5,6 +5,7 @@ from typing import List, Dict, Any
 from pathlib import Path
 from datetime import datetime
 from unilabos.devices.workstation.bioyond_studio.station import BioyondWorkstation
+from unilabos.devices.workstation.bioyond_studio.bioyond_rpc import MachineState
 from unilabos.ros.msgs.message_converter import convert_to_ros_msg, Float64, String
 from unilabos.devices.workstation.bioyond_studio.config import (
     WORKFLOW_STEP_IDS,
@@ -717,8 +718,7 @@ class BioyondReactionStation(BioyondWorkstation):
                     if oc in self.order_completion_status:
                         info = self.order_completion_status[oc]
                         try:
-                            rq = json.dumps({"order_id": oid})
-                            rep = self.hardware_interface.order_report(rq)
+                            rep = self.hardware_interface.order_report(oid)
                             if not rep:
                                 rep = {"error": "无法获取报告"}
                             reports.append({
@@ -912,6 +912,106 @@ class BioyondReactionStation(BioyondWorkstation):
         """
         return self.hardware_interface.create_order(json_str)
 
+    def hard_delete_merged_workflows(self, workflow_ids: List[str]) -> Dict[str, Any]:
+        """
+        调用新接口：硬删除合并后的工作流
+
+        Args:
+            workflow_ids: 要删除的工作流ID数组
+
+        Returns:
+            删除结果
+        """
+        try:
+            if not isinstance(workflow_ids, list):
+                raise ValueError("workflow_ids必须是字符串数组")
+            return self._delete_project_api("/api/lims/order/workflows", workflow_ids)
+        except Exception as e:
+            print(f"❌ 硬删除异常: {str(e)}")
+            return {"code": 0, "message": str(e), "timestamp": int(time.time())}
+
+    # ==================== 项目接口通用方法 ====================
+
+    def _post_project_api(self, endpoint: str, data: Any) -> Dict[str, Any]:
+        """项目接口通用POST调用
+
+        参数:
+            endpoint: 接口路径（例如 /api/lims/order/skip-titration-steps）
+            data: 请求体中的 data 字段内容
+
+        返回:
+            dict: 服务端响应，失败时返回 {code:0,message,...}
+        """
+        request_data = {
+            "apiKey": API_CONFIG["api_key"],
+            "requestTime": self.hardware_interface.get_current_time_iso8601(),
+            "data": data
+        }
+        print(f"\n📤 项目POST请求: {self.hardware_interface.host}{endpoint}")
+        print(json.dumps(request_data, indent=4, ensure_ascii=False))
+        try:
+            response = requests.post(
+                f"{self.hardware_interface.host}{endpoint}",
+                json=request_data,
+                headers={"Content-Type": "application/json"},
+                timeout=30
+            )
+            result = response.json()
+            if result.get("code") == 1:
+                print("✅ 请求成功")
+            else:
+                print(f"❌ 请求失败: {result.get('message','未知错误')}")
+            return result
+        except json.JSONDecodeError:
+            print("❌ 非JSON响应")
+            return {"code": 0, "message": "非JSON响应", "timestamp": int(time.time())}
+        except requests.exceptions.Timeout:
+            print("❌ 请求超时")
+            return {"code": 0, "message": "请求超时", "timestamp": int(time.time())}
+        except requests.exceptions.RequestException as e:
+            print(f"❌ 网络异常: {str(e)}")
+            return {"code": 0, "message": str(e), "timestamp": int(time.time())}
+
+    def _delete_project_api(self, endpoint: str, data: Any) -> Dict[str, Any]:
+        """项目接口通用DELETE调用
+
+        参数:
+            endpoint: 接口路径（例如 /api/lims/order/workflows）
+            data: 请求体中的 data 字段内容
+
+        返回:
+            dict: 服务端响应，失败时返回 {code:0,message,...}
+        """
+        request_data = {
+            "apiKey": API_CONFIG["api_key"],
+            "requestTime": self.hardware_interface.get_current_time_iso8601(),
+            "data": data
+        }
+        print(f"\n📤 项目DELETE请求: {self.hardware_interface.host}{endpoint}")
+        print(json.dumps(request_data, indent=4, ensure_ascii=False))
+        try:
+            response = requests.delete(
+                f"{self.hardware_interface.host}{endpoint}",
+                json=request_data,
+                headers={"Content-Type": "application/json"},
+                timeout=30
+            )
+            result = response.json()
+            if result.get("code") == 1:
+                print("✅ 请求成功")
+            else:
+                print(f"❌ 请求失败: {result.get('message','未知错误')}")
+            return result
+        except json.JSONDecodeError:
+            print("❌ 非JSON响应")
+            return {"code": 0, "message": "非JSON响应", "timestamp": int(time.time())}
+        except requests.exceptions.Timeout:
+            print("❌ 请求超时")
+            return {"code": 0, "message": "请求超时", "timestamp": int(time.time())}
+        except requests.exceptions.RequestException as e:
+            print(f"❌ 网络异常: {str(e)}")
+            return {"code": 0, "message": str(e), "timestamp": int(time.time())}
+
     # ==================== 工作流执行核心方法 ====================
 
     def process_web_workflows(self, web_workflow_json: str) -> List[Dict[str, str]]:
@@ -941,76 +1041,6 @@ class BioyondReactionStation(BioyondWorkstation):
         except Exception as e:
             print(f"错误：处理工作流失败: {e}")
             return []
-
-    def process_and_execute_workflow(self, workflow_name: str, task_name: str) -> dict:
-        """
-        一站式处理工作流程：解析网页工作流列表，合并工作流(带参数)，然后发布任务
-
-        Args:
-            workflow_name: 合并后的工作流名称
-            task_name: 任务名称
-
-        Returns:
-            任务创建结果
-        """
-        web_workflow_list = self.get_workflow_sequence()
-        print(f"\n{'='*60}")
-        print(f"📋 处理网页工作流列表: {web_workflow_list}")
-        print(f"{'='*60}")
-
-        web_workflow_json = json.dumps({"web_workflow_list": web_workflow_list})
-        workflows_result = self.process_web_workflows(web_workflow_json)
-
-        if not workflows_result:
-            return self._create_error_result("处理网页工作流列表失败", "process_web_workflows")
-
-        print(f"workflows_result 类型: {type(workflows_result)}")
-        print(f"workflows_result 内容: {workflows_result}")
-
-        workflows_with_params = self._build_workflows_with_parameters(workflows_result)
-
-        merge_data = {
-            "name": workflow_name,
-            "workflows": workflows_with_params
-        }
-
-        # print(f"\n🔄 合并工作流（带参数），名称: {workflow_name}")
-        merged_workflow = self.merge_workflow_with_parameters(json.dumps(merge_data))
-
-        if not merged_workflow:
-            return self._create_error_result("合并工作流失败", "merge_workflow_with_parameters")
-
-        workflow_id = merged_workflow.get("subWorkflows", [{}])[0].get("id", "")
-        # print(f"\n📤 使用工作流创建任务: {workflow_name} (ID: {workflow_id})")
-
-        order_params = [{
-            "orderCode": f"task_{self.hardware_interface.get_current_time_iso8601()}",
-            "orderName": task_name,
-            "workFlowId": workflow_id,
-            "borderNumber": 1,
-            "paramValues": {}
-        }]
-
-        result = self.create_order(json.dumps(order_params))
-
-        if not result:
-            return self._create_error_result("创建任务失败", "create_order")
-
-        # 清空工作流序列和参数，防止下次执行时累积重复
-        self.pending_task_params = []
-        self.clear_workflows()  # 清空工作流序列，避免重复累积
-
-        # print(f"\n✅ 任务创建成功: {result}")
-        # print(f"\n✅ 任务创建成功")
-        print(f"{'='*60}\n")
-
-        # 返回结果，包含合并后的工作流数据和订单参数
-        return json.dumps({
-            "success": True,
-            "result": result,
-            "merged_workflow": merged_workflow,
-            "order_params": order_params
-        })
 
     def _build_workflows_with_parameters(self, workflows_result: list) -> list:
         """
@@ -1211,3 +1241,90 @@ class BioyondReactionStation(BioyondWorkstation):
             print(f"   ❌ 工作流ID验证失败: {e}")
             print(f"   💡 将重新合并工作流")
             return False
+
+    def process_and_execute_workflow(self, workflow_name: str, task_name: str) -> dict:
+        """
+        一站式处理工作流程：解析网页工作流列表，合并工作流(带参数)，然后发布任务
+
+        Args:
+            workflow_name: 合并后的工作流名称
+            task_name: 任务名称
+
+        Returns:
+            任务创建结果
+        """
+        web_workflow_list = self.get_workflow_sequence()
+        print(f"\n{'='*60}")
+        print(f"📋 处理网页工作流列表: {web_workflow_list}")
+        print(f"{'='*60}")
+
+        web_workflow_json = json.dumps({"web_workflow_list": web_workflow_list})
+        workflows_result = self.process_web_workflows(web_workflow_json)
+
+        if not workflows_result:
+            return self._create_error_result("处理网页工作流列表失败", "process_web_workflows")
+
+        print(f"workflows_result 类型: {type(workflows_result)}")
+        print(f"workflows_result 内容: {workflows_result}")
+
+        workflows_with_params = self._build_workflows_with_parameters(workflows_result)
+
+        merge_data = {
+            "name": workflow_name,
+            "workflows": workflows_with_params
+        }
+
+        # print(f"\n🔄 合并工作流（带参数），名称: {workflow_name}")
+        merged_workflow = self.merge_workflow_with_parameters(json.dumps(merge_data))
+
+        if not merged_workflow:
+            return self._create_error_result("合并工作流失败", "merge_workflow_with_parameters")
+
+        workflow_id = merged_workflow.get("subWorkflows", [{}])[0].get("id", "")
+        # print(f"\n📤 使用工作流创建任务: {workflow_name} (ID: {workflow_id})")
+
+        order_params = [{
+            "orderCode": f"task_{self.hardware_interface.get_current_time_iso8601()}",
+            "orderName": task_name,
+            "workFlowId": workflow_id,
+            "borderNumber": 1,
+            "paramValues": {}
+        }]
+
+        result = self.create_order(json.dumps(order_params))
+
+        if not result:
+            return self._create_error_result("创建任务失败", "create_order")
+
+        # 清空工作流序列和参数，防止下次执行时累积重复
+        self.pending_task_params = []
+        self.clear_workflows()  # 清空工作流序列，避免重复累积
+
+        # print(f"\n✅ 任务创建成功: {result}")
+        # print(f"\n✅ 任务创建成功")
+        print(f"{'='*60}\n")
+
+        # 返回结果，包含合并后的工作流数据和订单参数
+        return json.dumps({
+            "success": True,
+            "result": result,
+            "merged_workflow": merged_workflow,
+            "order_params": order_params
+        })
+
+    # ==================== 反应器操作接口 ====================
+
+    def skip_titration_steps(self, preintake_id: str) -> Dict[str, Any]:
+        """跳过当前正在进行的滴定步骤
+
+        Args:
+            preintake_id: 通量ID
+
+        Returns:
+            Dict[str, Any]: 服务器响应，包含状态码、消息和时间戳
+        """
+        try:
+            return self._post_project_api("/api/lims/order/skip-titration-steps", preintake_id)
+        except Exception as e:
+            print(f"❌ 跳过滴定异常: {str(e)}")
+            return {"code": 0, "message": str(e), "timestamp": int(time.time())}
