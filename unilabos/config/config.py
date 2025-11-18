@@ -36,15 +36,6 @@ class WSConfig:
     ping_interval = 30  # ping间隔（秒）
 
 
-# OSS上传配置
-class OSSUploadConfig:
-    api_host = ""
-    authorization = ""
-    init_endpoint = ""
-    complete_endpoint = ""
-    max_retries = 3
-
-
 # HTTP配置
 class HTTPConfig:
     remote_addr = "http://127.0.0.1:48197/api/v1"
