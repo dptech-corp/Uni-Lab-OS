@@ -302,6 +302,11 @@ def main():
         graph, resource_tree_set, resource_links = read_node_link_json(request_startup_json)
     else:
         file_path = args_dict["graph"]
+        if not os.path.isfile(file_path):
+            temp_file_path = os.path.abspath(str(os.path.join(__file__, "..", "..", file_path)))
+            if os.path.isfile(temp_file_path):
+                print_status(f"使用相对路径{temp_file_path}", "info")
+                file_path = temp_file_path
         if file_path.endswith(".json"):
             graph, resource_tree_set, resource_links = read_node_link_json(file_path)
         else:
