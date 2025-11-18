@@ -1,4 +1,8 @@
-# 工作站模板架构设计与对接指南
+# 实例：工作站模板架构设计与对接指南
+
+> **文档类型**：架构设计指南与实战案例  
+> **适用场景**：大型工作站接入、子设备管理、物料系统集成  
+> **前置知识**：{doc}`../add_device` | {doc}`../add_registry`
 
 ## 0. 问题简介
 
@@ -6,9 +10,9 @@
 
 ### 0.1 自研常量有机工站：最重要的是子设备管理和通信转发
 
-![workstation_organic_yed](image/workstation_architecture/workstation_organic_yed.png)
+![workstation_organic_yed](../image/workstation_architecture/workstation_organic_yed.png)
 
-![workstation_organic](image/workstation_architecture/workstation_organic.png)
+![workstation_organic](../image/workstation_architecture/workstation_organic.png)
 
 这类工站由开发者自研，组合所有子设备和实验耗材、希望让他们在工作站这一级协调配合；
 
@@ -18,7 +22,7 @@
 
 ### 0.2 移液工作站：物料系统和工作流模板管理
 
-![workstation_liquid_handler](image/workstation_architecture/workstation_liquid_handler.png)
+![workstation_liquid_handler](../image/workstation_architecture/workstation_liquid_handler.png)
 
 1. 绝大多数情况没有子设备，有时候选配恒温震荡等模块时，接口也由工作站提供
 2. 所有任务系统均由工作站本身实现并下发指令，有统一的抽象函数可实现（pick_up_tips, aspirate, dispense, transfer 等）。有时需要将这些指令组合、转化为工作站的脚本语言，再统一下发。因此会形成大量固定的 protocols。
@@ -26,7 +30,7 @@
 
 ### 0.3 厂家开发的定制大型工站
 
-![workstation_by_supplier](image/workstation_architecture/workstation_by_supplier.png)
+![workstation_by_supplier](../image/workstation_architecture/workstation_by_supplier.png)
 
 由厂家开发，具备完善的物料系统、任务系统甚至调度系统；由 PLC 或 OpenAPI TCP 协议统一通信
 

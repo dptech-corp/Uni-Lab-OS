@@ -1,6 +1,17 @@
-# 电池装配工站接入（PLC）
+# 实例：电池装配工站接入（PLC控制）
 
-本指南将引导你完成电池装配工站（以 PLC 控制为例）的接入流程，包括新建工站文件、编写驱动与寄存器读写、生成注册表、上传及注意事项。
+> **文档类型**：实际应用案例  
+> **适用场景**：使用 PLC 控制的电池装配工站接入  
+> **前置知识**：{doc}`../add_device` | {doc}`../add_registry`
+
+本指南以电池装配工站为实际案例，引导你完成 PLC 控制设备的完整接入流程，包括新建工站文件、编写驱动与寄存器读写、生成注册表、上传及注意事项。
+
+## 案例概述
+
+**设备类型**：电池装配工站  
+**通信方式**：Modbus TCP (PLC)  
+**工站基类**：`WorkstationBase`  
+**主要功能**：电池组装、寄存器读写、数据采集
 
 ## 1. 新建工站文件
 
@@ -93,10 +104,12 @@ python unilabos\app\main.py -g celljson.json --ak <user的AK> --sk <user的SK>
 ```
 
 点击注册表编辑，进入注册表编辑页面
-![Layers](image_add_batteryPLC/unilab_sys_status.png)
+
+![系统状态页面](image_battery_plc/unilab_sys_status.png)
 
 按照图示步骤填写自动生成注册表信息：
-![Layers](image_add_batteryPLC/unilab_registry_process.png)
+
+![注册表生成流程](image_battery_plc/unilab_registry_process.png)
 
 步骤说明：
 1. 选择新增的工站`coin_cell_assembly.py`文件
@@ -107,8 +120,9 @@ python unilabos\app\main.py -g celljson.json --ak <user的AK> --sk <user的SK>
 6. 填写新的工站注册表备注信息
 7. 生成注册表
 
-以上操作步骤完成，则会生成的新的注册表ymal文件，如下图：
-![Layers](image_add_batteryPLC/unilab_new_yaml.png)
+以上操作步骤完成，则会生成的新的注册表YAML文件，如下图：
+
+![生成的YAML文件](image_battery_plc/unilab_new_yaml.png)
 
 
 
@@ -134,14 +148,60 @@ python unilabos\app\main.py -g celljson.json --ak <user的AK> --sk <user的SK> -
 
 ## 4. 注意事项
 
-- 在新生成的 YAML 中，确认 `module` 指向新工站类，本例中需检查`coincellassemblyworkstation_device.yaml`文件中是否指向了`coin_cell_assembly.py`文件中定义的`CoinCellAssemblyWorkstation`类文件：
+### 4.1 验证模块路径
 
-```
+在新生成的 YAML 中，确认 `module` 指向新工站类。本例中需检查 `coincellassemblyworkstation_device.yaml` 文件中是否正确指向了 `CoinCellAssemblyWorkstation` 类：
+
+```yaml
 module: unilabos.devices.workstation.coin_cell_assembly.coin_cell_assembly:CoinCellAssemblyWorkstation
 ```
 
-- 首次新增设备（或资源）需要在网页端新增注册表信息，`--complete_registry`补全注册表，`--upload_registry`上传注册表信息。
+### 4.2 首次接入流程
 
-- 如果不是新增设备（或资源），仅对工站驱动的.py文件进行了修改，则不需要在网页端新增注册表信息。只需要运行补全注册表信息之后，上传注册表即可。
+首次新增设备（或资源）需要完整流程：
+1. ✅ 在网页端生成注册表信息
+2. ✅ 使用 `--complete_registry` 补全注册表
+3. ✅ 使用 `--upload_registry` 上传注册表信息
+
+### 4.3 驱动更新流程
+
+如果不是新增设备，仅修改了工站驱动的 `.py` 文件：
+1. ✅ 运行 `--complete_registry` 补全注册表
+2. ✅ 运行 `--upload_registry` 上传注册表
+3. ❌ 不需要在网页端重新生成注册表
+
+### 4.4 PLC通信注意事项
+
+- **握手机制**：若需参数下发，建议在 PLC 端设置标志寄存器并完成握手复位，避免粘连与竞争
+- **字节序**：FLOAT32 等多字节数据类型需要正确指定字节序（如 `WorderOrder.LITTLE`）
+- **寄存器映射**：确保 CSV 文件中的寄存器地址与 PLC 实际配置一致
+- **连接稳定性**：在初始化时检查 PLC 连接状态，建议添加重连机制
+
+## 5. 扩展阅读
+
+### 相关文档
+
+- {doc}`../add_device` - 设备驱动编写通用指南
+- {doc}`../add_registry` - 注册表配置完整指南
+- {doc}`../workstation_architecture` - 工站架构详解
+
+### 技术要点
+
+- **Modbus TCP 通信**：PLC 通信协议和寄存器读写
+- **WorkstationBase**：工站基类的继承和使用
+- **寄存器映射**：CSV 格式的寄存器配置
+- **注册表生成**：自动化工具使用
+
+## 6. 总结
+
+通过本案例，你应该掌握：
+
+1. ✅ 如何创建 PLC 控制的工站驱动
+2. ✅ Modbus TCP 通信和寄存器读写
+3. ✅ 使用可视化编辑器生成注册表
+4. ✅ 注册表的补全和上传流程
+5. ✅ 新增设备与更新驱动的区别
+
+这个案例展示了完整的 PLC 设备接入流程，可以作为其他类似设备接入的参考模板。
 
 
