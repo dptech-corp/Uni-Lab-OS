@@ -18,6 +18,9 @@ class BasicConfig:
     vis_2d_enable = False
     enable_resource_load = True
     communication_protocol = "websocket"
+    startup_json_path = None  # 填写绝对路径
+    disable_browser = False  # 禁止浏览器自动打开
+    port = 8002  # 本地HTTP服务
     log_level: Literal['TRACE', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'] = "DEBUG"  # 'TRACE', 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
 
     @classmethod
