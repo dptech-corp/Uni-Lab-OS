@@ -1202,17 +1202,93 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         
     '''
 
+def run_coin_cell_packaging_workflow(config: Dict[str, Any]) -> CoinCellAssemblyWorkstation:
+    """根据统一配置顺序执行扣电池装配工作流。
+
+    Args:
+        config: 统一的工作流配置。字段示例:
+            {
+                "deck": {"setup": True, "name": "coin_cell_deck"},
+                "workstation": {"address": "...", "port": "...", "debug_mode": False},
+                "qiming": {...},
+                "init": True,
+                "auto": True,
+                "start": True,
+                "packaging": {
+                    "bottle_num": 16,
+                    "command": {...}
+                }
+            }
+
+    Returns:
+        执行完毕的 `CoinCellAssemblyWorkstation` 实例。
+    """
+
+    deck_config = config.get("deck")
+    if isinstance(deck_config, Deck):
+        deck = deck_config
+    elif isinstance(deck_config, dict):
+        deck = CoincellDeck(**deck_config)
+    elif deck_config is None:
+        deck = CoincellDeck(setup=True, name="coin_cell_deck")
+    else:
+        raise ValueError("deck 配置需为 Deck 实例或 dict。")
+
+    workstation_config = dict(config.get("workstation", {}))
+    workstation_config.setdefault("deck", deck)
+    workstation = CoinCellAssemblyWorkstation(**workstation_config)
+
+    qiming_params = config.get("qiming", {})
+    if qiming_params:
+        workstation.qiming_coin_cell_code(**qiming_params)
+
+    if config.get("init", True):
+        workstation.func_pack_device_init()
+    if config.get("auto", True):
+        workstation.func_pack_device_auto()
+    if config.get("start", True):
+        workstation.func_pack_device_start()
+
+    packaging_config = config.get("packaging", {})
+    bottle_num = packaging_config.get("bottle_num")
+    if bottle_num is not None:
+        workstation.func_pack_send_bottle_num(bottle_num)
+
+    allpack_params = packaging_config.get("command", {})
+    if allpack_params:
+        workstation.func_allpack_cmd(**allpack_params)
+
+    return workstation
 
 
 if __name__ == "__main__":
-    # 简单测试
-    workstation = CoinCellAssemblyWorkstation(deck=CoincellDeck(setup=True, name="coin_cell_deck"))
-    # workstation.qiming_coin_cell_code(fujipian_panshu=1, fujipian_juzhendianwei=2, gemopanshu=3, gemo_juzhendianwei=4, lvbodian=False, battery_pressure_mode=False, battery_pressure=4200, battery_clean_ignore=False)
-    # print(f"工作站创建成功: {workstation.deck.name}")
-    # print(f"料盘数量: {len(workstation.deck.children)}")
-    workstation.func_pack_device_init()
-    workstation.func_pack_device_auto()
-    workstation.func_pack_device_start()
-    workstation.func_pack_send_bottle_num(16)
-    workstation.func_allpack_cmd(elec_num=16, elec_use_num=16, elec_vol=50, assembly_type=7, assembly_pressure=4200, file_path="/Users/calvincao/Desktop/work/Uni-Lab-OS-hhm")
-    
+    workflow_config = {
+        "deck": {"setup": True, "name": "coin_cell_deck"},
+        "workstation": {
+            "address": "172.16.28.102",
+            "port": "502",
+            "debug_mode": False,
+        },
+        "qiming": {
+            "fujipian_panshu": 1,
+            "fujipian_juzhendianwei": 2,
+            "gemopanshu": 3,
+            "gemo_juzhendianwei": 4,
+            "lvbodian": False,
+            "battery_pressure_mode": False,
+            "battery_pressure": 4200,
+            "battery_clean_ignore": False,
+        },
+        "packaging": {
+            "bottle_num": 16,
+            "command": {
+                "elec_num": 16,
+                "elec_use_num": 16,
+                "elec_vol": 50,
+                "assembly_type": 7,
+                "assembly_pressure": 4200,
+                "file_path": "/Users/calvincao/Desktop/work/Uni-Lab-OS-hhm",
+            },
+        },
+    }
+    run_coin_cell_packaging_workflow(workflow_config)
