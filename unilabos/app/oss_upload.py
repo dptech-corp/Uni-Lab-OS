@@ -2,7 +2,8 @@ import argparse
 import os
 import time
 from datetime import datetime
-from typing import Dict, Optional, Tuple
+from pathlib import Path
+from typing import Dict, Optional, Tuple, Union
 
 import requests
 
@@ -97,7 +98,7 @@ def _put_upload(file_path: str, upload_url: str) -> bool:
 
 
 def oss_upload(
-    file_path: str,
+    file_path: Union[str, Path],
     filename: Optional[str] = None,
     driver_name: str = "default",
     exp_type: str = "default",
@@ -122,6 +123,7 @@ def oss_upload(
             "oss_path": str  # OSS路径（成功时）或空字符串（失败时）
         }
     """
+    file_path = Path(file_path)
     if filename is None:
         filename = os.path.basename(file_path)
 
