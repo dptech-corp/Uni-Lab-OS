@@ -1,6 +1,10 @@
-# 物料教程（Resource）
+# 实例：物料教程（Resource）
 
-本教程面向 Uni-Lab-OS 的开发者，讲解“物料”的核心概念、3种物料格式（UniLab、PyLabRobot、奔耀Bioyond）及其相互转换方法，并说明4种 children 结构表现形式及使用场景。
+> **文档类型**：物料系统完整教程  
+> **适用场景**：物料格式转换、多系统物料对接、资源结构理解  
+> **前置知识**：Python 基础 | JSON 数据结构
+
+本教程面向 Uni-Lab-OS 的开发者，讲解"物料"的核心概念、3种物料格式（UniLab、PyLabRobot、奔耀Bioyond）及其相互转换方法，并说明4种 children 结构表现形式及使用场景。
 
 ---
 
