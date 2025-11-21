@@ -13,6 +13,8 @@
 - 状态类型: working/stop/finish/protect/pause/false/unknown
 """
 
+import os
+import sys
 import socket
 import xml.etree.ElementTree as ET
 import json
@@ -21,7 +23,6 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, TypedDict
 
 from pylabrobot.resources import ResourceHolder, Coordinate, create_ordered_items_2d, Deck, Plate
-
 from unilabos.ros.nodes.base_device_node import ROS2DeviceNode
 from unilabos.ros.nodes.presets.workstation import ROS2WorkstationNode
 
@@ -56,13 +57,6 @@ class BatteryTestPositionState(TypedDict):
     status: str  # 通道状态
     color: str  # 状态对应颜色
 
-    # 额外的inquire协议字段
-    relativetime: float  # 相对时间 (s)
-    open_or_close: int  # 0=关闭, 1=打开
-    step_type: str  # 步骤类型
-    cycle_id: int  # 循环ID
-    step_id: int  # 步骤ID
-    log_code: str  # 日志代码
 
 
 class BatteryTestPosition(ResourceHolder):
@@ -142,9 +136,9 @@ class NewareBatteryTestSystem:
         devtype: str = None, 
         timeout: int = None,
         
-        size_x: float = 500.0,
-        size_y: float = 500.0,
-        size_z: float = 2000.0,
+        size_x: float = 50,
+        size_y: float = 50,
+        size_z: float = 20,
     ):
         """
         初始化新威电池测试系统
@@ -162,6 +156,12 @@ class NewareBatteryTestSystem:
         self.machine_id = machine_id
         self.devtype = devtype or self.DEVTYPE
         self.timeout = timeout or self.TIMEOUT
+        
+        # 存储设备物理尺寸
+        self.size_x = size_x
+        self.size_y = size_y
+        self.size_z = size_z
+        
         self._last_status_update = None
         self._cached_status = {}
         self._ros_node: Optional[ROS2WorkstationNode] = None  # ROS节点引用，由框架设置
@@ -192,8 +192,9 @@ class NewareBatteryTestSystem:
     def _setup_material_management(self):
         """设置物料管理系统"""
         # 第1盘：5行8列网格 (A1-E8) - 5行对应subdevid 1-5，8列对应chlid 1-8
-        # 先给物料设置一个最大的Deck
-        deck_main = Deck("ADeckName", 200, 200, 200)
+        # 先给物料设置一个最大的Deck，并设置其在空间中的位置
+        
+        deck_main = Deck("ADeckName", 2000, 1800, 100, origin=Coordinate(2000,2000,0))
 
         plate1_resources: Dict[str, BatteryTestPosition] = create_ordered_items_2d(
             BatteryTestPosition,
@@ -202,8 +203,8 @@ class NewareBatteryTestSystem:
             dx=10,
             dy=10,
             dz=0,
-            item_dx=45,
-            item_dy=45
+            item_dx=65,
+            item_dy=65
         )
         plate1 = Plate("P1", 400, 300, 50, ordered_items=plate1_resources)
         deck_main.assign_child_resource(plate1, location=Coordinate(0, 0, 0))
@@ -232,10 +233,14 @@ class NewareBatteryTestSystem:
             num_items_y=5,  # 5行（对应subdevid 6-10，即A-E）
             dx=10,
             dy=10,
-            dz=100,  # Z轴偏移100mm
+            dz=0,  
             item_dx=65,
             item_dy=65
         )
+
+        plate2 = Plate("P2", 400, 300, 50, ordered_items=plate2_resources)
+        deck_main.assign_child_resource(plate2, location=Coordinate(0, 350, 0))
+
 
         # 为第2盘资源添加P2_前缀
         self.station_resources_plate2 = {}
@@ -306,55 +311,132 @@ class NewareBatteryTestSystem:
 
     def _update_plate_resources(self, subunits: Dict):
         """更新两盘电池资源的状态"""
-        # 第1盘：subdevid 1-5 映射到 P1_A1-P1_E8 (5行8列)
+        # 第1盘：subdevid 1-5 映射到 8列5行网格 (列0-7, 行0-4)
         for subdev_id in range(1, 6):  # subdevid 1-5
             status_row = subunits.get(subdev_id, {})
             
             for chl_id in range(1, 9):  # chlid 1-8
                 try:
-                    # 计算在5×8网格中的位置
-                    row_idx = (subdev_id - 1)  # 0-4 (对应A-E)
-                    col_idx = (chl_id - 1)     # 0-7 (对应1-8)
-                    resource_name = f"P1_{self.LETTERS[row_idx]}{col_idx + 1}"
+                    # 根据用户描述：第一个是(0,0)，最后一个是(7,4)
+                    # 说明是8列5行，列从0开始，行从0开始
+                    col_idx = (chl_id - 1)      # 0-7 (chlid 1-8 -> 列0-7)
+                    row_idx = (subdev_id - 1)   # 0-4 (subdevid 1-5 -> 行0-4)
                     
-                    r = self.station_resources.get(resource_name)
+                    # 尝试多种可能的资源命名格式
+                    possible_names = [
+                        f"P1_batterytestposition_{col_idx}_{row_idx}",  # 用户提到的格式
+                        f"P1_{self.LETTERS[row_idx]}{col_idx + 1}",     # 原有的A1-E8格式
+                        f"P1_{self.LETTERS[row_idx].lower()}{col_idx + 1}",  # 小写字母格式
+                    ]
+                    
+                    r = None
+                    resource_name = None
+                    for name in possible_names:
+                        if name in self.station_resources:
+                            r = self.station_resources[name]
+                            resource_name = name
+                            break
+                    
                     if r:
                         status_channel = status_row.get(chl_id, {})
+                        metrics = status_channel.get("metrics", {})
+                        # 构建BatteryTestPosition状态数据（移除capacity和energy）
                         channel_state = {
+                            # 基本测量数据
+                            "voltage": metrics.get("voltage_V", 0.0),
+                            "current": metrics.get("current_A", 0.0),
+                            "time": metrics.get("totaltime_s", 0.0),
+                            
+                            # 状态信息
                             "status": status_channel.get("state", "unknown"),
                             "color": status_channel.get("color", self.STATUS_COLOR["unknown"]),
-                            "voltage": status_channel.get("voltage_V", 0.0),
-                            "current": status_channel.get("current_A", 0.0),
-                            "time": status_channel.get("totaltime_s", 0.0),
+                            
+                            # 通道名称标识
+                            "Channel_Name": f"{self.machine_id}-{subdev_id}-{chl_id}",
+
                         }
                         r.load_state(channel_state)
-                except (KeyError, IndexError):
+                  
+                        # 调试信息
+                        if self._ros_node and hasattr(self._ros_node, 'lab_logger'):
+                            self._ros_node.lab_logger().debug(
+                                f"更新P1资源状态: {resource_name} <- subdev{subdev_id}/chl{chl_id} "
+                                f"状态:{channel_state['status']}"
+                            )
+                    else:
+                        # 如果找不到资源，记录调试信息
+                        if self._ros_node and hasattr(self._ros_node, 'lab_logger'):
+                            self._ros_node.lab_logger().debug(
+                                f"P1未找到资源: subdev{subdev_id}/chl{chl_id} -> 尝试的名称: {possible_names}"
+                            )
+                except (KeyError, IndexError) as e:
+                    if self._ros_node and hasattr(self._ros_node, 'lab_logger'):
+                        self._ros_node.lab_logger().debug(f"P1映射错误: subdev{subdev_id}/chl{chl_id} - {e}")
                     continue
         
-        # 第2盘：subdevid 6-10 映射到 P2_A1-P2_E8 (5行8列)
+        # 第2盘：subdevid 6-10 映射到 8列5行网格 (列0-7, 行0-4)
         for subdev_id in range(6, 11):  # subdevid 6-10
             status_row = subunits.get(subdev_id, {})
             
             for chl_id in range(1, 9):  # chlid 1-8
                 try:
-                    # 计算在5×8网格中的位置
-                    row_idx = (subdev_id - 6)  # 0-4 (subdevid 6->0, 7->1, ..., 10->4) (对应A-E)
-                    col_idx = (chl_id - 1)     # 0-7 (对应1-8)
-                    resource_name = f"P2_{self.LETTERS[row_idx]}{col_idx + 1}"
+                    col_idx = (chl_id - 1)          # 0-7 (chlid 1-8 -> 列0-7)
+                    row_idx = (subdev_id - 6)       # 0-4 (subdevid 6-10 -> 行0-4)
                     
-                    r = self.station_resources.get(resource_name)
+                    # 尝试多种可能的资源命名格式
+                    possible_names = [
+                        f"P2_batterytestposition_{col_idx}_{row_idx}",  # 用户提到的格式
+                        f"P2_{self.LETTERS[row_idx]}{col_idx + 1}",     # 原有的A1-E8格式
+                        f"P2_{self.LETTERS[row_idx].lower()}{col_idx + 1}",  # 小写字母格式
+                    ]
+                    
+                    r = None
+                    resource_name = None
+                    for name in possible_names:
+                        if name in self.station_resources:
+                            r = self.station_resources[name]
+                            resource_name = name
+                            break
+                    
                     if r:
                         status_channel = status_row.get(chl_id, {})
+                        metrics = status_channel.get("metrics", {})
+                        # 构建BatteryTestPosition状态数据（移除capacity和energy）
                         channel_state = {
+                            # 基本测量数据
+                            "voltage": metrics.get("voltage_V", 0.0),
+                            "current": metrics.get("current_A", 0.0),
+                            "time": metrics.get("totaltime_s", 0.0),
+                            
+                            # 状态信息
                             "status": status_channel.get("state", "unknown"),
                             "color": status_channel.get("color", self.STATUS_COLOR["unknown"]),
-                            "voltage": status_channel.get("voltage_V", 0.0),
-                            "current": status_channel.get("current_A", 0.0),
-                            "time": status_channel.get("totaltime_s", 0.0),
+                            
+                            # 通道名称标识
+                            "Channel_Name": f"{self.machine_id}-{subdev_id}-{chl_id}",
+                            
                         }
                         r.load_state(channel_state)
-                except (KeyError, IndexError):
+                        
+                        # 调试信息
+                        if self._ros_node and hasattr(self._ros_node, 'lab_logger'):
+                            self._ros_node.lab_logger().debug(
+                                f"更新P2资源状态: {resource_name} <- subdev{subdev_id}/chl{chl_id} "
+                                f"状态:{channel_state['status']}"
+                            )
+                    else:
+                        # 如果找不到资源，记录调试信息
+                        if self._ros_node and hasattr(self._ros_node, 'lab_logger'):
+                            self._ros_node.lab_logger().debug(
+                                f"P2未找到资源: subdev{subdev_id}/chl{chl_id} -> 尝试的名称: {possible_names}"
+                            )
+                except (KeyError, IndexError) as e:
+                    if self._ros_node and hasattr(self._ros_node, 'lab_logger'):
+                        self._ros_node.lab_logger().debug(f"P2映射错误: subdev{subdev_id}/chl{chl_id} - {e}")
                     continue
+        ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
+                    "resources": list(self.station_resources.values())
+                })
 
     @property
     def connection_info(self) -> Dict[str, str]:
@@ -490,6 +572,45 @@ class NewareBatteryTestSystem:
 
 
 
+    def debug_resource_names(self) -> dict:
+        """
+        调试方法：显示所有资源的实际名称（ROS2动作）
+        
+        Returns:
+            dict: ROS2动作结果格式，包含所有资源名称信息
+        """
+        try:
+            debug_info = {
+                "total_resources": len(self.station_resources),
+                "plate1_resources": len(self.station_resources_plate1),
+                "plate2_resources": len(self.station_resources_plate2),
+                "plate1_names": list(self.station_resources_plate1.keys())[:10],  # 显示前10个
+                "plate2_names": list(self.station_resources_plate2.keys())[:10],  # 显示前10个
+                "all_resource_names": list(self.station_resources.keys())[:20],   # 显示前20个
+            }
+            
+            # 检查是否有用户提到的命名格式
+            batterytestposition_names = [name for name in self.station_resources.keys() 
+                                       if "batterytestposition" in name]
+            debug_info["batterytestposition_names"] = batterytestposition_names[:10]
+            
+            success_msg = f"资源调试信息获取成功，共{debug_info['total_resources']}个资源"
+            if self._ros_node:
+                self._ros_node.lab_logger().info(success_msg)
+                self._ros_node.lab_logger().info(f"调试信息: {debug_info}")
+            
+            return {
+                "return_info": success_msg,
+                "success": True,
+                "debug_data": debug_info
+            }
+            
+        except Exception as e:
+            error_msg = f"获取资源调试信息失败: {str(e)}"
+            if self._ros_node:
+                self._ros_node.lab_logger().error(error_msg)
+            return {"return_info": error_msg, "success": False}
+
     # ========================
     # 辅助方法
     # ========================
@@ -537,6 +658,228 @@ class NewareBatteryTestSystem:
                     
         except Exception as e:
             print(f"   获取状态失败: {e}")
+
+    # ========================
+    # CSV批量提交功能（新增）
+    # ========================
+    
+    def _ensure_local_import_path(self):
+        """确保本地模块导入路径"""
+        base_dir = os.path.dirname(__file__)
+        if base_dir not in sys.path:
+            sys.path.insert(0, base_dir)
+    
+    def _canon(self, bs: str) -> str:
+        """规范化电池体系名称"""
+        return str(bs).strip().replace('-', '_').upper()
+    
+    def _compute_values(self, row):
+        """
+        计算活性物质质量和容量
+        
+        Args:
+            row: DataFrame行数据
+            
+        Returns:
+            tuple: (活性物质质量mg, 容量mAh)
+        """
+        pw = float(row['Pole_Weight'])
+        cm = float(row['集流体质量'])
+        am = row['活性物质含量']
+        if isinstance(am, str) and am.endswith('%'):
+            amv = float(am.rstrip('%')) / 100.0
+        else:
+            amv = float(am)
+        act_mass = (pw - cm) * amv
+        sc = float(row['克容量mah/g'])
+        cap = act_mass * sc / 1000.0
+        return round(act_mass, 2), round(cap, 3)
+    
+    def _get_xml_builder(self, gen_mod, key: str):
+        """
+        获取对应电池体系的XML生成函数
+        
+        Args:
+            gen_mod: generate_xml_content模块
+            key: 电池体系标识
+            
+        Returns:
+            callable: XML生成函数
+        """
+        fmap = {
+            'LB6': gen_mod.xml_LB6,
+            'GR_LI': gen_mod.xml_Gr_Li,
+            'LFP_LI': gen_mod.xml_LFP_Li,
+            'LFP_GR': gen_mod.xml_LFP_Gr,
+            '811_LI_002': gen_mod.xml_811_Li_002,
+            '811_LI_005': gen_mod.xml_811_Li_005,
+            'SIGR_LI_STEP': gen_mod.xml_SiGr_Li_Step,
+            'SIGR_LI': gen_mod.xml_SiGr_Li_Step,
+            '811_SIGR': gen_mod.xml_811_SiGr,
+        }
+        if key not in fmap:
+            raise ValueError(f"未定义电池体系映射: {key}")
+        return fmap[key]
+    
+    def _save_xml(self, xml: str, path: str):
+        """
+        保存XML文件
+        
+        Args:
+            xml: XML内容
+            path: 文件路径
+        """
+        with open(path, 'w', encoding='utf-8') as f:
+            f.write(xml)
+    
+    def submit_from_csv(self, csv_path: str, output_dir: str = ".") -> dict:
+        """
+        从CSV文件批量提交Neware测试任务（设备动作）
+        
+        Args:
+            csv_path (str): 输入CSV文件路径
+            output_dir (str): 输出目录，用于存储XML文件和备份，默认当前目录
+            
+        Returns:
+            dict: 执行结果 {"return_info": str, "success": bool, "submitted_count": int}
+        """
+        try:
+            # 确保可以导入本地模块
+            self._ensure_local_import_path()
+            import pandas as pd
+            import generate_xml_content as gen_mod
+            from neware_driver import start_test
+            
+            if self._ros_node:
+                self._ros_node.lab_logger().info(f"开始从CSV文件提交任务: {csv_path}")
+            
+            # 读取CSV文件
+            if not os.path.exists(csv_path):
+                error_msg = f"CSV文件不存在: {csv_path}"
+                if self._ros_node:
+                    self._ros_node.lab_logger().error(error_msg)
+                return {"return_info": error_msg, "success": False, "submitted_count": 0}
+            
+            df = pd.read_csv(csv_path, encoding='gbk')
+            
+            # 验证必需列
+            required = [
+                'Battery_Code', 'Pole_Weight', '集流体质量', '活性物质含量', 
+                '克容量mah/g', '电池体系', '设备号', '排号', '通道号'
+            ]
+            missing = [c for c in required if c not in df.columns]
+            if missing:
+                error_msg = f"CSV缺少必需列: {missing}"
+                if self._ros_node:
+                    self._ros_node.lab_logger().error(error_msg)
+                return {"return_info": error_msg, "success": False, "submitted_count": 0}
+            
+            # 创建输出目录
+            xml_dir = os.path.join(output_dir, 'xml_dir')
+            backup_dir = os.path.join(output_dir, 'backup_dir')
+            os.makedirs(xml_dir, exist_ok=True)
+            os.makedirs(backup_dir, exist_ok=True)
+            
+            if self._ros_node:
+                self._ros_node.lab_logger().info(
+                    f"输出目录: XML={xml_dir}, 备份={backup_dir}"
+                )
+            
+            # 逐行处理CSV数据
+            submitted_count = 0
+            results = []
+            
+            for idx, row in df.iterrows():
+                try:
+                    coin_id = str(row['Battery_Code'])
+                    
+                    # 计算活性物质质量和容量
+                    act_mass, cap_mAh = self._compute_values(row)
+                    
+                    if cap_mAh < 0:
+                        error_msg = (
+                            f"容量为负数: Battery_Code={coin_id}, "
+                            f"活性物质质量mg={act_mass}, 容量mah={cap_mAh}"
+                        )
+                        if self._ros_node:
+                            self._ros_node.lab_logger().warning(error_msg)
+                        results.append(f"行{idx+1} 失败: {error_msg}")
+                        continue
+                    
+                    # 获取电池体系对应的XML生成函数
+                    key = self._canon(row['电池体系'])
+                    builder = self._get_xml_builder(gen_mod, key)
+                    
+                    # 生成XML内容
+                    xml_content = builder(act_mass, cap_mAh)
+                    
+                    # 获取设备信息
+                    devid = int(row['设备号'])
+                    subdevid = int(row['排号'])
+                    chlid = int(row['通道号'])
+                    
+                    # 保存XML文件
+                    recipe_path = os.path.join(
+                        xml_dir, 
+                        f"{coin_id}_{devid}_{subdevid}_{chlid}.xml"
+                    )
+                    self._save_xml(xml_content, recipe_path)
+                    
+                    # 提交测试任务
+                    resp = start_test(
+                        ip=self.ip, 
+                        port=self.port, 
+                        devid=devid, 
+                        subdevid=subdevid, 
+                        chlid=chlid, 
+                        CoinID=coin_id, 
+                        recipe_path=recipe_path, 
+                        backup_dir=backup_dir
+                    )
+                    
+                    submitted_count += 1
+                    results.append(f"行{idx+1} {coin_id}: {resp}")
+                    
+                    if self._ros_node:
+                        self._ros_node.lab_logger().info(
+                            f"已提交 {coin_id} (设备{devid}-{subdevid}-{chlid}): {resp}"
+                        )
+                
+                except Exception as e:
+                    error_msg = f"行{idx+1} 处理失败: {str(e)}"
+                    results.append(error_msg)
+                    if self._ros_node:
+                        self._ros_node.lab_logger().error(error_msg)
+            
+            # 汇总结果
+            success_msg = (
+                f"批量提交完成: 成功{submitted_count}个，共{len(df)}行。"
+                f"\n详细结果:\n" + "\n".join(results)
+            )
+            
+            if self._ros_node:
+                self._ros_node.lab_logger().info(
+                    f"批量提交完成: 成功{submitted_count}/{len(df)}"
+                )
+            
+            return {
+                "return_info": success_msg,
+                "success": True,
+                "submitted_count": submitted_count,
+                "total_count": len(df),
+                "results": results
+            }
+        
+        except Exception as e:
+            error_msg = f"批量提交失败: {str(e)}"
+            if self._ros_node:
+                self._ros_node.lab_logger().error(error_msg)
+            return {
+                "return_info": error_msg, 
+                "success": False, 
+                "submitted_count": 0
+            }
+
 
     def get_device_summary(self) -> dict:
         """
