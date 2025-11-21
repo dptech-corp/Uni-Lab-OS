@@ -1,73 +1,40 @@
 neware_battery_test_system:
   category:
   - neware_battery_test_system
+  - neware
+  - battery_test
   class:
     action_value_mappings:
-      auto-post_init:
+      debug_resource_names:
         feedback: {}
         goal: {}
-        goal_default:
-          ros_node: null
+        goal_default: {}
         handles: {}
-        placeholder_keys: {}
-        result: {}
+        result:
+          return_info: return_info
+          success: success
         schema:
-          description: ''
+          description: 调试方法：显示所有资源的实际名称
           properties:
             feedback: {}
             goal:
+              properties: {}
+              required: []
+              type: object
+            result:
               properties:
-                ros_node:
+                return_info:
+                  description: 资源调试信息
                   type: string
+                success:
+                  description: 是否成功
+                  type: boolean
               required:
-              - ros_node
+              - return_info
+              - success
               type: object
-            result: {}
           required:
           - goal
-          title: post_init参数
-          type: object
-        type: UniLabJsonCommand
-      auto-print_status_summary:
-        feedback: {}
-        goal: {}
-        goal_default: {}
-        handles: {}
-        placeholder_keys: {}
-        result: {}
-        schema:
-          description: ''
-          properties:
-            feedback: {}
-            goal:
-              properties: {}
-              required: []
-              type: object
-            result: {}
-          required:
-          - goal
-          title: print_status_summary参数
-          type: object
-        type: UniLabJsonCommand
-      auto-test_connection:
-        feedback: {}
-        goal: {}
-        goal_default: {}
-        handles: {}
-        placeholder_keys: {}
-        result: {}
-        schema:
-          description: ''
-          properties:
-            feedback: {}
-            goal:
-              properties: {}
-              required: []
-              type: object
-            result: {}
-          required:
-          - goal
-          title: test_connection参数
           type: object
         type: UniLabJsonCommand
       export_status_json:
@@ -219,7 +186,9 @@ neware_battery_test_system:
         goal_default:
           string: ''
         handles: {}
-        result: {}
+        result:
+          return_info: return_info
+          success: success
         schema:
           description: ''
           properties:
@@ -252,6 +221,56 @@ neware_battery_test_system:
           title: StrSingleInput
           type: object
         type: StrSingleInput
+      submit_from_csv:
+        feedback: {}
+        goal:
+          csv_path: string
+          output_dir: string
+        goal_default:
+          csv_path: ''
+          output_dir: .
+        handles: {}
+        result:
+          return_info: return_info
+          submitted_count: submitted_count
+          success: success
+        schema:
+          description: 从CSV文件批量提交Neware测试任务
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                csv_path:
+                  description: 输入CSV文件的绝对路径
+                  type: string
+                output_dir:
+                  description: 输出目录（用于存储XML和备份文件），默认当前目录
+                  type: string
+              required:
+              - csv_path
+              type: object
+            result:
+              properties:
+                return_info:
+                  description: 执行结果详细信息
+                  type: string
+                submitted_count:
+                  description: 成功提交的任务数量
+                  type: integer
+                success:
+                  description: 是否成功
+                  type: boolean
+                total_count:
+                  description: CSV文件中的总行数
+                  type: integer
+              required:
+              - return_info
+              - success
+              type: object
+          required:
+          - goal
+          type: object
+        type: UniLabJsonCommand
       test_connection_action:
         feedback: {}
         goal: {}
@@ -284,7 +303,7 @@ neware_battery_test_system:
           - goal
           type: object
         type: UniLabJsonCommand
-    module: unilabos.devices.battery.neware_battery_test_system:NewareBatteryTestSystem
+    module: unilabos.devices.neware_battery_test_system.neware_battery_test_system:NewareBatteryTestSystem
     status_types:
       channel_status: dict
       connection_info: dict
@@ -294,31 +313,35 @@ neware_battery_test_system:
       total_channels: int
     type: python
   config_info: []
-  description: 新威电池测试系统驱动，支持720个通道的电池测试状态监控和数据导出。通过TCP通信实现远程控制，包含完整的物料管理系统，支持2盘电池的状态映射和监控。
+  description: 新威电池测试系统驱动，提供720个通道的电池测试状态监控、物料管理和CSV批量提交功能。支持TCP通信实现远程控制，包含完整的物料管理系统（2盘电池状态映射），以及从CSV文件批量提交测试任务的能力。
   handles: []
   icon: ''
   init_param_schema:
     config:
       properties:
         devtype:
+          default: '27'
           type: string
         ip:
+          default: 127.0.0.1
           type: string
         machine_id:
           default: 1
           type: integer
         port:
+          default: 502
           type: integer
         size_x:
-          default: 500.0
+          default: 50.0
           type: number
         size_y:
-          default: 500.0
+          default: 50.0
           type: number
         size_z:
-          default: 2000.0
+          default: 20.0
           type: number
         timeout:
+          default: 20
           type: integer
       required: []
       type: object

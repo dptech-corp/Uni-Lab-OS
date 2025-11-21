@@ -1,0 +1,3 @@
+Timestamp,Battery_Count,Assembly_Time,Open_Circuit_Voltage,Pole_Weight,Assembly_Pressure,Battery_Code,Electrolyte_Code,集流体质量,活性物质含量,克容量mah/g,电池体系,设备号,排号,通道号
+2025/10/29 17:32,7,5,0.11299999803304672,18.049999237060547,3593,Li000595,Si-Gr001,9.2,0.954,469,SiGr_Li,1,1,2
+2025/10/30 17:49,2,5,0,13.109999895095825,4094,YS101224,NoRead88,5.2,0.92,190,SiGr_Li,2,1,1
