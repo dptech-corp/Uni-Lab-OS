@@ -42,6 +42,10 @@ def warehouse_factory(
                 if layout == "row-major":
                     # 行优先：row=0(A行) 应该显示在上方，需要较小的 y 值
                     y = dy + row * item_dy
+                elif layout == "vertical-col-major":
+                    # 竖向warehouse: row=0 对应顶部（y小），row=n-1 对应底部（y大）
+                    # 但标签 01 应该在底部，所以使用反向映射
+                    y = dy + (num_items_y - row - 1) * item_dy
                 else:
                     # 列优先：保持原逻辑（row=0 对应较大的 y）
                     y = dy + (num_items_y - row - 1) * item_dy
@@ -66,6 +70,14 @@ def warehouse_factory(
         # 行优先顺序: A01,A02,A03,A04, B01,B02,B03,B04
         # locations[0] 对应 row=0, y最大（前端顶部）→ 应该是 A01
         keys = [f"{LETTERS[j]}{i + 1 + col_offset:02d}" for j in range(len_y) for i in range(len_x)]
+    elif layout == "vertical-col-major":
+        # ⭐ 竖向warehouse专用布局：
+        # 字母(A,B,C...)对应列(横向, x方向)，数字(01,02,03...)对应行(竖向, y方向，从下到上)
+        # locations 生成顺序: row→col (row=0,col=0 → row=0,col=1 → row=1,col=0 → ...)
+        # 其中 row=0 对应底部(y大)，row=n-1 对应顶部(y小)
+        # 标签中 01 对应底部(row=0)，02 对应中间(row=1)，03 对应顶部(row=2)
+        # 标签顺序: A01,B01,A02,B02,A03,B03
+        keys = [f"{LETTERS[col]}{row + 1 + col_offset:02d}" for row in range(len_y) for col in range(len_x)]
     else:
         # 列优先顺序: A01,B01,C01,D01, A02,B02,C02,D02
         keys = [f"{LETTERS[j]}{i + 1 + col_offset:02d}" for i in range(len_x) for j in range(len_y)]

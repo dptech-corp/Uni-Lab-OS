@@ -763,6 +763,22 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
             if not locations:
                 logger.debug(f"[物料位置] {unique_name} 没有location信息，跳过warehouse放置")
 
+            # ⭐ 预先检查：如果物料的任何location在竖向warehouse中，提前交换尺寸
+            # 这样可以避免多个location时尺寸不一致的问题
+            needs_size_swap = False
+            for loc in locations:
+                wh_name_check = loc.get("whName")
+                if wh_name_check in ["站内试剂存放堆栈", "测量小瓶仓库(测密度)"]:
+                    needs_size_swap = True
+                    break
+
+            if needs_size_swap and hasattr(plr_material, 'size_x') and hasattr(plr_material, 'size_y'):
+                original_x = plr_material.size_x
+                original_y = plr_material.size_y
+                plr_material.size_x = original_y
+                plr_material.size_y = original_x
+                logger.debug(f"   物料 {unique_name} 将放入竖向warehouse，预先交换尺寸: {original_x}×{original_y} → {plr_material.size_x}×{plr_material.size_y}")
+
             for loc in locations:
                 wh_name = loc.get("whName")
                 logger.debug(f"[物料位置] {unique_name} 尝试放置到 warehouse: {wh_name} (Bioyond坐标: x={loc.get('x')}, y={loc.get('y')}, z={loc.get('z')})")
@@ -784,7 +800,6 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
                     logger.debug(f"[Warehouse匹配] 找到warehouse: {wh_name} (容量: {warehouse.capacity}, 行×列: {warehouse.num_items_x}×{warehouse.num_items_y})")
 
                     # Bioyond坐标映射 (重要！): x→行(1=A,2=B...), y→列(1=01,2=02...), z→层(通常=1)
-                    # PyLabRobot warehouse是列优先存储: A01,B01,C01,D01, A02,B02,C02,D02, ...
                     x = loc.get("x", 1)  # 行号 (1-based: 1=A, 2=B, 3=C, 4=D)
                     y = loc.get("y", 1)  # 列号 (1-based: 1=01, 2=02, 3=03...)
                     z = loc.get("z", 1)  # 层号 (1-based, 通常为1)
@@ -793,12 +808,23 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
                     if wh_name == "堆栈1右":
                         y = y - 4  # 将5-8映射到1-4
 
-                    # 特殊处理：对于1行×N列的横向warehouse（如站内试剂存放堆栈）
-                    # Bioyond的y坐标表示线性位置序号，而不是列号
-                    if warehouse.num_items_y == 1:
-                        # 1行warehouse: 直接用y作为线性索引
-                        idx = y - 1
-                        logger.debug(f"1行warehouse {wh_name}: y={y} → idx={idx}")
+                    # 特殊处理竖向warehouse（站内试剂存放堆栈、测量小瓶仓库）
+                    # 这些warehouse使用 vertical-col-major 布局
+                    if wh_name in ["站内试剂存放堆栈", "测量小瓶仓库(测密度)"]:
+                        # vertical-col-major 布局的坐标映射：
+                        # - Bioyond的x(1=A,2=B)对应warehouse的列(col, x方向)
+                        # - Bioyond的y(1=01,2=02,3=03)对应warehouse的行(row, y方向)，从下到上
+                        # vertical-col-major 中: row=0 对应底部，row=n-1 对应顶部
+                        # Bioyond y=1(01) 对应底部 → row=0, y=2(02) 对应中间 → row=1
+                        # 索引计算: idx = row * num_cols + col
+                        col_idx = x - 1  # Bioyond的x(A,B) → col索引(0,1)
+                        row_idx = y - 1  # Bioyond的y(01,02,03) → row索引(0,1,2)
+                        layer_idx = z - 1
+
+                        idx = layer_idx * (warehouse.num_items_x * warehouse.num_items_y) + row_idx * warehouse.num_items_x + col_idx
+                        logger.debug(f"🔍 竖向warehouse {wh_name}: Bioyond(x={x},y={y},z={z}) → warehouse(col={col_idx},row={row_idx},layer={layer_idx}) → idx={idx}, capacity={warehouse.capacity}")
+
+                    # 普通横向warehouse的处理
                     else:
                         # 多行warehouse: 根据 layout 使用不同的索引计算
                         row_idx = x - 1  # x表示行: 转为0-based
@@ -822,6 +848,7 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
 
                     if 0 <= idx < warehouse.capacity:
                         if warehouse[idx] is None or isinstance(warehouse[idx], ResourceHolder):
+                            # 物料尺寸已在放入warehouse前根据需要进行了交换
                             warehouse[idx] = plr_material
                             logger.debug(f"✅ 物料 {unique_name} 放置到 {wh_name}[{idx}] (Bioyond坐标: x={loc.get('x')}, y={loc.get('y')})")
                     else:
