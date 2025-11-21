@@ -752,6 +752,12 @@ class HostNode(BaseROS2DeviceNode):
                 if return_info_str is not None:
                     try:
                         return_info = json.loads(return_info_str)
+                        # 适配后端的一些额外处理
+                        return_value = return_info.get("return_value")
+                        if isinstance(return_value, dict):
+                            unilabos_samples = return_info.get("unilabos_samples")
+                            if isinstance(unilabos_samples, list):
+                                return_info["unilabos_samples"] = unilabos_samples
                         suc = return_info.get("suc", False)
                         if not suc:
                             status = "failed"
