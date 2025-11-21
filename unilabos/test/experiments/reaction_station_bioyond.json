@@ -57,6 +57,10 @@
                         "BIOYOND_PolymerStation_TipBox": [
                             "枪头盒",
                             "3a143890-9d51-60ac-6d6f-6edb43c12041"
+                        ],
+                        "BIOYOND_PolymerStation_Measurement_Vial": [
+                            "测量小瓶",
+                            "b1fc79c9-5864-4f05-8052-6ed3abc18a97"
                         ]
                     }
                 },
