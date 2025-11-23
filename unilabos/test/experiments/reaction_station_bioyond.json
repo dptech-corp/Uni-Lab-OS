@@ -14,7 +14,11 @@
             ],
             "type": "device",
             "class": "reaction_station.bioyond",
-            "position": {"x": 0, "y": 3800, "z": 0},
+            "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+            },
             "config": {
                 "config": {
                     "api_key": "DE9BDDA0",
@@ -81,7 +85,11 @@
             "parent": "reaction_station_bioyond",
             "type": "device",
             "class": "reaction_station.reactor",
-            "position": {"x": 1150, "y": 380, "z": 0},
+            "position": {
+                "x": 1150,
+                "y": 380,
+                "z": 0
+            },
             "config": {},
             "data": {}
         },
@@ -92,7 +100,11 @@
             "parent": "reaction_station_bioyond",
             "type": "device",
             "class": "reaction_station.reactor",
-            "position": {"x": 1365, "y": 380, "z": 0},
+            "position": {
+                "x": 1365,
+                "y": 380,
+                "z": 0
+            },
             "config": {},
             "data": {}
         },
@@ -103,7 +115,11 @@
             "parent": "reaction_station_bioyond",
             "type": "device",
             "class": "reaction_station.reactor",
-            "position": {"x": 1580, "y": 380, "z": 0},
+            "position": {
+                "x": 1580,
+                "y": 380,
+                "z": 0
+            },
             "config": {},
             "data": {}
         },
@@ -114,7 +130,11 @@
             "parent": "reaction_station_bioyond",
             "type": "device",
             "class": "reaction_station.reactor",
-            "position": {"x": 1790, "y": 380, "z": 0},
+            "position": {
+                "x": 1790,
+                "y": 380,
+                "z": 0
+            },
             "config": {},
             "data": {}
         },
@@ -125,7 +145,11 @@
             "parent": "reaction_station_bioyond",
             "type": "device",
             "class": "reaction_station.reactor",
-            "position": {"x": 2010, "y": 380, "z": 0},
+            "position": {
+                "x": 2010,
+                "y": 380,
+                "z": 0
+            },
             "config": {},
             "data": {}
         },
@@ -138,7 +162,7 @@
             "class": "BIOYOND_PolymerReactionStation_Deck",
             "position": {
                 "x": 0,
-                "y": 0,
+                "y": 3800,
                 "z": 0
             },
             "config": {
