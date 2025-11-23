@@ -1291,14 +1291,22 @@ class BioyondReactionStation(BioyondWorkstation):
             "paramValues": {}
         }]
 
-        result = self.create_order(json.dumps(order_params))
-
-        if not result:
-            return self._create_error_result("创建任务失败", "create_order")
-
-        # 清空工作流序列和参数，防止下次执行时累积重复
-        self.pending_task_params = []
-        self.clear_workflows()  # 清空工作流序列，避免重复累积
+        # 尝试创建订单：无论成功或失败，都需要在本次尝试结束后清理本地队列，避免下一次重复累积
+        try:
+            result = self.create_order(json.dumps(order_params))
+            if not result:
+                # 返回错误结果之前先记录情况（稍后由 finally 清理队列）
+                print("⚠️ 创建任务返回空或失败响应，稍后将清理本地队列以避免重复累积")
+                return self._create_error_result("创建任务失败", "create_order")
+        finally:
+            # 无论任务创建成功与否，都要清空本地保存的参数和工作流序列，防止下次重复
+            try:
+                self.pending_task_params = []
+                self.clear_workflows()  # 清空工作流序列，避免重复累积
+                print("✅ 已清理 pending_task_params 与 workflow_sequence")
+            except Exception as _ex:
+                # 记录清理失败，但不要阻塞原始返回
+                print(f"❌ 清理队列时发生异常: {_ex}")
 
         # print(f"\n✅ 任务创建成功: {result}")
         # print(f"\n✅ 任务创建成功")
