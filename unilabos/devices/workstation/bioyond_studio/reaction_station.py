@@ -1336,3 +1336,35 @@ class BioyondReactionStation(BioyondWorkstation):
         except Exception as e:
             print(f"❌ 跳过滴定异常: {str(e)}")
             return {"code": 0, "message": str(e), "timestamp": int(time.time())}
+
+    def set_reactor_temperature(self, reactor_id: int, temperature: float) -> str:
+        """
+        设置反应器温度
+
+        Args:
+            reactor_id: 反应器编号 (1-5)
+            temperature: 目标温度 (°C)
+
+        Returns:
+            str: JSON 字符串，格式为 {"suc": True/False, "msg": "描述信息"}
+        """
+        if reactor_id not in range(1, 6):
+            return json.dumps({"suc": False, "msg": "反应器编号必须在 1-5 之间"})
+
+        try:
+            payload = {
+                "deviceTypeName": f"反应模块{chr(64 + reactor_id)}",  # 1->A, 2->B...
+                "temperature": float(temperature)
+            }
+            resp = requests.post(
+                f"{self.hardware_interface.host}/api/lims/device/set-reactor-temperatue",
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=10
+            )
+            if resp.status_code == 200:
+                return json.dumps({"suc": True, "msg": "温度设置成功"})
+            else:
+                return json.dumps({"suc": False, "msg": f"温度设置失败，HTTP {resp.status_code}"})
+        except Exception as e:
+            return json.dumps({"suc": False, "msg": f"温度设置异常: {str(e)}"})
