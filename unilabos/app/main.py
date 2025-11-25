@@ -450,13 +450,13 @@ def main():
             start_backend(**args_dict)
             start_server(
                 open_browser=not args_dict["disable_browser"],
-                port=args_dict["port"],
+                port=BasicConfig.port,
             )
     else:
         start_backend(**args_dict)
         start_server(
             open_browser=not args_dict["disable_browser"],
-            port=args_dict["port"],
+            port=BasicConfig.port,
         )
 
 
