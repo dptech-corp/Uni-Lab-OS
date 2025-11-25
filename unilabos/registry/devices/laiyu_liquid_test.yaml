@@ -9,6 +9,10 @@ xyz_stepper_controller:
         goal_default:
           save_path: work_origin.json
         handles: {}
+<<<<<<< HEAD
+=======
+        placeholder_keys: {}
+>>>>>>> dev
         result: {}
         schema:
           description: ''
@@ -34,6 +38,10 @@ xyz_stepper_controller:
           axis: null
           state: null
         handles: {}
+<<<<<<< HEAD
+=======
+        placeholder_keys: {}
+>>>>>>> dev
         result: {}
         schema:
           description: ''
@@ -65,6 +73,10 @@ xyz_stepper_controller:
           speed: 2000
           steps: null
         handles: {}
+<<<<<<< HEAD
+=======
+        placeholder_keys: {}
+>>>>>>> dev
         result: {}
         schema:
           description: ''
@@ -105,6 +117,10 @@ xyz_stepper_controller:
           y: 0.0
           z: 0.0
         handles: {}
+<<<<<<< HEAD
+=======
+        placeholder_keys: {}
+>>>>>>> dev
         result: {}
         schema:
           description: ''
@@ -142,6 +158,10 @@ xyz_stepper_controller:
           acc: 800
           speed: 200
         handles: {}
+<<<<<<< HEAD
+=======
+        placeholder_keys: {}
+>>>>>>> dev
         result: {}
         schema:
           description: ''
@@ -170,6 +190,10 @@ xyz_stepper_controller:
           axis: null
           timeout: 30.0
         handles: {}
+<<<<<<< HEAD
+=======
+        placeholder_keys: {}
+>>>>>>> dev
         result: {}
         schema:
           description: ''
@@ -211,7 +235,11 @@ xyz_stepper_controller:
           default: unilabos/devices/laiyu_liquid_test/work_origin.json
           type: string
         port:
+<<<<<<< HEAD
           default: /dev/ttyUSB1
+=======
+          default: /dev/ttyUSB0
+>>>>>>> dev
           type: string
       required: []
       type: object
