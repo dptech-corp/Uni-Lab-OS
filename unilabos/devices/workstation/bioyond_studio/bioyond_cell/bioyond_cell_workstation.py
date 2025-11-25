@@ -19,6 +19,7 @@ from unilabos.devices.workstation.bioyond_studio.config import (
 )
 from unilabos.devices.workstation.workstation_http_service import WorkstationHTTPService
 from unilabos.resources.bioyond.decks import BIOYOND_YB_Deck
+from unilabos.resources.graphio import resource_bioyond_to_plr
 from unilabos.utils.log import logger
 from unilabos.registry.registry import lab_registry
 
@@ -394,10 +395,13 @@ class BioyondCellWorkstation(BioyondWorkstation):
         order_code = response.get("data", {}).get("orderCode")
         if not order_code:
             logger.error("上料任务未返回有效 orderCode！")
-            return response
-          # 等待完成报送
+            return {"api_response": response, "order_finish": None}
+        # 等待完成报送
         result = self.wait_for_order_finish(order_code)
-        return result
+        return {
+            "api_response": response,
+            "order_finish": result
+        }
     
 
     def auto_batch_outbound_from_xlsx(self, xlsx_path: str) -> Dict[str, Any]:
@@ -623,7 +627,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
         if not order_code:
             logger.error("上料任务未返回有效 orderCode！")
             return response
-          # 等待完成报送
+        # 等待完成报送
         result = self.wait_for_order_finish(order_code)
         return result
 
@@ -1165,7 +1169,36 @@ class BioyondCellWorkstation(BioyondWorkstation):
         })
         return final_result
 
-    def run_bioyond_cell_workflow(self):
+    def _fetch_bioyond_materials(
+        self,
+        *,
+        filter_keyword: Optional[str] = None,
+        type_mode: int = 2,
+    ) -> List[Dict[str, Any]]:
+        query: Dict[str, Any] = {
+            "typeMode": type_mode,
+            "includeDetail": True,
+        }
+        if filter_keyword:
+            query["filter"] = filter_keyword
+
+        response = self._post_lims("/api/lims/storage/stock-material", query)
+        raw_materials = response.get("data")
+        if not isinstance(raw_materials, list):
+            raw_materials = []
+
+        try:
+            resource_bioyond_to_plr(
+                raw_materials,
+                type_mapping=self.bioyond_config.get("material_type_mappings", MATERIAL_TYPE_MAPPINGS),
+                deck=self.deck,
+            )
+        except Exception as exc: 
+            logger.warning(f"转换奔曜物料到 PLR 失败: {exc}", exc_info=True)
+
+        return raw_materials
+
+    def run_feeding_stage(self) -> Dict[str, List[Dict[str, Any]]]:
         self.create_sample(
             board_type="配液瓶(小)板",
             bottle_type="配液瓶(小)",
@@ -1184,20 +1217,46 @@ class BioyondCellWorkstation(BioyondWorkstation):
         self.auto_feeding4to3(
             xlsx_path="/Users/sml/work/Unilab/Uni-Lab-OS/unilabos/devices/workstation/bioyond_studio/bioyond_cell/material_template.xlsx"
         )
-        self.create_orders(
+        feeding_materials = self._fetch_bioyond_materials()
+        return {"feeding_materials": feeding_materials}
+
+    def run_liquid_preparation_stage(
+        self,
+        feeding_materials: Optional[List[Dict[str, Any]]] = None,
+    ) -> Dict[str, List[Dict[str, Any]]]:
+        result = self.create_orders(
             xlsx_path="/Users/sml/work/Unilab/Uni-Lab-OS/unilabos/devices/workstation/bioyond_studio/bioyond_cell/2025092701.xlsx"
         )
+        filter_keyword = self.bioyond_config.get("mixing_material_filter") or None
+        materials = result.get("materials")
+        if materials is None:
+            materials = self._fetch_bioyond_materials(filter_keyword=filter_keyword)
+        return {
+            "feeding_materials": feeding_materials or [],
+            "liquid_materials": materials,
+        }
+
+    def run_transfer_stage(
+        self,
+        liquid_materials: Optional[List[Dict[str, Any]]] = None,
+    ) -> Dict[str, List[Dict[str, Any]]]:
         self.transfer_3_to_2_to_1(
             source_wh_id="3a19debc-84b4-0359-e2d4-b3beea49348b",
             source_x=1,
             source_y=1,
             source_z=1,
         )
-        return self
+        transfer_materials = self._fetch_bioyond_materials()
+        return {
+            "liquid_materials": liquid_materials or [],
+            "transfer_materials": transfer_materials,
+        }
 if __name__ == "__main__":
     deck = BIOYOND_YB_Deck(setup=True)
     w = BioyondCellWorkstation(deck=deck, address="172.16.28.102", port="502", debug_mode=False)
-    w.run_bioyond_cell_workflow()
+    feeding = w.run_feeding_stage()
+    liquid = w.run_liquid_preparation_stage(feeding.get("feeding_materials"))
+    transfer = w.run_transfer_stage(liquid.get("liquid_materials"))
     while True:
         time.sleep(1)
     # re=ws.scheduler_stop()
