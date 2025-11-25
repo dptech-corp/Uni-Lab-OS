@@ -821,13 +821,26 @@ bioyond_cell:
           title: resource_tree_transfer参数
           type: object
         type: UniLabJsonCommand
-      auto-run_bioyond_cell_workflow:
+      auto-run_feeding_stage:
         feedback: {}
         goal: {}
         goal_default: {}
-        handles: {}
+        handles:
+          input: []
+          output:
+          - data_key: feeding_materials
+            data_source: executor
+            data_type: resource
+            handler_key: feeding_materials
+            label: Feeding Materials
         placeholder_keys: {}
-        result: {}
+        result:
+          properties:
+            feeding_materials:
+              type: array
+          required:
+          - feeding_materials
+          type: object
         schema:
           description: ''
           properties:
@@ -839,7 +852,93 @@ bioyond_cell:
             result: {}
           required:
           - goal
-          title: run_bioyond_cell_workflow参数
+          title: run_feeding_stage参数
+          type: object
+        type: UniLabJsonCommand
+      auto-run_liquid_preparation_stage:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles:
+          input:
+          - data_key: feeding_materials
+            data_source: handle
+            data_type: resource
+            handler_key: feeding_materials
+            label: Feeding Materials
+          output:
+          - data_key: liquid_materials
+            data_source: executor
+            data_type: resource
+            handler_key: liquid_materials
+            label: Liquid Materials
+        placeholder_keys: {}
+        result:
+          properties:
+            feeding_materials:
+              type: array
+            liquid_materials:
+              type: array
+          required:
+          - liquid_materials
+          type: object
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                feeding_materials:
+                  type: array
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: run_liquid_preparation_stage参数
+          type: object
+        type: UniLabJsonCommand
+      auto-run_transfer_stage:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles:
+          input:
+          - data_key: liquid_materials
+            data_source: handle
+            data_type: resource
+            handler_key: liquid_materials
+            label: Liquid Materials
+          output:
+          - data_key: transfer_materials
+            data_source: executor
+            data_type: resource
+            handler_key: transfer_materials
+            label: Transfer Materials
+        placeholder_keys: {}
+        result:
+          properties:
+            liquid_materials:
+              type: array
+            transfer_materials:
+              type: array
+          required:
+          - transfer_materials
+          type: object
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                liquid_materials:
+                  type: array
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: run_transfer_stage参数
           type: object
         type: UniLabJsonCommand
       auto-scheduler_continue:
@@ -1133,7 +1232,7 @@ bioyond_cell:
       device_id: String
     type: python
   config_info: []
-  description: ''
+  description: 配液工站
   handles: []
   icon: ''
   init_param_schema:
