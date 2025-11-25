@@ -1,8 +1,8 @@
 
 """
-XYZ 三轴步进电机驱动（统一字符串参数版）
+XYZ 三轴步进电机驱动
 基于 Modbus RTU 协议
-Author: Xiuyu Chen (Modified by Assistant)
+Author: Xiuyu Chen
 """
 
 import serial  # type: ignore
@@ -59,7 +59,7 @@ class ModbusRTUTransport:
         self.ser.reset_input_buffer()
         self.ser.write(frame)
         self.ser.flush()
-        logger.debug(f"[TX] {frame.hex(' ').upper()}")
+        # logger.debug(f"[TX] {frame.hex(' ').upper()}")
 
     def receive(self, expected_len: int) -> bytes:
         if not self.ser or not self.ser.is_open:
@@ -98,34 +98,87 @@ class ModbusClient:
                 crc = (crc >> 1) ^ 0xA001 if crc & 1 else crc >> 1
         return struct.pack("<H", crc)
 
-    def send_request(self, addr: int, func: int, payload: bytes) -> bytes:
-        frame = bytes([addr, func]) + payload
-        full = frame + self.calc_crc(frame)
-        self.transport.send(full)
-        time.sleep(0.01)
-        resp = self.transport.ser.read(256)
-        if not resp:
-            raise ModbusException("未收到响应")
+    def send_request(
+        self,
+        addr: int,
+        func: int,
+        payload: bytes,
+        retries: int = 1,
+    ) -> Optional[bytes]:
+        """
+        发送一次 Modbus 请求：
+        - 内部尝试 (retries + 1) 次
+        - 成功返回响应帧 bytes
+        - 多次失败返回 None（不抛异常，由上层决定如何容错）
+        """
+        last_err: Optional[Exception] = None
 
-        start = resp.find(bytes([addr, func]))
-        if start > 0:
-            resp = resp[start:]
-        if len(resp) < 5:
-            raise ModbusException(f"响应长度不足: {resp.hex(' ').upper()}")
-        if self.calc_crc(resp[:-2]) != resp[-2:]:
-            raise ModbusException("CRC 校验失败")
-        return resp
+        for _ in range(retries + 1):
+            try:
+                # 组帧
+                frame = bytes([addr, func]) + payload
+                full = frame + self.calc_crc(frame)
 
-    def read_registers(self, addr: int, start: int, count: int) -> List[int]:
+                # 发送
+                self.transport.send(full)  # 建议这里封装了 reset_input_buffer + write
+                time.sleep(0.01)  # 视波特率可适当调整
+
+                # 接收：沿用你原来的简单方案
+                resp = self.transport.ser.read(256)
+
+                if not resp:
+                    raise ModbusException("未收到响应")
+
+                # 对齐设备地址+功能码
+                start = resp.find(bytes([addr, func]))
+                if start > 0:
+                    resp = resp[start:]
+
+                if len(resp) < 5:
+                    raise ModbusException(f"响应长度不足: {resp.hex(' ').upper()}")
+
+                # CRC 校验
+                calc_crc = self.calc_crc(resp[:-2])
+                frame_crc = resp[-2:]
+                if calc_crc != frame_crc:
+                    raise ModbusException("CRC 校验失败")
+
+                # 到这里说明这一轮成功
+                return resp
+
+            except Exception as e:
+                last_err = e
+                # 不往上抛，先稍微等一下再重试
+                time.sleep(0.02)
+
+        return None
+
+    def read_registers(self, addr: int, start: int, count: int) -> Optional[List[int]]:
+        """
+        读保持寄存器：
+        - 成功时返回寄存器列表 List[int]
+        - 失败时返回 None（send_request 已经做了重试）
+        """
         payload = struct.pack(">HH", start, count)
-        resp = self.send_request(addr, ModbusFunction.READ_HOLDING_REGISTERS.value, payload)
+        resp = self.send_request(
+            addr,
+            ModbusFunction.READ_HOLDING_REGISTERS.value,
+            payload,
+        )
+        if resp is None:
+            return None
+
         byte_count = resp[2]
-        regs = [struct.unpack(">H", resp[3 + i:5 + i])[0] for i in range(0, byte_count, 2)]
+        regs: List[int] = []
+        for i in range(0, byte_count, 2):
+            regs.append(struct.unpack(">H", resp[3 + i:5 + i])[0])
         return regs
 
     def write_single_register(self, addr: int, reg: int, val: int) -> bool:
         payload = struct.pack(">HH", reg, val)
         resp = self.send_request(addr, ModbusFunction.WRITE_SINGLE_REGISTER.value, payload)
+        if resp is None:
+            return False
         return resp[1] == ModbusFunction.WRITE_SINGLE_REGISTER.value
 
     def write_multiple_registers(self, addr: int, start: int, values: List[int]) -> bool:
@@ -133,6 +186,8 @@ class ModbusClient:
         payload = struct.pack(">HHB", start, len(values), byte_count)
         payload += b"".join(struct.pack(">H", v & 0xFFFF) for v in values)
         resp = self.send_request(addr, ModbusFunction.WRITE_MULTIPLE_REGISTERS.value, payload)
+        if resp is None:
+            return False
         return resp[1] == ModbusFunction.WRITE_MULTIPLE_REGISTERS.value
 
 
@@ -232,6 +287,9 @@ class XYZStepperController:
             raise TypeError("axis 参数必须为 str 或 MotorAxis")
 
         vals = self.client.read_registers(self.axis_addr[axis_enum], self.REG_STATUS, 6)
+
+        if vals is None or len(vals) < 5:
+            return [0, 0, 0, MotorStatus.STANDBY.value]
         return [
             self.s32(vals[1], vals[2]),
             self.s16(vals[3]),
@@ -243,19 +301,47 @@ class XYZStepperController:
         a = MotorAxis[axis.upper()]
         return self.client.write_single_register(self.axis_addr[a], self.REG_ENABLE, 1 if state else 0)
 
-    def wait_complete(self, axis: str, timeout=30.0) -> bool:
+    def wait_complete(self, axis: str, timeout: float = 30.0) -> bool:
+        """
+        等待某轴运动完成，带容错：
+        - get_status 内部读寄存器失败会返回默认状态
+        - 这里只在异常停止或超时时返回 False
+        """
         a = axis.upper()
         start = time.time()
+
         while time.time() - start < timeout:
-            vals = self.get_status(a)
-            st = MotorStatus(vals[3])  # 第4个元素是状态值
+            try:
+                vals = self.get_status(a)
+            except Exception:
+                # 任意异常都不往外抛，直接重试
+                time.sleep(0.1)
+                continue
+
+            if len(vals) <= 3:
+                time.sleep(0.1)
+                continue
+
+            try:
+                st = MotorStatus(vals[3])
+            except Exception:
+                time.sleep(0.1)
+                continue
+
             if st == MotorStatus.STANDBY:
                 return True
-            if st in (MotorStatus.COLLISION_STOP, MotorStatus.FORWARD_LIMIT_STOP, MotorStatus.REVERSE_LIMIT_STOP):
+
+            if st in (
+                MotorStatus.COLLISION_STOP,
+                MotorStatus.FORWARD_LIMIT_STOP,
+                MotorStatus.REVERSE_LIMIT_STOP,
+            ):
                 logger.warning(f"{a} 轴异常停止: {st.name}")
                 return False
+
             time.sleep(0.1)
-        logger.warning(f"{a} 轴运动超时")
+
+        # logger.warning(f"{a} 轴运动超时（超过 {timeout} 秒未进入 STANDBY）")
         return False
 
     # ========== 控制命令 ==========
@@ -270,7 +356,7 @@ class XYZStepperController:
         return ok
 
     def move_xyz_work(self, x: float = 0.0, y: float = 0.0, z: float = 0.0, speed: int = 100, acc: int = 1500):
-        logger.info("🧭 执行安全多轴运动：Z→XY→Z")
+        # logger.info("执行安全多轴运动：Z→XY→Z")
         if z is not None:
             safe_z = self._to_machine_steps("Z", 0.0)
             self.move_to("Z", safe_z, speed, acc)
@@ -289,7 +375,7 @@ class XYZStepperController:
         if z is not None:
             self.move_to("Z", self._to_machine_steps("Z", z), speed, acc)
             self.wait_complete("Z")
-        logger.info("✅ 多轴顺序运动完成")
+        # logger.info("多轴顺序运动完成")
 
     # ========== 坐标与零点 ==========
     def _to_machine_steps(self, axis: str, mm: float) -> int:
@@ -308,23 +394,23 @@ class XYZStepperController:
             json.dump({"work_origin_steps": origin, "timestamp": datetime.now().isoformat()}, f, indent=2)
         self.work_origin_steps = origin
         self.is_homed = True
-        logger.info(f"✅ 零点已定义并保存至 {save_path}")
+        # logger.info(f"零点已定义并保存至 {save_path}")
 
     def _load_work_origin(self, path: str) -> bool:
         import json, os
 
         if not os.path.exists(path):
-            logger.warning("⚠️ 未找到软零点文件")
+            # logger.warning("未找到软零点文件")
             return False
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
         self.work_origin_steps = data.get("work_origin_steps", {"x": 0, "y": 0, "z": 0})
         self.is_homed = True
-        logger.info(f"📂 软零点已加载: {self.work_origin_steps}")
+        # logger.info(f"软零点已加载: {self.work_origin_steps}")
         return True
 
     def return_to_work_origin(self, speed: int = 200, acc: int = 800):
-        logger.info("🏁 回工件软零点")
+        # logger.info("回工件软零点")
         self.move_to("Z", self._to_machine_steps("Z", 0.0), speed, acc)
         self.wait_complete("Z")
         self.move_to("X", self.work_origin_steps.get("x", 0), speed, acc)
@@ -333,4 +419,4 @@ class XYZStepperController:
         self.wait_complete("Y")
         self.move_to("Z", self.work_origin_steps.get("z", 0), speed, acc)
         self.wait_complete("Z")
-        logger.info("🎯 回软零点完成 ✅")
+        # logger.info("回软零点完成")
