@@ -1,4 +1,3 @@
-      
 import csv
 import inspect
 import json
@@ -139,12 +138,11 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
                 time.sleep(2)
             if not modbus_client.client.is_socket_open():
                 raise ValueError('modbus tcp connection failed')
-            self.nodes = BaseClient.load_csv(os.path.join(os.path.dirname(__file__), 'coin_cell_assembly_a.csv'))
+            self.nodes = BaseClient.load_csv(os.path.join(os.path.dirname(__file__), 'coin_cell_assembly_1105.csv'))
             self.client = modbus_client.register_node_list(self.nodes)
         else:
             print("测试模式，跳过连接")
             self.nodes, self.client = None, None
-
         """ 工站的配置 """
 
         self.success = False
@@ -986,6 +984,31 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         #self.success = True
         #return self.success
     
+    def run_packaging_workflow(self, workflow_config: Dict[str, Any]) -> "CoinCellAssemblyWorkstation":
+        config = workflow_config or {}
+
+        qiming_params = config.get("qiming") or {}
+        if qiming_params:
+            self.qiming_coin_cell_code(**qiming_params)
+
+        if config.get("init", True):
+            self.func_pack_device_init()
+        if config.get("auto", True):
+            self.func_pack_device_auto()
+        if config.get("start", True):
+            self.func_pack_device_start()
+
+        packaging_config = config.get("packaging") or {}
+        bottle_num = packaging_config.get("bottle_num")
+        if bottle_num is not None:
+            self.func_pack_send_bottle_num(bottle_num)
+
+        allpack_params = packaging_config.get("command") or {}
+        if allpack_params:
+            self.func_allpack_cmd(**allpack_params)
+
+        return self
+    
     def fun_wuliao_test(self) -> bool: 
         #找到data_init中构建的2个物料盘
         liaopan3 = self.deck.get_resource("\u7535\u6c60\u6599\u76d8")
@@ -1199,96 +1222,34 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         """移液枪头库存 (数量, INT16)"""
         inventory, read_err = self.client.register_node_list(self.nodes).use_node('REG_DATA_TIPS_INVENTORY').read(1)
         return inventory
-        
+         
     '''
 
-def run_coin_cell_packaging_workflow(config: Dict[str, Any]) -> CoinCellAssemblyWorkstation:
-    """根据统一配置顺序执行扣电池装配工作流。
-
-    Args:
-        config: 统一的工作流配置。字段示例:
-            {
-                "deck": {"setup": True, "name": "coin_cell_deck"},
-                "workstation": {"address": "...", "port": "...", "debug_mode": False},
-                "qiming": {...},
-                "init": True,
-                "auto": True,
-                "start": True,
-                "packaging": {
-                    "bottle_num": 16,
-                    "command": {...}
-                }
-            }
-
-    Returns:
-        执行完毕的 `CoinCellAssemblyWorkstation` 实例。
-    """
-
-    deck_config = config.get("deck")
-    if isinstance(deck_config, Deck):
-        deck = deck_config
-    elif isinstance(deck_config, dict):
-        deck = CoincellDeck(**deck_config)
-    elif deck_config is None:
-        deck = CoincellDeck(setup=True, name="coin_cell_deck")
-    else:
-        raise ValueError("deck 配置需为 Deck 实例或 dict。")
-
-    workstation_config = dict(config.get("workstation", {}))
-    workstation_config.setdefault("deck", deck)
-    workstation = CoinCellAssemblyWorkstation(**workstation_config)
-
-    qiming_params = config.get("qiming", {})
-    if qiming_params:
-        workstation.qiming_coin_cell_code(**qiming_params)
-
-    if config.get("init", True):
-        workstation.func_pack_device_init()
-    if config.get("auto", True):
-        workstation.func_pack_device_auto()
-    if config.get("start", True):
-        workstation.func_pack_device_start()
-
-    packaging_config = config.get("packaging", {})
-    bottle_num = packaging_config.get("bottle_num")
-    if bottle_num is not None:
-        workstation.func_pack_send_bottle_num(bottle_num)
-
-    allpack_params = packaging_config.get("command", {})
-    if allpack_params:
-        workstation.func_allpack_cmd(**allpack_params)
-
-    return workstation
+    def run_coin_cell_assembly_workflow(self):
+        self.qiming_coin_cell_code(
+            fujipian_panshu=1,
+            fujipian_juzhendianwei=0,
+            gemopanshu=0,
+            gemo_juzhendianwei=0,
+            lvbodian=True,
+            battery_pressure_mode=True,
+            battery_pressure=4200,
+            battery_clean_ignore=False,
+        )
+        self.func_pack_device_init()
+        self.func_pack_device_auto()
+        self.func_pack_device_start()
+        self.func_pack_send_bottle_num(1)
+        self.func_allpack_cmd(elec_num = 1, elec_use_num = 1, elec_vol=50, assembly_type=7, assembly_pressure=4200, file_path="/Users/sml/work")
+        self.func_pack_send_finished_cmd()
+        self.func_pack_device_stop()
+        # 物料转换
+        return self
 
 
 if __name__ == "__main__":
-    workflow_config = {
-        "deck": {"setup": True, "name": "coin_cell_deck"},
-        "workstation": {
-            "address": "172.16.28.102",
-            "port": "502",
-            "debug_mode": False,
-        },
-        "qiming": {
-            "fujipian_panshu": 1,
-            "fujipian_juzhendianwei": 2,
-            "gemopanshu": 3,
-            "gemo_juzhendianwei": 4,
-            "lvbodian": False,
-            "battery_pressure_mode": False,
-            "battery_pressure": 4200,
-            "battery_clean_ignore": False,
-        },
-        "packaging": {
-            "bottle_num": 16,
-            "command": {
-                "elec_num": 16,
-                "elec_use_num": 16,
-                "elec_vol": 50,
-                "assembly_type": 7,
-                "assembly_pressure": 4200,
-                "file_path": "/Users/calvincao/Desktop/work/Uni-Lab-OS-hhm",
-            },
-        },
-    }
-    run_coin_cell_packaging_workflow(workflow_config)
+    deck = CoincellDeck(setup=True, name="coin_cell_deck")
+    w = CoinCellAssemblyWorkstation(deck=deck, address="172.16.28.102", port="502", debug_mode=False)
+    w.run_coin_cell_assembly_workflow()
+        
+       

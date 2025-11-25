@@ -821,6 +821,27 @@ bioyond_cell:
           title: resource_tree_transfer参数
           type: object
         type: UniLabJsonCommand
+      auto-run_bioyond_cell_workflow:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        placeholder_keys: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: run_bioyond_cell_workflow参数
+          type: object
+        type: UniLabJsonCommand
       auto-scheduler_continue:
         feedback: {}
         goal: {}
@@ -1114,7 +1135,7 @@ bioyond_cell:
   config_info: []
   description: ''
   handles: []
-  icon: benyao2.webp
+  icon: ''
   init_param_schema:
     config:
       properties:

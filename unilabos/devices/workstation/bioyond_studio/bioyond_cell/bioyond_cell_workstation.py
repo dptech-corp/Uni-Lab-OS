@@ -257,7 +257,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
     def auto_feeding4to3(
         self,
         # ★ 修改点：默认模板路径
-        xlsx_path: Optional[str] = "/Users/calvincao/Desktop/work/uni-lab-all/Uni-Lab-OS/unilabos/devices/workstation/bioyond_studio/bioyond_cell/material_template.xlsx",
+        xlsx_path: Optional[str] = "/Users/sml/work/Unilab/Uni-Lab-OS/unilabos/devices/workstation/bioyond_studio/bioyond_cell/material_template.xlsx",
         # ---------------- WH4 - 加样头面 (Z=1, 12个点位) ----------------
         WH4_x1_y1_z1_1_materialName: str = "", WH4_x1_y1_z1_1_quantity: float = 0.0,
         WH4_x2_y1_z1_2_materialName: str = "", WH4_x2_y1_z1_2_quantity: float = 0.0,
@@ -477,7 +477,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
         - totalMass 自动计算为所有物料质量之和
         - createTime 缺失或为空时自动填充为当前日期（YYYY/M/D）
         """
-        default_path = Path("/Users/calvincao/Desktop/work/uni-lab-all/Uni-Lab-OS/unilabos/devices/workstation/bioyond_studio/bioyond_cell/2025092701.xlsx")
+        default_path = Path("/Users/sml/work/Unilab/Uni-Lab-OS/unilabos/devices/workstation/bioyond_studio/bioyond_cell/2025092701.xlsx")
         path = Path(xlsx_path) if xlsx_path else default_path
         print(f"[create_orders] 使用 Excel 路径: {path}")
         if path != default_path:
@@ -1165,137 +1165,39 @@ class BioyondCellWorkstation(BioyondWorkstation):
         })
         return final_result
 
-
-
-
-def run_bioyond_cell_workflow(config: Dict[str, Any]) -> BioyondCellWorkstation:
-    """按照统一配置执行奔曜配液与转运工作流。
-
-    Args:
-        config: 统一的工作流配置。字段示例:
-            {
-                "lab_registry": {"setup": True},
-                "deck": {"setup": True},
-                "workstation": {"config": {...}},
-                "update_push_ip": True,
-                "samples": [
-                    {"name": "...", "board_type": "...", "bottle_type": "...", "location_code": "...", "warehouse_name": "..."}
-                ],
-                "scheduler": {"start": True, "log": True},
-                "operations": {
-                    "auto_feeding4to3": {"enabled": True},
-                    "create_orders": {"excel_path": "...", "log": True},
-                    "transfer_3_to_2_to_1": {"enabled": True, "log": True},
-                    "transfer_1_to_2": {"enabled": True, "log": True}
-                },
-                "keep_alive": False,
-                "keep_alive_interval": 1
-            }
-
-    Returns:
-        执行完毕的 `BioyondCellWorkstation` 实例。
-    """
-
-    if config.get("lab_registry", {}).get("setup", True):
-        lab_registry.setup()
-
-    deck_config = config.get("deck")
-    if isinstance(deck_config, dict):
-        deck = BIOYOND_YB_Deck(**deck_config)
-    elif deck_config is None:
-        deck = BIOYOND_YB_Deck(setup=True)
-    else:
-        deck = deck_config
-
-    workstation_kwargs = dict(config.get("workstation", {}))
-    if "deck" not in workstation_kwargs:
-        workstation_kwargs["deck"] = deck
-    ws = BioyondCellWorkstation(**workstation_kwargs)
-
-    if config.get("update_push_ip", True):
-        ws.update_push_ip()
-
-    for sample_cfg in config.get("samples", []):
-        ws.create_sample(**sample_cfg)
-
-    scheduler_cfg = config.get("scheduler", {})
-    if scheduler_cfg.get("start", True):
-        result = ws.scheduler_start()
-        if scheduler_cfg.get("log", True):
-            logger.info(result)
-
-    operations_cfg = config.get("operations", {})
-
-    auto_feeding_cfg = operations_cfg.get("auto_feeding4to3", {})
-    if auto_feeding_cfg.get("enabled", True):
-        result = ws.auto_feeding4to3()
-        if auto_feeding_cfg.get("log", True):
-            logger.info(result)
-
-    create_orders_cfg = operations_cfg.get("create_orders")
-    if create_orders_cfg:
-        excel_path = create_orders_cfg.get("excel_path")
-        if not excel_path:
-            raise ValueError("create_orders 需要提供 excel_path。")
-        result = ws.create_orders(Path(excel_path))
-        if create_orders_cfg.get("log", True):
-            logger.info(result)
-
-    transfer_321_cfg = operations_cfg.get("transfer_3_to_2_to_1", {})
-    if transfer_321_cfg.get("enabled", True):
-        result = ws.transfer_3_to_2_to_1()
-        if transfer_321_cfg.get("log", True):
-            logger.info(result)
-
-    transfer_12_cfg = operations_cfg.get("transfer_1_to_2", {})
-    if transfer_12_cfg.get("enabled", True):
-        result = ws.transfer_1_to_2()
-        if transfer_12_cfg.get("log", True):
-            logger.info(result)
-
-    if config.get("keep_alive", False):
-        interval = config.get("keep_alive_interval", 1)
-        while True:
-            time.sleep(interval)
-
-    return ws
-
-
+    def run_bioyond_cell_workflow(self):
+        self.create_sample(
+            board_type="配液瓶(小)板",
+            bottle_type="配液瓶(小)",
+            location_code="B01",
+            name="配液瓶",
+            warehouse_name="手动堆栈"
+        )
+        self.create_sample(
+            board_type="5ml分液瓶板",
+            bottle_type="5ml分液瓶",
+            location_code="B02",
+            name="分液瓶",
+            warehouse_name="手动堆栈"
+        )
+        self.scheduler_start()
+        self.auto_feeding4to3(
+            xlsx_path="/Users/sml/work/Unilab/Uni-Lab-OS/unilabos/devices/workstation/bioyond_studio/bioyond_cell/material_template.xlsx"
+        )
+        self.create_orders(
+            xlsx_path="/Users/sml/work/Unilab/Uni-Lab-OS/unilabos/devices/workstation/bioyond_studio/bioyond_cell/2025092701.xlsx"
+        )
+        self.transfer_3_to_2_to_1(
+            source_wh_id="3a19debc-84b4-0359-e2d4-b3beea49348b",
+            source_x=1,
+            source_y=1,
+            source_z=1,
+        )
+        return self
 if __name__ == "__main__":
-    workflow_config = {
-        "deck": {"setup": True},
-        "update_push_ip": True,
-        "samples": [
-            {
-                "name": "配液瓶",
-                "board_type": "配液瓶(小)板",
-                "bottle_type": "配液瓶(小)",
-                "location_code": "E01",
-            },
-            {
-                "name": "分液瓶",
-                "board_type": "5ml分液瓶板",
-                "bottle_type": "5ml分液瓶",
-                "location_code": "D01",
-            },
-        ],
-        "operations": {
-            "auto_feeding4to3": {"enabled": True, "log": True},
-            "create_orders": {
-                "excel_path": "/Users/calvincao/Desktop/work/uni-lab-all/Uni-Lab-OS/unilabos/devices/workstation/bioyond_studio/bioyond_cell/2025092701.xlsx",
-                "log": True,
-            },
-            "transfer_3_to_2_to_1": {"enabled": True, "log": True},
-            "transfer_1_to_2": {"enabled": True, "log": True},
-        },
-        "keep_alive": True,
-    }
-    run_bioyond_cell_workflow(workflow_config)
-
-    # 1. location code
-    # 2. 实验文件
-    # 3. material template file
-
+    deck = BIOYOND_YB_Deck(setup=True)
+    w = BioyondCellWorkstation(deck=deck, address="172.16.28.102", port="502", debug_mode=False)
+    w.run_bioyond_cell_workflow()
     while True:
         time.sleep(1)
     # re=ws.scheduler_stop()
