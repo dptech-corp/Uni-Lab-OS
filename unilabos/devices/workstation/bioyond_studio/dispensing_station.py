@@ -1303,16 +1303,20 @@ class BioyondDispensingStation(BioyondWorkstation):
         """启动调度器 - 启动Bioyond工作站的任务调度器，开始执行队列中的任务
 
         Returns:
-            dict: 包含return_info的字典，return_info为整型(1=成功, 0=失败)
+            dict: 包含return_info的字典，return_info为整型(1=成功)
+
+        Raises:
+            BioyondException: 调度器启动失败时抛出异常
         """
-        try:
-            result = self.hardware_interface.scheduler_start()
-            self.hardware_interface._logger.info(f"调度器启动结果: {result}")
-            return {"return_info": result}
-        except Exception as e:
-            error_msg = f"启动调度器失败: {str(e)}"
+        result = self.hardware_interface.scheduler_start()
+        self.hardware_interface._logger.info(f"调度器启动结果: {result}")
+        
+        if result != 1:
+            error_msg = "启动调度器失败: 有未处理错误，调度无法启动。请检查Bioyond系统状态。"
             self.hardware_interface._logger.error(error_msg)
-            return {"return_info": 0, "error": error_msg}
+            raise BioyondException(error_msg)
+        
+        return {"return_info": result}
 
     # 等待多个任务完成并获取实验报告
     def wait_for_multiple_orders_and_get_reports(self,

@@ -16,7 +16,7 @@
             "class": "reaction_station.bioyond",
             "position": {
                 "x": 0,
-                "y": 0,
+                "y": 1100,
                 "z": 0
             },
             "config": {
@@ -74,6 +74,9 @@
                         "_resource_type": "unilabos.resources.bioyond.decks:BIOYOND_PolymerReactionStation_Deck"
                     }
                 },
+                "size_x": 2700.0,
+                "size_y": 1080.0,
+                "size_z": 2000.0,
                 "protocol_type": []
             },
             "data": {}
@@ -162,7 +165,7 @@
             "class": "BIOYOND_PolymerReactionStation_Deck",
             "position": {
                 "x": 0,
-                "y": 3800,
+                "y": 1100,
                 "z": 0
             },
             "config": {

@@ -471,6 +471,35 @@ reaction_station.bioyond:
           title: reactor_taken_out参数
           type: object
         type: UniLabJsonCommand
+      scheduler_start:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result:
+          return_info: return_info
+        schema:
+          description: 启动调度器 - 启动Bioyond工作站的任务调度器，开始执行队列中的任务
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result:
+              properties:
+                return_info:
+                  description: 调度器启动结果，成功返回1，失败返回0
+                  type: integer
+              required:
+              - return_info
+              title: scheduler_start结果
+              type: object
+          required:
+          - goal
+          title: scheduler_start参数
+          type: object
+        type: UniLabJsonCommand
       solid_feeding_vials:
         feedback: {}
         goal:
