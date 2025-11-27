@@ -159,6 +159,27 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
             "resources": [self.deck]
         })
 
+    def sync_transfer_resources(self) -> Dict[str, Any]:
+        """
+        供跨工站转运完成后调用，强制将当前台面资源同步到云端/前端。
+        """
+        if not hasattr(self, "_ros_node") or self._ros_node is None:
+            return {"status": "failed", "error": "ros_node_not_ready"}
+        if self.deck is None:
+            return {"status": "failed", "error": "deck_not_initialized"}
+        try:
+            future = ROS2DeviceNode.run_async_func(
+                self._ros_node.update_resource,
+                True,
+                resources=[self.deck],
+            )
+            if future:
+                future.result()
+            return {"status": "success"}
+        except Exception as exc:
+            logger.error(f"同步转运资源失败: {exc}", exc_info=True)
+            return {"status": "failed", "error": str(exc)}
+
     # 批量操作在这里写
     async def change_hole_sheet_to_2(self, hole: MaterialHole):
         hole._unilabos_state["max_sheets"] = 2
@@ -1225,26 +1246,87 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
          
     '''
 
-    def run_coin_cell_assembly_workflow(self):
-        self.qiming_coin_cell_code(
-            fujipian_panshu=1,
-            fujipian_juzhendianwei=0,
-            gemopanshu=0,
-            gemo_juzhendianwei=0,
-            lvbodian=True,
-            battery_pressure_mode=True,
-            battery_pressure=4200,
-            battery_clean_ignore=False,
-        )
-        self.func_pack_device_init()
-        self.func_pack_device_auto()
-        self.func_pack_device_start()
-        self.func_pack_send_bottle_num(1)
-        self.func_allpack_cmd(elec_num = 1, elec_use_num = 1, elec_vol=50, assembly_type=7, assembly_pressure=4200, file_path="/Users/sml/work")
-        self.func_pack_send_finished_cmd()
-        self.func_pack_device_stop()
-        # 物料转换
-        return self
+    def run_coin_cell_assembly_workflow(
+        self,
+        workflow_config: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        config: Dict[str, Any]
+        if workflow_config is None:
+            config = {}
+        elif isinstance(workflow_config, list):
+            config = {"materials": workflow_config}
+        else:
+            config = workflow_config
+        qiming_defaults = {
+            "fujipian_panshu": 1,
+            "fujipian_juzhendianwei": 0,
+            "gemopanshu": 1,
+            "gemo_juzhendianwei": 0,
+            "lvbodian": True,
+            "battery_pressure_mode": True,
+            "battery_pressure": 4200,
+            "battery_clean_ignore": False,
+        }
+        qiming_params = {**qiming_defaults, **(config.get("qiming") or {})}
+        qiming_success = self.qiming_coin_cell_code(**qiming_params)
+
+        step_results: Dict[str, Any] = {}
+        try:
+            self.func_pack_device_init()
+            step_results["init"] = True
+        except Exception as exc:
+            step_results["init"] = f"error: {exc}"
+
+        try:
+            self.func_pack_device_auto()
+            step_results["auto"] = True
+        except Exception as exc:
+            step_results["auto"] = f"error: {exc}"
+
+        try:
+            self.func_pack_device_start()
+            step_results["start"] = True
+        except Exception as exc:
+            step_results["start"] = f"error: {exc}"
+
+        packaging_cfg = config.get("packaging") or {}
+        bottle_num = packaging_cfg.get("bottle_num", 1)
+        try:
+            self.func_pack_send_bottle_num(bottle_num)
+            step_results["send_bottle_num"] = True
+        except Exception as exc:
+            step_results["send_bottle_num"] = f"error: {exc}"
+
+        command_defaults = {
+            "elec_num": 1,
+            "elec_use_num": 1,
+            "elec_vol": 50,
+            "assembly_type": 7,
+            "assembly_pressure": 4200,
+            "file_path": "/Users/sml/work",
+        }
+        command_params = {**command_defaults, **(packaging_cfg.get("command") or {})}
+        packaging_result = self.func_allpack_cmd(**command_params)
+
+        finished_result = self.func_pack_send_finished_cmd()
+        stop_result = self.func_pack_device_stop()
+
+        return {
+            "qiming": {
+                "params": qiming_params,
+                "success": qiming_success,
+            },
+            "workflow_steps": step_results,
+            "packaging": {
+                "bottle_num": bottle_num,
+                "command": command_params,
+                "result": packaging_result,
+            },
+            "finish": {
+                "send_finished": finished_result,
+                "stop": stop_result,
+            },
+        }
 
 
 if __name__ == "__main__":

@@ -837,6 +837,8 @@ bioyond_cell:
         result:
           properties:
             feeding_materials:
+              items:
+                type: object
               type: array
           required:
           - feeding_materials
@@ -876,8 +878,12 @@ bioyond_cell:
         result:
           properties:
             feeding_materials:
+              items:
+                type: object
               type: array
             liquid_materials:
+              items:
+                type: object
               type: array
           required:
           - liquid_materials
@@ -889,6 +895,8 @@ bioyond_cell:
             goal:
               properties:
                 feeding_materials:
+                  items:
+                    type: object
                   type: array
               required: []
               type: object
@@ -919,9 +927,15 @@ bioyond_cell:
         result:
           properties:
             liquid_materials:
+              items:
+                type: object
               type: array
             transfer_materials:
+              items:
+                type: object
               type: array
+            transfer_summary:
+              type: object
           required:
           - transfer_materials
           type: object
@@ -932,10 +946,24 @@ bioyond_cell:
             goal:
               properties:
                 liquid_materials:
+                  items:
+                    type: object
                   type: array
               required: []
               type: object
-            result: {}
+            result:
+              properties:
+                liquid_materials:
+                  items:
+                    type: object
+                  type: array
+                transfer_materials:
+                  items:
+                    type: object
+                  type: array
+                transfer_summary:
+                  type: object
+              type: object
           required:
           - goal
           title: run_transfer_stage参数
@@ -1234,7 +1262,7 @@ bioyond_cell:
   config_info: []
   description: 配液工站
   handles: []
-  icon: ''
+  icon: benyao2.webp
   init_param_schema:
     config:
       properties:

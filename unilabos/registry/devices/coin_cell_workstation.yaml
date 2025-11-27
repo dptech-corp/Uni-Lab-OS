@@ -479,20 +479,139 @@ coincellassemblyworkstation_device:
         type: UniLabJsonCommand
       auto-run_coin_cell_assembly_workflow:
         feedback: {}
-        goal: {}
-        goal_default: {}
-        handles: {}
+        goal:
+          properties:
+            workflow_config:
+              type: object
+          required: []
+          type: object
+        goal_default:
+          workflow_config: {}
+        handles:
+          input:
+          - data_key: workflow_config
+            data_source: handle
+            data_type: resource
+            handler_key: WorkflowConfig
+            label: Workflow Config
+          output:
+          - data_key: qiming
+            data_source: executor
+            data_type: resource
+            handler_key: QimingResult
+            label: Qiming Result
+          - data_key: workflow_steps
+            data_source: executor
+            data_type: resource
+            handler_key: WorkflowSteps
+            label: Workflow Steps
+          - data_key: packaging
+            data_source: executor
+            data_type: resource
+            handler_key: PackagingResult
+            label: Packaging Result
+          - data_key: finish
+            data_source: executor
+            data_type: resource
+            handler_key: FinishResult
+            label: Finish Result
         placeholder_keys: {}
-        result: {}
+        result:
+          properties:
+            finish:
+              properties:
+                send_finished:
+                  type: object
+                stop:
+                  type: object
+              required:
+              - send_finished
+              - stop
+              type: object
+            packaging:
+              properties:
+                bottle_num:
+                  type: integer
+                command:
+                  type: object
+                result:
+                  type: object
+              required:
+              - bottle_num
+              - command
+              - result
+              type: object
+            qiming:
+              properties:
+                params:
+                  type: object
+                success:
+                  type: boolean
+              required:
+              - params
+              - success
+              type: object
+            workflow_steps:
+              type: object
+          required:
+          - qiming
+          - workflow_steps
+          - packaging
+          - finish
+          type: object
         schema:
           description: ''
           properties:
             feedback: {}
             goal:
-              properties: {}
+              properties:
+                workflow_config:
+                  type: object
               required: []
               type: object
-            result: {}
+            result:
+              properties:
+                finish:
+                  properties:
+                    send_finished:
+                      type: object
+                    stop:
+                      type: object
+                  required:
+                  - send_finished
+                  - stop
+                  type: object
+                packaging:
+                  properties:
+                    bottle_num:
+                      type: integer
+                    command:
+                      type: object
+                    result:
+                      type: object
+                  required:
+                  - bottle_num
+                  - command
+                  - result
+                  type: object
+                qiming:
+                  properties:
+                    params:
+                      type: object
+                    success:
+                      type: boolean
+                  required:
+                  - params
+                  - success
+                  type: object
+                workflow_steps:
+                  type: object
+              required:
+              - qiming
+              - workflow_steps
+              - packaging
+              - finish
+              type: object
           required:
           - goal
           title: run_coin_cell_assembly_workflow参数
@@ -548,7 +667,7 @@ coincellassemblyworkstation_device:
   config_info: []
   description: 扣电工站
   handles: []
-  icon: ''
+  icon: koudian.webp
   init_param_schema:
     config:
       properties:
