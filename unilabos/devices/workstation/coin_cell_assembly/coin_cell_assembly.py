@@ -139,7 +139,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
                 time.sleep(2)
             if not modbus_client.client.is_socket_open():
                 raise ValueError('modbus tcp connection failed')
-            self.nodes = BaseClient.load_csv(os.path.join(os.path.dirname(__file__), 'coin_cell_assembly_a.csv'))
+            self.nodes = BaseClient.load_csv(os.path.join(os.path.dirname(__file__), 'coin_cell_assembly_1105.csv'))
             self.client = modbus_client.register_node_list(self.nodes)
         else:
             print("测试模式，跳过连接")
