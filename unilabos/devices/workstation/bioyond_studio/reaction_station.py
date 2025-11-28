@@ -97,6 +97,27 @@ class BioyondReactionStation(BioyondWorkstation):
         print(f"当前队列长度: {len(self.pending_task_params)}")
         return json.dumps({"suc": True})
 
+    def scheduler_start(self) -> dict:
+        """启动调度器 - 启动Bioyond工作站的任务调度器，开始执行队列中的任务
+
+        Returns:
+            dict: 包含return_info的字典，return_info为整型(1=成功)
+
+        Raises:
+            BioyondException: 调度器启动失败时抛出异常
+        """
+        from unilabos.devices.workstation.bioyond_studio.bioyond_rpc import BioyondException
+        
+        result = self.hardware_interface.scheduler_start()
+        self.hardware_interface._logger.info(f"调度器启动结果: {result}")
+        
+        if result != 1:
+            error_msg = "启动调度器失败: 有未处理错误，调度无法启动。请检查Bioyond系统状态。"
+            self.hardware_interface._logger.error(error_msg)
+            raise BioyondException(error_msg)
+        
+        return {"return_info": result}
+
     def reactor_taken_in(
         self,
         assign_material_name: str,
@@ -1291,14 +1312,22 @@ class BioyondReactionStation(BioyondWorkstation):
             "paramValues": {}
         }]
 
-        result = self.create_order(json.dumps(order_params))
-
-        if not result:
-            return self._create_error_result("创建任务失败", "create_order")
-
-        # 清空工作流序列和参数，防止下次执行时累积重复
-        self.pending_task_params = []
-        self.clear_workflows()  # 清空工作流序列，避免重复累积
+        # 尝试创建订单：无论成功或失败，都需要在本次尝试结束后清理本地队列，避免下一次重复累积
+        try:
+            result = self.create_order(json.dumps(order_params))
+            if not result:
+                # 返回错误结果之前先记录情况（稍后由 finally 清理队列）
+                print("⚠️ 创建任务返回空或失败响应，稍后将清理本地队列以避免重复累积")
+                return self._create_error_result("创建任务失败", "create_order")
+        finally:
+            # 无论任务创建成功与否，都要清空本地保存的参数和工作流序列，防止下次重复
+            try:
+                self.pending_task_params = []
+                self.clear_workflows()  # 清空工作流序列，避免重复累积
+                print("✅ 已清理 pending_task_params 与 workflow_sequence")
+            except Exception as _ex:
+                # 记录清理失败，但不要阻塞原始返回
+                print(f"❌ 清理队列时发生异常: {_ex}")
 
         # print(f"\n✅ 任务创建成功: {result}")
         # print(f"\n✅ 任务创建成功")
@@ -1328,3 +1357,35 @@ class BioyondReactionStation(BioyondWorkstation):
         except Exception as e:
             print(f"❌ 跳过滴定异常: {str(e)}")
             return {"code": 0, "message": str(e), "timestamp": int(time.time())}
+
+    def set_reactor_temperature(self, reactor_id: int, temperature: float) -> str:
+        """
+        设置反应器温度
+
+        Args:
+            reactor_id: 反应器编号 (1-5)
+            temperature: 目标温度 (°C)
+
+        Returns:
+            str: JSON 字符串，格式为 {"suc": True/False, "msg": "描述信息"}
+        """
+        if reactor_id not in range(1, 6):
+            return json.dumps({"suc": False, "msg": "反应器编号必须在 1-5 之间"})
+
+        try:
+            payload = {
+                "deviceTypeName": f"反应模块{chr(64 + reactor_id)}",  # 1->A, 2->B...
+                "temperature": float(temperature)
+            }
+            resp = requests.post(
+                f"{self.hardware_interface.host}/api/lims/device/set-reactor-temperatue",
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=10
+            )
+            if resp.status_code == 200:
+                return json.dumps({"suc": True, "msg": "温度设置成功"})
+            else:
+                return json.dumps({"suc": False, "msg": f"温度设置失败，HTTP {resp.status_code}"})
+        except Exception as e:
+            return json.dumps({"suc": False, "msg": f"温度设置异常: {str(e)}"})
