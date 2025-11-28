@@ -532,7 +532,7 @@ class HostNode(BaseROS2DeviceNode):
         self.lab_logger().info(f"[Host Node] Initializing device: {device_id}")
 
         try:
-            d = initialize_device_from_dict(device_id, device_config.get_nested_dict())
+            d = initialize_device_from_dict(device_id, device_config)
         except DeviceClassInvalid as e:
             self.lab_logger().error(f"[Host Node] Device class invalid: {e}")
             d = None
