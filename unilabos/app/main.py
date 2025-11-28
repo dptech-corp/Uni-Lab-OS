@@ -218,7 +218,7 @@ def main():
 
     if hasattr(BasicConfig, "log_level"):
         logger.info(f"Log level set to '{BasicConfig.log_level}' from config file.")
-        configure_logger(loglevel=BasicConfig.log_level)
+        configure_logger(loglevel=BasicConfig.log_level, working_dir=working_dir)
 
     if args_dict["addr"] == "test":
         print_status("使用测试环境地址", "info")
@@ -450,13 +450,13 @@ def main():
             start_backend(**args_dict)
             start_server(
                 open_browser=not args_dict["disable_browser"],
-                port=args_dict["port"],
+                port=BasicConfig.port,
             )
     else:
         start_backend(**args_dict)
         start_server(
             open_browser=not args_dict["disable_browser"],
-            port=args_dict["port"],
+            port=BasicConfig.port,
         )
 
 

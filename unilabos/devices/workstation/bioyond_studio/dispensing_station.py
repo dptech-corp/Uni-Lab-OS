@@ -2,6 +2,7 @@ from datetime import datetime
 import json
 import time
 from typing import Optional, Dict, Any, List
+from typing_extensions import TypedDict
 import requests
 import pint
 from unilabos.devices.workstation.bioyond_studio.config import API_CONFIG
@@ -13,6 +14,14 @@ import json
 import sys
 from pathlib import Path
 import importlib
+
+class ComputeExperimentDesignReturn(TypedDict):
+    solutions: list
+    titration: dict
+    solvents: dict
+    feeding_order: list
+    return_info: str
+
 
 class BioyondDispensingStation(BioyondWorkstation):
     def __init__(
@@ -138,85 +147,20 @@ class BioyondDispensingStation(BioyondWorkstation):
         wt_percent: str = "0.25",
         m_tot: str = "70",
         titration_percent: str = "0.03",
-    ) -> dict:
-        """计算实验设计参数
-
-        参数:
-            ratio: 化合物配比，支持多种格式:
-                   1. 简化格式(推荐): "MDA:0.5,PAPP:0.5,BTDA:0.95"
-                   2. JSON字符串: '{"MDA": 1, "BTDA": 0.95, "PAPP": 1}'
-                   3. Python字典: {"MDA": 1, "BTDA": 0.95, "PAPP": 1}
-            wt_percent: 固体重量百分比，默认 0.25
-            m_tot: 反应混合物总质量(g)，默认 70
-            titration_percent: 滴定溶液百分比，默认 0.03
-
-        返回:
-            包含实验设计参数的字典
-        """
+    ) -> ComputeExperimentDesignReturn:
         try:
-            # 1. 参数解析和验证
-            original_ratio = ratio
-
             if isinstance(ratio, str):
-                # 尝试解析简化格式: "MDA:0.5,PAPP:0.5,BTDA:0.95"
-                if ':' in ratio and ',' in ratio:
-                    try:
-                        ratio_dict = {}
-                        pairs = ratio.split(',')
-                        for pair in pairs:
-                            pair = pair.strip()
-                            if ':' in pair:
-                                key, value = pair.split(':', 1)
-                                key = key.strip()
-                                value = value.strip()
-                                try:
-                                    ratio_dict[key] = float(value)
-                                except ValueError:
-                                    raise BioyondException(f"无法将 '{value}' 转换为数字")
-                        if ratio_dict:
-                            ratio = ratio_dict
-                            self.hardware_interface._logger.info(
-                                f"从简化格式解析 ratio: '{original_ratio}' -> {ratio}"
-                            )
-                    except BioyondException:
-                        raise
-                    except Exception as e:
-                        self.hardware_interface._logger.warning(
-                            f"简化格式解析失败，尝试JSON格式: {e}"
-                        )
-
-                # 如果不是简化格式或解析失败，尝试JSON格式
-                if isinstance(ratio, str):
-                    try:
-                        ratio = json.loads(ratio)
-                        # 处理可能的多层 JSON 编码
-                        if isinstance(ratio, str):
-                            try:
-                                ratio = json.loads(ratio)
-                            except Exception:
-                                pass
-                    except Exception as e:
-                        raise BioyondException(
-                            f"ratio 参数解析失败: {e}。\n"
-                            f"支持的格式:\n"
-                            f"  1. 简化格式(推荐): 'MDA:0.5,PAPP:0.5,BTDA:0.95'\n"
-                            f"  2. JSON格式: '{{\"MDA\": 0.5, \"BTDA\": 0.95, \"PAPP\": 0.5}}'"
-                        )
-
-            if not isinstance(ratio, dict):
-                raise BioyondException(
-                    f"ratio 必须是字典类型或可解析的字符串，当前类型: {type(ratio)}。\n"
-                    f"支持的格式:\n"
-                    f"  1. 简化格式(推荐): 'MDA:0.5,PAPP:0.5,BTDA:0.95'\n"
-                    f"  2. JSON格式: '{{\"MDA\": 0.5, \"BTDA\": 0.95, \"PAPP\": 0.5}}'"
-                )
-
-            if not ratio:
-                raise BioyondException("ratio 参数不能为空")
-
-            # 记录解析后的参数用于调试
-            self.hardware_interface._logger.info(f"最终解析的 ratio 参数: {ratio} (类型: {type(ratio)})")
-
+                try:
+                    ratio = json.loads(ratio)
+                except Exception:
+                    ratio = {}
+            root = str(Path(__file__).resolve().parents[3])
+            if root not in sys.path:
+                sys.path.append(root)
+            try:
+                mod = importlib.import_module("tem.compute")
+            except Exception as e:
+                raise BioyondException(f"无法导入计算模块: {e}")
             try:
                 wp = float(wt_percent) if isinstance(wt_percent, str) else wt_percent
                 mt = float(m_tot) if isinstance(m_tot, str) else m_tot
@@ -1298,25 +1242,6 @@ class BioyondDispensingStation(BioyondWorkstation):
             'actualTargetWeigh': actual_target_weigh,
             'actualVolume': actual_volume
         }
-
-    def scheduler_start(self) -> dict:
-        """启动调度器 - 启动Bioyond工作站的任务调度器，开始执行队列中的任务
-
-        Returns:
-            dict: 包含return_info的字典，return_info为整型(1=成功)
-
-        Raises:
-            BioyondException: 调度器启动失败时抛出异常
-        """
-        result = self.hardware_interface.scheduler_start()
-        self.hardware_interface._logger.info(f"调度器启动结果: {result}")
-        
-        if result != 1:
-            error_msg = "启动调度器失败: 有未处理错误，调度无法启动。请检查Bioyond系统状态。"
-            self.hardware_interface._logger.error(error_msg)
-            raise BioyondException(error_msg)
-        
-        return {"return_info": result}
 
     # 等待多个任务完成并获取实验报告
     def wait_for_multiple_orders_and_get_reports(self,
