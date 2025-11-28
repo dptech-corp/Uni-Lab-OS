@@ -58,15 +58,15 @@
             "type": "deck",
             "class": "",
             "position": {
-                "x": 0,
-                "y": 0,
-                "z": 0
+                "x": 200 ,
+                "y": 120,
+                "z": 90
             },
             "config": {
                 "type": "PRCXI9300Deck",
-                "size_x": 100,
-                "size_y": 100,
-                "size_z": 100,
+                "size_x": 640,
+                "size_y": 420,
+                "size_z": 25,
                 "rotation": {
                     "x": 0,
                     "y": 0,

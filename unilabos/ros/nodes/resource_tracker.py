@@ -145,8 +145,21 @@ class ResourceDictInstance(object):
             content["data"] = {}
         if not content.get("extra"):  # MagicCode
             content["extra"] = {}
-        if "pose" not in content:
-            content["pose"] = content.get("position", {})
+
+        if "position" in content:
+            pose = content["config"].get("pose",{})
+            if "position" not in pose :
+                if "position" in content["position"]:
+                    pose["position"] = content["position"]["position"]
+                else:
+                    pose["position"] = {"x": 0, "y": 0, "z": 0}
+            if "size" not in pose:
+                pose["size"] = {
+                    "width": content["config"].get("size_x", 0), 
+                    "height": content["config"].get("size_y", 0), 
+                    "depth": content["config"].get("size_z", 0)
+                }
+            content["pose"] = pose
         return ResourceDictInstance(ResourceDict.model_validate(content))
 
     def get_nested_dict(self) -> Dict[str, Any]:

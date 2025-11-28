@@ -8882,6 +8882,8 @@ liquid_handler.prcxi:
             type: ''
         handles: {}
         placeholder_keys:
+          liquid_names: unilabos_resource_names
+          volumes: unilabos_resource_amounts
           wells: unilabos_resources
         result: {}
         schema:

@@ -67,8 +67,37 @@ class PRCXI9300Deck(Deck):
 
     def __init__(self, name: str, size_x: float, size_y: float, size_z: float, **kwargs):
         super().__init__(name, size_x, size_y, size_z)
-        self.slots = [None] * 6  # PRCXI 9300 有 6 个槽位
-
+        self.slots = [None] * 12  # PRCXI 9300 有 6 个槽位
+        self.slot_locations = [
+        Coordinate(x=0.0, y=0.0, z=0.0),
+        Coordinate(x=132.5, y=0.0, z=0.0),
+        Coordinate(x=265.0, y=0.0, z=0.0),
+        Coordinate(x=0.0, y=90.5, z=0.0),
+        Coordinate(x=132.5, y=90.5, z=0.0),
+        Coordinate(x=265.0, y=90.5, z=0.0),
+        Coordinate(x=0.0, y=181.0, z=0.0),
+        Coordinate(x=132.5, y=181.0, z=0.0),
+        Coordinate(x=265.0, y=181.0, z=0.0),
+        Coordinate(x=0.0, y=271.5, z=0.0),
+        Coordinate(x=132.5, y=271.5, z=0.0),
+        Coordinate(x=265.0, y=271.5, z=0.0),
+        ]
+    
+    def serialize(self):
+        super_serialized = super().serialize()
+        if hasattr(self, "slot_locations"):
+            super_serialized["sites"] = [
+                {
+                "label": str(i),
+                "visible": True,
+                "position": {"x": slot.x, "y": slot.y, "z": slot.z},
+                "size": {"width": 127.0, "height": 85.5, "depth":0},
+                "content_type": ["plate", "tip_rack", "tube_rack"],
+                } for i, slot in enumerate(self.slot_locations)
+            ]
+        print("----"*10)
+        print(super_serialized)
+        return super_serialized
 
 class PRCXI9300Container(Plate, TipRack):
     """PRCXI 9300 的专用 Container 类，继承自 Plate和TipRack。
@@ -149,6 +178,7 @@ class PRCXI9300Handler(LiquidHandlerAbstract):
         step_mode=False,
         matrix_id="",
         is_9320=False,
+        **kwargs,
     ):
         tablets_info = []
         count = 0
