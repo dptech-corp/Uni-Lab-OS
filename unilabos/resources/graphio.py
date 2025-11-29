@@ -564,8 +564,10 @@ def resource_ulab_to_plr(resource: dict, plr_model=False) -> "ResourcePLR":
 
     sub_cls = find_subclass(d["type"], ResourcePLR)
     spect = inspect.signature(sub_cls)
-    if "category" not in spect.parameters:
-        d.pop("category")
+    for param in list(d.keys()):
+
+        if param == "category" or param == "pose":
+            d.pop(param)
     resource_plr = sub_cls.deserialize(d, allow_marshal=True)
     resource_plr.load_all_state(all_states)
     return resource_plr
