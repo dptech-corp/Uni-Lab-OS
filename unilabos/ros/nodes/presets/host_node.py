@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING, Optional, Dict, Any, List, ClassVar, Set, Type
 from action_msgs.msg import GoalStatus
 from geometry_msgs.msg import Point
 from rclpy.action import ActionClient, get_action_server_names_and_types_by_node
-from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.service import Service
 from unilabos_msgs.msg import Resource  # type: ignore
 from unilabos_msgs.srv import (
@@ -19,14 +18,12 @@ from unilabos_msgs.srv import (
     ResourceUpdate,
     ResourceList,
     SerialCommand,
-    ResourceGet,
 )  # type: ignore
 from unilabos_msgs.srv._serial_command import SerialCommand_Request, SerialCommand_Response
 from unique_identifier_msgs.msg import UUID
 
 from unilabos.registry.registry import lab_registry
 from unilabos.resources.graphio import initialize_resource
-from unilabos.resources.registry import add_schema
 from unilabos.ros.initialize_device import initialize_device_from_dict
 from unilabos.ros.msgs.message_converter import (
     get_msg_type,
@@ -37,7 +34,7 @@ from unilabos.ros.msgs.message_converter import (
 )
 from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode, ROS2DeviceNode, DeviceNodeResourceTracker
 from unilabos.ros.nodes.presets.controller_node import ControllerNode
-from unilabos.ros.nodes.resource_tracker import (
+from unilabos.resources.resource_tracker import (
     ResourceDict,
     ResourceDictInstance,
     ResourceTreeSet,
@@ -1111,7 +1108,7 @@ class HostNode(BaseROS2DeviceNode):
         if len(self.bridges) > 0:  # 边的提交待定
             from unilabos.app.web.client import HTTPClient, http_client
 
-            r = http_client.resource_add(add_schema(resources))
+            r = http_client.resource_add(resources)
             success = bool(r)
 
         response.success = success
@@ -1208,7 +1205,7 @@ class HostNode(BaseROS2DeviceNode):
         success = False
         if len(self.bridges) > 0:
             try:
-                r = self.bridges[-1].resource_update(add_schema(resources))
+                r = self.bridges[-1].resource_update(resources)
                 success = bool(r)
             except Exception as e:
                 self.lab_logger().error(f"[Host Node-Resource] Error updating resources: {str(e)}")
