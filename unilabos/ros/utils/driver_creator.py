@@ -12,7 +12,7 @@ from abc import abstractmethod
 from typing import Type, Any, Dict, Optional, TypeVar, Generic
 
 from unilabos.resources.graphio import nested_dict_to_list, resource_ulab_to_plr
-from unilabos.ros.nodes.resource_tracker import DeviceNodeResourceTracker
+from unilabos.resources.resource_tracker import DeviceNodeResourceTracker
 from unilabos.utils import logger, import_manager
 from unilabos.utils.cls_creator import create_instance_from_config
 

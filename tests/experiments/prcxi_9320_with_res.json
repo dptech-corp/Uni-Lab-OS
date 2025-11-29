@@ -1,72 +1,67 @@
 {
     "nodes": [
         {
+            "uuid": "160bffc6-d0ad-4898-ad3d-916fb98cd1b5",
+            "parent_uuid": "",
             "id": "PRCXI",
             "name": "PRCXI",
-            "parent": null,
             "type": "device",
             "class": "liquid_handler.prcxi",
-            "position": {
-                "x": 0,
-                "y": 0,
-                "z": 0
+            "parent": "",
+            "pose": {
+                "size": {
+                    "width": 562,
+                    "height": 394,
+                    "depth": 0
+                }
             },
             "config": {
+                "axis": "Left",
                 "deck": {
-                    "_resource_child_name": "PRCXI_Deck",
-                    "_resource_type": "unilabos.devices.liquid_handling.prcxi.prcxi:PRCXI9300Deck"
+                    "_resource_type": "unilabos.devices.liquid_handling.prcxi.prcxi:PRCXI9300Deck",
+                    "_resource_child_name": "PRCXI_Deck"
                 },
                 "host": "192.168.1.201",
                 "port": 9999,
-                "timeout": 10.0,
-                "axis": "Left",
-                "channel_num": 1,
-                "setup": true,
                 "debug": false,
-                "simulator": false,
+                "setup": true,
+                "is_9320": true,
+                "timeout": 10,
                 "matrix_id": "5de524d0-3f95-406c-86dd-f83626ebc7cb",
-                "is_9320": true
+                "simulator": false,
+                "channel_num": 1
             },
-            "data": {},
-            "children": [
-                "PRCXI_Deck"
-            ]
+            "data": {
+                "reset_ok": true
+            },
+            "schema": {},
+            "description": "",
+            "model": null,
+            "position": {
+                "x": 0,
+                "y": 240,
+                "z": 0
+            }
         },
         {
             "id": "PRCXI_Deck",
             "name": "PRCXI_Deck",
             
             "children": [
-                "RackT1",
-                "PlateT2",
-                "container_for_nothin3",
-                "PlateT4",
-                "RackT5",
-                "PlateT6",
-                "container_for_nothing7",
-                "container_for_nothing8",
-                "PlateT9",
-                "PlateT10",
-                "container_for_nothing11",
-                "container_for_nothing12",
-                "PlateT13",
-                "PlateT14",
-                "PlateT15",
-                "trash"
             ],
             "parent": "PRCXI",
             "type": "deck",
             "class": "",
             "position": {
-                "x": 0,
-                "y": 0,
+                "x": 10 ,
+                "y": 10,
                 "z": 0
             },
             "config": {
                 "type": "PRCXI9300Deck",
-                "size_x": 100,
-                "size_y": 100,
-                "size_z": 100,
+                "size_x": 542,
+                "size_y": 374,
+                "size_z": 0,
                 "rotation": {
                     "x": 0,
                     "y": 0,
@@ -74,10 +69,125 @@
                     "type": "Rotation"
                 },
                 "category": "deck",
-                "barcode": null
+                "barcode": null,
+                "sites": [
+                    {
+                        "label": "1",
+                        "visible": true,
+                        "position": {"x": 0, "y": 0, "z": 0},
+                        "size": {"width": 128.0, "height": 86, "depth":0},
+                        "content_type": ["plate", "tip_rack", "plates", "tip_racks", "tube_rack"]
+                    },
+                    {
+                        "label": "2",
+                        "visible": true,
+                        "position": {"x": 138, "y": 0, "z": 0},
+                        "size": {"width": 128.0, "height": 86, "depth":0},
+                        "content_type": ["plate", "tip_rack", "plates", "tip_racks", "tube_rack"]
+                    },
+                    {
+                        "label": "3",
+                        "visible": true,
+                        "position": {"x": 276, "y": 0, "z": 0},
+                        "size": {"width": 128.0, "height": 86, "depth":0},
+                        "content_type": ["plate", "tip_rack", "plates", "tip_racks", "tube_rack"]
+                    },
+                    {
+                        "label": "4",
+                        "visible": true,
+                        "position": {"x": 414, "y": 0, "z": 0},
+                        "size": {"width": 128.0, "height": 86, "depth":0},
+                        "content_type": ["plate", "tip_rack", "plates", "tip_racks", "tube_rack"]
+                    },
+                    {
+                        "label": "5",
+                        "visible": true,
+                        "position": {"x": 0, "y": 96, "z": 0},
+                        "size": {"width": 128.0, "height": 86, "depth":0},
+                        "content_type": ["plate", "tip_rack", "plates", "tip_racks", "tube_rack"]
+                    },
+                    {
+                        "label": "6",
+                        "visible": true,
+                        "position": {"x": 138, "y": 96, "z": 0},
+                        "size": {"width": 128.0, "height": 86, "depth":0},
+                        "content_type": ["plate", "tip_rack", "plates", "tip_racks", "tube_rack"]
+                    },
+                    {
+                        "label": "7",
+                        "visible": true,
+                        "position": {"x": 276, "y": 96, "z": 0},
+                        "size": {"width": 128.0, "height": 86, "depth":0},
+                        "content_type": ["plate", "tip_rack", "plates", "tip_racks", "tube_rack"]
+                    },
+                    {
+                        "label": "8",
+                        "visible": true,
+                        "position": {"x": 414, "y": 96, "z": 0},
+                        "size": {"width": 128.0, "height": 86, "depth":0},
+                        "content_type": ["plate", "tip_rack", "plates", "tip_racks", "tube_rack"]
+                    },
+                    {
+                        "label": "9",
+                        "visible": true,
+                        "position": {"x": 0, "y": 192, "z": 0},
+                        "size": {"width": 128.0, "height": 86, "depth":0},
+                        "content_type": ["plate", "tip_rack", "plates", "tip_racks", "tube_rack"]
+                    },
+                    {
+                        "label": "10",
+                        "visible": true,
+                        "position": {"x": 138, "y": 192, "z": 0},
+                        "size": {"width": 128.0, "height": 86, "depth":0},
+                        "content_type": ["plate", "tip_rack", "plates", "tip_racks", "tube_rack"]
+                    },
+                    {
+                        "label": "11",
+                        "visible": true,
+                        "position": {"x": 276, "y": 192, "z": 0},
+                        "size": {"width": 128.0, "height": 86, "depth":0},
+                        "content_type": ["plate", "tip_rack", "plates", "tip_racks", "tube_rack"]
+                    },
+                    {
+                        "label": "12",
+                        "visible": true,
+                        "position": {"x": 414, "y": 192, "z": 0},
+                        "size": {"width": 128.0, "height": 86, "depth":0},
+                        "content_type": ["plate", "tip_rack", "plates", "tip_racks", "tube_rack"]
+                    },
+                    {
+                        "label": "13",
+                        "visible": true,
+                        "position": {"x": 0, "y": 288, "z": 0},
+                        "size": {"width": 128.0, "height": 86, "depth":0},
+                        "content_type": ["plate", "tip_rack", "plates", "tip_racks", "tube_rack"]
+                    },
+                    {
+                        "label": "14",
+                        "visible": true,
+                        "position": {"x": 138, "y": 288, "z": 0},
+                        "size": {"width": 128.0, "height": 86, "depth":0},
+                        "content_type": ["plate", "tip_rack", "plates", "tip_racks", "tube_rack"]
+                    },
+                    {
+                        "label": "15",
+                        "visible": true,
+                        "position": {"x": 276, "y": 288, "z": 0},
+                        "size": {"width": 128.0, "height": 86, "depth":0},
+                        "content_type": ["plate", "tip_rack", "plates", "tip_racks", "tube_rack"]
+                    },
+                    {
+                        "label": "16",
+                        "visible": true,
+                        "position": {"x": 414, "y": 288, "z": 0},
+                        "size": {"width": 128.0, "height": 86, "depth":0},
+                        "content_type": ["plate", "tip_rack", "plates", "tip_racks", "tube_rack"]
+                    }
+                ]
             },
             "data": {}
-        },
+        }
+        ,
         {
             "id": "RackT1",
             "name": "RackT1",
@@ -181,7 +291,7 @@
                 "RackT1_H12"
             ],
             "parent": "PRCXI_Deck",
-            "type": "container",
+            "type": "tip_rack",
             "class": "",
             "position": {
                 "x": 0,
@@ -190,8 +300,8 @@
             },
             "config": {
                 "type": "PRCXI9300Container",
-                "size_x": 50,
-                "size_y": 50,
+                "size_x": 127,
+                "size_y": 85.5,
                 "size_z": 10,
                 "rotation": {
                     "x": 0,
@@ -315,7 +425,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 13.224,
@@ -356,7 +466,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 13.224,
@@ -397,7 +507,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 13.224,
@@ -438,7 +548,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 13.224,
@@ -479,7 +589,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 13.224,
@@ -520,7 +630,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 13.224,
@@ -561,7 +671,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 13.224,
@@ -602,7 +712,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 13.224,
@@ -643,7 +753,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 22.224,
@@ -684,7 +794,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 22.224,
@@ -725,7 +835,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 22.224,
@@ -766,7 +876,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 22.224,
@@ -807,7 +917,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 22.224,
@@ -848,7 +958,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 22.224,
@@ -889,7 +999,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 22.224,
@@ -930,7 +1040,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 22.224,
@@ -971,7 +1081,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 31.224,
@@ -1012,7 +1122,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 31.224,
@@ -1053,7 +1163,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 31.224,
@@ -1094,7 +1204,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 31.224,
@@ -1135,7 +1245,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 31.224,
@@ -1176,7 +1286,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 31.224,
@@ -1217,7 +1327,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 31.224,
@@ -1258,7 +1368,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 31.224,
@@ -1299,7 +1409,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 40.224,
@@ -1340,7 +1450,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 40.224,
@@ -1381,7 +1491,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 40.224,
@@ -1422,7 +1532,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 40.224,
@@ -1463,7 +1573,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 40.224,
@@ -1504,7 +1614,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 40.224,
@@ -1545,7 +1655,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 40.224,
@@ -1586,7 +1696,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 40.224,
@@ -1627,7 +1737,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 49.224,
@@ -1668,7 +1778,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 49.224,
@@ -1709,7 +1819,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 49.224,
@@ -1750,7 +1860,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 49.224,
@@ -1791,7 +1901,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 49.224,
@@ -1832,7 +1942,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 49.224,
@@ -1873,7 +1983,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 49.224,
@@ -1914,7 +2024,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 49.224,
@@ -1955,7 +2065,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 58.224,
@@ -1996,7 +2106,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 58.224,
@@ -2037,7 +2147,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 58.224,
@@ -2078,7 +2188,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 58.224,
@@ -2119,7 +2229,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 58.224,
@@ -2160,7 +2270,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 58.224,
@@ -2201,7 +2311,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 58.224,
@@ -2242,7 +2352,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 58.224,
@@ -2283,7 +2393,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 67.224,
@@ -2324,7 +2434,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 67.224,
@@ -2365,7 +2475,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 67.224,
@@ -2406,7 +2516,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 67.224,
@@ -2447,7 +2557,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 67.224,
@@ -2488,7 +2598,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 67.224,
@@ -2529,7 +2639,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 67.224,
@@ -2570,7 +2680,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 67.224,
@@ -2611,7 +2721,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 76.224,
@@ -2652,7 +2762,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 76.224,
@@ -2693,7 +2803,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 76.224,
@@ -2734,7 +2844,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 76.224,
@@ -2775,7 +2885,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 76.224,
@@ -2816,7 +2926,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 76.224,
@@ -2857,7 +2967,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 76.224,
@@ -2898,7 +3008,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 76.224,
@@ -2939,7 +3049,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 85.224,
@@ -2980,7 +3090,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 85.224,
@@ -3021,7 +3131,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 85.224,
@@ -3062,7 +3172,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 85.224,
@@ -3103,7 +3213,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 85.224,
@@ -3144,7 +3254,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 85.224,
@@ -3185,7 +3295,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 85.224,
@@ -3226,7 +3336,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 85.224,
@@ -3267,7 +3377,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 94.224,
@@ -3308,7 +3418,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 94.224,
@@ -3349,7 +3459,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 94.224,
@@ -3390,7 +3500,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 94.224,
@@ -3431,7 +3541,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 94.224,
@@ -3472,7 +3582,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 94.224,
@@ -3513,7 +3623,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 94.224,
@@ -3554,7 +3664,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 94.224,
@@ -3595,7 +3705,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 103.224,
@@ -3636,7 +3746,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 103.224,
@@ -3677,7 +3787,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 103.224,
@@ -3718,7 +3828,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 103.224,
@@ -3759,7 +3869,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 103.224,
@@ -3800,7 +3910,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 103.224,
@@ -3841,7 +3951,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 103.224,
@@ -3882,7 +3992,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 103.224,
@@ -3923,7 +4033,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 112.224,
@@ -3964,7 +4074,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 112.224,
@@ -4005,7 +4115,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 112.224,
@@ -4046,7 +4156,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 112.224,
@@ -4087,7 +4197,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 112.224,
@@ -4128,7 +4238,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 112.224,
@@ -4169,7 +4279,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 112.224,
@@ -4210,7 +4320,7 @@
             
             "children": [],
             "parent": "RackT1",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 112.224,
@@ -4351,14 +4461,14 @@
             "type": "plate",
             "class": "",
             "position": {
-                "x": 0,
+                "x": 138,
                 "y": 0,
                 "z": 0
             },
             "config": {
                 "type": "PRCXI9300Container",
-                "size_x": 50,
-                "size_y": 50,
+                "size_x": 127,
+                "size_y": 85.5,
                 "size_z": 10,
                 "rotation": {
                     "x": 0,
@@ -8316,37 +8426,7 @@
                 "liquid_history": []
             }
         },
-        {
-            "id": "container_for_nothin3",
-            "name": "container_for_nothin3",
-            
-            "children": [],
-            "parent": "PRCXI_Deck",
-            "type": "plate",
-            "class": "",
-            "position": {
-                "x": 0,
-                "y": 0,
-                "z": 0
-            },
-            "config": {
-                "type": "PRCXI9300Container",
-                "size_x": 50,
-                "size_y": 50,
-                "size_z": 10,
-                "rotation": {
-                    "x": 0,
-                    "y": 0,
-                    "z": 0,
-                    "type": "Rotation"
-                },
-                "category": "plate",
-                "model": null,
-                "barcode": null,
-                "ordering": {}
-            },
-            "data": {}
-        },
+
         {
             "id": "PlateT4",
             "name": "PlateT4",
@@ -8453,14 +8533,14 @@
             "type": "plate",
             "class": "",
             "position": {
-                "x": 0,
+                "x": 414,
                 "y": 0,
                 "z": 0
             },
             "config": {
                 "type": "PRCXI9300Container",
-                "size_x": 50,
-                "size_y": 50,
+                "size_x": 127,
+                "size_y": 85.5,
                 "size_z": 10,
                 "rotation": {
                     "x": 0,
@@ -12521,17 +12601,17 @@
                 "RackT5_H12"
             ],
             "parent": "PRCXI_Deck",
-            "type": "container",
+            "type": "tip_rack",
             "class": "",
             "position": {
                 "x": 0,
-                "y": 0,
+                "y": 96,
                 "z": 0
             },
             "config": {
                 "type": "PRCXI9300Container",
-                "size_x": 50,
-                "size_y": 50,
+                "size_x": 127,
+                "size_y": 85.5,
                 "size_z": 10,
                 "rotation": {
                     "x": 0,
@@ -12656,7 +12736,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 13.224,
@@ -12697,7 +12777,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 13.224,
@@ -12738,7 +12818,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 13.224,
@@ -12779,7 +12859,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 13.224,
@@ -12820,7 +12900,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 13.224,
@@ -12861,7 +12941,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 13.224,
@@ -12902,7 +12982,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 13.224,
@@ -12943,7 +13023,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 13.224,
@@ -12984,7 +13064,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 22.224,
@@ -13025,7 +13105,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 22.224,
@@ -13066,7 +13146,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 22.224,
@@ -13107,7 +13187,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 22.224,
@@ -13148,7 +13228,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 22.224,
@@ -13189,7 +13269,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 22.224,
@@ -13230,7 +13310,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 22.224,
@@ -13271,7 +13351,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 22.224,
@@ -13312,7 +13392,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 31.224,
@@ -13353,7 +13433,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 31.224,
@@ -13394,7 +13474,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 31.224,
@@ -13435,7 +13515,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 31.224,
@@ -13476,7 +13556,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 31.224,
@@ -13517,7 +13597,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 31.224,
@@ -13558,7 +13638,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 31.224,
@@ -13599,7 +13679,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 31.224,
@@ -13640,7 +13720,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 40.224,
@@ -13681,7 +13761,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 40.224,
@@ -13722,7 +13802,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 40.224,
@@ -13763,7 +13843,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 40.224,
@@ -13804,7 +13884,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 40.224,
@@ -13845,7 +13925,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 40.224,
@@ -13886,7 +13966,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 40.224,
@@ -13927,7 +14007,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 40.224,
@@ -13968,7 +14048,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 49.224,
@@ -14009,7 +14089,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 49.224,
@@ -14050,7 +14130,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 49.224,
@@ -14091,7 +14171,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 49.224,
@@ -14132,7 +14212,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 49.224,
@@ -14173,7 +14253,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 49.224,
@@ -14214,7 +14294,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 49.224,
@@ -14255,7 +14335,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 49.224,
@@ -14296,7 +14376,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 58.224,
@@ -14337,7 +14417,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 58.224,
@@ -14378,7 +14458,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 58.224,
@@ -14419,7 +14499,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 58.224,
@@ -14460,7 +14540,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 58.224,
@@ -14501,7 +14581,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 58.224,
@@ -14542,7 +14622,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 58.224,
@@ -14583,7 +14663,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 58.224,
@@ -14624,7 +14704,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 67.224,
@@ -14665,7 +14745,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 67.224,
@@ -14706,7 +14786,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 67.224,
@@ -14747,7 +14827,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 67.224,
@@ -14788,7 +14868,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 67.224,
@@ -14829,7 +14909,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 67.224,
@@ -14870,7 +14950,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 67.224,
@@ -14911,7 +14991,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 67.224,
@@ -14952,7 +15032,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 76.224,
@@ -14993,7 +15073,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 76.224,
@@ -15034,7 +15114,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 76.224,
@@ -15075,7 +15155,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 76.224,
@@ -15116,7 +15196,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 76.224,
@@ -15157,7 +15237,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 76.224,
@@ -15198,7 +15278,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 76.224,
@@ -15239,7 +15319,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 76.224,
@@ -15280,7 +15360,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 85.224,
@@ -15321,7 +15401,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 85.224,
@@ -15362,7 +15442,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 85.224,
@@ -15403,7 +15483,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 85.224,
@@ -15444,7 +15524,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 85.224,
@@ -15485,7 +15565,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 85.224,
@@ -15526,7 +15606,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 85.224,
@@ -15567,7 +15647,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 85.224,
@@ -15608,7 +15688,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 94.224,
@@ -15649,7 +15729,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 94.224,
@@ -15690,7 +15770,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 94.224,
@@ -15731,7 +15811,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 94.224,
@@ -15772,7 +15852,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 94.224,
@@ -15813,7 +15893,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 94.224,
@@ -15854,7 +15934,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 94.224,
@@ -15895,7 +15975,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 94.224,
@@ -15936,7 +16016,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 103.224,
@@ -15977,7 +16057,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 103.224,
@@ -16018,7 +16098,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 103.224,
@@ -16059,7 +16139,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 103.224,
@@ -16100,7 +16180,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 103.224,
@@ -16141,7 +16221,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 103.224,
@@ -16182,7 +16262,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 103.224,
@@ -16223,7 +16303,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 103.224,
@@ -16264,7 +16344,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 112.224,
@@ -16305,7 +16385,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 112.224,
@@ -16346,7 +16426,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 112.224,
@@ -16387,7 +16467,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 112.224,
@@ -16428,7 +16508,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 112.224,
@@ -16469,7 +16549,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 112.224,
@@ -16510,7 +16590,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 112.224,
@@ -16551,7 +16631,7 @@
             
             "children": [],
             "parent": "RackT5",
-            "type": "container",
+            "type": "tip_spot",
             "class": "",
             "position": {
                 "x": 112.224,
@@ -16692,14 +16772,14 @@
             "type": "plate",
             "class": "",
             "position": {
-                "x": 0,
-                "y": 0,
+                "x": 138,
+                "y": 96,
                 "z": 0
             },
             "config": {
                 "type": "PRCXI9300Container",
-                "size_x": 50,
-                "size_y": 50,
+                "size_x": 127,
+                "size_y": 85.5,
                 "size_z": 10,
                 "rotation": {
                     "x": 0,
@@ -20659,68 +20739,7 @@
                 "liquid_history": []
             }
         },
-        {
-            "id": "container_for_nothing7",
-            "name": "container_for_nothing7",
-            
-            "children": [],
-            "parent": "PRCXI_Deck",
-            "type": "plate",
-            "class": "",
-            "position": {
-                "x": 0,
-                "y": 0,
-                "z": 0
-            },
-            "config": {
-                "type": "PRCXI9300Container",
-                "size_x": 50,
-                "size_y": 50,
-                "size_z": 10,
-                "rotation": {
-                    "x": 0,
-                    "y": 0,
-                    "z": 0,
-                    "type": "Rotation"
-                },
-                "category": "plate",
-                "model": null,
-                "barcode": null,
-                "ordering": {}
-            },
-            "data": {}
-        },
-        {
-            "id": "container_for_nothing8",
-            "name": "container_for_nothing8",
-            
-            "children": [],
-            "parent": "PRCXI_Deck",
-            "type": "plate",
-            "class": "",
-            "position": {
-                "x": 0,
-                "y": 0,
-                "z": 0
-            },
-            "config": {
-                "type": "PRCXI9300Container",
-                "size_x": 50,
-                "size_y": 50,
-                "size_z": 10,
-                "rotation": {
-                    "x": 0,
-                    "y": 0,
-                    "z": 0,
-                    "type": "Rotation"
-                },
-                "category": "plate",
-                "model": null,
-                "barcode": null,
-                "ordering": {}
-            },
-            "data": {}
-        },
+
         {
             "id": "PlateT9",
             "name": "PlateT9",
@@ -20828,13 +20847,13 @@
             "class": "",
             "position": {
                 "x": 0,
-                "y": 0,
+                "y": 192,
                 "z": 0
             },
             "config": {
                 "type": "PRCXI9300Container",
-                "size_x": 50,
-                "size_y": 50,
+                "size_x": 127,
+                "size_y": 85.5,
                 "size_z": 10,
                 "rotation": {
                     "x": 0,
@@ -24900,14 +24919,14 @@
             "type": "plate",
             "class": "",
             "position": {
-                "x": 0,
-                "y": 0,
+                "x": 138,
+                "y": 192,
                 "z": 0
             },
             "config": {
                 "type": "PRCXI9300Container",
-                "size_x": 50,
-                "size_y": 50,
+                "size_x": 127,
+                "size_y": 85.5,
                 "size_z": 10,
                 "rotation": {
                     "x": 0,
@@ -28867,68 +28886,7 @@
                 "liquid_history": []
             }
         },
-        {
-            "id": "container_for_nothing11",
-            "name": "container_for_nothing11",
-            
-            "children": [],
-            "parent": "PRCXI_Deck",
-            "type": "plate",
-            "class": "",
-            "position": {
-                "x": 0,
-                "y": 0,
-                "z": 0
-            },
-            "config": {
-                "type": "PRCXI9300Container",
-                "size_x": 50,
-                "size_y": 50,
-                "size_z": 10,
-                "rotation": {
-                    "x": 0,
-                    "y": 0,
-                    "z": 0,
-                    "type": "Rotation"
-                },
-                "category": "plate",
-                "model": null,
-                "barcode": null,
-                "ordering": {}
-            },
-            "data": {}
-        },
-        {
-            "id": "container_for_nothing12",
-            "name": "container_for_nothing12",
-            
-            "children": [],
-            "parent": "PRCXI_Deck",
-            "type": "plate",
-            "class": "",
-            "position": {
-                "x": 0,
-                "y": 0,
-                "z": 0
-            },
-            "config": {
-                "type": "PRCXI9300Container",
-                "size_x": 50,
-                "size_y": 50,
-                "size_z": 10,
-                "rotation": {
-                    "x": 0,
-                    "y": 0,
-                    "z": 0,
-                    "type": "Rotation"
-                },
-                "category": "plate",
-                "model": null,
-                "barcode": null,
-                "ordering": {}
-            },
-            "data": {}
-        },
+
         {
             "id": "PlateT13",
             "name": "PlateT13",
@@ -29036,13 +28994,13 @@
             "class": "",
             "position": {
                 "x": 0,
-                "y": 0,
+                "y": 288,
                 "z": 0
             },
             "config": {
                 "type": "PRCXI9300Container",
-                "size_x": 50,
-                "size_y": 50,
+                "size_x": 127,
+                "size_y": 85.5,
                 "size_z": 10,
                 "rotation": {
                     "x": 0,
@@ -33108,14 +33066,14 @@
             "type": "plate",
             "class": "",
             "position": {
-                "x": 0,
-                "y": 0,
+                "x": 138,
+                "y": 288,
                 "z": 0
             },
             "config": {
                 "type": "PRCXI9300Container",
-                "size_x": 50,
-                "size_y": 50,
+                "size_x": 127,
+                "size_y": 85.5,
                 "size_z": 10,
                 "rotation": {
                     "x": 0,
@@ -37181,14 +37139,14 @@
             "type": "plate",
             "class": "",
             "position": {
-                "x": 0,
-                "y": 0,
+                "x": 276,
+                "y": 288,
                 "z": 0
             },
             "config": {
                 "type": "PRCXI9300Container",
-                "size_x": 50,
-                "size_y": 50,
+                "size_x": 127,
+                "size_y": 85.5,
                 "size_z": 10,
                 "rotation": {
                     "x": 0,
@@ -41150,17 +41108,17 @@
             
             "children": [],
             "parent": "PRCXI_Deck",
-            "type": "container",
+            "type": "plate",
             "class": "",
             "position": {
-                "x": 0,
-                "y": 0,
+                "x": 414,
+                "y": 288,
                 "z": 0
             },
             "config": {
                 "type": "PRCXI9300Trash",
-                "size_x": 50,
-                "size_y": 50,
+                "size_x": 127,
+                "size_y": 85.5,
                 "size_z": 10,
                 "rotation": {
                     "x": 0,
@@ -41186,5 +41144,5 @@
             }
         }
     ],
-    "links": []
+    "edges": []
 }

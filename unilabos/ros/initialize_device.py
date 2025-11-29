@@ -36,6 +36,8 @@ def initialize_device_from_dict(device_id, device_config) -> Optional[ROS2Device
     elif isinstance(device_class_config, dict):
         raise DeviceClassInvalid(f"Device [{device_id}] class config should be type 'str' but 'dict' got. {device_config}")
     if isinstance(device_class_config, dict):
+        if "pose" in device_config:
+            device_config.pop("pose")
         DEVICE = default_manager.get_class(device_class_config["module"])
         # 不管是ros2的实例，还是python的，都必须包一次，除了HostNode
         DEVICE = ros2_device_node(
