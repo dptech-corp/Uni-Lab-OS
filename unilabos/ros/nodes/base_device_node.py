@@ -1,4 +1,3 @@
-import copy
 import inspect
 import io
 import json
@@ -24,9 +23,7 @@ from unilabos_msgs.srv._serial_command import SerialCommand_Request, SerialComma
 
 from unilabos.resources.container import RegularContainer
 from unilabos.resources.graphio import (
-    resource_ulab_to_plr,
     initialize_resources,
-    dict_to_tree,
     resource_plr_to_ulab,
     tree_to_list,
 )
@@ -45,7 +42,7 @@ from unilabos_msgs.srv import (
 )  # type: ignore
 from unilabos_msgs.msg import Resource  # type: ignore
 
-from unilabos.ros.nodes.resource_tracker import (
+from unilabos.resources.resource_tracker import (
     DeviceNodeResourceTracker,
     ResourceTreeSet,
     ResourceTreeInstance,

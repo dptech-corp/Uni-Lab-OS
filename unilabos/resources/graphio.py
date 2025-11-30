@@ -13,7 +13,7 @@ from unilabos.config.config import BasicConfig
 from unilabos.resources.container import RegularContainer
 from unilabos.resources.itemized_carrier import ItemizedCarrier, BottleCarrier
 from unilabos.ros.msgs.message_converter import convert_to_ros_msg
-from unilabos.ros.nodes.resource_tracker import (
+from unilabos.resources.resource_tracker import (
     ResourceDictInstance,
     ResourceTreeSet,
 )
@@ -265,7 +265,7 @@ def read_node_link_json(
         "nodes": [node.res_content.model_dump(by_alias=True) for node in resource_tree_set.all_nodes],
         "links": standardized_links,
     }
-    physical_setup_graph = nx.node_link_graph(graph_data, edges="links", multigraph=False)
+    physical_setup_graph = nx.node_link_graph(graph_data, multigraph=False)
     handle_communications(physical_setup_graph)
 
     return physical_setup_graph, resource_tree_set, standardized_links
@@ -536,6 +536,10 @@ def resource_ulab_to_plr(resource: dict, plr_model=False) -> "ResourcePLR":
     def resource_ulab_to_plr_inner(resource: dict):
         all_states[resource["name"]] = resource["data"]
         extra = resource.pop("extra", {})
+        if "pose" in resource:
+            pose = resource.pop("pose")
+            resource["position"] = pose["position"]
+
         d = {
             "name": resource["name"],
             "type": resource["type"],
