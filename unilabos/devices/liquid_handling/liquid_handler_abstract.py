@@ -6,6 +6,7 @@ import traceback
 from collections import Counter
 from typing import List, Sequence, Optional, Literal, Union, Iterator, Dict, Any, Callable, Set, cast
 
+from typing_extensions import TypedDict
 from pylabrobot.liquid_handling import LiquidHandler, LiquidHandlerBackend, LiquidHandlerChatterboxBackend, Strictness
 from unilabos.devices.liquid_handling.rviz_backend import UniLiquidHandlerRvizBackend
 from unilabos.devices.liquid_handling.laiyu.backend.laiyu_v_backend import UniLiquidHandlerLaiyuBackend
@@ -28,7 +29,9 @@ from pylabrobot.resources import (
 )
 
 from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode
-
+class SimpleReturn(TypedDict):
+    simples: list
+    volumes: list
 
 class LiquidHandlerMiddleware(LiquidHandler):
     def __init__(self, backend: LiquidHandlerBackend, deck: Deck, simulator: bool = False, channel_num: int = 8, **kwargs):
@@ -600,10 +603,16 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
         self._ros_node = ros_node
 
     @classmethod
-    def set_liquid(cls, wells: list[Well], liquid_names: list[str], volumes: list[float]):
+    def set_liquid(cls, wells: list[Well], liquid_names: list[str], volumes: list[float]) -> SimpleReturn:
         """Set the liquid in a well."""
+        res_simples = []
+        res_volumes = []
         for well, liquid_name, volume in zip(wells, liquid_names, volumes):
             well.set_liquids([(liquid_name, volume)])  # type: ignore
+            res_simples.append({"name": well.name, "sample_uuid": well.unilabos_uuid})
+            res_volumes.append(volume)
+        
+        return SimpleReturn(simples=res_simples, volumes=res_volumes)
     # ---------------------------------------------------------------
     # REMOVE LIQUID --------------------------------------------------
     # ---------------------------------------------------------------

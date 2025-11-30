@@ -1303,10 +1303,14 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                 if attr_name in ["success", "reached_goal"]:
                     setattr(result_msg, attr_name, True)
                 elif attr_name == "return_info":
+                    simples = None
+                    if isinstance(action_return_value, dict):
+                        if "simples" in action_return_value:
+                            simples = action_return_value.pop("simples")
                     setattr(
                         result_msg,
                         attr_name,
-                        get_result_info_str(execution_error, execution_success, action_return_value),
+                        get_result_info_str(execution_error, execution_success, action_return_value, simples),
                     )
 
             ##### self.lab_logger().info(f"动作 {action_name} 完成并返回结果")
