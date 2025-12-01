@@ -62,7 +62,6 @@ class ResourceDict(BaseModel):
     parent: Optional["ResourceDict"] = Field(description="Parent resource object", default=None, exclude=True)
     type: Union[Literal["device"], str] = Field(description="Resource type")
     klass: str = Field(alias="class", description="Resource class name")
-    position: ResourceDictPosition = Field(description="Resource position", default_factory=ResourceDictPosition)
     pose: ResourceDictPosition = Field(description="Resource position", default_factory=ResourceDictPosition)
     config: Dict[str, Any] = Field(description="Resource configuration")
     data: Dict[str, Any] = Field(description="Resource data")
@@ -146,15 +145,16 @@ class ResourceDictInstance(object):
         if not content.get("extra"):  # MagicCode
             content["extra"] = {}
         if "pose" not in content:
-            content["pose"] = content.get("position", {})
+            content["pose"] = content.pop("position", {})
         return ResourceDictInstance(ResourceDict.model_validate(content))
 
-    def get_nested_dict(self) -> Dict[str, Any]:
+    def get_plr_nested_dict(self) -> Dict[str, Any]:
         """获取资源实例的嵌套字典表示"""
         res_dict = self.res_content.model_dump(by_alias=True)
-        res_dict["children"] = {child.res_content.id: child.get_nested_dict() for child in self.children}
+        res_dict["children"] = {child.res_content.id: child.get_plr_nested_dict() for child in self.children}
         res_dict["parent"] = self.res_content.parent_instance_name
         res_dict["position"] = self.res_content.position.position.model_dump()
+        del res_dict["pose"]
         return res_dict
 
 
