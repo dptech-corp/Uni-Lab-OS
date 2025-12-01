@@ -107,15 +107,15 @@ class BioyondReactionStation(BioyondWorkstation):
             BioyondException: 调度器启动失败时抛出异常
         """
         from unilabos.devices.workstation.bioyond_studio.bioyond_rpc import BioyondException
-        
+
         result = self.hardware_interface.scheduler_start()
         self.hardware_interface._logger.info(f"调度器启动结果: {result}")
-        
+
         if result != 1:
             error_msg = "启动调度器失败: 有未处理错误，调度无法启动。请检查Bioyond系统状态。"
             self.hardware_interface._logger.error(error_msg)
             raise BioyondException(error_msg)
-        
+
         return {"return_info": result}
 
     def reactor_taken_in(
@@ -908,7 +908,8 @@ class BioyondReactionStation(BioyondWorkstation):
         for workflow_id in self.workflow_sequence:
             workflow_name = id_to_name.get(workflow_id, workflow_id)
             workflow_names.append(workflow_name)
-        print(f"工作流序列: {workflow_names}")
+        if workflow_names:
+            print(f"工作流序列: {workflow_names}")
         return workflow_names
 
     def workflow_step_query(self, workflow_id: str) -> dict:

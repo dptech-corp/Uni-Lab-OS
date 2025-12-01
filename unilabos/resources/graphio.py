@@ -1022,11 +1022,24 @@ def resource_plr_to_bioyond(plr_resources: list[ResourcePLR], type_mapping: dict
                 logger.debug(f"  📭 [单瓶物料] {resource.name} 无液体，使用资源名: {material_name}")
 
             # 🎯 处理物料默认参数和单位
-            # 检查是否有该物料名称的默认参数配置
+            # 优先级: typeId参数 > 物料名称参数 > 默认值
             default_unit = "个"  # 默认单位
             material_parameters = {}
 
-            if material_name in material_params:
+            # 1️⃣ 首先检查是否有 typeId 对应的参数配置（从 material_params 中获取，key 格式为 "type:<typeId>"）
+            type_params_key = f"type:{type_id}"
+            if type_params_key in material_params:
+                params_config = material_params[type_params_key].copy()
+
+                # 提取 unit 字段（如果有）
+                if "unit" in params_config:
+                    default_unit = params_config.pop("unit")  # 从参数中移除，放到外层
+
+                # 剩余的字段放入 Parameters
+                material_parameters = params_config
+                logger.debug(f"  🔧 [物料参数-按typeId] 为 typeId={type_id[:8]}... 应用配置: unit={default_unit}, parameters={material_parameters}")
+            # 2️⃣ 其次检查是否有该物料名称的默认参数配置
+            elif material_name in material_params:
                 params_config = material_params[material_name].copy()
 
                 # 提取 unit 字段（如果有）
@@ -1035,7 +1048,7 @@ def resource_plr_to_bioyond(plr_resources: list[ResourcePLR], type_mapping: dict
 
                 # 剩余的字段放入 Parameters
                 material_parameters = params_config
-                logger.debug(f"  🔧 [物料参数] 为 {material_name} 应用配置: unit={default_unit}, parameters={material_parameters}")
+                logger.debug(f"  🔧 [物料参数-按名称] 为 {material_name} 应用配置: unit={default_unit}, parameters={material_parameters}")
 
             # 转换为 JSON 字符串
             parameters_json = json.dumps(material_parameters) if material_parameters else "{}"
