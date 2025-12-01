@@ -117,7 +117,7 @@ class CameraController:
         )
         self._loop_thread.start()
 
-        # 在这个新 loop 上调度主协程
+        # 在这个新 loop 上调度主协程，并保留 Future，后续在 stop() 中取消和收割结果
         self._loop_task = asyncio.run_coroutine_threadsafe(
             self._run_main_loop(), self._loop
         )
@@ -154,6 +154,24 @@ class CameraController:
 
             asyncio.run_coroutine_threadsafe(close_ws(), self._loop)
 
+        # 先处理 _loop_task：取消并收割结果，避免隐藏异常
+        if self._loop_task is not None:
+            if not self._loop_task.done():
+                self._loop_task.cancel()
+            try:
+                # 这里会把 _run_main_loop 里的异常抛出来，方便日志排查
+                self._loop_task.result()
+            except asyncio.CancelledError:
+                # 正常的取消，忽略
+                pass
+            except Exception as e:
+                print(
+                    f"[CameraController] main loop task error in stop(): {e}",
+                    file=sys.stderr,
+                )
+            finally:
+                self._loop_task = None
+
         # 停止事件循环
         if self._loop is not None:
             try:
@@ -173,12 +191,12 @@ class CameraController:
                     f"[CameraController] error when joining loop thread: {e}",
                     file=sys.stderr,
                 )
+            finally:
+                self._loop_thread = None
 
         # 清理状态
         self._ws = None
-        self._loop_task = None
         self._loop = None
-        self._loop_thread = None
 
         return {"status": "stopped", "host_id": self.host_id}
 
@@ -217,18 +235,27 @@ class CameraController:
         - 不断接收后端的命令/offer
         """
         # 日志调整: 移除正常“loop started/exited”打印
-        while self._running:
-            try:
-                async with websockets.connect(self.signal_backend_url) as ws:
-                    self._ws = ws
-                    await self._recv_loop()
-            except Exception as e:
-                if self._running:
-                    print(
-                        f"[CameraController] WebSocket connection error: {e}",
-                        file=sys.stderr,
-                    )
-                    await asyncio.sleep(3)
+        try:
+            while self._running:
+                try:
+                    async with websockets.connect(self.signal_backend_url) as ws:
+                        self._ws = ws
+                        await self._recv_loop()
+                except asyncio.CancelledError:
+                    # 收到取消（来自 stop() -> self._loop_task.cancel()）时优雅退出
+                    # 如果还有清理逻辑可以在这里加
+                    raise
+                except Exception as e:
+                    if self._running:
+                        print(
+                            f"[CameraController] WebSocket connection error: {e}",
+                            file=sys.stderr,
+                        )
+                        # 避免频繁重连打爆日志
+                        await asyncio.sleep(3)
+        except asyncio.CancelledError:
+            # 最外层再抓一次，确保协程被 cancel 时不会打印成普通异常
+            pass
 
     async def _recv_loop(self):
         """
