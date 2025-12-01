@@ -289,7 +289,8 @@ class CameraController:
             offer_sdp = data.get("sdp", "")
             camera_id = data.get("cameraId", "camera-01")
             try:
-                answer_sdp = self._handle_webrtc_offer(offer_sdp)
+                # 加 await，因为 _handle_webrtc_offer 现在是 async def
+                answer_sdp = await self._handle_webrtc_offer(offer_sdp)
             except Exception as e:
                 print(
                     f"[CameraController] error when handling WebRTC offer: {e}",
@@ -368,6 +369,7 @@ class CameraController:
                 cmd,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.STDOUT,
+                shell=False, # 安全起见不使用 shell
             )
         except Exception as e:
             print(f"[CameraController] failed to start FFmpeg: {e}", file=sys.stderr)
@@ -378,31 +380,50 @@ class CameraController:
         """
         停止 FFmpeg 推流。
         """
-        if self._ffmpeg_process and self._ffmpeg_process.poll() is None:
+        proc = self._ffmpeg_process
+
+        # 先把引用取出来，最后统一置 None，避免多次访问过程中状态变化
+        if proc and proc.poll() is None:
             try:
-                self._ffmpeg_process.terminate()
-                self._ffmpeg_process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
+                # 尝试优雅终止
+                proc.terminate()
                 try:
-                    self._ffmpeg_process.kill()
-                except Exception as e:
-                    print(
-                        f"[CameraController] failed to kill FFmpeg process: {e}",
-                        file=sys.stderr,
-                    )
+                    proc.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    # 超时则强制 kill
+                    try:
+                        proc.kill()
+                        try:
+                            # kill 之后再等一小会儿，避免僵尸进程
+                            proc.wait(timeout=2)
+                        except subprocess.TimeoutExpired:
+                            print(
+                                f"[CameraController] FFmpeg process did not exit even after kill (pid={proc.pid})",
+                                file=sys.stderr,
+                            )
+                    except Exception as e:
+                        print(
+                            f"[CameraController] failed to kill FFmpeg process: {e}",
+                            file=sys.stderr,
+                        )
             except Exception as e:
                 print(
                     f"[CameraController] error when stopping FFmpeg: {e}",
                     file=sys.stderr,
                 )
+
+        # 无论上面发生什么，最后都把句柄清掉，避免后续误用
         self._ffmpeg_process = None
 
     # ------------------------ WebRTC Offer 相关 ------------------------
 
-    def _handle_webrtc_offer(self, offer_sdp: str) -> str:
+    async def _handle_webrtc_offer(self, offer_sdp: str) -> str:
         """
         将浏览器的 Offer 发送给媒体服务器（SRS），
         拿到 Answer SDP 并返回。
+
+        注意：此方法在事件循环中被调用，因此通过 run_in_executor
+        将阻塞的 HTTP 请求放到线程池中执行，避免阻塞事件循环。
         """
         payload = {
             "api": self.webrtc_api,
@@ -411,13 +432,20 @@ class CameraController:
         }
 
         headers = {"Content-Type": "application/json"}
-        try:
-            resp = requests.post(
+
+        def _do_request():
+            # 在线程池中执行同步 HTTP 请求
+            return requests.post(
                 self.webrtc_api,
                 json=payload,
                 headers=headers,
                 timeout=10,
             )
+
+        # 发送 HTTP 请求（在线程池中执行，避免阻塞事件循环）
+        try:
+            loop = asyncio.get_running_loop()
+            resp = await loop.run_in_executor(None, _do_request)
         except Exception as e:
             print(
                 f"[CameraController] failed to send offer to media server: {e}",
