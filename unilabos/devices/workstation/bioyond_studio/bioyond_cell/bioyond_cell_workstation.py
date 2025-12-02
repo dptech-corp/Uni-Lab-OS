@@ -654,12 +654,13 @@ class BioyondCellWorkstation(BioyondWorkstation):
                 "[create_orders] 未收到订单报送物料信息，回退到实时查询"
             )
         print("materials_from_report:", materials_from_report)
-        self.transfer_resource_to_another(
-        plr_resources=[materials],
-        target_device_id="BatteryStation",
-        target_resources=["YB_YH_Deck"],
-        sites=[None]
-        )
+        # TODO: 需要将 materials 字典转换为 ResourceSlot 对象后才能转运
+        # self.transfer_resource_to_another(
+        #     resource=[materials],
+        #     mount_resource=["YB_YH_Deck"],
+        #     sites=[None],
+        #     mount_device_id="BatteryStation"
+        # )
         return {
             "api_response": response,
             "order_finish": result,
@@ -1377,39 +1378,38 @@ class BioyondCellWorkstation(BioyondWorkstation):
     def run_transfer_stage(
         self,
         liquid_materials: Optional[List[Dict[str, Any]]] = None,
-    ) -> Dict[str, List[Dict[str, Any]]]:
-        transfer_summary: Dict[str, Any] = {}
-        try:
-            source_materials = liquid_materials or self._fetch_bioyond_materials()
-            transfer_plr = self._convert_materials_to_plr(source_materials)
-            transfer_summary["plr_count"] = len(transfer_plr)
-
-            if transfer_plr:
-                self._register_plr_resources(transfer_plr)
-                target_parent = self._get_target_resource(self.transfer_target_parent)
-                sites = self._allocate_sites(target_parent, len(transfer_plr))
-                future = ROS2DeviceNode.run_async_func(
-                    self._ros_node.transfer_resource_to_another,  # type: ignore[arg-type]
-                    True,
-                    plr_resources=transfer_plr,
-                    target_device_id=self.transfer_target_device_id,
-                    target_resources=[target_parent] * len(transfer_plr),
-                    sites=sites,
-                )
-                self._wait_for_future(future, "transfer_resource_to_another")
-                transfer_summary["sites"] = sites
-
-                coin_cell_result = self._invoke_coin_cell_workflow(source_materials)
-                transfer_summary["coin_cell_result"] = coin_cell_result
-        except Exception as exc:
-            transfer_summary["error"] = str(exc)
-            logger.error(f"跨工站转运失败: {exc}", exc_info=True)
-
-        transfer_materials = self._fetch_bioyond_materials()
+        source_wh_id: Optional[str] = '3a19debc-84b4-0359-e2d4-b3beea49348b',
+        source_x: int = 1,
+        source_y: int = 1,
+        source_z: int = 1
+    ) -> Dict[str, Any]:
+        """转运阶段：调用transfer_3_to_2_to_1执行3到2到1转运"""
+        logger.info("开始执行转运阶段 (run_transfer_stage)")
+        
+        # 暂时注释掉物料转换和跨工站转运逻辑
+        # transfer_summary: Dict[str, Any] = {}
+        # try:
+        #     source_materials = liquid_materials or self._fetch_bioyond_materials()
+        #     transfer_plr = self._convert_materials_to_plr(source_materials)
+        #     transfer_summary["plr_count"] = len(transfer_plr)
+        #     ...
+        # except Exception as exc:
+        #     transfer_summary["error"] = str(exc)
+        #     logger.error(f"跨工站转运失败: {exc}", exc_info=True)
+        
+        # 只执行核心的3到2到1转运
+        transfer_result = self.transfer_3_to_2_to_1(
+            source_wh_id=source_wh_id,
+            source_x=source_x,
+            source_y=source_y,
+            source_z=source_z
+        )
+        
+        logger.info("转运阶段执行完成")
         return {
-            "liquid_materials": liquid_materials or [],
-            "transfer_materials": transfer_materials,
-            "transfer_summary": transfer_summary,
+            "success": True,
+            "stage": "transfer",
+            "transfer_result": transfer_result
         }
 if __name__ == "__main__":
     deck = BIOYOND_YB_Deck(setup=True)
