@@ -239,13 +239,18 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
             logger.info(f"[同步→Bioyond] 🔄 转换物料为 Bioyond 格式...")
 
             # 导入物料默认参数配置
-            from .config import MATERIAL_DEFAULT_PARAMETERS
+            from .config import MATERIAL_DEFAULT_PARAMETERS, MATERIAL_TYPE_PARAMETERS
+
+            # 合并参数配置：物料名称参数 + typeId参数（转换为 type:<uuid> 格式）
+            merged_params = MATERIAL_DEFAULT_PARAMETERS.copy()
+            for type_id, params in MATERIAL_TYPE_PARAMETERS.items():
+                merged_params[f"type:{type_id}"] = params
 
             bioyond_material = resource_plr_to_bioyond(
                 [resource],
                 type_mapping=self.workstation.bioyond_config["material_type_mappings"],
                 warehouse_mapping=self.workstation.bioyond_config["warehouse_mapping"],
-                material_params=MATERIAL_DEFAULT_PARAMETERS
+                material_params=merged_params
             )[0]
 
             logger.info(f"[同步→Bioyond] 🔧 准备覆盖locations字段，目标仓库: {parent_name}, 库位: {update_site}, UUID: {target_location_uuid[:8]}...")
@@ -468,13 +473,18 @@ class BioyondResourceSynchronizer(ResourceSynchronizer):
                 return material_bioyond_id
 
             # 转换为 Bioyond 格式
-            from .config import MATERIAL_DEFAULT_PARAMETERS
+            from .config import MATERIAL_DEFAULT_PARAMETERS, MATERIAL_TYPE_PARAMETERS
+
+            # 合并参数配置：物料名称参数 + typeId参数（转换为 type:<uuid> 格式）
+            merged_params = MATERIAL_DEFAULT_PARAMETERS.copy()
+            for type_id, params in MATERIAL_TYPE_PARAMETERS.items():
+                merged_params[f"type:{type_id}"] = params
 
             bioyond_material = resource_plr_to_bioyond(
                 [resource],
                 type_mapping=self.workstation.bioyond_config["material_type_mappings"],
                 warehouse_mapping=self.workstation.bioyond_config["warehouse_mapping"],
-                material_params=MATERIAL_DEFAULT_PARAMETERS
+                material_params=merged_params
             )[0]
 
             # ⚠️ 关键：创建物料时不设置 locations，让 Bioyond 系统暂不分配库位
