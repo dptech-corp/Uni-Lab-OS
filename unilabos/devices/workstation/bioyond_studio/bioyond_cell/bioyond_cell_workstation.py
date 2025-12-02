@@ -24,6 +24,18 @@ from unilabos.utils.log import logger
 from unilabos.registry.registry import lab_registry
 from unilabos.ros.nodes.base_device_node import ROS2DeviceNode
 
+
+class device(BIOYOND_YB_Deck):
+
+    @classmethod
+    def deserialize(cls, data, allow_marshal=False):  # type: ignore[override]
+        patched = dict(data)
+        if patched.get("type") == "device":
+            patched["type"] = "Deck"
+        if patched.get("category") == "device":
+            patched["category"] = "deck"
+        return super().deserialize(patched, allow_marshal=allow_marshal)
+
 def _iso_local_now_ms() -> str:
     # 文档要求：到毫秒 + Z，例如 2025-08-15T05:43:22.814Z
     dt = datetime.now()
@@ -409,7 +421,8 @@ class BioyondCellWorkstation(BioyondWorkstation):
         result = self.wait_for_order_finish(order_code)
         return {
             "api_response": response,
-            "order_finish": result
+            "order_finish": result,
+            "items": items,
         }
     
 
@@ -1337,7 +1350,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
                 return result.return_info
         return result
 
-    def run_feeding_stage(self) -> Dict[str, List[Dict[str, Any]]]:
+    def run_feeding_stage(self) -> Dict[str, Any]:
         self.create_sample(
             board_type="配液瓶(小)板",
             bottle_type="配液瓶(小)",
@@ -1353,11 +1366,15 @@ class BioyondCellWorkstation(BioyondWorkstation):
             warehouse_name="手动堆栈"
         )
         self.scheduler_start()
-        self.auto_feeding4to3(
+        feeding_task = self.auto_feeding4to3(
             xlsx_path="/Users/sml/work/Unilab/Uni-Lab-OS/unilabos/devices/workstation/bioyond_studio/bioyond_cell/material_template.xlsx"
         )
         feeding_materials = self._fetch_bioyond_materials()
-        return {"feeding_materials": feeding_materials}
+        return {
+            "feeding_materials": feeding_materials,
+            "feeding_items": feeding_task.get("items", []),
+            "feeding_task": feeding_task,
+        }
 
     def run_liquid_preparation_stage(
         self,
