@@ -402,7 +402,6 @@ class ROS2WorkstationNode(BaseROS2DeviceNode):
 
         return result_future.result
 
-    """还没有改过的部分"""
 
     def _setup_hardware_proxy(
         self, device: ROS2DeviceNode, communication_device: ROS2DeviceNode, read_method, write_method
