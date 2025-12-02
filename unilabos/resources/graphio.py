@@ -674,10 +674,15 @@ def resource_bioyond_to_plr(bioyond_materials: list[dict], type_mapping: Dict[st
             for loc in material.get("locations", []):
                 if hasattr(deck, "warehouses") and loc.get("whName") in deck.warehouses:
                     warehouse = deck.warehouses[loc["whName"]]
+                    num_x = getattr(warehouse, "num_items_x", 0) or 0
+                    num_y = getattr(warehouse, "num_items_y", 0) or 0
+                    num_z = getattr(warehouse, "num_items_z", 0) or 0
+                    if num_x <= 0 or num_y <= 0 or num_z <= 0:
+                        continue
                     idx = (
-                        (loc.get("y", 0) - 1) * warehouse.num_items_x * warehouse.num_items_y
-                        + (loc.get("x", 0) - 1) * warehouse.num_items_x
-                        + (loc.get("z", 0) - 1)
+                        (loc.get("z", 0) - 1) * num_x * num_y
+                        + (loc.get("y", 0) - 1) * num_x
+                        + (loc.get("x", 0) - 1)
                     )
                     if 0 <= idx < warehouse.capacity:
                         if warehouse[idx] is None or isinstance(warehouse[idx], ResourceHolder):
