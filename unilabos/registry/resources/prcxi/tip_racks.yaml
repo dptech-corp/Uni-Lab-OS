@@ -1,6 +1,6 @@
 prcxi_opentrons_96_tiprack_10ul:
   category:
-  - tip_racks
+  - tip_rack
   class:
     module: unilabos.devices.liquid_handling.prcxi.prcxi_res:prcxi_opentrons_96_tiprack_10ul
     type: pylabrobot
@@ -12,8 +12,7 @@ prcxi_opentrons_96_tiprack_10ul:
   version: 1.0.0
 tip_adaptor_1250ul_2:
   category:
-  - prcxi
-  - tip_racks
+  - tip_rack
   class:
     module: unilabos.devices.liquid_handling.prcxi.prcxi_materials:tip_adaptor_1250ul
     type: pylabrobot

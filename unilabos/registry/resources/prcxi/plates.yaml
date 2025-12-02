@@ -1,6 +1,6 @@
 prcxi_96_wellplate_360ul_flat:
   category:
-  - plates
+  - plate
   class:
     module: unilabos.devices.liquid_handling.prcxi.prcxi_res:prcxi_96_wellplate_360ul_flat
     type: pylabrobot

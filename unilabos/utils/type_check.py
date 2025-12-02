@@ -66,7 +66,7 @@ class ResultInfoEncoder(json.JSONEncoder):
             return str(obj)
 
 
-def get_result_info_str(error: str, suc: bool, return_value=None) -> str:
+def get_result_info_str(error: str, suc: bool, return_value=None, samples=None) -> str:
     """
     序列化任务执行结果信息
 
@@ -78,7 +78,7 @@ def get_result_info_str(error: str, suc: bool, return_value=None) -> str:
     Returns:
         JSON字符串格式的结果信息
     """
-    result_info = {"error": error, "suc": suc, "return_value": return_value}
+    result_info = {"error": error, "suc": suc, "return_value": return_value, "samples": samples}
 
     return json.dumps(result_info, ensure_ascii=False, cls=ResultInfoEncoder)
 

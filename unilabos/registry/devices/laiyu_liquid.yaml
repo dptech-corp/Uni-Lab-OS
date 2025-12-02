@@ -1361,7 +1361,8 @@ laiyu_liquid:
           mix_liquid_height: 0.0
           mix_rate: 0
           mix_stage: ''
-          mix_times: 0
+          mix_times:
+          - 0
           mix_vol: 0
           none_keys:
           - ''
@@ -1491,9 +1492,11 @@ laiyu_liquid:
                 mix_stage:
                   type: string
                 mix_times:
-                  maximum: 2147483647
-                  minimum: -2147483648
-                  type: integer
+                  items:
+                    maximum: 2147483647
+                    minimum: -2147483648
+                    type: integer
+                  type: array
                 mix_vol:
                   maximum: 2147483647
                   minimum: -2147483648

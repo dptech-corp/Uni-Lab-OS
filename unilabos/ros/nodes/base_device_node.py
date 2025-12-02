@@ -1,4 +1,3 @@
-import copy
 import inspect
 import io
 import json
@@ -24,9 +23,7 @@ from unilabos_msgs.srv._serial_command import SerialCommand_Request, SerialComma
 
 from unilabos.resources.container import RegularContainer
 from unilabos.resources.graphio import (
-    resource_ulab_to_plr,
     initialize_resources,
-    dict_to_tree,
     resource_plr_to_ulab,
     tree_to_list,
 )
@@ -45,7 +42,7 @@ from unilabos_msgs.srv import (
 )  # type: ignore
 from unilabos_msgs.msg import Resource  # type: ignore
 
-from unilabos.ros.nodes.resource_tracker import (
+from unilabos.resources.resource_tracker import (
     DeviceNodeResourceTracker,
     ResourceTreeSet,
     ResourceTreeInstance, ResourceDictInstance,
@@ -1299,10 +1296,14 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                 if attr_name in ["success", "reached_goal"]:
                     setattr(result_msg, attr_name, True)
                 elif attr_name == "return_info":
+                    simples = None
+                    if isinstance(action_return_value, dict):
+                        if "simples" in action_return_value:
+                            simples = action_return_value.pop("simples")
                     setattr(
                         result_msg,
                         attr_name,
-                        get_result_info_str(execution_error, execution_success, action_return_value),
+                        get_result_info_str(execution_error, execution_success, action_return_value, simples),
                     )
 
             ##### self.lab_logger().info(f"动作 {action_name} 完成并返回结果")

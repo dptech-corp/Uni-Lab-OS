@@ -29,7 +29,7 @@ from pylabrobot.liquid_handling.standard import (
 )
 from pylabrobot.resources import Tip, Deck, Plate, Well, TipRack, Resource, Container, Coordinate, TipSpot, Trash
 
-from unilabos.devices.liquid_handling.liquid_handler_abstract import LiquidHandlerAbstract
+from unilabos.devices.liquid_handling.liquid_handler_abstract import LiquidHandlerAbstract, SimpleReturn
 from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode
 
 
@@ -67,8 +67,37 @@ class PRCXI9300Deck(Deck):
 
     def __init__(self, name: str, size_x: float, size_y: float, size_z: float, **kwargs):
         super().__init__(name, size_x, size_y, size_z)
-        self.slots = [None] * 6  # PRCXI 9300 有 6 个槽位
-
+        self.slots = [None] * 12  # PRCXI 9300 有 6 个槽位
+        self.slot_locations = [
+        Coordinate(x=0.0, y=0.0, z=0.0),
+        Coordinate(x=132.5, y=0.0, z=0.0),
+        Coordinate(x=265.0, y=0.0, z=0.0),
+        Coordinate(x=0.0, y=90.5, z=0.0),
+        Coordinate(x=132.5, y=90.5, z=0.0),
+        Coordinate(x=265.0, y=90.5, z=0.0),
+        Coordinate(x=0.0, y=181.0, z=0.0),
+        Coordinate(x=132.5, y=181.0, z=0.0),
+        Coordinate(x=265.0, y=181.0, z=0.0),
+        Coordinate(x=0.0, y=271.5, z=0.0),
+        Coordinate(x=132.5, y=271.5, z=0.0),
+        Coordinate(x=265.0, y=271.5, z=0.0),
+        ]
+    
+    def serialize(self):
+        super_serialized = super().serialize()
+        if hasattr(self, "slot_locations"):
+            super_serialized["sites"] = [
+                {
+                "label": str(i),
+                "visible": True,
+                "position": {"x": slot.x, "y": slot.y, "z": slot.z},
+                "size": {"width": 127.0, "height": 85.5, "depth":0},
+                "content_type": ["plate", "tip_rack", "tube_rack"],
+                } for i, slot in enumerate(self.slot_locations)
+            ]
+        # print("----"*10)
+        # print(super_serialized)
+        return super_serialized
 
 class PRCXI9300Container(Plate, TipRack):
     """PRCXI 9300 的专用 Container 类，继承自 Plate和TipRack。
@@ -149,6 +178,7 @@ class PRCXI9300Handler(LiquidHandlerAbstract):
         step_mode=False,
         matrix_id="",
         is_9320=False,
+        **kwargs,
     ):
         tablets_info = []
         count = 0
@@ -176,7 +206,7 @@ class PRCXI9300Handler(LiquidHandlerAbstract):
         super().post_init(ros_node)
         self._unilabos_backend.post_init(ros_node)
 
-    def set_liquid(self, wells: list[Well], liquid_names: list[str], volumes: list[float]):
+    def set_liquid(self, wells: list[Well], liquid_names: list[str], volumes: list[float]) -> SimpleReturn:
         return super().set_liquid(wells, liquid_names, volumes)
 
     def set_group(self, group_name: str, wells: List[Well], volumes: List[float]):
@@ -505,7 +535,11 @@ class PRCXI9300Backend(LiquidHandlerBackend):
         print(f"PRCXI9300Backend created solution with ID: {solution_id}")
         self.api_client.load_solution(solution_id)
         print(json.dumps(self.steps_todo_list, indent=2))
-        return self.api_client.start()
+        if not self.api_client.start():
+            return False
+        if not self.api_client.wait_for_finish():
+            return False
+        return True
 
     @classmethod
     def check_channels(cls, use_channels: List[int]) -> List[int]:
@@ -888,7 +922,25 @@ class PRCXI9300Api:
 
     # ---------------------------------------------------- 自动化控制（IAutomation）
     def start(self) -> bool:
+        success = self.call("IAutomation", "Start")
+        
         return self.call("IAutomation", "Start")
+
+    def wait_for_finish(self) -> bool:
+        success = False
+        start = False
+        while not success:
+            status = self.step_state_list()
+            if status[-1]["State"] == 2 and start:
+                success = True
+            elif status[-1]["State"] > 2:
+                break
+            elif status[-1]["State"] == 0:
+                start = True
+            else:
+                time.sleep(1)
+        return success
+
 
     def call(self, service: str, method: str, params: Optional[list] = None) -> Any:
         payload = json.dumps(

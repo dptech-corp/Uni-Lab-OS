@@ -13,7 +13,7 @@ from unilabos.config.config import BasicConfig
 from unilabos.resources.container import RegularContainer
 from unilabos.resources.itemized_carrier import ItemizedCarrier, BottleCarrier
 from unilabos.ros.msgs.message_converter import convert_to_ros_msg
-from unilabos.ros.nodes.resource_tracker import (
+from unilabos.resources.resource_tracker import (
     ResourceDictInstance,
     ResourceTreeSet,
 )
@@ -45,13 +45,10 @@ def canonicalize_nodes_data(
     print_status(f"{len(nodes)} Resources loaded:", "info")
 
     # 第一步：基本预处理（处理graphml的label字段）
-    outer_host_node_id = None
-    for idx, node in enumerate(nodes):
+    for node in nodes:
         if node.get("label") is not None:
             node_id = node.pop("label")
             node["id"] = node["name"] = node_id
-        if node["id"] == "host_node":
-            outer_host_node_id = idx
         if not isinstance(node.get("config"), dict):
             node["config"] = {}
         if not node.get("type"):
@@ -79,8 +76,7 @@ def canonicalize_nodes_data(
             if k not in ["id", "uuid", "name", "description", "schema", "model", "icon", "parent_uuid", "parent", "type", "class", "position", "config", "data", "children", "pose"]:
                 v = node.pop(k)
                 node["config"][k] = v
-    if outer_host_node_id is not None:
-        nodes.pop(outer_host_node_id)
+
     # 第二步：处理parent_relation
     id2idx = {node["id"]: idx for idx, node in enumerate(nodes)}
     for parent, children in parent_relation.items():
@@ -269,7 +265,7 @@ def read_node_link_json(
         "nodes": [node.res_content.model_dump(by_alias=True) for node in resource_tree_set.all_nodes],
         "links": standardized_links,
     }
-    physical_setup_graph = nx.node_link_graph(graph_data, edges="links", multigraph=False)
+    physical_setup_graph = nx.node_link_graph(graph_data, multigraph=False)
     handle_communications(physical_setup_graph)
 
     return physical_setup_graph, resource_tree_set, standardized_links
@@ -540,6 +536,10 @@ def resource_ulab_to_plr(resource: dict, plr_model=False) -> "ResourcePLR":
     def resource_ulab_to_plr_inner(resource: dict):
         all_states[resource["name"]] = resource["data"]
         extra = resource.pop("extra", {})
+        if "pose" in resource:
+            pose = resource.pop("pose")
+            resource["position"] = pose["position"]
+
         d = {
             "name": resource["name"],
             "type": resource["type"],
@@ -568,8 +568,10 @@ def resource_ulab_to_plr(resource: dict, plr_model=False) -> "ResourcePLR":
 
     sub_cls = find_subclass(d["type"], ResourcePLR)
     spect = inspect.signature(sub_cls)
-    if "category" not in spect.parameters:
-        d.pop("category")
+    for param in list(d.keys()):
+
+        if param == "category" or param == "pose":
+            d.pop(param)
     resource_plr = sub_cls.deserialize(d, allow_marshal=True)
     resource_plr.load_all_state(all_states)
     return resource_plr
