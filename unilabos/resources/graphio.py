@@ -45,10 +45,13 @@ def canonicalize_nodes_data(
     print_status(f"{len(nodes)} Resources loaded:", "info")
 
     # 第一步：基本预处理（处理graphml的label字段）
-    for node in nodes:
+    outer_host_node_id = None
+    for idx, node in enumerate(nodes):
         if node.get("label") is not None:
             node_id = node.pop("label")
             node["id"] = node["name"] = node_id
+        if node["id"] == "host_node":
+            outer_host_node_id = idx
         if not isinstance(node.get("config"), dict):
             node["config"] = {}
         if not node.get("type"):
@@ -76,7 +79,8 @@ def canonicalize_nodes_data(
             if k not in ["id", "uuid", "name", "description", "schema", "model", "icon", "parent_uuid", "parent", "type", "class", "position", "config", "data", "children", "pose"]:
                 v = node.pop(k)
                 node["config"][k] = v
-
+    if outer_host_node_id is not None:
+        nodes.pop(outer_host_node_id)
     # 第二步：处理parent_relation
     id2idx = {node["id"]: idx for idx, node in enumerate(nodes)}
     for parent, children in parent_relation.items():
