@@ -45,13 +45,10 @@ def canonicalize_nodes_data(
     print_status(f"{len(nodes)} Resources loaded:", "info")
 
     # 第一步：基本预处理（处理graphml的label字段）
-    outer_host_node_id = None
-    for idx, node in enumerate(nodes):
+    for node in nodes:
         if node.get("label") is not None:
             node_id = node.pop("label")
             node["id"] = node["name"] = node_id
-        if node["id"] == "host_node":
-            outer_host_node_id = idx
         if not isinstance(node.get("config"), dict):
             node["config"] = {}
         if not node.get("type"):
@@ -61,26 +58,25 @@ def canonicalize_nodes_data(
             node["name"] = node.get("id")
             print_status(f"Warning: Node {node.get('id', 'unknown')} missing 'name', defaulting to {node['name']}", "warning")
         if not isinstance(node.get("position"), dict):
-            node["pose"] = {"position": {}}
+            node["position"] = {"position": {}}
             x = node.pop("x", None)
             if x is not None:
-                node["pose"]["position"]["x"] = x
+                node["position"]["position"]["x"] = x
             y = node.pop("y", None)
             if y is not None:
-                node["pose"]["position"]["y"] = y
+                node["position"]["position"]["y"] = y
             z = node.pop("z", None)
             if z is not None:
-                node["pose"]["position"]["z"] = z
+                node["position"]["position"]["z"] = z
         if "sample_id" in node:
             sample_id = node.pop("sample_id")
             if sample_id:
                 logger.error(f"{node}的sample_id参数已弃用，sample_id: {sample_id}")
         for k in list(node.keys()):
-            if k not in ["id", "uuid", "name", "description", "schema", "model", "icon", "parent_uuid", "parent", "type", "class", "position", "config", "data", "children", "pose"]:
+            if k not in ["id", "uuid", "name", "description", "schema", "model", "icon", "parent_uuid", "parent", "type", "class", "position", "config", "data", "children"]:
                 v = node.pop(k)
                 node["config"][k] = v
-    if outer_host_node_id is not None:
-        nodes.pop(outer_host_node_id)
+
     # 第二步：处理parent_relation
     id2idx = {node["id"]: idx for idx, node in enumerate(nodes)}
     for parent, children in parent_relation.items():

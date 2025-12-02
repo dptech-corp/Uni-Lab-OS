@@ -12,11 +12,10 @@ from unilabos_msgs.srv import ResourceUpdate
 from unilabos.messages import *  # type: ignore  # protocol names
 from rclpy.action import ActionServer, ActionClient
 from rclpy.action.server import ServerGoalHandle
-from rclpy.callback_groups import ReentrantCallbackGroup
 from unilabos_msgs.srv._serial_command import SerialCommand_Request, SerialCommand_Response
 
 from unilabos.compile import action_protocol_generators
-from unilabos.resources.graphio import list_to_nested_dict, nested_dict_to_list
+from unilabos.resources.graphio import nested_dict_to_list
 from unilabos.ros.initialize_device import initialize_device_from_dict
 from unilabos.ros.msgs.message_converter import (
     get_action_type,
@@ -24,7 +23,7 @@ from unilabos.ros.msgs.message_converter import (
     convert_from_ros_msg_with_mapping,
 )
 from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode, DeviceNodeResourceTracker, ROS2DeviceNode
-from unilabos.ros.nodes.resource_tracker import ResourceTreeSet, ResourceDictInstance
+from unilabos.resources.resource_tracker import ResourceTreeSet
 from unilabos.utils.type_check import get_result_info_str
 
 if TYPE_CHECKING:
@@ -47,7 +46,7 @@ class ROS2WorkstationNode(BaseROS2DeviceNode):
     def __init__(
         self,
         protocol_type: List[str],
-        children: List[ResourceDictInstance],
+        children: Dict[str, Any],
         *,
         driver_instance: "WorkstationBase",
         device_id: str,
@@ -81,11 +80,10 @@ class ROS2WorkstationNode(BaseROS2DeviceNode):
         # 初始化子设备
         self.communication_node_id_to_instance = {}
 
-        for device_config in self.children:
-            device_id = device_config.res_content.id
-            if device_config.res_content.type != "device":
+        for device_id, device_config in self.children.items():
+            if device_config.get("type", "device") != "device":
                 self.lab_logger().debug(
-                    f"[Protocol Node] Skipping type {device_config.res_content.type} {device_id} already existed, skipping."
+                    f"[Protocol Node] Skipping type {device_config['type']} {device_id} already existed, skipping."
                 )
                 continue
             try:
@@ -102,9 +100,8 @@ class ROS2WorkstationNode(BaseROS2DeviceNode):
                 self.communication_node_id_to_instance[device_id] = d
                 continue
 
-        for device_config in self.children:
-            device_id = device_config.res_content.id
-            if device_config.res_content.type != "device":
+        for device_id, device_config in self.children.items():
+            if device_config.get("type", "device") != "device":
                 continue
             # 设置硬件接口代理
             if device_id not in self.sub_devices:
