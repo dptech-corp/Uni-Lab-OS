@@ -1,4 +1,4 @@
-xyz_stepper_controller:
+xyzsteppercontroller_device:
   category:
   - laiyu_liquid_test
   class:
@@ -9,10 +9,6 @@ xyz_stepper_controller:
         goal_default:
           save_path: work_origin.json
         handles: {}
-<<<<<<< HEAD
-=======
-        placeholder_keys: {}
->>>>>>> dev
         result: {}
         schema:
           description: ''
@@ -38,10 +34,6 @@ xyz_stepper_controller:
           axis: null
           state: null
         handles: {}
-<<<<<<< HEAD
-=======
-        placeholder_keys: {}
->>>>>>> dev
         result: {}
         schema:
           description: ''
@@ -73,10 +65,6 @@ xyz_stepper_controller:
           speed: 2000
           steps: null
         handles: {}
-<<<<<<< HEAD
-=======
-        placeholder_keys: {}
->>>>>>> dev
         result: {}
         schema:
           description: ''
@@ -117,10 +105,6 @@ xyz_stepper_controller:
           y: 0.0
           z: 0.0
         handles: {}
-<<<<<<< HEAD
-=======
-        placeholder_keys: {}
->>>>>>> dev
         result: {}
         schema:
           description: ''
@@ -158,10 +142,6 @@ xyz_stepper_controller:
           acc: 800
           speed: 200
         handles: {}
-<<<<<<< HEAD
-=======
-        placeholder_keys: {}
->>>>>>> dev
         result: {}
         schema:
           description: ''
@@ -190,10 +170,6 @@ xyz_stepper_controller:
           axis: null
           timeout: 30.0
         handles: {}
-<<<<<<< HEAD
-=======
-        placeholder_keys: {}
->>>>>>> dev
         result: {}
         schema:
           description: ''
@@ -205,7 +181,7 @@ xyz_stepper_controller:
                   type: string
                 timeout:
                   default: 30.0
-                  type: string
+                  type: number
               required:
               - axis
               type: object
@@ -220,7 +196,7 @@ xyz_stepper_controller:
       status: list
     type: python
   config_info: []
-  description: 新XYZ控制器
+  description: laiyu_xyz三轴运动控制
   handles: []
   icon: ''
   init_param_schema:
@@ -235,11 +211,7 @@ xyz_stepper_controller:
           default: unilabos/devices/laiyu_liquid_test/work_origin.json
           type: string
         port:
-<<<<<<< HEAD
-          default: /dev/ttyUSB1
-=======
           default: /dev/ttyUSB0
->>>>>>> dev
           type: string
       required: []
       type: object
