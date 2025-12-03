@@ -1,4 +1,4 @@
-camera.USB:
+camera:
   category:
   - camera
   class:
@@ -60,6 +60,9 @@ camera.USB:
           type: string
         device_id:
           default: video_publisher
+          type: string
+        device_uuid:
+          default: ''
           type: string
         period:
           default: 0.1

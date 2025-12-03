@@ -105,7 +105,7 @@ def parse_args():
     parser.add_argument(
         "--port",
         type=int,
-        default=8002,
+        default=None,
         help="Port for web service information page",
     )
     parser.add_argument(
@@ -252,6 +252,8 @@ def main():
         else:
             print_status("远程资源不存在，本地将进行首次上报！", "info")
 
+    BasicConfig.port = args_dict["port"] if args_dict["port"] else BasicConfig.port
+    BasicConfig.disable_browser = args_dict["disable_browser"] or BasicConfig.disable_browser
     BasicConfig.working_dir = working_dir
     BasicConfig.is_host_mode = not args_dict.get("is_slave", False)
     BasicConfig.slave_no_host = args_dict.get("slave_no_host", False)
@@ -291,7 +293,9 @@ def main():
     resource_tree_set: ResourceTreeSet
     resource_links: List[Dict[str, Any]]
     request_startup_json = http_client.request_startup_json()
-    if args_dict["graph"] is None:
+
+    file_path = args_dict.get("graph", BasicConfig.startup_json_path)
+    if file_path is None:
         if not request_startup_json:
             print_status(
                 "未指定设备加载文件路径，尝试从HTTP获取失败，请检查网络或者使用-g参数指定设备加载文件路径", "error"
@@ -301,7 +305,11 @@ def main():
             print_status("联网获取设备加载文件成功", "info")
         graph, resource_tree_set, resource_links = read_node_link_json(request_startup_json)
     else:
-        file_path = args_dict["graph"]
+        if not os.path.isfile(file_path):
+            temp_file_path = os.path.abspath(str(os.path.join(__file__, "..", "..", file_path)))
+            if os.path.isfile(temp_file_path):
+                print_status(f"使用相对路径{temp_file_path}", "info")
+                file_path = temp_file_path
         if file_path.endswith(".json"):
             graph, resource_tree_set, resource_links = read_node_link_json(file_path)
         else:
@@ -413,13 +421,29 @@ def main():
             server_thread = threading.Thread(
                 target=start_server,
                 kwargs=dict(
-                    open_browser=not args_dict["disable_browser"],
-                    port=args_dict["port"],
+                    open_browser=not BasicConfig.disable_browser,
+                    port=BasicConfig.port,
                 ),
             )
             server_thread.start()
             asyncio.set_event_loop(asyncio.new_event_loop())
-            resource_visualization.start()
+            try:
+                resource_visualization.start()
+            except OSError as e:
+                if "AMENT_PREFIX_PATH" in str(e):
+                    print_status(
+                        f"ROS 2环境未正确设置，跳过3D可视化启动。错误详情: {e}",
+                        "warning"
+                    )
+                    print_status(
+                        "建议解决方案：\n"
+                        "1. 激活Conda环境: conda activate unilab\n"
+                        "2. 或使用 --backend simple 参数\n"
+                        "3. 或使用 --visual disable 参数禁用可视化",
+                        "info"
+                    )
+                else:
+                    raise
             while True:
                 time.sleep(1)
         else:

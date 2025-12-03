@@ -1,46 +1,42 @@
-
 import os
 import time
-import json
 import logging
-from xyz_stepper_driver import ModbusRTUTransport, ModbusClient, XYZStepperController, MotorStatus
+
+from xyz_stepper_driver import (
+    XYZStepperController,
+    MotorStatus,
+)
 
 # ========== 日志配置 ==========
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("XYZ_Debug")
 
-
-def create_controller(port: str = "/dev/ttyUSB1", baudrate: int = 115200) -> XYZStepperController:
-    """
-    初始化通信层与三轴控制器
-    """
-    logger.info(f"🔧 初始化控制器: {port} @ {baudrate}bps")
-    transport = ModbusRTUTransport(port=port, baudrate=baudrate)
-    transport.open()
-    client = ModbusClient(transport)
-    return XYZStepperController(client=client, port=port, baudrate=baudrate)
+# 软零点文件与控制器路径（与驱动内部默认一致）
+ORIGIN_PATH = "unilabos/devices/laiyu_liquid_test/work_origin.json"
 
 
-def load_existing_soft_zero(ctrl: XYZStepperController, path: str = "work_origin.json") -> bool:
+def create_controller(
+    port: str = "/dev/ttyUSB1",
+    baudrate: int = 115200,
+    origin_path: str = ORIGIN_PATH,
+) -> XYZStepperController:
     """
-    如果已存在软零点文件则加载，否则返回 False
-    """
-    if not os.path.exists(path):
-        logger.warning("⚠ 未找到已有软零点文件，将等待人工定义新零点。")
-        return False
+    初始化三轴控制器
 
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        origin = data.get("work_origin_steps", {})
-        ctrl.work_origin_steps = origin
-        ctrl.is_homed = True
-        logger.info(f"✔ 已加载软零点文件：{path}")
-        logger.info(f"当前软零点步数: {origin}")
-        return True
-    except Exception as e:
-        logger.error(f"读取软零点文件失败: {e}")
-        return False
+    说明：
+    - XYZStepperController 内部如果 client 为 None，
+      会自行创建 ModbusRTUTransport 和 ModbusClient 并打开串口。
+    - origin_path 会在 __init__ 时自动尝试加载软零点。
+    """
+    logger.info(f"初始化控制器: {port} @ {baudrate}bps, origin_path={origin_path}")
+    ctrl = XYZStepperController(
+        client=None,
+        port=port,
+        baudrate=baudrate,
+        origin_path=origin_path,
+    )
+    logger.info(f"is_homed={ctrl.is_homed}, work_origin_steps={ctrl.work_origin_steps}")
+    return ctrl
 
 
 def test_enable_axis(ctrl: XYZStepperController):
@@ -80,18 +76,24 @@ def test_status_read(ctrl: XYZStepperController):
         time.sleep(0.2)
 
 
-def redefine_soft_zero(ctrl: XYZStepperController):
+def redefine_soft_zero(ctrl: XYZStepperController, path: str = ORIGIN_PATH):
     """
-    手动重新定义软零点
+    手动重新定义软零点：
+    - 以当前各轴位置为工作原点
+    - 写入指定的 JSON 文件
     """
-    logger.info("=== ⚙️ 重新定义软零点 ===")
-    ctrl.define_current_as_zero("work_origin.json")
-    logger.info("✅ 新软零点已写入 work_origin.json")
+    logger.info("=== 重新定义软零点 ===")
+    # 使用驱动内置的保存方法
+    ctrl.define_current_as_zero(path)
+    logger.info(f"新的软零点已写入: {path}")
+    logger.info(f"当前 work_origin_steps = {ctrl.work_origin_steps}")
 
 
 def test_soft_zero_move(ctrl: XYZStepperController):
     """
     以软零点为基准执行三轴运动测试
+    注意：
+    - 使用 move_xyz_work，会执行 Z→XY→Z 的安全顺序运动
     """
     logger.info("=== 测试软零点相对运动 ===")
     ctrl.move_xyz_work(x=100.0, y=100.0, z=40.0, speed=100, acc=800)
@@ -100,38 +102,50 @@ def test_soft_zero_move(ctrl: XYZStepperController):
         ctrl.wait_complete(axis)
 
     test_status_read(ctrl)
-    logger.info("✅ 软零点运动测试完成")
+    logger.info("软零点运动测试完成")
 
 
 def main():
-    ctrl = create_controller(port="/dev/ttyUSB1", baudrate=115200)
+    # 如需改串口或波特率，在这里改
+    ctrl = create_controller(
+        port="/dev/ttyUSB1",
+        baudrate=115200,
+        origin_path=ORIGIN_PATH,
+    )
 
     try:
+        # 1. 使能各轴并读一下状态
         test_enable_axis(ctrl)
         test_status_read(ctrl)
 
-        # === 初始化或加载软零点 ===
-        loaded = load_existing_soft_zero(ctrl)
-        if not loaded:
-            logger.info("👣 首次运行，定义软零点并保存。")
-            ctrl.define_current_as_zero("work_origin.json")
+        # 2. 软零点初始化逻辑：
+        #    - 如果加载不到，is_homed 会是 False
+        if not ctrl.is_homed:
+            logger.info("首次运行或未找到软零点文件，将使用当前机械位置定义软零点。")
+            redefine_soft_zero(ctrl, ORIGIN_PATH)
 
-        # === 软零点回归动作 ===
+        # 3. 回工件软零点（软零点已经在控制器内部）
+        logger.info("执行回软零点动作...")
         ctrl.return_to_work_origin()
+        logger.info("回软零点完成。")
 
-        # === 可选软零点运动测试 ===
+        # 4. 可选：做一次相对软零点的运动测试
         # test_soft_zero_move(ctrl)
 
     except KeyboardInterrupt:
-        logger.info("🛑 手动中断退出")
+        logger.info("手动中断退出")
 
     except Exception as e:
-        logger.exception(f"❌ 调试出错: {e}")
+        logger.exception(f"调试出错: {e}")
 
     finally:
-        if hasattr(ctrl.client, "transport"):
-            ctrl.client.transport.close()
-        logger.info("串口已安全关闭 ✅")
+        # 安全关闭串口
+        try:
+            if hasattr(ctrl, "client") and hasattr(ctrl.client, "transport"):
+                ctrl.client.transport.close()
+        except Exception:
+            pass
+        logger.info("串口已安全关闭")
 
 
 if __name__ == "__main__":

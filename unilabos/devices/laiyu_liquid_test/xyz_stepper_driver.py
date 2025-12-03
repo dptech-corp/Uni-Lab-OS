@@ -1,8 +1,8 @@
 
 """
-XYZ 三轴步进电机驱动（统一字符串参数版）
+XYZ 三轴步进电机驱动
 基于 Modbus RTU 协议
-Author: Xiuyu Chen (Modified by Assistant)
+Author: Xiuyu Chen
 """
 
 import serial  # type: ignore
