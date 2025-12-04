@@ -32,8 +32,10 @@ class CameraController:
         rtmp_url: str = "rtmp://srs.sciol.ac.cn:4499/live/camera-01",
         webrtc_api: str = "https://srs.sciol.ac.cn/rtc/v1/play/",
         webrtc_stream_url: str = "webrtc://srs.sciol.ac.cn:4500/live/camera-01",
+        camera_rtsp_url: str = "",
     ):
         self.host_id = host_id
+        self.camera_rtsp_url = camera_rtsp_url
 
         # 拼接最终的 WebSocket URL：.../host/<host_id>
         signal_backend_url = signal_backend_url.rstrip("/")
@@ -77,6 +79,7 @@ class CameraController:
 
         # 应用 config 覆盖（如果有）
         if config:
+            self.camera_rtsp_url = config.get("camera_rtsp_url", self.camera_rtsp_url)
             cfg_host_id = config.get("host_id")
             if cfg_host_id:
                 self.host_id = cfg_host_id
@@ -353,51 +356,48 @@ class CameraController:
 
         cmd = [
             "ffmpeg",
-            "-f",
-            "v4l2",
-            "-framerate",
-            "30",
-            "-video_size",
-            "1280x720",
-            "-i",
-            "/dev/video0",
-            "-c:v",
-            "libx264",
-            "-preset",
-            "ultrafast",
-            "-tune",
-            "zerolatency",
-            "-profile:v",
-            "baseline",
-            "-b:v",
-            "1M",
-            "-maxrate",
-            "1M",
-            "-bufsize",
-            "2M",
-            "-g",
-            "10",
-            "-keyint_min",
-            "10",
-            "-sc_threshold",
-            "0",
-            "-pix_fmt",
-            "yuv420p",
-            "-x264-params",
-            "bframes=0",
-            "-f",
-            "flv",
+            "-rtsp_transport", "tcp",
+            "-i", self.camera_rtsp_url,
+
+            # 视频编码
+            "-c:v", "libx264",
+            "-preset", "ultrafast",
+            "-tune", "zerolatency",
+            "-profile:v", "baseline",
+            "-b:v", "1M",
+            "-maxrate", "1M",
+            "-bufsize", "2M",
+            "-g", "10",
+            "-keyint_min", "10",
+            "-sc_threshold", "0",
+            "-pix_fmt", "yuv420p",
+            "-x264-params", "bframes=0",
+
+            # 音频编码（关键修改）
+            "-c:a", "aac",        # 使用 AAC
+            "-ar", "44100",       # 采样率改成 44100
+            "-ac", "1",           # 单声道
+            "-b:a", "64k",        # 音频码率
+
+            "-f", "flv",
             self.rtmp_url,
         ]
-        # 日志调整: 不再打印完整命令，只在失败时打印异常
 
         try:
             self._ffmpeg_process = subprocess.Popen(
                 cmd,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.STDOUT,
+                # stderr=sys.stderr,
                 shell=False, # 安全起见不使用 shell
             )
+            # # 调试：打印视频流日志
+            # def _log_ffmpeg(proc):
+            #     for line in proc.stdout:
+            #         print("[FFmpeg]", line.rstrip())
+            
+            # threading.Thread(target=_log_ffmpeg, args=(self._ffmpeg_process,), daemon=True).start()
+
         except Exception as e:
             print(f"[CameraController] failed to start FFmpeg: {e}", file=sys.stderr)
             self._ffmpeg_process = None
