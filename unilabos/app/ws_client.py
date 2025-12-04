@@ -389,7 +389,7 @@ class MessageProcessor:
         self.is_running = True
         self.thread = threading.Thread(target=self._run, daemon=True, name="MessageProcessor")
         self.thread.start()
-        logger.info("[MessageProcessor] Started")
+        logger.trace("[MessageProcessor] Started")
 
     def stop(self) -> None:
         """停止消息处理线程"""
@@ -939,7 +939,7 @@ class QueueProcessor:
         # 事件通知机制
         self.queue_update_event = threading.Event()
 
-        logger.info("[QueueProcessor] Initialized")
+        logger.trace("[QueueProcessor] Initialized")
 
     def set_websocket_client(self, websocket_client: "WebSocketClient"):
         """设置WebSocket客户端引用"""
@@ -954,7 +954,7 @@ class QueueProcessor:
         self.is_running = True
         self.thread = threading.Thread(target=self._run, daemon=True, name="QueueProcessor")
         self.thread.start()
-        logger.info("[QueueProcessor] Started")
+        logger.trace("[QueueProcessor] Started")
 
     def stop(self) -> None:
         """停止队列处理线程"""
