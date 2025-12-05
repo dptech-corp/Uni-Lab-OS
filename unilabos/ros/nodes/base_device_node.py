@@ -1142,20 +1142,28 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                                 plr_resource = await self.get_resource_with_dir(
                                     resource_id=resource_data["id"], with_children=True
                                 )
+                                if "sample_id" in resource_data:
+                                    plr_resource.unilabos_extra["sample_uuid"] = resource_data["sample_id"]
                                 queried_resources.append(plr_resource)
 
                             self.lab_logger().debug(f"资源查询结果: 共 {len(queried_resources)} 个资源")
 
                             # 通过资源跟踪器获取本地实例
                             final_resources = queried_resources if is_sequence else queried_resources[0]
-                            final_resources = (
-                                self.resource_tracker.figure_resource({"name": final_resources.name}, try_mode=False)
-                                if not is_sequence
-                                else [
-                                    self.resource_tracker.figure_resource({"name": res.name}, try_mode=False)
-                                    for res in queried_resources
-                                ]
-                            )
+                            if not is_sequence:
+                                plr = self.resource_tracker.figure_resource({"name": final_resources.name}, try_mode=False)
+                                # 保留unilabos_extra
+                                if hasattr(final_resources, "unilabos_extra") and hasattr(plr, "unilabos_extra"):
+                                    plr.unilabos_extra = getattr(final_resources, "unilabos_extra", {}).copy()
+                                final_resources = plr
+                            else:
+                                new_resources = []
+                                for res in queried_resources:
+                                    plr = self.resource_tracker.figure_resource({"name": res.name}, try_mode=False)
+                                    if hasattr(res, "unilabos_extra") and hasattr(plr, "unilabos_extra"):
+                                        plr.unilabos_extra = getattr(res, "unilabos_extra", {}).copy()
+                                    new_resources.append(plr)
+                                final_resources = new_resources
                             action_kwargs[k] = final_resources
 
                         except Exception as e:

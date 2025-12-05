@@ -29,7 +29,7 @@ from pylabrobot.liquid_handling.standard import (
 )
 from pylabrobot.resources import Tip, Deck, Plate, Well, TipRack, Resource, Container, Coordinate, TipSpot, Trash
 
-from unilabos.devices.liquid_handling.liquid_handler_abstract import LiquidHandlerAbstract
+from unilabos.devices.liquid_handling.liquid_handler_abstract import LiquidHandlerAbstract, SimpleReturn
 from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode
 
 
@@ -176,7 +176,7 @@ class PRCXI9300Handler(LiquidHandlerAbstract):
         super().post_init(ros_node)
         self._unilabos_backend.post_init(ros_node)
 
-    def set_liquid(self, wells: list[Well], liquid_names: list[str], volumes: list[float]):
+    def set_liquid(self, wells: list[Well], liquid_names: list[str], volumes: list[float]) -> SimpleReturn:
         return super().set_liquid(wells, liquid_names, volumes)
 
     def set_group(self, group_name: str, wells: List[Well], volumes: List[float]):
@@ -505,7 +505,11 @@ class PRCXI9300Backend(LiquidHandlerBackend):
         print(f"PRCXI9300Backend created solution with ID: {solution_id}")
         self.api_client.load_solution(solution_id)
         print(json.dumps(self.steps_todo_list, indent=2))
-        return self.api_client.start()
+        if not self.api_client.start():
+            return False
+        if not self.api_client.wait_for_finish():
+            return False
+        return True
 
     @classmethod
     def check_channels(cls, use_channels: List[int]) -> List[int]:
@@ -889,6 +893,26 @@ class PRCXI9300Api:
     # ---------------------------------------------------- 自动化控制（IAutomation）
     def start(self) -> bool:
         return self.call("IAutomation", "Start")
+
+    def wait_for_finish(self) -> bool:
+        success = False
+        start = False
+        while not success:
+            status = self.step_state_list()
+            if status is None:
+                break
+            if len(status) == 0:
+                break
+            if status[-1]["State"] == 2 and start:
+                success = True
+            elif status[-1]["State"] > 2:
+                break
+            elif status[-1]["State"] == 0:
+                start = True
+            else:
+                time.sleep(1)
+        return success
+
 
     def call(self, service: str, method: str, params: Optional[list] = None) -> Any:
         payload = json.dumps(
