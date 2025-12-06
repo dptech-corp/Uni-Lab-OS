@@ -5,10 +5,157 @@ import subprocess
 import sys
 import threading
 from typing import Optional, Dict, Any
+import logging
 
 import requests
 import websockets
 
+logging.getLogger("zeep").setLevel(logging.WARNING)
+logging.getLogger("zeep.xsd.schema").setLevel(logging.WARNING)
+logging.getLogger("zeep.xsd.schema.schema").setLevel(logging.WARNING)
+from onvif import ONVIFCamera  # 新增：ONVIF PTZ 控制
+
+
+# ======================= 独立的 PTZController =======================
+class PTZController:
+    def __init__(self, host: str, port: int, user: str, password: str):
+        """
+        :param host: 摄像机 IP 或域名（和 RTSP 的一样即可）
+        :param port: ONVIF 端口（多数为 80，看你的设备）
+        :param user: 摄像机用户名
+        :param password: 摄像机密码
+        """
+        self.host = host
+        self.port = port
+        self.user = user
+        self.password = password
+
+        self.cam: Optional[ONVIFCamera] = None
+        self.media_service = None
+        self.ptz_service = None
+        self.profile = None
+
+    def connect(self) -> bool:
+        """
+        建立 ONVIF 连接并初始化 PTZ 能力，失败返回 False（不抛异常）
+        Note: 首先 pip install onvif-zeep
+        """
+        try:
+            self.cam = ONVIFCamera(self.host, self.port, self.user, self.password)
+            self.media_service = self.cam.create_media_service()
+            self.ptz_service = self.cam.create_ptz_service()
+            profiles = self.media_service.GetProfiles()
+            if not profiles:
+                print("[PTZ] No media profiles found on camera.", file=sys.stderr)
+                return False
+            self.profile = profiles[0]
+            return True
+        except Exception as e:
+            print(f"[PTZ] Failed to init ONVIF PTZ: {e}", file=sys.stderr)
+            return False
+
+    def _continuous_move(self, pan: float, tilt: float, zoom: float, duration: float) -> bool:
+        """
+        连续移动一段时间（秒），之后自动停止。
+        此函数为阻塞模式：只有在 Stop 调用结束后，才返回 True/False。
+        """
+        if not self.ptz_service or not self.profile:
+            print("[PTZ] _continuous_move: ptz_service or profile not ready", file=sys.stderr)
+            return False
+
+        # 进入前先强行停一下，避免前一次残留动作
+        self._force_stop()
+
+        req = self.ptz_service.create_type("ContinuousMove")
+        req.ProfileToken = self.profile.token
+
+        req.Velocity = {
+            "PanTilt": {"x": pan, "y": tilt},
+            "Zoom": {"x": zoom},
+        }
+
+        try:
+            print(f"[PTZ] ContinuousMove start: pan={pan}, tilt={tilt}, zoom={zoom}, duration={duration}", file=sys.stderr)
+            self.ptz_service.ContinuousMove(req)
+        except Exception as e:
+            print(f"[PTZ] ContinuousMove failed: {e}", file=sys.stderr)
+            return False
+
+        # 阻塞等待：这里决定“运动时间”
+        import time
+        wait_seconds = max(2 * duration, 0.0)
+        time.sleep(wait_seconds)
+
+        # 运动完成后强制停止
+        return self._force_stop()
+
+    def stop(self) -> bool:
+        """
+        阻塞调用 Stop（带重试），成功 True，失败 False。
+        """
+        return self._force_stop()
+
+    # ------- 对外动作接口（给 CameraController 调用） -------
+    # 所有接口都为“阻塞模式”：只有在运动 + Stop 完成后才返回 True/False
+
+    def move_up(self, speed: float = 0.5, duration: float = 1.0) -> bool:
+        print(f"[PTZ] move_up called, speed={speed}, duration={duration}", file=sys.stderr)
+        return self._continuous_move(pan=0.0, tilt=+speed, zoom=0.0, duration=duration)
+
+    def move_down(self, speed: float = 0.5, duration: float = 1.0) -> bool:
+        print(f"[PTZ] move_down called, speed={speed}, duration={duration}", file=sys.stderr)
+        return self._continuous_move(pan=0.0, tilt=-speed, zoom=0.0, duration=duration)
+
+    def move_left(self, speed: float = 0.2, duration: float = 1.0) -> bool:
+        print(f"[PTZ] move_left called, speed={speed}, duration={duration}", file=sys.stderr)
+        return self._continuous_move(pan=-speed, tilt=0.0, zoom=0.0, duration=duration)
+
+    def move_right(self, speed: float = 0.2, duration: float = 1.0) -> bool:
+        print(f"[PTZ] move_right called, speed={speed}, duration={duration}", file=sys.stderr)
+        return self._continuous_move(pan=+speed, tilt=0.0, zoom=0.0, duration=duration)
+
+    # ------- 占位的变倍接口（当前设备不支持） -------
+    def zoom_in(self, speed: float = 0.2, duration: float = 1.0) -> bool:
+        """
+        当前设备不支持变倍；保留方法只是避免上层调用时报错。
+        """
+        print("[PTZ] zoom_in is disabled for this device.", file=sys.stderr)
+        return False
+
+    def zoom_out(self, speed: float = 0.2, duration: float = 1.0) -> bool:
+        """
+        当前设备不支持变倍；保留方法只是避免上层调用时报错。
+        """
+        print("[PTZ] zoom_out is disabled for this device.", file=sys.stderr)
+        return False
+
+    def _force_stop(self, retries: int = 3, delay: float = 0.1) -> bool:
+        """
+        尝试多次调用 Stop，作为“强制停止”手段。
+        :param retries: 重试次数
+        :param delay: 每次重试间隔（秒）
+        """
+        if not self.ptz_service or not self.profile:
+            print("[PTZ] _force_stop: ptz_service or profile not ready", file=sys.stderr)
+            return False
+
+        import time
+        last_error = None
+        for i in range(retries):
+            try:
+                print(f"[PTZ] _force_stop: calling Stop(), attempt={i+1}", file=sys.stderr)
+                self.ptz_service.Stop({"ProfileToken": self.profile.token})
+                print("[PTZ] _force_stop: Stop() returned OK", file=sys.stderr)
+                return True
+            except Exception as e:
+                last_error = e
+                print(f"[PTZ] _force_stop: Stop() failed at attempt {i+1}: {e}", file=sys.stderr)
+                time.sleep(delay)
+
+        print(f"[PTZ] _force_stop: all {retries} attempts failed, last error: {last_error}", file=sys.stderr)
+        return False
+
+# ======================= CameraController（加入 PTZ） =======================
 
 class CameraController:
     """
@@ -33,6 +180,12 @@ class CameraController:
         webrtc_api: str = "https://srs.sciol.ac.cn/rtc/v1/play/",
         webrtc_stream_url: str = "webrtc://srs.sciol.ac.cn:4500/live/camera-01",
         camera_rtsp_url: str = "",
+
+        # （3）PTZ 控制相关（ONVIF）
+        ptz_host: str = "",           # 一般就是摄像头 IP，比如 "192.168.31.164"
+        ptz_port: int = 80,           # ONVIF 端口，不一定是 80，按实际情况改
+        ptz_user: str = "",           # admin
+        ptz_password: str = "",       # admin123
     ):
         self.host_id = host_id
         self.camera_rtsp_url = camera_rtsp_url
@@ -43,10 +196,18 @@ class CameraController:
             signal_backend_url = signal_backend_url + "/host"
         self.signal_backend_url = f"{signal_backend_url}/{host_id}"
 
-        # 媒体服务器配置（与 HostSimulator 保持一致）
+        # 媒体服务器配置
         self.rtmp_url = rtmp_url
         self.webrtc_api = webrtc_api
         self.webrtc_stream_url = webrtc_stream_url
+
+        # PTZ 控制
+        self.ptz_host = ptz_host
+        self.ptz_port = ptz_port
+        self.ptz_user = ptz_user
+        self.ptz_password = ptz_password
+        self._ptz: Optional[PTZController] = None
+        self._init_ptz_if_possible()
 
         # 运行时状态
         self._ws: Optional[object] = None
@@ -58,12 +219,68 @@ class CameraController:
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._loop_thread: Optional[threading.Thread] = None
 
-        # 这里不传 config，使用构造参数作为默认配置
         try:
             self.start()
         except Exception as e:
-            # 日志调整: 构造阶段只打印错误
             print(f"[CameraController] __init__ auto start failed: {e}", file=sys.stderr)
+
+    # ------------------------ PTZ 初始化 ------------------------
+
+    # ------------------------ PTZ 公开动作方法（一个动作一个函数） ------------------------
+
+    def ptz_move_up(self, speed: float = 0.5, duration: float = 1.0) -> bool:
+        print(f"[CameraController] ptz_move_up called, speed={speed}, duration={duration}")
+        return self._ptz.move_up(speed=speed, duration=duration)
+
+    def ptz_move_down(self, speed: float = 0.5, duration: float = 1.0) -> bool:
+        print(f"[CameraController] ptz_move_down called, speed={speed}, duration={duration}")
+        return self._ptz.move_down(speed=speed, duration=duration)
+
+    def ptz_move_left(self, speed: float = 0.2, duration: float = 1.0) -> bool:
+        print(f"[CameraController] ptz_move_left called, speed={speed}, duration={duration}")
+        return self._ptz.move_left(speed=speed, duration=duration)
+
+    def ptz_move_right(self, speed: float = 0.2, duration: float = 1.0) -> bool:
+        print(f"[CameraController] ptz_move_right called, speed={speed}, duration={duration}")
+        return self._ptz.move_right(speed=speed, duration=duration)
+
+    def zoom_in(self, speed: float = 0.2, duration: float = 1.0) -> bool:
+        """
+        当前设备不支持变倍；保留方法只是避免上层调用时报错。
+        """
+        print("[PTZ] zoom_in is disabled for this device.", file=sys.stderr)
+        return False
+
+    def zoom_out(self, speed: float = 0.2, duration: float = 1.0) -> bool:
+        """
+        当前设备不支持变倍；保留方法只是避免上层调用时报错。
+        """
+        print("[PTZ] zoom_out is disabled for this device.", file=sys.stderr)
+        return False
+
+    def ptz_stop(self):
+        if self._ptz is None:
+            print("[CameraController] PTZ not initialized.", file=sys.stderr)
+            return
+        self._ptz.stop()
+
+    def _init_ptz_if_possible(self):
+        """
+        根据 ptz_host / user / password 初始化 PTZ；
+        如果配置信息不全则不启用 PTZ（静默）。
+        """
+        if not (self.ptz_host and self.ptz_user and self.ptz_password):
+            return
+        ctrl = PTZController(
+            host=self.ptz_host,
+            port=self.ptz_port,
+            user=self.ptz_user,
+            password=self.ptz_password,
+        )
+        if ctrl.connect():
+            self._ptz = ctrl
+        else:
+            self._ptz = None
 
     # ---------------------------------------------------------------------
     # 对外暴露的方法：供 Uni-Lab-OS 调用
@@ -97,12 +314,17 @@ class CameraController:
                 "webrtc_stream_url", self.webrtc_stream_url
             )
 
+            # PTZ 相关配置也允许通过 config 注入
+            self.ptz_host = config.get("ptz_host", self.ptz_host)
+            self.ptz_port = int(config.get("ptz_port", self.ptz_port))
+            self.ptz_user = config.get("ptz_user", self.ptz_user)
+            self.ptz_password = config.get("ptz_password", self.ptz_password)
+            self._init_ptz_if_possible()
+
         self._running = True
 
         # === start 时启动 FFmpeg 推流 ===
-        # 日志调整: 不再输出正常启动信息，保留异常打印
         self._start_ffmpeg()
-        # =================================================
 
         # 创建新的事件循环和线程（用于 WebSocket 信令）
         self._loop = asyncio.new_event_loop()
@@ -112,7 +334,6 @@ class CameraController:
             try:
                 loop.run_forever()
             except Exception as e:
-                # 日志调整: 只打印循环异常
                 print(f"[CameraController] event loop error: {e}", file=sys.stderr)
 
         self._loop_thread = threading.Thread(
@@ -120,7 +341,6 @@ class CameraController:
         )
         self._loop_thread.start()
 
-        # 在这个新 loop 上调度主协程，并保留 Future，后续在 stop() 中取消和收割结果
         self._loop_task = asyncio.run_coroutine_threadsafe(
             self._run_main_loop(), self._loop
         )
@@ -140,12 +360,9 @@ class CameraController:
         """
         self._running = False
 
-        # 停止 ffmpeg
         self._stop_ffmpeg()
 
-        # 在事件循环线程中关闭 WebSocket
         if self._ws and self._loop is not None:
-
             async def close_ws():
                 try:
                     await self._ws.close()
@@ -157,15 +374,12 @@ class CameraController:
 
             asyncio.run_coroutine_threadsafe(close_ws(), self._loop)
 
-        # 先处理 _loop_task：取消并收割结果，避免隐藏异常
         if self._loop_task is not None:
             if not self._loop_task.done():
                 self._loop_task.cancel()
             try:
-                # 这里会把 _run_main_loop 里的异常抛出来，方便日志排查
                 self._loop_task.result()
             except asyncio.CancelledError:
-                # 正常的取消，忽略
                 pass
             except Exception as e:
                 print(
@@ -175,7 +389,6 @@ class CameraController:
             finally:
                 self._loop_task = None
 
-        # 停止事件循环
         if self._loop is not None:
             try:
                 self._loop.call_soon_threadsafe(self._loop.stop)
@@ -185,7 +398,6 @@ class CameraController:
                     file=sys.stderr,
                 )
 
-        # 等待线程结束
         if self._loop_thread is not None:
             try:
                 self._loop_thread.join(timeout=5)
@@ -197,7 +409,6 @@ class CameraController:
             finally:
                 self._loop_thread = None
 
-        # 清理状态
         self._ws = None
         self._loop = None
 
@@ -232,12 +443,6 @@ class CameraController:
     # ---------------------------------------------------------------------
 
     async def _run_main_loop(self):
-        """
-        后台主循环：
-        - 建立 WebSocket 连接
-        - 不断接收后端的命令/offer
-        """
-        # 日志调整: 移除正常“loop started/exited”打印
         try:
             while self._running:
                 try:
@@ -245,8 +450,6 @@ class CameraController:
                         self._ws = ws
                         await self._recv_loop()
                 except asyncio.CancelledError:
-                    # 收到取消（来自 stop() -> self._loop_task.cancel()）时优雅退出
-                    # 如果还有清理逻辑可以在这里加
                     raise
                 except Exception as e:
                     if self._running:
@@ -254,16 +457,11 @@ class CameraController:
                             f"[CameraController] WebSocket connection error: {e}",
                             file=sys.stderr,
                         )
-                        # 避免频繁重连打爆日志
                         await asyncio.sleep(3)
         except asyncio.CancelledError:
-            # 最外层再抓一次，确保协程被 cancel 时不会打印成普通异常
             pass
 
     async def _recv_loop(self):
-        """
-        WebSocket 收消息循环
-        """
         assert self._ws is not None
         ws = self._ws
 
@@ -271,7 +469,6 @@ class CameraController:
             try:
                 data = json.loads(message)
             except json.JSONDecodeError:
-                # 日志调整: 仅在格式错误时打印
                 print(
                     f"[CameraController] received non-JSON message: {message}",
                     file=sys.stderr,
@@ -289,12 +486,13 @@ class CameraController:
     async def _handle_message(self, data: Dict[str, Any]):
         """
         处理来自信令后端的消息：
-        - command: start_stream / stop_stream
+        - command: start_stream / stop_stream / ptz_xxx
         - type: offer (WebRTC)
         """
         cmd = data.get("command")
+
+        # ---------- 推流控制 ----------
         if cmd == "start_stream":
-            # 日志调整: 不打印“收到 start_stream”，只在失败时打印
             try:
                 self._start_ffmpeg()
             except Exception as e:
@@ -305,7 +503,6 @@ class CameraController:
             return
 
         if cmd == "stop_stream":
-            # 日志调整: 不打印正常 stop
             try:
                 self._stop_ffmpeg()
             except Exception as e:
@@ -315,11 +512,49 @@ class CameraController:
                 )
             return
 
+        # # ---------- PTZ 控制 ----------
+        # # 例如信令可以发：
+        # # {"command": "ptz_move", "direction": "down", "speed": 0.5, "duration": 0.5}
+        # if cmd == "ptz_move":
+        #     if self._ptz is None:
+        #         # 没有初始化 PTZ，静默忽略或打印一条
+        #         print("[CameraController] PTZ not initialized.", file=sys.stderr)
+        #         return
+
+        #     direction = data.get("direction", "")
+        #     speed = float(data.get("speed", 0.5))
+        #     duration = float(data.get("duration", 0.5))
+
+        #     try:
+        #         if direction == "up":
+        #             self._ptz.move_up(speed=speed, duration=duration)
+        #         elif direction == "down":
+        #             self._ptz.move_down(speed=speed, duration=duration)
+        #         elif direction == "left":
+        #             self._ptz.move_left(speed=speed, duration=duration)
+        #         elif direction == "right":
+        #             self._ptz.move_right(speed=speed, duration=duration)
+        #         elif direction == "zoom_in":
+        #             self._ptz.zoom_in(speed=speed, duration=duration)
+        #         elif direction == "zoom_out":
+        #             self._ptz.zoom_out(speed=speed, duration=duration)
+        #         elif direction == "stop":
+        #             self._ptz.stop()
+        #         else:
+        #             # 未知方向，忽略
+        #             pass
+        #     except Exception as e:
+        #         print(
+        #             f"[CameraController] error when handling PTZ move: {e}",
+        #             file=sys.stderr,
+        #         )
+        #     return
+
+        # ---------- WebRTC Offer ----------
         if data.get("type") == "offer":
             offer_sdp = data.get("sdp", "")
             camera_id = data.get("cameraId", "camera-01")
             try:
-                # 加 await，因为 _handle_webrtc_offer 现在是 async def
                 answer_sdp = await self._handle_webrtc_offer(offer_sdp)
             except Exception as e:
                 print(
@@ -328,7 +563,6 @@ class CameraController:
                 )
                 return
 
-            # 把 answer 发回信令后端
             if self._ws:
                 answer_payload = {
                     "type": "answer",
@@ -347,11 +581,7 @@ class CameraController:
     # ------------------------ FFmpeg 相关 ------------------------
 
     def _start_ffmpeg(self):
-        """
-        启动 FFmpeg，将本地摄像头推流到 rtmp_url。
-        """
         if self._ffmpeg_process and self._ffmpeg_process.poll() is None:
-            # 日志调整: FFmpeg 已运行视为正常状态，不打印
             return
 
         cmd = [
@@ -359,7 +589,6 @@ class CameraController:
             "-rtsp_transport", "tcp",
             "-i", self.camera_rtsp_url,
 
-            # 视频编码
             "-c:v", "libx264",
             "-preset", "ultrafast",
             "-tune", "zerolatency",
@@ -373,11 +602,10 @@ class CameraController:
             "-pix_fmt", "yuv420p",
             "-x264-params", "bframes=0",
 
-            # 音频编码（关键修改）
-            "-c:a", "aac",        # 使用 AAC
-            "-ar", "44100",       # 采样率改成 44100
-            "-ac", "1",           # 单声道
-            "-b:a", "64k",        # 音频码率
+            "-c:a", "aac",
+            "-ar", "44100",
+            "-ac", "1",
+            "-b:a", "64k",
 
             "-f", "flv",
             self.rtmp_url,
@@ -388,40 +616,25 @@ class CameraController:
                 cmd,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.STDOUT,
-                # stderr=sys.stderr,
-                shell=False, # 安全起见不使用 shell
+                shell=False,
             )
-            # # 调试：打印视频流日志
-            # def _log_ffmpeg(proc):
-            #     for line in proc.stdout:
-            #         print("[FFmpeg]", line.rstrip())
-            
-            # threading.Thread(target=_log_ffmpeg, args=(self._ffmpeg_process,), daemon=True).start()
-
         except Exception as e:
             print(f"[CameraController] failed to start FFmpeg: {e}", file=sys.stderr)
             self._ffmpeg_process = None
             raise
 
     def _stop_ffmpeg(self):
-        """
-        停止 FFmpeg 推流。
-        """
         proc = self._ffmpeg_process
 
-        # 先把引用取出来，最后统一置 None，避免多次访问过程中状态变化
         if proc and proc.poll() is None:
             try:
-                # 尝试优雅终止
                 proc.terminate()
                 try:
                     proc.wait(timeout=5)
                 except subprocess.TimeoutExpired:
-                    # 超时则强制 kill
                     try:
                         proc.kill()
                         try:
-                            # kill 之后再等一小会儿，避免僵尸进程
                             proc.wait(timeout=2)
                         except subprocess.TimeoutExpired:
                             print(
@@ -439,19 +652,11 @@ class CameraController:
                     file=sys.stderr,
                 )
 
-        # 无论上面发生什么，最后都把句柄清掉，避免后续误用
         self._ffmpeg_process = None
 
     # ------------------------ WebRTC Offer 相关 ------------------------
 
     async def _handle_webrtc_offer(self, offer_sdp: str) -> str:
-        """
-        将浏览器的 Offer 发送给媒体服务器（SRS），
-        拿到 Answer SDP 并返回。
-
-        注意：此方法在事件循环中被调用，因此通过 run_in_executor
-        将阻塞的 HTTP 请求放到线程池中执行，避免阻塞事件循环。
-        """
         payload = {
             "api": self.webrtc_api,
             "streamurl": self.webrtc_stream_url,
@@ -461,7 +666,6 @@ class CameraController:
         headers = {"Content-Type": "application/json"}
 
         def _do_request():
-            # 在线程池中执行同步 HTTP 请求
             return requests.post(
                 self.webrtc_api,
                 json=payload,
@@ -469,7 +673,6 @@ class CameraController:
                 timeout=10,
             )
 
-        # 发送 HTTP 请求（在线程池中执行，避免阻塞事件循环）
         try:
             loop = asyncio.get_running_loop()
             resp = await loop.run_in_executor(None, _do_request)
@@ -480,7 +683,6 @@ class CameraController:
             )
             raise
 
-        # 日志调整: 不再打印正常 status/body，只在异常时 raise 并打印
         try:
             resp.raise_for_status()
         except Exception as e:

@@ -3,13 +3,144 @@ cameracontroller_device:
   - cameraSII
   class:
     action_value_mappings:
+      auto-ptz_move_down:
+        feedback: {}
+        goal: {}
+        goal_default:
+          duration: 1.0
+          speed: 0.5
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                duration:
+                  default: 1.0
+                  type: number
+                speed:
+                  default: 0.5
+                  type: number
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: ptz_move_down参数
+          type: object
+        type: UniLabJsonCommand
+      auto-ptz_move_left:
+        feedback: {}
+        goal: {}
+        goal_default:
+          duration: 1.0
+          speed: 0.2
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                duration:
+                  default: 1.0
+                  type: number
+                speed:
+                  default: 0.2
+                  type: number
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: ptz_move_left参数
+          type: object
+        type: UniLabJsonCommand
+      auto-ptz_move_right:
+        feedback: {}
+        goal: {}
+        goal_default:
+          duration: 1.0
+          speed: 0.2
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                duration:
+                  default: 1.0
+                  type: number
+                speed:
+                  default: 0.2
+                  type: number
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: ptz_move_right参数
+          type: object
+        type: UniLabJsonCommand
+      auto-ptz_move_up:
+        feedback: {}
+        goal: {}
+        goal_default:
+          duration: 1.0
+          speed: 0.5
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                duration:
+                  default: 1.0
+                  type: number
+                speed:
+                  default: 0.5
+                  type: number
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: ptz_move_up参数
+          type: object
+        type: UniLabJsonCommand
+      auto-ptz_stop:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: ptz_stop参数
+          type: object
+        type: UniLabJsonCommand
       auto-start:
         feedback: {}
         goal: {}
         goal_default:
           config: null
         handles: {}
-        placeholder_keys: {}
         result: {}
         schema:
           description: ''
@@ -32,7 +163,6 @@ cameracontroller_device:
         goal: {}
         goal_default: {}
         handles: {}
-        placeholder_keys: {}
         result: {}
         schema:
           description: ''
@@ -48,12 +178,68 @@ cameracontroller_device:
           title: stop参数
           type: object
         type: UniLabJsonCommand
+      auto-zoom_in:
+        feedback: {}
+        goal: {}
+        goal_default:
+          duration: 1.0
+          speed: 0.2
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                duration:
+                  default: 1.0
+                  type: number
+                speed:
+                  default: 0.2
+                  type: number
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: zoom_in参数
+          type: object
+        type: UniLabJsonCommand
+      auto-zoom_out:
+        feedback: {}
+        goal: {}
+        goal_default:
+          duration: 1.0
+          speed: 0.2
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                duration:
+                  default: 1.0
+                  type: number
+                speed:
+                  default: 0.2
+                  type: number
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: zoom_out参数
+          type: object
+        type: UniLabJsonCommand
     module: unilabos.devices.cameraSII.cameraDriver:CameraController
     status_types:
       status: dict
     type: python
   config_info: []
-  description: 摄像头推流驱动
+  description: 'cameraSII driver: display and actions'
   handles: []
   icon: ''
   init_param_schema:
@@ -64,6 +250,18 @@ cameracontroller_device:
           type: string
         host_id:
           default: demo-host
+          type: string
+        ptz_host:
+          default: ''
+          type: string
+        ptz_password:
+          default: ''
+          type: string
+        ptz_port:
+          default: 80
+          type: integer
+        ptz_user:
+          default: ''
           type: string
         rtmp_url:
           default: rtmp://srs.sciol.ac.cn:4499/live/camera-01
