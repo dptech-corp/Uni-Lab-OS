@@ -147,7 +147,7 @@ class ResourceDictInstance(object):
         if not content.get("extra"):  # MagicCode
             content["extra"] = {}
         if "position" in content:
-            pose = content["config"].get("pose",{})
+            pose = content.get("pose",{})
             if "position" not in pose :
                 if "position" in content["position"]:
                     pose["position"] = content["position"]["position"]
