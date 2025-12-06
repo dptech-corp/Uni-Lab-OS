@@ -148,11 +148,11 @@ class XYZModbus:
                     #     raise ModbusException("No valid frame found in raw data")
 
             except ModbusException as e:
-                logger.warning("Attempt %d failed: %s", attempt, e)
-                if attempt == retries:
-                    logger.error("Max retries reached")
+                # logger.warning("Attempt %d failed: %s", attempt, e)
+                # if attempt == retries:
+                #     logger.error("Max retries reached")
 
-        raise ModbusException("Modbus transfer failed after retries")
+        # raise ModbusException("Modbus transfer failed after retries")
 
     def read_regs(self, slave: int, addr: int, count: int) -> List[int]:
         fn = 0x03
