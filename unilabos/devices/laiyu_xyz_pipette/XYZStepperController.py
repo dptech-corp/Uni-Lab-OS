@@ -47,7 +47,7 @@ class XYZStepperController:
     def __init__(
         self,
         bus: SharedRS485Bus,
-        origin_path: str = "work_origin.json",
+        origin_path: str = "unilabos/devices/laiyu_xyz_pipette/work_origin.json",
     ):
         """
         这里不再自己开串口，而是复用上层传入的 SharedRS485Bus。
