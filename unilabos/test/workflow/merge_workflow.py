@@ -9,7 +9,7 @@ if str(ROOT_DIR) not in sys.path:
 
 import pytest
 
-from scripts.workflow import build_protocol_graph, draw_protocol_graph, draw_protocol_graph_with_ports
+from unilabos.workflow.common import build_protocol_graph, draw_protocol_graph, draw_protocol_graph_with_ports
 
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
