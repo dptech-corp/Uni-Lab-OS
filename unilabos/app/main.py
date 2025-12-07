@@ -49,6 +49,8 @@ def convert_argv_dashes_to_underscores(args: argparse.ArgumentParser):
 def parse_args():
     """解析命令行参数"""
     parser = argparse.ArgumentParser(description="Start Uni-Lab Edge server.")
+    subparsers = parser.add_subparsers(title="Valid subcommands", dest="command")
+
     parser.add_argument("-g", "--graph", help="Physical setup graph file path.")
     parser.add_argument("-c", "--controllers", default=None, help="Controllers config file path.")
     parser.add_argument(
@@ -153,6 +155,14 @@ def parse_args():
         default=False,
         help="Complete registry information",
     )
+
+    # label
+    workflow_parser = subparsers.add_parser(
+        "workflow_upload",
+        help="Upload workflow from xdl/json/python files",
+    )
+    workflow_parser.add_argument("-t", "--labeltype", default="singlepoint", type=str,
+                              help="QM calculation type, support 'singlepoint', 'optimize' and 'dimer' currently")
     return parser
 
 
@@ -162,6 +172,9 @@ def main():
     args = parse_args()
     convert_argv_dashes_to_underscores(args)
     args_dict = vars(args.parse_args())
+
+    # 显示启动横幅
+    print_unilab_banner(args_dict)
 
     # 环境检查 - 检查并自动安装必需的包 (可选)
     if not args_dict.get("skip_env_check", False):
@@ -239,7 +252,18 @@ def main():
     if args_dict.get("sk", ""):
         BasicConfig.sk = args_dict.get("sk", "")
         print_status("传入了sk参数，优先采用传入参数！", "info")
+    BasicConfig.working_dir = working_dir
 
+    # 显示启动横幅
+    print_unilab_banner(args_dict)
+
+    #####################################
+    ######## 启动设备接入端(主入口) ########
+    #####################################
+    launch(args_dict)
+
+
+def launch(args_dict: Dict[str, Any]):
     # 使用远程资源启动
     if args_dict["use_remote_resource"]:
         print_status("使用远程资源启动", "info")
@@ -254,7 +278,6 @@ def main():
 
     BasicConfig.port = args_dict["port"] if args_dict["port"] else BasicConfig.port
     BasicConfig.disable_browser = args_dict["disable_browser"] or BasicConfig.disable_browser
-    BasicConfig.working_dir = working_dir
     BasicConfig.is_host_mode = not args_dict.get("is_slave", False)
     BasicConfig.slave_no_host = args_dict.get("slave_no_host", False)
     BasicConfig.upload_registry = args_dict.get("upload_registry", False)
@@ -277,9 +300,6 @@ def main():
     from unilabos.app.register import register_devices_and_resources
     from unilabos.resources.graphio import modify_to_backend_format
     from unilabos.ros.nodes.resource_tracker import ResourceTreeSet, ResourceDict
-
-    # 显示启动横幅
-    print_unilab_banner(args_dict)
 
     # 注册表
     lab_registry = build_registry(
