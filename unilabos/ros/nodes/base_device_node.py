@@ -48,7 +48,7 @@ from unilabos_msgs.msg import Resource  # type: ignore
 from unilabos.ros.nodes.resource_tracker import (
     DeviceNodeResourceTracker,
     ResourceTreeSet,
-    ResourceTreeInstance,
+    ResourceTreeInstance, ResourceDictInstance,
 )
 from unilabos.ros.x.rclpyx import get_event_loop
 from unilabos.ros.utils.driver_creator import WorkstationNodeCreator, PyLabRobotCreator, DeviceClassCreator
@@ -133,12 +133,11 @@ def init_wrapper(
     device_id: str,
     device_uuid: str,
     driver_class: type[T],
-    device_config: Dict[str, Any],
+    device_config: ResourceTreeInstance,
     status_types: Dict[str, Any],
     action_value_mappings: Dict[str, Any],
     hardware_interface: Dict[str, Any],
     print_publish: bool,
-    children: Optional[list] = None,
     driver_params: Optional[Dict[str, Any]] = None,
     driver_is_ros: bool = False,
     *args,
@@ -147,8 +146,6 @@ def init_wrapper(
     """初始化设备节点的包装函数，和ROS2DeviceNode初始化保持一致"""
     if driver_params is None:
         driver_params = kwargs.copy()
-    if children is None:
-        children = []
     kwargs["device_id"] = device_id
     kwargs["device_uuid"] = device_uuid
     kwargs["driver_class"] = driver_class
@@ -157,7 +154,6 @@ def init_wrapper(
     kwargs["status_types"] = status_types
     kwargs["action_value_mappings"] = action_value_mappings
     kwargs["hardware_interface"] = hardware_interface
-    kwargs["children"] = children
     kwargs["print_publish"] = print_publish
     kwargs["driver_is_ros"] = driver_is_ros
     super(type(self), self).__init__(*args, **kwargs)
@@ -586,7 +582,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
         except Exception as e:
             self.lab_logger().error(f"更新资源uuid失败: {e}")
             self.lab_logger().error(traceback.format_exc())
-        self.lab_logger().debug(f"资源更新结果: {response}")
+        self.lab_logger().trace(f"资源更新结果: {response}")
 
     async def get_resource(self, resources_uuid: List[str], with_children: bool = True) -> ResourceTreeSet:
         """
@@ -1168,7 +1164,6 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                             execution_error = traceback.format_exc()
                             break
 
-            ##### self.lab_logger().info(f"准备执行: {action_kwargs}, 函数: {ACTION.__name__}")
             time_start = time.time()
             time_overall = 100
             future = None
@@ -1176,35 +1171,36 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                 # 将阻塞操作放入线程池执行
                 if asyncio.iscoroutinefunction(ACTION):
                     try:
-                        ##### self.lab_logger().info(f"异步执行动作 {ACTION}")
-                        future = ROS2DeviceNode.run_async_func(ACTION, trace_error=False, **action_kwargs)
-
-                        def _handle_future_exception(fut):
+                        self.lab_logger().trace(f"异步执行动作 {ACTION}")
+                        def _handle_future_exception(fut: Future):
                             nonlocal execution_error, execution_success, action_return_value
                             try:
                                 action_return_value = fut.result()
+                                if isinstance(action_return_value, BaseException):
+                                    raise action_return_value
                                 execution_success = True
-                            except Exception as e:
+                            except Exception as _:
                                 execution_error = traceback.format_exc()
                                 error(
                                     f"异步任务 {ACTION.__name__} 报错了\n{traceback.format_exc()}\n原始输入：{action_kwargs}"
                                 )
 
+                        future = ROS2DeviceNode.run_async_func(ACTION, trace_error=False, **action_kwargs)
                         future.add_done_callback(_handle_future_exception)
                     except Exception as e:
                         execution_error = traceback.format_exc()
                         execution_success = False
                         self.lab_logger().error(f"创建异步任务失败: {traceback.format_exc()}")
                 else:
-                    #####    self.lab_logger().info(f"同步执行动作 {ACTION}")
+                    self.lab_logger().trace(f"同步执行动作 {ACTION}")
                     future = self._executor.submit(ACTION, **action_kwargs)
 
-                    def _handle_future_exception(fut):
+                    def _handle_future_exception(fut: Future):
                         nonlocal execution_error, execution_success, action_return_value
                         try:
                             action_return_value = fut.result()
                             execution_success = True
-                        except Exception as e:
+                        except Exception as _:
                             execution_error = traceback.format_exc()
                             error(
                                 f"同步任务 {ACTION.__name__} 报错了\n{traceback.format_exc()}\n原始输入：{action_kwargs}"
@@ -1309,7 +1305,7 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                         get_result_info_str(execution_error, execution_success, action_return_value),
                     )
 
-            ##### self.lab_logger().info(f"动作 {action_name} 完成并返回结果")
+            self.lab_logger().trace(f"动作 {action_name} 完成并返回结果")
             return result_msg
 
         return execute_callback
@@ -1544,17 +1540,29 @@ class ROS2DeviceNode:
     这个类封装了设备类实例和ROS2节点的功能，提供ROS2接口。
     它不继承设备类，而是通过代理模式访问设备类的属性和方法。
     """
+    @staticmethod
+    async def safe_task_wrapper(trace_callback, func, **kwargs):
+        try:
+            if callable(trace_callback):
+                trace_callback(await func(**kwargs))
+            return await func(**kwargs)
+        except Exception as e:
+            if callable(trace_callback):
+                trace_callback(e)
+            return e
 
     @classmethod
-    def run_async_func(cls, func, trace_error=True, **kwargs) -> Task:
-        def _handle_future_exception(fut):
+    def run_async_func(cls, func, trace_error=True, inner_trace_callback=None, **kwargs) -> Task:
+        def _handle_future_exception(fut: Future):
             try:
-                fut.result()
+                ret = fut.result()
+                if isinstance(ret, BaseException):
+                    raise ret
             except Exception as e:
-                error(f"异步任务 {func.__name__} 报错了")
+                error(f"异步任务 {func.__name__} 获取结果失败")
                 error(traceback.format_exc())
 
-        future = rclpy.get_global_executor().create_task(func(**kwargs))
+        future = rclpy.get_global_executor().create_task(ROS2DeviceNode.safe_task_wrapper(inner_trace_callback, func, **kwargs))
         if trace_error:
             future.add_done_callback(_handle_future_exception)
         return future
@@ -1582,12 +1590,11 @@ class ROS2DeviceNode:
         device_id: str,
         device_uuid: str,
         driver_class: Type[T],
-        device_config: Dict[str, Any],
+        device_config: ResourceDictInstance,
         driver_params: Dict[str, Any],
         status_types: Dict[str, Any],
         action_value_mappings: Dict[str, Any],
         hardware_interface: Dict[str, Any],
-        children: Dict[str, Any],
         print_publish: bool = True,
         driver_is_ros: bool = False,
     ):
@@ -1598,7 +1605,7 @@ class ROS2DeviceNode:
             device_id: 设备标识符
             device_uuid: 设备uuid
             driver_class: 设备类
-            device_config: 原始初始化的json
+            device_config: 原始初始化的ResourceDictInstance
             driver_params: driver初始化的参数
             status_types: 状态类型映射
             action_value_mappings: 动作值映射
@@ -1612,6 +1619,7 @@ class ROS2DeviceNode:
         self._has_async_context = hasattr(driver_class, "__aenter__") and hasattr(driver_class, "__aexit__")
         self._driver_class = driver_class
         self.device_config = device_config
+        children: List[ResourceDictInstance] = device_config.children
         self.driver_is_ros = driver_is_ros
         self.driver_is_workstation = False
         self.resource_tracker = DeviceNodeResourceTracker()

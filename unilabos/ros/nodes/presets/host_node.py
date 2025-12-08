@@ -289,6 +289,12 @@ class HostNode(BaseROS2DeviceNode):
         self.lab_logger().info("[Host Node] Host node initialized.")
         HostNode._ready_event.set()
 
+        # 发送host_node ready信号到所有桥接器
+        for bridge in self.bridges:
+            if hasattr(bridge, "publish_host_ready"):
+                bridge.publish_host_ready()
+                self.lab_logger().debug(f"Host ready signal sent via {bridge.__class__.__name__}")
+
     def _send_re_register(self, sclient):
         sclient.wait_for_service()
         request = SerialCommand.Request()
@@ -532,7 +538,7 @@ class HostNode(BaseROS2DeviceNode):
         self.lab_logger().info(f"[Host Node] Initializing device: {device_id}")
 
         try:
-            d = initialize_device_from_dict(device_id, device_config.get_nested_dict())
+            d = initialize_device_from_dict(device_id, device_config)
         except DeviceClassInvalid as e:
             self.lab_logger().error(f"[Host Node] Device class invalid: {e}")
             d = None
@@ -712,7 +718,7 @@ class HostNode(BaseROS2DeviceNode):
             feedback_callback=lambda feedback_msg: self.feedback_callback(item, action_id, feedback_msg),
             goal_uuid=goal_uuid_obj,
         )
-        future.add_done_callback(lambda future: self.goal_response_callback(item, action_id, future))
+        future.add_done_callback(lambda f: self.goal_response_callback(item, action_id, f))
 
     def goal_response_callback(self, item: "QueueItem", action_id: str, future) -> None:
         """目标响应回调"""
@@ -723,9 +729,11 @@ class HostNode(BaseROS2DeviceNode):
 
         self.lab_logger().info(f"[Host Node] Goal {action_id} ({item.job_id}) accepted")
         self._goals[item.job_id] = goal_handle
-        goal_handle.get_result_async().add_done_callback(
-            lambda future: self.get_result_callback(item, action_id, future)
+        goal_future = goal_handle.get_result_async()
+        goal_future.add_done_callback(
+            lambda f: self.get_result_callback(item, action_id, f)
         )
+        goal_future.result()
 
     def feedback_callback(self, item: "QueueItem", action_id: str, feedback_msg) -> None:
         """反馈回调"""
@@ -794,6 +802,7 @@ class HostNode(BaseROS2DeviceNode):
             # 存储结果供 HTTP API 查询
             try:
                 from unilabos.app.web.controller import store_job_result
+
                 if goal_status == GoalStatus.STATUS_CANCELED:
                     store_job_result(job_id, status, return_info, {})
                 else:
