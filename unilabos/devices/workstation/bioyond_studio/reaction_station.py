@@ -85,6 +85,42 @@ class BioyondReactionStation(BioyondWorkstation):
         self.force = 0.0
 
         self._frame_to_reactor_id = {1: "reactor_1", 2: "reactor_2", 3: "reactor_3", 4: "reactor_4", 5: "reactor_5"}
+        
+        # 用于缓存从 Bioyond 查询的工作流序列
+        self._cached_workflow_sequence = []
+
+        # 自动从 Bioyond 系统同步工作流序列（只在初始化时执行一次）
+        try:
+            print(f"[初始化] 开始自动同步工作流序列...")
+            sync_result = self.sync_workflow_sequence_from_bioyond()
+            if sync_result.get("success"):
+                print(f"✅ [初始化] {sync_result.get('message')}")
+                print(f"✅ [初始化] workflow_sequence 已设置为: {self._cached_workflow_sequence}")
+            else:
+                print(f"⚠️ [初始化] 工作流序列同步失败: {sync_result.get('message')}")
+        except Exception as e:
+            print(f"⚠️ [初始化] 自动同步工作流序列时发生异常: {e}")
+            import traceback
+            traceback.print_exc()
+
+    @property
+    def workflow_sequence(self) -> str:
+        """工作流序列属性 - 返回初始化时查询的工作流列表
+
+        Returns:
+            str: 工作流信息的 JSON 字符串
+        """
+        import json
+        return json.dumps(self._cached_workflow_sequence, ensure_ascii=False)
+    
+    @workflow_sequence.setter
+    def workflow_sequence(self, value: List[str]):
+        """设置工作流序列
+
+        Args:
+            value: 工作流 ID 列表
+        """
+        self._cached_workflow_sequence = value
 
     # ==================== 工作流方法 ====================
 
@@ -905,12 +941,114 @@ class BioyondReactionStation(BioyondWorkstation):
         """
         id_to_name = {workflow_id: name for name, workflow_id in self.workflow_mappings.items()}
         workflow_names = []
-        for workflow_id in self.workflow_sequence:
+        # 使用内部缓存的列表，而不是属性（属性返回 JSON 字符串）
+        for workflow_id in self._cached_workflow_sequence:
             workflow_name = id_to_name.get(workflow_id, workflow_id)
             workflow_names.append(workflow_name)
-        if workflow_names:
-            print(f"工作流序列: {workflow_names}")
         return workflow_names
+
+    def sync_workflow_sequence_from_bioyond(self) -> dict:
+        """从 Bioyond 系统同步工作流序列
+
+        查询 Bioyond 系统中的工作流列表，并更新本地 workflow_sequence
+
+        Returns:
+            dict: 包含同步结果的字典
+                - success: bool, 是否成功
+                - workflows: list, 工作流列表
+                - message: str, 结果消息
+        """
+        try:
+            print(f"[同步工作流序列] 开始从 Bioyond 系统查询工作流...")
+            
+            # 检查 hardware_interface 是否可用
+            if not hasattr(self, 'hardware_interface') or self.hardware_interface is None:
+                error_msg = "hardware_interface 未初始化"
+                print(f"❌ [同步工作流序列] {error_msg}")
+                return {
+                    "success": False,
+                    "workflows": [],
+                    "message": error_msg
+                }
+            
+            # 查询所有工作流
+            query_params = json.dumps({})
+            print(f"[同步工作流序列] 调用 hardware_interface.query_workflow...")
+            workflows_data = self.hardware_interface.query_workflow(query_params)
+            
+            print(f"[同步工作流序列] 查询返回数据: {workflows_data}")
+            
+            if not workflows_data:
+                error_msg = "未能从 Bioyond 系统获取工作流数据（返回为空）"
+                print(f"⚠️ [同步工作流序列] {error_msg}")
+                return {
+                    "success": False,
+                    "workflows": [],
+                    "message": error_msg
+                }
+            
+            # 获取工作流列表 - Bioyond API 返回的字段是 items，不是 list
+            workflow_list = workflows_data.get("items", workflows_data.get("list", []))
+            print(f"[同步工作流序列] 从 Bioyond 查询到 {len(workflow_list)} 个工作流")
+            
+            if len(workflow_list) == 0:
+                warning_msg = "Bioyond 系统中暂无工作流"
+                print(f"⚠️ [同步工作流序列] {warning_msg}")
+                # 清空缓存
+                self._cached_workflow_sequence = []
+                return {
+                    "success": True,
+                    "workflows": [],
+                    "message": warning_msg
+                }
+            
+            # 清空当前序列
+            workflow_ids = []
+            
+            # 构建结果
+            synced_workflows = []
+            for workflow in workflow_list:
+                workflow_id = workflow.get("id")
+                workflow_name = workflow.get("name")
+                workflow_status = workflow.get("status")  # 工作流状态
+                
+                print(f"  - 工作流: {workflow_name} (ID: {workflow_id[:8] if workflow_id else 'N/A'}..., 状态: {workflow_status})")
+                
+                synced_workflows.append({
+                    "id": workflow_id,
+                    "name": workflow_name,
+                    "status": workflow_status,
+                    "createTime": workflow.get("createTime"),
+                    "updateTime": workflow.get("updateTime")
+                })
+                
+                # 添加所有工作流 ID 到执行序列
+                if workflow_id:
+                    workflow_ids.append(workflow_id)
+            
+            # 更新缓存
+            self._cached_workflow_sequence = workflow_ids
+            
+            success_msg = f"成功同步 {len(synced_workflows)} 个工作流到本地序列"
+            print(f"✅ [同步工作流序列] {success_msg}")
+            print(f"[同步工作流序列] 当前 workflow_sequence: {self._cached_workflow_sequence}")
+            
+            return {
+                "success": True,
+                "workflows": synced_workflows,
+                "message": success_msg
+            }
+            
+        except Exception as e:
+            error_msg = f"从 Bioyond 同步工作流序列失败: {e}"
+            print(f"❌ [同步工作流序列] {error_msg}")
+            import traceback
+            traceback.print_exc()
+            return {
+                "success": False,
+                "workflows": [],
+                "message": error_msg
+            }
 
     def workflow_step_query(self, workflow_id: str) -> dict:
         """查询工作流步骤参数
@@ -1247,10 +1385,10 @@ class BioyondReactionStation(BioyondWorkstation):
             bool: 验证或刷新是否成功
         """
         print(f"\n🔍 验证工作流ID有效性...")
-        if not self.workflow_sequence:
+        if not self._cached_workflow_sequence:
             print(f"   ⚠️ 工作流序列为空，需要重新合并")
             return False
-        first_workflow_id = self.workflow_sequence[0]
+        first_workflow_id = self._cached_workflow_sequence[0]
         try:
             structure = self.workflow_step_query(first_workflow_id)
             if structure:

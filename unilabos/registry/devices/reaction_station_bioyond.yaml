@@ -156,6 +156,44 @@ reaction_station.bioyond:
           title: skip_titration_steps参数
           type: object
         type: UniLabJsonCommand
+      auto-sync_workflow_sequence_from_bioyond:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        placeholder_keys: {}
+        result: {}
+        schema:
+          description: 从Bioyond系统同步工作流序列
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result:
+              properties:
+                message:
+                  type: string
+                success:
+                  type: boolean
+                workflows:
+                  items:
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      status:
+                        type: string
+                    type: object
+                  type: array
+              type: object
+          required:
+          - goal
+          title: sync_workflow_sequence_from_bioyond参数
+          type: object
+        type: UniLabJsonCommand
       auto-wait_for_multiple_orders_and_get_reports:
         feedback: {}
         goal: {}
@@ -762,6 +800,16 @@ reaction_station.bioyond:
     module: unilabos.devices.workstation.bioyond_studio.reaction_station:BioyondReactionStation
     protocol_type: []
     status_types:
+      average_viscosity: Float64
+      force: Float64
+      in_temperature: Float64
+      out_temperature: Float64
+      pt100_temperature: Float64
+      sensor_average_temperature: Float64
+      setting_temperature: Float64
+      speed: Float64
+      target_temperature: Float64
+      viscosity: Float64
       workflow_sequence: String
     type: python
   config_info: []
@@ -821,7 +869,17 @@ reaction_station.reactor:
           type: object
         type: UniLabJsonCommand
     module: unilabos.devices.workstation.bioyond_studio.reaction_station:BioyondReactor
-    status_types: {}
+    status_types:
+      average_viscosity: Float64
+      force: Float64
+      in_temperature: Float64
+      out_temperature: Float64
+      pt100_temperature: Float64
+      sensor_average_temperature: Float64
+      setting_temperature: Float64
+      speed: Float64
+      target_temperature: Float64
+      viscosity: Float64
     type: python
   config_info: []
   description: 反应站子设备-反应器
