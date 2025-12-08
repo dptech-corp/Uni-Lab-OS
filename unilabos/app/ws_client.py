@@ -438,7 +438,7 @@ class MessageProcessor:
                     self.connected = True
                     self.reconnect_count = 0
 
-                    logger.info(f"[MessageProcessor] Connected to {self.websocket_url}")
+                    logger.trace(f"[MessageProcessor] Connected to {self.websocket_url}")
 
                     # 启动发送协程
                     send_task = asyncio.create_task(self._send_handler())
@@ -503,7 +503,7 @@ class MessageProcessor:
 
     async def _send_handler(self):
         """处理发送队列中的消息"""
-        logger.debug("[MessageProcessor] Send handler started")
+        logger.trace("[MessageProcessor] Send handler started")
 
         try:
             while self.connected and self.websocket:
@@ -965,7 +965,7 @@ class QueueProcessor:
 
     def _run(self):
         """运行队列处理主循环"""
-        logger.debug("[QueueProcessor] Queue processor started")
+        logger.trace("[QueueProcessor] Queue processor started")
 
         while self.is_running:
             try:
@@ -1175,7 +1175,6 @@ class WebSocketClient(BaseCommunicationClient):
         else:
             url = f"{scheme}://{parsed.netloc}/api/v1/ws/schedule"
 
-        logger.debug(f"[WebSocketClient] URL: {url}")
         return url
 
     def start(self) -> None:
@@ -1188,13 +1187,11 @@ class WebSocketClient(BaseCommunicationClient):
             logger.error("[WebSocketClient] WebSocket URL not configured")
             return
 
-        logger.info(f"[WebSocketClient] Starting connection to {self.websocket_url}")
-
         # 启动两个核心线程
         self.message_processor.start()
         self.queue_processor.start()
 
-        logger.info("[WebSocketClient] All threads started")
+        logger.trace("[WebSocketClient] All threads started")
 
     def stop(self) -> None:
         """停止WebSocket客户端"""

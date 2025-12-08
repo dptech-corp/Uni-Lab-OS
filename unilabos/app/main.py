@@ -203,7 +203,6 @@ def main():
     if not args_dict.get("skip_env_check", False):
         from unilabos.utils.environment_check import check_environment
 
-        print_status("正在进行环境依赖检查...", "info")
         if not check_environment(auto_install=True):
             print_status("环境检查失败，程序退出", "error")
             os._exit(1)
