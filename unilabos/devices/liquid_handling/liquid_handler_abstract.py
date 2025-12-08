@@ -174,6 +174,12 @@ class LiquidHandlerMiddleware(LiquidHandler):
         spread: Literal["wide", "tight", "custom"] = "wide",
         **backend_kwargs,
     ):
+        res_samples = []
+        res_volumes = []
+        for resource, volume in zip(resources, vols):
+            res_samples.append({"name": resource.name, "sample_uuid": resource.unilabos_extra.get("sample_uuid", None)})
+            res_volumes.append(volume)
+        
         if self._simulator:
             return await self._simulate_handler.aspirate(
                 resources,
@@ -186,7 +192,7 @@ class LiquidHandlerMiddleware(LiquidHandler):
                 spread,
                 **backend_kwargs,
             )
-        return await super().aspirate(
+        await super().aspirate(
             resources,
             vols,
             use_channels,
@@ -197,6 +203,8 @@ class LiquidHandlerMiddleware(LiquidHandler):
             spread,
             **backend_kwargs,
         )
+        return SimpleReturn(samples=res_samples, volumes=res_volumes)
+
 
     async def dispense(
         self,
