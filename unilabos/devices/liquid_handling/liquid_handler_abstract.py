@@ -37,6 +37,7 @@ class LiquidHandlerMiddleware(LiquidHandler):
     def __init__(self, backend: LiquidHandlerBackend, deck: Deck, simulator: bool = False, channel_num: int = 8, **kwargs):
         self._simulator = simulator
         self.channel_num = channel_num
+        self.pending_liquids_dict = {}
         joint_config = kwargs.get("joint_config", None)
         if simulator:
             if joint_config:
@@ -174,11 +175,7 @@ class LiquidHandlerMiddleware(LiquidHandler):
         spread: Literal["wide", "tight", "custom"] = "wide",
         **backend_kwargs,
     ):
-        res_samples = []
-        res_volumes = []
-        for resource, volume in zip(resources, vols):
-            res_samples.append({"name": resource.name, "sample_uuid": resource.unilabos_extra.get("sample_uuid", None)})
-            res_volumes.append(volume)
+
         
         if self._simulator:
             return await self._simulate_handler.aspirate(
@@ -203,6 +200,16 @@ class LiquidHandlerMiddleware(LiquidHandler):
             spread,
             **backend_kwargs,
         )
+
+        res_samples = []
+        res_volumes = []
+        for resource, volume, channel in zip(resources, vols, use_channels):
+            res_samples.append({"name": resource.name, "sample_uuid": resource.unilabos_extra.get("sample_uuid", None)})
+            res_volumes.append(volume)
+            self.pending_liquids_dict[channel] = {
+                "sample_uuid": resource.unilabos_extra.get("sample_uuid", None),
+                "volume": volume
+            }
         return SimpleReturn(samples=res_samples, volumes=res_volumes)
 
 
@@ -217,7 +224,7 @@ class LiquidHandlerMiddleware(LiquidHandler):
         blow_out_air_volume: Optional[List[Optional[float]]] = None,
         spread: Literal["wide", "tight", "custom"] = "wide",
         **backend_kwargs,
-    ):
+    ) -> SimpleReturn:
         if self._simulator:
             return await self._simulate_handler.dispense(
                 resources,
@@ -230,7 +237,7 @@ class LiquidHandlerMiddleware(LiquidHandler):
                 spread,
                 **backend_kwargs,
             )
-        return await super().dispense(
+        await super().dispense(
             resources,
             vols,
             use_channels,
@@ -240,7 +247,17 @@ class LiquidHandlerMiddleware(LiquidHandler):
             blow_out_air_volume,
             **backend_kwargs,
         )
+        res_samples = []
+        res_volumes = []
+        for resource, volume, channel in zip(resources, vols, use_channels):
+            res_uuid = self.pending_liquids_dict[channel]["sample_uuid"]
+            self.pending_liquids_dict[channel]["volume"] -= volume
+            resource.unilabos_extra["sample_uuid"] = res_uuid
+            res_samples.append({"name": resource.name, "sample_uuid": res_uuid})
+            res_volumes.append(volume)
 
+        return SimpleReturn(samples=res_samples, volumes=res_volumes)
+        
     async def transfer(
         self,
         source: Well,
