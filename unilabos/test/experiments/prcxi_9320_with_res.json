@@ -9964,6 +9964,37 @@
         },
 
         {
+            "id": "container_for_nothing3",
+            "name": "container_for_nothing3",
+            
+            "children": [],
+            "parent": "PRCXI_Deck",
+            "type": "plate",
+            "class": "",
+            "position": {
+                "x": 276,
+                "y": 0,
+                "z": 0
+            },
+            "config": {
+                "type": "PRCXI9300Container",
+                "size_x": 127,
+                "size_y": 85.5,
+                "size_z": 10,
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0,
+                    "type": "Rotation"
+                },
+                "category": "plate",
+                "model": null,
+                "barcode": null,
+                "ordering": {}
+            },
+            "data": {}
+        },
+        {
             "id": "PlateT4",
             "name": "PlateT4",
             
@@ -23813,6 +23844,68 @@
         },
 
         {
+            "id": "container_for_nothing7",
+            "name": "container_for_nothing7",
+            
+            "children": [],
+            "parent": "PRCXI_Deck",
+            "type": "plate",
+            "class": "",
+            "position": {
+                "x": 276,
+                "y": 96,
+                "z": 0
+            },
+            "config": {
+                "type": "PRCXI9300Container",
+                "size_x": 127,
+                "size_y": 85.5,
+                "size_z": 10,
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0,
+                    "type": "Rotation"
+                },
+                "category": "plate",
+                "model": null,
+                "barcode": null,
+                "ordering": {}
+            },
+            "data": {}
+        },
+        {
+            "id": "container_for_nothing8",
+            "name": "container_for_nothing8",
+            
+            "children": [],
+            "parent": "PRCXI_Deck",
+            "type": "plate",
+            "class": "",
+            "position": {
+                "x": 414,
+                "y": 96,
+                "z": 0
+            },
+            "config": {
+                "type": "PRCXI9300Container",
+                "size_x": 127,
+                "size_y": 85.5,
+                "size_z": 10,
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0,
+                    "type": "Rotation"
+                },
+                "category": "plate",
+                "model": null,
+                "barcode": null,
+                "ordering": {}
+            },
+            "data": {}
+        },
+        {
             "id": "PlateT9",
             "name": "PlateT9",
             
@@ -31959,6 +32052,68 @@
             }
         },
 
+        {
+            "id": "container_for_nothing11",
+            "name": "container_for_nothing11",
+            
+            "children": [],
+            "parent": "PRCXI_Deck",
+            "type": "plate",
+            "class": "",
+            "position": {
+                "x": 276,
+                "y": 192,
+                "z": 0
+            },
+            "config": {
+                "type": "PRCXI9300Container",
+                "size_x": 127,
+                "size_y": 85.5,
+                "size_z": 10,
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0,
+                    "type": "Rotation"
+                },
+                "category": "plate",
+                "model": null,
+                "barcode": null,
+                "ordering": {}
+            },
+            "data": {}
+        },
+        {
+            "id": "container_for_nothing12",
+            "name": "container_for_nothing12",
+            
+            "children": [],
+            "parent": "PRCXI_Deck",
+            "type": "plate",
+            "class": "",
+            "position": {
+                "x": 414,
+                "y": 192,
+                "z": 0
+            },
+            "config": {
+                "type": "PRCXI9300Container",
+                "size_x": 127,
+                "size_y": 85.5,
+                "size_z": 10,
+                "rotation": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0,
+                    "type": "Rotation"
+                },
+                "category": "plate",
+                "model": null,
+                "barcode": null,
+                "ordering": {}
+            },
+            "data": {}
+        },
         {
             "id": "PlateT13",
             "name": "PlateT13",
