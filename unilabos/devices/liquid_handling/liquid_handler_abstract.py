@@ -135,7 +135,9 @@ class LiquidHandlerMiddleware(LiquidHandler):
             return await self._simulate_handler.drop_tips(
                 tip_spots, use_channels, offsets, allow_nonzero_volume, **backend_kwargs
             )
-        return await super().drop_tips(tip_spots, use_channels, offsets, allow_nonzero_volume, **backend_kwargs)
+        await super().drop_tips(tip_spots, use_channels, offsets, allow_nonzero_volume, **backend_kwargs)
+        self.pending_liquids_dict = {}
+        return 
 
     async def return_tips(
         self, use_channels: Optional[list[int]] = None, allow_nonzero_volume: bool = False, **backend_kwargs
@@ -158,8 +160,10 @@ class LiquidHandlerMiddleware(LiquidHandler):
             offsets = [Coordinate.zero()] * len(use_channels)
         if self._simulator:
             return await self._simulate_handler.discard_tips(use_channels, allow_nonzero_volume, offsets, **backend_kwargs)
-        return await super().discard_tips(use_channels, allow_nonzero_volume, offsets, **backend_kwargs)
-
+        await super().discard_tips(use_channels, allow_nonzero_volume, offsets, **backend_kwargs)
+        self.pending_liquids_dict = {}
+        return 
+        
     def _check_containers(self, resources: Sequence[Resource]):
         super()._check_containers(resources)
 
