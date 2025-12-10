@@ -89,20 +89,6 @@ class BioyondReactionStation(BioyondWorkstation):
         # 用于缓存从 Bioyond 查询的工作流序列
         self._cached_workflow_sequence = []
 
-        # 自动从 Bioyond 系统同步工作流序列（只在初始化时执行一次）
-        # 自动从 Bioyond 系统同步工作流序列（只在初始化时执行一次）
-        # try:
-        #     print(f"[初始化] 开始自动同步工作流序列...")
-        #     sync_result = self.sync_workflow_sequence_from_bioyond()
-        #     if sync_result.get("success"):
-        #         print(f"✅ [初始化] {sync_result.get('message')}")
-        #         print(f"✅ [初始化] workflow_sequence 已设置为: {self._cached_workflow_sequence}")
-        #     else:
-        #         print(f"⚠️ [初始化] 工作流序列同步失败: {sync_result.get('message')}")
-        # except Exception as e:
-        #     print(f"⚠️ [初始化] 自动同步工作流序列时发生异常: {e}")
-        #     import traceback
-        #     traceback.print_exc()
 
     @property
     def workflow_sequence(self) -> str:

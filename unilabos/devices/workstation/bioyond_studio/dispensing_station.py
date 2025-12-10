@@ -154,13 +154,6 @@ class BioyondDispensingStation(BioyondWorkstation):
                     ratio = json.loads(ratio)
                 except Exception:
                     ratio = {}
-            root = str(Path(__file__).resolve().parents[3])
-            if root not in sys.path:
-                sys.path.append(root)
-            try:
-                mod = importlib.import_module("tem.compute")
-            except Exception as e:
-                raise BioyondException(f"无法导入计算模块: {e}")
             try:
                 wp = float(wt_percent) if isinstance(wt_percent, str) else wt_percent
                 mt = float(m_tot) if isinstance(m_tot, str) else m_tot
