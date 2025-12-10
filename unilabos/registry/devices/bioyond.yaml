@@ -139,7 +139,35 @@ workstation.bioyond_dispensing_station:
               required:
               - ratio
               type: object
-            result: {}
+            result:
+              properties:
+                feeding_order:
+                  items: {}
+                  title: Feeding Order
+                  type: array
+                return_info:
+                  title: Return Info
+                  type: string
+                solutions:
+                  items: {}
+                  title: Solutions
+                  type: array
+                solvents:
+                  additionalProperties: true
+                  title: Solvents
+                  type: object
+                titration:
+                  additionalProperties: true
+                  title: Titration
+                  type: object
+              required:
+              - solutions
+              - titration
+              - solvents
+              - feeding_order
+              - return_info
+              title: ComputeExperimentDesignReturn
+              type: object
           required:
           - goal
           title: compute_experiment_design参数
