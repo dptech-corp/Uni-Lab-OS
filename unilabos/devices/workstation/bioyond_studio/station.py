@@ -1024,7 +1024,15 @@ class BioyondWorkstation(WorkstationBase):
 
         workflow_id = self._get_workflow(actual_workflow_name)
         if workflow_id:
-            self.workflow_sequence.append(workflow_id)
+            # 兼容 BioyondReactionStation 中 workflow_sequence 被重写为 property 的情况
+            if isinstance(self.workflow_sequence, list):
+                self.workflow_sequence.append(workflow_id)
+            elif hasattr(self, "_cached_workflow_sequence") and isinstance(self._cached_workflow_sequence, list):
+                self._cached_workflow_sequence.append(workflow_id)
+            else:
+                print(f"❌ 无法添加工作流: workflow_sequence 类型错误 {type(self.workflow_sequence)}")
+                return False
+
             print(f"添加工作流到执行顺序: {actual_workflow_name} -> {workflow_id}")
             return True
         return False
