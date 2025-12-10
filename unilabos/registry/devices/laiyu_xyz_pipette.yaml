@@ -47,6 +47,26 @@ xyz_pipette_device:
           title: connect参数
           type: object
         type: UniLabJsonCommand
+      auto-define_current_as_zero:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: define_current_as_zero参数
+          type: object
+        type: UniLabJsonCommand
       auto-disconnect:
         feedback: {}
         goal: {}
@@ -200,6 +220,9 @@ xyz_pipette_device:
         baudrate:
           default: 115200
           type: integer
+        origin_file:
+          default: work_origin.json
+          type: string
         points_file:
           default: points.json
           type: string

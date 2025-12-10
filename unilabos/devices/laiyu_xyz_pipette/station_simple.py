@@ -23,7 +23,8 @@ class Station:
         self,
         port: str = "/dev/ttyUSB0",
         baudrate: int = 115200,
-        points_file: str = "unilabos/devices/laiyu_xyz_pipette/points.json",   # 新增：点位文件路径
+        points_file: str = "unilabos/devices/laiyu_xyz_pipette/points.json",
+        origin_file: str = "unilabos/devices/laiyu_xyz_pipette/work_origin.json",  # 新增：软零点文件路径
     ):
         self.port = port
         self.baudrate = baudrate
@@ -34,7 +35,9 @@ class Station:
 
         self.points_file = points_file
         self.points: dict[str, dict[str, float]] = {}
-        self._load_points()  # 新增：启动时加载点位
+        self._load_points()
+
+        self.origin_file = origin_file  # 新增：保存软零点 JSON 的路径
 
     # ===== 点位加载 =====
     def _load_points(self):
@@ -70,7 +73,8 @@ class Station:
     def connect(self):
         logger.info("Connecting station on %s ...", self.port)
         self.bus.open()
-        self.xyz = XYZStepperController(self.bus)
+        # 把 origin_file 传进去，这样 XYZStepperController 会用这个路径加载/保存软零点
+        self.xyz = XYZStepperController(self.bus, origin_path=self.origin_file)
         self.pip = SOPAPipetteYYQ(self.bus)
         logger.info("Station connected.")
 
@@ -147,3 +151,18 @@ class Station:
             name, x, y, z, z_offset,
         )
         self.xyz.move_xyz_work(x, y, z, speed, acc)
+
+    # ===== 新增：重置工件软零点 =====
+    def define_current_as_zero(self):
+        """
+        以当前 XYZ 三轴的位置为新的工件软零点，并写入 origin_file 指定的 JSON。
+
+        等价于直接调用 XYZStepperController.define_current_as_zero(origin_file)。
+        """
+        self._ensure_connected()
+        if not self.xyz:
+            raise RuntimeError("XYZ controller not initialized")
+
+        logger.info("正在以当前步数重置工件软零点到: %s", self.origin_file)
+        self.xyz.define_current_as_zero(save_path=self.origin_file)
+        logger.info("软零点重置完成: %s", self.xyz.work_origin_steps)
