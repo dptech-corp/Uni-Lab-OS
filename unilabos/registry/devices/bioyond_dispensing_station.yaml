@@ -61,7 +61,35 @@ bioyond_dispensing_station:
               required:
               - ratio
               type: object
-            result: {}
+            result:
+              properties:
+                feeding_order:
+                  items: {}
+                  title: Feeding Order
+                  type: array
+                return_info:
+                  title: Return Info
+                  type: string
+                solutions:
+                  items: {}
+                  title: Solutions
+                  type: array
+                solvents:
+                  additionalProperties: true
+                  title: Solvents
+                  type: object
+                titration:
+                  additionalProperties: true
+                  title: Titration
+                  type: object
+              required:
+              - solutions
+              - titration
+              - solvents
+              - feeding_order
+              - return_info
+              title: ComputeExperimentDesignReturn
+              type: object
           required:
           - goal
           title: compute_experiment_design参数
@@ -144,6 +172,35 @@ bioyond_dispensing_station:
           required:
           - goal
           title: query_resource_by_name参数
+          type: object
+        type: UniLabJsonCommand
+      auto-transfer_materials_to_reaction_station:
+        feedback: {}
+        goal: {}
+        goal_default:
+          target_device_id: null
+          transfer_groups: null
+        handles: {}
+        placeholder_keys: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                target_device_id:
+                  type: string
+                transfer_groups:
+                  type: array
+              required:
+              - target_device_id
+              - transfer_groups
+              type: object
+            result: {}
+          required:
+          - goal
+          title: transfer_materials_to_reaction_station参数
           type: object
         type: UniLabJsonCommand
       auto-workflow_sample_locations:
