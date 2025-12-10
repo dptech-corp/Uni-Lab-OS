@@ -2,7 +2,7 @@
 import logging
 import time
 
-from station_simple import Station
+from .station_simple import Station
 
 if __name__ == "__main__":
     logging.basicConfig(
@@ -10,7 +10,7 @@ if __name__ == "__main__":
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     )
 
-    st = Station(port="/dev/ttyUSB1", baudrate=115200)
+    st = Station(port="/dev/ttyUSB0", baudrate=115200)
     st.connect()
 
     # 先移动到工件坐标 (x=100, y=100, z=0)

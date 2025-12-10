@@ -21,7 +21,7 @@ class Station:
 
     def __init__(
         self,
-        port: str = "/dev/ttyUSB1",
+        port: str = "/dev/ttyUSB0",
         baudrate: int = 115200,
         points_file: str = "unilabos/devices/laiyu_xyz_pipette/points.json",   # 新增：点位文件路径
     ):
