@@ -24,7 +24,7 @@ class Station:
         port: str = "/dev/ttyUSB0",
         baudrate: int = 115200,
         points_file: str = "unilabos/devices/laiyu_xyz_pipette/points.json",
-        origin_file: str = "unilabos/devices/laiyu_xyz_pipette/work_origin.json",  # 新增：软零点文件路径
+        origin_file: str = "unilabos/devices/laiyu_xyz_pipette/work_origin.json",
     ):
         self.port = port
         self.baudrate = baudrate
@@ -37,7 +37,11 @@ class Station:
         self.points: dict[str, dict[str, float]] = {}
         self._load_points()
 
-        self.origin_file = origin_file  # 新增：保存软零点 JSON 的路径
+        self.origin_file = origin_file
+
+        # 新增：记录最近一次 move_xyz 的目标工件坐标
+        # 注意：这里的 x/y/z 是“工件坐标系的 mm”，和 move_xyz / move_to_point 使用的坐标体系一致
+        self._last_target_work: dict[str, float] = {"x": 0.0, "y": 0.0, "z": 0.0}
 
     # ===== 点位加载 =====
     def _load_points(self):
@@ -97,17 +101,25 @@ class Station:
     ):
         self._ensure_connected()
 
-        # 把可能是字符串的 x/y/z 转成 float 或 None
         def _to_float_or_none(v):
             if v is None:
                 return None
-            # 允许传入 "0"、"100.5" 这类字符串
             return float(v)
 
         x_f = _to_float_or_none(x)
         y_f = _to_float_or_none(y)
         z_f = _to_float_or_none(z)
 
+        # 记录这次的目标工件坐标（None 时保持上一次的值）
+        # 这样 save_current_position_as_point 可以“保存最后一次 move_xyz 的目标”
+        if x_f is not None:
+            self._last_target_work["x"] = x_f
+        if y_f is not None:
+            self._last_target_work["y"] = y_f
+        if z_f is not None:
+            self._last_target_work["z"] = z_f
+
+        # 仍然调用底层的工件坐标运动函数
         self.xyz.move_xyz_work(x_f, y_f, z_f, speed, acc)
 
     def aspirate(self, volume_uL: float):
@@ -136,6 +148,10 @@ class Station:
         acc: int = 6000,
         z_offset: float = 0.0,
     ):
+        """
+        根据点位名，从 self.points 中取出工件坐标 (x, y, z)，
+        然后直接调用 move_xyz 来完成运动并更新 _last_target_work。
+        """
         self._ensure_connected()
 
         if name not in self.points:
@@ -150,7 +166,58 @@ class Station:
             "Move to point %s: x=%.3f, y=%.3f, z=%.3f (z_offset=%.3f)",
             name, x, y, z, z_offset,
         )
-        self.xyz.move_xyz_work(x, y, z, speed, acc)
+        # 关键：改为通过 move_xyz，而不是直接调 xyz.move_xyz_work
+        self.move_xyz(x, y, z, speed, acc)
+
+    def save_point(self, name: str, x: float, y: float, z: float) -> None:
+        """
+        将一个点位保存/更新到 points_file 对应的 JSON 文件，并更新内存中的 self.points。
+
+        这里假定 x, y, z 已经是“工件坐标系下的目标坐标（单位 mm）”，
+        即直接保存 move_xyz/move_to_point 所用的坐标。
+        """
+        x = float(x)
+        y = float(y)
+        z = float(z)
+
+        if self.points is None:
+            self.points = {}
+        self.points[name] = {"x": x, "y": y, "z": z}
+
+        points_dir = os.path.dirname(self.points_file)
+        if points_dir and not os.path.exists(points_dir):
+            os.makedirs(points_dir, exist_ok=True)
+
+        try:
+            with open(self.points_file, "w", encoding="utf-8") as f:
+                json.dump(self.points, f, indent=4, ensure_ascii=False)
+            logger.info(
+                "点位已保存到 %s: %s -> x=%.6f, y=%.6f, z=%.6f",
+                self.points_file, name, x, y, z,
+            )
+        except Exception as e:
+            logger.error("保存点位到文件失败 %s: %s", self.points_file, e)
+            raise
+
+    def save_current_position_as_point(self, name: str) -> None:
+        """
+        不再从电机读“当前位置”，而是把最近一次 move_xyz / move_to_point
+        的目标工件坐标 (x, y, z) 直接保存为点位。
+
+        这样即使某个轴通讯不正常，也能保证点位文件里的坐标和
+        上层调用 move_xyz 时的目标坐标一致。
+        """
+        self._ensure_connected()
+
+        x_work = float(self._last_target_work.get("x", 0.0))
+        y_work = float(self._last_target_work.get("y", 0.0))
+        z_work = float(self._last_target_work.get("z", 0.0))
+
+        self.save_point(name, x_work, y_work, z_work)
+        logger.info(
+            "最近一次目标坐标已保存为点位 %s: x=%.6f, y=%.6f, z=%.6f (工件坐标 mm)",
+            name, x_work, y_work, z_work,
+        )
 
     # ===== 新增：重置工件软零点 =====
     def define_current_as_zero(self):

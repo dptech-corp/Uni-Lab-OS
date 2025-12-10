@@ -207,6 +207,66 @@ xyz_pipette_device:
           title: move_xyz参数
           type: object
         type: UniLabJsonCommand
+      auto-save_current_position_as_point:
+        feedback: {}
+        goal: {}
+        goal_default:
+          name: null
+        handles: {}
+        result: {}
+        schema:
+          description: 使用当前机械位置记录成一个命名点位
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                name:
+                  type: string
+              required:
+              - name
+              type: object
+            result: {}
+          required:
+          - goal
+          title: save_current_position_as_point参数
+          type: object
+        type: UniLabJsonCommand
+      auto-save_point:
+        feedback: {}
+        goal: {}
+        goal_default:
+          name: null
+          x: null
+          y: null
+          z: null
+        handles: {}
+        result: {}
+        schema:
+          description: 保存/更新一个点位到 points.json
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                name:
+                  type: string
+                x:
+                  type: number
+                y:
+                  type: number
+                z:
+                  type: number
+              required:
+              - name
+              - x
+              - y
+              - z
+              type: object
+            result: {}
+          required:
+          - goal
+          title: save_point参数
+          type: object
+        type: UniLabJsonCommand
     module: unilabos.devices.laiyu_xyz_pipette.station_simple:Station
     status_types: {}
     type: python
