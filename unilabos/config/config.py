@@ -41,7 +41,7 @@ class WSConfig:
 
 # HTTP配置
 class HTTPConfig:
-    remote_addr = "http://127.0.0.1:48197/api/v1"
+    remote_addr = "https://uni-lab.bohrium.com/api/v1"
 
 
 # ROS配置
