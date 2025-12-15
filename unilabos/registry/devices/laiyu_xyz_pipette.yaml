@@ -1,0 +1,299 @@
+xyz_pipette_device:
+  category:
+  - laiyu_xyz_pipette
+  class:
+    action_value_mappings:
+      auto-aspirate:
+        feedback: {}
+        goal: {}
+        goal_default:
+          volume_uL: null
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                volume_uL:
+                  type: number
+              required:
+              - volume_uL
+              type: object
+            result: {}
+          required:
+          - goal
+          title: aspirate参数
+          type: object
+        type: UniLabJsonCommand
+      auto-connect:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: connect参数
+          type: object
+        type: UniLabJsonCommand
+      auto-define_current_as_zero:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: define_current_as_zero参数
+          type: object
+        type: UniLabJsonCommand
+      auto-disconnect:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: disconnect参数
+          type: object
+        type: UniLabJsonCommand
+      auto-dispense:
+        feedback: {}
+        goal: {}
+        goal_default:
+          volume_uL: null
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                volume_uL:
+                  type: number
+              required:
+              - volume_uL
+              type: object
+            result: {}
+          required:
+          - goal
+          title: dispense参数
+          type: object
+        type: UniLabJsonCommand
+      auto-eject_tip:
+        feedback: {}
+        goal: {}
+        goal_default: {}
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties: {}
+              required: []
+              type: object
+            result: {}
+          required:
+          - goal
+          title: eject_tip参数
+          type: object
+        type: UniLabJsonCommand
+      auto-move_to_point:
+        feedback: {}
+        goal: {}
+        goal_default:
+          acc: 6000
+          name: null
+          speed: 500
+          z_offset: 0.0
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                acc:
+                  default: 6000
+                  type: integer
+                name:
+                  type: string
+                speed:
+                  default: 500
+                  type: integer
+                z_offset:
+                  default: 0.0
+                  type: number
+              required:
+              - name
+              type: object
+            result: {}
+          required:
+          - goal
+          title: move_to_point参数
+          type: object
+        type: UniLabJsonCommand
+      auto-move_xyz:
+        feedback: {}
+        goal: {}
+        goal_default:
+          acc: 6000
+          speed: 500
+          x: null
+          y: null
+          z: null
+        handles: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                acc:
+                  default: 6000
+                  type: integer
+                speed:
+                  default: 500
+                  type: integer
+                x:
+                  type: string
+                y:
+                  type: string
+                z:
+                  type: string
+              required:
+              - x
+              - y
+              - z
+              type: object
+            result: {}
+          required:
+          - goal
+          title: move_xyz参数
+          type: object
+        type: UniLabJsonCommand
+      auto-save_current_position_as_point:
+        feedback: {}
+        goal: {}
+        goal_default:
+          name: null
+        handles: {}
+        result: {}
+        schema:
+          description: 使用当前机械位置记录成一个命名点位
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                name:
+                  type: string
+              required:
+              - name
+              type: object
+            result: {}
+          required:
+          - goal
+          title: save_current_position_as_point参数
+          type: object
+        type: UniLabJsonCommand
+      auto-save_point:
+        feedback: {}
+        goal: {}
+        goal_default:
+          name: null
+          x: null
+          y: null
+          z: null
+        handles: {}
+        result: {}
+        schema:
+          description: 保存/更新一个点位到 points.json
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                name:
+                  type: string
+                x:
+                  type: number
+                y:
+                  type: number
+                z:
+                  type: number
+              required:
+              - name
+              - x
+              - y
+              - z
+              type: object
+            result: {}
+          required:
+          - goal
+          title: save_point参数
+          type: object
+        type: UniLabJsonCommand
+    module: unilabos.devices.laiyu_xyz_pipette.station_simple:Station
+    status_types: {}
+    type: python
+  config_info: []
+  description: xyz_pipette_device
+  handles: []
+  icon: ''
+  init_param_schema:
+    config:
+      properties:
+        baudrate:
+          default: 115200
+          type: integer
+        origin_file:
+          default: work_origin.json
+          type: string
+        points_file:
+          default: points.json
+          type: string
+        port:
+          default: /dev/ttyUSB1
+          type: string
+      required: []
+      type: object
+    data:
+      properties: {}
+      required: []
+      type: object
+  registry_type: device
+  version: 1.0.0
