@@ -1,4 +1,4 @@
-from unilabos.resources.post_process.post_process_warehouse import WareHouse, warehouse_factory
+from unilabos.devices.workstation.post_process.post_process_warehouse import WareHouse, warehouse_factory
 
 
 

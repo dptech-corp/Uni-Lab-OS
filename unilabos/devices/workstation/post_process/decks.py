@@ -1,7 +1,7 @@
 from os import name
 from pylabrobot.resources import Deck, Coordinate, Rotation
 
-from unilabos.resources.post_process.warehouses import (
+from unilabos.devices.workstation.post_process.warehouses import (
     post_process_warehouse_4x3x1,
     post_process_warehouse_4x3x1_2, 
 )

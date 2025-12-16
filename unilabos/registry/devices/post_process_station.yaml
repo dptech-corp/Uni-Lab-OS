@@ -600,7 +600,7 @@ post_process_station:
           title: SendCmd
           type: object
         type: SendCmd
-    module: unilabos.device_comms.opcua_client.client:OpcUaClient
+    module: unilabos.devices.workstation.post_process.post_process:OpcUaClient
     status_types:
       acetone_tank_empty_alarm: Bool
       atomization_fast_speed: Float64
