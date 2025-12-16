@@ -4500,6 +4500,9 @@ liquid_handler:
         simulator:
           default: false
           type: boolean
+        total_height:
+          default: 310
+          type: number
       required:
       - backend
       - deck
@@ -7553,6 +7556,35 @@ liquid_handler.prcxi:
           title: custom_delay参数
           type: object
         type: UniLabJsonCommandAsync
+      auto-heater_action:
+        feedback: {}
+        goal: {}
+        goal_default:
+          temperature: null
+          time: null
+        handles: {}
+        placeholder_keys: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                temperature:
+                  type: number
+                time:
+                  type: integer
+              required:
+              - temperature
+              - time
+              type: object
+            result: {}
+          required:
+          - goal
+          title: heater_action参数
+          type: object
+        type: UniLabJsonCommandAsync
       auto-iter_tips:
         feedback: {}
         goal: {}
@@ -7694,6 +7726,35 @@ liquid_handler.prcxi:
           title: set_group参数
           type: object
         type: UniLabJsonCommand
+      auto-shaker_action:
+        feedback: {}
+        goal: {}
+        goal_default:
+          frequency: null
+          time: null
+        handles: {}
+        placeholder_keys: {}
+        result: {}
+        schema:
+          description: ''
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                frequency:
+                  type: number
+                time:
+                  type: integer
+              required:
+              - time
+              - frequency
+              type: object
+            result: {}
+          required:
+          - goal
+          title: shaker_action参数
+          type: object
+        type: UniLabJsonCommandAsync
       auto-touch_tip:
         feedback: {}
         goal: {}

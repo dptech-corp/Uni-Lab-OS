@@ -21,7 +21,7 @@
                     "_resource_type": "unilabos.devices.liquid_handling.prcxi.prcxi:PRCXI9300Deck",
                     "_resource_child_name": "PRCXI_Deck"
                 },
-                "host": "192.168.1.201",
+                "host": "10.20.30.184",
                 "port": 9999,
                 "debug": false,
                 "setup": true,
@@ -29,7 +29,7 @@
                 "timeout": 10,
                 "matrix_id": "5de524d0-3f95-406c-86dd-f83626ebc7cb",
                 "simulator": false,
-                "channel_num": 1
+                "channel_num": 2
             },
             "data": {
                 "reset_ok": true
@@ -9964,8 +9964,8 @@
         },
 
         {
-            "id": "container_for_nothing3",
-            "name": "container_for_nothing3",
+            "id": "emptyT3",
+            "name": "emptyT3",
             
             "children": [],
             "parent": "PRCXI_Deck",
@@ -9996,8 +9996,8 @@
         },
 
         {
-            "id": "container_for_nothing4",
-            "name": "container_for_nothing4",
+            "id": "emptyT4",
+            "name": "emptyT4",
             
             "children": [],
             "parent": "PRCXI_Deck",
@@ -19806,8 +19806,8 @@
         },
 
         {
-            "id": "container_for_nothing7",
-            "name": "container_for_nothing7",
+            "id": "emptyT7",
+            "name": "emptyT7",
             
             "children": [],
             "parent": "PRCXI_Deck",
@@ -19837,8 +19837,8 @@
             "data": {}
         },
         {
-            "id": "container_for_nothing8",
-            "name": "container_for_nothing8",
+            "id": "emptyT8",
+            "name": "emptyT8",
             
             "children": [],
             "parent": "PRCXI_Deck",
@@ -28015,8 +28015,8 @@
         },
 
         {
-            "id": "container_for_nothing11",
-            "name": "container_for_nothing11",
+            "id": "emptyT11",
+            "name": "emptyT11",
             
             "children": [],
             "parent": "PRCXI_Deck",
@@ -28046,8 +28046,8 @@
             "data": {}
         },
         {
-            "id": "container_for_nothing12",
-            "name": "container_for_nothing12",
+            "id": "emptyT12",
+            "name": "emptyT12",
             
             "children": [],
             "parent": "PRCXI_Deck",
