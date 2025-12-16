@@ -4,6 +4,54 @@ reaction_station.bioyond:
   - reaction_station_bioyond
   class:
     action_value_mappings:
+      add_time_constraint:
+        feedback: {}
+        goal:
+          duration: duration
+          end_point: end_point
+          end_step_key: end_step_key
+          start_point: start_point
+          start_step_key: start_step_key
+        goal_default:
+          duration: 0
+          end_point: 0
+          end_step_key: ''
+          start_point: 0
+          start_step_key: ''
+        handles: {}
+        result: {}
+        schema:
+          description: 添加时间约束 - 在两个工作流之间添加时间约束
+          properties:
+            feedback: {}
+            goal:
+              properties:
+                duration:
+                  description: 时间(秒)
+                  type: integer
+                end_point:
+                  default: 0
+                  description: 终点计时点 (0=开始前, 1=结束后)
+                  type: integer
+                end_step_key:
+                  description: 终点步骤Key (可选, 默认为空则自动选择)
+                  type: string
+                start_point:
+                  default: 0
+                  description: 起点计时点 (0=开始前, 1=结束后)
+                  type: integer
+                start_step_key:
+                  description: 起点步骤Key (例如 "feeding", "liquid", 可选, 默认为空则自动选择)
+                  type: string
+              required:
+              - duration
+              type: object
+            result: {}
+          required:
+          - goal
+          title: add_time_constraint参数
+          type: object
+        type: UniLabJsonCommand
       auto-create_order:
         feedback: {}
         goal: {}

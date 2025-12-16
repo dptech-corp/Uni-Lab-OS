@@ -88,6 +88,8 @@ class BioyondReactionStation(BioyondWorkstation):
 
         # 用于缓存从 Bioyond 查询的工作流序列
         self._cached_workflow_sequence = []
+        # 用于缓存待处理的时间约束
+        self.pending_time_constraints = []
 
 
     @property
@@ -918,6 +920,46 @@ class BioyondReactionStation(BioyondWorkstation):
         print(f"当前队列长度: {len(self.pending_task_params)}")
         return json.dumps({"suc": True})
 
+    def add_time_constraint(
+        self,
+        duration: int,
+        start_step_key: str = "",
+        end_step_key: str = "",
+        start_point: int = 0,
+        end_point: int = 0
+    ):
+        """添加时间约束
+
+        Args:
+            duration: 时间(秒)
+            start_step_key: 起点步骤Key (可选, 默认为空则自动选择)
+            end_step_key: 终点步骤Key (可选, 默认为空则自动选择)
+            start_point: 起点计时点 (0=开始前, 1=结束后)
+            end_point: 终点计时点 (0=开始前, 1=结束后)
+        """
+       # 注意：此方法应在添加完起点工作流后，添加终点工作流前调用
+
+        current_count = len(self._cached_workflow_sequence)
+        if current_count == 0:
+            print("⚠️ 无法添加时间约束：当前没有工作流")
+            return
+
+        start_index = current_count - 1
+        end_index = current_count # 指向下一个即将添加的工作流
+
+        constraint = {
+            "start_index": start_index,
+            "start_step_key": start_step_key,
+            "end_index": end_index,
+            "end_step_key": end_step_key,
+            "duration": duration,
+            "start_point": start_point,
+            "end_point": end_point
+        }
+        self.pending_time_constraints.append(constraint)
+        print(f"已添加时间约束: Workflow[{start_index}].{start_step_key} -> Workflow[{end_index}].{end_step_key} ({duration}s)")
+        return json.dumps({"suc": True})
+
     # ==================== 工作流管理方法 ====================
 
     def get_workflow_sequence(self) -> List[str]:
@@ -1058,6 +1100,12 @@ class BioyondReactionStation(BioyondWorkstation):
             创建结果
         """
         return self.hardware_interface.create_order(json_str)
+
+    def clear_workflows(self):
+        """清空缓存的工作流序列和参数"""
+        self._cached_workflow_sequence = []
+        self.pending_time_constraints = []
+        print("已清空工作流序列缓存和时间约束队列")
 
     def hard_delete_merged_workflows(self, workflow_ids: List[str]) -> Dict[str, Any]:
         """
@@ -1416,9 +1464,108 @@ class BioyondReactionStation(BioyondWorkstation):
 
         workflows_with_params = self._build_workflows_with_parameters(workflows_result)
 
+        # === 构建时间约束 (tcmBs) ===
+        tcm_bs_list = []
+        if self.pending_time_constraints:
+            print(f"\n🔗 处理时间约束 ({len(self.pending_time_constraints)} 个)...")
+            from unilabos.devices.workstation.bioyond_studio.config import WORKFLOW_STEP_IDS
+
+            # 建立索引到名称的映射
+            workflow_names_by_index = [w["name"] for w in workflows_result]
+
+            # 默认步骤映射表
+            DEFAULT_STEP_KEYS = {
+                "Solid_feeding_vials": "feeding",
+                "liquid_feeding_beaker": "liquid",
+                "Liquid_feeding_vials(non-titration)": "liquid",
+                "Liquid_feeding_solvents": "liquid",
+                "Liquid_feeding(titration)": "liquid",
+                "Drip_back": "liquid",
+                "reactor_taken_in": "config"
+            }
+
+            for c in self.pending_time_constraints:
+                try:
+                    start_idx = c["start_index"]
+                    end_idx = c["end_index"]
+
+                    if start_idx >= len(workflow_names_by_index) or end_idx >= len(workflow_names_by_index):
+                        print(f"   ❌ 约束索引越界: {start_idx} -> {end_idx} (总数: {len(workflow_names_by_index)})")
+                        continue
+
+                    start_wf_name = workflow_names_by_index[start_idx]
+                    end_wf_name = workflow_names_by_index[end_idx]
+
+                    # 辅助函数：根据名称查找 config 中的 key
+                    def find_config_key(name):
+                        # 1. 直接匹配
+                        if name in WORKFLOW_STEP_IDS:
+                            return name
+                        # 2. 尝试反向查找 WORKFLOW_TO_SECTION_MAP (如果需要)
+                        # 3. 尝试查找 WORKFLOW_MAPPINGS 的 key (忽略大小写匹配或特定映射)
+
+                        # 硬编码常见映射 (Web名称 -> Config Key)
+                        mapping = {
+                            "Solid_feeding_vials": "solid_feeding_vials",
+                            "Liquid_feeding_vials(non-titration)": "liquid_feeding_vials_non_titration",
+                            "Liquid_feeding_solvents": "liquid_feeding_solvents",
+                            "Liquid_feeding(titration)": "liquid_feeding_titration",
+                            "Drip_back": "drip_back"
+                        }
+                        return mapping.get(name, name)
+
+                    start_config_key = find_config_key(start_wf_name)
+                    end_config_key = find_config_key(end_wf_name)
+
+                    # 查找 UUID
+                    if start_config_key not in WORKFLOW_STEP_IDS:
+                        print(f"   ❌ 找不到工作流 {start_wf_name} (Key: {start_config_key}) 的步骤配置")
+                        continue
+                    if end_config_key not in WORKFLOW_STEP_IDS:
+                        print(f"   ❌ 找不到工作流 {end_wf_name} (Key: {end_config_key}) 的步骤配置")
+                        continue
+
+                    # 确定步骤 Key
+                    start_key = c["start_step_key"]
+                    if not start_key:
+                        start_key = DEFAULT_STEP_KEYS.get(start_wf_name)
+                        if not start_key:
+                            print(f"   ❌ 未指定起点步骤Key且无默认值: {start_wf_name}")
+                            continue
+
+                    end_key = c["end_step_key"]
+                    if not end_key:
+                        end_key = DEFAULT_STEP_KEYS.get(end_wf_name)
+                        if not end_key:
+                            print(f"   ❌ 未指定终点步骤Key且无默认值: {end_wf_name}")
+                            continue
+
+                    start_step_id = WORKFLOW_STEP_IDS[start_config_key].get(start_key)
+                    end_step_id = WORKFLOW_STEP_IDS[end_config_key].get(end_key)
+
+                    if not start_step_id or not end_step_id:
+                        print(f"   ❌ 无法解析步骤ID: {start_config_key}.{start_key} -> {end_config_key}.{end_key}")
+                        continue
+
+                    tcm_bs_list.append({
+                        "startWorkflowIndex": start_idx,
+                        "startStepId": start_step_id,
+                        "startComparePoint": c["start_point"],
+                        "endWorkflowIndex": end_idx,
+                        "endStepId": end_step_id,
+                        "endComparePoint": c["end_point"],
+                        "ct": c["duration"],
+                        "description": f"Constraint {start_idx}->{end_idx}"
+                    })
+                    print(f"   ✅ 添加约束: {start_wf_name}({start_key}) -> {end_wf_name}({end_key})")
+
+                except Exception as e:
+                    print(f"   ❌ 处理约束时出错: {e}")
+
         merge_data = {
             "name": workflow_name,
-            "workflows": workflows_with_params
+            "workflows": workflows_with_params,
+            "tcmBs": tcm_bs_list
         }
 
         # print(f"\n🔄 合并工作流（带参数），名称: {workflow_name}")
