@@ -1,137 +1,101 @@
       
 {
-  "nodes": [
-    {
-      "id": "bioyond_cell_workstation",
-      "name": "配液分液工站",
-      "parent": null,
-      "children": [
-        "YB_Bioyond_Deck"
-      ],
-      "type": "device",
-      "class": "bioyond_cell",
-      "config": {
-        "deck": {
-          "data": {
-            "_resource_child_name": "YB_Bioyond_Deck",
-            "_resource_type": "unilabos.resources.bioyond.decks:BIOYOND_YB_Deck"
-          }
+    "nodes": [
+      {
+        "id": "bioyond_cell_workstation",
+        "name": "配液分液工站",
+        "parent": null,
+        "children": [
+          "YB_Bioyond_Deck"
+        ],
+        "type": "device",
+        "class": "bioyond_cell",
+        "config": {
+          "deck": {
+            "data": {
+              "_resource_child_name": "YB_Bioyond_Deck",
+              "_resource_type": "unilabos.resources.bioyond.decks:BIOYOND_YB_Deck"
+            }
+          },
+          "protocol_type": []
         },
-        "protocol_type": []
+        "data": {}
       },
-      "data": {}
-    },
-    {
-      "id": "YB_Bioyond_Deck",
-      "name": "YB_Bioyond_Deck",
-      "children": [],
-      "parent": "bioyond_cell_workstation",
-      "type": "deck",
-      "class": "BIOYOND_YB_Deck",
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      },
-      "config": {
-        "type": "BIOYOND_YB_Deck",
-        "setup": true,
-        "rotation": {
+      {
+        "id": "YB_Bioyond_Deck",
+        "name": "YB_Bioyond_Deck",
+        "children": [],
+        "parent": "bioyond_cell_workstation",
+        "type": "deck",
+        "class": "BIOYOND_YB_Deck",
+        "position": {
           "x": 0,
           "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        }
-      },
-      "data": {}
-    },
-    {
-      "id": "BatteryStation",
-      "name": "扣电工作站",
-      "parent": null,
-      "children": [
-        "coin_cell_deck"
-      ],
-      "type": "device",
-      "class":"coincellassemblyworkstation_device",
-      "config": {
-        "deck": {
-          "data": {
-            "_resource_child_name": "YB_YH_Deck",
-            "_resource_type": "unilabos.devices.workstation.coin_cell_assembly.YB_YH_materials:CoincellDeck"
+          "z": 0
+        },
+        "config": {
+          "type": "BIOYOND_YB_Deck",
+          "setup": true,
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "type": "Rotation"
           }
         },
-        "protocol_type": []
+        "data": {}
       },
-      "position": {
-        "size": {"height": 1450, "width": 1450, "depth": 2100},
-        "position": {
-          "x": -1500,
-          "y": 0,
-          "z": 0
-        }
-      }
-    },
-    {
-      "id": "YB_YH_Deck",
-      "name": "YB_YH_Deck",
-      "children": [],
-      "parent": "BatteryStation",
-      "type": "deck",
-      "class": "CoincellDeck",
-      "config": {
-        "type": "CoincellDeck",
-        "setup": true,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        }
-      },
-      "data": {}
-    },
-    {
-      "id": "NewareTester",
-      "name": "新威电池测试系统",
-      "parent": null,
-      "children": [],
-      "type": "device",
-      "class": "neware_battery_test_system",
-      "config": {
-        "ip": "127.0.0.1",
-        "port": 502,
-        "machine_id": 1,
-        "devtype": "27",
-        "timeout": 20,
-        "size_x": 500.0,
-        "size_y": 500.0,
-        "size_z": 2000.0
-      },
-      "position": {
-        "size": {
-          "height": 1600,
-          "width": 1200,
-          "depth": 800
+      {
+        "id": "BatteryStation",
+        "name": "扣电工作站",
+        "parent": null,
+        "children": [
+          "coin_cell_deck"
+        ],
+        "type": "device",
+        "class":"coincellassemblyworkstation_device",
+        "config": {
+          "deck": {
+            "data": {
+              "_resource_child_name": "YB_YH_Deck",
+              "_resource_type": "unilabos.devices.workstation.coin_cell_assembly.YB_YH_materials:CoincellDeck"
+            }
+          },
+          "protocol_type": []
         },
         "position": {
-          "x": 1500,
-          "y": 0,
-          "z": 0
+          "size": {"height": 1450, "width": 1450, "depth": 2100},
+          "position": {
+            "x": -1500,
+            "y": 0,
+            "z": 0
+          }
         }
       },
-      "data": {
-        "功能说明": "新威电池测试系统，提供720通道监控和CSV批量提交功能",
-        "监控功能": "支持720个通道的实时状态监控、2盘电池物料管理、状态导出等",
-        "提交功能": "通过submit_from_csv action从CSV文件批量提交测试任务"
+      {
+        "id": "YB_YH_Deck",
+        "name": "YB_YH_Deck",
+        "children": [],
+        "parent": "BatteryStation",
+        "type": "deck",
+        "class": "CoincellDeck",
+        "config": {
+          "type": "CoincellDeck",
+          "setup": true,
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0,
+            "type": "Rotation"
+          }
+        },
+        "data": {}
       }
-    }
-  ],
-  "links": []
-}
-
-
-
-
-
-    
+    ]
+  }
+  
+  
+  
+  
+  
+      

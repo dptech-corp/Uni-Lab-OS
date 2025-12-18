@@ -5,7 +5,7 @@ import threading
 import time
 import traceback
 import uuid
-from typing import TYPE_CHECKING, Optional, Dict, Any, List, ClassVar, Set, Union
+from typing import TYPE_CHECKING, Optional, Dict, Any, List, ClassVar, Set, TypedDict, Union
 
 from action_msgs.msg import GoalStatus
 from geometry_msgs.msg import Point
@@ -38,6 +38,7 @@ from unilabos.ros.msgs.message_converter import (
 from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode, ROS2DeviceNode, DeviceNodeResourceTracker
 from unilabos.ros.nodes.presets.controller_node import ControllerNode
 from unilabos.ros.nodes.resource_tracker import (
+    ResourceDict,
     ResourceDictInstance,
     ResourceTreeSet,
     ResourceTreeInstance,
@@ -48,12 +49,17 @@ from unilabos.utils.type_check import serialize_result_info
 from unilabos.registry.placeholder_type import ResourceSlot, DeviceSlot
 
 if TYPE_CHECKING:
-    from unilabos.app.ws_client import QueueItem, WSResourceChatData
+    from unilabos.app.ws_client import QueueItem
 
 
 @dataclass
 class DeviceActionStatus:
     job_ids: Dict[str, float] = field(default_factory=dict)
+
+
+class TestResourceReturn(TypedDict):
+    resources: List[List[ResourceDict]]
+    devices: List[DeviceSlot]
 
 
 class HostNode(BaseROS2DeviceNode):
@@ -282,6 +288,12 @@ class HostNode(BaseROS2DeviceNode):
 
         self.lab_logger().info("[Host Node] Host node initialized.")
         HostNode._ready_event.set()
+
+        # 发送host_node ready信号到所有桥接器
+        for bridge in self.bridges:
+            if hasattr(bridge, "publish_host_ready"):
+                bridge.publish_host_ready()
+                self.lab_logger().debug(f"Host ready signal sent via {bridge.__class__.__name__}")
 
     def _send_re_register(self, sclient):
         sclient.wait_for_service()
@@ -526,7 +538,7 @@ class HostNode(BaseROS2DeviceNode):
         self.lab_logger().info(f"[Host Node] Initializing device: {device_id}")
 
         try:
-            d = initialize_device_from_dict(device_id, device_config.get_nested_dict())
+            d = initialize_device_from_dict(device_id, device_config)
         except DeviceClassInvalid as e:
             self.lab_logger().error(f"[Host Node] Device class invalid: {e}")
             d = None
@@ -706,7 +718,7 @@ class HostNode(BaseROS2DeviceNode):
             feedback_callback=lambda feedback_msg: self.feedback_callback(item, action_id, feedback_msg),
             goal_uuid=goal_uuid_obj,
         )
-        future.add_done_callback(lambda future: self.goal_response_callback(item, action_id, future))
+        future.add_done_callback(lambda f: self.goal_response_callback(item, action_id, f))
 
     def goal_response_callback(self, item: "QueueItem", action_id: str, future) -> None:
         """目标响应回调"""
@@ -717,9 +729,11 @@ class HostNode(BaseROS2DeviceNode):
 
         self.lab_logger().info(f"[Host Node] Goal {action_id} ({item.job_id}) accepted")
         self._goals[item.job_id] = goal_handle
-        goal_handle.get_result_async().add_done_callback(
-            lambda future: self.get_result_callback(item, action_id, future)
+        goal_future = goal_handle.get_result_async()
+        goal_future.add_done_callback(
+            lambda f: self.get_result_callback(item, action_id, f)
         )
+        goal_future.result()
 
     def feedback_callback(self, item: "QueueItem", action_id: str, feedback_msg) -> None:
         """反馈回调"""
@@ -734,46 +748,133 @@ class HostNode(BaseROS2DeviceNode):
     def get_result_callback(self, item: "QueueItem", action_id: str, future) -> None:
         """获取结果回调"""
         job_id = item.job_id
-        result_msg = future.result().result
-        result_data = convert_from_ros_msg(result_msg)
-        status = "success"
-        return_info_str = result_data.get("return_info")
-        if return_info_str is not None:
-            try:
-                return_info = json.loads(return_info_str)
-                suc = return_info.get("suc", False)
-                if not suc:
-                    status = "failed"
-            except json.JSONDecodeError:
+
+        try:
+            result = future.result()
+            result_msg = result.result
+            goal_status = result.status
+
+            # 检查是否是被取消的任务
+            if goal_status == GoalStatus.STATUS_CANCELED:
+                self.lab_logger().info(f"[Host Node] Goal {action_id} ({job_id[:8]}) was cancelled")
                 status = "failed"
-                return_info = serialize_result_info("", False, result_data)
-                self.lab_logger().critical("错误的return_info类型，请断点修复")
-        else:
-            # 无 return_info 字段时，回退到 success 字段（若存在）
-            suc_field = result_data.get("success")
-            if isinstance(suc_field, bool):
-                status = "success" if suc_field else "failed"
-                return_info = serialize_result_info("", suc_field, result_data)
+                return_info = serialize_result_info("Job was cancelled", False, {})
             else:
-                # 最保守的回退：标记失败并返回空JSON
-                status = "failed"
-                return_info = serialize_result_info("缺少return_info", False, result_data)
+                result_data = convert_from_ros_msg(result_msg)
+                status = "success"
+                return_info_str = result_data.get("return_info")
+                if return_info_str is not None:
+                    try:
+                        return_info = json.loads(return_info_str)
+                        # 适配后端的一些额外处理
+                        return_value = return_info.get("return_value")
+                        if isinstance(return_value, dict):
+                            unilabos_samples = return_info.get("unilabos_samples")
+                            if isinstance(unilabos_samples, list):
+                                return_info["unilabos_samples"] = unilabos_samples
+                        suc = return_info.get("suc", False)
+                        if not suc:
+                            status = "failed"
+                    except json.JSONDecodeError:
+                        status = "failed"
+                        return_info = serialize_result_info("", False, result_data)
+                        self.lab_logger().critical("错误的return_info类型，请断点修复")
+                else:
+                    # 无 return_info 字段时，回退到 success 字段（若存在）
+                    suc_field = result_data.get("success")
+                    if isinstance(suc_field, bool):
+                        status = "success" if suc_field else "failed"
+                        return_info = serialize_result_info("", suc_field, result_data)
+                    else:
+                        # 最保守的回退：标记失败并返回空JSON
+                        status = "failed"
+                        return_info = serialize_result_info("缺少return_info", False, result_data)
 
-        self.lab_logger().info(f"[Host Node] Result for {action_id} ({job_id}): {status}")
-        self.lab_logger().debug(f"[Host Node] Result data: {result_data}")
+            self.lab_logger().info(f"[Host Node] Result for {action_id} ({job_id[:8]}): {status}")
+            if goal_status != GoalStatus.STATUS_CANCELED:
+                self.lab_logger().debug(f"[Host Node] Result data: {result_data}")
 
-        if job_id:
+            # 清理 _goals 中的记录
+            if job_id in self._goals:
+                del self._goals[job_id]
+                self.lab_logger().debug(f"[Host Node] Removed goal {job_id[:8]} from _goals")
+
+            # 存储结果供 HTTP API 查询
+            try:
+                from unilabos.app.web.controller import store_job_result
+
+                if goal_status == GoalStatus.STATUS_CANCELED:
+                    store_job_result(job_id, status, return_info, {})
+                else:
+                    store_job_result(job_id, status, return_info, result_data)
+            except ImportError:
+                pass  # controller 模块可能未加载
+
+            # 发布状态到桥接器
+            if job_id:
+                for bridge in self.bridges:
+                    if hasattr(bridge, "publish_job_status"):
+                        if goal_status == GoalStatus.STATUS_CANCELED:
+                            bridge.publish_job_status({}, item, status, return_info)
+                        else:
+                            bridge.publish_job_status(result_data, item, status, return_info)
+
+        except Exception as e:
+            self.lab_logger().error(
+                f"[Host Node] Error in get_result_callback for {action_id} ({job_id[:8]}): {str(e)}"
+            )
+            import traceback
+
+            self.lab_logger().error(traceback.format_exc())
+
+            # 清理 _goals 中的记录
+            if job_id in self._goals:
+                del self._goals[job_id]
+
+            # 发布失败状态
             for bridge in self.bridges:
                 if hasattr(bridge, "publish_job_status"):
-                    bridge.publish_job_status(result_data, item, status, return_info)
+                    bridge.publish_job_status(
+                        {}, item, "failed", serialize_result_info(f"Callback error: {str(e)}", False, {})
+                    )
 
-    def cancel_goal(self, goal_uuid: str) -> None:
-        """取消目标"""
+    def cancel_goal(self, goal_uuid: str) -> bool:
+        """
+        取消目标
+
+        Args:
+            goal_uuid: 目标UUID（job_id）
+
+        Returns:
+            bool: 如果找到目标并发起取消请求返回True，否则返回False
+        """
         if goal_uuid in self._goals:
-            self.lab_logger().info(f"[Host Node] Cancelling goal {goal_uuid}")
-            self._goals[goal_uuid].cancel_goal_async()
+            self.lab_logger().info(f"[Host Node] Cancelling goal {goal_uuid[:8]}")
+            goal_handle = self._goals[goal_uuid]
+
+            # 发起异步取消请求
+            cancel_future = goal_handle.cancel_goal_async()
+
+            # 添加取消完成的回调
+            cancel_future.add_done_callback(lambda future: self._cancel_goal_callback(goal_uuid, future))
+            return True
         else:
-            self.lab_logger().warning(f"[Host Node] Goal {goal_uuid} not found, cannot cancel")
+            self.lab_logger().warning(f"[Host Node] Goal {goal_uuid[:8]} not found in _goals, cannot cancel")
+            return False
+
+    def _cancel_goal_callback(self, goal_uuid: str, future) -> None:
+        """取消目标的回调"""
+        try:
+            cancel_response = future.result()
+            if cancel_response.goals_canceling:
+                self.lab_logger().info(f"[Host Node] Goal {goal_uuid[:8]} cancel request accepted")
+            else:
+                self.lab_logger().warning(f"[Host Node] Goal {goal_uuid[:8]} cancel request rejected")
+        except Exception as e:
+            self.lab_logger().error(f"[Host Node] Error cancelling goal {goal_uuid[:8]}: {str(e)}")
+            import traceback
+
+            self.lab_logger().error(traceback.format_exc())
 
     def get_goal_status(self, job_id: str) -> int:
         """获取目标状态"""
@@ -1056,11 +1157,12 @@ class HostNode(BaseROS2DeviceNode):
             响应对象，包含查询到的资源
         """
         try:
+            from unilabos.app.web import http_client
             data = json.loads(request.command)
             if "uuid" in data and data["uuid"] is not None:
-                http_req = self.bridges[-1].resource_tree_get([data["uuid"]], data["with_children"])
+                http_req = http_client.resource_tree_get([data["uuid"]], data["with_children"])
             elif "id" in data and data["id"].startswith("/"):
-                http_req = self.bridges[-1].resource_get(data["id"], data["with_children"])
+                http_req = http_client.resource_get(data["id"], data["with_children"])
             else:
                 raise ValueError("没有使用正确的物料 id 或 uuid")
             response.response = json.dumps(http_req["data"])
@@ -1270,7 +1372,7 @@ class HostNode(BaseROS2DeviceNode):
 
     def test_resource(
         self, resource: ResourceSlot, resources: List[ResourceSlot], device: DeviceSlot, devices: List[DeviceSlot]
-    ):
+    ) -> TestResourceReturn:
         return {
             "resources": ResourceTreeSet.from_plr_resources([resource, *resources]).dump(),
             "devices": [device, *devices],

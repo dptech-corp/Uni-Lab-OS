@@ -5,6 +5,7 @@ import json
 import os
 import socket
 import time
+import uuid
 from typing import Any, List, Dict, Optional, Tuple, TypedDict, Union, Sequence, Iterator, Literal
 
 from pylabrobot.liquid_handling import (
@@ -65,7 +66,7 @@ class PRCXI9300Deck(Deck):
     该类定义了 PRCXI 9300 的工作台布局和槽位信息。
     """
 
-    def __init__(self, name: str, size_x: float, size_y: float, size_z: float):
+    def __init__(self, name: str, size_x: float, size_y: float, size_z: float, **kwargs):
         super().__init__(name, size_x, size_y, size_z)
         self.slots = [None] * 6  # PRCXI 9300 有 6 个槽位
 
@@ -85,6 +86,7 @@ class PRCXI9300Container(Plate, TipRack):
         category: str,
         ordering: collections.OrderedDict,
         model: Optional[str] = None,
+        **kwargs,
     ):
         super().__init__(name, size_x, size_y, size_z, category=category, ordering=ordering, model=model)
         self._unilabos_state = {}
@@ -145,6 +147,7 @@ class PRCXI9300Handler(LiquidHandlerAbstract):
         setup=True,
         debug=False,
         simulator=False,
+        step_mode=False,
         matrix_id="",
         is_9320=False,
     ):
@@ -158,6 +161,13 @@ class PRCXI9300Handler(LiquidHandlerAbstract):
                 )
         if is_9320:
             print("当前设备是9320")
+        # 始终初始化 step_mode 属性
+        self.step_mode = False
+        if step_mode:
+            if is_9320:
+                self.step_mode = step_mode
+            else:
+                print("9300设备不支持 单点动作模式")
         self._unilabos_backend = PRCXI9300Backend(
             tablets_info, host, port, timeout, channel_num, axis, setup, debug, matrix_id, is_9320
         )
@@ -344,6 +354,10 @@ class PRCXI9300Handler(LiquidHandlerAbstract):
         offsets: Optional[List[Coordinate]] = None,
         **backend_kwargs,
     ):
+        if self.step_mode:
+            await self.create_protocol(f"单点动作{time.time()}")
+            await super().pick_up_tips(tip_spots, use_channels, offsets, **backend_kwargs)
+            await self.run_protocol()
         return await super().pick_up_tips(tip_spots, use_channels, offsets, **backend_kwargs)
 
     async def aspirate(
@@ -506,10 +520,26 @@ class PRCXI9300Backend(LiquidHandlerBackend):
         await super().setup()
         try:
             if self._execute_setup:
+                # 先获取错误代码
+                error_code = self.api_client.get_error_code()
+                if error_code:
+                    print(f"PRCXI9300 error code detected: {error_code}")
+                
+                # 清除错误代码
+                self.api_client.clear_error_code()
+                print("PRCXI9300 error code cleared.")
+                
+                # 执行重置
+                print("Starting PRCXI9300 reset...")
                 self.api_client.call("IAutomation", "Reset")
+                
+                # 检查重置状态并等待完成
                 while not self.is_reset_ok:
                     print("Waiting for PRCXI9300 to reset...")
-                    await self._ros_node.sleep(1)
+                    if hasattr(self, '_ros_node') and self._ros_node is not None:
+                        await self._ros_node.sleep(1)
+                    else:
+                        await asyncio.sleep(1)
                 print("PRCXI9300 reset successfully.")
         except ConnectionRefusedError as e:
             raise RuntimeError(
@@ -827,7 +857,30 @@ class PRCXI9300Api:
 
     def _raw_request(self, payload: str) -> str:
         if self.debug:
-            return " "
+            # 调试/仿真模式下直接返回可解析的模拟 JSON，避免后续 json.loads 报错
+            try:
+                req = json.loads(payload)
+                method = req.get("MethodName")
+            except Exception:
+                method = None
+
+            data: Any = True
+            if method in {"AddSolution"}:
+                data = str(uuid.uuid4())
+            elif method in {"AddWorkTabletMatrix", "AddWorkTabletMatrix2"}:
+                data = {"Success": True, "Message": "debug mock"}
+            elif method in {"GetErrorCode"}:
+                data = ""
+            elif method in {"RemoveErrorCodet", "Reset", "Start", "LoadSolution", "Pause", "Resume", "Stop"}:
+                data = True
+            elif method in {"GetStepStateList", "GetStepStatus", "GetStepState"}:
+                data = []
+            elif method in {"GetLocation"}:
+                data = {"X": 0, "Y": 0, "Z": 0}
+            elif method in {"GetResetStatus"}:
+                data = False
+
+            return json.dumps({"Success": True, "Msg": "debug mock", "Data": data})
         with contextlib.closing(socket.socket()) as sock:
             sock.settimeout(self.timeout)
             sock.connect((self.host, self.port))
@@ -1138,7 +1191,7 @@ class DefaultLayout:
             self.waste_liquid_slot = 6
 
         elif product_name == "PRCXI9320":
-            self.rows = 3
+            self.rows = 4
             self.columns = 4
             self.layout = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
             self.trash_slot = 16
@@ -1694,11 +1747,47 @@ if __name__ == "__main__":
 
     A = tree_to_list([resource_plr_to_ulab(deck)])
     with open("deck.json", "w", encoding="utf-8") as f:
-        json.dump(A, f, indent=4, ensure_ascii=False)
+        A.insert(0, {
+            "id": "PRCXI",
+            "name": "PRCXI",
+            "parent": None,
+            "type": "device",
+            "class": "liquid_handler.prcxi",
+            "position": {
+                "x": 0,
+                "y": 0,
+                "z": 0
+            },
+            "config": {
+                "deck": {
+                    "_resource_child_name": "PRCXI_Deck",
+                    "_resource_type": "unilabos.devices.liquid_handling.prcxi.prcxi:PRCXI9300Deck"
+                },
+                "host": "192.168.0.121",
+                "port": 9999,
+                "timeout": 10.0,
+                "axis": "Right",
+                "channel_num": 1,
+                "setup": False,
+                "debug": True,
+                "simulator": True,
+                "matrix_id": "5de524d0-3f95-406c-86dd-f83626ebc7cb",
+                "is_9320": True
+            },
+            "data": {},
+            "children": [
+                "PRCXI_Deck"
+            ]
+        })
+        A[1]["parent"] = "PRCXI"
+        json.dump({
+            "nodes": A,
+            "links": []
+        }, f, indent=4, ensure_ascii=False)
 
     handler = PRCXI9300Handler(
         deck=deck,
-        host="192.168.0.121",
+        host="192.168.1.201",
         port=9999,
         timeout=10.0,
         setup=True,
@@ -1735,6 +1824,12 @@ if __name__ == "__main__":
     asyncio.run(handler.run_protocol())
     time.sleep(5)
     os._exit(0)
+
+
+    prcxi_api = PRCXI9300Api(host="192.168.0.121", port=9999)
+    prcxi_api.list_matrices()
+    prcxi_api.get_all_materials()
+
     # 第一种情景：一个孔往多个孔加液
     # plate_2_liquids = handler.set_group("water", [plate2.children[0]], [300])
     # plate5_liquids = handler.set_group("master_mix", plate5.children[:23], [100]*23)
