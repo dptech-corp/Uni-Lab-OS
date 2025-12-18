@@ -176,7 +176,17 @@ class BioyondV1RPC(BaseRequest):
             return {}
 
         print(f"add material data: {response['data']}")
-        return response.get("data", {})
+
+        # 自动更新缓存
+        data = response.get("data", {})
+        if data:
+            name = data.get("name") or params.get("name")
+            mat_id = data.get("id")
+            if name and mat_id:
+                self.material_cache[name] = mat_id
+                print(f"已自动更新缓存: {name} -> {mat_id}")
+
+        return data
 
     def query_matial_type_id(self, data) -> list:
         """查找物料typeid"""
@@ -273,6 +283,14 @@ class BioyondV1RPC(BaseRequest):
 
         if not response or response['code'] != 1:
             return {}
+
+        # 自动更新缓存 - 移除被删除的物料
+        for name, mid in list(self.material_cache.items()):
+            if mid == material_id:
+                del self.material_cache[name]
+                print(f"已从缓存移除物料: {name}")
+                break
+
         return response.get("data", {})
 
     def material_outbound(self, material_id: str, location_name: str, quantity: int) -> dict:
