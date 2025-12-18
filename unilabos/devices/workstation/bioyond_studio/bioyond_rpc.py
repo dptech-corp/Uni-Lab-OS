@@ -47,8 +47,8 @@ class BioyondV1RPC(BaseRequest):
         super().__init__()
         print("开始初始化 BioyondV1RPC")
         self.config = config
-        self.api_key = config["api_key"]
-        self.host = config["api_host"]
+        self.api_key = config.get("api_key", "")
+        self.host = config.get("api_host", "") or config.get("base_url", "")
         self._logger = SimpleLogger()
         self.material_cache = {}
         self._load_material_cache()
@@ -61,7 +61,7 @@ class BioyondV1RPC(BaseRequest):
 
         :return: 当前时间的 ISO 8601 格式字符串
         """
-        current_time = datetime.now(timezone.utc).isoformat(
+        current_time = datetime.now().isoformat(
             timespec='milliseconds'
         )
         # 替换时区部分为 'Z'
@@ -192,23 +192,6 @@ class BioyondV1RPC(BaseRequest):
             return []
         return str(response.get("data", {}))
 
-    def material_type_list(self) -> list:
-        """查询物料类型列表
-
-        返回值:
-            list: 物料类型数组，失败返回空列表
-        """
-        response = self.post(
-            url=f'{self.host}/api/lims/storage/material-type-list',
-            params={
-                "apiKey": self.api_key,
-                "requestTime": self.get_current_time_iso8601(),
-                "data": {},
-            })
-        if not response or response['code'] != 1:
-            return []
-        return response.get("data", [])
-
     def material_inbound(self, material_id: str, location_id: str) -> dict:
         """
             描述：指定库位入库一个物料
@@ -229,34 +212,8 @@ class BioyondV1RPC(BaseRequest):
             })
 
         if not response or response['code'] != 1:
-            if response:
-                error_msg = response.get('message', '未知错误')
-                print(f"[ERROR] 物料入库失败: code={response.get('code')}, message={error_msg}")
-            else:
-                print(f"[ERROR] 物料入库失败: API 无响应")
             return {}
-        # 入库成功时，即使没有 data 字段，也返回成功标识
-        return response.get("data") or {"success": True}
-
-    def batch_inbound(self, inbound_items: List[Dict[str, Any]]) -> int:
-        """批量入库物料
-
-        参数:
-            inbound_items: 入库条目列表，每项包含 materialId/locationId/quantity 等
-
-        返回值:
-            int: 成功返回1，失败返回0
-        """
-        response = self.post(
-            url=f'{self.host}/api/lims/storage/batch-inbound',
-            params={
-                "apiKey": self.api_key,
-                "requestTime": self.get_current_time_iso8601(),
-                "data": inbound_items,
-            })
-        if not response or response['code'] != 1:
-            return 0
-        return response.get("code", 0)
+        return response.get("data", {})
 
     def delete_material(self, material_id: str) -> dict:
         """
@@ -276,7 +233,7 @@ class BioyondV1RPC(BaseRequest):
         return response.get("data", {})
 
     def material_outbound(self, material_id: str, location_name: str, quantity: int) -> dict:
-        """指定库位出库物料（通过库位名称）"""
+        """指定库位出库物料"""
         location_id = LOCATION_MAPPING.get(location_name, location_name)
 
         params = {
@@ -294,97 +251,8 @@ class BioyondV1RPC(BaseRequest):
             })
 
         if not response or response['code'] != 1:
-            return None
-        return response
-
-    def material_outbound_by_id(self, material_id: str, location_id: str, quantity: int) -> dict:
-        """指定库位出库物料（直接使用location_id）
-
-        Args:
-            material_id: 物料ID
-            location_id: 库位ID（不是库位名称，是UUID）
-            quantity: 数量
-
-        Returns:
-            dict: API响应，失败返回None
-        """
-        params = {
-            "materialId": material_id,
-            "locationId": location_id,
-            "quantity": quantity
-        }
-
-        response = self.post(
-            url=f'{self.host}/api/lims/storage/outbound',
-            params={
-                "apiKey": self.api_key,
-                "requestTime": self.get_current_time_iso8601(),
-                "data": params
-            })
-
-        if not response or response['code'] != 1:
-            return None
-        return response
-
-    def batch_outbound(self, outbound_items: List[Dict[str, Any]]) -> int:
-        """批量出库物料
-
-        参数:
-            outbound_items: 出库条目列表，每项包含 materialId/locationId/quantity 等
-
-        返回值:
-            int: 成功返回1，失败返回0
-        """
-        response = self.post(
-            url=f'{self.host}/api/lims/storage/batch-outbound',
-            params={
-                "apiKey": self.api_key,
-                "requestTime": self.get_current_time_iso8601(),
-                "data": outbound_items,
-            })
-        if not response or response['code'] != 1:
-            return 0
-        return response.get("code", 0)
-
-    def material_info(self, material_id: str) -> dict:
-        """查询物料详情
-
-        参数:
-            material_id: 物料ID
-
-        返回值:
-            dict: 物料信息字典，失败返回空字典
-        """
-        response = self.post(
-            url=f'{self.host}/api/lims/storage/material-info',
-            params={
-                "apiKey": self.api_key,
-                "requestTime": self.get_current_time_iso8601(),
-                "data": material_id,
-            })
-        if not response or response['code'] != 1:
             return {}
-        return response.get("data", {})
-
-    def reset_location(self, location_id: str) -> int:
-        """复位库位
-
-        参数:
-            location_id: 库位ID
-
-        返回值:
-            int: 成功返回1，失败返回0
-        """
-        response = self.post(
-            url=f'{self.host}/api/lims/storage/reset-location',
-            params={
-                "apiKey": self.api_key,
-                "requestTime": self.get_current_time_iso8601(),
-                "data": location_id,
-            })
-        if not response or response['code'] != 1:
-            return 0
-        return response.get("code", 0)
+        return response
 
     # ==================== 工作流查询相关接口 ====================
 
@@ -425,66 +293,6 @@ class BioyondV1RPC(BaseRequest):
                 "data": workflow_id,
             })
 
-        if not response or response['code'] != 1:
-            return {}
-        return response.get("data", {})
-
-    def split_workflow_list(self, params: Dict[str, Any]) -> dict:
-        """查询可拆分工作流列表
-
-        参数:
-            params: 查询条件参数
-
-        返回值:
-            dict: 返回数据字典，失败返回空字典
-        """
-        response = self.post(
-            url=f'{self.host}/api/lims/workflow/split-workflow-list',
-            params={
-                "apiKey": self.api_key,
-                "requestTime": self.get_current_time_iso8601(),
-                "data": params,
-            })
-        if not response or response['code'] != 1:
-            return {}
-        return response.get("data", {})
-
-    def merge_workflow(self, data: Dict[str, Any]) -> dict:
-        """合并工作流（无参数版）
-
-        参数:
-            data: 合并请求体，包含待合并的子工作流信息
-
-        返回值:
-            dict: 合并结果，失败返回空字典
-        """
-        response = self.post(
-            url=f'{self.host}/api/lims/workflow/merge-workflow',
-            params={
-                "apiKey": self.api_key,
-                "requestTime": self.get_current_time_iso8601(),
-                "data": data,
-            })
-        if not response or response['code'] != 1:
-            return {}
-        return response.get("data", {})
-
-    def merge_workflow_with_parameters(self, data: Dict[str, Any]) -> dict:
-        """合并工作流（携带参数）
-
-        参数:
-            data: 合并请求体，包含 name、workflows 以及 stepParameters 等
-
-        返回值:
-            dict: 合并结果，失败返回空字典
-        """
-        response = self.post(
-            url=f'{self.host}/api/lims/workflow/merge-workflow-with-parameters',
-            params={
-                "apiKey": self.api_key,
-                "requestTime": self.get_current_time_iso8601(),
-                "data": data,
-            })
         if not response or response['code'] != 1:
             return {}
         return response.get("data", {})
@@ -651,15 +459,18 @@ class BioyondV1RPC(BaseRequest):
             return {}
         return response.get("data", {})
 
-    def order_report(self, order_id: str) -> dict:
-        """查询订单报告
-
-        参数:
-            order_id: 订单ID
-
-        返回值:
-            dict: 报告数据，失败返回空字典
+    def order_report(self, json_str: str) -> dict:
         """
+            描述：查询某个任务明细
+            json_str 格式为JSON字符串:
+            '{"order_id": "order123"}'
+        """
+        try:
+            data = json.loads(json_str)
+            order_id = data.get("order_id", "")
+        except json.JSONDecodeError:
+            return {}
+
         response = self.post(
             url=f'{self.host}/api/lims/order/order-report',
             params={
@@ -667,18 +478,16 @@ class BioyondV1RPC(BaseRequest):
                 "requestTime": self.get_current_time_iso8601(),
                 "data": order_id,
             })
+
         if not response or response['code'] != 1:
             return {}
         return response.get("data", {})
 
     def order_takeout(self, json_str: str) -> int:
-        """取出任务产物
-
-        参数:
-            json_str: JSON字符串，包含 order_id 与 preintake_id
-
-        返回值:
-            int: 成功返回1，失败返回0
+        """
+            描述：取出任务产物
+            json_str 格式为JSON字符串:
+            '{"order_id": "order123", "preintake_id": "preintake123"}'
         """
         try:
             data = json.loads(json_str)
@@ -701,15 +510,14 @@ class BioyondV1RPC(BaseRequest):
             return 0
         return response.get("code", 0)
 
-
     def sample_waste_removal(self, order_id: str) -> dict:
-        """样品/废料取出
+        """
+        样品/废料取出接口
 
         参数:
-            order_id: 订单ID
+        - order_id: 订单ID
 
-        返回值:
-            dict: 取出结果，失败返回空字典
+        返回: 取出结果
         """
         params = {"orderId": order_id}
 
@@ -731,13 +539,10 @@ class BioyondV1RPC(BaseRequest):
         return response.get("data", {})
 
     def cancel_order(self, json_str: str) -> bool:
-        """取消指定任务
-
-        参数:
-            json_str: JSON字符串，包含 order_id
-
-        返回值:
-            bool: 成功返回 True，失败返回 False
+        """
+            描述：取消指定任务
+            json_str 格式为JSON字符串:
+            '{"order_id": "order123"}'
         """
         try:
             data = json.loads(json_str)
@@ -756,126 +561,6 @@ class BioyondV1RPC(BaseRequest):
         if not response or response['code'] != 1:
             return False
         return True
-
-    def cancel_experiment(self, order_id: str) -> int:
-        """取消指定实验
-
-        参数:
-            order_id: 订单ID
-
-        返回值:
-            int: 成功返回1，失败返回0
-        """
-        response = self.post(
-            url=f'{self.host}/api/lims/order/cancel-experiment',
-            params={
-                "apiKey": self.api_key,
-                "requestTime": self.get_current_time_iso8601(),
-                "data": order_id,
-            })
-        if not response or response['code'] != 1:
-            return 0
-        return response.get("code", 0)
-
-    def batch_cancel_experiment(self, order_ids: List[str]) -> int:
-        """批量取消实验
-
-        参数:
-            order_ids: 订单ID列表
-
-        返回值:
-            int: 成功返回1，失败返回0
-        """
-        response = self.post(
-            url=f'{self.host}/api/lims/order/batch-cancel-experiment',
-            params={
-                "apiKey": self.api_key,
-                "requestTime": self.get_current_time_iso8601(),
-                "data": order_ids,
-            })
-        if not response or response['code'] != 1:
-            return 0
-        return response.get("code", 0)
-
-    def gantts_by_order_id(self, order_id: str) -> dict:
-        """查询订单甘特图数据
-
-        参数:
-            order_id: 订单ID
-
-        返回值:
-            dict: 甘特数据，失败返回空字典
-        """
-        response = self.post(
-            url=f'{self.host}/api/lims/order/gantts-by-order-id',
-            params={
-                "apiKey": self.api_key,
-                "requestTime": self.get_current_time_iso8601(),
-                "data": order_id,
-            })
-        if not response or response['code'] != 1:
-            return {}
-        return response.get("data", {})
-
-    def simulation_gantt_by_order_id(self, order_id: str) -> dict:
-        """查询订单模拟甘特图数据
-
-        参数:
-            order_id: 订单ID
-
-        返回值:
-            dict: 模拟甘特数据，失败返回空字典
-        """
-        response = self.post(
-            url=f'{self.host}/api/lims/order/simulation-gantt-by-order-id',
-            params={
-                "apiKey": self.api_key,
-                "requestTime": self.get_current_time_iso8601(),
-                "data": order_id,
-            })
-        if not response or response['code'] != 1:
-            return {}
-        return response.get("data", {})
-
-    def reset_order_status(self, order_id: str) -> int:
-        """复位订单状态
-
-        参数:
-            order_id: 订单ID
-
-        返回值:
-            int: 成功返回1，失败返回0
-        """
-        response = self.post(
-            url=f'{self.host}/api/lims/order/reset-order-status',
-            params={
-                "apiKey": self.api_key,
-                "requestTime": self.get_current_time_iso8601(),
-                "data": order_id,
-            })
-        if not response or response['code'] != 1:
-            return 0
-        return response.get("code", 0)
-
-    def gantt_with_simulation_by_order_id(self, order_id: str) -> dict:
-        """查询订单甘特与模拟联合数据
-
-        参数:
-            order_id: 订单ID
-
-        返回值:
-            dict: 联合数据，失败返回空字典
-        """
-        response = self.post(
-            url=f'{self.host}/api/lims/order/gantt-with-simulation-by-order-id',
-            params={
-                "apiKey": self.api_key,
-                "requestTime": self.get_current_time_iso8601(),
-                "data": order_id,
-            })
-        if not response or response['code'] != 1:
-            return {}
-        return response.get("data", {})
 
     # ==================== 设备管理相关接口 ====================
 
@@ -908,13 +593,9 @@ class BioyondV1RPC(BaseRequest):
         return response.get("data", [])
 
     def device_operation(self, json_str: str) -> int:
-        """设备操作
-
-        参数:
-            json_str: JSON字符串，包含 device_no/operationType/operationParams
-
-        返回值:
-            int: 成功返回1，失败返回0
+        """
+            描述：操作设备
+            json_str 格式为JSON字符串
         """
         try:
             data = json.loads(json_str)
@@ -927,7 +608,7 @@ class BioyondV1RPC(BaseRequest):
             return 0
 
         response = self.post(
-            url=f'{self.host}/api/lims/device/execute-operation',
+            url=f'{self.host}/api/lims/device/device-operation',
             params={
                 "apiKey": self.api_key,
                 "requestTime": self.get_current_time_iso8601(),
@@ -938,30 +619,9 @@ class BioyondV1RPC(BaseRequest):
             return 0
         return response.get("code", 0)
 
-    def reset_devices(self) -> int:
-        """复位设备集合
-
-        返回值:
-            int: 成功返回1，失败返回0
-        """
-        response = self.post(
-            url=f'{self.host}/api/lims/device/reset-devices',
-            params={
-                "apiKey": self.api_key,
-                "requestTime": self.get_current_time_iso8601(),
-            })
-        if not response or response['code'] != 1:
-            return 0
-        return response.get("code", 0)
-
     # ==================== 调度器相关接口 ====================
 
     def scheduler_status(self) -> dict:
-        """查询调度器状态
-
-        返回值:
-            dict: 包含 schedulerStatus/hasTask/creationTime 等
-        """
         response = self.post(
             url=f'{self.host}/api/lims/scheduler/scheduler-status',
             params={
@@ -974,7 +634,7 @@ class BioyondV1RPC(BaseRequest):
         return response.get("data", {})
 
     def scheduler_start(self) -> int:
-        """启动调度器"""
+        """描述：启动调度器"""
         response = self.post(
             url=f'{self.host}/api/lims/scheduler/start',
             params={
@@ -987,22 +647,9 @@ class BioyondV1RPC(BaseRequest):
         return response.get("code", 0)
 
     def scheduler_pause(self) -> int:
-        """暂停调度器"""
+        """描述：暂停调度器"""
         response = self.post(
-            url=f'{self.host}/api/lims/scheduler/pause',
-            params={
-                "apiKey": self.api_key,
-                "requestTime": self.get_current_time_iso8601(),
-            })
-
-        if not response or response['code'] != 1:
-            return 0
-        return response.get("code", 0)
-
-    def scheduler_smart_pause(self) -> int:
-        """智能暂停调度器"""
-        response = self.post(
-            url=f'{self.host}/api/lims/scheduler/smart-pause',
+            url=f'{self.host}/api/lims/scheduler/scheduler-pause',
             params={
                 "apiKey": self.api_key,
                 "requestTime": self.get_current_time_iso8601(),
@@ -1013,9 +660,8 @@ class BioyondV1RPC(BaseRequest):
         return response.get("code", 0)
 
     def scheduler_continue(self) -> int:
-        """继续调度器"""
         response = self.post(
-            url=f'{self.host}/api/lims/scheduler/continue',
+            url=f'{self.host}/api/lims/scheduler/scheduler-continue',
             params={
                 "apiKey": self.api_key,
                 "requestTime": self.get_current_time_iso8601(),
@@ -1026,9 +672,9 @@ class BioyondV1RPC(BaseRequest):
         return response.get("code", 0)
 
     def scheduler_stop(self) -> int:
-        """停止调度器"""
+        """描述：停止调度器"""
         response = self.post(
-            url=f'{self.host}/api/lims/scheduler/stop',
+            url=f'{self.host}/api/lims/scheduler/scheduler-stop',
             params={
                 "apiKey": self.api_key,
                 "requestTime": self.get_current_time_iso8601(),
@@ -1039,34 +685,14 @@ class BioyondV1RPC(BaseRequest):
         return response.get("code", 0)
 
     def scheduler_reset(self) -> int:
-        """复位调度器"""
+        """描述：重置调度器"""
         response = self.post(
-            url=f'{self.host}/api/lims/scheduler/reset',
+            url=f'{self.host}/api/lims/scheduler/scheduler-reset',
             params={
                 "apiKey": self.api_key,
                 "requestTime": self.get_current_time_iso8601(),
             })
 
-        if not response or response['code'] != 1:
-            return 0
-        return response.get("code", 0)
-
-    def scheduler_reply_error_handling(self, data: Dict[str, Any]) -> int:
-        """调度错误处理回复
-
-        参数:
-            data: 错误处理参数
-
-        返回值:
-            int: 成功返回1，失败返回0
-        """
-        response = self.post(
-            url=f'{self.host}/api/lims/scheduler/reply-error-handling',
-            params={
-                "apiKey": self.api_key,
-                "requestTime": self.get_current_time_iso8601(),
-                "data": data,
-            })
         if not response or response['code'] != 1:
             return 0
         return response.get("code", 0)
@@ -1077,10 +703,10 @@ class BioyondV1RPC(BaseRequest):
         """预加载材料列表到缓存中"""
         try:
             print("正在加载材料列表缓存...")
-
+            
             # 加载所有类型的材料：耗材(0)、样品(1)、试剂(2)
-            material_types = [0, 1, 2]
-
+            material_types = [1, 2]
+            
             for type_mode in material_types:
                 print(f"正在加载类型 {type_mode} 的材料...")
                 stock_query = f'{{"typeMode": {type_mode}, "includeDetail": true}}'
@@ -1097,7 +723,7 @@ class BioyondV1RPC(BaseRequest):
                     material_id = material.get("id")
                     if material_name and material_id:
                         self.material_cache[material_name] = material_id
-
+                    
                     # 处理样品板等容器中的detail材料
                     detail_materials = material.get("detail", [])
                     for detail_material in detail_materials:
@@ -1134,23 +760,3 @@ class BioyondV1RPC(BaseRequest):
     def get_available_materials(self):
         """获取所有可用的材料名称列表"""
         return list(self.material_cache.keys())
-
-    def get_scheduler_state(self) -> Optional[MachineState]:
-        """将调度状态字符串映射为枚举值
-
-        返回值:
-            Optional[MachineState]: 映射后的枚举，失败返回 None
-        """
-        data = self.scheduler_status()
-        if not isinstance(data, dict):
-            return None
-        status = data.get("schedulerStatus")
-        mapping = {
-            "Init": MachineState.INITIAL,
-            "Stop": MachineState.STOPPED,
-            "Running": MachineState.RUNNING,
-            "Pause": MachineState.PAUSED,
-            "ErrorPause": MachineState.ERROR_PAUSED,
-            "ErrorStop": MachineState.ERROR_STOPPED,
-        }
-        return mapping.get(status)

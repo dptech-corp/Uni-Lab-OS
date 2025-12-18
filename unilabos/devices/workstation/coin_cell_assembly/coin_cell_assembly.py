@@ -1,44 +1,133 @@
 import csv
+import inspect
 import json
 import os
 import threading
 import time
+import types
 from datetime import datetime
 from typing import Any, Dict, Optional
-from pylabrobot.resources import Resource as PLRResource
+from functools import wraps
+from pylabrobot.resources import Deck, Resource as PLRResource
 from unilabos_msgs.msg import Resource
 from unilabos.device_comms.modbus_plc.client import ModbusTcpClient
-from unilabos.devices.workstation.coin_cell_assembly.button_battery_station import MaterialHole, MaterialPlate
 from unilabos.devices.workstation.workstation_base import WorkstationBase
 from unilabos.device_comms.modbus_plc.client import TCPClient, ModbusNode, PLCWorkflow, ModbusWorkflow, WorkflowAction, BaseClient
 from unilabos.device_comms.modbus_plc.modbus import DeviceType, Base as ModbusNodeBase, DataType, WorderOrder
-from unilabos.devices.workstation.coin_cell_assembly.button_battery_station import *
+from unilabos.devices.workstation.coin_cell_assembly.YB_YH_materials import *
 from unilabos.ros.nodes.base_device_node import ROS2DeviceNode, BaseROS2DeviceNode
 from unilabos.ros.nodes.presets.workstation import ROS2WorkstationNode
+from unilabos.devices.workstation.coin_cell_assembly.YB_YH_materials import CoincellDeck
+from unilabos.resources.graphio import convert_resources_to_type
+from unilabos.utils.log import logger
+
+
+def _ensure_modbus_slave_kw_alias(modbus_client):
+    if modbus_client is None:
+        return
+
+    method_names = [
+        "read_coils",
+        "write_coils",
+        "write_coil",
+        "read_discrete_inputs",
+        "read_holding_registers",
+        "write_register",
+        "write_registers",
+    ]
+
+    def _wrap(func):
+        signature = inspect.signature(func)
+        has_var_kwargs = any(param.kind == param.VAR_KEYWORD for param in signature.parameters.values())
+        accepts_unit = has_var_kwargs or "unit" in signature.parameters
+        accepts_slave = has_var_kwargs or "slave" in signature.parameters
+
+        @wraps(func)
+        def _wrapped(self, *args, **kwargs):
+            if "slave" in kwargs and not accepts_slave:
+                slave_value = kwargs.pop("slave")
+                if accepts_unit and "unit" not in kwargs:
+                    kwargs["unit"] = slave_value
+            if "unit" in kwargs and not accepts_unit:
+                unit_value = kwargs.pop("unit")
+                if accepts_slave and "slave" not in kwargs:
+                    kwargs["slave"] = unit_value
+            return func(self, *args, **kwargs)
+
+        _wrapped._has_slave_alias = True
+        return _wrapped
+
+    for name in method_names:
+        if not hasattr(modbus_client, name):
+            continue
+        bound_method = getattr(modbus_client, name)
+        func = getattr(bound_method, "__func__", None)
+        if func is None:
+            continue
+        if getattr(func, "_has_slave_alias", False):
+            continue
+        wrapped = _wrap(func)
+        setattr(modbus_client, name, types.MethodType(wrapped, modbus_client))
+
+
+def _coerce_deck_input(deck: Any) -> Optional[Deck]:
+    if deck is None:
+        return None
+
+    if isinstance(deck, Deck):
+        return deck
+
+    if isinstance(deck, PLRResource):
+        return deck if isinstance(deck, Deck) else None
+
+    candidates = None
+    if isinstance(deck, dict):
+        if "nodes" in deck and isinstance(deck["nodes"], list):
+            candidates = deck["nodes"]
+        else:
+            candidates = [deck]
+    elif isinstance(deck, list):
+        candidates = deck
+
+    if candidates is None:
+        return None
+
+    try:
+        converted = convert_resources_to_type(resources_list=candidates, resource_type=Deck)
+        if isinstance(converted, Deck):
+            return converted
+        if isinstance(converted, list):
+            for item in converted:
+                if isinstance(item, Deck):
+                    return item
+    except Exception as exc:
+        logger.warning(f"deck 转换 Deck 失败: {exc}")
+    return None
+
 
 #构建物料系统
 
 class CoinCellAssemblyWorkstation(WorkstationBase):
-    def __init__(
-        self,
-        deck: CoincellDeck,
-        address: str = "192.168.1.20",
+    def __init__(self, 
+        config: dict = None, 
+        deck=None, 
+        address: str = "172.16.28.102",
         port: str = "502",
-        debug_mode: bool = True,
+        debug_mode: bool = False,
         *args,
-        **kwargs,
-    ):
-        super().__init__(
-            #桌子
-            deck=deck,
-            *args,
-            **kwargs,
-        )
+        **kwargs):
+
+        if deck is None and config:
+            deck = config.get('deck')
+        if deck is None:
+            logger.info("没有传入依华deck，检查启动json文件")
+        super().__init__(deck=deck, *args, **kwargs,)
         self.debug_mode = debug_mode
-        self.deck = deck
+ 
         """ 连接初始化 """
         modbus_client = TCPClient(addr=address, port=port)
-        print("modbus_client", modbus_client)
+        logger.debug(f"创建 Modbus 客户端: {modbus_client}")
+        _ensure_modbus_slave_kw_alias(modbus_client.client)
         if not debug_mode:
             modbus_client.client.connect()
             count = 100
@@ -49,33 +138,47 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
                 time.sleep(2)
             if not modbus_client.client.is_socket_open():
                 raise ValueError('modbus tcp connection failed')
+            self.nodes = BaseClient.load_csv(os.path.join(os.path.dirname(__file__), 'coin_cell_assembly_1105.csv'))
+            self.client = modbus_client.register_node_list(self.nodes)
         else:
             print("测试模式，跳过连接")
-
+            self.nodes, self.client = None, None
         """ 工站的配置 """
-        self.nodes = BaseClient.load_csv(os.path.join(os.path.dirname(__file__), 'coin_cell_assembly_a.csv'))
-        self.client  = modbus_client.register_node_list(self.nodes)
+
         self.success = False
         self.allow_data_read = False  #允许读取函数运行标志位
         self.csv_export_thread = None
         self.csv_export_running = False
         self.csv_export_file = None
-        #创建一个物料台面，包含两个极片板
-        #self.deck = create_a_coin_cell_deck()
-        
-        #self._ros_node.update_resource(self.deck)
-        
-        #ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
-        #    "resources": [self.deck]
-        #})
+        self.coin_num_N = 0  #已组装电池数量
 
-    
     def post_init(self, ros_node: ROS2WorkstationNode):
         self._ros_node = ros_node
         #self.deck = create_a_coin_cell_deck()
         ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
             "resources": [self.deck]
         })
+
+    def sync_transfer_resources(self) -> Dict[str, Any]:
+        """
+        供跨工站转运完成后调用，强制将当前台面资源同步到云端/前端。
+        """
+        if not hasattr(self, "_ros_node") or self._ros_node is None:
+            return {"status": "failed", "error": "ros_node_not_ready"}
+        if self.deck is None:
+            return {"status": "failed", "error": "deck_not_initialized"}
+        try:
+            future = ROS2DeviceNode.run_async_func(
+                self._ros_node.update_resource,
+                True,
+                resources=[self.deck],
+            )
+            if future:
+                future.result()
+            return {"status": "success"}
+        except Exception as exc:
+            logger.error(f"同步转运资源失败: {exc}", exc_info=True)
+            return {"status": "failed", "error": str(exc)}
 
     # 批量操作在这里写
     async def change_hole_sheet_to_2(self, hole: MaterialHole):
@@ -491,11 +594,11 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         try:
             # 尝试不同的字节序读取
             code_little, read_err = self.client.use_node('REG_DATA_COIN_CELL_CODE').read(10, word_order=WorderOrder.LITTLE)
-            print(code_little)
+            # logger.debug(f"读取电池二维码原始数据: {code_little}")
             clean_code = code_little[-8:][::-1]
             return clean_code
         except Exception as e:
-            print(f"读取电池二维码失败: {e}")
+            logger.error(f"读取电池二维码失败: {e}")
             return "N/A"
 
 
@@ -504,11 +607,11 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         try:
             # 尝试不同的字节序读取
             code_little, read_err = self.client.use_node('REG_DATA_ELECTROLYTE_CODE').read(10, word_order=WorderOrder.LITTLE)
-            print(code_little)
+            # logger.debug(f"读取电解液二维码原始数据: {code_little}")
             clean_code = code_little[-8:][::-1]
             return clean_code
         except Exception as e:
-            print(f"读取电解液二维码失败: {e}")
+            logger.error(f"读取电解液二维码失败: {e}")
             return "N/A"
 
     # ===================== 环境监控区 ======================
@@ -606,7 +709,8 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
             print("waiting for start_cmd")
             time.sleep(1)      
 
-    def func_pack_send_bottle_num(self, bottle_num: int):
+    def func_pack_send_bottle_num(self, bottle_num):
+        bottle_num = int(bottle_num)
         #发送电解液平台数
         print("启动")
         while (self._unilab_rece_electrolyte_bottle_num()) == False:
@@ -654,15 +758,24 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
     #    self.success = True
     #    return self.success
 
-    def func_pack_send_msg_cmd(self, elec_use_num) -> bool:
+    def func_pack_send_msg_cmd(self, elec_use_num, elec_vol, assembly_type, assembly_pressure) -> bool:
         """UNILAB写参数"""    
         while (self.request_rec_msg_status) == False: 
             print("wait for request_rec_msg_status to True")
             time.sleep(1)
         self.success = False
         #self._unilab_send_msg_electrolyte_num(elec_num)
-        time.sleep(1)
+        #设置平行样数目
         self._unilab_send_msg_electrolyte_use_num(elec_use_num)
+        time.sleep(1)
+        #发送电解液加注量
+        self._unilab_send_msg_electrolyte_vol(elec_vol)
+        time.sleep(1)
+        #发送电解液组装类型
+        self._unilab_send_msg_assembly_type(assembly_type)
+        time.sleep(1)
+        #发送电池压制力
+        self._unilab_send_msg_assembly_pressure(assembly_pressure)
         time.sleep(1)
         self._unilab_send_msg_succ_cmd(True)
         time.sleep(1)
@@ -688,15 +801,32 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         data_coin_num = self.data_coin_num
         data_electrolyte_code = self.data_electrolyte_code
         data_coin_cell_code = self.data_coin_cell_code
-        print("data_open_circuit_voltage", data_open_circuit_voltage)
-        print("data_pole_weight", data_pole_weight)
-        print("data_assembly_time", data_assembly_time)
-        print("data_assembly_pressure", data_assembly_pressure)
-        print("data_electrolyte_volume", data_electrolyte_volume)
-        print("data_coin_num", data_coin_num)
-        print("data_electrolyte_code", data_electrolyte_code)
-        print("data_coin_cell_code", data_coin_cell_code)
+        logger.debug(f"data_open_circuit_voltage: {data_open_circuit_voltage}")
+        logger.debug(f"data_pole_weight: {data_pole_weight}")
+        logger.debug(f"data_assembly_time: {data_assembly_time}")
+        logger.debug(f"data_assembly_pressure: {data_assembly_pressure}")
+        logger.debug(f"data_electrolyte_volume: {data_electrolyte_volume}")
+        logger.debug(f"data_coin_num: {data_coin_num}")
+        logger.debug(f"data_electrolyte_code: {data_electrolyte_code}")
+        logger.debug(f"data_coin_cell_code: {data_coin_cell_code}")
         #接收完信息后，读取完毕标志位置True
+        liaopan3 = self.deck.get_resource("成品弹夹")        
+        #把物料解绑后放到另一盘上
+        battery = ElectrodeSheet(name=f"battery_{self.coin_num_N}", size_x=14, size_y=14, size_z=2)
+        battery._unilabos_state = {
+                            "electrolyte_name": data_coin_cell_code,
+                            "data_electrolyte_code": data_electrolyte_code,
+                            "open_circuit_voltage": data_open_circuit_voltage,
+                            "assembly_pressure": data_assembly_pressure,
+                            "electrolyte_volume": data_electrolyte_volume
+                            }
+        liaopan3.children[self.coin_num_N].assign_child_resource(battery, location=None)
+        #print(jipian2.parent)
+        ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
+            "resources": [self.deck]
+        })
+
+
         self._unilab_rec_msg_succ_cmd(True)
         time.sleep(1)
         #等待允许读取标志位置False
@@ -754,11 +884,25 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         self.success = True
         return self.success
 
+    def qiming_coin_cell_code(self, fujipian_panshu:int, fujipian_juzhendianwei:int=0, gemopanshu:int=0, gemo_juzhendianwei:int=0, lvbodian:bool=True, battery_pressure_mode:bool=True, battery_pressure:int=4000, battery_clean_ignore:bool=False) -> bool:
+        self.success = False
+        self.client.use_node('REG_MSG_NE_PLATE_NUM').write(fujipian_panshu)
+        self.client.use_node('REG_MSG_NE_PLATE_MATRIX').write(fujipian_juzhendianwei)
+        self.client.use_node('REG_MSG_SEPARATOR_PLATE_NUM').write(gemopanshu)
+        self.client.use_node('REG_MSG_SEPARATOR_PLATE_MATRIX').write(gemo_juzhendianwei)
+        self.client.use_node('COIL_ALUMINUM_FOIL').write(not lvbodian)
+        self.client.use_node('REG_MSG_PRESS_MODE').write(not battery_pressure_mode)
+        # self.client.use_node('REG_MSG_ASSEMBLY_PRESSURE').write(battery_pressure)
+        self.client.use_node('REG_MSG_BATTERY_CLEAN_IGNORE').write(battery_clean_ignore)
+        self.success = True
+        
+        return self.success
 
-
-    def func_allpack_cmd(self, elec_num, elec_use_num, file_path: str="D:\\coin_cell_data") -> bool:
+    def func_allpack_cmd(self, elec_num, elec_use_num, elec_vol:int=50, assembly_type:int=7, assembly_pressure:int=4200, file_path: str="/Users/sml/work") -> bool:
+        elec_num, elec_use_num, elec_vol, assembly_type, assembly_pressure = int(elec_num), int(elec_use_num), int(elec_vol), int(assembly_type), int(assembly_pressure)
         summary_csv_file = os.path.join(file_path, "duandian.csv")
         # 如果断点文件存在，先读取之前的进度
+        
         if os.path.exists(summary_csv_file):
             read_status_flag = True
             with open(summary_csv_file, 'r', newline='', encoding='utf-8') as csvfile:
@@ -784,54 +928,38 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
             elec_num_N = 0
             elec_use_num_N = 0
             coin_num_N = 0
-
-        print(f"剩余电解液瓶数: {elec_num}, 已组装电池数: {elec_use_num}")
-
+        for i in range(20):
+            print(f"剩余电解液瓶数: {elec_num}, 已组装电池数: {elec_use_num}")
+            print(f"剩余电解液瓶数: {type(elec_num)}, 已组装电池数: {type(elec_use_num)}")
+            print(f"剩余电解液瓶数: {type(int(elec_num))}, 已组装电池数: {type(int(elec_use_num))}")
         
         #如果是第一次运行，则进行初始化、切换自动、启动, 如果是断点重启则跳过。
         if read_status_flag == False:
+            pass
             #初始化
-            self.func_pack_device_init()
+            #self.func_pack_device_init()
             #切换自动
-            self.func_pack_device_auto()
+            #self.func_pack_device_auto()
             #启动，小车收回
-            self.func_pack_device_start()
+            #self.func_pack_device_start()
             #发送电解液瓶数量，启动搬运,多搬运没事
-            self.func_pack_send_bottle_num(elec_num)
+            #self.func_pack_send_bottle_num(elec_num)
         last_i = elec_num_N
         last_j = elec_use_num_N
         for i in range(last_i, elec_num):
             print(f"开始第{last_i+i+1}瓶电解液的组装")
             #第一个循环从上次断点继续，后续循环从0开始
             j_start = last_j if i == last_i else 0
-            self.func_pack_send_msg_cmd(elec_use_num-j_start)
+            self.func_pack_send_msg_cmd(elec_use_num-j_start, elec_vol, assembly_type, assembly_pressure)
 
             for j in range(j_start, elec_use_num):
                 print(f"开始第{last_i+i+1}瓶电解液的第{j+j_start+1}个电池组装")
                 #读取电池组装数据并存入csv
                 self.func_pack_get_msg_cmd(file_path)
                 time.sleep(1)
-
-                #这里定义物料系统
                 # TODO:读完再将电池数加一还是进入循环就将电池数加一需要考虑
-                liaopan1 = self.deck.get_resource("liaopan1")
-                liaopan4 = self.deck.get_resource("liaopan4")
-                jipian1 = liaopan1.children[coin_num_N].children[0]
-                jipian4 = liaopan4.children[coin_num_N].children[0]
-                #print(jipian1)
-                #从料盘上去物料解绑后放到另一盘上
-                jipian1.parent.unassign_child_resource(jipian1)
-                jipian4.parent.unassign_child_resource(jipian4)
-                
-                #print(jipian2.parent)
-                battery = Battery(name = f"battery_{coin_num_N}")
-                battery.assign_child_resource(jipian1, location=None)
-                battery.assign_child_resource(jipian4, location=None)
-                
-                zidanjia6 = self.deck.get_resource("zi_dan_jia6")
 
-                zidanjia6.children[0].assign_child_resource(battery, location=None)
-               
+
 
                 # 生成断点文件
                 # 生成包含elec_num_N、coin_num_N、timestamp的CSV文件
@@ -842,6 +970,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
                     writer.writerow([elec_num, elec_use_num, elec_num_N, elec_use_num_N, coin_num_N, timestamp])
                     csvfile.flush()
                 coin_num_N += 1
+                self.coin_num_N = coin_num_N
                 elec_use_num_N += 1
             elec_num_N += 1
             elec_use_num_N = 0
@@ -876,38 +1005,54 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         #self.success = True
         #return self.success
     
+    def run_packaging_workflow(self, workflow_config: Dict[str, Any]) -> "CoinCellAssemblyWorkstation":
+        config = workflow_config or {}
+
+        qiming_params = config.get("qiming") or {}
+        if qiming_params:
+            self.qiming_coin_cell_code(**qiming_params)
+
+        if config.get("init", True):
+            self.func_pack_device_init()
+        if config.get("auto", True):
+            self.func_pack_device_auto()
+        if config.get("start", True):
+            self.func_pack_device_start()
+
+        packaging_config = config.get("packaging") or {}
+        bottle_num = packaging_config.get("bottle_num")
+        if bottle_num is not None:
+            self.func_pack_send_bottle_num(bottle_num)
+
+        allpack_params = packaging_config.get("command") or {}
+        if allpack_params:
+            self.func_allpack_cmd(**allpack_params)
+
+        return self
+    
     def fun_wuliao_test(self) -> bool: 
         #找到data_init中构建的2个物料盘
-        #liaopan1 = self.deck.get_resource("liaopan1")
-        #liaopan4 = self.deck.get_resource("liaopan4")
-        #for coin_num_N in range(16):
-        #    liaopan1 = self.deck.get_resource("liaopan1")
-        #    liaopan4 = self.deck.get_resource("liaopan4")
-        #    jipian1 = liaopan1.children[coin_num_N].children[0]
-        #    jipian4 = liaopan4.children[coin_num_N].children[0]
-        #    #print(jipian1)
-        #    #从料盘上去物料解绑后放到另一盘上
-        #    jipian1.parent.unassign_child_resource(jipian1)
-        #    jipian4.parent.unassign_child_resource(jipian4)
-        #    
-        #    #print(jipian2.parent)
-        #    battery = Battery(name = f"battery_{coin_num_N}")
-        #    battery.assign_child_resource(jipian1, location=None)
-        #    battery.assign_child_resource(jipian4, location=None)
-        #    
-        #    zidanjia6 = self.deck.get_resource("zi_dan_jia6")
-        #    zidanjia6.children[0].assign_child_resource(battery, location=None)
-        #    ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
-        #        "resources": [self.deck]
-        #    })
-        #    time.sleep(2)
-        for i in range(20):
-            print(f"输出{i}")
-            time.sleep(2)
-
+        liaopan3 = self.deck.get_resource("\u7535\u6c60\u6599\u76d8")
+        for i in range(16):            
+            battery = ElectrodeSheet(name=f"battery_{i}", size_x=16, size_y=16, size_z=2)
+            battery._unilabos_state = {
+                                "diameter": 20.0,
+                                "height": 20.0,
+                                "assembly_pressure": i,
+                                "electrolyte_volume": 20.0,
+                                "electrolyte_name": f"DP{i}"
+                                }
+            liaopan3.children[i].assign_child_resource(battery, location=None)
             
+            ROS2DeviceNode.run_async_func(self._ros_node.update_resource, True, **{
+                "resources": [self.deck]
+            })
+            # for i in range(40):
+            #     print(f"fun_wuliao_test 运行结束{i}")
+            #     time.sleep(1)
+            # time.sleep(40)
     # 数据读取与输出
-    def func_read_data_and_output(self, file_path: str="D:\\coin_cell_data"):
+    def func_read_data_and_output(self, file_path: str="/Users/sml/work"):
         # 检查CSV导出是否正在运行，已运行则跳出，防止同时启动两个while循环
         if self.csv_export_running:
             return False, "读取已在运行中"
@@ -1012,7 +1157,7 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         #    else:
         #        print("子弹夹洞位0没有极片")
         #  
-        #    #把电解液从瓶中取到电池夹子中
+        #    # TODO:#把电解液从瓶中取到电池夹子中
         #    battery_site = deck.get_resource("battery_press_1")
         #    clip_magazine_battery = deck.get_resource("clip_magazine_battery")
         #    if battery_site.has_battery():
@@ -1098,45 +1243,95 @@ class CoinCellAssemblyWorkstation(WorkstationBase):
         """移液枪头库存 (数量, INT16)"""
         inventory, read_err = self.client.register_node_list(self.nodes).use_node('REG_DATA_TIPS_INVENTORY').read(1)
         return inventory
-        
+         
     '''
+
+    def run_coin_cell_assembly_workflow(
+        self,
+        workflow_config: Optional[Dict[str, Any]] = None,
+    ) -> Dict[str, Any]:
+        config: Dict[str, Any]
+        if workflow_config is None:
+            config = {}
+        elif isinstance(workflow_config, list):
+            config = {"materials": workflow_config}
+        else:
+            config = workflow_config
+        qiming_defaults = {
+            "fujipian_panshu": 1,
+            "fujipian_juzhendianwei": 0,
+            "gemopanshu": 1,
+            "gemo_juzhendianwei": 0,
+            "lvbodian": True,
+            "battery_pressure_mode": True,
+            "battery_pressure": 4200,
+            "battery_clean_ignore": False,
+        }
+        qiming_params = {**qiming_defaults, **(config.get("qiming") or {})}
+        qiming_success = self.qiming_coin_cell_code(**qiming_params)
+
+        step_results: Dict[str, Any] = {}
+        try:
+            self.func_pack_device_init()
+            step_results["init"] = True
+        except Exception as exc:
+            step_results["init"] = f"error: {exc}"
+
+        try:
+            self.func_pack_device_auto()
+            step_results["auto"] = True
+        except Exception as exc:
+            step_results["auto"] = f"error: {exc}"
+
+        try:
+            self.func_pack_device_start()
+            step_results["start"] = True
+        except Exception as exc:
+            step_results["start"] = f"error: {exc}"
+
+        packaging_cfg = config.get("packaging") or {}
+        bottle_num = packaging_cfg.get("bottle_num", 1)
+        try:
+            self.func_pack_send_bottle_num(bottle_num)
+            step_results["send_bottle_num"] = True
+        except Exception as exc:
+            step_results["send_bottle_num"] = f"error: {exc}"
+
+        command_defaults = {
+            "elec_num": 1,
+            "elec_use_num": 1,
+            "elec_vol": 50,
+            "assembly_type": 7,
+            "assembly_pressure": 4200,
+            "file_path": "/Users/sml/work",
+        }
+        command_params = {**command_defaults, **(packaging_cfg.get("command") or {})}
+        packaging_result = self.func_allpack_cmd(**command_params)
+
+        finished_result = self.func_pack_send_finished_cmd()
+        stop_result = self.func_pack_device_stop()
+
+        return {
+            "qiming": {
+                "params": qiming_params,
+                "success": qiming_success,
+            },
+            "workflow_steps": step_results,
+            "packaging": {
+                "bottle_num": bottle_num,
+                "command": command_params,
+                "result": packaging_result,
+            },
+            "finish": {
+                "send_finished": finished_result,
+                "stop": stop_result,
+            },
+        }
 
 
 if __name__ == "__main__":
-    from pylabrobot.resources import Resource
-    Coin_Cell = CoinCellAssemblyWorkstation(Resource("1", 1, 1, 1), debug_mode=True)
-    #Coin_Cell.func_pack_device_init()  
-    #Coin_Cell.func_pack_device_auto()
-    #Coin_Cell.func_pack_device_start()
-    #Coin_Cell.func_pack_send_bottle_num(2)
-    #Coin_Cell.func_pack_send_msg_cmd(2)
-    #Coin_Cell.func_pack_get_msg_cmd()
-    #Coin_Cell.func_pack_get_msg_cmd()
-    #Coin_Cell.func_pack_send_finished_cmd()
-#
-    #Coin_Cell.func_allpack_cmd(3, 2)
-    #print(Coin_Cell.data_stack_vision_code)
-    #print("success")
-    #创建一个物料台面
-
-    #deck = create_a_coin_cell_deck()
-
-    ##在台面上找到料盘和极片
-    #liaopan1 = deck.get_resource("liaopan1")
-    #liaopan2 = deck.get_resource("liaopan2")
-    #jipian1 = liaopan1.children[1].children[0]
-#
-    ##print(jipian1)
-    ##把物料解绑后放到另一盘上
-    #jipian1.parent.unassign_child_resource(jipian1)
-    #liaopan2.children[1].assign_child_resource(jipian1, location=None)
-    ##print(jipian2.parent)
-    from unilabos.resources.graphio import resource_ulab_to_plr, convert_resources_to_type
-
-    with open("./button_battery_decks_unilab.json", "r", encoding="utf-8") as f:
-        bioyond_resources_unilab = json.load(f)
-    print(f"成功读取 JSON 文件，包含 {len(bioyond_resources_unilab)} 个资源")
-    ulab_resources = convert_resources_to_type(bioyond_resources_unilab, List[PLRResource])
-    print(f"转换结果类型: {type(ulab_resources)}")
-    print(ulab_resources)
-
+    deck = CoincellDeck(setup=True, name="coin_cell_deck")
+    w = CoinCellAssemblyWorkstation(deck=deck, address="172.16.28.102", port="502", debug_mode=False)
+    w.run_coin_cell_assembly_workflow()
+        
+       

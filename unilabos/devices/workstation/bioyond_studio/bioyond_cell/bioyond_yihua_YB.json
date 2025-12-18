@@ -1,8 +1,23 @@
 {
   "nodes": [
     {
+      "id": "bioyond_cell_workstation",
+      "name": "配液分液工站",
+      "children": [
+      ],
+      "parent": null,
+      "type": "device",
+      "class": "bioyond_cell",
+      "config": {
+          "protocol_type": [],
+          "station_resource": {}
+
+      },
+      "data": {}
+  },
+    {
       "id": "BatteryStation",
-      "name": "扣电工作站",
+      "name": "扣电组装工作站",
       "children": [
           "coin_cell_deck"
       ],
@@ -98,7 +113,7 @@
         "z": 0
       },
       "config": {
-        "type": "ClipMagazine_four",
+        "type": "MagazineHolder_4",
         "size_x": 80,
         "size_y": 80,
         "size_z": 10,
@@ -139,7 +154,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -234,7 +249,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -329,7 +344,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -424,7 +439,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -522,7 +537,7 @@
         "z": 0
       },
       "config": {
-        "type": "ClipMagazine_four",
+        "type": "MagazineHolder_4",
         "size_x": 80,
         "size_y": 80,
         "size_z": 10,
@@ -563,7 +578,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -658,7 +673,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -753,7 +768,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -848,7 +863,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -948,7 +963,7 @@
         "z": 0
       },
       "config": {
-        "type": "ClipMagazine",
+        "type": "MagazineHolder_6",
         "size_x": 80,
         "size_y": 80,
         "size_z": 10,
@@ -991,7 +1006,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -1086,7 +1101,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -1181,7 +1196,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -1276,7 +1291,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -1371,7 +1386,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -1466,7 +1481,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -1566,7 +1581,7 @@
         "z": 0
       },
       "config": {
-        "type": "ClipMagazine",
+        "type": "MagazineHolder_6",
         "size_x": 80,
         "size_y": 80,
         "size_z": 10,
@@ -1609,7 +1624,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -1704,7 +1719,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -1799,7 +1814,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -1894,7 +1909,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -1989,7 +2004,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -2084,7 +2099,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -2184,7 +2199,7 @@
         "z": 0
       },
       "config": {
-        "type": "ClipMagazine",
+        "type": "MagazineHolder_6",
         "size_x": 80,
         "size_y": 80,
         "size_z": 10,
@@ -2227,7 +2242,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -2322,7 +2337,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -2417,7 +2432,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -2512,7 +2527,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -2607,7 +2622,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -2702,7 +2717,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -2802,7 +2817,7 @@
         "z": 0
       },
       "config": {
-        "type": "ClipMagazine",
+        "type": "MagazineHolder_6",
         "size_x": 80,
         "size_y": 80,
         "size_z": 10,
@@ -2845,7 +2860,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -2940,7 +2955,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -3035,7 +3050,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -3130,7 +3145,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -3225,7 +3240,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -3320,7 +3335,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -3420,7 +3435,7 @@
         "z": 0
       },
       "config": {
-        "type": "ClipMagazine",
+        "type": "MagazineHolder_6",
         "size_x": 80,
         "size_y": 80,
         "size_z": 10,
@@ -3463,7 +3478,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -3558,7 +3573,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -3653,7 +3668,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -3748,7 +3763,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -3843,7 +3858,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -3938,7 +3953,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -4038,7 +4053,7 @@
         "z": 0
       },
       "config": {
-        "type": "ClipMagazine",
+        "type": "MagazineHolder_6",
         "size_x": 80,
         "size_y": 80,
         "size_z": 10,
@@ -4081,7 +4096,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -4176,7 +4191,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -4271,7 +4286,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -4366,7 +4381,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -4461,7 +4476,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,
@@ -4556,7 +4571,7 @@
         "z": 10
       },
       "config": {
-        "type": "ClipMagazineHole",
+        "type": "Magazine",
         "size_x": 14.0,
         "size_y": 14.0,
         "size_z": 10.0,

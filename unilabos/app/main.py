@@ -367,10 +367,37 @@ def main():
         graph, resource_tree_set, resource_links = read_node_link_json(request_startup_json)
     else:
         if not os.path.isfile(file_path):
+            # 尝试从 main.py 向上两级目录查找
             temp_file_path = os.path.abspath(str(os.path.join(__file__, "..", "..", file_path)))
             if os.path.isfile(temp_file_path):
                 print_status(f"使用相对路径{temp_file_path}", "info")
                 file_path = temp_file_path
+            else:
+                # 尝试在 working_dir 中查找
+                working_dir_file_path = os.path.join(working_dir, file_path)
+                if os.path.isfile(working_dir_file_path):
+                    print_status(f"在工作目录中找到文件: {working_dir_file_path}", "info")
+                    file_path = working_dir_file_path
+                else:
+                    # 尝试使用文件名在 working_dir 中查找
+                    file_name = os.path.basename(file_path)
+                    working_dir_file_path = os.path.join(working_dir, file_name)
+                    if os.path.isfile(working_dir_file_path):
+                        print_status(f"在工作目录中找到文件: {working_dir_file_path}", "info")
+                        file_path = working_dir_file_path
+        # 最终检查文件是否存在
+        if not os.path.isfile(file_path):
+            print_status(
+                f"无法找到设备加载文件: {file_path}\n"
+                f"已尝试在以下位置查找:\n"
+                f"  1. 原始路径: {args_dict.get('graph', BasicConfig.startup_json_path)}\n"
+                f"  2. 相对路径: {os.path.abspath(str(os.path.join(__file__, '..', '..', args_dict.get('graph', BasicConfig.startup_json_path) or '')))}\n"
+                f"  3. 工作目录: {os.path.join(working_dir, args_dict.get('graph', BasicConfig.startup_json_path) or '')}\n"
+                f"  4. 工作目录(仅文件名): {os.path.join(working_dir, os.path.basename(args_dict.get('graph', BasicConfig.startup_json_path) or ''))}\n"
+                f"请使用 -g 参数指定正确的文件路径，或在工作目录 {working_dir} 中放置文件",
+                "error"
+            )
+            os._exit(1)
         if file_path.endswith(".json"):
             graph, resource_tree_set, resource_links = read_node_link_json(file_path)
         else:
