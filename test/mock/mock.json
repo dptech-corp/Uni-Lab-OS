@@ -1,0 +1,24 @@
+{
+  "nodes": [
+    {
+      "id": "virtual_printer_device",
+      "name": "虚拟打印设备",
+      "children": [],
+      "parent": "",
+      "type": "device",
+      "class": "virtual_printer",
+      "position": {
+        "x": 600,
+        "y": 450,
+        "z": 0
+      },
+      "config": {
+        "host_id": "demo-host",
+        "port": "VIRTUAL",
+        "prefix": "[VIRTUAL-PRINTER]",
+        "pretty": true
+      }
+    }
+  ],
+  "links": []
+}

@@ -1,0 +1,21 @@
+{
+    "nodes": [
+        {
+            "id": "xyz_and_pipette",
+            "name": "laiyu_liquid xyz and pipette",
+            "children": [],
+            "parent": "",
+            "type": "device",
+            "class": "xyz_pipette_device",
+            "position": {
+                "x": 450,
+                "y": 450,
+                "z": 0
+            },
+            "config": {
+                "port": "/dev/ttyUSB0"
+            }
+        }
+    ],
+    "links": []
+}
