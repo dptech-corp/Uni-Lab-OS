@@ -963,6 +963,7 @@ class NewareBatteryTestSystem:
             'SIGR_LI_STEP': gen_mod.xml_SiGr_Li_Step,
             'SIGR_LI': gen_mod.xml_SiGr_Li_Step,
             '811_SIGR': gen_mod.xml_811_SiGr,
+            '811_CU_AGING': gen_mod.xml_811_Cu_aging,
         }
         if key not in fmap:
             raise ValueError(f"未定义电池体系映射: {key}")
@@ -1011,7 +1012,7 @@ class NewareBatteryTestSystem:
             
             # 验证必需列
             required = [
-                'Battery_Code', 'Pole_Weight', '集流体质量', '活性物质含量', 
+                'Battery_Code', 'Electrolyte_Code', 'Pole_Weight', '集流体质量', '活性物质含量', 
                 '克容量mah/g', '电池体系', '设备号', '排号', '通道号'
             ]
             missing = [c for c in required if c not in df.columns]
@@ -1041,7 +1042,7 @@ class NewareBatteryTestSystem:
             
             for idx, row in df.iterrows():
                 try:
-                    coin_id = str(row['Battery_Code'])
+                    coin_id = f"{row['Battery_Code']}-{row['Electrolyte_Code']}"
                     
                     # 计算活性物质质量和容量
                     act_mass, cap_mAh = self._compute_values(row)
@@ -1322,15 +1323,23 @@ class NewareBatteryTestSystem:
                             f"[{i}/{total_count}] 上传: {file_path} -> {oss_object_name}"
                         )
                     
-                    # upload_file_to_oss 成功时返回 URL
-                    result = upload_file_to_oss(file_path, oss_object_name)
-                    if result:
-                        uploaded_count += 1
-                        # 记录成功上传的文件信息
-                        uploaded_files.append({
-                            "filename": basename,
-                            "url": result if isinstance(result, str) else f"https://uni-lab-test.oss-cn-zhangjiakou.aliyuncs.com/{oss_object_name}"
-                        })
+                        # upload_file_to_oss 成功时返回 URL
+                        result = upload_file_to_oss(file_path, oss_object_name)
+                        if result:
+                            uploaded_count += 1
+                            # 解析文件名获取 Battery_Code 和 Electrolyte_Code
+                            name_without_ext = os.path.splitext(basename)[0]
+                            parts = name_without_ext.split('-', 1)
+                            battery_code = parts[0]
+                            electrolyte_code = parts[1] if len(parts) > 1 else ""
+                            
+                            # 记录成功上传的文件信息
+                            uploaded_files.append({
+                                "filename": basename,
+                                "url": result if isinstance(result, str) else f"https://uni-lab-test.oss-cn-zhangjiakou.aliyuncs.com/{oss_object_name}",
+                                "Battery_Code": battery_code,
+                                "Electrolyte_Code": electrolyte_code
+                            })
                         if self._ros_node:
                             self._ros_node.lab_logger().info(
                                 f"[{i}/{total_count}] 上传成功: {result if isinstance(result, str) else oss_object_name}"

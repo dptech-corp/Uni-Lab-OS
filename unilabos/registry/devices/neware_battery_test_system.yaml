@@ -317,7 +317,14 @@ neware_battery_test_system:
           backup_dir: null
           file_pattern: '*'
           oss_prefix: null
-        handles: {}
+        handles:
+          output:
+          - data_key: uploaded_files
+            data_source: executor
+            data_type: array
+            handler_key: uploaded_files
+            io_type: sink
+            label: Uploaded Files (with standard flow info)
         result:
           failed_files: failed_files
           return_info: return_info
@@ -361,12 +368,36 @@ neware_battery_test_system:
                 uploaded_count:
                   description: 成功上传的文件数
                   type: integer
+                uploaded_files:
+                  description: 成功上传的文件详情列表
+                  items:
+                    properties:
+                      Battery_Code:
+                        description: 电池编码
+                        type: string
+                      Electrolyte_Code:
+                        description: 电解液编码
+                        type: string
+                      filename:
+                        description: 文件名
+                        type: string
+                      url:
+                        description: OSS下载链接
+                        type: string
+                    required:
+                    - filename
+                    - url
+                    - Battery_Code
+                    - Electrolyte_Code
+                    type: object
+                  type: array
               required:
               - return_info
               - success
               - uploaded_count
               - total_count
               - failed_files
+              - uploaded_files
               type: object
           required:
           - goal
