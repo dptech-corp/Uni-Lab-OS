@@ -358,7 +358,8 @@ class ChinweDevice(UniversalDriver):
 
     def __init__(self, port: str = "192.168.1.200:8899", baudrate: int = 9600,
                  pump_ids: List[int] = None, motor_ids: List[int] = None,
-                 sensor_id: int = 6, sensor_threshold: int = 300):
+                 sensor_id: int = 6, sensor_threshold: int = 300,
+                 timeout: float = 10.0):
         """
         初始化 ChinWe 工作站
         :param port: 串口号 或 IP:Port
@@ -366,10 +367,13 @@ class ChinweDevice(UniversalDriver):
         :param pump_ids: 注射泵 ID列表 (默认 [1, 2, 3])
         :param motor_ids: 步进电机 ID列表 (默认 [4, 5])
         :param sensor_id: 液位传感器 ID (默认 6)
+        :param sensor_threshold: 传感器液位判定阈值
+        :param timeout: 通信超时时间 (默认 10秒)
         """
         super().__init__()
         self.port = port
         self.baudrate = baudrate
+        self.timeout = timeout
         self.mgr = None
         self._is_connected = False
 
@@ -406,8 +410,8 @@ class ChinweDevice(UniversalDriver):
     def connect(self) -> bool:
         if self._is_connected: return True
         try:
-            self.logger.info(f"Connecting to {self.port}...")
-            self.mgr = TransportManager(self.port, baudrate=self.baudrate, logger=self.logger)
+            self.logger.info(f"Connecting to {self.port} (timeout={self.timeout})...")
+            self.mgr = TransportManager(self.port, baudrate=self.baudrate, timeout=self.timeout, logger=self.logger)
 
             # 初始化所有泵
             for pid in self.pump_ids:
@@ -609,6 +613,15 @@ class ChinweDevice(UniversalDriver):
             time.sleep(0.1)
         self.logger.warning("Wait sensor level timeout")
         return False
+
+    def wait_time(self, duration: int) -> bool:
+        """
+        等待指定时间 (秒)
+        :param duration: 秒
+        """
+        self.logger.info(f"Waiting for {duration} seconds...")
+        time.sleep(duration)
+        return True
 
     def execute_command_from_outer(self, command_dict: Dict[str, Any]) -> bool:
         """支持标准 JSON 指令调用"""

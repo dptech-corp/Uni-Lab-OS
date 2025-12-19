@@ -275,6 +275,23 @@ separator.chinwe:
               - target_state
               type: object
         type: UniLabJsonCommand
+      wait_time:
+        goal:
+          duration: 10
+        handles: {}
+        schema:
+          description: 等待指定时间
+          properties:
+            goal:
+              properties:
+                duration:
+                  default: 10
+                  description: 等待时间 (秒)
+                  type: integer
+              required:
+              - duration
+              type: object
+        type: UniLabJsonCommand
     module: unilabos.devices.separator.chinwe:ChinweDevice
     status_types:
       is_connected: bool
@@ -319,5 +336,9 @@ separator.chinwe:
       sensor_threshold:
         default: 300
         description: 传感器液位判定阈值
+        type: integer
+      timeout:
+        default: 10
+        description: 通信超时时间 (秒)
         type: integer
   version: 2.1.0
