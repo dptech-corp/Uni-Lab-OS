@@ -1,0 +1,98 @@
+      
+{
+  "nodes": [
+    {
+      "id": "bioyond_cell_workstation",
+      "name": "配液分液工站",
+      "parent": null,
+      "children": [
+        "YB_Bioyond_Deck"
+      ],
+      "type": "device",
+      "class": "bioyond_cell",
+      "config": {
+        "deck": {
+          "data": {
+            "_resource_child_name": "YB_Bioyond_Deck",
+            "_resource_type": "unilabos.resources.bioyond.decks:BIOYOND_YB_Deck"
+          }
+        },
+        "protocol_type": []
+      },
+      "data": {}
+    },
+    {
+      "id": "YB_Bioyond_Deck",
+      "name": "YB_Bioyond_Deck",
+      "children": [],
+      "parent": "bioyond_cell_workstation",
+      "type": "deck",
+      "class": "BIOYOND_YB_Deck",
+      "position": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "BIOYOND_YB_Deck",
+        "setup": true,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        }
+      },
+      "data": {}
+    },
+    {
+      "id": "BatteryStation",
+      "name": "扣电工作站",
+      "parent": null,
+      "children": [
+        "coin_cell_deck"
+      ],
+      "type": "device",
+      "class":"coincellassemblyworkstation_device",
+      "config": {
+        "deck": {
+          "data": {
+            "_resource_child_name": "YB_YH_Deck",
+            "_resource_type": "unilabos.devices.workstation.coin_cell_assembly.YB_YH_materials:CoincellDeck"
+          }
+        },
+        "protocol_type": []
+      },
+      "position": {
+        "size": {"height": 1450, "width": 1450, "depth": 2100},
+        "position": {
+          "x": -1500,
+          "y": 0,
+          "z": 0
+        }
+      }
+    },
+    {
+      "id": "YB_YH_Deck",
+      "name": "YB_YH_Deck",
+      "children": [],
+      "parent": "BatteryStation",
+      "type": "deck",
+      "class": "CoincellDeck",
+      "config": {
+        "type": "CoincellDeck",
+        "setup": true,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        }
+      },
+      "data": {}
+    }
+  ],
+  "links": []
+}
+
+    
