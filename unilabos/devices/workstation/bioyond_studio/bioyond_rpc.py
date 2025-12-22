@@ -180,8 +180,15 @@ class BioyondV1RPC(BaseRequest):
         # 自动更新缓存
         data = response.get("data", {})
         if data:
-            name = data.get("name") or params.get("name")
-            mat_id = data.get("id")
+            if isinstance(data, str):
+                # 如果返回的是字符串，通常是ID
+                mat_id = data
+                name = params.get("name")
+            else:
+                # 如果返回的是字典，尝试获取name和id
+                name = data.get("name") or params.get("name")
+                mat_id = data.get("id")
+
             if name and mat_id:
                 self.material_cache[name] = mat_id
                 print(f"已自动更新缓存: {name} -> {mat_id}")
