@@ -29,7 +29,7 @@ class Bottle(Well):
         size_x: float = 0.0,
         size_y: float = 0.0,
         size_z: float = 0.0,
-        barcode: Optional[str] = "",
+        barcode: Optional[str] = None,
         category: str = "container",
         model: Optional[str] = None,
         **kwargs,

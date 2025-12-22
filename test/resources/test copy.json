@@ -1,0 +1,99 @@
+ {
+        "typeId": "3a190c8b-3284-af78-d29f-9a69463ad047",
+        "code": "",
+        "barCode": "",
+        "name": "test",
+        "unit": "",
+        "parameters": "{}",
+        "quantity": "",
+        "details": [
+            {
+                "typeId": "3a190c8c-fe8f-bf48-0dc3-97afc7f508eb",
+                "code": "",
+                "name": "配液瓶(小)11",
+                "quantity": "1",
+                "x": 1,
+                "y": 1,
+                "z": 1,
+                "unit": "",
+                "parameters": "{}"
+            },
+            {
+                "typeId": "3a190c8c-fe8f-bf48-0dc3-97afc7f508eb",
+                "code": "",
+                "name": "配液瓶(小)21",
+                "quantity": "1",
+                "x": 2,
+                "y": 1,
+                "z": 1,
+                "unit": "",
+                "parameters": "{}"
+            },
+            {
+                "typeId": "3a190c8c-fe8f-bf48-0dc3-97afc7f508eb",
+                "code": "",
+                "name": "配液瓶(小)12",
+                "quantity": "1",
+                "x": 1,
+                "y": 2,
+                "z": 1,
+                "unit": "",
+                "parameters": "{}"
+            },
+            {
+                "typeId": "3a190c8c-fe8f-bf48-0dc3-97afc7f508eb",
+                "code": "",
+                "name": "配液瓶(小)22",
+                "quantity": "1",
+                "x": 2,
+                "y": 2,
+                "z": 1,
+                "unit": "",
+                "parameters": "{}"
+            },
+            {
+                "typeId": "3a190c8c-fe8f-bf48-0dc3-97afc7f508eb",
+                "code": "",
+                "name": "配液瓶(小)13",
+                "quantity": "1",
+                "x": 1,
+                "y": 3,
+                "z": 1,
+                "unit": "",
+                "parameters": "{}"
+            },
+            {
+                "typeId": "3a190c8c-fe8f-bf48-0dc3-97afc7f508eb",
+                "code": "",
+                "name": "配液瓶(小)23",
+                "quantity": "1",
+                "x": 2,
+                "y": 3,
+                "z": 1,
+                "unit": "",
+                "parameters": "{}"
+            },
+            {
+                "typeId": "3a190c8c-fe8f-bf48-0dc3-97afc7f508eb",
+                "code": "",
+                "name": "配液瓶(小)14",
+                "quantity": "1",
+                "x": 1,
+                "y": 4,
+                "z": 1,
+                "unit": "",
+                "parameters": "{}"
+            },
+            {
+                "typeId": "3a190c8c-fe8f-bf48-0dc3-97afc7f508eb",
+                "code": "",
+                "name": "配液瓶(小)24",
+                "quantity": "1",
+                "x": 2,
+                "y": 4,
+                "z": 1,
+                "unit": "",
+                "parameters": "{}"
+            }
+        ]
+    }
