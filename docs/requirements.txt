@@ -2,6 +2,7 @@
 sphinx>=7.0.0
 sphinx-rtd-theme>=2.0.0
 myst-parser>=2.0.0
+sphinxcontrib-mermaid
 
 # 用于支持Jupyter notebook文档
 myst-nb>=1.0.0

@@ -20,6 +20,7 @@ if unilabos_dir not in sys.path:
 from unilabos.utils.banner_print import print_status, print_unilab_banner
 from unilabos.config.config import load_config, BasicConfig, HTTPConfig
 
+
 def load_config_from_file(config_path):
     if config_path is None:
         config_path = os.environ.get("UNILABOS_BASICCONFIG_CONFIG_PATH", None)
@@ -41,7 +42,7 @@ def convert_argv_dashes_to_underscores(args: argparse.ArgumentParser):
     for i, arg in enumerate(sys.argv):
         for option_string in option_strings:
             if arg.startswith(option_string):
-                new_arg = arg[:2] + arg[2:len(option_string)].replace("-", "_") + arg[len(option_string):]
+                new_arg = arg[:2] + arg[2 : len(option_string)].replace("-", "_") + arg[len(option_string) :]
                 sys.argv[i] = new_arg
                 break
 
@@ -49,6 +50,8 @@ def convert_argv_dashes_to_underscores(args: argparse.ArgumentParser):
 def parse_args():
     """解析命令行参数"""
     parser = argparse.ArgumentParser(description="Start Uni-Lab Edge server.")
+    subparsers = parser.add_subparsers(title="Valid subcommands", dest="command")
+
     parser.add_argument("-g", "--graph", help="Physical setup graph file path.")
     parser.add_argument("-c", "--controllers", default=None, help="Controllers config file path.")
     parser.add_argument(
@@ -105,7 +108,7 @@ def parse_args():
     parser.add_argument(
         "--port",
         type=int,
-        default=8002,
+        default=None,
         help="Port for web service information page",
     )
     parser.add_argument(
@@ -153,21 +156,54 @@ def parse_args():
         default=False,
         help="Complete registry information",
     )
+    # workflow upload subcommand
+    workflow_parser = subparsers.add_parser(
+        "workflow_upload",
+        aliases=["wf"],
+        help="Upload workflow from xdl/json/python files",
+    )
+    workflow_parser.add_argument(
+        "-f",
+        "--workflow_file",
+        type=str,
+        required=True,
+        help="Path to the workflow file (JSON format)",
+    )
+    workflow_parser.add_argument(
+        "-n",
+        "--workflow_name",
+        type=str,
+        default=None,
+        help="Workflow name, if not provided will use the name from file or filename",
+    )
+    workflow_parser.add_argument(
+        "--tags",
+        type=str,
+        nargs="*",
+        default=[],
+        help="Tags for the workflow (space-separated)",
+    )
+    workflow_parser.add_argument(
+        "--published",
+        action="store_true",
+        default=False,
+        help="Whether to publish the workflow (default: False)",
+    )
     return parser
 
 
 def main():
     """主函数"""
     # 解析命令行参数
-    args = parse_args()
-    convert_argv_dashes_to_underscores(args)
-    args_dict = vars(args.parse_args())
+    parser = parse_args()
+    convert_argv_dashes_to_underscores(parser)
+    args = parser.parse_args()
+    args_dict = vars(args)
 
     # 环境检查 - 检查并自动安装必需的包 (可选)
     if not args_dict.get("skip_env_check", False):
         from unilabos.utils.environment_check import check_environment
 
-        print_status("正在进行环境依赖检查...", "info")
         if not check_environment(auto_install=True):
             print_status("环境检查失败，程序退出", "error")
             os._exit(1)
@@ -218,19 +254,20 @@ def main():
 
     if hasattr(BasicConfig, "log_level"):
         logger.info(f"Log level set to '{BasicConfig.log_level}' from config file.")
-        configure_logger(loglevel=BasicConfig.log_level)
+    configure_logger(loglevel=BasicConfig.log_level, working_dir=working_dir)
 
-    if args_dict["addr"] == "test":
-        print_status("使用测试环境地址", "info")
-        HTTPConfig.remote_addr = "https://uni-lab.test.bohrium.com/api/v1"
-    elif args_dict["addr"] == "uat":
-        print_status("使用uat环境地址", "info")
-        HTTPConfig.remote_addr = "https://uni-lab.uat.bohrium.com/api/v1"
-    elif args_dict["addr"] == "local":
-        print_status("使用本地环境地址", "info")
-        HTTPConfig.remote_addr = "http://127.0.0.1:48197/api/v1"
-    else:
-        HTTPConfig.remote_addr = args_dict.get("addr", "")
+    if args.addr != parser.get_default("addr"):
+        if args.addr == "test":
+            print_status("使用测试环境地址", "info")
+            HTTPConfig.remote_addr = "https://uni-lab.test.bohrium.com/api/v1"
+        elif args.addr == "uat":
+            print_status("使用uat环境地址", "info")
+            HTTPConfig.remote_addr = "https://uni-lab.uat.bohrium.com/api/v1"
+        elif args.addr == "local":
+            print_status("使用本地环境地址", "info")
+            HTTPConfig.remote_addr = "http://127.0.0.1:48197/api/v1"
+        else:
+            HTTPConfig.remote_addr = args.addr
 
     # 设置BasicConfig参数
     if args_dict.get("ak", ""):
@@ -239,9 +276,12 @@ def main():
     if args_dict.get("sk", ""):
         BasicConfig.sk = args_dict.get("sk", "")
         print_status("传入了sk参数，优先采用传入参数！", "info")
+    BasicConfig.working_dir = working_dir
+
+    workflow_upload = args_dict.get("command") in ("workflow_upload", "wf")
 
     # 使用远程资源启动
-    if args_dict["use_remote_resource"]:
+    if not workflow_upload and args_dict["use_remote_resource"]:
         print_status("使用远程资源启动", "info")
         from unilabos.app.web import http_client
 
@@ -252,7 +292,8 @@ def main():
         else:
             print_status("远程资源不存在，本地将进行首次上报！", "info")
 
-    BasicConfig.working_dir = working_dir
+    BasicConfig.port = args_dict["port"] if args_dict["port"] else BasicConfig.port
+    BasicConfig.disable_browser = args_dict["disable_browser"] or BasicConfig.disable_browser
     BasicConfig.is_host_mode = not args_dict.get("is_slave", False)
     BasicConfig.slave_no_host = args_dict.get("slave_no_host", False)
     BasicConfig.upload_registry = args_dict.get("upload_registry", False)
@@ -281,8 +322,30 @@ def main():
 
     # 注册表
     lab_registry = build_registry(
-        args_dict["registry_path"], args_dict.get("complete_registry", False), args_dict["upload_registry"]
+        args_dict["registry_path"], args_dict.get("complete_registry", False), BasicConfig.upload_registry
     )
+
+    if BasicConfig.upload_registry:
+        # 设备注册到服务端 - 需要 ak 和 sk
+        if BasicConfig.ak and BasicConfig.sk:
+            print_status("开始注册设备到服务端...", "info")
+            try:
+                register_devices_and_resources(lab_registry)
+                print_status("设备注册完成", "info")
+            except Exception as e:
+                print_status(f"设备注册失败: {e}", "error")
+        else:
+            print_status("未提供 ak 和 sk，跳过设备注册", "info")
+    else:
+        print_status("本次启动注册表不报送云端，如果您需要联网调试，请在启动命令增加--upload_registry", "warning")
+
+    # 处理 workflow_upload 子命令
+    if workflow_upload:
+        from unilabos.workflow.wf_utils import handle_workflow_upload_command
+
+        handle_workflow_upload_command(args_dict)
+        print_status("工作流上传完成，程序退出", "info")
+        os._exit(0)
 
     if not BasicConfig.ak or not BasicConfig.sk:
         print_status("后续运行必须拥有一个实验室，请前往 https://uni-lab.bohrium.com 注册实验室！", "warning")
@@ -291,7 +354,9 @@ def main():
     resource_tree_set: ResourceTreeSet
     resource_links: List[Dict[str, Any]]
     request_startup_json = http_client.request_startup_json()
-    if args_dict["graph"] is None:
+
+    file_path = args_dict.get("graph", BasicConfig.startup_json_path)
+    if file_path is None:
         if not request_startup_json:
             print_status(
                 "未指定设备加载文件路径，尝试从HTTP获取失败，请检查网络或者使用-g参数指定设备加载文件路径", "error"
@@ -301,7 +366,11 @@ def main():
             print_status("联网获取设备加载文件成功", "info")
         graph, resource_tree_set, resource_links = read_node_link_json(request_startup_json)
     else:
-        file_path = args_dict["graph"]
+        if not os.path.isfile(file_path):
+            temp_file_path = os.path.abspath(str(os.path.join(__file__, "..", "..", file_path)))
+            if os.path.isfile(temp_file_path):
+                print_status(f"使用相对路径{temp_file_path}", "info")
+                file_path = temp_file_path
         if file_path.endswith(".json"):
             graph, resource_tree_set, resource_links = read_node_link_json(file_path)
         else:
@@ -354,20 +423,6 @@ def main():
     args_dict["devices_config"] = resource_tree_set
     args_dict["graph"] = graph_res.physical_setup_graph
 
-    if BasicConfig.upload_registry:
-        # 设备注册到服务端 - 需要 ak 和 sk
-        if BasicConfig.ak and BasicConfig.sk:
-            print_status("开始注册设备到服务端...", "info")
-            try:
-                register_devices_and_resources(lab_registry)
-                print_status("设备注册完成", "info")
-            except Exception as e:
-                print_status(f"设备注册失败: {e}", "error")
-        else:
-            print_status("未提供 ak 和 sk，跳过设备注册", "info")
-    else:
-        print_status("本次启动注册表不报送云端，如果您需要联网调试，请在启动命令增加--upload_registry", "warning")
-
     if args_dict["controllers"] is not None:
         args_dict["controllers_config"] = yaml.safe_load(open(args_dict["controllers"], encoding="utf-8"))
     else:
@@ -382,6 +437,7 @@ def main():
         comm_client = get_communication_client()
         if "websocket" in args_dict["app_bridges"]:
             args_dict["bridges"].append(comm_client)
+
             def _exit(signum, frame):
                 comm_client.stop()
                 sys.exit(0)
@@ -413,26 +469,39 @@ def main():
             server_thread = threading.Thread(
                 target=start_server,
                 kwargs=dict(
-                    open_browser=not args_dict["disable_browser"],
-                    port=args_dict["port"],
+                    open_browser=not BasicConfig.disable_browser,
+                    port=BasicConfig.port,
                 ),
             )
             server_thread.start()
             asyncio.set_event_loop(asyncio.new_event_loop())
-            resource_visualization.start()
+            try:
+                resource_visualization.start()
+            except OSError as e:
+                if "AMENT_PREFIX_PATH" in str(e):
+                    print_status(f"ROS 2环境未正确设置，跳过3D可视化启动。错误详情: {e}", "warning")
+                    print_status(
+                        "建议解决方案：\n"
+                        "1. 激活Conda环境: conda activate unilab\n"
+                        "2. 或使用 --backend simple 参数\n"
+                        "3. 或使用 --visual disable 参数禁用可视化",
+                        "info",
+                    )
+                else:
+                    raise
             while True:
                 time.sleep(1)
         else:
             start_backend(**args_dict)
             start_server(
                 open_browser=not args_dict["disable_browser"],
-                port=args_dict["port"],
+                port=BasicConfig.port,
             )
     else:
         start_backend(**args_dict)
         start_server(
             open_browser=not args_dict["disable_browser"],
-            port=args_dict["port"],
+            port=BasicConfig.port,
         )
 
 
