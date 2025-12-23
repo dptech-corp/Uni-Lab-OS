@@ -452,18 +452,7 @@ class PRCXI9300Handler(LiquidHandlerAbstract):
         pickup_distance_from_top: float = 13.2 - 3.33,
         **backend_kwargs,
     ):
-        if self._simulator:
-            return await self._simulate_handler.move_plate(
-                plate,
-                to,
-                intermediate_locations,
-                pickup_offset,
-                destination_offset,
-                drop_direction,
-                pickup_direction,
-                pickup_distance_from_top,
-                **backend_kwargs,
-            )
+
         return await super().move_plate(
             plate,
             to,
@@ -473,6 +462,7 @@ class PRCXI9300Handler(LiquidHandlerAbstract):
             drop_direction,
             pickup_direction,
             pickup_distance_from_top,
+            target_plate_number = to,
             **backend_kwargs,
         )
 
@@ -529,7 +519,7 @@ class PRCXI9300Backend(LiquidHandlerBackend):
         return step
 
 
-    async def pick_up_resource(self, pickup: ResourcePickup):
+    async def pick_up_resource(self, pickup: ResourcePickup, **backend_kwargs):
         
         resource=pickup.resource
         offset=pickup.offset
@@ -544,12 +534,19 @@ class PRCXI9300Backend(LiquidHandlerBackend):
         self.steps_todo_list.append(step)
         return step
 
-    async def drop_resource(self, drop: ResourceDrop):
-        resource=drop.resource
+    async def drop_resource(self, drop: ResourceDrop, **backend_kwargs):
 
-        plate_number = int(resource.name.replace("T", ""))
+
+        plate_number = None
+        target_plate_number = backend_kwargs.get("target_plate_number", None)
+        if target_plate_number is not None:
+            plate_number = int(target_plate_number.name.replace("T", ""))
+
+
         is_whole_plate = True
         balance_height = drop.pickup_distance_from_top
+        if plate_number is None:
+            raise ValueError("target_plate_number is required when dropping a resource")
         step = self.api_client.clamp_jaw_drop(plate_number, is_whole_plate, balance_height)
         self.steps_todo_list.append(step)
         return step
