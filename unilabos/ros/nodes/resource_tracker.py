@@ -66,8 +66,8 @@ class ResourceDict(BaseModel):
     klass: str = Field(alias="class", description="Resource class name")
     pose: ResourceDictPosition = Field(description="Resource position", default_factory=ResourceDictPosition)
     config: Dict[str, Any] = Field(description="Resource configuration")
-    data: Dict[str, Any] = Field(description="Resource data")
-    extra: Dict[str, Any] = Field(description="Extra data")
+    data: Dict[str, Any] = Field(description="Resource data, eg: container liquid data")
+    extra: Dict[str, Any] = Field(description="Extra data, eg: slot index")
 
     @field_serializer("parent_uuid")
     def _serialize_parent(self, parent_uuid: Optional["ResourceDict"]):
