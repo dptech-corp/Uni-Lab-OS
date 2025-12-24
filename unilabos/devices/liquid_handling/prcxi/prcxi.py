@@ -5,8 +5,8 @@ import json
 import os
 import socket
 import time
-import uuid
-from typing import Any, List, Dict, Optional, OrderedDict, Tuple, TypedDict, Union, Sequence, Iterator, Literal
+from typing import Any, List, Dict, Optional, Tuple, TypedDict, Union, Sequence, Iterator, Literal
+from pylabrobot.liquid_handling.standard import GripDirection
 
 from pylabrobot.liquid_handling import (
     LiquidHandlerBackend,
@@ -28,9 +28,9 @@ from pylabrobot.liquid_handling.standard import (
     ResourceMove,
     ResourceDrop,
 )
-from pylabrobot.resources import Tip, Deck, Plate, Well, TipRack, Resource, Container, Coordinate, TipSpot, Trash, TubeRack, PlateAdapter
+from pylabrobot.resources import ResourceHolder, ResourceStack, Tip, Deck, Plate, Well, TipRack, Resource, Container, Coordinate, TipSpot, Trash
 
-from unilabos.devices.liquid_handling.liquid_handler_abstract import LiquidHandlerAbstract
+from unilabos.devices.liquid_handling.liquid_handler_abstract import LiquidHandlerAbstract, SimpleReturn
 from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode
 
 
@@ -375,16 +375,12 @@ class PRCXI9300Handler(LiquidHandlerAbstract):
         tablets_info = []
         count = 0
         for child in deck.children:
-            child_state = getattr(child, "_unilabos_state", {})
-            if "Material" in child_state:
-                count += 1
-                tablets_info.append(
-                    WorkTablets(
-                        Number=count, 
-                        Code=f"T{count}", 
-                        Material=child_state["Material"]
+            if child.children:
+                if "Material" in child.children[0]._unilabos_state:
+                    number = int(child.name.replace("T", ""))
+                    tablets_info.append(
+                        WorkTablets(Number=number, Code=f"T{number}", Material=child.children[0]._unilabos_state["Material"])
                     )
-                )
         if is_9320:
             print("当前设备是9320")
         # 始终初始化 step_mode 属性
@@ -403,7 +399,7 @@ class PRCXI9300Handler(LiquidHandlerAbstract):
         super().post_init(ros_node)
         self._unilabos_backend.post_init(ros_node)
 
-    def set_liquid(self, wells: list[Well], liquid_names: list[str], volumes: list[float]):
+    def set_liquid(self, wells: list[Well], liquid_names: list[str], volumes: list[float]) -> SimpleReturn:
         return super().set_liquid(wells, liquid_names, volumes)
 
     def set_group(self, group_name: str, wells: List[Well], volumes: List[float]):
@@ -660,6 +656,37 @@ class PRCXI9300Handler(LiquidHandlerAbstract):
     async def move_to(self, well: Well, dis_to_top: float = 0, channel: int = 0):
         return await super().move_to(well, dis_to_top, channel)
 
+    async def shaker_action(self, time: int, module_no: int, amplitude: int, is_wait: bool):
+        return await self._unilabos_backend.shaker_action(time, module_no, amplitude, is_wait)
+
+    async def heater_action(self, temperature: float, time: int):
+        return await self._unilabos_backend.heater_action(temperature, time)  
+    async def move_plate(
+        self,
+        plate: Plate,
+        to: Resource,
+        intermediate_locations: Optional[List[Coordinate]] = None,
+        pickup_offset: Coordinate = Coordinate.zero(),
+        destination_offset: Coordinate = Coordinate.zero(),
+        drop_direction: GripDirection = GripDirection.FRONT,
+        pickup_direction: GripDirection = GripDirection.FRONT,
+        pickup_distance_from_top: float = 13.2 - 3.33,
+        **backend_kwargs,
+    ):
+
+        return await super().move_plate(
+            plate,
+            to,
+            intermediate_locations,
+            pickup_offset,
+            destination_offset,
+            drop_direction,
+            pickup_direction,
+            pickup_distance_from_top,
+            target_plate_number = to,
+            **backend_kwargs,
+        )
+
 class PRCXI9300Backend(LiquidHandlerBackend):
     """PRCXI 9300 的后端实现，继承自 LiquidHandlerBackend。
 
@@ -700,6 +727,55 @@ class PRCXI9300Backend(LiquidHandlerBackend):
         self._num_channels = channel_num
         self._execute_setup = setup
         self.debug = debug
+        self.axis = "Left"
+
+    async def shaker_action(self, time: int, module_no: int, amplitude: int, is_wait: bool):
+        step = self.api_client.shaker_action(
+            time=time,
+            module_no=module_no,
+            amplitude=amplitude,
+            is_wait=is_wait,
+        )
+        self.steps_todo_list.append(step)
+        return step
+
+
+    async def pick_up_resource(self, pickup: ResourcePickup, **backend_kwargs):
+        
+        resource=pickup.resource
+        offset=pickup.offset
+        pickup_distance_from_top=pickup.pickup_distance_from_top
+        direction=pickup.direction
+
+        plate_number = int(resource.parent.name.replace("T", ""))
+        is_whole_plate = True
+        balance_height = 0
+        step = self.api_client.clamp_jaw_pick_up(plate_number, is_whole_plate, balance_height)
+        
+        self.steps_todo_list.append(step)
+        return step
+
+    async def drop_resource(self, drop: ResourceDrop, **backend_kwargs):
+
+
+        plate_number = None
+        target_plate_number = backend_kwargs.get("target_plate_number", None)
+        if target_plate_number is not None:
+            plate_number = int(target_plate_number.name.replace("T", ""))
+
+
+        is_whole_plate = True
+        balance_height = 0
+        if plate_number is None:
+            raise ValueError("target_plate_number is required when dropping a resource")
+        step = self.api_client.clamp_jaw_drop(plate_number, is_whole_plate, balance_height)
+        self.steps_todo_list.append(step)
+        return step
+
+
+    async def heater_action(self, temperature: float, time: int):
+        print(f"\n\nHeater action: temperature={temperature}, time={time}\n\n")
+        # return await self.api_client.heater_action(temperature, time)
 
     def post_init(self, ros_node: BaseROS2DeviceNode):
         self._ros_node = ros_node
@@ -731,7 +807,11 @@ class PRCXI9300Backend(LiquidHandlerBackend):
         print(f"PRCXI9300Backend created solution with ID: {solution_id}")
         self.api_client.load_solution(solution_id)
         print(json.dumps(self.steps_todo_list, indent=2))
-        return self.api_client.start()
+        if not self.api_client.start():
+            return False
+        if not self.api_client.wait_for_finish():
+            return False
+        return True
 
     @classmethod
     def check_channels(cls, use_channels: List[int]) -> List[int]:
@@ -753,7 +833,7 @@ class PRCXI9300Backend(LiquidHandlerBackend):
                 # 清除错误代码
                 self.api_client.clear_error_code()
                 print("PRCXI9300 error code cleared.")
-                
+                self.api_client.call("IAutomation", "Stop")
                 # 执行重置
                 print("Starting PRCXI9300 reset...")
                 self.api_client.call("IAutomation", "Reset")
@@ -777,12 +857,23 @@ class PRCXI9300Backend(LiquidHandlerBackend):
 
     async def pick_up_tips(self, ops: List[Pickup], use_channels: List[int] = None):
         """Pick up tips from the specified resource."""
-
+        # INSERT_YOUR_CODE
+        # Ensure use_channels is converted to a list of ints if it's an array
+        if hasattr(use_channels, 'tolist'):
+            _use_channels = use_channels.tolist()
+        else:
+            _use_channels = list(use_channels) if use_channels is not None else None
+        if _use_channels == [0]:
+            axis = "Left"
+        elif _use_channels == [1]:
+            axis = "Right"
+        else:
+            raise ValueError("Invalid use channels: " + str(_use_channels))
         plate_indexes = []
         for op in ops:
             plate = op.resource.parent
-            deck = plate.parent
-            plate_index = deck.children.index(plate)
+            deck = plate.parent.parent
+            plate_index = deck.children.index(plate.parent)
             # print(f"Plate index: {plate_index}, Plate name: {plate.name}")
             # print(f"Number of children in deck: {len(deck.children)}")
 
@@ -807,6 +898,7 @@ class PRCXI9300Backend(LiquidHandlerBackend):
             hole_row = tipspot_index % 8 + 1
 
         step = self.api_client.Load(
+            axis=axis,
             dosage=0,
             plate_no=PlateNo,
             is_whole_plate=False,
@@ -821,13 +913,23 @@ class PRCXI9300Backend(LiquidHandlerBackend):
 
     async def drop_tips(self, ops: List[Drop], use_channels: List[int] = None):
         """Pick up tips from the specified resource."""
-
+        if hasattr(use_channels, 'tolist'):
+            _use_channels = use_channels.tolist()
+        else:
+            _use_channels = list(use_channels) if use_channels is not None else None
+        if _use_channels == [0]:
+            axis = "Left"
+        elif _use_channels == [1]:
+            axis = "Right"
+        else:
+            raise ValueError("Invalid use channels: " + str(_use_channels))
         # 检查trash #
         if ops[0].resource.name == "trash":
 
-            PlateNo = ops[0].resource.parent.children.index(ops[0].resource) + 1
+            PlateNo = ops[0].resource.parent.parent.children.index(ops[0].resource.parent) + 1
 
             step = self.api_client.UnLoad(
+                axis=axis,
                 dosage=0,
                 plate_no=PlateNo,
                 is_whole_plate=False,
@@ -845,8 +947,8 @@ class PRCXI9300Backend(LiquidHandlerBackend):
         plate_indexes = []
         for op in ops:
             plate = op.resource.parent
-            deck = plate.parent
-            plate_index = deck.children.index(plate)
+            deck = plate.parent.parent
+            plate_index = deck.children.index(plate.parent)
             plate_indexes.append(plate_index)
         if len(set(plate_indexes)) != 1:
             raise ValueError(
@@ -870,6 +972,7 @@ class PRCXI9300Backend(LiquidHandlerBackend):
             hole_row = tipspot_index % 8 + 1
 
         step = self.api_client.UnLoad(
+            axis=axis,
             dosage=0,
             plate_no=PlateNo,
             is_whole_plate=False,
@@ -893,12 +996,12 @@ class PRCXI9300Backend(LiquidHandlerBackend):
         none_keys: List[str] = [],
     ):
         """Mix liquid in the specified resources."""
-
+        
         plate_indexes = []
         for op in targets:
-            deck = op.parent.parent
+            deck = op.parent.parent.parent
             plate = op.parent
-            plate_index = deck.children.index(plate)
+            plate_index = deck.children.index(plate.parent)
             plate_indexes.append(plate_index)
 
         if len(set(plate_indexes)) != 1:
@@ -936,12 +1039,21 @@ class PRCXI9300Backend(LiquidHandlerBackend):
 
     async def aspirate(self, ops: List[SingleChannelAspiration], use_channels: List[int] = None):
         """Aspirate liquid from the specified resources."""
-
+        if hasattr(use_channels, 'tolist'):
+            _use_channels = use_channels.tolist()
+        else:
+            _use_channels = list(use_channels) if use_channels is not None else None
+        if _use_channels == [0]:
+            axis = "Left"
+        elif _use_channels == [1]:
+            axis = "Right"
+        else:
+            raise ValueError("Invalid use channels: " + str(_use_channels))
         plate_indexes = []
         for op in ops:
             plate = op.resource.parent
-            deck = plate.parent
-            plate_index = deck.children.index(plate)
+            deck = plate.parent.parent
+            plate_index = deck.children.index(plate.parent)
             plate_indexes.append(plate_index)
 
         if len(set(plate_indexes)) != 1:
@@ -969,6 +1081,7 @@ class PRCXI9300Backend(LiquidHandlerBackend):
             hole_row = tipspot_index % 8 + 1
 
         step = self.api_client.Imbibing(
+            axis=axis,
             dosage=int(volumes[0]),
             plate_no=PlateNo,
             is_whole_plate=False,
@@ -983,12 +1096,21 @@ class PRCXI9300Backend(LiquidHandlerBackend):
 
     async def dispense(self, ops: List[SingleChannelDispense], use_channels: List[int] = None):
         """Dispense liquid into the specified resources."""
-
+        if hasattr(use_channels, 'tolist'):
+            _use_channels = use_channels.tolist()
+        else:
+            _use_channels = list(use_channels) if use_channels is not None else None
+        if _use_channels == [0]:
+            axis = "Left"
+        elif _use_channels == [1]:
+            axis = "Right"
+        else:
+            raise ValueError("Invalid use channels: " + str(_use_channels))
         plate_indexes = []
         for op in ops:
             plate = op.resource.parent
-            deck = plate.parent
-            plate_index = deck.children.index(plate)
+            deck = plate.parent.parent
+            plate_index = deck.children.index(plate.parent)
             plate_indexes.append(plate_index)
 
         if len(set(plate_indexes)) != 1:
@@ -1017,6 +1139,7 @@ class PRCXI9300Backend(LiquidHandlerBackend):
             hole_row = tipspot_index % 8 + 1
 
         step = self.api_client.Tapping(
+            axis=axis,
             dosage=int(volumes[0]),
             plate_no=PlateNo,
             is_whole_plate=False,
@@ -1041,14 +1164,8 @@ class PRCXI9300Backend(LiquidHandlerBackend):
     async def dispense96(self, dispense: Union[MultiHeadDispensePlate, MultiHeadDispenseContainer]):
         raise NotImplementedError("The Opentrons backend does not support the 96 head.")
 
-    async def pick_up_resource(self, pickup: ResourcePickup):
-        raise NotImplementedError("The Opentrons backend does not support the robotic arm.")
-
     async def move_picked_up_resource(self, move: ResourceMove):
-        raise NotImplementedError("The Opentrons backend does not support the robotic arm.")
-
-    async def drop_resource(self, drop: ResourceDrop):
-        raise NotImplementedError("The Opentrons backend does not support the robotic arm.")
+        pass
 
     def can_pick_up_tip(self, channel_idx: int, tip: Tip) -> bool:
         return True  # PRCXI9300Backend does not have tip compatibility issues
@@ -1139,6 +1256,28 @@ class PRCXI9300Api:
     def start(self) -> bool:
         return self.call("IAutomation", "Start")
 
+    def wait_for_finish(self) -> bool:
+        success = False
+        start = False
+        while not success:
+            status = self.step_state_list()
+            if len(status) == 1:
+                start = True
+            if status is None:
+                break
+            if len(status) == 0:
+                break
+            if status[-1]["State"] == 2 and start:
+                success = True
+            elif status[-1]["State"] > 2:
+                break
+            elif status[-1]["State"] == 0:
+                start = True
+            else:
+                time.sleep(1)
+        return success
+
+
     def call(self, service: str, method: str, params: Optional[list] = None) -> Any:
         payload = json.dumps(
             {"ServiceName": service, "MethodName": method, "Paramters": params or []}, separators=(",", ":")
@@ -1225,9 +1364,10 @@ class PRCXI9300Api:
         assist_fun4: str = "",
         assist_fun5: str = "",
         liquid_method: str = "NormalDispense",
+        axis: str = "Left",
     ) -> Dict[str, Any]:
         return {
-            "StepAxis": self.axis,
+            "StepAxis": axis,
             "Function": "Load",
             "DosageNum": dosage,
             "PlateNo": plate_no,
@@ -1263,9 +1403,10 @@ class PRCXI9300Api:
         assist_fun4: str = "",
         assist_fun5: str = "",
         liquid_method: str = "NormalDispense",
-    ) -> Dict[str, Any]:
+        axis: str = "Left",
+        ) -> Dict[str, Any]:
         return {
-            "StepAxis": self.axis,
+            "StepAxis": axis,
             "Function": "Imbibing",
             "DosageNum": dosage,
             "PlateNo": plate_no,
@@ -1301,9 +1442,10 @@ class PRCXI9300Api:
         assist_fun4: str = "",
         assist_fun5: str = "",
         liquid_method: str = "NormalDispense",
+        axis: str = "Left",
     ) -> Dict[str, Any]:
         return {
-            "StepAxis": self.axis,
+            "StepAxis": axis,
             "Function": "Tapping",
             "DosageNum": dosage,
             "PlateNo": plate_no,
@@ -1339,9 +1481,10 @@ class PRCXI9300Api:
         assist_fun4: str = "",
         assist_fun5: str = "",
         liquid_method: str = "NormalDispense",
-    ) -> Dict[str, Any]:
+        axis: str = "Left",
+        ) -> Dict[str, Any]:
         return {
-            "StepAxis": self.axis,
+            "StepAxis": axis,
             "Function": "Blending",
             "DosageNum": dosage,
             "PlateNo": plate_no,
@@ -1377,9 +1520,10 @@ class PRCXI9300Api:
         assist_fun4: str = "",
         assist_fun5: str = "",
         liquid_method: str = "NormalDispense",
+        axis: str = "Left",
     ) -> Dict[str, Any]:
         return {
-            "StepAxis": self.axis,
+            "StepAxis": axis,
             "Function": "UnLoad",
             "DosageNum": dosage,
             "PlateNo": plate_no,
@@ -1398,6 +1542,50 @@ class PRCXI9300Api:
             "LiquidDispensingMethod": liquid_method,
         }
 
+    def clamp_jaw_pick_up(self,
+        plate_no: int,
+        is_whole_plate: bool,
+        balance_height: int,
+
+    ) -> Dict[str, Any]:
+        return {
+            "StepAxis": "ClampingJaw",
+            "Function": "DefectiveLift",
+            "PlateNo": plate_no,
+            "IsWholePlate": is_whole_plate,
+            "HoleRow": 1,
+            "HoleCol": 1,
+            "BalanceHeight": balance_height,
+            "PlateOrHoleNum": f"T{plate_no}"
+        }
+
+    def clamp_jaw_drop(
+        self,
+        plate_no: int,
+        is_whole_plate: bool,
+        balance_height: int,
+
+    ) -> Dict[str, Any]:
+        return {
+            "StepAxis": "ClampingJaw",
+            "Function": "PutDown",
+            "PlateNo": plate_no,
+            "IsWholePlate": is_whole_plate,
+            "HoleRow": 1,
+            "HoleCol": 1,
+            "BalanceHeight": balance_height,
+            "PlateOrHoleNum": f"T{plate_no}"
+        }
+
+    def shaker_action(self, time: int, module_no: int, amplitude: int, is_wait: bool):
+        return {
+            "StepAxis": "Left",
+            "Function": "Shaking",
+            "AssistFun1": time,
+            "AssistFun2": module_no,
+            "AssistFun3": amplitude,
+            "AssistFun4": is_wait,
+        }
 
 class DefaultLayout:
 
