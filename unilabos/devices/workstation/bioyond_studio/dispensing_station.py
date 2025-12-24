@@ -1236,6 +1236,89 @@ class BioyondDispensingStation(BioyondWorkstation):
             'actualVolume': actual_volume
         }
 
+    def _simplify_report(self, report) -> Dict[str, Any]:
+        """简化实验报告，只保留关键信息，去除冗余的工作流参数"""
+        if not isinstance(report, dict):
+            return report
+
+        data = report.get('data', {})
+        if not isinstance(data, dict):
+            return report
+
+        # 提取关键信息
+        simplified = {
+            'name': data.get('name'),
+            'code': data.get('code'),
+            'requester': data.get('requester'),
+            'workflowName': data.get('workflowName'),
+            'workflowStep': data.get('workflowStep'),
+            'requestTime': data.get('requestTime'),
+            'startPreparationTime': data.get('startPreparationTime'),
+            'completeTime': data.get('completeTime'),
+            'useTime': data.get('useTime'),
+            'status': data.get('status'),
+            'statusName': data.get('statusName'),
+        }
+
+        # 提取物料信息（简化版）
+        pre_intakes = data.get('preIntakes', [])
+        if pre_intakes and isinstance(pre_intakes, list):
+            first_intake = pre_intakes[0]
+            sample_materials = first_intake.get('sampleMaterials', [])
+
+            # 简化物料信息
+            simplified_materials = []
+            for material in sample_materials:
+                if isinstance(material, dict):
+                    mat_info = {
+                        'materialName': material.get('materialName'),
+                        'materialTypeName': material.get('materialTypeName'),
+                        'materialCode': material.get('materialCode'),
+                        'materialLocation': material.get('materialLocation'),
+                    }
+
+                    # 解析parameters中的关键信息（如密度、加料历史等）
+                    params_str = material.get('parameters', '{}')
+                    try:
+                        params = json.loads(params_str) if isinstance(params_str, str) else params_str
+                        if isinstance(params, dict):
+                            # 只保留关键参数
+                            if 'density' in params:
+                                mat_info['density'] = params['density']
+                            if 'feedingHistory' in params:
+                                mat_info['feedingHistory'] = params['feedingHistory']
+                            if 'liquidVolume' in params:
+                                mat_info['liquidVolume'] = params['liquidVolume']
+                            if 'm_diamine_tot' in params:
+                                mat_info['m_diamine_tot'] = params['m_diamine_tot']
+                            if 'wt_diamine' in params:
+                                mat_info['wt_diamine'] = params['wt_diamine']
+                    except:
+                        pass
+
+                    simplified_materials.append(mat_info)
+
+            simplified['sampleMaterials'] = simplified_materials
+
+            # 提取extraProperties中的实际值
+            extra_props = first_intake.get('extraProperties', {})
+            if isinstance(extra_props, dict):
+                simplified_extra = {}
+                for key, value in extra_props.items():
+                    try:
+                        parsed_value = json.loads(value) if isinstance(value, str) else value
+                        simplified_extra[key] = parsed_value
+                    except:
+                        simplified_extra[key] = value
+                simplified['extraProperties'] = simplified_extra
+
+        return {
+            'data': simplified,
+            'code': report.get('code'),
+            'message': report.get('message'),
+            'timestamp': report.get('timestamp')
+        }
+
     def scheduler_start(self) -> dict:
         """启动调度器 - 启动Bioyond工作站的任务调度器，开始执行队列中的任务
 
@@ -1296,7 +1379,12 @@ class BioyondDispensingStation(BioyondWorkstation):
 
             # 验证batch_create_result参数
             if not batch_create_result or batch_create_result == "":
-                raise BioyondException("batch_create_result参数为空，请确保从batch_create节点正确连接handle")
+                raise BioyondException(
+                    "batch_create_result参数为空，请确保:\n"
+                    "1. batch_create节点与wait节点之间正确连接了handle\n"
+                    "2. batch_create节点成功执行并返回了结果\n"
+                    "3. 检查上游batch_create任务是否成功创建了订单"
+                )
 
             # 解析batch_create_result JSON对象
             try:
@@ -1325,7 +1413,17 @@ class BioyondDispensingStation(BioyondWorkstation):
 
             # 验证提取的数据
             if not order_codes:
-                raise BioyondException("batch_create_result中未找到order_codes字段或为空")
+                self.hardware_interface._logger.error(
+                    f"batch_create任务未生成任何订单。batch_create_result内容: {batch_create_result}"
+                )
+                raise BioyondException(
+                    "batch_create_result中未找到order_codes或为空。\n"
+                    "可能的原因:\n"
+                    "1. batch_create任务执行失败（检查任务是否报错）\n"
+                    "2. 物料配置问题（如'物料样品板分配失败'）\n"
+                    "3. Bioyond系统状态异常\n"
+                    f"请检查batch_create任务的执行结果"
+                )
             if not order_ids:
                 raise BioyondException("batch_create_result中未找到order_ids字段或为空")
 
@@ -1408,6 +1506,8 @@ class BioyondDispensingStation(BioyondWorkstation):
                                 self.hardware_interface._logger.info(
                                     f"成功获取任务 {order_code} 的实验报告"
                                 )
+                                # 简化报告，去除冗余信息
+                                report = self._simplify_report(report)
 
                             reports.append({
                                 "order_code": order_code,
