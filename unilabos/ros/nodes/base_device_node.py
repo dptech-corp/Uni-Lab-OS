@@ -1276,7 +1276,11 @@ class BaseROS2DeviceNode(Node, Generic[T]):
                         seen = set()
                         unique_resources = []
                         for rs in akv:  # todo: 这里目前只支持plr的类型
-                            res = self.resource_tracker.parent_resource(rs)  # 获取 resource 对象
+                            if isinstance(rs, list):
+                                for r in rs:
+                                    res = self.resource_tracker.parent_resource(r)  # 获取 resource 对象
+                            else:
+                                res = self.resource_tracker.parent_resource(r)
                             if id(res) not in seen:
                                 seen.add(id(res))
                                 unique_resources.append(res)

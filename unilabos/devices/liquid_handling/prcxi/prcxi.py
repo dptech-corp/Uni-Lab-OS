@@ -443,7 +443,7 @@ class PRCXI9300Handler(LiquidHandlerAbstract):
     async def move_plate(
         self,
         plate: Plate,
-        to: Union[ResourceStack, ResourceHolder, Resource, Coordinate],
+        to: Resource,
         intermediate_locations: Optional[List[Coordinate]] = None,
         pickup_offset: Coordinate = Coordinate.zero(),
         destination_offset: Coordinate = Coordinate.zero(),
@@ -544,7 +544,7 @@ class PRCXI9300Backend(LiquidHandlerBackend):
 
 
         is_whole_plate = True
-        balance_height = drop.pickup_distance_from_top
+        balance_height = 0
         if plate_number is None:
             raise ValueError("target_plate_number is required when dropping a resource")
         step = self.api_client.clamp_jaw_drop(plate_number, is_whole_plate, balance_height)
@@ -612,7 +612,7 @@ class PRCXI9300Backend(LiquidHandlerBackend):
                 # 清除错误代码
                 self.api_client.clear_error_code()
                 print("PRCXI9300 error code cleared.")
-                
+                self.api_client.call("IAutomation", "Stop")
                 # 执行重置
                 print("Starting PRCXI9300 reset...")
                 self.api_client.call("IAutomation", "Reset")
