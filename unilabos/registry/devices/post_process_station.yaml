@@ -136,46 +136,46 @@ post_process_station:
           water_stirrer_cleaning_wait_time: water_stirrer_cleaning_wait_time
           water_stirrer_cleaning_waste_time: water_stirrer_cleaning_waste_time
         goal_default:
-          nmp_outer_wall_cleaning_injection: 240.0
-          nmp_outer_wall_cleaning_count: 3
-          nmp_outer_wall_cleaning_wait_time: 30
-          nmp_outer_wall_cleaning_waste_time: 20
-          nmp_inner_wall_cleaning_injection: 300.0
-          nmp_inner_wall_cleaning_count: 2
-          nmp_pump_cleaning_suction_count: 8
-          nmp_inner_wall_cleaning_waste_time: 20
-          nmp_stirrer_cleaning_injection: 500.0
-          nmp_stirrer_cleaning_count: 1
-          nmp_stirrer_cleaning_wait_time: 30
-          nmp_stirrer_cleaning_waste_time: 30
-          water_outer_wall_cleaning_injection: 200.0
-          water_outer_wall_cleaning_count: 2
-          water_outer_wall_cleaning_wait_time: 20
-          water_outer_wall_cleaning_waste_time: 15
-          water_inner_wall_cleaning_injection: 200.0
-          water_inner_wall_cleaning_count: 1
-          water_pump_cleaning_suction_count: 3
-          water_inner_wall_cleaning_waste_time: 15
-          water_stirrer_cleaning_injection: 200.0
-          water_stirrer_cleaning_count: 1
-          water_stirrer_cleaning_wait_time: 20
-          water_stirrer_cleaning_waste_time: 15
-          acetone_outer_wall_cleaning_injection: 240.0
-          acetone_outer_wall_cleaning_count: 1
-          acetone_outer_wall_cleaning_wait_time: 30
-          acetone_outer_wall_cleaning_waste_time: 10
-          acetone_inner_wall_cleaning_injection: 200.0
-          acetone_inner_wall_cleaning_count: 1
-          acetone_pump_cleaning_suction_count: 3
-          acetone_inner_wall_cleaning_waste_time: 10
-          acetone_stirrer_cleaning_injection: 500.0
-          acetone_stirrer_cleaning_count: 1
-          acetone_stirrer_cleaning_wait_time: 30
-          acetone_stirrer_cleaning_waste_time: 30
-          pipe_blowing_time: 15
-          injection_pump_forward_empty_suction_count: 15
-          injection_pump_reverse_empty_suction_count: 60
+          acetone_inner_wall_cleaning_count: 0
+          acetone_inner_wall_cleaning_injection: 0.0
+          acetone_inner_wall_cleaning_waste_time: 0
+          acetone_outer_wall_cleaning_count: 0
+          acetone_outer_wall_cleaning_injection: 0.0
+          acetone_outer_wall_cleaning_wait_time: 0
+          acetone_outer_wall_cleaning_waste_time: 0
+          acetone_pump_cleaning_suction_count: 0
+          acetone_stirrer_cleaning_count: 0
+          acetone_stirrer_cleaning_injection: 0.0
+          acetone_stirrer_cleaning_wait_time: 0
+          acetone_stirrer_cleaning_waste_time: 0
           filtration_liquid_selection: 0
+          injection_pump_forward_empty_suction_count: 0
+          injection_pump_reverse_empty_suction_count: 0
+          nmp_inner_wall_cleaning_count: 0
+          nmp_inner_wall_cleaning_injection: 0.0
+          nmp_inner_wall_cleaning_waste_time: 0
+          nmp_outer_wall_cleaning_count: 0
+          nmp_outer_wall_cleaning_injection: 0.0
+          nmp_outer_wall_cleaning_wait_time: 0
+          nmp_outer_wall_cleaning_waste_time: 0
+          nmp_pump_cleaning_suction_count: 0
+          nmp_stirrer_cleaning_count: 0
+          nmp_stirrer_cleaning_injection: 0.0
+          nmp_stirrer_cleaning_wait_time: 0
+          nmp_stirrer_cleaning_waste_time: 0
+          pipe_blowing_time: 0
+          water_inner_wall_cleaning_count: 0
+          water_inner_wall_cleaning_injection: 0.0
+          water_inner_wall_cleaning_waste_time: 0
+          water_outer_wall_cleaning_count: 0
+          water_outer_wall_cleaning_injection: 0.0
+          water_outer_wall_cleaning_wait_time: 0
+          water_outer_wall_cleaning_waste_time: 0
+          water_pump_cleaning_suction_count: 0
+          water_stirrer_cleaning_count: 0
+          water_stirrer_cleaning_injection: 0.0
+          water_stirrer_cleaning_wait_time: 0
+          water_stirrer_cleaning_waste_time: 0
         handles: {}
         result:
           return_info: return_info
@@ -438,34 +438,34 @@ post_process_station:
         feedback: {}
         goal:
           atomization_fast_speed: atomization_fast_speed
-          wash_slow_speed: wash_slow_speed
-          injection_pump_suction_speed: injection_pump_suction_speed
-          injection_pump_push_speed: injection_pump_push_speed
-          raw_liquid_suction_count: raw_liquid_suction_count
-          first_wash_water_amount: first_wash_water_amount
-          second_wash_water_amount: second_wash_water_amount
-          first_powder_mixing_time: first_powder_mixing_time
-          second_powder_mixing_time: second_powder_mixing_time
-          first_powder_wash_count: first_powder_wash_count
-          second_powder_wash_count: second_powder_wash_count
-          initial_water_amount: initial_water_amount
-          pre_filtration_mixing_time: pre_filtration_mixing_time
           atomization_pressure_kpa: atomization_pressure_kpa
+          first_powder_mixing_tim: first_powder_mixing_tim
+          first_powder_wash_count: first_powder_wash_count
+          first_wash_water_amount: first_wash_water_amount
+          initial_water_amount: initial_water_amount
+          injection_pump_push_speed: injection_pump_push_speed
+          injection_pump_suction_speed: injection_pump_suction_speed
+          pre_filtration_mixing_time: pre_filtration_mixing_time
+          raw_liquid_suction_count: raw_liquid_suction_count
+          second_powder_mixing_time: second_powder_mixing_time
+          second_powder_wash_count: second_powder_wash_count
+          second_wash_water_amount: second_wash_water_amount
+          wash_slow_speed: wash_slow_speed
         goal_default:
-          atomization_fast_speed: 17.0
-          wash_slow_speed: 17.0
-          injection_pump_suction_speed: 300
-          injection_pump_push_speed: 100
-          raw_liquid_suction_count: 1
-          first_wash_water_amount: 550.0
-          second_wash_water_amount: 550.0
-          first_powder_mixing_time: 300
-          second_powder_mixing_time: 300
-          first_powder_wash_count: 1
-          second_powder_wash_count: 1
-          initial_water_amount: 551.0
-          pre_filtration_mixing_time: 300
-          atomization_pressure_kpa: 74
+          atomization_fast_speed: 0.0
+          atomization_pressure_kpa: 0
+          first_powder_mixing_tim: 0
+          first_powder_wash_count: 0
+          first_wash_water_amount: 0.0
+          initial_water_amount: 0.0
+          injection_pump_push_speed: 0
+          injection_pump_suction_speed: 0
+          pre_filtration_mixing_time: 0
+          raw_liquid_suction_count: 0
+          second_powder_mixing_time: 0
+          second_powder_wash_count: 0
+          second_wash_water_amount: 0.0
+          wash_slow_speed: 0.0
         handles: {}
         result:
           return_info: return_info
@@ -485,7 +485,7 @@ post_process_station:
                   maximum: 2147483647
                   minimum: -2147483648
                   type: integer
-                first_powder_mixing_time:
+                first_powder_mixing_tim:
                   maximum: 2147483647
                   minimum: -2147483648
                   type: integer
@@ -526,20 +526,20 @@ post_process_station:
                 wash_slow_speed:
                   type: number
               required:
-                - atomization_fast_speed
-                - wash_slow_speed
-                - injection_pump_suction_speed
-                - injection_pump_push_speed
-                - raw_liquid_suction_count
-                - first_wash_water_amount
-                - second_wash_water_amount
-                - first_powder_mixing_time
-                - second_powder_mixing_time
-                - first_powder_wash_count
-                - second_powder_wash_count
-                - initial_water_amount
-                - pre_filtration_mixing_time
-                - atomization_pressure_kpa
+              - atomization_fast_speed
+              - wash_slow_speed
+              - injection_pump_suction_speed
+              - injection_pump_push_speed
+              - raw_liquid_suction_count
+              - first_wash_water_amount
+              - second_wash_water_amount
+              - first_powder_mixing_tim
+              - second_powder_mixing_time
+              - first_powder_wash_count
+              - second_powder_wash_count
+              - initial_water_amount
+              - pre_filtration_mixing_time
+              - atomization_pressure_kpa
               title: PostProcessTriggerPostPro_Goal
               type: object
             result:
@@ -600,7 +600,7 @@ post_process_station:
           title: SendCmd
           type: object
         type: SendCmd
-    module: unilabos.device_comms.opcua_client.client:OpcUaClient
+    module: unilabos.devices.workstation.post_process.post_process:OpcUaClient
     status_types:
       acetone_tank_empty_alarm: Bool
       atomization_fast_speed: Float64
@@ -625,6 +625,6 @@ post_process_station:
   config_info: []
   description: 后处理站
   handles: []
-  icon: post_process_station.png
+  icon: post_process_station.webp
   init_param_schema: {}
   version: 1.0.0
