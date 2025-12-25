@@ -1,10 +1,12 @@
 import asyncio
 import collections
+from collections import OrderedDict
 import contextlib
 import json
 import os
 import socket
 import time
+import uuid
 from typing import Any, List, Dict, Optional, Tuple, TypedDict, Union, Sequence, Iterator, Literal
 from pylabrobot.liquid_handling.standard import GripDirection
 
@@ -28,7 +30,7 @@ from pylabrobot.liquid_handling.standard import (
     ResourceMove,
     ResourceDrop,
 )
-from pylabrobot.resources import ResourceHolder, ResourceStack, Tip, Deck, Plate, Well, TipRack, Resource, Container, Coordinate, TipSpot, Trash
+from pylabrobot.resources import ResourceHolder, ResourceStack, Tip, Deck, Plate, Well, TipRack, Resource, Container, Coordinate, TipSpot, Trash, PlateAdapter, TubeRack
 
 from unilabos.devices.liquid_handling.liquid_handler_abstract import LiquidHandlerAbstract, SimpleReturn
 from unilabos.ros.nodes.base_device_node import BaseROS2DeviceNode
@@ -69,7 +71,35 @@ class PRCXI9300Deck(Deck):
     def __init__(self, name: str, size_x: float, size_y: float, size_z: float, **kwargs):
         super().__init__(name, size_x, size_y, size_z)
         self.slots = [None] * 6  # PRCXI 9300 有 6 个槽位
+class PRCXI9300Container(Plate):
+    """PRCXI 9300 的专用 Container 类，继承自 Plate，用于槽位定位和未知模块。
 
+    该类定义了 PRCXI 9300 的工作台布局和槽位信息。
+    """
+
+    def __init__(
+        self,
+        name: str,
+        size_x: float,
+        size_y: float,
+        size_z: float,
+        category: str,
+        ordering: collections.OrderedDict,
+        model: Optional[str] = None,
+        **kwargs,
+    ):
+        super().__init__(name, size_x, size_y, size_z, category=category, ordering=ordering, model=model)
+        self._unilabos_state = {}
+
+    def load_state(self, state: Dict[str, Any]) -> None:
+        """从给定的状态加载工作台信息。"""
+        super().load_state(state)
+        self._unilabos_state = state
+
+    def serialize_state(self) -> Dict[str, Dict[str, Any]]:
+        data = super().serialize_state()
+        data.update(self._unilabos_state)
+        return data   
 class PRCXI9300Plate(Plate):
     """ 
     专用孔板类：
@@ -83,11 +113,43 @@ class PRCXI9300Plate(Plate):
                  model: Optional[str] = None, 
                  material_info: Optional[Dict[str, Any]] = None, 
                  **kwargs):
-        items = ordered_items if ordered_items is not None else ordering
-        super().__init__(name, size_x, size_y, size_z, 
-                         ordered_items=items,
-                         category=category,
-                         model=model, **kwargs)
+        # 如果 ordered_items 不为 None，直接使用
+        if ordered_items is not None:
+            items = ordered_items
+        elif ordering is not None:
+            # 检查 ordering 中的值是否是字符串（从 JSON 反序列化时的情况）
+            # 如果是字符串，说明这是位置名称，需要让 Plate 自己创建 Well 对象
+            # 我们只传递位置信息（键），不传递值，使用 ordering 参数
+            if ordering and isinstance(next(iter(ordering.values()), None), str):
+                # ordering 的值是字符串，只使用键（位置信息）创建新的 OrderedDict
+                # 传递 ordering 参数而不是 ordered_items，让 Plate 自己创建 Well 对象
+                items = None
+                # 使用 ordering 参数，只包含位置信息（键）
+                ordering_param = collections.OrderedDict((k, None) for k in ordering.keys())
+            else:
+                # ordering 的值已经是对象，可以直接使用
+                items = ordering
+                ordering_param = None
+        else:
+            items = None
+            ordering_param = None
+        
+        # 根据情况传递不同的参数
+        if items is not None:
+            super().__init__(name, size_x, size_y, size_z, 
+                             ordered_items=items,
+                             category=category,
+                             model=model, **kwargs)
+        elif ordering_param is not None:
+            # 传递 ordering 参数，让 Plate 自己创建 Well 对象
+            super().__init__(name, size_x, size_y, size_z, 
+                             ordering=ordering_param,
+                             category=category,
+                             model=model, **kwargs)
+        else:
+            super().__init__(name, size_x, size_y, size_z, 
+                             category=category,
+                             model=model, **kwargs)
         
         self._unilabos_state = {}
         if material_info:
@@ -124,8 +186,7 @@ class PRCXI9300Plate(Plate):
                     safe_state[k] = v
             
             data.update(safe_state)
-        return data
-
+        return data            # 其他顶层属性也进行类型检查
 class PRCXI9300TipRack(TipRack):
     """ 专用吸头盒类 """
     def __init__(self, name: str, size_x: float, size_y: float, size_z: float, 
@@ -135,11 +196,43 @@ class PRCXI9300TipRack(TipRack):
                  model: Optional[str] = None,
                  material_info: Optional[Dict[str, Any]] = None,
                  **kwargs):
-        items = ordered_items if ordered_items is not None else ordering
-        super().__init__(name, size_x, size_y, size_z, 
-                         ordered_items=items,
-                         category=category, 
-                         model=model, **kwargs)
+        # 如果 ordered_items 不为 None，直接使用
+        if ordered_items is not None:
+            items = ordered_items
+        elif ordering is not None:
+            # 检查 ordering 中的值是否是字符串（从 JSON 反序列化时的情况）
+            # 如果是字符串，说明这是位置名称，需要让 TipRack 自己创建 Tip 对象
+            # 我们只传递位置信息（键），不传递值，使用 ordering 参数
+            if ordering and isinstance(next(iter(ordering.values()), None), str):
+                # ordering 的值是字符串，只使用键（位置信息）创建新的 OrderedDict
+                # 传递 ordering 参数而不是 ordered_items，让 TipRack 自己创建 Tip 对象
+                items = None
+                # 使用 ordering 参数，只包含位置信息（键）
+                ordering_param = collections.OrderedDict((k, None) for k in ordering.keys())
+            else:
+                # ordering 的值已经是对象，可以直接使用
+                items = ordering
+                ordering_param = None
+        else:
+            items = None
+            ordering_param = None
+        
+        # 根据情况传递不同的参数
+        if items is not None:
+            super().__init__(name, size_x, size_y, size_z, 
+                             ordered_items=items,
+                             category=category, 
+                             model=model, **kwargs)
+        elif ordering_param is not None:
+            # 传递 ordering 参数，让 TipRack 自己创建 Tip 对象
+            super().__init__(name, size_x, size_y, size_z, 
+                             ordering=ordering_param,
+                             category=category, 
+                             model=model, **kwargs)
+        else:
+            super().__init__(name, size_x, size_y, size_z, 
+                             category=category, 
+                             model=model, **kwargs)
         self._unilabos_state = {}
         if material_info:
             self._unilabos_state["Material"] = material_info
@@ -235,16 +328,53 @@ class PRCXI9300TubeRack(TubeRack):
                  category: str = "tube_rack", 
                  items: Optional[Dict[str, Any]] = None,
                  ordered_items: Optional[OrderedDict] = None,
+                 ordering: Optional[OrderedDict] = None,
                  model: Optional[str] = None,
                  material_info: Optional[Dict[str, Any]] = None, 
                  **kwargs):
         
-        # 兼容处理：PLR 的 TubeRack 构造函数可能接受 items 或 ordered_items
-        items_to_pass = items if items is not None else ordered_items
-        super().__init__(name, size_x, size_y, size_z, 
-                         ordered_items=ordered_items, 
-                         model=model, 
-                         **kwargs)
+        # 如果 ordered_items 不为 None，直接使用
+        if ordered_items is not None:
+            items_to_pass = ordered_items
+            ordering_param = None
+        elif ordering is not None:
+            # 检查 ordering 中的值是否是字符串（从 JSON 反序列化时的情况）
+            # 如果是字符串，说明这是位置名称，需要让 TubeRack 自己创建 Tube 对象
+            # 我们只传递位置信息（键），不传递值，使用 ordering 参数
+            if ordering and isinstance(next(iter(ordering.values()), None), str):
+                # ordering 的值是字符串，只使用键（位置信息）创建新的 OrderedDict
+                # 传递 ordering 参数而不是 ordered_items，让 TubeRack 自己创建 Tube 对象
+                items_to_pass = None
+                # 使用 ordering 参数，只包含位置信息（键）
+                ordering_param = collections.OrderedDict((k, None) for k in ordering.keys())
+            else:
+                # ordering 的值已经是对象，可以直接使用
+                items_to_pass = ordering
+                ordering_param = None
+        elif items is not None:
+            # 兼容旧的 items 参数
+            items_to_pass = items
+            ordering_param = None
+        else:
+            items_to_pass = None
+            ordering_param = None
+        
+        # 根据情况传递不同的参数
+        if items_to_pass is not None:
+            super().__init__(name, size_x, size_y, size_z, 
+                             ordered_items=items_to_pass, 
+                             model=model, 
+                             **kwargs)
+        elif ordering_param is not None:
+            # 传递 ordering 参数，让 TubeRack 自己创建 Tube 对象
+            super().__init__(name, size_x, size_y, size_z, 
+                             ordering=ordering_param,
+                             model=model, 
+                             **kwargs)
+        else:
+            super().__init__(name, size_x, size_y, size_z, 
+                             model=model, 
+                             **kwargs)
         
         self._unilabos_state = {}
         if material_info:
