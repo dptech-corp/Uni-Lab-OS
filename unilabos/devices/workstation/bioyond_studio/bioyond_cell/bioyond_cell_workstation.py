@@ -257,7 +257,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
     def auto_feeding4to3(
         self,
         # ★ 修改点：默认模板路径
-        xlsx_path: Optional[str] = "/Users/sml/work/Unilab/Uni-Lab-OS/unilabos/devices/workstation/bioyond_studio/bioyond_cell/material_template.xlsx",
+        xlsx_path: Optional[str] = "/Users/sml/work/Unilab/unilabos/devices/workstation/bioyond_studio/bioyond_cell/material_template.xlsx",
         # ---------------- WH4 - 加样头面 (Z=1, 12个点位) ----------------
         WH4_x1_y1_z1_1_materialName: str = "", WH4_x1_y1_z1_1_quantity: float = 0.0,
         WH4_x2_y1_z1_2_materialName: str = "", WH4_x2_y1_z1_2_quantity: float = 0.0,
@@ -394,9 +394,13 @@ class BioyondCellWorkstation(BioyondWorkstation):
             return response
           # 等待完成报送
         result = self.wait_for_order_finish(order_code)
+        print("\n" + "="*60)
+        print("实验记录本结果auto_feeding4to3")
+        print("="*60)
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        print("="*60 + "\n")
         return result
     
-
     def auto_batch_outbound_from_xlsx(self, xlsx_path: str) -> Dict[str, Any]:
         """
         3.31 自动化下料（Excel -> JSON -> POST /api/lims/storage/auto-batch-out-bound）
@@ -474,7 +478,7 @@ class BioyondCellWorkstation(BioyondWorkstation):
         - totalMass 自动计算为所有物料质量之和
         - createTime 缺失或为空时自动填充为当前日期（YYYY/M/D）
         """
-        default_path = Path("/Users/sml/work/Unilab/Uni-Lab-OS/unilabos/devices/workstation/bioyond_studio/bioyond_cell/2025092701.xlsx")
+        default_path = Path("/Users/sml/work/Unilab/unilabos/devices/workstation/bioyond_studio/bioyond_cell/2025092701.xlsx")
         path = Path(xlsx_path) if xlsx_path else default_path
         print(f"[create_orders] 使用 Excel 路径: {path}")
         if path != default_path:
@@ -622,6 +626,9 @@ class BioyondCellWorkstation(BioyondWorkstation):
             return response
           # 等待完成报送
         result = self.wait_for_order_finish(order_code)
+        print("实验记录本========================create_orders========================")
+        print(result)
+        print("========================")
         return result
 
     # 2.7 启动调度
