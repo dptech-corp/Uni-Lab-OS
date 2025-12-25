@@ -448,7 +448,7 @@ class ResourceTreeSet(object):
         from pylabrobot.utils.object_parsing import find_subclass
 
         # 类型映射
-        TYPE_MAP = {"plate": "Plate", "well": "Well", "deck": "Deck", "container": "RegularContainer"}
+        TYPE_MAP = {"plate": "Plate", "well": "Well", "deck": "Deck", "container": "RegularContainer", "tip_spot": "TipSpot"}
 
         def collect_node_data(node: ResourceDictInstance, name_to_uuid: dict, all_states: dict, name_to_extra: dict):
             """一次遍历收集 name_to_uuid, all_states 和 name_to_extra"""
