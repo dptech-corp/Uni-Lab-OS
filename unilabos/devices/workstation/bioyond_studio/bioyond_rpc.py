@@ -220,7 +220,7 @@ class BioyondV1RPC(BaseRequest):
             params={
                 "apiKey": self.api_key,
                 "requestTime": self.get_current_time_iso8601(),
-                "data": {},
+                "data": 0,
             })
         if not response or response['code'] != 1:
             return []
