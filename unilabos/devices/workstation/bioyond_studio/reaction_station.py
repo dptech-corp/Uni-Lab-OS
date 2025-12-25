@@ -49,16 +49,16 @@ class BioyondReactor:
 class BioyondReactionStation(BioyondWorkstation):
     """Bioyond反应站类
 
-    继承自BioyondWorkstation，提供反应站特定的业务方法
+    继承自BioyondWorkstation,提供反应站特定的业务方法
     """
 
     def __init__(self, config: dict = None, deck=None, protocol_type=None, **kwargs):
         """初始化反应站
 
         Args:
-            config: 配置字典，应包含workflow_mappings等配置
+            config: 配置字典,应包含workflow_mappings等配置
             deck: Deck对象
-            protocol_type: 协议类型（由ROS系统传递，此处忽略）
+            protocol_type: 协议类型(由ROS系统传递,此处忽略)
             **kwargs: 其他可能的参数
         """
         if deck is None and config:
@@ -86,6 +86,31 @@ class BioyondReactionStation(BioyondWorkstation):
 
         self._frame_to_reactor_id = {1: "reactor_1", 2: "reactor_2", 3: "reactor_3", 4: "reactor_4", 5: "reactor_5"}
 
+        # 用于缓存从 Bioyond 查询的工作流序列
+        self._cached_workflow_sequence = []
+        # 用于缓存待处理的时间约束
+        self.pending_time_constraints = []
+
+
+    @property
+    def workflow_sequence(self) -> str:
+        """工作流序列属性 - 返回初始化时查询的工作流列表
+
+        Returns:
+            str: 工作流信息的 JSON 字符串
+        """
+        import json
+        return json.dumps(self._cached_workflow_sequence, ensure_ascii=False)
+
+    @workflow_sequence.setter
+    def workflow_sequence(self, value: List[str]):
+        """设置工作流序列
+
+        Args:
+            value: 工作流 ID 列表
+        """
+        self._cached_workflow_sequence = value
+
     # ==================== 工作流方法 ====================
 
     def reactor_taken_out(self):
@@ -97,6 +122,27 @@ class BioyondReactionStation(BioyondWorkstation):
         print(f"当前队列长度: {len(self.pending_task_params)}")
         return json.dumps({"suc": True})
 
+    def scheduler_start(self) -> dict:
+        """启动调度器 - 启动Bioyond工作站的任务调度器,开始执行队列中的任务
+
+        Returns:
+            dict: 包含return_info的字典,return_info为整型(1=成功)
+
+        Raises:
+            BioyondException: 调度器启动失败时抛出异常
+        """
+        from unilabos.devices.workstation.bioyond_studio.bioyond_rpc import BioyondException
+
+        result = self.hardware_interface.scheduler_start()
+        self.hardware_interface._logger.info(f"调度器启动结果: {result}")
+
+        if result != 1:
+            error_msg = "启动调度器失败: 有未处理错误,调度无法启动。请检查Bioyond系统状态。"
+            self.hardware_interface._logger.error(error_msg)
+            raise BioyondException(error_msg)
+
+        return {"return_info": result}
+
     def reactor_taken_in(
         self,
         assign_material_name: str,
@@ -106,12 +152,12 @@ class BioyondReactionStation(BioyondWorkstation):
         """反应器放入
 
         Args:
-            assign_material_name: 物料名称（不能为空）
-            cutoff: 粘度上限（需为有效数字字符串，默认 "900000"）
-            temperature: 温度设定（°C，范围：-50.00 至 100.00）
+            assign_material_name: 物料名称(不能为空)
+            cutoff: 粘度上限(需为有效数字字符串,默认 "900000")
+            temperature: 温度设定(C,范围:-50.00 至 100.00)
 
         Returns:
-            str: JSON 字符串，格式为 {"suc": True}
+            str: JSON 字符串,格式为 {"suc": True}
 
         Raises:
             ValueError: 若物料名称无效或 cutoff 格式错误
@@ -130,6 +176,7 @@ class BioyondReactionStation(BioyondWorkstation):
 
         if isinstance(temperature, str):
             temperature = float(temperature)
+
 
         step_id = WORKFLOW_STEP_IDS["reactor_taken_in"]["config"]
         reactor_taken_in_params = {
@@ -162,12 +209,19 @@ class BioyondReactionStation(BioyondWorkstation):
         """固体进料小瓶
 
         Args:
-            material_id: 粉末类型ID，1=盐（21分钟），2=面粉（27分钟），3=BTDA（38分钟）
+            material_id: 粉末类型ID, Salt=1, Flour=2, BTDA=3
             time: 观察时间(分钟)
-            torque_variation: 是否观察(int类型, 1=否, 2=是)
+            torque_variation: 是否观察(NO=1, YES=2)
             assign_material_name: 物料名称(用于获取试剂瓶位ID)
-            temperature: 温度设定(°C)
+            temperature: 温度设定(C)
         """
+        # 参数映射
+        material_map = {"Salt": "1", "Flour": "2", "BTDA": "3", "1": "1", "2": "2", "3": "3"}
+        torque_map = {"NO": "1", "YES": "2", 1: "1", 2: "2", "1": "1", "2": "2"}
+
+        mapped_material_id = material_map.get(str(material_id), str(material_id))
+        mapped_torque_variation = int(torque_map.get(str(torque_variation), "1"))
+
         self.append_to_workflow_sequence('{"web_workflow_name": "Solid_feeding_vials"}')
         material_id_m = self.hardware_interface._get_material_id_by_name(assign_material_name) if assign_material_name else None
 
@@ -181,14 +235,14 @@ class BioyondReactionStation(BioyondWorkstation):
             "param_values": {
                 feeding_step_id: {
                     ACTION_NAMES["solid_feeding_vials"]["feeding"]: [
-                        {"m": 0, "n": 3, "Key": "materialId", "Value": material_id},
+                        {"m": 0, "n": 3, "Key": "materialId", "Value": mapped_material_id},
                         {"m": 0, "n": 3, "Key": "assignMaterialName", "Value": material_id_m} if material_id_m else {}
                     ]
                 },
                 observe_step_id: {
                     ACTION_NAMES["solid_feeding_vials"]["observe"]: [
                         {"m": 1, "n": 0, "Key": "time", "Value": time},
-                        {"m": 1, "n": 0, "Key": "torqueVariation", "Value": str(torque_variation)},
+                        {"m": 1, "n": 0, "Key": "torqueVariation", "Value": str(mapped_torque_variation)},
                         {"m": 1, "n": 0, "Key": "temperature", "Value": f"{temperature:.2f}"}
                     ]
                 }
@@ -196,7 +250,7 @@ class BioyondReactionStation(BioyondWorkstation):
         }
 
         self.pending_task_params.append(solid_feeding_vials_params)
-        print(f"成功添加固体进料小瓶参数: material_id={material_id}, time={time}min, torque={torque_variation}, temp={temperature:.2f}°C")
+        print(f"成功添加固体进料小瓶参数: material_id={material_id}, time={time}min, torque={torque_variation}, temp={temperature:.2f}C")
         print(f"当前队列长度: {len(self.pending_task_params)}")
         return json.dumps({"suc": True})
 
@@ -214,11 +268,18 @@ class BioyondReactionStation(BioyondWorkstation):
         Args:
             volume_formula: 分液公式(μL)
             assign_material_name: 物料名称
-            titration_type: 是否滴定(1=否, 2=是)
+            titration_type: 是否滴定(NO=1, YES=2)
             time: 观察时间(分钟)
-            torque_variation: 是否观察(int类型, 1=否, 2=是)
-            temperature: 温度(°C)
+            torque_variation: 是否观察(NO=1, YES=2)
+            temperature: 温度(C)
         """
+        # 参数映射
+        titration_map = {"NO": "1", "YES": "2", "1": "1", "2": "2"}
+        torque_map = {"NO": "1", "YES": "2", 1: "1", 2: "2", "1": "1", "2": "2"}
+
+        mapped_titration_type = titration_map.get(str(titration_type), "1")
+        mapped_torque_variation = int(torque_map.get(str(torque_variation), "1"))
+
         self.append_to_workflow_sequence('{"web_workflow_name": "Liquid_feeding_vials(non-titration)"}')
         material_id = self.hardware_interface._get_material_id_by_name(assign_material_name)
         if material_id is None:
@@ -236,13 +297,13 @@ class BioyondReactionStation(BioyondWorkstation):
                     ACTION_NAMES["liquid_feeding_vials_non_titration"]["liquid"]: [
                         {"m": 0, "n": 3, "Key": "volumeFormula", "Value": volume_formula},
                         {"m": 0, "n": 3, "Key": "assignMaterialName", "Value": material_id},
-                        {"m": 0, "n": 3, "Key": "titrationType", "Value": titration_type}
+                        {"m": 0, "n": 3, "Key": "titrationType", "Value": mapped_titration_type}
                     ]
                 },
                 observe_step_id: {
                     ACTION_NAMES["liquid_feeding_vials_non_titration"]["observe"]: [
                         {"m": 1, "n": 0, "Key": "time", "Value": time},
-                        {"m": 1, "n": 0, "Key": "torqueVariation", "Value": str(torque_variation)},
+                        {"m": 1, "n": 0, "Key": "torqueVariation", "Value": str(mapped_torque_variation)},
                         {"m": 1, "n": 0, "Key": "temperature", "Value": f"{temperature:.2f}"}
                     ]
                 }
@@ -275,11 +336,18 @@ class BioyondReactionStation(BioyondWorkstation):
                   "total_liquid_volume": 48.00916988195499
               }
               如果提供solvents,则从中提取additional_solvent并转换为μL
-            titration_type: 是否滴定(1=否, 2=是)
+            titration_type: 是否滴定(NO=1, YES=2)
             time: 观察时间(分钟)
-            torque_variation: 是否观察(int类型, 1=否, 2=是)
-            temperature: 温度设定(°C)
+            torque_variation: 是否观察(NO=1, YES=2)
+            temperature: 温度设定(C)
         """
+        # 参数映射
+        titration_map = {"NO": "1", "YES": "2", "1": "1", "2": "2"}
+        torque_map = {"NO": "1", "YES": "2", 1: "1", 2: "2", "1": "1", "2": "2"}
+
+        mapped_titration_type = titration_map.get(str(titration_type), "1")
+        mapped_torque_variation = int(torque_map.get(str(torque_variation), "1"))
+
         # 处理 volume 参数:优先使用直接传入的 volume,否则从 solvents 中提取
         if not volume and solvents is not None:
             # 参数类型转换:如果是字符串则解析为字典
@@ -318,7 +386,7 @@ class BioyondReactionStation(BioyondWorkstation):
             "param_values": {
                 liquid_step_id: {
                     ACTION_NAMES["liquid_feeding_solvents"]["liquid"]: [
-                        {"m": 0, "n": 1, "Key": "titrationType", "Value": titration_type},
+                        {"m": 0, "n": 1, "Key": "titrationType", "Value": mapped_titration_type},
                         {"m": 0, "n": 1, "Key": "volume", "Value": volume},
                         {"m": 0, "n": 1, "Key": "assignMaterialName", "Value": material_id}
                     ]
@@ -326,7 +394,7 @@ class BioyondReactionStation(BioyondWorkstation):
                 observe_step_id: {
                     ACTION_NAMES["liquid_feeding_solvents"]["observe"]: [
                         {"m": 1, "n": 0, "Key": "time", "Value": time},
-                        {"m": 1, "n": 0, "Key": "torqueVariation", "Value": str(torque_variation)},
+                        {"m": 1, "n": 0, "Key": "torqueVariation", "Value": str(mapped_torque_variation)},
                         {"m": 1, "n": 0, "Key": "temperature", "Value": f"{temperature:.2f}"}
                     ]
                 }
@@ -362,10 +430,10 @@ class BioyondReactionStation(BioyondWorkstation):
             x_value: 手工输入的x值,格式如 "1-2-3"
             feeding_order_data: feeding_order JSON字符串或对象,用于获取m二酐值
             extracted_actuals: 从报告提取的实际加料量JSON字符串,包含actualTargetWeigh和actualVolume
-            titration_type: 是否滴定(1=否, 2=是),默认2
+            titration_type: 是否滴定(NO=1, YES=2),默认2
             time: 观察时间(分钟)
-            torque_variation: 是否观察(int类型, 1=否, 2=是)
-            temperature: 温度(°C)
+            torque_variation: 是否观察(NO=1, YES=2)
+            temperature: 温度(C)
 
         自动公式模板: 1000*(m二酐-x)*V二酐滴定/m二酐滴定
         其中:
@@ -374,6 +442,13 @@ class BioyondReactionStation(BioyondWorkstation):
         - x = x_value (手工输入)
         - m二酐 = feeding_order中type为"main_anhydride"的amount值
         """
+        # 参数映射
+        titration_map = {"NO": "1", "YES": "2", "1": "1", "2": "2"}
+        torque_map = {"NO": "1", "YES": "2", 1: "1", 2: "2", "1": "1", "2": "2"}
+
+        mapped_titration_type = titration_map.get(str(titration_type), "2")
+        mapped_torque_variation = int(torque_map.get(str(torque_variation), "1"))
+
         self.append_to_workflow_sequence('{"web_workflow_name": "Liquid_feeding(titration)"}')
         material_id = self.hardware_interface._get_material_id_by_name(assign_material_name)
         if material_id is None:
@@ -468,14 +543,14 @@ class BioyondReactionStation(BioyondWorkstation):
                 liquid_step_id: {
                     ACTION_NAMES["liquid_feeding_titration"]["liquid"]: [
                         {"m": 0, "n": 3, "Key": "volumeFormula", "Value": volume_formula},
-                        {"m": 0, "n": 3, "Key": "titrationType", "Value": titration_type},
+                        {"m": 0, "n": 3, "Key": "titrationType", "Value": mapped_titration_type},
                         {"m": 0, "n": 3, "Key": "assignMaterialName", "Value": material_id}
                     ]
                 },
                 observe_step_id: {
                     ACTION_NAMES["liquid_feeding_titration"]["observe"]: [
                         {"m": 1, "n": 0, "Key": "time", "Value": time},
-                        {"m": 1, "n": 0, "Key": "torqueVariation", "Value": str(torque_variation)},
+                        {"m": 1, "n": 0, "Key": "torqueVariation", "Value": str(mapped_torque_variation)},
                         {"m": 1, "n": 0, "Key": "temperature", "Value": f"{temperature:.2f}"}
                     ]
                 }
@@ -516,6 +591,89 @@ class BioyondReactionStation(BioyondWorkstation):
         return {
             'actualTargetWeigh': actual_target_weigh,
             'actualVolume': actual_volume
+        }
+
+    def _simplify_report(self, report) -> Dict[str, Any]:
+        """简化实验报告,只保留关键信息,去除冗余的工作流参数"""
+        if not isinstance(report, dict):
+            return report
+
+        data = report.get('data', {})
+        if not isinstance(data, dict):
+            return report
+
+        # 提取关键信息
+        simplified = {
+            'name': data.get('name'),
+            'code': data.get('code'),
+            'requester': data.get('requester'),
+            'workflowName': data.get('workflowName'),
+            'workflowStep': data.get('workflowStep'),
+            'requestTime': data.get('requestTime'),
+            'startPreparationTime': data.get('startPreparationTime'),
+            'completeTime': data.get('completeTime'),
+            'useTime': data.get('useTime'),
+            'status': data.get('status'),
+            'statusName': data.get('statusName'),
+        }
+
+        # 提取物料信息(简化版)
+        pre_intakes = data.get('preIntakes', [])
+        if pre_intakes and isinstance(pre_intakes, list):
+            first_intake = pre_intakes[0]
+            sample_materials = first_intake.get('sampleMaterials', [])
+
+            # 简化物料信息
+            simplified_materials = []
+            for material in sample_materials:
+                if isinstance(material, dict):
+                    mat_info = {
+                        'materialName': material.get('materialName'),
+                        'materialTypeName': material.get('materialTypeName'),
+                        'materialCode': material.get('materialCode'),
+                        'materialLocation': material.get('materialLocation'),
+                    }
+
+                    # 解析parameters中的关键信息
+                    params_str = material.get('parameters', '{}')
+                    try:
+                        params = json.loads(params_str) if isinstance(params_str, str) else params_str
+                        if isinstance(params, dict):
+                            # 只保留关键参数
+                            if 'density' in params:
+                                mat_info['density'] = params['density']
+                            if 'feedingHistory' in params:
+                                mat_info['feedingHistory'] = params['feedingHistory']
+                            if 'liquidVolume' in params:
+                                mat_info['liquidVolume'] = params['liquidVolume']
+                            if 'm_diamine_tot' in params:
+                                mat_info['m_diamine_tot'] = params['m_diamine_tot']
+                            if 'wt_diamine' in params:
+                                mat_info['wt_diamine'] = params['wt_diamine']
+                    except:
+                        pass
+
+                    simplified_materials.append(mat_info)
+
+            simplified['sampleMaterials'] = simplified_materials
+
+            # 提取extraProperties中的实际值
+            extra_props = first_intake.get('extraProperties', {})
+            if isinstance(extra_props, dict):
+                simplified_extra = {}
+                for key, value in extra_props.items():
+                    try:
+                        parsed_value = json.loads(value) if isinstance(value, str) else value
+                        simplified_extra[key] = parsed_value
+                    except:
+                        simplified_extra[key] = value
+                simplified['extraProperties'] = simplified_extra
+
+        return {
+            'data': simplified,
+            'code': report.get('code'),
+            'message': report.get('message'),
+            'timestamp': report.get('timestamp')
         }
 
     def extract_actuals_from_batch_reports(self, batch_reports_result: str) -> dict:
@@ -671,7 +829,12 @@ class BioyondReactionStation(BioyondWorkstation):
             timeout = int(timeout) if timeout else 7200
             check_interval = int(check_interval) if check_interval else 10
             if not batch_create_result or batch_create_result == "":
-                raise ValueError("batch_create_result为空")
+                raise ValueError(
+                    "batch_create_result参数为空,请确保:\n"
+                    "1. batch_create节点与wait节点之间正确连接了handle\n"
+                    "2. batch_create节点成功执行并返回了结果\n"
+                    "3. 检查上游batch_create任务是否成功创建了订单"
+                )
             try:
                 if isinstance(batch_create_result, str) and '[...]' in batch_create_result:
                     batch_create_result = batch_create_result.replace('[...]', '[]')
@@ -687,7 +850,14 @@ class BioyondReactionStation(BioyondWorkstation):
             except Exception as e:
                 raise ValueError(f"解析batch_create_result失败: {e}")
             if not order_codes or not order_ids:
-                raise ValueError("缺少order_codes或order_ids")
+                raise ValueError(
+                    "batch_create_result中未找到order_codes或order_ids,或者为空。\n"
+                    "可能的原因:\n"
+                    "1. batch_create任务执行失败(检查任务是否报错)\n"
+                    "2. 物料配置问题(如'物料样品板分配失败')\n"
+                    "3. Bioyond系统状态异常\n"
+                    f"batch_create_result内容: {batch_create_result[:200]}..."
+                )
             if not isinstance(order_codes, list):
                 order_codes = [order_codes]
             if not isinstance(order_ids, list):
@@ -696,6 +866,17 @@ class BioyondReactionStation(BioyondWorkstation):
                 raise ValueError("order_codes与order_ids数量不匹配")
             total = len(order_codes)
             pending = {c: {"order_id": order_ids[i], "completed": False} for i, c in enumerate(order_codes)}
+
+            # 发布初始状态事件
+            for i, oc in enumerate(order_codes):
+                self._publish_task_status(
+                    task_id=order_ids[i],
+                    task_code=oc,
+                    task_type="bioyond_workflow",
+                    status="running",
+                    progress=0.0
+                )
+
             reports = []
             start_time = time.time()
             while pending:
@@ -711,6 +892,14 @@ class BioyondReactionStation(BioyondWorkstation):
                             "extracted": None,
                             "elapsed_time": elapsed_time
                         })
+                        # 发布超时事件
+                        self._publish_task_status(
+                            task_id=pending[oc]["order_id"],
+                            task_code=oc,
+                            task_type="bioyond_workflow",
+                            status="timeout",
+                            result={"elapsed_time": elapsed_time}
+                        )
                     break
                 completed_round = []
                 for oc in list(pending.keys()):
@@ -721,6 +910,9 @@ class BioyondReactionStation(BioyondWorkstation):
                             rep = self.hardware_interface.order_report(oid)
                             if not rep:
                                 rep = {"error": "无法获取报告"}
+                            else:
+                                # 简化报告,去除冗余信息
+                                rep = self._simplify_report(rep)
                             reports.append({
                                 "order_code": oc,
                                 "order_id": oid,
@@ -730,6 +922,15 @@ class BioyondReactionStation(BioyondWorkstation):
                                 "extracted": self._extract_actuals_from_report(rep),
                                 "elapsed_time": elapsed_time
                             })
+                            # 发布完成事件
+                            self._publish_task_status(
+                                task_id=oid,
+                                task_code=oc,
+                                task_type="bioyond_workflow",
+                                status="completed",
+                                progress=1.0,
+                                result=rep
+                            )
                             completed_round.append(oc)
                             del self.order_completion_status[oc]
                         except Exception as e:
@@ -743,6 +944,14 @@ class BioyondReactionStation(BioyondWorkstation):
                                 "error": str(e),
                                 "elapsed_time": elapsed_time
                             })
+                            # 发布错误事件
+                            self._publish_task_status(
+                                task_id=oid,
+                                task_code=oc,
+                                task_type="bioyond_workflow",
+                                status="error",
+                                result={"error": str(e)}
+                            )
                             completed_round.append(oc)
                 for oc in completed_round:
                     del pending[oc]
@@ -782,9 +991,16 @@ class BioyondReactionStation(BioyondWorkstation):
             assign_material_name: 物料名称(试剂瓶位)
             time: 观察时间(分钟)
             torque_variation: 是否观察(int类型, 1=否, 2=是)
-            titration_type: 是否滴定(1=否, 2=是)
-            temperature: 温度设定(°C)
+            titration_type: 是否滴定(NO=1, YES=2)
+            temperature: 温度设定(C)
         """
+        # 参数映射
+        titration_map = {"NO": "1", "YES": "2", "1": "1", "2": "2"}
+        torque_map = {"NO": "1", "YES": "2", 1: "1", 2: "2", "1": "1", "2": "2"}
+
+        mapped_titration_type = titration_map.get(str(titration_type), "1")
+        mapped_torque_variation = int(torque_map.get(str(torque_variation), "1"))
+
         self.append_to_workflow_sequence('{"web_workflow_name": "liquid_feeding_beaker"}')
         material_id = self.hardware_interface._get_material_id_by_name(assign_material_name)
         if material_id is None:
@@ -802,13 +1018,13 @@ class BioyondReactionStation(BioyondWorkstation):
                     ACTION_NAMES["liquid_feeding_beaker"]["liquid"]: [
                         {"m": 0, "n": 2, "Key": "volume", "Value": volume},
                         {"m": 0, "n": 2, "Key": "assignMaterialName", "Value": material_id},
-                        {"m": 0, "n": 2, "Key": "titrationType", "Value": titration_type}
+                        {"m": 0, "n": 2, "Key": "titrationType", "Value": mapped_titration_type}
                     ]
                 },
                 observe_step_id: {
                     ACTION_NAMES["liquid_feeding_beaker"]["observe"]: [
                         {"m": 1, "n": 0, "Key": "time", "Value": time},
-                        {"m": 1, "n": 0, "Key": "torqueVariation", "Value": str(torque_variation)},
+                        {"m": 1, "n": 0, "Key": "torqueVariation", "Value": str(mapped_torque_variation)},
                         {"m": 1, "n": 0, "Key": "temperature", "Value": f"{temperature:.2f}"}
                     ]
                 }
@@ -834,11 +1050,18 @@ class BioyondReactionStation(BioyondWorkstation):
         Args:
             assign_material_name: 物料名称(液体种类)
             volume: 分液量(μL)
-            titration_type: 是否滴定(1=否, 2=是)
+            titration_type: 是否滴定(NO=1, YES=2)
             time: 观察时间(分钟)
-            torque_variation: 是否观察(int类型, 1=否, 2=是)
-            temperature: 温度(°C)
+            torque_variation: 是否观察(NO=1, YES=2)
+            temperature: 温度(C)
         """
+        # 参数映射
+        titration_map = {"NO": "1", "YES": "2", "1": "1", "2": "2"}
+        torque_map = {"NO": "1", "YES": "2", 1: "1", 2: "2", "1": "1", "2": "2"}
+
+        mapped_titration_type = titration_map.get(str(titration_type), "1")
+        mapped_torque_variation = int(torque_map.get(str(torque_variation), "1"))
+
         self.append_to_workflow_sequence('{"web_workflow_name": "drip_back"}')
         material_id = self.hardware_interface._get_material_id_by_name(assign_material_name)
         if material_id is None:
@@ -854,7 +1077,7 @@ class BioyondReactionStation(BioyondWorkstation):
             "param_values": {
                 liquid_step_id: {
                     ACTION_NAMES["drip_back"]["liquid"]: [
-                        {"m": 0, "n": 1, "Key": "titrationType", "Value": titration_type},
+                        {"m": 0, "n": 1, "Key": "titrationType", "Value": mapped_titration_type},
                         {"m": 0, "n": 1, "Key": "assignMaterialName", "Value": material_id},
                         {"m": 0, "n": 1, "Key": "volume", "Value": volume}
                     ]
@@ -862,7 +1085,7 @@ class BioyondReactionStation(BioyondWorkstation):
                 observe_step_id: {
                     ACTION_NAMES["drip_back"]["observe"]: [
                         {"m": 1, "n": 0, "Key": "time", "Value": time},
-                        {"m": 1, "n": 0, "Key": "torqueVariation", "Value": str(torque_variation)},
+                        {"m": 1, "n": 0, "Key": "torqueVariation", "Value": str(mapped_torque_variation)},
                         {"m": 1, "n": 0, "Key": "temperature", "Value": f"{temperature:.2f}"}
                     ]
                 }
@@ -872,6 +1095,53 @@ class BioyondReactionStation(BioyondWorkstation):
         self.pending_task_params.append(params)
         print(f"成功添加滴回去参数: material={assign_material_name}->ID:{material_id}, volume={volume}μL")
         print(f"当前队列长度: {len(self.pending_task_params)}")
+        return json.dumps({"suc": True})
+
+    def add_time_constraint(
+        self,
+        duration: int,
+        start_step_key: str = "",
+        end_step_key: str = "",
+        start_point: int = 0,
+        end_point: int = 0
+    ):
+        """添加时间约束
+
+        Args:
+            duration: 时间(秒)
+            start_step_key: 起点步骤Key (可选, 默认为空则自动选择)
+            end_step_key: 终点步骤Key (可选, 默认为空则自动选择)
+            start_point: 起点计时点 (Start=0, End=1)
+            end_point: 终点计时点 (Start=0, End=1)
+        """
+        # 参数映射
+        point_map = {"Start": 0, "End": 1, 0: 0, 1: 1, "0": 0, "1": 1}
+
+        mapped_start_point = point_map.get(start_point, 0)
+        mapped_end_point = point_map.get(end_point, 0)
+
+       # 注意:此方法应在添加完起点工作流后,添加终点工作流前调用
+
+
+        current_count = len(self._cached_workflow_sequence)
+        if current_count == 0:
+            print("⚠️ 无法添加时间约束:当前没有工作流")
+            return
+
+        start_index = current_count - 1
+        end_index = current_count # 指向下一个即将添加的工作流
+
+        constraint = {
+            "start_index": start_index,
+            "start_step_key": start_step_key,
+            "end_index": end_index,
+            "end_step_key": end_step_key,
+            "duration": duration,
+            "start_point": mapped_start_point,
+            "end_point": mapped_end_point
+        }
+        self.pending_time_constraints.append(constraint)
+        print(f"已添加时间约束: Workflow[{start_index}].{start_step_key} -> Workflow[{end_index}].{end_step_key} ({duration}s)")
         return json.dumps({"suc": True})
 
     # ==================== 工作流管理方法 ====================
@@ -884,11 +1154,114 @@ class BioyondReactionStation(BioyondWorkstation):
         """
         id_to_name = {workflow_id: name for name, workflow_id in self.workflow_mappings.items()}
         workflow_names = []
-        for workflow_id in self.workflow_sequence:
+        # 使用内部缓存的列表,而不是属性(属性返回 JSON 字符串)
+        for workflow_id in self._cached_workflow_sequence:
             workflow_name = id_to_name.get(workflow_id, workflow_id)
             workflow_names.append(workflow_name)
-        print(f"工作流序列: {workflow_names}")
         return workflow_names
+
+    def sync_workflow_sequence_from_bioyond(self) -> dict:
+        """从 Bioyond 系统同步工作流序列
+
+        查询 Bioyond 系统中的工作流列表,并更新本地 workflow_sequence
+
+        Returns:
+            dict: 包含同步结果的字典
+                - success: bool, 是否成功
+                - workflows: list, 工作流列表
+                - message: str, 结果消息
+        """
+        try:
+            print(f"[同步工作流序列] 开始从 Bioyond 系统查询工作流...")
+
+            # 检查 hardware_interface 是否可用
+            if not hasattr(self, 'hardware_interface') or self.hardware_interface is None:
+                error_msg = "hardware_interface 未初始化"
+                print(f"❌ [同步工作流序列] {error_msg}")
+                return {
+                    "success": False,
+                    "workflows": [],
+                    "message": error_msg
+                }
+
+            # 查询所有工作流
+            query_params = json.dumps({})
+            print(f"[同步工作流序列] 调用 hardware_interface.query_workflow...")
+            workflows_data = self.hardware_interface.query_workflow(query_params)
+
+            print(f"[同步工作流序列] 查询返回数据: {workflows_data}")
+
+            if not workflows_data:
+                error_msg = "未能从 Bioyond 系统获取工作流数据(返回为空)"
+                print(f"⚠️ [同步工作流序列] {error_msg}")
+                return {
+                    "success": False,
+                    "workflows": [],
+                    "message": error_msg
+                }
+
+            # 获取工作流列表 - Bioyond API 返回的字段是 items,不是 list
+            workflow_list = workflows_data.get("items", workflows_data.get("list", []))
+            print(f"[同步工作流序列] 从 Bioyond 查询到 {len(workflow_list)} 个工作流")
+
+            if len(workflow_list) == 0:
+                warning_msg = "Bioyond 系统中暂无工作流"
+                print(f"⚠️ [同步工作流序列] {warning_msg}")
+                # 清空缓存
+                self._cached_workflow_sequence = []
+                return {
+                    "success": True,
+                    "workflows": [],
+                    "message": warning_msg
+                }
+
+            # 清空当前序列
+            workflow_ids = []
+
+            # 构建结果
+            synced_workflows = []
+            for workflow in workflow_list:
+                workflow_id = workflow.get("id")
+                workflow_name = workflow.get("name")
+                workflow_status = workflow.get("status")  # 工作流状态
+
+                print(f"  - 工作流: {workflow_name} (ID: {workflow_id[:8] if workflow_id else 'N/A'}..., 状态: {workflow_status})")
+
+                synced_workflows.append({
+                    "id": workflow_id,
+                    "name": workflow_name,
+                    "status": workflow_status,
+                    "createTime": workflow.get("createTime"),
+                    "updateTime": workflow.get("updateTime")
+                })
+
+                # 添加所有工作流 ID 到执行序列
+                if workflow_id:
+                    workflow_ids.append(workflow_id)
+
+            # 更新缓存
+            self._cached_workflow_sequence = workflow_ids
+
+            success_msg = f"成功同步 {len(synced_workflows)} 个工作流到本地序列"
+            print(f"✅ [同步工作流序列] {success_msg}")
+            print(f"[同步工作流序列] 当前 workflow_sequence: {self._cached_workflow_sequence}")
+
+            return {
+                "success": True,
+                "workflows": synced_workflows,
+                "message": success_msg
+            }
+
+        except Exception as e:
+            error_msg = f"从 Bioyond 同步工作流序列失败: {e}"
+            print(f"❌ [同步工作流序列] {error_msg}")
+            import traceback
+            traceback.print_exc()
+            return {
+                "success": False,
+                "workflows": [],
+                "message": error_msg
+            }
 
     def workflow_step_query(self, workflow_id: str) -> dict:
         """查询工作流步骤参数
@@ -912,9 +1285,15 @@ class BioyondReactionStation(BioyondWorkstation):
         """
         return self.hardware_interface.create_order(json_str)
 
+    def clear_workflows(self):
+        """清空缓存的工作流序列和参数"""
+        self._cached_workflow_sequence = []
+        self.pending_time_constraints = []
+        print("已清空工作流序列缓存和时间约束队列")
+
     def hard_delete_merged_workflows(self, workflow_ids: List[str]) -> Dict[str, Any]:
         """
-        调用新接口：硬删除合并后的工作流
+        调用新接口:硬删除合并后的工作流
 
         Args:
             workflow_ids: 要删除的工作流ID数组
@@ -936,11 +1315,11 @@ class BioyondReactionStation(BioyondWorkstation):
         """项目接口通用POST调用
 
         参数:
-            endpoint: 接口路径（例如 /api/lims/order/skip-titration-steps）
+            endpoint: 接口路径(例如 /api/lims/order/skip-titration-steps)
             data: 请求体中的 data 字段内容
 
         返回:
-            dict: 服务端响应，失败时返回 {code:0,message,...}
+            dict: 服务端响应,失败时返回 {code:0,message,...}
         """
         request_data = {
             "apiKey": API_CONFIG["api_key"],
@@ -976,11 +1355,11 @@ class BioyondReactionStation(BioyondWorkstation):
         """项目接口通用DELETE调用
 
         参数:
-            endpoint: 接口路径（例如 /api/lims/order/workflows）
+            endpoint: 接口路径(例如 /api/lims/order/workflows)
             data: 请求体中的 data 字段内容
 
         返回:
-            dict: 服务端响应，失败时返回 {code:0,message,...}
+            dict: 服务端响应,失败时返回 {code:0,message,...}
         """
         request_data = {
             "apiKey": API_CONFIG["api_key"],
@@ -1030,16 +1409,16 @@ class BioyondReactionStation(BioyondWorkstation):
             for name in web_workflow_list:
                 workflow_id = self.workflow_mappings.get(name, "")
                 if not workflow_id:
-                    print(f"警告：未找到工作流名称 {name} 对应的 ID")
+                    print(f"警告:未找到工作流名称 {name} 对应的 ID")
                     continue
                 workflows_result.append({"id": workflow_id, "name": name})
             print(f"process_web_workflows 输出: {workflows_result}")
             return workflows_result
         except json.JSONDecodeError as e:
-            print(f"错误：无法解析 web_workflow_json: {e}")
+            print(f"错误:无法解析 web_workflow_json: {e}")
             return []
         except Exception as e:
-            print(f"错误：处理工作流失败: {e}")
+            print(f"错误:处理工作流失败: {e}")
             return []
 
     def _build_workflows_with_parameters(self, workflows_result: list) -> list:
@@ -1047,7 +1426,7 @@ class BioyondReactionStation(BioyondWorkstation):
         构建带参数的工作流列表
 
         Args:
-            workflows_result: 处理后的工作流列表（应为包含 id 和 name 的字典列表）
+            workflows_result: 处理后的工作流列表(应为包含 id 和 name 的字典列表)
 
         Returns:
             符合新接口格式的工作流参数结构
@@ -1059,24 +1438,24 @@ class BioyondReactionStation(BioyondWorkstation):
 
         for idx, workflow_info in enumerate(workflows_result):
             if not isinstance(workflow_info, dict):
-                print(f"错误：workflows_result[{idx}] 不是字典，而是 {type(workflow_info)}: {workflow_info}")
+                print(f"错误:workflows_result[{idx}] 不是字典,而是 {type(workflow_info)}: {workflow_info}")
                 continue
             workflow_id = workflow_info.get("id")
             if not workflow_id:
-                print(f"警告：workflows_result[{idx}] 缺少 'id' 键")
+                print(f"警告:workflows_result[{idx}] 缺少 'id' 键")
                 continue
             workflow_name = workflow_info.get("name", "")
             # print(f"\n🔧 处理工作流 [{idx}]: {workflow_name} (ID: {workflow_id})")
 
             if idx >= len(self.pending_task_params):
-                # print(f"   ⚠️ 无对应参数，跳过")
+                # print(f"   ⚠️ 无对应参数,跳过")
                 workflows_with_params.append({"id": workflow_id})
                 continue
 
             param_data = self.pending_task_params[idx]
             param_values = param_data.get("param_values", {})
             if not param_values:
-                # print(f"   ⚠️ 参数为空，跳过")
+                # print(f"   ⚠️ 参数为空,跳过")
                 workflows_with_params.append({"id": workflow_id})
                 continue
 
@@ -1135,10 +1514,10 @@ class BioyondReactionStation(BioyondWorkstation):
 
     def merge_workflow_with_parameters(self, json_str: str) -> dict:
         """
-        调用新接口：合并工作流并传递参数
+        调用新接口:合并工作流并传递参数
 
         Args:
-            json_str: JSON格式的字符串，包含:
+            json_str: JSON格式的字符串,包含:
                 - name: 工作流名称
                 - workflows: [{"id": "工作流ID", "stepParameters": {...}}]
 
@@ -1148,7 +1527,7 @@ class BioyondReactionStation(BioyondWorkstation):
         try:
             data = json.loads(json_str)
 
-            # 在工作流名称后面添加时间戳，避免重复
+            # 在工作流名称后面添加时间戳,避免重复
             if "name" in data and data["name"]:
                 timestamp = self.hardware_interface.get_current_time_iso8601().replace(":", "-").replace(".", "-")
                 original_name = data["name"]
@@ -1195,7 +1574,7 @@ class BioyondReactionStation(BioyondWorkstation):
                 return None
 
             if result.get("code") == 1:
-                print(f"✅ 工作流合并成功（带参数）")
+                print(f"✅ 工作流合并成功(带参数)")
                 return result.get("data", {})
             else:
                 error_msg = result.get('message', '未知错误')
@@ -1216,7 +1595,7 @@ class BioyondReactionStation(BioyondWorkstation):
             return None
 
     def _validate_and_refresh_workflow_if_needed(self, workflow_name: str) -> bool:
-        """验证工作流ID是否有效，如果无效则重新合并
+        """验证工作流ID是否有效,如果无效则重新合并
 
         Args:
             workflow_name: 工作流名称
@@ -1225,17 +1604,17 @@ class BioyondReactionStation(BioyondWorkstation):
             bool: 验证或刷新是否成功
         """
         print(f"\n🔍 验证工作流ID有效性...")
-        if not self.workflow_sequence:
-            print(f"   ⚠️ 工作流序列为空，需要重新合并")
+        if not self._cached_workflow_sequence:
+            print(f"   ⚠️ 工作流序列为空,需要重新合并")
             return False
-        first_workflow_id = self.workflow_sequence[0]
+        first_workflow_id = self._cached_workflow_sequence[0]
         try:
             structure = self.workflow_step_query(first_workflow_id)
             if structure:
                 print(f"   ✅ 工作流ID有效")
                 return True
             else:
-                print(f"   ⚠️ 工作流ID已过期，需要重新合并")
+                print(f"   ⚠️ 工作流ID已过期,需要重新合并")
                 return False
         except Exception as e:
             print(f"   ❌ 工作流ID验证失败: {e}")
@@ -1244,7 +1623,7 @@ class BioyondReactionStation(BioyondWorkstation):
 
     def process_and_execute_workflow(self, workflow_name: str, task_name: str) -> dict:
         """
-        一站式处理工作流程：解析网页工作流列表，合并工作流(带参数)，然后发布任务
+        一站式处理工作流程:解析网页工作流列表,合并工作流(带参数),然后发布任务
 
         Args:
             workflow_name: 合并后的工作流名称
@@ -1269,12 +1648,111 @@ class BioyondReactionStation(BioyondWorkstation):
 
         workflows_with_params = self._build_workflows_with_parameters(workflows_result)
 
+        # === 构建时间约束 (tcmBs) ===
+        tcm_bs_list = []
+        if self.pending_time_constraints:
+            print(f"\n🔗 处理时间约束 ({len(self.pending_time_constraints)} 个)...")
+            from unilabos.devices.workstation.bioyond_studio.config import WORKFLOW_STEP_IDS
+
+            # 建立索引到名称的映射
+            workflow_names_by_index = [w["name"] for w in workflows_result]
+
+            # 默认步骤映射表
+            DEFAULT_STEP_KEYS = {
+                "Solid_feeding_vials": "feeding",
+                "liquid_feeding_beaker": "liquid",
+                "Liquid_feeding_vials(non-titration)": "liquid",
+                "Liquid_feeding_solvents": "liquid",
+                "Liquid_feeding(titration)": "liquid",
+                "Drip_back": "liquid",
+                "reactor_taken_in": "config"
+            }
+
+            for c in self.pending_time_constraints:
+                try:
+                    start_idx = c["start_index"]
+                    end_idx = c["end_index"]
+
+                    if start_idx >= len(workflow_names_by_index) or end_idx >= len(workflow_names_by_index):
+                        print(f"   ❌ 约束索引越界: {start_idx} -> {end_idx} (总数: {len(workflow_names_by_index)})")
+                        continue
+
+                    start_wf_name = workflow_names_by_index[start_idx]
+                    end_wf_name = workflow_names_by_index[end_idx]
+
+                    # 辅助函数:根据名称查找 config 中的 key
+                    def find_config_key(name):
+                        # 1. 直接匹配
+                        if name in WORKFLOW_STEP_IDS:
+                            return name
+                        # 2. 尝试反向查找 WORKFLOW_TO_SECTION_MAP (如果需要)
+                        # 3. 尝试查找 WORKFLOW_MAPPINGS 的 key (忽略大小写匹配或特定映射)
+
+                        # 硬编码常见映射 (Web名称 -> Config Key)
+                        mapping = {
+                            "Solid_feeding_vials": "solid_feeding_vials",
+                            "Liquid_feeding_vials(non-titration)": "liquid_feeding_vials_non_titration",
+                            "Liquid_feeding_solvents": "liquid_feeding_solvents",
+                            "Liquid_feeding(titration)": "liquid_feeding_titration",
+                            "Drip_back": "drip_back"
+                        }
+                        return mapping.get(name, name)
+
+                    start_config_key = find_config_key(start_wf_name)
+                    end_config_key = find_config_key(end_wf_name)
+
+                    # 查找 UUID
+                    if start_config_key not in WORKFLOW_STEP_IDS:
+                        print(f"   ❌ 找不到工作流 {start_wf_name} (Key: {start_config_key}) 的步骤配置")
+                        continue
+                    if end_config_key not in WORKFLOW_STEP_IDS:
+                        print(f"   ❌ 找不到工作流 {end_wf_name} (Key: {end_config_key}) 的步骤配置")
+                        continue
+
+                    # 确定步骤 Key
+                    start_key = c["start_step_key"]
+                    if not start_key:
+                        start_key = DEFAULT_STEP_KEYS.get(start_wf_name)
+                        if not start_key:
+                            print(f"   ❌ 未指定起点步骤Key且无默认值: {start_wf_name}")
+                            continue
+
+                    end_key = c["end_step_key"]
+                    if not end_key:
+                        end_key = DEFAULT_STEP_KEYS.get(end_wf_name)
+                        if not end_key:
+                            print(f"   ❌ 未指定终点步骤Key且无默认值: {end_wf_name}")
+                            continue
+
+                    start_step_id = WORKFLOW_STEP_IDS[start_config_key].get(start_key)
+                    end_step_id = WORKFLOW_STEP_IDS[end_config_key].get(end_key)
+
+                    if not start_step_id or not end_step_id:
+                        print(f"   ❌ 无法解析步骤ID: {start_config_key}.{start_key} -> {end_config_key}.{end_key}")
+                        continue
+
+                    tcm_bs_list.append({
+                        "startWorkflowIndex": start_idx,
+                        "startStepId": start_step_id,
+                        "startComparePoint": c["start_point"],
+                        "endWorkflowIndex": end_idx,
+                        "endStepId": end_step_id,
+                        "endComparePoint": c["end_point"],
+                        "ct": c["duration"],
+                        "description": f"Constraint {start_idx}->{end_idx}"
+                    })
+                    print(f"   ✅ 添加约束: {start_wf_name}({start_key}) -> {end_wf_name}({end_key})")
+
+                except Exception as e:
+                    print(f"   ❌ 处理约束时出错: {e}")
+
         merge_data = {
             "name": workflow_name,
-            "workflows": workflows_with_params
+            "workflows": workflows_with_params,
+            "tcmBs": tcm_bs_list
         }
 
-        # print(f"\n🔄 合并工作流（带参数），名称: {workflow_name}")
+        # print(f"\n🔄 合并工作流(带参数),名称: {workflow_name}")
         merged_workflow = self.merge_workflow_with_parameters(json.dumps(merge_data))
 
         if not merged_workflow:
@@ -1291,20 +1769,28 @@ class BioyondReactionStation(BioyondWorkstation):
             "paramValues": {}
         }]
 
-        result = self.create_order(json.dumps(order_params))
-
-        if not result:
-            return self._create_error_result("创建任务失败", "create_order")
-
-        # 清空工作流序列和参数，防止下次执行时累积重复
-        self.pending_task_params = []
-        self.clear_workflows()  # 清空工作流序列，避免重复累积
+        # 尝试创建订单:无论成功或失败,都需要在本次尝试结束后清理本地队列,避免下一次重复累积
+        try:
+            result = self.create_order(json.dumps(order_params))
+            if not result:
+                # 返回错误结果之前先记录情况(稍后由 finally 清理队列)
+                print("⚠️ 创建任务返回空或失败响应,稍后将清理本地队列以避免重复累积")
+                return self._create_error_result("创建任务失败", "create_order")
+        finally:
+            # 无论任务创建成功与否,都要清空本地保存的参数和工作流序列,防止下次重复
+            try:
+                self.pending_task_params = []
+                self.clear_workflows()  # 清空工作流序列,避免重复累积
+                print("✅ 已清理 pending_task_params 与 workflow_sequence")
+            except Exception as _ex:
+                # 记录清理失败,但不要阻塞原始返回
+                print(f"❌ 清理队列时发生异常: {_ex}")
 
         # print(f"\n✅ 任务创建成功: {result}")
         # print(f"\n✅ 任务创建成功")
         print(f"{'='*60}\n")
 
-        # 返回结果，包含合并后的工作流数据和订单参数
+        # 返回结果,包含合并后的工作流数据和订单参数
         return json.dumps({
             "success": True,
             "result": result,
@@ -1321,10 +1807,42 @@ class BioyondReactionStation(BioyondWorkstation):
             preintake_id: 通量ID
 
         Returns:
-            Dict[str, Any]: 服务器响应，包含状态码、消息和时间戳
+            Dict[str, Any]: 服务器响应,包含状态码,消息和时间戳
         """
         try:
             return self._post_project_api("/api/lims/order/skip-titration-steps", preintake_id)
         except Exception as e:
             print(f"❌ 跳过滴定异常: {str(e)}")
             return {"code": 0, "message": str(e), "timestamp": int(time.time())}
+
+    def set_reactor_temperature(self, reactor_id: int, temperature: float) -> str:
+        """
+        设置反应器温度
+
+        Args:
+            reactor_id: 反应器编号 (1-5)
+            temperature: 目标温度 (°C)
+
+        Returns:
+            str: JSON 字符串,格式为 {"suc": True/False, "msg": "描述信息"}
+        """
+        if reactor_id not in range(1, 6):
+            return json.dumps({"suc": False, "msg": "反应器编号必须在 1-5 之间"})
+
+        try:
+            payload = {
+                "deviceTypeName": f"反应模块{chr(64 + reactor_id)}",  # 1->A, 2->B...
+                "temperature": float(temperature)
+            }
+            resp = requests.post(
+                f"{self.hardware_interface.host}/api/lims/device/set-reactor-temperatue",
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=10
+            )
+            if resp.status_code == 200:
+                return json.dumps({"suc": True, "msg": "温度设置成功"})
+            else:
+                return json.dumps({"suc": False, "msg": f"温度设置失败,HTTP {resp.status_code}"})
+        except Exception as e:
+            return json.dumps({"suc": False, "msg": f"温度设置异常: {str(e)}"})
