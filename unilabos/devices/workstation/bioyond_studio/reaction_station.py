@@ -837,6 +837,17 @@ class BioyondReactionStation(BioyondWorkstation):
                 raise ValueError("order_codes与order_ids数量不匹配")
             total = len(order_codes)
             pending = {c: {"order_id": order_ids[i], "completed": False} for i, c in enumerate(order_codes)}
+
+            # 发布初始状态事件
+            for i, oc in enumerate(order_codes):
+                self._publish_task_status(
+                    task_id=order_ids[i],
+                    task_code=oc,
+                    task_type="bioyond_workflow",
+                    status="running",
+                    progress=0.0
+                )
+
             reports = []
             start_time = time.time()
             while pending:
@@ -852,6 +863,14 @@ class BioyondReactionStation(BioyondWorkstation):
                             "extracted": None,
                             "elapsed_time": elapsed_time
                         })
+                        # 发布超时事件
+                        self._publish_task_status(
+                            task_id=pending[oc]["order_id"],
+                            task_code=oc,
+                            task_type="bioyond_workflow",
+                            status="timeout",
+                            result={"elapsed_time": elapsed_time}
+                        )
                     break
                 completed_round = []
                 for oc in list(pending.keys()):
@@ -874,6 +893,15 @@ class BioyondReactionStation(BioyondWorkstation):
                                 "extracted": self._extract_actuals_from_report(rep),
                                 "elapsed_time": elapsed_time
                             })
+                            # 发布完成事件
+                            self._publish_task_status(
+                                task_id=oid,
+                                task_code=oc,
+                                task_type="bioyond_workflow",
+                                status="completed",
+                                progress=1.0,
+                                result=rep
+                            )
                             completed_round.append(oc)
                             del self.order_completion_status[oc]
                         except Exception as e:
@@ -887,6 +915,14 @@ class BioyondReactionStation(BioyondWorkstation):
                                 "error": str(e),
                                 "elapsed_time": elapsed_time
                             })
+                            # 发布错误事件
+                            self._publish_task_status(
+                                task_id=oid,
+                                task_code=oc,
+                                task_type="bioyond_workflow",
+                                status="error",
+                                result={"error": str(e)}
+                            )
                             completed_round.append(oc)
                 for oc in completed_round:
                     del pending[oc]
