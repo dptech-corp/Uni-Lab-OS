@@ -197,7 +197,7 @@ xyz_stepper_controller:
           title: wait_complete参数
           type: object
         type: UniLabJsonCommand
-    module: unilabos.devices.laiyu_liquid_test.xyz_stepper_driver:XYZStepperController
+    module: unilabos.devices.liquid_handling.laiyu.drivers.xyz_stepper_driver:XYZStepperController
     status_types:
       status: list
     type: python
