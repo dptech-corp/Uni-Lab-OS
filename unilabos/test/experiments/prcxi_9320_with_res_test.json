@@ -812,7 +812,7 @@
                 "z": 0
             },
             "config": {
-                "type": "PRCXI9300Container",
+                "type": "PRCXI9300TipRack",
                 "size_x": 127,
                 "size_y": 85.5,
                 "size_z": 10,
@@ -6515,7 +6515,7 @@
                 "z": 0
             },
             "config": {
-                "type": "PRCXI9300Container",
+                "type": "PRCXI9300Plate",
                 "size_x": 127,
                 "size_y": 85.5,
                 "size_z": 10,
@@ -10587,7 +10587,7 @@
                 "z": 0
             },
             "config": {
-                "type": "PRCXI9300Container",
+                "type": "PRCXI9300TipRack",
                 "size_x": 127,
                 "size_y": 85.5,
                 "size_z": 10,
@@ -16291,7 +16291,7 @@
                 "z": 0
             },
             "config": {
-                "type": "PRCXI9300Container",
+                "type": "PRCXI9300Plate",
                 "size_x": 127,
                 "size_y": 85.5,
                 "size_z": 10,
@@ -20365,7 +20365,7 @@
                 "z": 0
             },
             "config": {
-                "type": "PRCXI9300Container",
+                "type": "PRCXI9300Plate",
                 "size_x": 127,
                 "size_y": 85.5,
                 "size_z": 10,
@@ -24438,7 +24438,7 @@
                 "z": 0
             },
             "config": {
-                "type": "PRCXI9300Container",
+                "type": "PRCXI9300Plate",
                 "size_x": 127,
                 "size_y": 85.5,
                 "size_z": 10,
@@ -28512,7 +28512,7 @@
                 "z": 0
             },
             "config": {
-                "type": "PRCXI9300Container",
+                "type": "PRCXI9300Plate",
                 "size_x": 127,
                 "size_y": 85.5,
                 "size_z": 10,
@@ -32585,7 +32585,7 @@
                 "z": 0
             },
             "config": {
-                "type": "PRCXI9300Container",
+                "type": "PRCXI9300Plate",
                 "size_x": 127,
                 "size_y": 85.5,
                 "size_z": 10,
@@ -36658,7 +36658,7 @@
                 "z": 0
             },
             "config": {
-                "type": "PRCXI9300Container",
+                "type": "PRCXI9300Plate",
                 "size_x": 127,
                 "size_y": 85.5,
                 "size_z": 10,
