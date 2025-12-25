@@ -66,42 +66,207 @@
           "type": "Rotation"
         },
         "category": "deck",
-        "barcode": null
-      },
-      "data": {}
-    },
-    {
-      "id": "T1",
-      "name": "T1",
-      "children": [],
-      "parent": "PRCXI_Deck",
-      "type": "plate",
-      "class": "",
-      "position": {
-        "x": 0,
-        "y": 288,
-        "z": 0
-      },
-      "config": {
-        "type": "PRCXI9300Container",
-        "size_x": 127,
-        "size_y": 85.5,
-        "size_z": 10,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "plate",
-        "model": null,
         "barcode": null,
-        "ordering": {},
         "sites": [
           {
-            "label": "T1",
+            "label": "1",
             "visible": true,
             "position": { "x": 0, "y": 0, "z": 0 },
+            "size": { "width": 128.0, "height": 86, "depth": 0 },
+            "content_type": [
+              "plate",
+              "tip_rack",
+              "plates",
+              "tip_racks",
+              "tube_rack"
+            ]
+          },
+          {
+            "label": "2",
+            "visible": true,
+            "position": { "x": 138, "y": 0, "z": 0 },
+            "size": { "width": 128.0, "height": 86, "depth": 0 },
+            "content_type": [
+              "plate",
+              "tip_rack",
+              "plates",
+              "tip_racks",
+              "tube_rack"
+            ]
+          },
+          {
+            "label": "3",
+            "visible": true,
+            "position": { "x": 276, "y": 0, "z": 0 },
+            "size": { "width": 128.0, "height": 86, "depth": 0 },
+            "content_type": [
+              "plate",
+              "tip_rack",
+              "plates",
+              "tip_racks",
+              "tube_rack"
+            ]
+          },
+          {
+            "label": "4",
+            "visible": true,
+            "position": { "x": 414, "y": 0, "z": 0 },
+            "size": { "width": 128.0, "height": 86, "depth": 0 },
+            "content_type": [
+              "plate",
+              "tip_rack",
+              "plates",
+              "tip_racks",
+              "tube_rack"
+            ]
+          },
+          {
+            "label": "5",
+            "visible": true,
+            "position": { "x": 0, "y": 96, "z": 0 },
+            "size": { "width": 128.0, "height": 86, "depth": 0 },
+            "content_type": [
+              "plate",
+              "tip_rack",
+              "plates",
+              "tip_racks",
+              "tube_rack"
+            ]
+          },
+          {
+            "label": "6",
+            "visible": true,
+            "position": { "x": 138, "y": 96, "z": 0 },
+            "size": { "width": 128.0, "height": 86, "depth": 0 },
+            "content_type": [
+              "plate",
+              "tip_rack",
+              "plates",
+              "tip_racks",
+              "tube_rack"
+            ]
+          },
+          {
+            "label": "7",
+            "visible": true,
+            "position": { "x": 276, "y": 96, "z": 0 },
+            "size": { "width": 128.0, "height": 86, "depth": 0 },
+            "content_type": [
+              "plate",
+              "tip_rack",
+              "plates",
+              "tip_racks",
+              "tube_rack"
+            ]
+          },
+          {
+            "label": "8",
+            "visible": true,
+            "position": { "x": 414, "y": 96, "z": 0 },
+            "size": { "width": 128.0, "height": 86, "depth": 0 },
+            "content_type": [
+              "plate",
+              "tip_rack",
+              "plates",
+              "tip_racks",
+              "tube_rack"
+            ]
+          },
+          {
+            "label": "9",
+            "visible": true,
+            "position": { "x": 0, "y": 192, "z": 0 },
+            "size": { "width": 128.0, "height": 86, "depth": 0 },
+            "content_type": [
+              "plate",
+              "tip_rack",
+              "plates",
+              "tip_racks",
+              "tube_rack"
+            ]
+          },
+          {
+            "label": "10",
+            "visible": true,
+            "position": { "x": 138, "y": 192, "z": 0 },
+            "size": { "width": 128.0, "height": 86, "depth": 0 },
+            "content_type": [
+              "plate",
+              "tip_rack",
+              "plates",
+              "tip_racks",
+              "tube_rack"
+            ]
+          },
+          {
+            "label": "11",
+            "visible": true,
+            "position": { "x": 276, "y": 192, "z": 0 },
+            "size": { "width": 128.0, "height": 86, "depth": 0 },
+            "content_type": [
+              "plate",
+              "tip_rack",
+              "plates",
+              "tip_racks",
+              "tube_rack"
+            ]
+          },
+          {
+            "label": "12",
+            "visible": true,
+            "position": { "x": 414, "y": 192, "z": 0 },
+            "size": { "width": 128.0, "height": 86, "depth": 0 },
+            "content_type": [
+              "plate",
+              "tip_rack",
+              "plates",
+              "tip_racks",
+              "tube_rack"
+            ]
+          },
+          {
+            "label": "13",
+            "visible": true,
+            "position": { "x": 0, "y": 288, "z": 0 },
+            "size": { "width": 128.0, "height": 86, "depth": 0 },
+            "content_type": [
+              "plate",
+              "tip_rack",
+              "plates",
+              "tip_racks",
+              "tube_rack"
+            ]
+          },
+          {
+            "label": "14",
+            "visible": true,
+            "position": { "x": 138, "y": 288, "z": 0 },
+            "size": { "width": 128.0, "height": 86, "depth": 0 },
+            "content_type": [
+              "plate",
+              "tip_rack",
+              "plates",
+              "tip_racks",
+              "tube_rack"
+            ]
+          },
+          {
+            "label": "15",
+            "visible": true,
+            "position": { "x": 276, "y": 288, "z": 0 },
+            "size": { "width": 128.0, "height": 86, "depth": 0 },
+            "content_type": [
+              "plate",
+              "tip_rack",
+              "plates",
+              "tip_racks",
+              "tube_rack"
+            ]
+          },
+          {
+            "label": "16",
+            "visible": true,
+            "position": { "x": 414, "y": 288, "z": 0 },
             "size": { "width": 128.0, "height": 86, "depth": 0 },
             "content_type": [
               "plate",
@@ -115,682 +280,6 @@
       },
       "data": {}
     },
-    {
-      "id": "T2",
-      "name": "T2",
-      "children": [],
-      "parent": "PRCXI_Deck",
-      "type": "plate",
-      "class": "",
-      "position": {
-        "x": 138,
-        "y": 288,
-        "z": 0
-      },
-      "config": {
-        "type": "PRCXI9300Container",
-        "size_x": 127,
-        "size_y": 85.5,
-        "size_z": 10,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "plate",
-        "model": null,
-        "barcode": null,
-        "ordering": {},
-        "sites": [
-          {
-            "label": "T2",
-            "visible": true,
-            "position": { "x": 0, "y": 0, "z": 0 },
-            "size": { "width": 128.0, "height": 86, "depth": 0 },
-            "content_type": [
-              "plate",
-              "tip_rack",
-              "plates",
-              "tip_racks",
-              "tube_rack"
-            ]
-          }
-        ]
-      },
-      "data": {}
-    },
-    {
-      "id": "T3",
-      "name": "T3",
-      "children": [],
-      "parent": "PRCXI_Deck",
-      "type": "plate",
-      "class": "",
-      "position": {
-        "x": 276,
-        "y": 288,
-        "z": 0
-      },
-      "config": {
-        "type": "PRCXI9300Container",
-        "size_x": 127,
-        "size_y": 85.5,
-        "size_z": 10,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "plate",
-        "model": null,
-        "barcode": null,
-        "ordering": {},
-        "sites": [
-          {
-            "label": "T3",
-            "visible": true,
-            "position": { "x": 0, "y": 0, "z": 0 },
-            "size": { "width": 128.0, "height": 86, "depth": 0 },
-            "content_type": [
-              "plate",
-              "tip_rack",
-              "plates",
-              "tip_racks",
-              "tube_rack"
-            ]
-          }
-        ]
-      },
-      "data": {}
-    },
-    {
-      "id": "T4",
-      "name": "T4",
-      "children": [],
-      "parent": "PRCXI_Deck",
-      "type": "plate",
-      "class": "",
-      "position": {
-        "x": 414,
-        "y": 288,
-        "z": 0
-      },
-      "config": {
-        "type": "PRCXI9300Container",
-        "size_x": 127,
-        "size_y": 85.5,
-        "size_z": 10,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "plate",
-        "model": null,
-        "barcode": null,
-        "ordering": {},
-        "sites": [
-          {
-            "label": "T4",
-            "visible": true,
-            "position": { "x": 0, "y": 0, "z": 0 },
-            "size": { "width": 128.0, "height": 86, "depth": 0 },
-            "content_type": [
-              "plate",
-              "tip_rack",
-              "plates",
-              "tip_racks",
-              "tube_rack"
-            ]
-          }
-        ]
-      },
-      "data": {}
-    },
-    {
-      "id": "T5",
-      "name": "T5",
-      "children": [],
-      "parent": "PRCXI_Deck",
-      "type": "plate",
-      "class": "",
-      "position": {
-        "x": 0,
-        "y": 192,
-        "z": 0
-      },
-      "config": {
-        "type": "PRCXI9300Container",
-        "size_x": 127,
-        "size_y": 85.5,
-        "size_z": 10,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "plate",
-        "model": null,
-        "barcode": null,
-        "ordering": {},
-        "sites": [
-          {
-            "label": "T5",
-            "visible": true,
-            "position": { "x": 0, "y": 0, "z": 0 },
-            "size": { "width": 128.0, "height": 86, "depth": 0 },
-            "content_type": [
-              "plate",
-              "tip_rack",
-              "plates",
-              "tip_racks",
-              "tube_rack"
-            ]
-          }
-        ]
-      },
-      "data": {}
-    },
-    {
-      "id": "T6",
-      "name": "T6",
-      "children": [],
-      "parent": "PRCXI_Deck",
-      "type": "plate",
-      "class": "",
-      "position": {
-        "x": 138,
-        "y": 192,
-        "z": 0
-      },
-      "config": {
-        "type": "PRCXI9300Container",
-        "size_x": 127,
-        "size_y": 85.5,
-        "size_z": 10,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "plate",
-        "model": null,
-        "barcode": null,
-        "ordering": {},
-        "sites": [
-          {
-            "label": "T6",
-            "visible": true,
-            "position": { "x": 0, "y": 0, "z": 0 },
-            "size": { "width": 128.0, "height": 86, "depth": 0 },
-            "content_type": [
-              "plate",
-              "tip_rack",
-              "plates",
-              "tip_racks",
-              "tube_rack"
-            ]
-          }
-        ]
-      },
-      "data": {}
-    },
-    {
-      "id": "T7",
-      "name": "T7",
-      "children": [],
-      "parent": "PRCXI_Deck",
-      "type": "plate",
-      "class": "",
-      "position": {
-        "x": 276,
-        "y": 192,
-        "z": 0
-      },
-      "config": {
-        "type": "PRCXI9300Container",
-        "size_x": 127,
-        "size_y": 85.5,
-        "size_z": 10,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "plate",
-        "model": null,
-        "barcode": null,
-        "ordering": {},
-        "sites": [
-          {
-            "label": "T7",
-            "visible": true,
-            "position": { "x": 0, "y": 0, "z": 0 },
-            "size": { "width": 128.0, "height": 86, "depth": 0 },
-            "content_type": [
-              "plate",
-              "tip_rack",
-              "plates",
-              "tip_racks",
-              "tube_rack"
-            ]
-          }
-        ]
-      },
-      "data": {}
-    },
-    {
-      "id": "T8",
-      "name": "T8",
-      "children": [],
-      "parent": "PRCXI_Deck",
-      "type": "plate",
-      "class": "",
-      "position": {
-        "x": 414,
-        "y": 192,
-        "z": 0
-      },
-      "config": {
-        "type": "PRCXI9300Container",
-        "size_x": 127,
-        "size_y": 85.5,
-        "size_z": 10,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "plate",
-        "model": null,
-        "barcode": null,
-        "ordering": {},
-        "sites": [
-          {
-            "label": "T8",
-            "visible": true,
-            "position": { "x": 0, "y": 0, "z": 0 },
-            "size": { "width": 128.0, "height": 86, "depth": 0 },
-            "content_type": [
-              "plate",
-              "tip_rack",
-              "plates",
-              "tip_racks",
-              "tube_rack"
-            ]
-          }
-        ]
-      },
-      "data": {}
-    },
-    {
-      "id": "T9",
-      "name": "T9",
-      "children": [],
-      "parent": "PRCXI_Deck",
-      "type": "plate",
-      "class": "",
-      "position": {
-        "x": 0,
-        "y": 96,
-        "z": 0
-      },
-      "config": {
-        "type": "PRCXI9300Container",
-        "size_x": 127,
-        "size_y": 85.5,
-        "size_z": 10,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "plate",
-        "model": null,
-        "barcode": null,
-        "ordering": {},
-        "sites": [
-          {
-            "label": "T9",
-            "visible": true,
-            "position": { "x": 0, "y": 0, "z": 0 },
-            "size": { "width": 128.0, "height": 86, "depth": 0 },
-            "content_type": [
-              "plate",
-              "tip_rack",
-              "plates",
-              "tip_racks",
-              "tube_rack"
-            ]
-          }
-        ]
-      },
-      "data": {}
-    },
-    {
-      "id": "T10",
-      "name": "T10",
-      "children": [],
-      "parent": "PRCXI_Deck",
-      "type": "plate",
-      "class": "",
-      "position": {
-        "x": 138,
-        "y": 96,
-        "z": 0
-      },
-      "config": {
-        "type": "PRCXI9300Container",
-        "size_x": 127,
-        "size_y": 85.5,
-        "size_z": 10,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "plate",
-        "model": null,
-        "barcode": null,
-        "ordering": {},
-        "sites": [
-          {
-            "label": "T10",
-            "visible": true,
-            "position": { "x": 0, "y": 0, "z": 0 },
-            "size": { "width": 128.0, "height": 86, "depth": 0 },
-            "content_type": [
-              "plate",
-              "tip_rack",
-              "plates",
-              "tip_racks",
-              "tube_rack"
-            ]
-          }
-        ]
-      },
-      "data": {}
-    },
-    {
-      "id": "T11",
-      "name": "T11",
-      "children": [],
-      "parent": "PRCXI_Deck",
-      "type": "plate",
-      "class": "",
-      "position": {
-        "x": 276,
-        "y": 96,
-        "z": 0
-      },
-      "config": {
-        "type": "PRCXI9300Container",
-        "size_x": 127,
-        "size_y": 85.5,
-        "size_z": 10,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "plate",
-        "model": null,
-        "barcode": null,
-        "ordering": {},
-        "sites": [
-          {
-            "label": "T11",
-            "visible": true,
-            "position": { "x": 0, "y": 0, "z": 0 },
-            "size": { "width": 128.0, "height": 86, "depth": 0 },
-            "content_type": [
-              "plate",
-              "tip_rack",
-              "plates",
-              "tip_racks",
-              "tube_rack"
-            ]
-          }
-        ]
-      },
-      "data": {}
-    },
-    {
-      "id": "T12",
-      "name": "T12",
-      "children": [],
-      "parent": "PRCXI_Deck",
-      "type": "plate",
-      "class": "",
-      "position": {
-        "x": 414,
-        "y": 96,
-        "z": 0
-      },
-      "config": {
-        "type": "PRCXI9300Container",
-        "size_x": 127,
-        "size_y": 85.5,
-        "size_z": 10,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "plate",
-        "model": null,
-        "barcode": null,
-        "ordering": {},
-        "sites": [
-          {
-            "label": "T12",
-            "visible": true,
-            "position": { "x": 0, "y": 0, "z": 0 },
-            "size": { "width": 128.0, "height": 86, "depth": 0 },
-            "content_type": [
-              "plate",
-              "tip_rack",
-              "plates",
-              "tip_racks",
-              "tube_rack"
-            ]
-          }
-        ]
-      },
-      "data": {}
-    },
-    {
-      "id": "T13",
-      "name": "T13",
-      "children": [],
-      "parent": "PRCXI_Deck",
-      "type": "plate",
-      "class": "",
-      "position": {
-        "x": 0,
-        "y": 0,
-        "z": 0
-      },
-      "config": {
-        "type": "PRCXI9300Container",
-        "size_x": 127,
-        "size_y": 85.5,
-        "size_z": 10,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "plate",
-        "model": null,
-        "barcode": null,
-        "ordering": {},
-        "sites": [
-          {
-            "label": "T13",
-            "visible": true,
-            "position": { "x": 0, "y": 0, "z": 0 },
-            "size": { "width": 128.0, "height": 86, "depth": 0 },
-            "content_type": [
-              "plate",
-              "tip_rack",
-              "plates",
-              "tip_racks",
-              "tube_rack"
-            ]
-          }
-        ]
-      },
-      "data": {}
-    },
-    {
-      "id": "T14",
-      "name": "T14",
-      "children": [],
-      "parent": "PRCXI_Deck",
-      "type": "plate",
-      "class": "",
-      "position": {
-        "x": 138,
-        "y": 0,
-        "z": 0
-      },
-      "config": {
-        "type": "PRCXI9300Container",
-        "size_x": 127,
-        "size_y": 85.5,
-        "size_z": 10,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "plate",
-        "model": null,
-        "barcode": null,
-        "ordering": {},
-        "sites": [
-          {
-            "label": "T14",
-            "visible": true,
-            "position": { "x": 0, "y": 0, "z": 0 },
-            "size": { "width": 128.0, "height": 86, "depth": 0 },
-            "content_type": [
-              "plate",
-              "tip_rack",
-              "plates",
-              "tip_racks",
-              "tube_rack"
-            ]
-          }
-        ]
-      },
-      "data": {}
-    },
-    {
-      "id": "T15",
-      "name": "T15",
-      "children": [],
-      "parent": "PRCXI_Deck",
-      "type": "plate",
-      "class": "",
-      "position": {
-        "x": 276,
-        "y": 0,
-        "z": 0
-      },
-      "config": {
-        "type": "PRCXI9300Container",
-        "size_x": 127,
-        "size_y": 85.5,
-        "size_z": 10,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "plate",
-        "model": null,
-        "barcode": null,
-        "ordering": {},
-        "sites": [
-          {
-            "label": "T15",
-            "visible": true,
-            "position": { "x": 0, "y": 0, "z": 0 },
-            "size": { "width": 128.0, "height": 86, "depth": 0 },
-            "content_type": [
-              "plate",
-              "tip_rack",
-              "plates",
-              "tip_racks",
-              "tube_rack"
-            ]
-          }
-        ]
-      },
-      "data": {}
-    },
-    {
-      "id": "T16",
-      "name": "T16",
-      "children": [],
-      "parent": "PRCXI_Deck",
-      "type": "plate",
-      "class": "",
-      "position": {
-        "x": 414,
-        "y": 0,
-        "z": 0
-      },
-      "config": {
-        "type": "PRCXI9300Container",
-        "size_x": 127,
-        "size_y": 85.5,
-        "size_z": 10,
-        "rotation": {
-          "x": 0,
-          "y": 0,
-          "z": 0,
-          "type": "Rotation"
-        },
-        "category": "plate",
-        "model": null,
-        "barcode": null,
-        "ordering": {},
-        "sites": [
-          {
-            "label": "T16",
-            "visible": true,
-            "position": { "x": 0, "y": 0, "z": 0 },
-            "size": { "width": 128.0, "height": 86, "depth": 0 },
-            "content_type": [
-              "plate",
-              "tip_rack",
-              "plates",
-              "tip_racks",
-              "tube_rack"
-            ]
-          }
-        ]
-      },
-      "data": {}
-    },
-
     {
       "id": "RackT1",
       "name": "RackT1",
@@ -893,7 +382,7 @@
         "RackT1_G12",
         "RackT1_H12"
       ],
-      "parent": "T1",
+      "parent": "PRCXI_Deck",
       "type": "tip_rack",
       "class": "",
       "position": {
@@ -902,7 +391,7 @@
         "z": 0
       },
       "config": {
-        "type": "PRCXI9300TipRack",
+        "type": "PRCXI9300Container",
         "size_x": 127,
         "size_y": 85.5,
         "size_z": 10,
@@ -6596,16 +6085,16 @@
         "PlateT2_G12",
         "PlateT2_H12"
       ],
-      "parent": "T2",
+      "parent": "PRCXI_Deck",
       "type": "plate",
       "class": "",
       "position": {
-        "x": 0,
+        "x": 138,
         "y": 0,
         "z": 0
       },
       "config": {
-        "type": "PRCXI9300Plate",
+        "type": "PRCXI9300Container",
         "size_x": 127,
         "size_y": 85.5,
         "size_z": 10,
@@ -10567,6 +10056,70 @@
     },
 
     {
+      "id": "emptyT3",
+      "name": "emptyT3",
+
+      "children": [],
+      "parent": "PRCXI_Deck",
+      "type": "plate",
+      "class": "",
+      "position": {
+        "x": 276,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "PRCXI9300Container",
+        "size_x": 127,
+        "size_y": 85.5,
+        "size_z": 10,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "plate",
+        "model": null,
+        "barcode": null,
+        "ordering": {}
+      },
+      "data": {}
+    },
+
+    {
+      "id": "emptyT4",
+      "name": "emptyT4",
+
+      "children": [],
+      "parent": "PRCXI_Deck",
+      "type": "plate",
+      "class": "",
+      "position": {
+        "x": 414,
+        "y": 0,
+        "z": 0
+      },
+      "config": {
+        "type": "PRCXI9300Container",
+        "size_x": 127,
+        "size_y": 85.5,
+        "size_z": 10,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "plate",
+        "model": null,
+        "barcode": null,
+        "ordering": {}
+      },
+      "data": {}
+    },
+
+    {
       "id": "RackT5",
       "name": "RackT5",
 
@@ -10668,16 +10221,16 @@
         "RackT5_G12",
         "RackT5_H12"
       ],
-      "parent": "T5",
+      "parent": "PRCXI_Deck",
       "type": "tip_rack",
       "class": "",
       "position": {
         "x": 0,
-        "y": 0,
+        "y": 96,
         "z": 0
       },
       "config": {
-        "type": "PRCXI9300TipRack",
+        "type": "PRCXI9300Container",
         "size_x": 127,
         "size_y": 85.5,
         "size_z": 10,
@@ -16372,16 +15925,16 @@
         "PlateT6_G12",
         "PlateT6_H12"
       ],
-      "parent": "T6",
+      "parent": "PRCXI_Deck",
       "type": "plate",
       "class": "",
       "position": {
-        "x": 0,
-        "y": 0,
+        "x": 138,
+        "y": 96,
         "z": 0
       },
       "config": {
-        "type": "PRCXI9300Plate",
+        "type": "PRCXI9300Container",
         "size_x": 127,
         "size_y": 85.5,
         "size_z": 10,
@@ -20345,6 +19898,68 @@
     },
 
     {
+      "id": "emptyT7",
+      "name": "emptyT7",
+
+      "children": [],
+      "parent": "PRCXI_Deck",
+      "type": "plate",
+      "class": "",
+      "position": {
+        "x": 276,
+        "y": 96,
+        "z": 0
+      },
+      "config": {
+        "type": "PRCXI9300Container",
+        "size_x": 127,
+        "size_y": 85.5,
+        "size_z": 10,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "plate",
+        "model": null,
+        "barcode": null,
+        "ordering": {}
+      },
+      "data": {}
+    },
+    {
+      "id": "emptyT8",
+      "name": "emptyT8",
+
+      "children": [],
+      "parent": "PRCXI_Deck",
+      "type": "plate",
+      "class": "",
+      "position": {
+        "x": 414,
+        "y": 96,
+        "z": 0
+      },
+      "config": {
+        "type": "PRCXI9300Container",
+        "size_x": 127,
+        "size_y": 85.5,
+        "size_z": 10,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "plate",
+        "model": null,
+        "barcode": null,
+        "ordering": {}
+      },
+      "data": {}
+    },
+    {
       "id": "PlateT9",
       "name": "PlateT9",
 
@@ -20446,16 +20061,16 @@
         "PlateT9_G12",
         "PlateT9_H12"
       ],
-      "parent": "T9",
+      "parent": "PRCXI_Deck",
       "type": "plate",
       "class": "",
       "position": {
         "x": 0,
-        "y": 0,
+        "y": 192,
         "z": 0
       },
       "config": {
-        "type": "PRCXI9300Plate",
+        "type": "PRCXI9300Container",
         "size_x": 127,
         "size_y": 85.5,
         "size_z": 10,
@@ -24519,16 +24134,16 @@
         "PlateT10_G12",
         "PlateT10_H12"
       ],
-      "parent": "T10",
+      "parent": "PRCXI_Deck",
       "type": "plate",
       "class": "",
       "position": {
-        "x": 0,
-        "y": 0,
+        "x": 138,
+        "y": 192,
         "z": 0
       },
       "config": {
-        "type": "PRCXI9300Plate",
+        "type": "PRCXI9300Container",
         "size_x": 127,
         "size_y": 85.5,
         "size_z": 10,
@@ -28492,6 +28107,68 @@
     },
 
     {
+      "id": "emptyT11",
+      "name": "emptyT11",
+
+      "children": [],
+      "parent": "PRCXI_Deck",
+      "type": "plate",
+      "class": "",
+      "position": {
+        "x": 276,
+        "y": 192,
+        "z": 0
+      },
+      "config": {
+        "type": "PRCXI9300Container",
+        "size_x": 127,
+        "size_y": 85.5,
+        "size_z": 10,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "plate",
+        "model": null,
+        "barcode": null,
+        "ordering": {}
+      },
+      "data": {}
+    },
+    {
+      "id": "emptyT12",
+      "name": "emptyT12",
+
+      "children": [],
+      "parent": "PRCXI_Deck",
+      "type": "plate",
+      "class": "",
+      "position": {
+        "x": 414,
+        "y": 192,
+        "z": 0
+      },
+      "config": {
+        "type": "PRCXI9300Container",
+        "size_x": 127,
+        "size_y": 85.5,
+        "size_z": 10,
+        "rotation": {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "type": "Rotation"
+        },
+        "category": "plate",
+        "model": null,
+        "barcode": null,
+        "ordering": {}
+      },
+      "data": {}
+    },
+    {
       "id": "PlateT13",
       "name": "PlateT13",
 
@@ -28593,16 +28270,16 @@
         "PlateT13_G12",
         "PlateT13_H12"
       ],
-      "parent": "T13",
+      "parent": "PRCXI_Deck",
       "type": "plate",
       "class": "",
       "position": {
         "x": 0,
-        "y": 0,
+        "y": 288,
         "z": 0
       },
       "config": {
-        "type": "PRCXI9300Plate",
+        "type": "PRCXI9300Container",
         "size_x": 127,
         "size_y": 85.5,
         "size_z": 10,
@@ -32666,16 +32343,16 @@
         "PlateT14_G12",
         "PlateT14_H12"
       ],
-      "parent": "T14",
+      "parent": "PRCXI_Deck",
       "type": "plate",
       "class": "",
       "position": {
-        "x": 0,
-        "y": 0,
+        "x": 138,
+        "y": 288,
         "z": 0
       },
       "config": {
-        "type": "PRCXI9300Plate",
+        "type": "PRCXI9300Container",
         "size_x": 127,
         "size_y": 85.5,
         "size_z": 10,
@@ -36739,16 +36416,16 @@
         "PlateT15_G12",
         "PlateT15_H12"
       ],
-      "parent": "T15",
+      "parent": "PRCXI_Deck",
       "type": "plate",
       "class": "",
       "position": {
-        "x": 0,
-        "y": 0,
+        "x": 276,
+        "y": 288,
         "z": 0
       },
       "config": {
-        "type": "PRCXI9300Plate",
+        "type": "PRCXI9300Container",
         "size_x": 127,
         "size_y": 85.5,
         "size_z": 10,
@@ -40711,12 +40388,12 @@
       "name": "trash",
 
       "children": [],
-      "parent": "T16",
+      "parent": "PRCXI_Deck",
       "type": "plate",
       "class": "",
       "position": {
-        "x": 0,
-        "y": 0,
+        "x": 414,
+        "y": 288,
         "z": 0
       },
       "config": {
