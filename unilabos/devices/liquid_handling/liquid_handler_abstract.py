@@ -969,11 +969,19 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
             One or more TipRacks providing fresh tips.
         is_96_well
             Set *True* to use the 96‑channel head.
+        mix_stage
+            When to mix the target wells relative to dispensing. Default "none" means
+            no mixing occurs even if mix_times is provided. Use "before", "after", or
+            "both" to mix at the corresponding stage(s).
+        mix_times
+            Number of mix cycles. If *None* (default) no mixing occurs regardless of
+            mix_stage.
         """
         
         # 确保 use_channels 有默认值
         if use_channels is None:
-            use_channels = [0] if self.channel_num >= 1 else list(range(self.channel_num))
+            # 默认使用设备所有通道（例如 8 通道移液站默认就是 0-7）
+            use_channels = list(range(self.channel_num)) if self.channel_num > 0 else [0]
         
         if is_96_well:
             pass  # This mode is not verified.
@@ -1001,42 +1009,42 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
         if mix_times is not None:
             mix_times = int(mix_times)
             
-            # 识别传输模式
-            num_sources = len(sources)
-            num_targets = len(targets)
-            
-            if num_sources == 1 and num_targets > 1:
-                # 模式1: 一对多 (1 source -> N targets)
-                await self._transfer_one_to_many(
-                    sources[0], targets, tip_racks, use_channels,
-                    asp_vols, dis_vols, asp_flow_rates, dis_flow_rates,
-                    offsets, touch_tip, liquid_height, blow_out_air_volume,
-                    spread, mix_stage, mix_times, mix_vol, mix_rate,
-                    mix_liquid_height, delays
-                )
-            elif num_sources > 1 and num_targets == 1:
-                # 模式2: 多对一 (N sources -> 1 target)
-                await self._transfer_many_to_one(
-                    sources, targets[0], tip_racks, use_channels,
-                    asp_vols, dis_vols, asp_flow_rates, dis_flow_rates,
-                    offsets, touch_tip, liquid_height, blow_out_air_volume,
-                    spread, mix_stage, mix_times, mix_vol, mix_rate,
-                    mix_liquid_height, delays
-                )
-            elif num_sources == num_targets:
-                # 模式3: 一对一 (N sources -> N targets) - 原有逻辑
-                await self._transfer_one_to_one(
-                    sources, targets, tip_racks, use_channels,
-                    asp_vols, dis_vols, asp_flow_rates, dis_flow_rates,
-                    offsets, touch_tip, liquid_height, blow_out_air_volume,
-                    spread, mix_stage, mix_times, mix_vol, mix_rate,
-                    mix_liquid_height, delays
-                )
-            else:
-                raise ValueError(
-                    f"Unsupported transfer mode: {num_sources} sources -> {num_targets} targets. "
-                    "Supported modes: 1->N, N->1, or N->N."
-                )
+        # 识别传输模式（mix_times 为 None 也应该能正常移液，只是不做 mix）
+        num_sources = len(sources)
+        num_targets = len(targets)
+        
+        if num_sources == 1 and num_targets > 1:
+            # 模式1: 一对多 (1 source -> N targets)
+            await self._transfer_one_to_many(
+                sources[0], targets, tip_racks, use_channels,
+                asp_vols, dis_vols, asp_flow_rates, dis_flow_rates,
+                offsets, touch_tip, liquid_height, blow_out_air_volume,
+                spread, mix_stage, mix_times, mix_vol, mix_rate,
+                mix_liquid_height, delays
+            )
+        elif num_sources > 1 and num_targets == 1:
+            # 模式2: 多对一 (N sources -> 1 target)
+            await self._transfer_many_to_one(
+                sources, targets[0], tip_racks, use_channels,
+                asp_vols, dis_vols, asp_flow_rates, dis_flow_rates,
+                offsets, touch_tip, liquid_height, blow_out_air_volume,
+                spread, mix_stage, mix_times, mix_vol, mix_rate,
+                mix_liquid_height, delays
+            )
+        elif num_sources == num_targets:
+            # 模式3: 一对一 (N sources -> N targets)
+            await self._transfer_one_to_one(
+                sources, targets, tip_racks, use_channels,
+                asp_vols, dis_vols, asp_flow_rates, dis_flow_rates,
+                offsets, touch_tip, liquid_height, blow_out_air_volume,
+                spread, mix_stage, mix_times, mix_vol, mix_rate,
+                mix_liquid_height, delays
+            )
+        else:
+            raise ValueError(
+                f"Unsupported transfer mode: {num_sources} sources -> {num_targets} targets. "
+                "Supported modes: 1->N, N->1, or N->N."
+            )
 
     async def _transfer_one_to_one(
         self,
@@ -1075,6 +1083,16 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
                 for ___ in range(len(use_channels)):
                     tip.extend(next(self.current_tip))
                 await self.pick_up_tips(tip)
+
+                if mix_stage in ["before", "both"] and mix_times is not None and mix_times > 0:
+                    await self.mix(
+                        targets=[targets[_]],
+                        mix_time=mix_times,
+                        mix_vol=mix_vol,
+                        offsets=offsets if offsets else None,
+                        height_to_bottom=mix_liquid_height if mix_liquid_height else None,
+                        mix_rate=mix_rate if mix_rate else None,
+                    )
 
                 await self.aspirate(
                     resources=[sources[_]],
@@ -1135,6 +1153,16 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
                 current_asp_blow_out_air_volume = blow_out_air_volume[i:i + 8] if blow_out_air_volume else [None] * 8
                 current_dis_blow_out_air_volume = blow_out_air_volume[i:i + 8] if blow_out_air_volume else [None] * 8
                 current_dis_flow_rates = dis_flow_rates[i:i + 8] if dis_flow_rates else None
+
+                if mix_stage in ["before", "both"] and mix_times is not None and mix_times > 0:
+                    await self.mix(
+                        targets=current_targets,
+                        mix_time=mix_times,
+                        mix_vol=mix_vol,
+                        offsets=offsets if offsets else None,
+                        height_to_bottom=mix_liquid_height if mix_liquid_height else None,
+                        mix_rate=mix_rate if mix_rate else None,
+                    )
 
                 await self.aspirate(
                     resources=current_reagent_sources,
@@ -1217,6 +1245,17 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
                 tip.extend(next(self.current_tip))
             await self.pick_up_tips(tip)
 
+            if mix_stage in ["before", "both"] and mix_times is not None and mix_times > 0:
+                for idx, target in enumerate(targets):
+                    await self.mix(
+                        targets=[target],
+                        mix_time=mix_times,
+                        mix_vol=mix_vol,
+                        offsets=offsets[idx:idx + 1] if offsets and len(offsets) > idx else None,
+                        height_to_bottom=mix_liquid_height if mix_liquid_height else None,
+                        mix_rate=mix_rate if mix_rate else None,
+                    )
+
             # 从源容器吸液（总体积）
             await self.aspirate(
                 resources=[source],
@@ -1280,6 +1319,16 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
                 current_asp_offset = offsets[0:1] * 8 if offsets and len(offsets) > 0 else [None] * 8
                 current_asp_liquid_height = liquid_height[0:1] * 8 if liquid_height and len(liquid_height) > 0 else [None] * 8
                 current_asp_blow_out_air_volume = blow_out_air_volume[0:1] * 8 if blow_out_air_volume and len(blow_out_air_volume) > 0 else [None] * 8
+                
+                if mix_stage in ["before", "both"] and mix_times is not None and mix_times > 0:
+                    await self.mix(
+                        targets=current_targets,
+                        mix_time=mix_times,
+                        mix_vol=mix_vol,
+                        offsets=offsets[i:i + 8] if offsets else None,
+                        height_to_bottom=mix_liquid_height if mix_liquid_height else None,
+                        mix_rate=mix_rate if mix_rate else None,
+                    )
                 
                 # 从源容器吸液（8个通道都从同一个源，但每个通道的吸液体积不同）
                 await self.aspirate(
@@ -1379,8 +1428,14 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
             # 单通道模式：多次吸液，一次分液
             # 先混合前（如果需要）
             if mix_stage in ["before", "both"] and mix_times is not None and mix_times > 0:
-                # 注意：在吸液前混合源容器通常不常见，这里跳过
-                pass
+                await self.mix(
+                    targets=[target],
+                    mix_time=mix_times,
+                    mix_vol=mix_vol,
+                    offsets=offsets[0:1] if offsets else None,
+                    height_to_bottom=mix_liquid_height if mix_liquid_height else None,
+                    mix_rate=mix_rate if mix_rate else None,
+                )
             
             # 从每个源容器吸液并分液到目标容器
             for idx, source in enumerate(sources):
@@ -1455,6 +1510,16 @@ class LiquidHandlerAbstract(LiquidHandlerMiddleware):
                 raise ValueError(f"For 8-channel mode, number of sources {len(sources)} must be a multiple of 8.")
             
             # 每次处理8个源
+            if mix_stage in ["before", "both"] and mix_times is not None and mix_times > 0:
+                await self.mix(
+                    targets=[target],
+                    mix_time=mix_times,
+                    mix_vol=mix_vol,
+                    offsets=offsets[0:1] if offsets else None,
+                    height_to_bottom=mix_liquid_height if mix_liquid_height else None,
+                    mix_rate=mix_rate if mix_rate else None,
+                )
+
             for i in range(0, len(sources), 8):
                 tip = []
                 for _ in range(len(use_channels)):
